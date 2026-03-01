@@ -1,0 +1,97 @@
+.section {
+  position: relative;
+  padding: 7rem 2rem;
+  background: var(--bg-dark);
+  overflow: hidden;
+}
+
+.glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(237, 62, 62, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  filter: blur(60px);
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.container.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  background: rgba(251, 255, 172, 0.12);
+  border: 1px solid rgba(251, 255, 172, 0.3);
+  border-radius: 999px;
+  color: var(--accent-yellow);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 1.5rem;
+}
+
+.heading {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 1rem;
+}
+
+.description {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin: 0 0 2.5rem;
+}
+
+.ctaButton {
+  padding: 1rem 2.5rem;
+  background: var(--accent-red);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 24px rgba(237, 62, 62, 0.35);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.ctaButton:hover {
+  background: var(--accent-red-bright);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 0 40px rgba(237, 62, 62, 0.55);
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(237, 62, 62, 0.35); }
+  50% { box-shadow: 0 0 40px rgba(237, 62, 62, 0.5); }
+}
+
+@media (max-width: 768px) {
+  .heading {
+    font-size: 2rem;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+}

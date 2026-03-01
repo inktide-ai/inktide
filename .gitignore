@@ -1,0 +1,49 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+
+# C#
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+
+# Node.js
+node_modules/
+web/node_modules
+npm-debug.log
+yarn-error.log
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.dockerignore
+
+# Database
+*.db
+*.sqlite
