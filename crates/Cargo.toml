@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = [
+    "chimera-server",
+    "chimera-lipsync",
+    "chimera-animation",
+    "chimera-audio",
+    "chimera-rendering",
+]
