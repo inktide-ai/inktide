@@ -20,7 +20,7 @@ export async function getMe(): Promise<MeResponse> {
 
   if (!res.ok) {
     const err = data as ApiError
-    throw new Error(err.error ?? 'Не удалось загрузить профиль')
+    throw new Error(err.error ?? 'Failed to load profile')
   }
 
   return data as MeResponse

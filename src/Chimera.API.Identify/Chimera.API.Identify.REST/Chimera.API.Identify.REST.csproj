@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Chimera.API.Identify.REST</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\Chimera.API.Core\Chimera.API.Core.csproj" />
+      <ProjectReference Include="..\Chimera.API.Identify.Application\Chimera.API.Identify.Application.csproj" />
+      <ProjectReference Include="..\Chimera.API.Identify.REST.Models\Chimera.API.Identify.REST.Models.csproj" />
+    </ItemGroup>
+
+</Project>

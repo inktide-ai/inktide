@@ -5,7 +5,7 @@
   right: 0;
   z-index: 1000;
   padding: 0.75rem 2rem;
-  background: var(--bg-dark);
+  background: rgba(0, 0, 0, 0.6);
   border-bottom: 1px solid var(--border);
   transition: transform 0.35s ease;
 }

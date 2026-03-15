@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Chimera.API.Core\Chimera.API.Core.csproj" />
+        <ProjectReference Include="..\Chimera.API.Soul.Application\Chimera.API.Soul.Application.csproj" />
+    </ItemGroup>
+
+</Project>

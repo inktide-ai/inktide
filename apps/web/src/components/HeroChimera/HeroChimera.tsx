@@ -11,7 +11,9 @@ const HeroChimera = ({ onSignUpClick }: HeroChimeraProps) => {
     <section className={styles.heroSection}>
       <div className={styles.container}>
         <div className={styles.leftColumn}>
-          <h1 className={styles.title}>{CONTENT.hero.title}</h1>
+          <h1 className={styles.title}>
+            Create your <span className={styles.titleAccent}>AI companion</span> for streaming
+          </h1>
           <p className={styles.subtitle}>{CONTENT.hero.subtitle}</p>
           <button
             type="button"
@@ -57,28 +59,28 @@ const HeroChimera = ({ onSignUpClick }: HeroChimeraProps) => {
                 <span />
                 <span />
               </div>
-              <span className={styles.mockupTitle}>Chimera — Настройка ИИ</span>
+              <span className={styles.mockupTitle}>Chimera — AI Setup</span>
             </div>
             <div className={styles.mockupBody}>
               <div className={styles.mockupSidebar}>
-                <div className={styles.mockupItem}>Персонажи</div>
-                <div className={styles.mockupItem}>Промпты</div>
-                <div className={styles.mockupItemActive}>Поведение</div>
-                <div className={styles.mockupItem}>Голос</div>
-                <div className={styles.mockupItem}>Внешность</div>
+                <div className={styles.mockupItem}>Characters</div>
+                <div className={styles.mockupItem}>Prompts</div>
+                <div className={styles.mockupItemActive}>Behavior</div>
+                <div className={styles.mockupItem}>Voice</div>
+                <div className={styles.mockupItem}>Appearance</div>
               </div>
               <div className={styles.mockupMain}>
                 <div className={styles.mockupField}>
-                  <span className={styles.mockupLabel}>Реакция на донаты</span>
+                  <span className={styles.mockupLabel}>Donation reactions</span>
                   <div className={styles.mockupInput} />
                 </div>
                 <div className={styles.mockupField}>
-                  <span className={styles.mockupLabel}>Тон общения</span>
+                  <span className={styles.mockupLabel}>Communication tone</span>
                   <div className={styles.mockupInput} />
                 </div>
                 <div className={styles.mockupHint}>
                   <span className={styles.mockupPointer}>👆</span>
-                  Настрой параметры ИИ под свой стиль
+                  Customize AI parameters to match your style
                 </div>
               </div>
             </div>

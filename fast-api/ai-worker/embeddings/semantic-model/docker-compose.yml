@@ -1,0 +1,10 @@
+services:
+  semantic-model:
+    build: .
+    image: chimera-semantic-model:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-sentence-transformers/all-MiniLM-L6-v2}
+      - HF_TOKEN=${HF_TOKEN:-}
+    restart: unless-stopped

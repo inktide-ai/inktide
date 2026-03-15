@@ -10,6 +10,7 @@
 .container {
   max-width: 1300px;
   margin: 0 auto;
+  margin-top: 4rem;
   padding: 4rem 2rem 2rem 2rem;
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -19,8 +20,21 @@
 }
 
 .logosWrapper {
+  margin-top: auto;
+  margin-bottom: 4rem;
   padding-top: 1rem;
   padding-bottom: 1rem;
+}
+
+/* MacBook и экраны с меньшей высотой — меньшие отступы, чтобы лента не улетала вниз */
+@media (max-height: 950px) {
+  .container {
+    margin-top: 1.5rem;
+  }
+
+  .logosWrapper {
+    margin-bottom: 1.5rem;
+  }
 }
 
 .leftColumn {
@@ -35,6 +49,30 @@
   color: var(--text-primary);
   margin: 0 0 1.5rem;
   letter-spacing: -0.02em;
+}
+
+.titleAccent {
+  background: linear-gradient(
+    90deg,
+    #22D3EE,
+    #8B5CF6,
+    #EC4899,
+    #22D3EE
+  );
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradientShift 5s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .subtitle {

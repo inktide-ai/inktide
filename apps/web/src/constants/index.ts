@@ -1,5 +1,5 @@
 /**
- * Chimera — платформа ИИ-напарников для стриминга
+ * Chimera — AI companion platform for streaming
  */
 
 export const VIDEO_CONFIG = {
@@ -19,67 +19,139 @@ export const STAR_CONFIG_SECTION = {
 } as const
 
 export const NAVIGATION_ITEMS = [
-  { label: 'Продукт', href: '#features', withCaret: true },
-  { label: 'Решения', href: '#how', withCaret: true },
-  { label: 'Как работает', href: '#how-it-works', withCaret: true },
+  { label: 'Product', href: '#features', withCaret: true },
+  { label: 'Solutions', href: '#how', withCaret: true },
+  { label: 'How it works', href: '#how-it-works', withCaret: true },
 ] as const
 
 export const CONTENT = {
   hero: {
-    title: 'Создай своего ИИ‑напарника для стрима',
+    title: 'Create your AI companion for streaming',
     subtitle:
-      'Настраивай промпты, алгоритмы и модели — сделай стрим ярким и интерактивным',
-    ctaPrimary: 'Зарегистрируйтесь бесплатно',
-    downloadLabel: 'Загрузить OBS плагин для',
-    docs: 'Документация',
-    signUpFree: 'Зарегистрируйтесь бесплатно',
-    logIn: 'Войти',
+      'Customize prompts, algorithms and models — make your stream vibrant and interactive',
+    ctaPrimary: 'Sign up for free',
+    downloadLabel: 'Download OBS plugin for',
+    docs: 'Documentation',
+    signUpFree: 'Sign up for free',
+    logIn: 'Log in',
   },
   features: {
-    heading: 'Всё для уникального ИИ',
-    subheading: 'Собери образ под себя',
+    heading: 'Everything for a unique AI',
+    subheading: 'Build the persona that fits you',
+    supportButton: 'Support the Project 🙏',
+    tryButton: 'Try it out...',
     items: [
       {
-        title: 'Промпты и логика',
+        title: 'Prompts and logic',
         description:
-          'Меняй сценарии общения, добавляй свою манеру речи и реакции. ИИ ведёт себя именно так, как нужно твоему каналу.',
+          'Change conversation scenarios, add your own speech style and reactions. The AI behaves exactly how your channel needs.',
         icon: '⚡',
       },
       {
-        title: 'Внешний вид и голос',
+        title: 'Appearance and voice',
         description:
-          'Кастомизируй внешность, голос и поведение. Создай узнаваемого персонажа для своих зрителей.',
+          'Customize looks, voice and behavior. Create a recognizable character for your viewers.',
         icon: '✨',
       },
       {
-        title: 'API и интеграции',
+        title: 'API and integrations',
         description:
-          'Подключай Chimera к Twitch, YouTube, Discord и другим платформам. Один раз настроил — работает везде.',
+          'Connect Chimera to Twitch, YouTube, Discord and other platforms. Set up once — works everywhere.',
         icon: '🔌',
       },
     ],
   },
   benefits: {
-    heading: 'Почему Chimera',
-    items: [
-      { text: 'Гибкость настройки', highlight: 'под любую идею' },
-      { text: 'Уникальные ИИ‑партнёры', highlight: 'которых больше ни у кого нет' },
-      { text: 'Простой интерфейс', highlight: 'разберётся даже новичок' },
+    heading: 'Why Chimera',
+    subheading: 'Analytics and insights to grow your AI companion',
+    tabs: [
+      {
+        id: 'engagement',
+        label: 'AI Viewer Engagement Stats',
+        description:
+          'Tracking viewer engagement with your AI is crucial for streamers and brands. By analyzing conversation metrics, you gain insights into audience behavior and preferences. These analytics help optimize your AI personality, improve interactions, and build stronger connections with your community.',
+      },
+      {
+        id: 'performance',
+        label: 'AI Performance Analytics',
+        description:
+          'Monitor how your AI companion performs across different streaming platforms. Understand response times, conversation quality, and viewer retention. Use these insights to refine prompts and behavior for maximum impact.',
+      },
+      {
+        id: 'integration',
+        label: 'Stream Integration Metrics',
+        description:
+          'See how Chimera integrates with Twitch, YouTube, and Discord. Track donation reactions, chat triggers, and community engagement. Data-driven decisions help you create the perfect AI companion for your channel.',
+      },
+      {
+        id: 'growth',
+        label: 'Channel Growth & Trends',
+        description:
+          'Identify trends and growth opportunities for your AI-powered stream. Compare performance across time periods and discover what resonates with your audience.',
+      },
     ],
   },
   cta: {
-    heading: 'Присоединяйся первым',
+    heading: 'Join early',
     description:
-      'Скидки и бонусы для ранних пользователей и стримеров. Начни создавать своего ИИ уже сегодня.',
-    button: 'Получить ранний доступ',
-    badge: 'Скидка для первых',
+      'Discounts and bonuses for early users and streamers. Start building your AI today.',
+    button: 'Get early access',
+    badge: 'Early adopter discount',
   },
   demo: {
-    heading: 'Посмотри, как это работает',
+    heading: 'See how it works',
     description:
-      'Chimera настраивается за минуты и встраивается в твой стрим без лишних заморочек.',
+      'Chimera sets up in minutes and integrates into your stream with no hassle.',
+    steps: [
+      {
+        heading: 'See how it works',
+        description:
+          'Chimera sets up in minutes and integrates into your stream with no hassle. Connect the OBS plugin, add your AI, and go live.',
+        videoId: 'dQw4w9WgXcQ',
+        image: 'https://www.jetbrains.com/img/home-page/screenshots/webstorm.svg',
+      },
+      {
+        heading: 'Ready out of the box',
+        description:
+          'No complex setup — just install, configure your AI personality, and start streaming. Everything works from the first click.',
+        videoId: 'dQw4w9WgXcQ',
+        image: 'https://www.jetbrains.com/img/home-page/screenshots/idea.svg',
+      },
+      {
+        heading: 'Complex tasks become easy',
+        description:
+          'The AI knows your channel and uses this knowledge to offer smart suggestions, natural reactions, and relevant responses in every context. Donations, chat, raids — handled automatically.',
+        videoId: 'dQw4w9WgXcQ',
+        image: 'https://www.jetbrains.com/img/home-page/screenshots/rider.gif',
+      },
+      {
+        heading: 'Built-in tools',
+        description:
+          'Customize prompts, voice, and appearance without leaving the dashboard. Run, tune, and test your AI companion — all important tools are within a hand\'s reach.',
+        videoId: 'dQw4w9WgXcQ',
+        image: 'https://www.jetbrains.com/img/home-page/screenshots/webstorm.svg',
+      },
+      {
+        heading: 'Grow with your community',
+        description:
+          'Analytics and insights help you understand what resonates. Track engagement, optimize reactions, and build an AI that truly reflects your stream\'s personality.',
+        videoId: 'dQw4w9WgXcQ',
+        image: 'https://www.jetbrains.com/img/home-page/screenshots/idea.svg',
+      },
+    ],
   },
   partners: {
-    heading: 'Поддержка разных LLM моделей',
+    heading: 'Support for multiple LLM models',
+  },
+  learn: {
+    heading: "What You'll Learn",
+    bullets: [
+      'The latest data on AI engagement trends across Twitch, YouTube Live and TikTok Live.',
+      'How AI companions enhance viewer interaction and boost stream retention.',
+      'The real business benefits for brands, agencies, and content creators.',
+      'Proven methods for measuring and optimizing AI performance.',
+      'Expert recommendations and streaming perspective provided for this report.',
+    ],
+    cta: 'help with development',
   },
 } as const

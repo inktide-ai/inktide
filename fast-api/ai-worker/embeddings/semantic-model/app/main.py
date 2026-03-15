@@ -1,0 +1,32 @@
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.routing import APIRoute
+
+from app.api.main import api_router
+from app.core.config import settings
+from app.services.embeddings import warm_up_model
+
+
+def custom_generate_unique_id(route: APIRoute) -> str:
+    return f"{route.tags[0]}-{route.name}" if route.tags else route.name
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    warm_up_model()
+    yield
+
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version="0.1.0",
+    description="REST API for semantic text processing: embeddings and classification",
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan,
+    generate_unique_id_function=custom_generate_unique_id,
+)
+
+app.include_router(api_router, prefix=settings.API_V1_STR)

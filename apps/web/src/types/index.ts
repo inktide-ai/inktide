@@ -1,5 +1,5 @@
 /**
- * Общие типы для приложения
+ * Common types for the application
  */
 
 export interface Star {

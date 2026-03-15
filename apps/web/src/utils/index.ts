@@ -1,12 +1,12 @@
 /**
- * Утилиты
+ * Utilities
  */
 
 import type { Star } from '../types'
 import { STAR_CONFIG_SECTION } from '../constants'
 
 /**
- * Генерирует массив звезд для секции
+ * Generates array of stars for section
  */
 export const generateSectionStars = (count: number = STAR_CONFIG_SECTION.count): Star[] => {
   const stars: Star[] = []
@@ -23,7 +23,7 @@ export const generateSectionStars = (count: number = STAR_CONFIG_SECTION.count):
 }
 
 /**
- * Формирует URL для YouTube iframe
+ * Builds URL for YouTube iframe
  */
 export const getYouTubeEmbedUrl = (
   videoId: string,

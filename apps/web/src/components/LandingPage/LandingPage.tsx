@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   BenefitsSection,
   ChimeraApp,
   CTASection,
   FeaturesSection,
+  Footer,
   HeroChimera,
+  LearnSection,
   Navigation,
   ProfileSection,
   VideoSection,
@@ -12,9 +15,8 @@ import {
 import { useAuth } from '../../context/AuthContext'
 
 const LandingPage = () => {
+  const navigate = useNavigate()
   const { isLoggedIn } = useAuth()
-  const [showRegister, setShowRegister] = useState(false)
-  const [showLogin, setShowLogin] = useState(false)
   const [showAppView, setShowAppView] = useState(true)
   const [scrollToHash, setScrollToHash] = useState<string | null>(null)
 
@@ -42,23 +44,21 @@ const LandingPage = () => {
   return (
     <>
       <Navigation
-        onLoginClick={() => setShowLogin(true)}
-        onRegisterClick={() => setShowRegister(true)}
-        showLogin={showLogin}
-        setShowLogin={setShowLogin}
-        showRegister={showRegister}
-        setShowRegister={setShowRegister}
+        onLoginClick={() => navigate('/login')}
+        onRegisterClick={() => navigate('/register')}
         onGoToLanding={isLoggedIn ? handleGoToLanding : undefined}
         onGoToApp={isLoggedIn ? handleGoToApp : undefined}
       />
       {showLanding ? (
         <>
-          <HeroChimera onSignUpClick={() => setShowRegister(true)} />
+          <HeroChimera onSignUpClick={() => navigate('/register')} />
           <FeaturesSection />
           <BenefitsSection />
+          <LearnSection />
           <VideoSection />
           <ProfileSection />
           <CTASection />
+          <Footer />
         </>
       ) : (
         <ChimeraApp />

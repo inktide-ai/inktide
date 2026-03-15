@@ -46,7 +46,7 @@ const LoginModal = ({ onClose, onSuccess }: LoginModalProps) => {
       onSuccess?.(trimmed, user)
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка входа')
+      setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
       setLoading(false)
     }
@@ -65,19 +65,19 @@ const LoginModal = ({ onClose, onSuccess }: LoginModalProps) => {
           type="button"
           className={styles.closeButton}
           onClick={onClose}
-          aria-label="Закрыть"
+          aria-label="Close"
         >
           ×
         </button>
 
         <h2 id="login-title" className={styles.title}>
-          Вход
+          Log in
         </h2>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.field}>
             <label htmlFor="login-email" className={styles.label}>
-              Email или логин
+              Email or username
             </label>
             <input
               id="login-email"
@@ -85,7 +85,7 @@ const LoginModal = ({ onClose, onSuccess }: LoginModalProps) => {
               value={emailOrUsername}
               onChange={(e) => setEmailOrUsername(e.target.value)}
               className={styles.input}
-              placeholder="example@mail.com или username"
+              placeholder="example@mail.com or username"
               autoComplete="username"
               autoFocus
               required
@@ -95,7 +95,7 @@ const LoginModal = ({ onClose, onSuccess }: LoginModalProps) => {
 
           <div className={styles.field}>
             <label htmlFor="login-password" className={styles.label}>
-              Пароль
+              Password
             </label>
             <input
               id="login-password"
@@ -117,7 +117,7 @@ const LoginModal = ({ onClose, onSuccess }: LoginModalProps) => {
             className={styles.submitButton}
             disabled={loading}
           >
-            {loading ? 'Вход...' : 'Войти'}
+            {loading ? 'Logging in...' : 'Log in'}
           </button>
         </form>
       </div>

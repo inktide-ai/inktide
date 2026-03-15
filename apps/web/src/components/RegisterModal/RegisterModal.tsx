@@ -31,7 +31,7 @@ const RegisterModal = ({ onClose, onSuccess }: RegisterModalProps) => {
     setLoading(true)
 
     if (password.length < 8) {
-      setError('Пароль должен быть не менее 8 символов')
+      setError('Password must be at least 8 characters')
       setLoading(false)
       return
     }
@@ -50,7 +50,7 @@ const RegisterModal = ({ onClose, onSuccess }: RegisterModalProps) => {
       onSuccess?.(email.trim().toLowerCase(), user)
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка регистрации')
+      setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
       setLoading(false)
     }
@@ -69,13 +69,13 @@ const RegisterModal = ({ onClose, onSuccess }: RegisterModalProps) => {
           type="button"
           className={styles.closeButton}
           onClick={onClose}
-          aria-label="Закрыть"
+          aria-label="Close"
         >
           ×
         </button>
 
         <h2 id="register-title" className={styles.title}>
-          Регистрация
+          Sign up
         </h2>
 
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -99,7 +99,7 @@ const RegisterModal = ({ onClose, onSuccess }: RegisterModalProps) => {
 
           <div className={styles.field}>
             <label htmlFor="register-displayName" className={styles.label}>
-              Отображаемое имя
+              Display name
             </label>
             <input
               id="register-displayName"
@@ -107,7 +107,7 @@ const RegisterModal = ({ onClose, onSuccess }: RegisterModalProps) => {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className={styles.input}
-              placeholder="Как к вам обращаться (необязательно)"
+              placeholder="How to address you (optional)"
               autoComplete="name"
               disabled={loading}
             />
@@ -115,7 +115,7 @@ const RegisterModal = ({ onClose, onSuccess }: RegisterModalProps) => {
 
           <div className={styles.field}>
             <label htmlFor="register-password" className={styles.label}>
-              Пароль
+              Password
             </label>
             <input
               id="register-password"
@@ -123,7 +123,7 @@ const RegisterModal = ({ onClose, onSuccess }: RegisterModalProps) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className={styles.input}
-              placeholder="Минимум 8 символов"
+              placeholder="At least 8 characters"
               autoComplete="new-password"
               required
               minLength={8}
@@ -138,7 +138,7 @@ const RegisterModal = ({ onClose, onSuccess }: RegisterModalProps) => {
             className={styles.submitButton}
             disabled={loading}
           >
-            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+            {loading ? 'Signing up...' : 'Sign up'}
           </button>
         </form>
       </div>

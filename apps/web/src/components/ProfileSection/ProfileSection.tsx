@@ -14,11 +14,11 @@ const ProfileSection = () => {
           <span className={styles.avatar}>
             {displayName.charAt(0).toUpperCase()}
           </span>
-          <h2 className={styles.title}>Профиль</h2>
+          <h2 className={styles.title}>Profile</h2>
           <p className={styles.email}>{displayName}</p>
-          <p className={styles.hint}>Вы успешно вошли в аккаунт Chimera</p>
+          <p className={styles.hint}>You are logged in to Chimera</p>
           <button type="button" className={styles.logoutButton} onClick={logout}>
-            Выйти
+            Log out
           </button>
         </div>
       </div>

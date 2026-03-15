@@ -40,7 +40,7 @@ export async function login(
 
   if (!res.ok) {
     const err = data as ApiError
-    throw new Error(err.error ?? 'Ошибка входа')
+    throw new Error(err.error ?? 'Login failed')
   }
 
   return data as LoginResponse
@@ -75,10 +75,28 @@ export async function register(
 
   if (!res.ok) {
     const err = responseData as ApiError
-    throw new Error(err.error ?? 'Ошибка регистрации')
+    throw new Error(err.error ?? 'Registration failed')
   }
 
   return responseData as LoginResponse
+}
+
+/**
+ * Request password reset email.
+ */
+export async function requestPasswordReset(email: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email.trim().toLowerCase() }),
+  })
+
+  const data = await res.json().catch(() => ({})) as ApiError | { message?: string }
+
+  if (!res.ok) {
+    const err = data as ApiError
+    throw new Error(err.error ?? 'Failed to send reset email')
+  }
 }
 
 /**

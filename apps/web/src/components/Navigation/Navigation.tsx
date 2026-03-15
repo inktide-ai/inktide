@@ -109,14 +109,14 @@ const Navigation = (props: NavigationProps) => {
                 <span className={styles.profileIcon} aria-hidden>
                   {userEmail ? userEmail.charAt(0).toUpperCase() : '?'}
                 </span>
-                <span className={styles.profileText}>Профиль</span>
+                <span className={styles.profileText}>Profile</span>
               </button>
               <button
                 type="button"
                 className={styles.logoutButton}
                 onClick={logout}
               >
-                Выйти
+                Log out
               </button>
             </>
           ) : (
