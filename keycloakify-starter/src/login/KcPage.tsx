@@ -5,12 +5,13 @@ import { useI18n } from "./i18n";
 import DefaultPage from "keycloakify/login/DefaultPage";
 import Template from "keycloakify/login/Template";
 import ChimeraLogin from "./pages/Login";
+import ChimeraRegister from "./pages/Register";
 
 const UserProfileFormFields = lazy(
     () => import("keycloakify/login/UserProfileFormFields")
 );
 
-const doMakeUserConfirmPassword = true;
+const doMakeUserConfirmPassword = false;
 
 export default function KcPage(props: { kcContext: KcContext }) {
     const { kcContext } = props;
@@ -28,6 +29,17 @@ export default function KcPage(props: { kcContext: KcContext }) {
                                 i18n={i18n}
                                 Template={Template}
                                 doUseDefaultCss={false}
+                            />
+                        );
+                    case "register.ftl":
+                        return (
+                            <ChimeraRegister
+                                kcContext={kcContext}
+                                i18n={i18n}
+                                Template={Template}
+                                doUseDefaultCss={false}
+                                UserProfileFormFields={UserProfileFormFields}
+                                doMakeUserConfirmPassword={doMakeUserConfirmPassword}
                             />
                         );
                     default:

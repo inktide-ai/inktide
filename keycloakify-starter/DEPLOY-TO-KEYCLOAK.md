@@ -94,7 +94,12 @@ services:
 2. В **Login theme** выбери **keycloakify-starter**
 3. **Save**
 
-## 4. Чеклист настройки (admin → realm → client → user)
+## 4. Страницы темы
+
+- **Login** — Chimera-styled login (username/password, Google, Twitch)
+- **Register** — Chimera-styled registration (100% match from apps/web)
+
+## 5. Чеклист настройки (admin → realm → client → user)
 
 После первого входа admin/admin:
 
@@ -112,6 +117,6 @@ services:
 
 > ⚠️ На Mac H2 теряет admin после рестарта (`user_not_found` в логах). Используй **docker-compose.keycloak.yml** с PostgreSQL.
 
-## 5. Проверка
+## 6. Проверка
 
 Открой страницу логина твоего приложения — должна отображаться тема Chimera.
