@@ -47,3 +47,7 @@ Thumbs.db
 # Database
 *.db
 *.sqlite
+
+# Keycloak / credentials
+keycloakify/
+*.textClipping
