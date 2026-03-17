@@ -56,7 +56,12 @@
     <!-- Connector -->
     <ProjectReference Include="..\Chimera.API.Connector\Chimera.API.Connector.Infrastructure\Chimera.API.Connector.Infrastructure.csproj" />
     <ProjectReference Include="..\Chimera.API.Connector\Chimera.API.Connector.Discord\Chimera.API.Connector.Discord.csproj" />
+    <!-- Soul -->
+    <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.Application\Chimera.API.Soul.Application.csproj" />
     <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.Infrastructure\Chimera.API.Soul.Infrastructure.csproj" />
+    <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.REST\Chimera.API.Soul.REST.csproj" />
+    <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.Grpc\Chimera.API.Soul.Grpc.csproj" />
+    <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.Grpc.AiCards.Service\Chimera.API.Soul.Grpc.AiCards.Service.csproj" />
     <ProjectReference Include="..\Chimera.API.Synapse\Chimera.API.Synapse.Application\Chimera.API.Synapse.Application.csproj" />
     <ProjectReference Include="..\Chimera.API.Synapse\Chimera.API.Synapse.Infrastructure\Chimera.API.Synapse.Infrastructure.csproj" />
   </ItemGroup>
