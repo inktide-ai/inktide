@@ -1,0 +1,22 @@
+name: Keycloak theme
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'keycloakify-starter/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'keycloakify-starter/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: keycloakify-starter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      - run: npm run build-keycloak-theme

@@ -1,5 +1,5 @@
-# Keycloak + PostgreSQL — надёжное сохранение данных (H2 на Mac теряет admin после рестарта)
-# Запуск: docker compose -f docker-compose.keycloak.yml up -d
+# Keycloak + PostgreSQL — reliable data persistence (H2 loses admin on Mac after restart)
+# Run: docker compose -f docker-compose.keycloak.yml up -d
 
 services:
   postgres:
