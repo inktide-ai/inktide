@@ -8,6 +8,7 @@ import ChimeraLogin from "./pages/Login";
 import ChimeraRegister from "./pages/Register";
 import ChimeraForgotPassword from "./pages/ForgotPassword";
 import ChimeraVerifyEmail from "./pages/VerifyEmail";
+import ChimeraUpdatePassword from "./pages/UpdatePassword";
 
 const UserProfileFormFields = lazy(
     () => import("keycloakify/login/UserProfileFormFields")
@@ -56,6 +57,15 @@ export default function KcPage(props: { kcContext: KcContext }) {
                     case "login-verify-email.ftl":
                         return (
                             <ChimeraVerifyEmail
+                                kcContext={kcContext}
+                                i18n={i18n}
+                                Template={Template}
+                                doUseDefaultCss={false}
+                            />
+                        );
+                    case "login-update-password.ftl":
+                        return (
+                            <ChimeraUpdatePassword
                                 kcContext={kcContext}
                                 i18n={i18n}
                                 Template={Template}
