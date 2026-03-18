@@ -4,14 +4,9 @@ interface LoadingScreenProps {
   message?: string
 }
 
-const LoadingScreen = ({ message = 'Loading...' }: LoadingScreenProps) => (
+const LoadingScreen = (_props?: LoadingScreenProps) => (
   <div className={styles.container}>
-    <div className={styles.dots}>
-      <span />
-      <span />
-      <span />
-    </div>
-    <p className={styles.text}>{message}</p>
+    <div className={styles.loader} />
   </div>
 )
 

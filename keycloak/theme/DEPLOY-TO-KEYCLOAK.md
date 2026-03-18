@@ -8,7 +8,7 @@
 ## 1. Build the theme
 
 ```bash
-cd keycloakify-starter
+cd keycloak/theme
 npm run build-keycloak-theme
 ```
 
@@ -25,9 +25,9 @@ On Mac, the built-in H2 database loses the admin user after restart (`user_not_f
 
 ```bash
 # 1. Build theme and copy JAR
-cd keycloakify-starter && npm run build-keycloak-theme && cd ..
+cd keycloak/theme && npm run build-keycloak-theme && cd ../..
 mkdir -p themes
-cp keycloakify-starter/dist_keycloak/keycloak-theme-for-kc-22-to-25.jar themes/
+cp keycloak/theme/dist_keycloak/keycloak-theme-for-kc-22-to-25.jar themes/
 
 # 2. Start Keycloak + PostgreSQL
 docker compose -f docker-compose.keycloak.yml up -d
@@ -39,7 +39,7 @@ docker compose -f docker-compose.keycloak.yml up -d
 
 ```bash
 mkdir -p themes
-cp keycloakify-starter/dist_keycloak/keycloak-theme-for-kc-22-to-25.jar themes/
+cp keycloak/theme/dist_keycloak/keycloak-theme-for-kc-22-to-25.jar themes/
 
 docker stop keycloak 2>/dev/null; docker rm keycloak 2>/dev/null
 docker run -d --name keycloak \

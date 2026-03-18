@@ -1,6 +1,6 @@
 #!/bin/bash
 # Start Keycloak with Chimera theme (PostgreSQL — reliable on Mac)
-# Run from chimera root: ./keycloakify-starter/start-keycloak.sh
+# Run from chimera root: ./keycloak/theme/start-keycloak.sh
 
 set -e
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -9,7 +9,7 @@ cd "$ROOT"
 # themes folder with JAR
 mkdir -p themes
 if [ ! -f themes/keycloak-theme-for-kc-22-to-25.jar ]; then
-    echo "Copy JAR first: cp keycloakify-starter/dist_keycloak/keycloak-theme-for-kc-22-to-25.jar themes/"
+    echo "Copy JAR first: cp keycloak/theme/dist_keycloak/keycloak-theme-for-kc-22-to-25.jar themes/"
     exit 1
 fi
 
