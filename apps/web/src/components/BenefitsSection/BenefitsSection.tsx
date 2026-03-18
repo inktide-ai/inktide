@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import classnames from 'classnames'
 import GlitchText from '../GlitchText'
 import { useRevealOnScroll } from '../../hooks'
@@ -8,6 +8,7 @@ import styles from './BenefitsSection.module.css'
 const BenefitsSection = () => {
   const { ref, isVisible } = useRevealOnScroll()
   const [activeTab, setActiveTab] = useState(0)
+  const gradientId = useId()
   const { heading, subheading, tabs } = CONTENT.benefits
   const active = tabs[activeTab]
 
@@ -51,21 +52,21 @@ const BenefitsSection = () => {
                   <path
                     d="M0,80 Q50,70 100,50 T200,50 T300,35 T400,20"
                     fill="none"
-                    stroke="url(#lineGrad1)"
+                    stroke={`url(#${gradientId}-1)`}
                     strokeWidth="2"
                   />
                   <path
                     d="M0,80 Q50,75 100,65 T200,60 T300,55 T400,45"
                     fill="none"
-                    stroke="url(#lineGrad2)"
+                    stroke={`url(#${gradientId}-2)`}
                     strokeWidth="2"
                   />
                   <defs>
-                    <linearGradient id="lineGrad1" x1="0" y1="0" x2="1" y2="0">
+                    <linearGradient id={`${gradientId}-1`} x1="0" y1="0" x2="1" y2="0">
                       <stop offset="0%" stopColor="#4DABF7" />
                       <stop offset="100%" stopColor="#22D3EE" />
                     </linearGradient>
-                    <linearGradient id="lineGrad2" x1="0" y1="0" x2="1" y2="0">
+                    <linearGradient id={`${gradientId}-2`} x1="0" y1="0" x2="1" y2="0">
                       <stop offset="0%" stopColor="#8B5CF6" />
                       <stop offset="100%" stopColor="#A78BFA" />
                     </linearGradient>

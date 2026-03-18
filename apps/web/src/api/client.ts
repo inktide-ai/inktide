@@ -1,13 +1,15 @@
 /**
  * API client with Bearer token and 401 -> refresh -> retry
+ * Uses Keycloak token when available, else localStorage (legacy backend auth).
  */
 
 import { API_BASE_URL } from './config'
 import { refreshTokens } from './auth'
 import { STORAGE_KEYS } from './types'
+import { keycloak } from '../keycloak'
 
 function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+  const token = keycloak.token ?? localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
   if (!token) return {}
   return { Authorization: `Bearer ${token}` }
 }
@@ -38,7 +40,17 @@ export async function apiFetch(
   let res = await fetch(url, { ...init, headers })
 
   if (res.status === 401 && retryOn401 && auth.Authorization) {
-    const refreshed = await refreshTokens()
+    let refreshed = false
+    if (keycloak.authenticated) {
+      try {
+        refreshed = await keycloak.updateToken(30)
+      } catch {
+        refreshed = false
+      }
+    }
+    if (!refreshed) {
+      refreshed = await refreshTokens()
+    }
     if (refreshed) {
       const newAuth = getAuthHeaders()
       Object.entries(newAuth).forEach(([k, v]) => headers.set(k, v))

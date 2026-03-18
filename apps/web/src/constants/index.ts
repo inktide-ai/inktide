@@ -3,7 +3,7 @@
  */
 
 export const VIDEO_CONFIG = {
-  videoId: 'dQw4w9WgXcQ',
+  videoId: '',
   autoplay: false,
   controls: true,
   modestbranding: true,
@@ -107,36 +107,36 @@ export const CONTENT = {
         heading: 'See how it works',
         description:
           'Chimera sets up in minutes and integrates into your stream with no hassle. Connect the OBS plugin, add your AI, and go live.',
-        videoId: 'dQw4w9WgXcQ',
-        image: 'https://www.jetbrains.com/img/home-page/screenshots/webstorm.svg',
+        videoId: '',
+        image: 'https://www.sandfield.co.nz/media/ocwmcnyw/bernd-dittrich-d_3ekbsg1tg-unsplash-1.webp?width=1920&height=1080&v=1d9745ecae6a000',
       },
       {
         heading: 'Ready out of the box',
         description:
           'No complex setup — just install, configure your AI personality, and start streaming. Everything works from the first click.',
-        videoId: 'dQw4w9WgXcQ',
-        image: 'https://www.jetbrains.com/img/home-page/screenshots/idea.svg',
+        videoId: '',
+        image: 'https://images.wallpapershq.com/wallpapers/405/wallpaper_405_1920x1080.jpg',
       },
       {
         heading: 'Complex tasks become easy',
         description:
           'The AI knows your channel and uses this knowledge to offer smart suggestions, natural reactions, and relevant responses in every context. Donations, chat, raids — handled automatically.',
-        videoId: 'dQw4w9WgXcQ',
-        image: 'https://www.jetbrains.com/img/home-page/screenshots/rider.gif',
+        videoId: '',
+        image: 'https://www.sandfield.co.nz/media/ocwmcnyw/bernd-dittrich-d_3ekbsg1tg-unsplash-1.webp?width=1920&height=1080&v=1d9745ecae6a000',
       },
       {
         heading: 'Built-in tools',
         description:
           'Customize prompts, voice, and appearance without leaving the dashboard. Run, tune, and test your AI companion — all important tools are within a hand\'s reach.',
-        videoId: 'dQw4w9WgXcQ',
-        image: 'https://www.jetbrains.com/img/home-page/screenshots/webstorm.svg',
+        videoId: '',
+        image: 'https://images.wallpapershq.com/wallpapers/405/wallpaper_405_1920x1080.jpg',
       },
       {
         heading: 'Grow with your community',
         description:
           'Analytics and insights help you understand what resonates. Track engagement, optimize reactions, and build an AI that truly reflects your stream\'s personality.',
-        videoId: 'dQw4w9WgXcQ',
-        image: 'https://www.jetbrains.com/img/home-page/screenshots/idea.svg',
+        videoId: '',
+        image: 'https://www.sandfield.co.nz/media/ocwmcnyw/bernd-dittrich-d_3ekbsg1tg-unsplash-1.webp?width=1920&height=1080&v=1d9745ecae6a000',
       },
     ],
   },
@@ -144,7 +144,9 @@ export const CONTENT = {
     heading: 'Support for multiple LLM models',
   },
   learn: {
-    heading: "What You'll Learn",
+    heading: 'Insights & Research',
+    subheading: 'Data-driven findings on AI-powered streaming',
+    sectionHeading: "What You'll Learn",
     bullets: [
       'The latest data on AI engagement trends across Twitch, YouTube Live and TikTok Live.',
       'How AI companions enhance viewer interaction and boost stream retention.',

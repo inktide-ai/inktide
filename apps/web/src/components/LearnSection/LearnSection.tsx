@@ -11,14 +11,14 @@ const LearnSection = () => {
     <section className={styles.section} ref={ref}>
       <div className={styles.container}>
         <div className={styles.header}>
-          <GlitchText text={CONTENT.benefits.heading} tag="h2" className={styles.heading} />
-          <p className={styles.subheading}>{CONTENT.benefits.subheading}</p>
+          <GlitchText text={CONTENT.learn.heading} tag="h2" className={styles.heading} />
+          <p className={styles.subheading}>{CONTENT.learn.subheading}</p>
         </div>
         <div
           className={classnames(styles.block, { [styles.revealed]: isVisible })}
         >
           <div className={styles.leftColumn}>
-            <h3 className={styles.learnHeading}>{CONTENT.learn.heading}</h3>
+            <h3 className={styles.learnHeading}>{CONTENT.learn.sectionHeading}</h3>
             <ul className={styles.bulletList}>
               {CONTENT.learn.bullets.map((item, i) => (
                 <li key={i} className={styles.bulletItem}>
