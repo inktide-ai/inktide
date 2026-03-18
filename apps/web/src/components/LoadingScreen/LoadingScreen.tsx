@@ -1,13 +1,17 @@
 import styles from './LoadingScreen.module.css'
 
-const LoadingScreen = () => (
+interface LoadingScreenProps {
+  message?: string
+}
+
+const LoadingScreen = ({ message = 'Loading...' }: LoadingScreenProps) => (
   <div className={styles.container}>
     <div className={styles.dots}>
       <span />
       <span />
       <span />
     </div>
-    <p className={styles.text}>Loading...</p>
+    <p className={styles.text}>{message}</p>
   </div>
 )
 
