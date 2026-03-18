@@ -1,6 +1,5 @@
 using Chimera.API.Core;
 using Chimera.API.Core.Settings;
-using Chimera.API.Identify.Infrastructure.Settings;
 using DryIoc;
 using StackExchange.Redis;
 

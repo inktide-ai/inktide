@@ -47,12 +47,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Chimera.API.Core\Chimera.API.Core.csproj" />
-    <!-- Identify -->
-    <ProjectReference Include="..\Chimera.API.Identify\Chimera.API.Identify.Application\Chimera.API.Identify.Application.csproj" />
-    <ProjectReference Include="..\Chimera.API.Identify\Chimera.API.Identify.Infrastructure\Chimera.API.Identify.Infrastructure.csproj" />
-    <ProjectReference Include="..\Chimera.API.Identify\Chimera.API.Identify.REST\Chimera.API.Identify.REST.csproj" />
-    <ProjectReference Include="..\Chimera.API.Identify\Chimera.API.Identify.Grpc\Chimera.API.Identify.Grpc.csproj" />
-    <ProjectReference Include="..\Chimera.API.Identify\Chimera.API.Identify.Grpc.Auth.Service\Chimera.API.Identify.Grpc.Auth.Service.csproj" />
     <!-- Connector -->
     <ProjectReference Include="..\Chimera.API.Connector\Chimera.API.Connector.Infrastructure\Chimera.API.Connector.Infrastructure.csproj" />
     <ProjectReference Include="..\Chimera.API.Connector\Chimera.API.Connector.Discord\Chimera.API.Connector.Discord.csproj" />
