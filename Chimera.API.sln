@@ -1,48 +1,48 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API", "Chimera.API\Chimera.API.csproj", "{B1C2D3E4-F5A6-4B7C-8D9E-0F1A2B3C4D5E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API", "src\Chimera.API\Chimera.API.csproj", "{B1C2D3E4-F5A6-4B7C-8D9E-0F1A2B3C4D5E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Core", "Chimera.API.Core\Chimera.API.Core.csproj", "{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Core", "src\Chimera.API.Core\Chimera.API.Core.csproj", "{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chimera.API.Connector", "Chimera.API.Connector", "{A1B2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Connector.Application", "Chimera.API.Connector\Chimera.API.Connector.Application\Chimera.API.Connector.Application.csproj", "{D1E2F3A4-B5C6-4D7E-8F9A-0B1C2D3E4F5A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Connector.Application", "src\Chimera.API.Connector\Chimera.API.Connector.Application\Chimera.API.Connector.Application.csproj", "{D1E2F3A4-B5C6-4D7E-8F9A-0B1C2D3E4F5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Connector.Infrastructure", "Chimera.API.Connector\Chimera.API.Connector.Infrastructure\Chimera.API.Connector.Infrastructure.csproj", "{E2F3A4B5-C6D7-4E8F-9A0B-1C2D3E4F5A6B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Connector.Infrastructure", "src\Chimera.API.Connector\Chimera.API.Connector.Infrastructure\Chimera.API.Connector.Infrastructure.csproj", "{E2F3A4B5-C6D7-4E8F-9A0B-1C2D3E4F5A6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Connector.Discord", "Chimera.API.Connector\Chimera.API.Connector.Discord\Chimera.API.Connector.Discord.csproj", "{F3A4B5C6-D7E8-4F9A-0B1C-2D3E4F5A6B7C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Connector.Discord", "src\Chimera.API.Connector\Chimera.API.Connector.Discord\Chimera.API.Connector.Discord.csproj", "{F3A4B5C6-D7E8-4F9A-0B1C-2D3E4F5A6B7C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chimera.API.Synapse", "Chimera.API.Synapse", "{7A8B9C0D-1E2F-4A3B-8C9D-0E1F2A3B4C5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Synapse.Application", "Chimera.API.Synapse\Chimera.API.Synapse.Application\Chimera.API.Synapse.Application.csproj", "{4D5E6F7A-8B9C-4D0E-1F2A-3B4C5D6E7F8A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Synapse.Application", "src\Chimera.API.Synapse\Chimera.API.Synapse.Application\Chimera.API.Synapse.Application.csproj", "{4D5E6F7A-8B9C-4D0E-1F2A-3B4C5D6E7F8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Synapse.Infrastructure", "Chimera.API.Synapse\Chimera.API.Synapse.Infrastructure\Chimera.API.Synapse.Infrastructure.csproj", "{3C4D5E6F-7A8B-4C9D-0E1F-2A3B4C5D6E7F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Synapse.Infrastructure", "src\Chimera.API.Synapse\Chimera.API.Synapse.Infrastructure\Chimera.API.Synapse.Infrastructure.csproj", "{3C4D5E6F-7A8B-4C9D-0E1F-2A3B4C5D6E7F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chimera.API.Soul", "Chimera.API.Soul", "{8B9C0D1E-2F3A-4B5C-9D0E-1F2A3B4C5D6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Application", "Chimera.API.Soul\Chimera.API.Soul.Application\Chimera.API.Soul.Application.csproj", "{B2C3D4E5-F6A7-4B8C-9D0E-1F2A3B4C5D6E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Application", "src\Chimera.API.Soul\Chimera.API.Soul.Application\Chimera.API.Soul.Application.csproj", "{B2C3D4E5-F6A7-4B8C-9D0E-1F2A3B4C5D6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Infrastructure", "Chimera.API.Soul\Chimera.API.Soul.Infrastructure\Chimera.API.Soul.Infrastructure.csproj", "{C3D4E5F6-A7B8-4C9D-0E1F-2A3B4C5D6E7F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Infrastructure", "src\Chimera.API.Soul\Chimera.API.Soul.Infrastructure\Chimera.API.Soul.Infrastructure.csproj", "{C3D4E5F6-A7B8-4C9D-0E1F-2A3B4C5D6E7F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Domain", "Chimera.API.Soul\Chimera.API.Soul.Domain\Chimera.API.Soul.Domain.csproj", "{3D0B8DC7-1462-471E-BAA3-67618AE2FFC6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Domain", "src\Chimera.API.Soul\Chimera.API.Soul.Domain\Chimera.API.Soul.Domain.csproj", "{3D0B8DC7-1462-471E-BAA3-67618AE2FFC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.REST", "Chimera.API.Soul\Chimera.API.Soul.REST\Chimera.API.Soul.REST.csproj", "{3CB2CE0C-E8FA-45E4-AFD1-479C7EAA710F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.REST", "src\Chimera.API.Soul\Chimera.API.Soul.REST\Chimera.API.Soul.REST.csproj", "{3CB2CE0C-E8FA-45E4-AFD1-479C7EAA710F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.REST.Models", "Chimera.API.Soul\Chimera.API.Soul.REST.Models\Chimera.API.Soul.REST.Models.csproj", "{F30A8B85-6BA8-4A40-A5DF-4099C3E1A2EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.REST.Models", "src\Chimera.API.Soul\Chimera.API.Soul.REST.Models\Chimera.API.Soul.REST.Models.csproj", "{F30A8B85-6BA8-4A40-A5DF-4099C3E1A2EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Grpc.Contracts", "Chimera.API.Soul\Chimera.API.Soul.Grpc.Contracts\Chimera.API.Soul.Grpc.Contracts.csproj", "{61669234-4ED0-40A8-AF04-99D447760A49}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Grpc.Contracts", "src\Chimera.API.Soul\Chimera.API.Soul.Grpc.Contracts\Chimera.API.Soul.Grpc.Contracts.csproj", "{61669234-4ED0-40A8-AF04-99D447760A49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Grpc", "Chimera.API.Soul\Chimera.API.Soul.Grpc\Chimera.API.Soul.Grpc.csproj", "{F0FA6A5A-B6A0-40F4-A887-3ADCDE60A6FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Grpc", "src\Chimera.API.Soul\Chimera.API.Soul.Grpc\Chimera.API.Soul.Grpc.csproj", "{F0FA6A5A-B6A0-40F4-A887-3ADCDE60A6FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Grpc.AiCards.Service", "Chimera.API.Soul\Chimera.API.Soul.Grpc.AiCards.Service\Chimera.API.Soul.Grpc.AiCards.Service.csproj", "{15B86793-8D91-4124-A641-9CE774CAB5F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Soul.Grpc.AiCards.Service", "src\Chimera.API.Soul\Chimera.API.Soul.Grpc.AiCards.Service\Chimera.API.Soul.Grpc.AiCards.Service.csproj", "{15B86793-8D91-4124-A641-9CE774CAB5F8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chimera.API.Profile", "Chimera.API.Profile", "{7F46405B-B06A-5290-96C5-DA37B58FA2E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Profile.Application", "Chimera.API.Profile\Chimera.API.Profile.Application\Chimera.API.Profile.Application.csproj", "{5BD7E99B-81B9-4FE9-9771-6A58AD6F6497}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Profile.Application", "src\Chimera.API.Profile\Chimera.API.Profile.Application\Chimera.API.Profile.Application.csproj", "{5BD7E99B-81B9-4FE9-9771-6A58AD6F6497}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Profile.Infrastructure", "Chimera.API.Profile\Chimera.API.Profile.Infrastructure\Chimera.API.Profile.Infrastructure.csproj", "{02409046-0FF9-4F62-B407-914AE8C85142}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Profile.Infrastructure", "src\Chimera.API.Profile\Chimera.API.Profile.Infrastructure\Chimera.API.Profile.Infrastructure.csproj", "{02409046-0FF9-4F62-B407-914AE8C85142}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Profile.REST", "Chimera.API.Profile\Chimera.API.Profile.REST\Chimera.API.Profile.REST.csproj", "{247329A3-E970-491C-9CA5-0C2010E3E1F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chimera.API.Profile.REST", "src\Chimera.API.Profile\Chimera.API.Profile.REST\Chimera.API.Profile.REST.csproj", "{247329A3-E970-491C-9CA5-0C2010E3E1F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
