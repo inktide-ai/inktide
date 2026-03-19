@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { useKeycloak } from '@react-keycloak/web'
+import { useAuth } from '../../context/AuthContext'
 import LoadingScreen from '../LoadingScreen'
 
 interface ProtectedRouteProps {
@@ -8,16 +8,11 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { keycloak, initialized } = useKeycloak()
+  const { isLoggedIn, isInitialized } = useAuth()
   const location = useLocation()
 
-  if (!initialized) {
-    return <LoadingScreen />
-  }
-
-  if (!keycloak.authenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />
-  }
+  if (!isInitialized) return <LoadingScreen />
+  if (!isLoggedIn) return <Navigate to="/login" state={{ from: location }} replace />
 
   return <>{children}</>
 }

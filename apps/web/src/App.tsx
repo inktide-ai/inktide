@@ -10,6 +10,7 @@ const RegisterPage = lazy(() => import('./components/RegisterPage'))
 const ForgotPasswordPage = lazy(() => import('./components/ForgotPasswordPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 const ProfilePage = lazy(() => import('./components/ProfilePage'))
+const CharacterEditPage = lazy(() => import('./components/ProfilePage/CharacterEditPage'))
 
 function App() {
   return (
@@ -22,6 +23,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/bot/:cardId/edit"
+            element={
+              <ProtectedRoute>
+                <CharacterEditPage />
               </ProtectedRoute>
             }
           />

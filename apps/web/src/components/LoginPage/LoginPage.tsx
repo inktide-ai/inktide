@@ -1,38 +1,26 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useKeycloak } from '@react-keycloak/web'
 import { useAuth } from '../../context/AuthContext'
 import LoadingScreen from '../LoadingScreen'
 
 const LoginPage = () => {
   const navigate = useNavigate()
-  const { keycloak, initialized } = useKeycloak()
-  const { isLoggedIn, loginWithKeycloak } = useAuth()
+  const { isLoggedIn, isInitialized, loginWithKeycloak } = useAuth()
   const redirectedRef = useRef(false)
 
   useEffect(() => {
-    if (!initialized) return
-    if (isLoggedIn || keycloak.authenticated) {
+    if (!isInitialized) return
+    if (isLoggedIn) {
       navigate('/profile', { replace: true })
-      return
-    }
-    const params = new URLSearchParams(window.location.search)
-    if (params.has('code') || params.has('state')) {
       return
     }
     if (!redirectedRef.current) {
       redirectedRef.current = true
       loginWithKeycloak()
     }
-  }, [initialized, isLoggedIn, keycloak.authenticated, loginWithKeycloak, navigate])
+  }, [isInitialized, isLoggedIn, loginWithKeycloak, navigate])
 
-  const message = initialized
-    ? keycloak.authenticated
-      ? 'Completing sign in...'
-      : 'Redirecting to sign in...'
-    : 'Loading...'
-
-  return <LoadingScreen message={message} />
+  return <LoadingScreen message={isLoggedIn ? 'Completing sign in...' : 'Redirecting to sign in...'} />
 }
 
 export default LoginPage

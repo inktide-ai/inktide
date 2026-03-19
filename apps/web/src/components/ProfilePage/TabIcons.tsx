@@ -1,7 +1,50 @@
 export const IconUser = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+  <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden>
     <path d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z" fill="currentColor" />
     <path d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z" fill="currentColor" />
+  </svg>
+)
+
+export const IconSkills = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M13 10V3L4 14h7v7l9-11h-7z" fill="currentColor" />
+  </svg>
+)
+
+export const IconScene = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M1 5h22v14H1V5z" stroke="currentColor" strokeWidth="2" fill="none" />
+    <path d="M1 19l6-6 4 4 4-6 6 8" fill="currentColor" opacity="0.5" />
+    <circle cx="7" cy="9" r="2" fill="currentColor" />
+  </svg>
+)
+
+export const IconMemory = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="2" fill="none" />
+    <path d="M8 6h8M8 10h8M8 14h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
+
+export const IconWorkshop = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M9 3v2.5l-4 6v8h14v-8l-4-6V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d="M9 5.5h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
+
+export const IconSearch = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" fill="none" />
+    <path d="M16 16l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
+
+export const IconBackup = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 )
 

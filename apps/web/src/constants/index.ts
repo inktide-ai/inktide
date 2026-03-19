@@ -10,14 +10,6 @@ export const VIDEO_CONFIG = {
   rel: 0,
 } as const
 
-export const STAR_CONFIG_SECTION = {
-  count: 50,
-  minSize: 0.5,
-  maxSize: 2.5,
-  minOpacity: 0.2,
-  maxOpacity: 0.7,
-} as const
-
 export const NAVIGATION_ITEMS = [
   { label: 'Product', href: '#features', withCaret: true },
   { label: 'Solutions', href: '#how', withCaret: true },

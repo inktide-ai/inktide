@@ -6,7 +6,7 @@ interface IntegrationTabProps {
   onUpdate: (patch: Partial<AiCharacter>) => void
 }
 
-const IntegrationTab = ({ character, onUpdate: _onUpdate }: IntegrationTabProps) => (
+const IntegrationTab = (_props: IntegrationTabProps) => (
   <div className={styles.tabRoot}>
     <div className={styles.section}>
       <div className={styles.sectionTitle}>Integration</div>

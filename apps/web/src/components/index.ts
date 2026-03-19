@@ -1,5 +1,4 @@
 export { default as BenefitsSection } from './BenefitsSection'
-export { default as ChimeraApp } from './ChimeraApp'
 export { default as CTASection } from './CTASection'
 export { default as FeaturesSection } from './FeaturesSection'
 export { default as Footer } from './Footer'

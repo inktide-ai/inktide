@@ -105,7 +105,7 @@ For SPA + JWT in localStorage: **Option A** is common. Frontend reads `window.lo
 
 ### 4. Migration
 ```bash
-dotnet ef database update --project src/Chimera.API.Identify/Chimera.API.Identify.Infrastructure --startup-project src/Chimera.API
+dotnet ef database update --project Chimera.API.Identify/Chimera.API.Identify.Infrastructure --startup-project Chimera.API
 ```
 
 ### 5. Frontend

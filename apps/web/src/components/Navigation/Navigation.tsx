@@ -14,7 +14,7 @@ interface NavigationProps {
 }
 
 const Navigation = (props: NavigationProps) => {
-  const { isLoggedIn, userEmail, loginWithKeycloak, registerWithKeycloak, logout } = useAuth()
+  const { isLoggedIn, userEmail, user, loginWithKeycloak, registerWithKeycloak, logout } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const onLoginClick = props.onLoginClick ?? loginWithKeycloak
@@ -96,7 +96,14 @@ const Navigation = (props: NavigationProps) => {
                   onClick={props.onGoToApp}
                 >
                   <span className={styles.profileIcon} aria-hidden>
-                    {userEmail ? userEmail.charAt(0).toUpperCase() : '?'}
+                    {user?.pictureUrl ? (
+                      <img src={user.pictureUrl} alt="" className={styles.profileIconImg} />
+                    ) : (
+                      (user?.nickname?.trim() || user?.userName || userEmail || '?')
+                        .replace(/^\./, '')
+                        .charAt(0)
+                        .toUpperCase() || '?'
+                    )}
                   </span>
                   <span className={styles.profileText}>Profile</span>
                 </button>

@@ -9,6 +9,9 @@ import ChimeraRegister from "./pages/Register";
 import ChimeraForgotPassword from "./pages/ForgotPassword";
 import ChimeraVerifyEmail from "./pages/VerifyEmail";
 import ChimeraUpdatePassword from "./pages/UpdatePassword";
+import ChimeraLoginIdpLinkConfirm from "./pages/LoginIdpLinkConfirm";
+import ChimeraLoginIdpLinkConfirmOverride from "./pages/LoginIdpLinkConfirmOverride";
+import ChimeraIdpReviewUserProfile from "./pages/IdpReviewUserProfile";
 
 const UserProfileFormFields = lazy(
     () => import("keycloakify/login/UserProfileFormFields")
@@ -70,6 +73,35 @@ export default function KcPage(props: { kcContext: KcContext }) {
                                 i18n={i18n}
                                 Template={Template}
                                 doUseDefaultCss={false}
+                            />
+                        );
+                    case "login-idp-link-confirm.ftl":
+                        return (
+                            <ChimeraLoginIdpLinkConfirm
+                                kcContext={kcContext}
+                                i18n={i18n}
+                                Template={Template}
+                                doUseDefaultCss={false}
+                            />
+                        );
+                    case "login-idp-link-confirm-override.ftl":
+                        return (
+                            <ChimeraLoginIdpLinkConfirmOverride
+                                kcContext={kcContext}
+                                i18n={i18n}
+                                Template={Template}
+                                doUseDefaultCss={false}
+                            />
+                        );
+                    case "idp-review-user-profile.ftl":
+                        return (
+                            <ChimeraIdpReviewUserProfile
+                                kcContext={kcContext}
+                                i18n={i18n}
+                                Template={Template}
+                                doUseDefaultCss={false}
+                                UserProfileFormFields={UserProfileFormFields}
+                                doMakeUserConfirmPassword={doMakeUserConfirmPassword}
                             />
                         );
                     default:

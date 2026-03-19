@@ -3,10 +3,12 @@ import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { KcPage } from "./kc.gen";
 import { getKcContextMock } from "./login/KcPageStory";
+import { getKcAccountContextMock } from "./account/getKcAccountContextMock";
 
-// Mock login page for dev (Chimera theme)
+// Dev mocks: `?account=1` loads Account console; otherwise login (Chimera theme).
 if (import.meta.env.DEV) {
-    window.kcContext = getKcContextMock({
+    const accountDev = new URLSearchParams(window.location.search).get("account") === "1";
+    window.kcContext = accountDev ? getKcAccountContextMock() : getKcContextMock({
         pageId: "login.ftl",
         overrides: {
             social: {

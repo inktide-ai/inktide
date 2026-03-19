@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useCallback, useRef, useState, type ChangeEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { uploadCardAvatar } from '../../api/soul'
 import styles from './IdentityCard.module.css'
 import type { AiCharacter } from './types'
 import { BANNER_PRESETS, getBannerGradient } from './bannerPresets'
@@ -6,20 +8,50 @@ import { BANNER_PRESETS, getBannerGradient } from './bannerPresets'
 interface IdentityCardProps {
   character: AiCharacter
   onUpdate: (patch: Partial<AiCharacter>) => void
+  onDelete?: () => void
 }
 
-const IdentityCard = ({ character, onUpdate }: IdentityCardProps) => {
-  const bannerIdx = character.bannerColorIndex ?? 0
-  const [editingField, setEditingField] = useState<string | null>(null)
+function PencilIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+const IdentityCard = ({ character, onUpdate, onDelete }: IdentityCardProps) => {
+  const navigate = useNavigate()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [avatarBusy, setAvatarBusy] = useState(false)
   const [deactivateConfirm, setDeactivateConfirm] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
 
+  const bannerIdx = character.bannerColorIndex ?? 0
   const initial = character.name.charAt(0).toUpperCase()
+
+  const onAvatarFile = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      e.target.value = ''
+      if (!file || !file.type.startsWith('image/')) return
+      setAvatarBusy(true)
+      try {
+        const res = await uploadCardAvatar(character.id, file)
+        onUpdate({ avatarUrl: res.avatar_url })
+      } catch {
+        /* optional toast */
+      } finally {
+        setAvatarBusy(false)
+      }
+    },
+    [character.id, onUpdate],
+  )
 
   return (
     <div className={styles.root}>
-
-      {/* ── Profile Card ── */}
       <div className={styles.profileCard}>
         <div
           className={styles.banner}
@@ -41,12 +73,31 @@ const IdentityCard = ({ character, onUpdate }: IdentityCardProps) => {
 
         <div className={styles.profileBody}>
           <div className={styles.avatarWrap}>
-            <div
-              className={styles.avatar}
-              style={{ background: getBannerGradient(bannerIdx) }}
+            <button
+              type="button"
+              className={styles.avatarBtn}
+              onClick={() => fileRef.current?.click()}
+              disabled={avatarBusy}
+              aria-label="Change avatar"
             >
-              {initial}
-            </div>
+              {character.avatarUrl ? (
+                <img src={character.avatarUrl} alt="" className={styles.avatarImg} />
+              ) : (
+                <div className={styles.avatar} style={{ background: getBannerGradient(bannerIdx) }}>
+                  {initial}
+                </div>
+              )}
+              <span className={styles.avatarEditOverlay}>
+                {avatarBusy ? '…' : <PencilIcon />}
+              </span>
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className={styles.hiddenFile}
+              onChange={onAvatarFile}
+            />
             {character.isActive && <span className={styles.onlineDot} />}
           </div>
 
@@ -54,91 +105,33 @@ const IdentityCard = ({ character, onUpdate }: IdentityCardProps) => {
             <div className={styles.profileName}>{character.name}</div>
             <div className={styles.profileSlug}>/{character.slug}</div>
             <div className={styles.profileBadges}>
-              <span className={styles.badge}>BOT</span>
+              <span className={styles.badge}>Bot</span>
               {character.ttsEnabled && <span className={`${styles.badge} ${styles.badgePurple}`}>TTS</span>}
-              {character.memoryEnabled && <span className={`${styles.badge} ${styles.badgeCyan}`}>MEMORY</span>}
+              {character.memoryEnabled && <span className={`${styles.badge} ${styles.badgeCyan}`}>Memory</span>}
             </div>
           </div>
 
           <button
             type="button"
             className={styles.editProfileBtn}
-            onClick={() => setEditingField(editingField ? null : 'name')}
+            onClick={() => navigate(`/profile/bot/${character.id}/edit`)}
           >
-            {editingField ? 'Done' : 'Edit Character'}
+            Edit Character
           </button>
         </div>
 
-        {/* ── About section ── */}
-        <div className={styles.aboutSection}>
-          <div className={styles.aboutLabel}>About</div>
-          <p className={styles.aboutText}>
-            {character.personality || 'No personality defined yet. Add one to bring your character to life.'}
-          </p>
-        </div>
-      </div>
-
-      {/* ── Info Rows ── */}
-      <div className={styles.section}>
-        <div className={styles.sectionTitle}>Character Info</div>
-
-        <div className={styles.infoCard}>
-          <InfoRow
-            label="Display Name"
-            value={character.name}
-            editing={editingField === 'name'}
-            onEdit={() => setEditingField('name')}
-            onDone={() => setEditingField(null)}
-            onChange={(v) => onUpdate({ name: v })}
-          />
-          <InfoRow
-            label="Slug"
-            value={character.slug}
-            editing={editingField === 'slug'}
-            onEdit={() => setEditingField('slug')}
-            onDone={() => setEditingField(null)}
-            onChange={(v) => onUpdate({ slug: v })}
-            prefix="/"
-          />
-          <InfoRow
-            label="Language"
-            value={character.language.toUpperCase()}
-            editing={editingField === 'lang'}
-            onEdit={() => setEditingField('lang')}
-            onDone={() => setEditingField(null)}
-            onChange={(v) => onUpdate({ language: v })}
-          />
-          <InfoRow
-            label="Key Phrases"
-            value={character.keyPhrases}
-            editing={editingField === 'phrases'}
-            onEdit={() => setEditingField('phrases')}
-            onDone={() => setEditingField(null)}
-            onChange={(v) => onUpdate({ keyPhrases: v })}
-            hint="Comma-separated"
-            isLast
-          />
-        </div>
-      </div>
-
-      {/* ── Personality ── */}
-      <div className={styles.section}>
-        <div className={styles.sectionTitle}>Personality</div>
-        <div className={styles.infoCard}>
-          <div className={styles.textareaRow}>
-            <div className={styles.infoLabel}>Description</div>
-            <textarea
-              className={styles.textarea}
-              value={character.personality}
-              onChange={(e) => onUpdate({ personality: e.target.value })}
-              placeholder="Describe your AI's personality, tone, and quirks..."
-              rows={4}
-            />
+        {character.personality ? (
+          <div className={styles.aboutTeaser}>
+            <div className={styles.aboutLabel}>About</div>
+            <p className={styles.aboutTeaserText}>
+              {character.personality.length > 160
+                ? `${character.personality.slice(0, 160)}…`
+                : character.personality}
+            </p>
           </div>
-        </div>
+        ) : null}
       </div>
 
-      {/* ── Status & Stats ── */}
       <div className={styles.section}>
         <div className={styles.sectionTitle}>Status</div>
         <div className={styles.statsGrid}>
@@ -161,7 +154,6 @@ const IdentityCard = ({ character, onUpdate }: IdentityCardProps) => {
         </div>
       </div>
 
-      {/* ── Connections (lorem) ── */}
       <div className={styles.section}>
         <div className={styles.sectionTitle}>Connections</div>
         <div className={styles.infoCard}>
@@ -171,7 +163,6 @@ const IdentityCard = ({ character, onUpdate }: IdentityCardProps) => {
         </div>
       </div>
 
-      {/* ── Activity (lorem) ── */}
       <div className={styles.section}>
         <div className={styles.sectionTitle}>Recent Activity</div>
         <div className={styles.infoCard}>
@@ -182,7 +173,6 @@ const IdentityCard = ({ character, onUpdate }: IdentityCardProps) => {
         </div>
       </div>
 
-      {/* ── Danger Zone ── */}
       <div className={styles.section}>
         <div className={styles.sectionTitle}>Account Management</div>
         <div className={styles.dangerCard}>
@@ -203,7 +193,10 @@ const IdentityCard = ({ character, onUpdate }: IdentityCardProps) => {
                 <button
                   type="button"
                   className={styles.btnDeactivate}
-                  onClick={() => { onUpdate({ isActive: !character.isActive }); setDeactivateConfirm(false) }}
+                  onClick={() => {
+                    onUpdate({ isActive: !character.isActive })
+                    setDeactivateConfirm(false)
+                  }}
                 >
                   {character.isActive ? 'Deactivate' : 'Activate'}
                 </button>
@@ -238,7 +231,14 @@ const IdentityCard = ({ character, onUpdate }: IdentityCardProps) => {
             {deleteConfirm ? (
               <div className={styles.confirmGroup}>
                 <span className={styles.confirmText}>This is permanent.</span>
-                <button type="button" className={styles.btnDelete}>
+                <button
+                  type="button"
+                  className={styles.btnDelete}
+                  onClick={() => {
+                    onDelete?.()
+                    setDeleteConfirm(false)
+                  }}
+                >
                   Delete Forever
                 </button>
                 <button
@@ -261,50 +261,9 @@ const IdentityCard = ({ character, onUpdate }: IdentityCardProps) => {
           </div>
         </div>
       </div>
-
     </div>
   )
 }
-
-// ── Sub-components ──
-
-interface InfoRowProps {
-  label: string
-  value: string
-  editing: boolean
-  onEdit: () => void
-  onDone: () => void
-  onChange: (v: string) => void
-  prefix?: string
-  hint?: string
-  isLast?: boolean
-}
-
-const InfoRow = ({ label, value, editing, onEdit, onDone, onChange, prefix, hint, isLast }: InfoRowProps) => (
-  <div className={`${styles.infoRow} ${isLast ? styles.infoRowLast : ''}`}>
-    <div className={styles.infoLeft}>
-      <div className={styles.infoLabel}>{label}</div>
-      {editing ? (
-        <input
-          className={styles.inlineInput}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onDone}
-          autoFocus
-        />
-      ) : (
-        <div className={styles.infoValue}>
-          {prefix && <span className={styles.infoPrefix}>{prefix}</span>}
-          {value || <span className={styles.infoEmpty}>Not set</span>}
-          {hint && <span className={styles.infoHint}> · {hint}</span>}
-        </div>
-      )}
-    </div>
-    <button type="button" className={styles.editBtn} onClick={editing ? onDone : onEdit}>
-      {editing ? 'Save' : 'Edit'}
-    </button>
-  </div>
-)
 
 interface ConnectionRowProps {
   icon: string

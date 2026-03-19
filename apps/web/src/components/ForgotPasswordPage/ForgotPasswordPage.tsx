@@ -1,18 +1,21 @@
 import { useEffect } from 'react'
 import { useKeycloak } from '@react-keycloak/web'
+import { createForgotCredentialsLoginUrl } from '../../keycloak'
 import LoadingScreen from '../LoadingScreen'
 
 const ForgotPasswordPage = () => {
   const { keycloak } = useKeycloak()
 
   useEffect(() => {
-    keycloak?.login()
+    if (!keycloak) return
+    const redirectUri = `${window.location.origin}/profile`
+    void createForgotCredentialsLoginUrl(keycloak, redirectUri).then((url) => {
+      window.location.assign(url)
+    })
   }, [keycloak])
 
   return (
-    <LoadingScreen
-      message='Redirecting to sign in. Use "Forgot password?" on the login page.'
-    />
+    <LoadingScreen message="Redirecting to password reset. You’ll enter your email on the Keycloak page." />
   )
 }
 

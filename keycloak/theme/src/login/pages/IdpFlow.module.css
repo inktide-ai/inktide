@@ -1,0 +1,184 @@
+/* Shared Chimera shell for IdP / broker flows — matches Login.module.css */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: #0a0a0e;
+}
+
+.logo {
+  margin-bottom: 2rem;
+}
+
+.logo img {
+  width: 80px;
+  height: 80px;
+  display: block;
+}
+
+.panel {
+  width: 100%;
+  max-width: 420px;
+  background: #050509;
+  border-radius: 16px;
+  padding: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  margin: 0 0 1.25rem;
+}
+
+.bodyText {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: rgba(232, 232, 236, 0.88);
+  margin: 0 0 1rem;
+}
+
+.bodyText:last-child {
+  margin-bottom: 0;
+}
+
+.link {
+  color: #fff;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link:hover {
+  opacity: 0.88;
+}
+
+.alertBase {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  border: 1px solid transparent;
+}
+
+.alertIcon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.alertError {
+  composes: alertBase;
+  background: rgba(237, 62, 62, 0.12);
+  border-color: rgba(237, 62, 62, 0.35);
+  color: #ffb4b4;
+}
+
+.alertErrorIcon {
+  composes: alertIcon;
+  background: var(--accent-red, #ed3e3e);
+  color: #fff;
+}
+
+.alertWarning {
+  composes: alertBase;
+  background: rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.35);
+  color: rgba(251, 255, 172, 0.95);
+}
+
+.alertWarningIcon {
+  composes: alertIcon;
+  background: rgba(212, 175, 55, 0.85);
+  color: #0a0a0e;
+}
+
+.alertInfo {
+  composes: alertBase;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(232, 232, 236, 0.92);
+}
+
+.alertInfoIcon {
+  composes: alertIcon;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.alertContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.alertContent :global(p) {
+  margin: 0;
+}
+
+.btnBase {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+  border: 1px solid transparent;
+  text-align: center;
+  font-family: inherit;
+}
+
+.btnPrimary {
+  composes: btnBase;
+  background: linear-gradient(135deg, var(--accent-red, #ed3e3e) 0%, var(--accent-red-bright, #ff5252) 100%);
+  color: #fff;
+  box-shadow: 0 0 16px rgba(237, 62, 62, 0.3);
+}
+
+.btnPrimary:hover {
+  box-shadow: 0 0 24px rgba(237, 62, 62, 0.5);
+  transform: translateY(-1px);
+}
+
+.btnSecondary {
+  composes: btnBase;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.btnSecondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formSpacer {
+  margin-top: 1.5rem;
+}

@@ -41,11 +41,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
                 <div className={styles.toggleHint}>Give your AI a voice for spoken responses</div>
               </div>
               <label className={styles.toggleControl}>
-                <input
-                  type="checkbox"
-                  checked={character.ttsEnabled}
-                  onChange={(e) => onUpdate({ ttsEnabled: e.target.checked })}
-                />
+                <input type="checkbox" checked={character.ttsEnabled} onChange={(e) => onUpdate({ ttsEnabled: e.target.checked })} />
                 <span className={styles.control} />
               </label>
             </div>
@@ -60,12 +56,10 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
                   <input
                     type="checkbox"
                     checked={character.useCustomVoice}
-                    onChange={(e) =>
-                      onUpdate({
-                        useCustomVoice: e.target.checked,
-                        ...(e.target.checked ? {} : { customVoiceFile: null, selectedVoiceId: '1' }),
-                      })
-                    }
+                    onChange={(e) => onUpdate({
+                      useCustomVoice: e.target.checked,
+                      ...(e.target.checked ? {} : { customVoiceFile: null, selectedVoiceId: '1' }),
+                    })}
                     disabled={!character.ttsEnabled}
                   />
                   <span className={styles.control} />
@@ -84,34 +78,21 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
                       if (file) onUpdate({ customVoiceFile: file.name, useCustomVoice: true, selectedVoiceId: null })
                     }}
                   />
-                  <button
-                    type="button"
-                    className={styles.btnGhost}
-                    onClick={() => fileRef.current?.click()}
-                    disabled={!character.ttsEnabled}
-                  >
+                  <button type="button" className={styles.btnGhost} onClick={() => fileRef.current?.click()} disabled={!character.ttsEnabled}>
                     Choose file
                   </button>
                   <span className={styles.modelFileName}>
-                    {character.customVoiceFile ?? (
-                      <span style={{ color: 'var(--text-muted)' }}>No file — .wav, .mp3, .ogg, .flac</span>
-                    )}
+                    {character.customVoiceFile ?? <span style={{ color: 'var(--text-muted)' }}>No file — .wav, .mp3, .ogg, .flac</span>}
                   </span>
                   {character.customVoiceFile && (
-                    <button
-                      type="button"
-                      className={styles.modelClearBtn}
-                      onClick={() => onUpdate({ customVoiceFile: null, useCustomVoice: false, selectedVoiceId: '1' })}
-                    >
+                    <button type="button" className={styles.modelClearBtn} onClick={() => onUpdate({ customVoiceFile: null, useCustomVoice: false, selectedVoiceId: '1' })}>
                       Remove
                     </button>
                   )}
                 </div>
               ) : (
                 <>
-                  <label className={styles.label} style={{ marginTop: '1rem', marginBottom: '0.25rem', display: 'block' }}>
-                    Select voice
-                  </label>
+                  <label className={styles.label} style={{ marginTop: '1rem', marginBottom: '0.25rem', display: 'block' }}>Select voice</label>
                   <div className={styles.labelHint} style={{ marginBottom: '0.75rem' }}>Choose from available TTS providers</div>
                   <div className={styles.voiceGrid}>
                     {CATALOG.map((v) => (
@@ -151,16 +132,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
                 </div>
                 <span className={styles.sliderValue}>{character.speed.toFixed(1)}x</span>
               </div>
-                <SliderWithTicks
-                  min={0.5}
-                  max={2.0}
-                  step={0.1}
-                  value={character.speed}
-                  onChange={(v) => onUpdate({ speed: v })}
-                  formatValue={(v) => `${v.toFixed(1)}x`}
-                  tickCount={4}
-                  disabled={!character.ttsEnabled}
-                />
+              <SliderWithTicks min={0.5} max={2.0} step={0.1} value={character.speed} onChange={(v) => onUpdate({ speed: v })} formatValue={(v) => `${v.toFixed(1)}x`} tickCount={4} disabled={!character.ttsEnabled} />
             </div>
             <div className={styles.sliderGroup}>
               <div className={styles.sliderHeader}>
@@ -170,16 +142,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
                 </div>
                 <span className={styles.sliderValue}>{character.pitch.toFixed(1)}x</span>
               </div>
-                <SliderWithTicks
-                  min={0.5}
-                  max={2.0}
-                  step={0.1}
-                  value={character.pitch}
-                  onChange={(v) => onUpdate({ pitch: v })}
-                  formatValue={(v) => `${v.toFixed(1)}x`}
-                  tickCount={4}
-                  disabled={!character.ttsEnabled}
-                />
+              <SliderWithTicks min={0.5} max={2.0} step={0.1} value={character.pitch} onChange={(v) => onUpdate({ pitch: v })} formatValue={(v) => `${v.toFixed(1)}x`} tickCount={4} disabled={!character.ttsEnabled} />
             </div>
             <div className={styles.sliderGroup}>
               <div className={styles.sliderHeader}>
@@ -189,16 +152,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
                 </div>
                 <span className={styles.sliderValue}>{character.stability.toFixed(2)}</span>
               </div>
-                <SliderWithTicks
-                  min={0}
-                  max={1}
-                  step={0.05}
-                  value={character.stability}
-                  onChange={(v) => onUpdate({ stability: v })}
-                  formatValue={(v) => v.toFixed(2)}
-                  tickCount={5}
-                  disabled={!character.ttsEnabled}
-                />
+              <SliderWithTicks min={0} max={1} step={0.05} value={character.stability} onChange={(v) => onUpdate({ stability: v })} formatValue={(v) => v.toFixed(2)} tickCount={5} disabled={!character.ttsEnabled} />
             </div>
             <div className={styles.sliderGroup}>
               <div className={styles.sliderHeader}>
@@ -208,16 +162,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
                 </div>
                 <span className={styles.sliderValue}>{character.similarityBoost.toFixed(2)}</span>
               </div>
-                <SliderWithTicks
-                  min={0}
-                  max={1}
-                  step={0.05}
-                  value={character.similarityBoost}
-                  onChange={(v) => onUpdate({ similarityBoost: v })}
-                  formatValue={(v) => v.toFixed(2)}
-                  tickCount={5}
-                  disabled={!character.ttsEnabled}
-                />
+              <SliderWithTicks min={0} max={1} step={0.05} value={character.similarityBoost} onChange={(v) => onUpdate({ similarityBoost: v })} formatValue={(v) => v.toFixed(2)} tickCount={5} disabled={!character.ttsEnabled} />
             </div>
           </div>
         </div>
