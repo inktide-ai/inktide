@@ -1,0 +1,40 @@
+using Chimera.API.Domain.Models;
+
+namespace Chimera.API.TTS.Core.Configuration;
+
+/// <summary>
+/// Application configuration for TTS / speech providers (defaults only; secrets via <see cref="ProviderOptions"/>).
+/// </summary>
+public sealed class TtsProviderOptions
+{
+    public const string SectionName = "TtsProviders";
+
+    #region Fields
+
+    private string _defaultProviderId = "kokoro";
+    private Dictionary<string, bool>? _featureFlags;
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// Provider id when the caller does not specify one (must exist in <see cref="ISpeechProviderRegistry"/>).
+    /// </summary>
+    public string DefaultProviderId
+    {
+        get => _defaultProviderId;
+        set => _defaultProviderId = value;
+    }
+
+    /// <summary>
+    /// Optional feature switches for routing / experiments.
+    /// </summary>
+    public Dictionary<string, bool>? FeatureFlags
+    {
+        get => _featureFlags;
+        set => _featureFlags = value;
+    }
+
+    #endregion
+}

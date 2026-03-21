@@ -47,6 +47,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Chimera.API.Core\Chimera.API.Core.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS\Chimera.API.TTS.Application\Chimera.API.TTS.Application.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS\Chimera.API.TTS.REST\Chimera.API.TTS.REST.csproj" />
     <!-- Connector -->
     <ProjectReference Include="..\Chimera.API.Connector\Chimera.API.Connector.Infrastructure\Chimera.API.Connector.Infrastructure.csproj" />
     <ProjectReference Include="..\Chimera.API.Connector\Chimera.API.Connector.Discord\Chimera.API.Connector.Discord.csproj" />

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Chimera.API.TTS.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Chimera.API.TTS.Core\Chimera.API.TTS.Core.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS.Infrastructure\Chimera.API.TTS.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Chimera.API.Core\Chimera.API.Core.csproj" />
+  </ItemGroup>
+
+</Project>

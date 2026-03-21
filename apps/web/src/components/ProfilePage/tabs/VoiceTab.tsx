@@ -13,9 +13,9 @@ interface TtsVoice {
 }
 
 const CATALOG: TtsVoice[] = [
-  { id: '1', provider: 'elevenlabs', displayName: 'Rachel', language: 'en', gender: 'female', tier: 'free' },
-  { id: '2', provider: 'elevenlabs', displayName: 'Adam', language: 'en', gender: 'male', tier: 'free' },
-  { id: '3', provider: 'elevenlabs', displayName: 'Bella', language: 'en', gender: 'female', tier: 'pro' },
+  { id: '1', provider: 'kokoro', displayName: 'af_heart', language: 'en', gender: 'female', tier: 'free' },
+  { id: '2', provider: 'kokoro', displayName: 'af_bella', language: 'en', gender: 'female', tier: 'free' },
+  { id: '3', provider: 'kokoro', displayName: 'am_adam', language: 'en', gender: 'male', tier: 'pro' },
   { id: '4', provider: 'azure', displayName: 'Jenny', language: 'en', gender: 'female', tier: 'free' },
   { id: '5', provider: 'azure', displayName: 'Guy', language: 'en', gender: 'male', tier: 'free' },
   { id: '6', provider: 'silero', displayName: 'Baya', language: 'ru', gender: 'female', tier: 'free' },

@@ -11,7 +11,7 @@ namespace Chimera.API
 
         public static int Main()
         {
-
+            
 
             var configuration = BuildConfiguration();
 
