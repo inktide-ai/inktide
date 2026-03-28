@@ -30,8 +30,7 @@ public sealed class StreamingConnectorEndpointConfigurator : IEndpointConfigurat
 
         var defaultDescriptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["rabbitmq"] = "RabbitMQ connection status",
-            ["redis"] = "Redis cache connectivity"
+            ["redis"] = "Redis connectivity (cache, Synapse ingest stream)"
         };
 
         var result = new

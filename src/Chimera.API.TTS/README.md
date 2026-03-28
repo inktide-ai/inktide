@@ -1,20 +1,19 @@
-# Chimera.API.TTS (modular)
+# Chimera.API.TTS (bounded context)
 
-| Project | Role |
-|---------|------|
-| **Chimera.API.TTS.Domain** | Speech DTOs: `SpeechRequest`, `VoiceInfo`, `SpeechProviderDescriptor`, … |
-| **Chimera.API.TTS.Core** | `ISpeechProvider`, registry, options, decorators, `AddChimeraSpeechProviders` |
-| **Chimera.API.TTS.Infrastructure** | Kokoro adapter, `HttpClient` + Polly, `AddChimeraTtsKokoroClients` |
-| **Chimera.API.TTS.Application** | Composition: `AddChimeraTts`, `ChimeraTtsStartup` |
-| **Chimera.API.TTS.REST.Models** | REST DTOs, e.g. `TtsSynthesizeRequest` |
-| **Chimera.API.TTS.REST** | `TtsRestApiStartup`, `POST /api/tts/synthesize` → `audio/mpeg` |
+Layers (DDD / hexagonal):
 
-Shared with the rest of Chimera: `IProvider`, `ProviderConfig`, `ModelInfo`, `ProviderCategory` (`Chimera.API.Core` / `Chimera.API.Domain`).
+| Project | Responsibility |
+|---------|----------------|
+| **Chimera.API.TTS.Domain** | Models (`Models/`), domain exceptions (`Exceptions/`), speech **ports** (`Speech/`: `ISpeechProvider`, `ISpeechProviderRegistry`, `SpeechProviderRegistry`) |
+| **Chimera.API.TTS.Application** | Use cases: `Synthesis/*` (`ITtsSynthesisService`, commands, results), application ports (`Abstractions/IApiKeyResolver`), options (`Configuration/TtsProviderOptions`), `SpeechProviderResolutionExtensions` |
+| **Chimera.API.TTS.Infrastructure** | Adapters: Kokoro (`Kokoro/`), `TtsApiKeyResolver`, `Decorators/LoggingSpeechProviderDecorator`, **composition root** DI (`AddChimeraTts`, `AddChimeraSpeechProviders`, `ChimeraTtsStartup`) |
+| **Chimera.API.TTS.REST.Models** | HTTP DTOs (`TtsSynthesizeRequest`, …) |
+| **Chimera.API.TTS.REST** | Controllers, FluentValidation, `TtsRestApiStartup` |
 
-See `Chimera.API.TTS.Core/Providers/TTS_PROVIDERS.md`.
+Shared kernel: `IProvider`, `ProviderOptions`, `ProviderCategory` — `Chimera.API.Core` / `Chimera.API.Domain`.
 
 ### REST
 
-- **POST** `/api/tts/synthesize` — body JSON (`TtsSynthesizeRequest`): `text`, `voice_id`, optional `model_id`, `speed`, `provider_id`, `audio_format`.
-- **API key:** only if the resolved provider sets `RequiresApiKey` — header `X-TTS-Api-Key`, or config `TtsProviders:{provider_id}:ApiKey`.
-- **Response:** audio stream (`Content-Type` matches selected format).
+- **POST** `/api/tts/synthesize` — JSON (`TtsSynthesizeRequest`): `text`, `voice_id`, optional `model_id`, `speed`, `provider_id`, `audio_format`, `stream`.
+- **API key** (if provider `RequiresApiKey`): header `X-TTS-Api-Key` or `TtsProviders:{provider_id}:ApiKey`.
+- **Response:** audio stream (see `SpeechResult.Ok` content type in application layer).

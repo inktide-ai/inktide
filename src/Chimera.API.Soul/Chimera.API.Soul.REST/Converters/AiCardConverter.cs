@@ -1,3 +1,4 @@
+using Chimera.API.Soul.Application.Models;
 using Chimera.API.Soul.Domain.Entities;
 using Chimera.API.Soul.REST.Models;
 using Newtonsoft.Json;
@@ -115,9 +116,26 @@ public static class AiCardConverter
 
     private static ChannelResponse ToChannelResponse(AiCardChannel c) => new()
     {
-        Id = c.Id, Platform = c.Platform, ChannelName = c.ChannelName,
-        BotUsername = c.BotUsername, IsActive = c.IsActive, ConnectedAt = c.ConnectedAt
+        Id = c.Id,
+        ChannelId = c.ChannelId,
+        Platform = c.Platform,
+        ChannelName = c.ChannelName,
+        BotUsername = c.BotUsername,
+        IsActive = c.IsActive,
+        ConnectedAt = c.ConnectedAt
     };
+
+    public static ChannelResponse ToChannelResponse(ChannelLinkDto d) =>
+        new()
+        {
+            Id = d.Id,
+            ChannelId = d.ChannelId,
+            Platform = d.Platform,
+            ChannelName = d.ChannelName,
+            BotUsername = d.BotUsername,
+            IsActive = d.IsActive,
+            ConnectedAt = d.ConnectedAt
+        };
 
     private static ToolResponse ToToolResponse(AiCardTool t) => new()
     {

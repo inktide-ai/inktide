@@ -28,11 +28,6 @@ public sealed partial class KokoroTtsClient
             HttpMethod.Post,
             uri);
 
-        var acceptPrimary = ResolveAcceptPrimaryMime(options.ResponseFormat);
-        httpRequest.Headers.TryAddWithoutValidation(
-            "Accept",
-            $"{acceptPrimary}, audio/*;q=0.9, */*;q=0.8");
-
         httpRequest.Content = JsonContent.Create(options, options: JsonOptions);
         
         return httpRequest;
@@ -115,20 +110,7 @@ public sealed partial class KokoroTtsClient
         return httpRequest;
     }
 
-    private static string ResolveAcceptPrimaryMime(string? responseFormat)
-    {
-        if (string.IsNullOrWhiteSpace(responseFormat))
-        {
-            return "audio/mpeg";
-        }
-
-        if (SpeechAudioFormatCatalog.TryResolve(responseFormat, out var info, out _))
-        {
-            return info!.MimeType;
-        }
-
-        return "audio/*";
-    }
+  
 
     #endregion
 }

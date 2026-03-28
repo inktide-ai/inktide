@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Chimera.API.Core\Chimera.API.Core.csproj" />
     <ProjectReference Include="..\Chimera.API.TTS.Application\Chimera.API.TTS.Application.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS.Domain\Chimera.API.TTS.Domain.csproj" />
     <ProjectReference Include="..\Chimera.API.TTS.Infrastructure\Chimera.API.TTS.Infrastructure.csproj" />
     <ProjectReference Include="..\Chimera.API.TTS.REST.Models\Chimera.API.TTS.REST.Models.csproj" />
   </ItemGroup>

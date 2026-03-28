@@ -12,9 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Chimera.API.TTS.Core\Chimera.API.TTS.Core.csproj" />
-    <ProjectReference Include="..\Chimera.API.TTS.Infrastructure\Chimera.API.TTS.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\Chimera.API.Core\Chimera.API.Core.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS.Domain\Chimera.API.TTS.Domain.csproj" />
+    <ProjectReference Include="..\..\Chimera.API.Domain\Chimera.API.Domain.csproj" />
   </ItemGroup>
 
 </Project>

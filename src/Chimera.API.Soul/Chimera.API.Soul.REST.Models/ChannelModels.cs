@@ -8,12 +8,23 @@ public sealed class CreateChannelRequest
 
     private string _platform = "twitch";
     private string _channelName = string.Empty;
+    private string? _channelId;
     private string _botUsername = string.Empty;
     private string? _oAuthToken;
 
     #endregion
 
     #region Properties
+
+    /// <summary>
+    /// Platform-specific stable id (e.g. Discord guild id — must match connector ingest <c>ChannelId</c>).
+    /// </summary>
+    [JsonProperty("channel_id")]
+    public string? ChannelId
+    {
+        get => _channelId;
+        set => _channelId = value;
+    }
 
     [JsonProperty("platform")]
     public string Platform
@@ -46,6 +57,26 @@ public sealed class CreateChannelRequest
     #endregion
 }
 
+public sealed class PatchChannelRequest
+{
+    #region Fields
+
+    private bool _isActive;
+
+    #endregion
+
+    #region Properties
+
+    [JsonProperty("is_active")]
+    public bool IsActive
+    {
+        get => _isActive;
+        set => _isActive = value;
+    }
+
+    #endregion
+}
+
 public sealed class ChannelResponse
 {
     #region Fields
@@ -53,6 +84,7 @@ public sealed class ChannelResponse
     private Guid _id;
     private string _platform = string.Empty;
     private string _channelName = string.Empty;
+    private string? _channelIdResponse;
     private string _botUsername = string.Empty;
     private bool _isActive;
     private DateTime? _connectedAt;
@@ -60,6 +92,13 @@ public sealed class ChannelResponse
     #endregion
 
     #region Properties
+
+    [JsonProperty("channel_id")]
+    public string? ChannelId
+    {
+        get => _channelIdResponse;
+        set => _channelIdResponse = value;
+    }
 
     [JsonProperty("id")]
     public Guid Id

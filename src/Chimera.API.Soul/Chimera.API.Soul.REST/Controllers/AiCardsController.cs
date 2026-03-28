@@ -39,7 +39,8 @@ public sealed class AiCardsController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<AiCardListItem>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAll(CancellationToken ct)
+    public async Task<IActionResult> GetAll(
+        CancellationToken ct = default)
     {
         var userId = GetUserId();
         var cards = await _cardService.GetAllByUserAsync(userId, ct);
@@ -49,7 +50,9 @@ public sealed class AiCardsController : ControllerBase
     [HttpGet("{cardId:guid}")]
     [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetById(Guid cardId, CancellationToken ct)
+    public async Task<IActionResult> GetById(
+        Guid cardId, 
+        CancellationToken ct = default)
     {
         var userId = GetUserId();
         var card = await _cardService.GetByIdAsync(userId, cardId, ct);
@@ -62,7 +65,9 @@ public sealed class AiCardsController : ControllerBase
     [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Create([FromBody] CreateAiCardRequest? request, CancellationToken ct)
+    public async Task<IActionResult> Create(
+        [FromBody] CreateAiCardRequest? request,
+        CancellationToken ct = default)
     {
         if (request is null)
             return BadRequest(ApiErrorResponse.From("Request body is required.", ErrorCodes.ValidationError));
@@ -77,7 +82,10 @@ public sealed class AiCardsController : ControllerBase
     [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Update(Guid cardId, [FromBody] UpdateAiCardRequest? request, CancellationToken ct)
+    public async Task<IActionResult> Update(
+        Guid cardId, 
+        [FromBody] UpdateAiCardRequest? request,
+        CancellationToken ct = default)
     {
         if (request is null)
             return BadRequest(ApiErrorResponse.From("Request body is required.", ErrorCodes.ValidationError));

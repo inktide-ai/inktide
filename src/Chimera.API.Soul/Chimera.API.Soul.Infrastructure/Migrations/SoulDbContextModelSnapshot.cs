@@ -190,6 +190,64 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                     b.ToTable("ai_card_channels", "soul");
                 });
 
+            modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCardModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AiCardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ai_card_id");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("original_file_name");
+
+                    b.Property<string>("PublicUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("public_url");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size_bytes");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("storage_key");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AiCardId")
+                        .HasDatabaseName("idx_ai_card_models_card");
+
+                    b.HasIndex("StorageKey")
+                        .IsUnique()
+                        .HasDatabaseName("idx_ai_card_models_storage_key");
+
+                    b.HasIndex("UserId", "AiCardId")
+                        .HasDatabaseName("idx_ai_card_models_user_card");
+
+                    b.ToTable("ai_card_models", "soul");
+                });
+
             modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCardTool", b =>
                 {
                     b.Property<Guid>("Id")
@@ -563,6 +621,17 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                 {
                     b.HasOne("Chimera.API.Soul.Domain.Entities.AiCard", "AiCard")
                         .WithMany("Channels")
+                        .HasForeignKey("AiCardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AiCard");
+                });
+
+            modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCardModel", b =>
+                {
+                    b.HasOne("Chimera.API.Soul.Domain.Entities.AiCard", "AiCard")
+                        .WithMany()
                         .HasForeignKey("AiCardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

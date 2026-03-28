@@ -7,8 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { useKeycloak } from '@react-keycloak/web'
-import type { KeycloakTokenParsed } from 'keycloak-js'
+import Keycloak, { type KeycloakTokenParsed } from 'keycloak-js'
 import { getMe } from '../api/me'
 import { readStoredNickname, writeStoredNickname } from '../utils/profileStorage'
 
@@ -17,7 +16,6 @@ export interface UserInfo {
   userName: string
   role: string
   pictureUrl?: string | null
-  /** Display name in UI; local storage until Keycloak attribute is wired. */
   nickname?: string | null
 }
 
@@ -32,20 +30,14 @@ interface AuthContextValue extends AuthState {
   logout: () => void
   loginWithKeycloak: () => void
   registerWithKeycloak: () => void
-  /** Opens Keycloak Account Console (profile, password, delete account if enabled in realm). */
   openAccountSettings: () => void
-  /** Refreshes the access token and merges `/api/me` (e.g. avatar URL) into local user state. */
   refreshSession: () => Promise<void>
-  /** Persists nickname locally (and later can sync from token). */
   setNickname: (value: string) => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-const IGNORED_ROLES = new Set([
-  'offline_access',
-  'uma_authorization',
-])
+const IGNORED_ROLES = new Set(['offline_access', 'uma_authorization'])
 
 function userFromToken(parsed: KeycloakTokenParsed | undefined): UserInfo | null {
   if (!parsed?.sub) return null
@@ -76,29 +68,38 @@ function loadUserInfo(parsed: KeycloakTokenParsed): UserInfo | null {
   return { ...base, nickname }
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const { keycloak, initialized } = useKeycloak()
-  const [state, setState] = useState<AuthState>({
-    isLoggedIn: false,
-    userEmail: null,
-    user: null,
-    isInitialized: false,
-  })
+function stateFromKeycloak(kc: Keycloak): AuthState {
+  if (kc.authenticated && kc.tokenParsed) {
+    const user = loadUserInfo(kc.tokenParsed)
+    const email = (kc.tokenParsed.email as string) ?? user?.userName ?? null
+    return { isLoggedIn: true, userEmail: email, user, isInitialized: true }
+  }
+  return { isLoggedIn: false, userEmail: null, user: null, isInitialized: true }
+}
 
+const LOGGED_OUT: AuthState = { isLoggedIn: false, userEmail: null, user: null, isInitialized: true }
+
+// ─── Provider ────────────────────────────────────────────────────────────────
+
+export function AuthProvider({ keycloak, children }: { keycloak: Keycloak; children: ReactNode }) {
+  // Keycloak is already initialized when this provider mounts — read current state immediately.
+  const [state, setState] = useState<AuthState>(() => stateFromKeycloak(keycloak))
+
+  // Subscribe to future Keycloak auth events.
   useEffect(() => {
-    if (!initialized) return
+    const sync = () => setState(stateFromKeycloak(keycloak))
+    const clear = () => setState(LOGGED_OUT)
 
-    if (keycloak.authenticated && keycloak.tokenParsed) {
-      const user = loadUserInfo(keycloak.tokenParsed)
-      const email = (keycloak.tokenParsed.email as string) ?? user?.userName ?? null
-      setState({ isLoggedIn: true, userEmail: email, user, isInitialized: true })
-    } else {
-      setState({ isLoggedIn: false, userEmail: null, user: null, isInitialized: true })
-    }
-  }, [initialized, keycloak.authenticated, keycloak.tokenParsed])
+    keycloak.onAuthSuccess = sync
+    keycloak.onAuthRefreshSuccess = sync
+    keycloak.onAuthLogout = clear
+    keycloak.onAuthError = clear
+    keycloak.onAuthRefreshError = clear
+  }, [keycloak])
 
+  // Fetch avatar from /api/me once authenticated.
   useEffect(() => {
-    if (!initialized || !keycloak.authenticated || !keycloak.tokenParsed?.sub) return
+    if (!state.isLoggedIn || !state.user) return
     let cancelled = false
     ;(async () => {
       try {
@@ -106,25 +107,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled) return
         setState((s) => {
           if (!s.user) return s
-          return {
-            ...s,
-            user: {
-              ...s.user,
-              pictureUrl: me.pictureUrl ?? s.user.pictureUrl ?? null,
-            },
-          }
+          return { ...s, user: { ...s.user, pictureUrl: me.pictureUrl ?? s.user.pictureUrl ?? null } }
         })
       } catch {
-        /* ignore — avatar is optional */
+        /* avatar is optional */
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [initialized, keycloak.authenticated, keycloak.tokenParsed?.sub])
+  }, [state.isLoggedIn, state.user?.userId])
 
   const logout = useCallback(() => {
-    setState({ isLoggedIn: false, userEmail: null, user: null, isInitialized: true })
+    setState(LOGGED_OUT)
     if (keycloak.authenticated) {
       keycloak.logout({ redirectUri: window.location.origin })
     }
@@ -143,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [keycloak])
 
   const refreshSession = useCallback(async () => {
-    if (!initialized || !keycloak.authenticated || !keycloak.tokenParsed) return
+    if (!keycloak.authenticated || !keycloak.tokenParsed) return
     try {
       await keycloak.updateToken(60)
     } catch {
@@ -166,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: merged ? { ...merged, pictureUrl } : null,
       isInitialized: true,
     })
-  }, [initialized, keycloak])
+  }, [keycloak])
 
   const setNickname = useCallback(
     (value: string) => {

@@ -1,3 +1,4 @@
+using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Chimera.API.Profile.Application.Interfaces;
@@ -96,6 +97,61 @@ public sealed class S3ObjectStorageService : IObjectStorageService
         } while (token != null);
 
         return list;
+    }
+
+    public string? GetPreSignedPutUrl(string objectKey, string contentType, TimeSpan expires)
+    {
+        var bucket = _settings.DefaultBucket;
+        var ct = string.IsNullOrWhiteSpace(contentType) ? "application/octet-stream" : contentType;
+        var request = new GetPreSignedUrlRequest
+        {
+            BucketName = bucket,
+            Key = objectKey,
+            Verb = HttpVerb.PUT,
+            Expires = DateTime.UtcNow.Add(expires),
+            ContentType = ct
+        };
+
+        var url = _client.GetPreSignedURL(request);
+
+        // AWS SDK ignores UseHttp when generating presigned URLs and always produces https://.
+        // Force the scheme to match ServiceUrl so local MinIO (http) works in browsers.
+        if (!string.IsNullOrWhiteSpace(url))
+        {
+            var serviceUri = new Uri(_settings.ServiceUrl);
+            if (serviceUri.Scheme == Uri.UriSchemeHttp)
+                url = url.Replace("https://", "http://", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return url;
+    }
+
+    public async Task<ObjectStorageObjectInfo?> GetObjectInfoAsync(string objectKey, CancellationToken ct = default)
+    {
+        try
+        {
+            var response = await _client
+                .GetObjectMetadataAsync(_settings.DefaultBucket, objectKey, ct)
+                .ConfigureAwait(false);
+
+            _logger.LogDebug("S3 HeadObject key={Key} size={Size} ct={ContentType}",
+                objectKey, response.ContentLength, response.Headers.ContentType);
+
+            return new ObjectStorageObjectInfo(
+                response.ContentLength,
+                response.Headers.ContentType);
+        }
+        catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            _logger.LogWarning("S3 HeadObject NOT FOUND bucket={Bucket} key={Key}", _settings.DefaultBucket, objectKey);
+            return null;
+        }
+        catch (AmazonS3Exception ex)
+        {
+            _logger.LogError(ex, "S3 HeadObject FAILED bucket={Bucket} key={Key} status={Status} code={Code}",
+                _settings.DefaultBucket, objectKey, ex.StatusCode, ex.ErrorCode);
+            return null;
+        }
     }
 
     #endregion

@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Chimera.API.TTS.Core\Chimera.API.TTS.Core.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS.Application\Chimera.API.TTS.Application.csproj" />
     <ProjectReference Include="..\Chimera.API.TTS.Domain\Chimera.API.TTS.Domain.csproj" />
     <ProjectReference Include="..\..\Chimera.API.Core\Chimera.API.Core.csproj" />
     <ProjectReference Include="..\..\Chimera.API.Domain\Chimera.API.Domain.csproj" />
@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="Flurl" Version="4.0.0" />
-    <PackageReference Include="OpenAI" Version="2.9.1" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
   </ItemGroup>
 
 </Project>

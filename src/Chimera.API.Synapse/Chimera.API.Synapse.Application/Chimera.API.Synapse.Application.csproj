@@ -6,4 +6,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Chimera.API.Memory\Chimera.API.Memory.Domain\Chimera.API.Memory.Domain.csproj" />
+    </ItemGroup>
+
 </Project>

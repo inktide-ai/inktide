@@ -153,7 +153,28 @@ const Navigation = (props: NavigationProps) => {
         <div className={styles.mobileOverlay} onClick={closeMobile} aria-hidden />
       )}
       <div className={classnames(styles.mobileDrawer, { [styles.mobileDrawerOpen]: mobileOpen })}>
+        {/* Header */}
+        <div className={styles.mobileDrawerHeader}>
+          <a href="#" className={styles.mobileDrawerLogo} onClick={closeMobile}>
+            <img src={logoSvg} alt="Chimera" className={styles.mobileDrawerLogoIcon} />
+            <span className={styles.mobileDrawerLogoText}>Chimera</span>
+          </a>
+          <button
+            type="button"
+            className={styles.mobileDrawerClose}
+            onClick={closeMobile}
+            aria-label="Close menu"
+          >
+            <svg viewBox="0 0 14 14" aria-hidden>
+              <line x1="1" y1="1" x2="13" y2="13" />
+              <line x1="13" y1="1" x2="1" y2="13" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Nav links */}
         <div className={styles.mobileMenu}>
+          <span className={styles.mobileMenuLabel}>Navigation</span>
           {NAVIGATION_ITEMS.map((item) =>
             props.onGoToLanding ? (
               <button
@@ -176,15 +197,32 @@ const Navigation = (props: NavigationProps) => {
             )
           )}
         </div>
+
+        {/* Auth */}
         <div className={styles.mobileAuth}>
           {isLoggedIn ? (
             <>
+              <div className={styles.mobileProfileBlock}>
+                <span className={styles.mobileProfileAvatar}>
+                  {user?.pictureUrl ? (
+                    <img src={user.pictureUrl} alt="" />
+                  ) : (
+                    (user?.nickname?.trim() || user?.userName || userEmail || '?')
+                      .replace(/^\./, '')
+                      .charAt(0)
+                      .toUpperCase() || '?'
+                  )}
+                </span>
+                <span className={styles.mobileProfileName}>
+                  {user?.nickname?.trim() || user?.userName || userEmail || 'Profile'}
+                </span>
+              </div>
               <button
                 type="button"
                 className={styles.mobileAuthButton}
                 onClick={() => { closeMobile(); props.onGoToApp?.() }}
               >
-                Profile
+                Go to Profile
               </button>
               <button
                 type="button"
@@ -198,20 +236,25 @@ const Navigation = (props: NavigationProps) => {
             <>
               <button
                 type="button"
-                className={styles.mobileAuthButtonOutline}
-                onClick={() => { closeMobile(); onLoginClick() }}
-              >
-                {CONTENT.hero.logIn}
-              </button>
-              <button
-                type="button"
                 className={styles.mobileAuthButton}
                 onClick={() => { closeMobile(); onRegisterClick() }}
               >
                 {CONTENT.hero.signUpFree}
               </button>
+              <button
+                type="button"
+                className={styles.mobileAuthButtonOutline}
+                onClick={() => { closeMobile(); onLoginClick() }}
+              >
+                {CONTENT.hero.logIn}
+              </button>
             </>
           )}
+        </div>
+
+        {/* Footer */}
+        <div className={styles.mobileDrawerFooter}>
+          <span className={styles.mobileDrawerVersion}>CHIMERA © 2026</span>
         </div>
       </div>
     </>

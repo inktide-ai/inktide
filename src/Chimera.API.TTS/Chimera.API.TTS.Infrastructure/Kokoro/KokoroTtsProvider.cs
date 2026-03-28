@@ -1,6 +1,6 @@
 using Chimera.API.Domain.Enums;
 using Chimera.API.Domain.Models;
-using Chimera.API.TTS.Core;
+using Chimera.API.TTS.Domain.Speech;
 using Chimera.API.TTS.Domain.Models;
 using FluentValidation;
 using FluentValidation.Results;
@@ -54,7 +54,7 @@ public sealed class KokoroTtsProvider : ISpeechProvider
         return new ValidationResult();
     }
 
-    public Task<TtsVoiceCollection> GetVoicesAsync(
+    public Task<SpeechVoiceCollection> GetVoicesAsync(
         ProviderOptions options,
         string? modelId = null,
         CancellationToken ct = default)
@@ -64,7 +64,7 @@ public sealed class KokoroTtsProvider : ISpeechProvider
         return _client.GetVoicesAsync(ct);
     }
 
-    public Task<TtsModelCollection> GetModelsAsync(
+    public Task<SpeechModelCollection> GetModelsAsync(
         ProviderOptions options,
         CancellationToken ct = default)
     {
@@ -95,9 +95,7 @@ public sealed class KokoroTtsProvider : ISpeechProvider
     private static KokoroSpeechOptions MapToKokoroOptions(SpeechOptions options)
     {
         var model = string.IsNullOrWhiteSpace(options.Model) ? "kokoro" : options.Model.Trim();
-        var format = string.IsNullOrWhiteSpace(options.AudioFormat)
-            ? SpeechAudioFormatCatalog.DefaultFormatId
-            : options.AudioFormat.Trim().ToLowerInvariant();
+        var format = string.IsNullOrWhiteSpace(options.AudioFormat) ? "mp3" : options.AudioFormat;
 
         return new KokoroSpeechOptions
         {
@@ -106,8 +104,6 @@ public sealed class KokoroTtsProvider : ISpeechProvider
             Model = model,
             Speed = Math.Clamp(options.Speed <= 0 ? 1.0 : options.Speed, 0.25, 4.0),
             ResponseFormat = format,
-            DownloadFormat = format,
-            Stream = options.Stream,
         };
     }
 

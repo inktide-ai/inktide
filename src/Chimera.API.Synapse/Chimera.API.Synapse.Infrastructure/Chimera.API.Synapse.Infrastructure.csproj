@@ -7,7 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
+        <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.3" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.3" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
         <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
@@ -16,6 +17,8 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Chimera.API.Core\Chimera.API.Core.csproj" />
+        <ProjectReference Include="..\..\Chimera.API.Memory\Chimera.API.Memory.Domain\Chimera.API.Memory.Domain.csproj" />
+        <ProjectReference Include="..\..\Chimera.API.Soul\Chimera.API.Soul.Infrastructure\Chimera.API.Soul.Infrastructure.csproj" />
         <ProjectReference Include="..\Chimera.API.Synapse.Application\Chimera.API.Synapse.Application.csproj" />
     </ItemGroup>
 

@@ -17,6 +17,7 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
         registrator.Register<ICatalogRepository, CatalogRepository>(Reuse.Scoped);
         registrator.Register<IUsageDailyRepository, UsageDailyRepository>(Reuse.Scoped);
         registrator.Register<IAuditLogRepository, AuditLogRepository>(Reuse.Scoped);
+        registrator.Register<IAiCardModelRepository, AiCardModelRepository>(Reuse.Scoped);
     }
 
     #endregion

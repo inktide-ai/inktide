@@ -6,7 +6,7 @@ using Chimera.API.Connector.Infrastructure.Messaging;
 namespace Chimera.API.Connector.Infrastructure.Messaging;
 
 /// <summary>
-/// Bounded in-memory buffer between chat connectors (producers) and RabbitMQ publisher (consumer).
+/// Bounded in-memory buffer between chat connectors (producers) and Redis stream publisher (consumer).
 /// Drops oldest messages under backpressure to keep the pipeline moving.
 /// </summary>
 public sealed class ChatMessageChannel : IChatMessageQueue

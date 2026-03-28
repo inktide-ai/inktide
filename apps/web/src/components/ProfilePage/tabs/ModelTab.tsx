@@ -1,4 +1,7 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import { uploadCardModelFile } from '../../../api/soul'
+import AvatarRenderer from '../../AvatarRenderer/AvatarRenderer'
+import { useCardModel } from '../../AvatarRenderer/hooks/useCardModel'
 import styles from '../ProfilePage.module.css'
 import type { AiCharacter, ModelType } from '../types'
 
@@ -19,14 +22,42 @@ const ACCEPT_MAP: Record<ModelType, string> = {
 interface ModelTabProps {
   character: AiCharacter
   onUpdate: (patch: Partial<AiCharacter>) => void
+  cardId?: string
 }
 
-const ModelTab = ({ character, onUpdate }: ModelTabProps) => {
+const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
   const fileRef = useRef<HTMLInputElement>(null)
+  const [uploadBusy, setUploadBusy] = useState(false)
+  const [uploadHint, setUploadHint] = useState<string | null>(null)
+  // Refresh key — bump after upload so useCardModel re-fetches
+  const [refreshKey, setRefreshKey] = useState(0)
+  const { model, loading: modelLoading } = useCardModel(cardId, refreshKey)
   const meta = MODEL_TYPES.find((m) => m.value === character.modelType)!
 
   return (
     <div className={styles.tabRoot}>
+      {/* Preview panel */}
+      {character.modelType !== 'none' && (
+        <div className={styles.section}>
+          <div className={styles.sectionTitle}>Preview</div>
+          <div className={styles.infoCard}>
+            <div style={{ height: 380, borderRadius: 8, overflow: 'hidden', background: '#0d0d0f' }}>
+              {modelLoading ? (
+                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  Loading…
+                </div>
+              ) : (
+                <AvatarRenderer
+                  modelType={character.modelType}
+                  modelUrl={model?.public_url ?? null}
+                  background="#0d0d0f"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={styles.section}>
         <div className={styles.sectionTitle}>Model</div>
         <div className={styles.infoCard}>
@@ -58,18 +89,35 @@ const ModelTab = ({ character, onUpdate }: ModelTabProps) => {
                   type="file"
                   accept={ACCEPT_MAP[character.modelType]}
                   style={{ display: 'none' }}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0]
-                    if (file) onUpdate({ modelFileName: file.name })
+                    e.target.value = ''
+                    if (!file) return
+                    onUpdate({ modelFileName: file.name })
+                    setUploadHint(null)
+                    if (!cardId) {
+                      setUploadHint('Save the character first — then uploads go to your project storage.')
+                      return
+                    }
+                    setUploadBusy(true)
+                    try {
+                      await uploadCardModelFile(cardId, file)
+                      setUploadHint('Uploaded — preview updated.')
+                      setRefreshKey((k) => k + 1)
+                    } catch (err) {
+                      setUploadHint(err instanceof Error ? err.message : 'Upload failed')
+                    } finally {
+                      setUploadBusy(false)
+                    }
                   }}
                 />
                 <button
                   type="button"
                   className={styles.btnGhost}
                   onClick={() => fileRef.current?.click()}
-                  disabled={character.modelType === 'none'}
+                  disabled={character.modelType === 'none' || uploadBusy}
                 >
-                  Choose file
+                  {uploadBusy ? 'Uploading…' : 'Choose file'}
                 </button>
                 <span className={styles.modelFileName}>
                   {character.modelFileName ?? (
@@ -88,6 +136,11 @@ const ModelTab = ({ character, onUpdate }: ModelTabProps) => {
                   </button>
                 )}
               </div>
+              {uploadHint && (
+                <div className={styles.labelHint} style={{ marginTop: 8 }}>
+                  {uploadHint}
+                </div>
+              )}
             </div>
           </div>
         </div>

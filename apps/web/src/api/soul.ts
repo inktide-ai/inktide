@@ -1,4 +1,4 @@
-import { apiFetch, jsonOrThrow } from './client'
+import { ApiError, apiFetch, emptyOrThrow, jsonOrThrow } from './client'
 
 // ── Response types (match backend snake_case JSON) ──
 
@@ -36,6 +36,8 @@ export interface ChannelResponse {
   id: string
   platform: string
   channel_name: string
+  /** Discord: guild id — must match connector ingest (Synapse routing). */
+  channel_id: string | null
   bot_username: string
   is_active: boolean
   connected_at: string | null
@@ -133,7 +135,46 @@ export async function updateCard(id: string, data: UpdateAiCardRequest): Promise
 
 export async function deleteCard(id: string): Promise<void> {
   const res = await apiFetch(`/api/soul/cards/${id}`, { method: 'DELETE' })
-  await jsonOrThrow<unknown>(res)
+  await emptyOrThrow(res)
+}
+
+/** Must match Soul ingest / Synapse routing (`ai_card_channels.platform` + `channel_id`). */
+export type IntegrationPlatform = 'discord' | 'twitch' | 'kick' | 'vk_video'
+
+export interface CreateChannelLinkRequest {
+  platform: IntegrationPlatform
+  channel_name: string
+  /** Routing key: guild id (Discord), channel/login/id string for Twitch/Kick/VK Video — same as connector ChatMessage.ChannelId. */
+  channel_id: string
+  bot_username: string
+}
+
+export async function createCardChannel(
+  cardId: string,
+  body: CreateChannelLinkRequest,
+): Promise<ChannelResponse> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/channels`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  return jsonOrThrow<ChannelResponse>(res)
+}
+
+export async function patchCardChannel(
+  cardId: string,
+  linkId: string,
+  body: { is_active: boolean },
+): Promise<ChannelResponse> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/channels/${linkId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ is_active: body.is_active }),
+  })
+  return jsonOrThrow<ChannelResponse>(res)
+}
+
+export async function deleteCardChannel(cardId: string, linkId: string): Promise<void> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/channels/${linkId}`, { method: 'DELETE' })
+  await emptyOrThrow(res)
 }
 
 /** POST multipart file; stores under users/{userId}/cards/{cardId}/ and sets avatar_url on the card. */
@@ -152,4 +193,89 @@ export async function getCatalogLlmModels(): Promise<LlmModelResponse[]> {
 export async function getCatalogTtsVoices(): Promise<TtsVoiceResponse[]> {
   const res = await apiFetch('/api/soul/catalog/tts-voices')
   return jsonOrThrow<TtsVoiceResponse[]>(res)
+}
+
+// ── 3D/2D model assets (MinIO presigned PUT → PostgreSQL) ──
+
+export interface BeginModelUploadResponse {
+  upload_url: string
+  storage_key: string
+  expires_at: string
+  required_content_type: string
+}
+
+export interface AiCardModelResponse {
+  id: string
+  ai_card_id: string
+  storage_key: string
+  public_url: string
+  original_file_name: string
+  content_type: string
+  size_bytes: number
+  created_at: string
+}
+
+export async function presignCardModelUpload(
+  cardId: string,
+  body: { file_name: string; content_type: string; size_bytes: number },
+): Promise<BeginModelUploadResponse> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/models/presign`, {
+    method: 'POST',
+    body: JSON.stringify({
+      file_name: body.file_name,
+      content_type: body.content_type,
+      size_bytes: body.size_bytes,
+    }),
+  })
+  return jsonOrThrow<BeginModelUploadResponse>(res)
+}
+
+export async function completeCardModelUpload(
+  cardId: string,
+  body: {
+    storage_key: string
+    file_name: string
+    content_type: string
+    size_bytes: number
+  },
+): Promise<AiCardModelResponse> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/models/complete`, {
+    method: 'POST',
+    body: JSON.stringify({
+      storage_key: body.storage_key,
+      file_name: body.file_name,
+      content_type: body.content_type,
+      size_bytes: body.size_bytes,
+    }),
+  })
+  return jsonOrThrow<AiCardModelResponse>(res)
+}
+
+/** Presign → PUT to MinIO (no API auth on that request) → complete registration. */
+export async function uploadCardModelFile(cardId: string, file: File): Promise<AiCardModelResponse> {
+  const contentType = file.type.trim() || 'application/octet-stream'
+  const presign = await presignCardModelUpload(cardId, {
+    file_name: file.name,
+    content_type: contentType,
+    size_bytes: file.size,
+  })
+  const putRes = await fetch(presign.upload_url, {
+    method: 'PUT',
+    headers: { 'Content-Type': presign.required_content_type },
+    body: file,
+  })
+  if (!putRes.ok) {
+    throw new ApiError(putRes.status, `Storage upload failed (${putRes.status})`)
+  }
+  return completeCardModelUpload(cardId, {
+    storage_key: presign.storage_key,
+    file_name: file.name,
+    content_type: presign.required_content_type,
+    size_bytes: file.size,
+  })
+}
+
+export async function listCardModels(cardId: string): Promise<AiCardModelResponse[]> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/models`)
+  return jsonOrThrow<AiCardModelResponse[]>(res)
 }

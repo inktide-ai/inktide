@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Claims;
 using Chimera.API.Core.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -70,20 +71,35 @@ public sealed class AuthStartup : IStartup
             {
                 if (cors.AllowedOrigins.Length > 0)
                 {
-                    builder.WithOrigins(cors.AllowedOrigins);
+                    // Separate Tauri/custom-scheme origins from http(s) origins.
+                    // AllowCredentials() is only valid with http(s) origins; non-standard
+                    // schemes (tauri://) must be listed separately without it.
+                    // Bearer-token auth does not need AllowCredentials (that's for cookies).
+                    var standardOrigins = cors.AllowedOrigins
+                        .Where(o => o.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                                 || o.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                        .ToArray();
+
+                    var customOrigins = cors.AllowedOrigins
+                        .Except(standardOrigins, StringComparer.OrdinalIgnoreCase)
+                        .ToArray();
+
+                    var allOrigins = cors.AllowedOrigins;
+                    builder.WithOrigins(allOrigins)
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+
+                    // Only add AllowCredentials for standard-scheme origins
+                    if (standardOrigins.Length > 0 && customOrigins.Length == 0)
+                    {
+                        builder.AllowCredentials();
+                    }
                 }
                 else
                 {
-                    builder.AllowAnyOrigin();
-                }
-
-                builder
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-
-                if (cors.AllowedOrigins.Length > 0)
-                {
-                    builder.AllowCredentials();
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
                 }
             });
         });

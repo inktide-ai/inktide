@@ -37,6 +37,7 @@ public sealed class AiCardRepository : IAiCardRepository
     {
         return await _db.AiCards
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(c => c.LlmCatalog)
             .Include(c => c.TtsCatalog)
             .Include(c => c.Channels)

@@ -18,7 +18,7 @@ public sealed partial class KokoroTtsClient
             .ConfigureAwait(false);
     }
     
-    public async Task<TtsModelCollection> GetModelsAsync(
+    public async Task<SpeechModelCollection> GetModelsAsync(
         CancellationToken cancellationToken = default)
     {
  
@@ -31,10 +31,10 @@ public sealed partial class KokoroTtsClient
         using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
    
-        return TtsModelCollection.FromResponse(doc.RootElement);
+        return SpeechModelCollection.FromResponse(doc.RootElement);
     }
     
-    public async Task<TtsModel> GetModelAsync(
+    public async Task<SpeechModel> GetModelAsync(
         string modelId,
         CancellationToken cancellationToken = default)
     {
@@ -49,10 +49,10 @@ public sealed partial class KokoroTtsClient
         using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
    
-        return TtsModel.FromResponse(doc.RootElement);
+        return SpeechModel.FromResponse(doc.RootElement);
     }
     
-    public async Task<TtsVoiceCollection> GetVoicesAsync(
+    public async Task<SpeechVoiceCollection> GetVoicesAsync(
         CancellationToken cancellationToken = default)
     {
         using var httpRequest = CreateGetVoicesRequest();
@@ -64,7 +64,7 @@ public sealed partial class KokoroTtsClient
         using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        return TtsVoiceCollection.FromResponse(doc.RootElement);
+        return SpeechVoiceCollection.FromResponse(doc.RootElement);
     }
     
     #region Private Methods

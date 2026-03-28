@@ -34,5 +34,15 @@ public sealed class DisabledObjectStorageService : IObjectStorageService
         throw new InvalidOperationException("Object storage (S3) is disabled. Enable S3Settings:Enabled and configure MinIO/AWS.");
     }
 
+    public string? GetPreSignedPutUrl(string objectKey, string contentType, TimeSpan expires)
+    {
+        return null;
+    }
+
+    public Task<ObjectStorageObjectInfo?> GetObjectInfoAsync(string objectKey, CancellationToken ct = default)
+    {
+        return Task.FromResult<ObjectStorageObjectInfo?>(null);
+    }
+
     #endregion
 }

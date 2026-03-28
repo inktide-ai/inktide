@@ -1,6 +1,6 @@
 namespace Chimera.API.Connector.Application.Models;
 
-/// <summary>Normalized chat message from any platform, ready for RabbitMQ publishing.</summary>
+/// <summary>Normalized chat message from any platform, ready for Synapse ingest (Redis Stream).</summary>
 public sealed record ChatMessage(
     string PlatformId,
     string ChannelId,

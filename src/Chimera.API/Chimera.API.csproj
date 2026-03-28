@@ -47,7 +47,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Chimera.API.Core\Chimera.API.Core.csproj" />
+    <ProjectReference Include="..\Chimera.API.Memory\Chimera.API.Memory.Infrastructure\Chimera.API.Memory.Infrastructure.csproj" />
     <ProjectReference Include="..\Chimera.API.TTS\Chimera.API.TTS.Application\Chimera.API.TTS.Application.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS\Chimera.API.TTS.Infrastructure\Chimera.API.TTS.Infrastructure.csproj" />
     <ProjectReference Include="..\Chimera.API.TTS\Chimera.API.TTS.REST\Chimera.API.TTS.REST.csproj" />
     <!-- Connector -->
     <ProjectReference Include="..\Chimera.API.Connector\Chimera.API.Connector.Infrastructure\Chimera.API.Connector.Infrastructure.csproj" />
@@ -64,6 +66,8 @@
     <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.Grpc.AiCards.Service\Chimera.API.Soul.Grpc.AiCards.Service.csproj" />
     <ProjectReference Include="..\Chimera.API.Synapse\Chimera.API.Synapse.Application\Chimera.API.Synapse.Application.csproj" />
     <ProjectReference Include="..\Chimera.API.Synapse\Chimera.API.Synapse.Infrastructure\Chimera.API.Synapse.Infrastructure.csproj" />
+    <!-- Realtime: SignalR hub + TTS audio delivery to browser -->
+    <ProjectReference Include="..\Chimera.API.Realtime\Chimera.API.Realtime.Infrastructure\Chimera.API.Realtime.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

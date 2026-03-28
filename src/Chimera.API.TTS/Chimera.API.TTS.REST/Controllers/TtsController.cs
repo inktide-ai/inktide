@@ -1,35 +1,25 @@
-using Chimera.API.Domain.Models;
-using Chimera.API.TTS.Core;
-using Chimera.API.TTS.Core.Configuration;
+using System.Security.Claims;
+using Chimera.API.TTS.Application.Synthesis;
+using Chimera.API.TTS.REST.Extensions;
 using Chimera.API.TTS.Domain.Models;
 using Chimera.API.TTS.REST.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Chimera.API.TTS.REST.Controllers;
 
-/// <summary>
-/// TTS: принимает JSON, проксирует в локальный Kokoro (OpenAI-совместимый <c>/v1/audio/speech</c>), отдаёт аудио-поток.
-/// </summary>
 [ApiController]
-[Route("api/tts")]
+[Route("api/v1/tts")]
+[Authorize]
 public sealed class TtsController : ControllerBase
 {
-    #region Constants
-
-    private const string TtsApiKeyHeader = "X-TTS-Api-Key";
-
-    #endregion
-
     #region Fields
 
-    private readonly ISpeechProviderRegistry _speechProviderRegistry;
-    private readonly IOptions<TtsProviderOptions> _ttsOptions;
-    private readonly IConfiguration _configuration;
+    private readonly ITtsSynthesisService _synthesisService;
     private readonly ILogger<TtsController> _logger;
 
     #endregion
@@ -37,14 +27,10 @@ public sealed class TtsController : ControllerBase
     #region Constructors
 
     public TtsController(
-        ISpeechProviderRegistry speechProviderRegistry,
-        IOptions<TtsProviderOptions> ttsOptions,
-        IConfiguration configuration,
+        ITtsSynthesisService synthesisService,
         ILogger<TtsController> logger)
     {
-        _speechProviderRegistry = speechProviderRegistry ?? throw new ArgumentNullException(nameof(speechProviderRegistry));
-        _ttsOptions = ttsOptions ?? throw new ArgumentNullException(nameof(ttsOptions));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _synthesisService = synthesisService ?? throw new ArgumentNullException(nameof(synthesisService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -53,33 +39,21 @@ public sealed class TtsController : ControllerBase
     #region Public Methods
 
     /// <summary>
-    /// Supported synthesized audio formats (id, MIME type, file extension) — for client discovery (SpeechKit-style catalog).
-    /// </summary>
-    [HttpGet("audio-formats")]
-    [ProducesResponseType(typeof(IReadOnlyList<SpeechAudioFormatInfo>), StatusCodes.Status200OK)]
-    public IActionResult GetAudioFormats()
-    {
-        return Ok(SpeechAudioFormatCatalog.All);
-    }
-
-    /// <summary>
-    /// Catalog of registered TTS providers (id, display name, capabilities).
+    /// Catalog of registered TTS providers (id, display name, capabilities). Public — no auth required.
     /// </summary>
     [HttpGet("providers")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(IReadOnlyCollection<SpeechProviderDescriptor>), StatusCodes.Status200OK)]
     public IActionResult GetProviders()
     {
-        var list = _speechProviderRegistry.Descriptors.Values
-            .OrderBy(d => d.Id, StringComparer.Ordinal)
-            .ToList();
-
-        return Ok(list);
+        return Ok(_synthesisService.GetProviderCatalog());
     }
 
     /// <summary>
-    /// Синтез речи. Для потокового ответа (как Python <c>with_streaming_response</c>) передайте <c>"stream": true</c>.
+    /// Synthesizes speech. Pass <c>"stream": true</c> for a streaming response.
     /// </summary>
     [HttpPost("synthesize")]
+    [EnableRateLimiting(TtsRestApiStartup.SynthesizeRateLimitPolicy)]
     [Produces(
         "audio/mpeg",
         "audio/wav",
@@ -92,6 +66,7 @@ public sealed class TtsController : ControllerBase
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     [ProducesResponseType(StatusCodes.Status501NotImplemented)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<IActionResult> SynthesizeAsync(
@@ -100,120 +75,64 @@ public sealed class TtsController : ControllerBase
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        _logger.LogDebug("TTS synthesize: provider={Provider}, stream={Stream}", request.ProviderId, request.Stream);
+        var userId = User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        ISpeechProvider provider;
-        try
-        {
-            provider = _speechProviderRegistry.Resolve(_ttsOptions, request.ProviderId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
-        }
+        _logger.LogInformation(
+            "TTS synthesize: provider={Provider} voice={Voice} chars={Chars} format={Format} stream={Stream} user={UserId}",
+            request.ProviderId ?? "(default)",
+            request.VoiceId,
+            request.Text?.Length ?? 0,
+            request.AudioFormat ?? "mp3",
+            request.Stream ?? false,
+            userId ?? "(anonymous)");
 
-        IActionResult? credentialProblem = TryBuildProviderOptions(provider, out var providerConfig);
-        if (credentialProblem is not null)
-        {
-            return credentialProblem;
-        }
+        var command = new SynthesizeCommand(
+            request.ProviderId,
+            request.Text ?? string.Empty,
+            request.VoiceId ?? string.Empty,
+            request.ModelId,
+            request.Speed,
+            request.Stream ?? false,
+            request.AudioFormat,
+            userId);
 
-        var validation = provider.Validate(providerConfig!);
-        if (!validation.IsValid)
-        {
-            return BadRequest(new { errors = validation.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
-        }
+        var result = await _synthesisService
+            .SynthesizeAsync(command, cancellationToken)
+            .ConfigureAwait(false);
 
-        if (!SpeechAudioFormatCatalog.TryResolve(request.AudioFormat, out var formatInfo, out var formatError))
+        return result switch
         {
-            return BadRequest(new { error = formatError });
-        }
-
-        var useStream = request.Stream == true;
-        if (useStream && !provider.Capabilities.SupportsStreaming)
-        {
-            return Problem(
-                detail: $"Speech provider '{provider.Id}' does not support streaming synthesis (stream: true).",
-                statusCode: StatusCodes.Status501NotImplemented);
-        }
-
-        var speechRequest = new SpeechOptions
-        {
-            Text = request.Text,
-            Voice = request.VoiceId.Trim(),
-            Model = string.IsNullOrWhiteSpace(request.ModelId) ? null : request.ModelId.Trim(),
-            Speed = request.Speed ?? 1f,
-            AudioFormat = formatInfo.Id,
-            Stream = useStream,
+            SpeechResult.Ok ok =>
+                BuildAudioResponse(ok, command.Stream),
+            SpeechResult.ProviderNotFound e =>
+                Problem(detail: $"Speech provider '{e.ProviderId}' is not registered.", statusCode: StatusCodes.Status400BadRequest),
+            SpeechResult.ValidationFailed e =>
+                ValidationProblem(e.Errors.ToModelStateDictionary()),
+            SpeechResult.ApiKeyMissing =>
+                Problem(detail: "An API key is required for this provider. Supply it via the X-TTS-Api-Key header.", statusCode: StatusCodes.Status401Unauthorized),
+            SpeechResult.StreamingNotSupported =>
+                Problem(detail: "This provider does not support streaming.", statusCode: StatusCodes.Status501NotImplemented),
+            SpeechResult.UpstreamError =>
+                Problem(detail: "The TTS provider is temporarily unavailable. Please try again later.", statusCode: StatusCodes.Status502BadGateway),
+            _ =>
+                Problem(statusCode: StatusCodes.Status500InternalServerError),
         };
-
-        Stream stream;
-        try
-        {
-            stream = await provider
-                .SynthesizeAsync(providerConfig!, speechRequest, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (HttpRequestException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status502BadGateway);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-        catch (NotImplementedException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status501NotImplemented);
-        }
-
-        if (useStream)
-        {
-            Response.Headers.CacheControl = "no-store, no-transform";
-            Response.Headers.Append("X-Accel-Buffering", "no");
-            HttpContext.Features.Get<IHttpResponseBodyFeature>()?.DisableBuffering();
-        }
-
-        var fileName = $"tts-{Guid.NewGuid():N}.{formatInfo.FileExtension}";
-        return File(
-            stream,
-            formatInfo.MimeType,
-            fileDownloadName: useStream ? null : fileName,
-            enableRangeProcessing: false);
     }
 
     #endregion
 
     #region Private Methods
 
-    private IActionResult? TryBuildProviderOptions(ISpeechProvider provider, out ProviderOptions providerConfig)
+    private IActionResult BuildAudioResponse(SpeechResult.Ok result, bool stream)
     {
-        providerConfig = new ProviderOptions
+        if (stream)
         {
-            ProviderId = provider.Id,
-        };
-
-        if (!provider.Capabilities.RequiresApiKey)
-        {
-            return null;
+            Response.Headers.CacheControl = "no-store, no-transform";
+            Response.Headers.Append("X-Accel-Buffering", "no");
+            HttpContext.Features.Get<IHttpResponseBodyFeature>()?.DisableBuffering();
         }
 
-        var apiKey = Request.Headers[TtsApiKeyHeader].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            apiKey = _configuration[$"TtsProviders:{provider.Id}:ApiKey"];
-        }
-
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            return Problem(
-                detail:
-                $"Speech provider '{provider.Id}' requires an API key (header {TtsApiKeyHeader} or configuration TtsProviders:{provider.Id}:ApiKey).",
-                statusCode: StatusCodes.Status401Unauthorized);
-        }
-
-        providerConfig.ApiKey = apiKey;
-        return null;
+        return File(result.Audio, result.ContentType);
     }
 
     #endregion

@@ -115,12 +115,13 @@ function renderTabContent(
   character: AiCharacter,
   onUpdate: (p: Partial<AiCharacter>) => void,
   onDelete: () => void,
+  cardId: string,
 ): ReactNode {
   const tabComponents: Record<BotTabId, ReactNode> = {
     profile: <IdentityCard character={character} onUpdate={onUpdate} onDelete={onDelete} />,
     skills: <SkillsTab character={character} onUpdate={onUpdate} />,
-    avatars: <ModelTab character={character} onUpdate={onUpdate} />,
-    scene: <SceneTab character={character} onUpdate={onUpdate} />,
+    avatars: <ModelTab character={character} onUpdate={onUpdate} cardId={cardId} />,
+    scene: <SceneTab character={character} onUpdate={onUpdate} cardId={cardId} />,
     memory: <MemoryTab character={character} onUpdate={onUpdate} />,
     brain: <BrainTab character={character} onUpdate={onUpdate} />,
     voice: <VoiceTab character={character} onUpdate={onUpdate} />,
@@ -476,16 +477,18 @@ const ProfilePage = () => {
                   className={`${styles.botRow} ${selectedId === c.id ? styles.botRowActive : ''}`}
                   onClick={() => selectCard(c.id)}
                 >
-                  <div
-                    className={styles.botAvatar}
-                    style={c.avatar_url ? undefined : { background: getBannerGradient(bannerIdx) }}
-                  >
-                    {c.avatar_url ? (
-                      <img src={c.avatar_url} alt="" className={styles.botAvatarImg} />
-                    ) : (
-                      c.name.charAt(0)
-                    )}
-                    {c.is_active && <span className={styles.botStatus} />}
+                  <div className={styles.botAvatar}>
+                    <div
+                      className={styles.botAvatarInner}
+                      style={c.avatar_url ? undefined : { background: getBannerGradient(bannerIdx) }}
+                    >
+                      {c.avatar_url ? (
+                        <img src={c.avatar_url} alt="" className={styles.botAvatarImg} />
+                      ) : (
+                        c.name.charAt(0)
+                      )}
+                    </div>
+                    {c.is_active && <span className={styles.botStatus} aria-hidden />}
                   </div>
                   <div className={styles.botInfo}>
                     <div className={styles.botNameRow}>
@@ -695,7 +698,7 @@ const ProfilePage = () => {
                   {BOT_TABS.find((t) => t.id === botTab)?.label}
                 </h2>
 
-                {renderTabContent(botTab, selected, (p) => updateCharacter(selected.id, p), () => removeCharacter(selected.id))}
+                {renderTabContent(botTab, selected, (p) => updateCharacter(selected.id, p), () => removeCharacter(selected.id), selected.id)}
               </div>
             )}
 

@@ -8,6 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Chimera.API.Core\Chimera.API.Core.csproj" />
+    <ProjectReference Include="..\..\Chimera.API.Domain\Chimera.API.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Chimera.API.TTS.Infrastructure" />
   </ItemGroup>
 

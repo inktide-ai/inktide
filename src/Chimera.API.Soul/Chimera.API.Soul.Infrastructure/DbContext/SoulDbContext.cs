@@ -22,6 +22,7 @@ public sealed class SoulDbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<MemoryMetadata> MemoryMetadata => Set<MemoryMetadata>();
     public DbSet<UsageDaily> UsageDaily => Set<UsageDaily>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<AiCardModel> AiCardModels => Set<AiCardModel>();
 
     #endregion
 
@@ -37,6 +38,7 @@ public sealed class SoulDbContext : Microsoft.EntityFrameworkCore.DbContext
         modelBuilder.ApplyConfiguration(new MemoryMetadataConfiguration());
         modelBuilder.ApplyConfiguration(new UsageDailyConfiguration());
         modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
+        modelBuilder.ApplyConfiguration(new AiCardModelConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }

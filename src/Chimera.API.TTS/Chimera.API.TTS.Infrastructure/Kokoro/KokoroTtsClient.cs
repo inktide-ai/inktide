@@ -4,9 +4,6 @@ using System.Text.Json.Serialization;
 using Chimera.API.TTS.Domain.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using TtsModel = Chimera.API.TTS.Domain.Models.TtsModel;
-using TtsModelCollection = Chimera.API.TTS.Domain.Models.TtsModelCollection;
-using TtsVoiceCollection = Chimera.API.TTS.Domain.Models.TtsVoiceCollection;
 
 namespace Chimera.API.TTS.Infrastructure.Kokoro;
 

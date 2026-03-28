@@ -61,11 +61,13 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
 
     private static IAmazonS3 CreateAmazonS3Client(S3Settings settings)
     {
+        var serviceUri = new Uri(settings.ServiceUrl.TrimEnd('/'));
         var config = new AmazonS3Config
         {
             ServiceURL = settings.ServiceUrl.TrimEnd('/'),
             ForcePathStyle = settings.ForcePathStyle,
-            AuthenticationRegion = settings.Region
+            AuthenticationRegion = settings.Region,
+            UseHttp = serviceUri.Scheme == Uri.UriSchemeHttp,
         };
 
         return new AmazonS3Client(settings.AccessKey, settings.SecretKey, config);

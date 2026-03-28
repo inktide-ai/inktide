@@ -29,11 +29,7 @@ public sealed class TtsSynthesizeRequestValidator : AbstractValidator<TtsSynthes
         RuleFor(x => x.ProviderId)
             .MaximumLength(64)
             .When(x => !string.IsNullOrEmpty(x.ProviderId));
-
-        RuleFor(x => x.AudioFormat)
-            .Must(SpeechAudioFormatCatalog.IsKnownFormat)
-            .When(x => !string.IsNullOrWhiteSpace(x.AudioFormat))
-            .WithMessage(x => $"audio_format is not supported. See GET .../audio-formats (requested: '{x.AudioFormat}').");
+        
     }
 
     #endregion
