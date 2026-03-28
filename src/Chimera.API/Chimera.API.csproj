@@ -6,7 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Chimera.API</RootNamespace>
-    <UserSecretsId>f50fcecb-9d6a-45bd-91ea-b8e4886bebf2</UserSecretsId>
   </PropertyGroup>
   
   <ItemGroup>
@@ -14,8 +13,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.3" />
-    
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4" />
