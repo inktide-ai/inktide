@@ -1,0 +1,42 @@
+namespace Chimera.API.Domain.Models;
+
+public sealed class ProviderOptions
+{
+    
+    #region Fields
+
+    private string _providerId = string.Empty;
+    private string? _apiKey;
+    private Dictionary<string, string> _headers = new();
+    private Dictionary<string, object> _extra = new();
+
+    #endregion
+    
+    #region Properties
+    
+    public string ProviderId
+    {
+        get => _providerId;
+        set => _providerId = value;
+    }
+
+    public string? ApiKey
+    {
+        get => _apiKey;
+        set => _apiKey = value;
+    }
+    
+    public Dictionary<string, string> Headers
+    {
+        get => _headers;
+        set => _headers = value;
+    }
+
+    public Dictionary<string, object> Extra
+    {
+        get => _extra;
+        set => _extra = value;
+    }
+    
+    #endregion
+}

@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Chimera.API</RootNamespace>
+    <UserSecretsId>f50fcecb-9d6a-45bd-91ea-b8e4886bebf2</UserSecretsId>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.3" />
+    
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    
+    <PackageReference Include="DryIoc.dll" Version="5.4.0" />
+    <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.Development.json">
+      <DependentUpon>appsettings.json</DependentUpon>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.Development.User.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>appsettings.Development.json</DependentUpon>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Chimera.API.Core\Chimera.API.Core.csproj" />
+    <ProjectReference Include="..\Chimera.API.Memory\Chimera.API.Memory.Infrastructure\Chimera.API.Memory.Infrastructure.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS\Chimera.API.TTS.Application\Chimera.API.TTS.Application.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS\Chimera.API.TTS.Infrastructure\Chimera.API.TTS.Infrastructure.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS\Chimera.API.TTS.REST\Chimera.API.TTS.REST.csproj" />
+    <!-- Connector -->
+    <ProjectReference Include="..\Chimera.API.Connector\Chimera.API.Connector.Infrastructure\Chimera.API.Connector.Infrastructure.csproj" />
+    <ProjectReference Include="..\Chimera.API.Connector\Chimera.API.Connector.Discord\Chimera.API.Connector.Discord.csproj" />
+    <!-- Profile (account / me / Keycloak admin) -->
+    <ProjectReference Include="..\Chimera.API.Profile\Chimera.API.Profile.Application\Chimera.API.Profile.Application.csproj" />
+    <ProjectReference Include="..\Chimera.API.Profile\Chimera.API.Profile.Infrastructure\Chimera.API.Profile.Infrastructure.csproj" />
+    <ProjectReference Include="..\Chimera.API.Profile\Chimera.API.Profile.REST\Chimera.API.Profile.REST.csproj" />
+    <!-- Soul -->
+    <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.Application\Chimera.API.Soul.Application.csproj" />
+    <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.Infrastructure\Chimera.API.Soul.Infrastructure.csproj" />
+    <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.REST\Chimera.API.Soul.REST.csproj" />
+    <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.Grpc\Chimera.API.Soul.Grpc.csproj" />
+    <ProjectReference Include="..\Chimera.API.Soul\Chimera.API.Soul.Grpc.AiCards.Service\Chimera.API.Soul.Grpc.AiCards.Service.csproj" />
+    <ProjectReference Include="..\Chimera.API.Synapse\Chimera.API.Synapse.Application\Chimera.API.Synapse.Application.csproj" />
+    <ProjectReference Include="..\Chimera.API.Synapse\Chimera.API.Synapse.Infrastructure\Chimera.API.Synapse.Infrastructure.csproj" />
+    <!-- Realtime: SignalR hub + TTS audio delivery to browser -->
+    <ProjectReference Include="..\Chimera.API.Realtime\Chimera.API.Realtime.Infrastructure\Chimera.API.Realtime.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

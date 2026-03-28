@@ -1,0 +1,98 @@
+
+#
+# Запуск core (БД + auth + redis): docker compose --profile core up -d
+# Запуск storage:                  docker compose --profile storage up -d
+# Запуск всего:                    docker compose --profile core --profile storage up -d
+# Остановка:                       docker compose down
+# Логи сервиса:                    docker compose logs -f keycloak
+# Пересобрать один:                docker compose up -d --no-deps postgres
+
+# Сервисы и порты:
+#   postgres    5432   — основная БД приложения
+#   redis       6379   — кэш / pub-sub
+#   keycloak    8080   — SSO/OAuth2 (admin/admin)
+#   minio       9000   — S3-хранилище (консоль: 9001)
+
+services:
+
+  # База данных приложения
+  postgres:
+    image: postgres:16-alpine
+    profiles: [core]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-chimera}
+      POSTGRES_USER: ${POSTGRES_USER:-chimera}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-chimera}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chimera"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # У Keycloak своя БД чтобы не мешать с основной
+  postgres-keycloak:
+    image: postgres:16-alpine
+    profiles: [core]
+    environment:
+      POSTGRES_DB: ${KC_POSTGRES_DB:-keycloak}
+      POSTGRES_USER: ${KC_POSTGRES_USER:-keycloak}
+      POSTGRES_PASSWORD: ${KC_POSTGRES_PASSWORD:-keycloak}
+    volumes:
+      - keycloak_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.6
+    profiles: [core]
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/keycloak
+      KC_DB_USERNAME: ${KC_POSTGRES_USER:-keycloak}
+      KC_DB_PASSWORD: ${KC_POSTGRES_PASSWORD:-keycloak}
+      KC_HOSTNAME: localhost
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/themes:/opt/keycloak/providers
+    depends_on:
+      postgres-keycloak:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    profiles: [core]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  minio:
+    image: minio/minio:latest
+    profiles: [core]
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio12345}
+    ports:
+      - "9000:9000"
+      - "9001:9001"   # Web console
+    volumes:
+      - minio_data:/data
+
+volumes:
+  postgres_data:
+  keycloak_postgres_data:
+  redis_data:
+  minio_data:

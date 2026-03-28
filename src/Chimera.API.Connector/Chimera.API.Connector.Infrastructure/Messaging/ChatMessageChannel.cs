@@ -1,0 +1,56 @@
+using System.Runtime.CompilerServices;
+using System.Threading.Channels;
+using Chimera.API.Connector.Application.Models;
+using Chimera.API.Connector.Infrastructure.Messaging;
+
+namespace Chimera.API.Connector.Infrastructure.Messaging;
+
+/// <summary>
+/// Bounded in-memory buffer between chat connectors (producers) and Redis stream publisher (consumer).
+/// Drops oldest messages under backpressure to keep the pipeline moving.
+/// </summary>
+public sealed class ChatMessageChannel : IChatMessageQueue
+{
+    #region Fields
+
+    private readonly Channel<ChatMessage> _channel;
+
+    #endregion
+
+    #region Constructors
+
+    public ChatMessageChannel(int capacity = 10_000)
+    {
+        _channel = Channel.CreateBounded<ChatMessage>(new BoundedChannelOptions(capacity)
+        {
+            FullMode = BoundedChannelFullMode.DropOldest,
+            SingleReader = true,
+            SingleWriter = false
+        });
+    }
+
+    #endregion
+
+    #region Properties
+
+    public ChannelWriter<ChatMessage> Writer => _channel.Writer;
+    public ChannelReader<ChatMessage> Reader => _channel.Reader;
+
+    #endregion
+
+    #region Public Methods
+
+    public bool TryEnqueue(ChatMessage message) =>
+        _channel.Writer.TryWrite(message);
+
+    public async IAsyncEnumerable<ChatMessage> ConsumeAllAsync(
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        await foreach (var message in _channel.Reader.ReadAllAsync(ct))
+        {
+            yield return message;
+        }
+    }
+
+    #endregion
+}

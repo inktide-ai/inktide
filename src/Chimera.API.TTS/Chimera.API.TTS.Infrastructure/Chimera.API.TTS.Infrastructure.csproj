@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Chimera.API.TTS.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Chimera.API.TTS.Application\Chimera.API.TTS.Application.csproj" />
+    <ProjectReference Include="..\Chimera.API.TTS.Domain\Chimera.API.TTS.Domain.csproj" />
+    <ProjectReference Include="..\..\Chimera.API.Core\Chimera.API.Core.csproj" />
+    <ProjectReference Include="..\..\Chimera.API.Domain\Chimera.API.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Flurl" Version="4.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+  </ItemGroup>
+
+</Project>

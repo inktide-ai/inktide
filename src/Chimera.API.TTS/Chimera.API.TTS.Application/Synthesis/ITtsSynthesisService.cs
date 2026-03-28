@@ -1,0 +1,22 @@
+using Chimera.API.TTS.Domain.Models;
+
+namespace Chimera.API.TTS.Application.Synthesis;
+
+/// <summary>
+/// Application use case: orchestrates TTS synthesis (provider resolution, credentials, validation, streaming rules, provider call).
+/// </summary>
+public interface ITtsSynthesisService
+{
+    #region Methods
+
+    Task<SpeechResult> SynthesizeAsync(
+        SynthesizeCommand command,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns the catalog of registered TTS providers, sorted by id.
+    /// </summary>
+    IReadOnlyCollection<SpeechProviderDescriptor> GetProviderCatalog();
+
+    #endregion
+}
