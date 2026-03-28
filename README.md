@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="apps/web/src/assets/icon.svg" width="72" />
-</p>
-
 # Chimera
 
 **Chimera** — AI-стример. Слушает Discord и Twitch чат, думает, отвечает голосом — в реальном времени, пока идёт стрим.
