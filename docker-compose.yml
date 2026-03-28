@@ -65,7 +65,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./keycloak/themes:/opt/keycloak/providers
+      - ./themes:/opt/keycloak/providers
     depends_on:
       postgres-keycloak:
         condition: service_healthy
