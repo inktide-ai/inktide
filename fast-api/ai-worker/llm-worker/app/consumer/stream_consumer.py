@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from app.core.config import settings
 from app.llm.client import OllamaClient
-from app.llm.sentence_accumulator import SentenceAccumulator
+from app.llm.sentence_accumulator import ChunkingMode, iter_sentences
 from app.models.envelope import SynapseAggregatedEnvelope
 from app.prompt.builder import build_messages
 
@@ -158,6 +158,24 @@ class StreamConsumer:
         tts_model_id    = ctx.tts_model_id    if ctx else None
         tts_speed       = ctx.tts_speed       if ctx else 1.0
 
+        # LLM generation options from the card's llm_config — forwarded to Ollama
+        llm_options: dict | None = None
+        if ctx:
+            llm_options = {
+                "temperature": ctx.llm_temperature,
+                "num_predict": ctx.llm_max_tokens,
+                "top_p":       ctx.llm_top_p,
+            }
+            # repeat_penalty is Ollama's closest equivalent to frequency + presence penalty.
+            # 1.0 = no penalty; > 1.0 = discourage repeated tokens.
+            combined_penalty = ctx.llm_frequency_penalty + ctx.llm_presence_penalty
+            if combined_penalty > 0:
+                llm_options["repeat_penalty"] = 1.0 + combined_penalty
+
+        # Response delay: LLM generation starts immediately; we sleep before the first
+        # publish so the response appears in chat after the configured delay.
+        response_delay_s = (ctx.response_delay_ms / 1000.0) if ctx and ctx.response_delay_ms > 0 else 0.0
+
         logger.info(
             "LLM request started. user=%s channel=%s model=%s correlation=%s",
             envelope.message.sender.user_name,
@@ -166,54 +184,47 @@ class StreamConsumer:
             envelope.correlation_id,
         )
 
-        accumulator = SentenceAccumulator()
-        seq = 0
+        try:
+            mode = ChunkingMode(ctx.chunking_mode) if ctx and ctx.chunking_mode else ChunkingMode.NARRATION
+        except ValueError:
+            mode = ChunkingMode.NARRATION
+
         total_chars = 0
         first_token_logged = False
 
-        # Look-ahead buffer: hold the previous sentence until we know whether it's the last.
-        # This guarantees we never send an empty terminal marker — the final real chunk
-        # always carries is_last=True.
-        pending: tuple[str, int] | None = None   # (text, seq)
-
-        async for llm_chunk in self._llm.chat_stream(
-            model=model,
-            messages=messages,
-            correlation_id=envelope.correlation_id,
-        ):
-            if not first_token_logged and llm_chunk.token:
-                logger.info(
-                    "First LLM token received. model=%s correlation=%s",
-                    model, envelope.correlation_id,
-                )
-                first_token_logged = True
-
-            total_chars += len(llm_chunk.token)
-
-            sentence = accumulator.feed(llm_chunk.token)
-            if sentence:
-                if pending is not None:
-                    # Publish the previous sentence — it's not the last
-                    await self._publish_chunk(
-                        envelope=envelope,
-                        text=pending[0],
-                        model=model,
-                        seq=pending[1],
-                        is_last=False,
-                        tts_provider_id=tts_provider_id,
-                        tts_voice_id=tts_voice_id,
-                        tts_model_id=tts_model_id,
-                        tts_speed=tts_speed,
+        async def _token_stream():
+            nonlocal total_chars, first_token_logged
+            async for llm_chunk in self._llm.chat_stream(
+                model=model,
+                messages=messages,
+                correlation_id=envelope.correlation_id,
+                options=llm_options,
+            ):
+                if not first_token_logged and llm_chunk.token:
+                    logger.info(
+                        "First LLM token received. model=%s correlation=%s",
+                        model, envelope.correlation_id,
                     )
-                pending = (sentence, seq)
-                seq += 1
+                    first_token_logged = True
+                total_chars += len(llm_chunk.token)
+                yield llm_chunk.token
 
-        # After the LLM stream closes, flush any remaining tokens
-        remainder = accumulator.flush()
+        # Look-ahead: hold each sentence until the next arrives so the final chunk
+        # always carries is_last=True and we never publish an empty terminal marker.
+        seq = 0
+        pending: tuple[str, int] | None = None
+        first_publish = True
 
-        if remainder:
-            # Publish the previously pending sentence (not last), then the remainder as last
+        async for sentence in iter_sentences(_token_stream(), mode=mode):
             if pending is not None:
+                if first_publish and response_delay_s > 0:
+                    logger.debug(
+                        "Response delay %.1fs applied. correlation=%s",
+                        response_delay_s,
+                        envelope.correlation_id,
+                    )
+                    await asyncio.sleep(response_delay_s)
+                    first_publish = False
                 await self._publish_chunk(
                     envelope=envelope,
                     text=pending[0],
@@ -225,20 +236,17 @@ class StreamConsumer:
                     tts_model_id=tts_model_id,
                     tts_speed=tts_speed,
                 )
-            await self._publish_chunk(
-                envelope=envelope,
-                text=remainder,
-                model=model,
-                seq=seq,
-                is_last=True,
-                tts_provider_id=tts_provider_id,
-                tts_voice_id=tts_voice_id,
-                tts_model_id=tts_model_id,
-                tts_speed=tts_speed,
-            )
+            pending = (sentence, seq)
             seq += 1
-        elif pending is not None:
-            # Remainder is empty — the last pending sentence is the final chunk
+
+        if pending is not None:
+            if first_publish and response_delay_s > 0:
+                logger.debug(
+                    "Response delay %.1fs applied (single-chunk response). correlation=%s",
+                    response_delay_s,
+                    envelope.correlation_id,
+                )
+                await asyncio.sleep(response_delay_s)
             await self._publish_chunk(
                 envelope=envelope,
                 text=pending[0],

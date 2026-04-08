@@ -364,6 +364,11 @@
   color: var(--text-primary);
 }
 
+.sidebarNavItemActive {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-primary);
+}
+
 .sidebarNavIcon {
   display: flex;
   align-items: center;
@@ -548,11 +553,14 @@
 /* ── Tab Card Grid (large blocks) ── */
 .tabCardsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
   max-width: 1200px;
+  margin-inline: auto;
+  width: 100%;
   animation: panelIn 0.35s ease;
 }
+
 
 .tabCard {
   --tab-accent: #ed3e3e;
@@ -659,24 +667,39 @@
 .backBtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 1rem;
-  margin-bottom: 1.25rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  gap: 0.5rem;
+  padding: 0.4375rem 0.875rem 0.4375rem 0.625rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
   color: var(--text-muted);
   font-family: var(--font-ui);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .backBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.backBtnArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.backBtn:hover .backBtnArrow {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .sectionHeading {
@@ -881,13 +904,21 @@
   overflow-x: hidden;
 }
 
+.mainScene {
+  padding: 0;
+  overflow: hidden;
+}
+
 .pageHeader {
   margin-bottom: 2rem;
+  max-width: 1200px;
+  margin-inline: auto;
+  width: 100%;
 }
 
 .pageHeaderRow {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
@@ -906,6 +937,31 @@
   flex-shrink: 0;
 }
 
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.75rem;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+}
+
+.statusBadgeActive {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.statusBadgeInactive {
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
 .pageTitle {
   font-size: 1.75rem;
   font-weight: 800;
@@ -922,6 +978,9 @@
 /* ── Tab Content Panels ── */
 .panel {
   animation: panelIn 0.3s ease;
+  max-width: 900px;
+  margin-inline: auto;
+  width: 100%;
 }
 
 /* ── Tab Layout (Identity-style) ── */
@@ -929,7 +988,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  max-width: 720px;
+  max-width: 840px;
+  margin-inline: auto;
+  width: 100%;
 }
 
 .section {
@@ -1533,6 +1594,152 @@
   transition: left 0.15s ease-in;
 }
 
+/* ── Speed slider ── */
+.speedLabelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.speedValue {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.sliderWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sliderBound {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.slider {
+  flex: 1;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  cursor: pointer;
+  accent-color: var(--accent-red, #ed3e3e);
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--accent-red, #ed3e3e);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--accent-red, #ed3e3e);
+  cursor: pointer;
+}
+
+/* ── Advanced collapsible ── */
+.advancedToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  margin-top: 0.25rem;
+}
+
+.advancedToggle:hover {
+  color: var(--text-secondary, #a0a0b0);
+}
+
+.advancedChevron {
+  transition: transform 0.2s ease;
+}
+
+.advancedChevronOpen {
+  transform: rotate(180deg);
+}
+
+.advancedPanel {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.625rem;
+}
+
+/* ── Voice Select ── */
+.voiceSelectWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.voiceSelect {
+  width: 100%;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.625rem;
+  padding: 0.6875rem 2.75rem 0.6875rem 1rem;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.voiceSelect:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.voiceSelect:focus {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.voiceSelect option,
+.voiceSelect optgroup {
+  background: #1a1a20;
+  color: var(--text-primary);
+}
+
+.voiceSelectChevron {
+  position: absolute;
+  right: 1rem;
+  color: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
 /* ── Voice Card ── */
 .voiceGrid {
   display: grid;
@@ -1583,6 +1790,445 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   color: var(--text-muted);
+}
+
+/* ── Provider List (Discord-style) ── */
+.providerPageHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.providerBackBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.providerBackBtn:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+}
+
+.providerPageTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.providerInfoCard {
+  background: transparent;
+  border: none;
+  border-left: 2px solid rgba(237, 62, 62, 0.35);
+  border-radius: 0;
+  padding: 0.25rem 1rem;
+}
+
+.providerInfoCardTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary, #a0a0b0);
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.01em;
+}
+
+.providerInfoCardText {
+  font-size: 0.775rem;
+  color: rgba(255, 255, 255, 0.25);
+  line-height: 1.55;
+}
+
+.providerSearchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.providerSearchIcon {
+  position: absolute;
+  left: 1rem;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.providerSearchWrap:focus-within .providerSearchIcon {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.providerSearchInput {
+  width: 100%;
+  padding: 0.6875rem 1rem 0.6875rem 2.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.625rem;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  outline: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.providerSearchInput::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.providerSearchInput:focus {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.providerList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.providerCard {
+  background: var(--bg-surface, #16161a);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.providerCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem 1.25rem;
+}
+
+.providerCardIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 0.625rem;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.375rem;
+  flex-shrink: 0;
+}
+
+.providerCardInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.providerCardName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.providerCardDesc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.125rem;
+}
+
+.providerCardDivider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 1.25rem;
+}
+
+.providerCardRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+
+.providerCardRow:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.providerCardRowLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary, #a0a0b0);
+}
+
+.providerCardRowChevron {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.providerCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.875rem 1.25rem;
+}
+
+.providerSelectBtn {
+  padding: 0.4rem 1rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.providerSelectBtn:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+
+.providerActiveBtn {
+  padding: 0.4rem 1rem;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 0.375rem;
+  color: #22c55e;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: default;
+}
+
+/* ── Provider Grid header ── */
+.pgHeaderCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.pgHeaderTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.375rem;
+}
+
+.pgHeaderDesc {
+  font-size: 0.775rem;
+  color: rgba(255, 255, 255, 0.3);
+  line-height: 1.55;
+}
+
+/* ── Provider Grid (card style) ── */
+.pgGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+}
+
+.pgCard {
+  position: relative;
+  background: var(--bg-surface, #16161a);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.125rem 1.125rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 130px;
+  overflow: hidden;
+  user-select: none;
+  outline: none;
+}
+
+.pgCard:hover {
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.09);
+}
+
+.pgCard:focus-visible {
+  box-shadow: 0 0 0 2px rgba(237, 62, 62, 0.4);
+}
+
+.pgCardActive {
+  border-color: rgba(237, 62, 62, 0.45);
+  background: rgba(237, 62, 62, 0.04);
+}
+
+.pgCardActive:hover {
+  background: rgba(237, 62, 62, 0.06);
+}
+
+.pgGhostIcon {
+  position: absolute;
+  top: 0.875rem;
+  right: 0.875rem;
+  font-size: 2.25rem;
+  opacity: 0.1;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.pgName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-top: auto;
+}
+
+.pgDesc {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-top: 0.25rem;
+}
+
+.pgFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.875rem;
+}
+
+.pgRadio {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.pgRadioActive {
+  border-color: #22c55e;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+.pgConfigure {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s ease;
+  line-height: 1;
+}
+
+.pgConfigure:hover {
+  color: var(--text-secondary, #a0a0b0);
+}
+
+/* ── Voice Tab Main View ── */
+.voiceEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.voiceEmptyIcon {
+  font-size: 2.5rem;
+  opacity: 0.4;
+}
+
+.voiceEmptyTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-secondary, #a0a0b0);
+}
+
+.voiceEmptyHint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.chooseProviderBtn {
+  padding: 0.625rem 1.5rem;
+  background: var(--accent-red);
+  border: none;
+  border-radius: 0.5rem;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  margin-top: 0.25rem;
+}
+
+.chooseProviderBtn:hover {
+  opacity: 0.88;
+}
+
+.currentProviderCard {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-surface, #16161a);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.currentProviderInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.currentProviderName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.currentProviderVoice {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.125rem;
+}
+
+.currentProviderChange {
+  padding: 0.375rem 0.875rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.currentProviderChange:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
 }
 
 /* ── Model Type Selector ── */
@@ -1955,8 +2601,9 @@
     padding: 1.75rem 1.5rem;
   }
 
+  /* 2 columns on medium desktop — no orphan with 10 items */
   .tabCardsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
 
@@ -1985,7 +2632,35 @@
     flex-shrink: 0;
   }
 
-  .sidebarNav,
+  /* Show nav as compact horizontal pills, hide only search */
+  .sidebarNav {
+    flex-direction: row;
+    padding: 0.375rem 0.25rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    gap: 0.125rem;
+    align-items: center;
+    border-right: 1px solid var(--border);
+  }
+
+  .sidebarNavItem {
+    flex-direction: row;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    gap: 0.375rem;
+  }
+
+  .sidebarNavIcon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .sidebarNavIcon svg {
+    width: 14px;
+    height: 14px;
+  }
+
   .sidebarSearch {
     display: none;
   }
@@ -2029,14 +2704,13 @@
     height: 28px;
   }
 
+  /* Keep 2-column from 1024px breakpoint — tablet gets 2 columns */
   .tabCardsGrid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    max-width: none;
+    gap: 0.875rem;
   }
 
   .tabCard {
-    padding: 1.5rem 1.5rem;
+    padding: 1.25rem 1.25rem;
     min-height: 100px;
   }
 
@@ -2112,6 +2786,7 @@
   }
 
   .tabCardsGrid {
+    grid-template-columns: 1fr;
     gap: 0.75rem;
   }
 

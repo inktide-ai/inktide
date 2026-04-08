@@ -1,4 +1,5 @@
 using Chimera.API.Connector.Application.Contracts;
+using Chimera.API.Connector.Application.Interfaces;
 using Chimera.API.Connector.Discord.Settings;
 using Discord;
 using Discord.WebSocket;

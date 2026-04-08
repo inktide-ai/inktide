@@ -6,86 +6,67 @@ using Flurl;
 
 namespace Chimera.API.TTS.Infrastructure.Kokoro;
 
-public sealed partial class KokoroTtsClient
+internal static class KokoroRequestFactory
 {
-    
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    internal static readonly JsonSerializerOptions JsonOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         PropertyNamingPolicy = null,
     };
-    
-    #region Methods
-    
-    internal HttpRequestMessage CreateGenerateSpeechRequest(KokoroSpeechOptions options)
-    {
-        var uri = 
-            _endpoint
-            .AppendPathSegment("audio")
-            .AppendPathSegment("speech");
-        
-        var httpRequest = new HttpRequestMessage(
-            HttpMethod.Post,
-            uri);
 
+    internal static HttpRequestMessage CreateGenerateSpeechRequest(Uri endpoint, KokoroSpeechOptions options)
+    {
+        var uri =
+            endpoint
+                .AppendPathSegment("audio")
+                .AppendPathSegment("speech");
+
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri);
         httpRequest.Content = JsonContent.Create(options, options: JsonOptions);
-        
         return httpRequest;
     }
-    
-    internal HttpRequestMessage CreateGetModelsRequest()
+
+    internal static HttpRequestMessage CreateGetModelsRequest(Uri endpoint)
     {
         var uri =
-            _endpoint
-            .AppendPathSegment("models");
-        
-        var httpRequest = new HttpRequestMessage(
-            HttpMethod.Get,
-            uri);
-        
+            endpoint
+                .AppendPathSegment("models");
+
+        var httpRequest = new HttpRequestMessage(HttpMethod.Get, uri);
         httpRequest.Headers.TryAddWithoutValidation("Accept", "application/json");
-        
         return httpRequest;
     }
-    
-    internal HttpRequestMessage CreateGetModelRequest(string modelId)
+
+    internal static HttpRequestMessage CreateGetModelRequest(Uri endpoint, string modelId)
     {
         var uri =
-            _endpoint
+            endpoint
                 .AppendPathSegment("models")
                 .AppendPathSegment(modelId);
-        
-        var httpRequest = new HttpRequestMessage(
-            HttpMethod.Get,
-            uri);
-        
+
+        var httpRequest = new HttpRequestMessage(HttpMethod.Get, uri);
         httpRequest.Headers.TryAddWithoutValidation("Accept", "application/json");
-        
-        return httpRequest;
-    }
-    
-    internal HttpRequestMessage CreateGetVoicesRequest()
-    {
-        var uri =
-            _endpoint
-            .AppendPathSegment("audio")
-            .AppendPathSegment("voices");
-        
-        var httpRequest = new HttpRequestMessage(
-            HttpMethod.Get,
-            uri);
-        
-        httpRequest.Headers.TryAddWithoutValidation("Accept", "application/json");
-        
         return httpRequest;
     }
 
-    internal HttpRequestMessage CreateDownloadFileRequest(string filename)
+    internal static HttpRequestMessage CreateGetVoicesRequest(Uri endpoint)
+    {
+        var uri =
+            endpoint
+                .AppendPathSegment("audio")
+                .AppendPathSegment("voices");
+
+        var httpRequest = new HttpRequestMessage(HttpMethod.Get, uri);
+        httpRequest.Headers.TryAddWithoutValidation("Accept", "application/json");
+        return httpRequest;
+    }
+
+    internal static HttpRequestMessage CreateDownloadFileRequest(Uri endpoint, string filename)
     {
         var safe = KokoroDownloadFilename.Sanitize(filename);
 
         var uri =
-            _endpoint
+            endpoint
                 .AppendPathSegment("download")
                 .AppendPathSegment(safe);
 
@@ -94,12 +75,12 @@ public sealed partial class KokoroTtsClient
         return httpRequest;
     }
 
-    internal HttpRequestMessage CreateCombineVoicesRequest(string jsonBody)
+    internal static HttpRequestMessage CreateCombineVoicesRequest(Uri endpoint, string jsonBody)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(jsonBody);
 
         var uri =
-            _endpoint
+            endpoint
                 .AppendPathSegment("audio")
                 .AppendPathSegment("voices")
                 .AppendPathSegment("combine");
@@ -109,8 +90,4 @@ public sealed partial class KokoroTtsClient
         httpRequest.Content = new StringContent(jsonBody, System.Text.Encoding.UTF8, "application/json");
         return httpRequest;
     }
-
-  
-
-    #endregion
 }

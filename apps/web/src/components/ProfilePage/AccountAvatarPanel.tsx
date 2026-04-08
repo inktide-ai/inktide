@@ -4,7 +4,7 @@ import { getStorageStatus, patchAvatar, uploadProfileFile } from '../../api/me'
 import type { AiCardListItem } from '../../api/soul'
 import { MAX_NICKNAME_LEN } from '../../utils/profileStorage'
 import { getBannerAccent, getBannerGradient } from './bannerPresets'
-import type { AiCharacter } from './types'
+import type { AiCharacter } from '../../domain/character'
 import styles from './AccountAvatarPanel.module.css'
 
 function getInitialLetter(userName: string | undefined): string {
@@ -240,7 +240,7 @@ export default function AccountAvatarPanel({
           <ul className={styles.projectGrid}>
             {projects.map((c) => {
               const char = characters.get(c.id)
-              const bannerIdx = char?.bannerColorIndex ?? 0
+              const bannerIdx = char?.appearance.bannerColorIndex ?? 0
               const accent = getBannerAccent(bannerIdx)
               const desc = truncateText(c.personality, 140)
               return (

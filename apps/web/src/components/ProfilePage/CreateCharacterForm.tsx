@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import styles from './ProfilePage.module.css'
-import type { AiCharacter } from './types'
+import type { AiCharacter } from '../../domain/character'
 import { IconUser, IconSkills, IconPaint, IconScene, IconMemory, IconBrain, IconMicrophone } from './TabIcons'
 import SkillsTab from './tabs/SkillsTab'
 import ModelTab from './tabs/ModelTab'
@@ -208,8 +208,8 @@ const CreateIdentitySection = ({ draft, greeting, onUpdate, setGreeting, avatarR
             id="create-phrases"
             className={styles.input}
             placeholder="hey chat, poggers, gg"
-            value={draft.keyPhrases}
-            onChange={(e) => onUpdate({ keyPhrases: e.target.value })}
+            value={draft.appearance.keyPhrases}
+            onChange={(e) => onUpdate({ appearance: { ...draft.appearance, keyPhrases: e.target.value } })}
           />
         </div>
       </div>

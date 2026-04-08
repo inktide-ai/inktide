@@ -11,6 +11,7 @@ const ForgotPasswordPage = lazy(() => import('./components/ForgotPasswordPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 const ProfilePage = lazy(() => import('./components/ProfilePage'))
 const CharacterEditPage = lazy(() => import('./components/ProfilePage/CharacterEditPage'))
+const ObsScenePage = lazy(() => import('./pages/obs/ObsScenePage'))
 
 function App() {
   return (
@@ -38,6 +39,8 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          {/* No auth guard — OBS Browser Source has no Keycloak session */}
+          <Route path="/obs/scene" element={<ObsScenePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

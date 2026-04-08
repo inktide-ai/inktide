@@ -6,6 +6,7 @@ using Chimera.API.Synapse.Application.Interfaces;
 using Chimera.API.Synapse.Infrastructure.Aggregation;
 using Chimera.API.Synapse.Infrastructure.ChannelContext;
 using Chimera.API.Synapse.Infrastructure.Messaging;
+using Chimera.API.Synapse.Infrastructure.Providers;
 using Chimera.API.Synapse.Infrastructure.Scattering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -39,5 +40,8 @@ public sealed class InfrastructureStartup : IStartup
         services.AddScoped<ISynapseScatterShard, ContextScatterShard>();
         services.AddScoped<ISynapseAggregationService, SynapseAggregationService>();
         services.AddScoped<ISynapseIngestOrchestrator, SynapseIngestOrchestrator>();
+
+        services.AddHttpClient<OllamaChatProvider>();
+        services.AddSingleton<OllamaChatProvider>();
     }
 }

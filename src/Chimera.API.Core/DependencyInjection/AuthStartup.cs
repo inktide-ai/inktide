@@ -37,6 +37,17 @@ public sealed class AuthStartup : IStartup
                 options.Authority = keycloak.Authority;
                 options.RequireHttpsMetadata = keycloak.RequireHttpsMetadata;
 
+                if (!string.IsNullOrWhiteSpace(keycloak.MetadataAddress))
+                {
+                    options.MetadataAddress = keycloak.MetadataAddress;
+
+                    var publicOrigin = new Uri(keycloak.Authority).GetLeftPart(UriPartial.Authority);
+                    var internalOrigin = new Uri(keycloak.MetadataAddress).GetLeftPart(UriPartial.Authority);
+
+                    if (!string.Equals(publicOrigin, internalOrigin, StringComparison.OrdinalIgnoreCase))
+                        options.BackchannelHttpHandler = new KeycloakUrlRewriteHandler(publicOrigin, internalOrigin);
+                }
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,

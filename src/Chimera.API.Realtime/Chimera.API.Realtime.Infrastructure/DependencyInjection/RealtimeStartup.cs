@@ -19,6 +19,9 @@ public sealed class RealtimeStartup : IStartup
         services.AddOptions<RealtimeStreamSettings>()
             .BindConfiguration(RealtimeStreamSettings.SectionName);
 
+        services.AddOptions<RealtimeTextStreamSettings>()
+            .BindConfiguration(RealtimeTextStreamSettings.SectionName);
+
         // 5 MB max message size — audio WAV payloads can be ~200 KB base64-encoded.
         services.AddSignalR(options =>
         {
@@ -26,5 +29,6 @@ public sealed class RealtimeStartup : IStartup
         });
 
         services.AddHostedService<BrowserAudioPublisher>();
+        services.AddHostedService<BrowserTextPublisher>();
     }
 }

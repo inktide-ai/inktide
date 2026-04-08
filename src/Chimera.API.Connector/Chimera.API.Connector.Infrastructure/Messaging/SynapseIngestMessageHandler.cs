@@ -1,4 +1,5 @@
 using Chimera.API.Connector.Application.Contracts;
+using Chimera.API.Connector.Application.Interfaces;
 using Chimera.API.Connector.Application.Models;
 using Microsoft.Extensions.Logging;
 

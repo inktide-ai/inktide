@@ -7,11 +7,14 @@ import type { VRM } from '@pixiv/three-vrm'
 import { VRMAnimationLoaderPlugin, createVRMAnimationClip } from '@pixiv/three-vrm-animation'
 
 import idleAnimationUrl from '../../../assets/idle_loop.vrma?url'
+import type { MouthWeights } from '../../../hooks/useLipSync'
 
 interface VrmRendererProps {
   url: string
   background?: string
   className?: string
+  /** Called each animation frame to obtain current mouth expression weights. */
+  getMouthWeights?: () => MouthWeights
 }
 
 // ── Blink state ──────────────────────────────────────────────────────────────
@@ -54,7 +57,6 @@ function updateBlink(state: BlinkState, vrm: VRM, delta: number) {
 
 // ── Eye saccades ──────────────────────────────────────────────────────────────
 
-// Probability table from airi — weighted random interval between micro-movements
 const SACCADE_STEP = 400
 const SACCADE_TABLE: [number, number][] = [
   [0.075, 800], [0.110, 0], [0.125, 0], [0.140, 0],
@@ -76,7 +78,7 @@ function randomSaccadeInterval(): number {
 
 interface SaccadeState {
   timeSinceLast: number
-  nextAfter: number       // seconds
+  nextAfter: number
   target: THREE.Vector3
   lookAtObj: THREE.Object3D
 }
@@ -109,16 +111,82 @@ function updateSaccade(state: SaccadeState, vrm: VRM, delta: number) {
   vrm.lookAt.update(delta)
 }
 
+// ── Lip-sync ──────────────────────────────────────────────────────────────────
+
+// VRM expression names for mouth shapes (standard VRM 0.x / 1.0)
+const MOUTH_EXPRESSIONS = ['aa', 'ih', 'ou', 'ee', 'oh'] as const
+
+/**
+ * Apply pre-computed mouth weights to VRM expression morph targets.
+ * Weights are obtained once per frame and shared with updateJaw.
+ */
+function updateLipSync(vrm: VRM, weights: MouthWeights) {
+  if (!vrm.expressionManager) return
+  for (const name of MOUTH_EXPRESSIONS) {
+    vrm.expressionManager.setValue(name, weights[name])
+  }
+}
+
+// ── Jaw bone ──────────────────────────────────────────────────────────────────
+//
+// Drives the humanoid jaw bone directly — separate from expression morph targets.
+// This is what makes lip sync look real: blend shapes reshape lips, bone opens the jaw.
+// Works only when the VRM model includes a jaw bone (optional in spec).
+
+/** Maximum jaw opening in radians (~18°). Covers full speech range without exaggeration. */
+const MAX_JAW_ANGLE = 0.32
+
+/**
+ * Below this combined weight the jaw stays fully closed.
+ * Prevents micro-jitter on silence and very quiet fricatives.
+ */
+const JAW_DEAD_ZONE = 0.10
+
+/**
+ * Rotate the jaw bone proportional to current mouth weights.
+ *
+ * Drive is computed from all open-mouth shapes, not just 'aa', so rounded vowels
+ * (ou/oh) and spread vowels (ee) also open the jaw — matching real articulation.
+ * The normalized bone is set before vrm.update() so the humanoid sync picks it up.
+ */
+function updateJaw(jawNode: THREE.Object3D, weights: MouthWeights) {
+  const drive = Math.max(
+    weights.aa,
+    weights.oh * 0.75,
+    weights.ou * 0.55,
+    weights.ee * 0.40,
+  )
+  const t = drive <= JAW_DEAD_ZONE
+    ? 0
+    : (drive - JAW_DEAD_ZONE) / (1 - JAW_DEAD_ZONE)
+  jawNode.rotation.x = t * MAX_JAW_ANGLE
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function randomRange(min: number, max: number) {
   return Math.random() * (max - min) + min
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function isImageUrl(bg: string): boolean {
+  return bg.startsWith('http://') || bg.startsWith('https://') || bg.startsWith('blob:') || bg.startsWith('/')
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function VrmRenderer({ url, background = 'transparent', className }: VrmRendererProps) {
+export default function VrmRenderer({
+  url,
+  background = 'transparent',
+  className,
+  getMouthWeights,
+}: VrmRendererProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
+  // Keep a stable ref so the animation loop always sees the latest callback
+  // without needing to restart the Three.js effect.
+  const getMouthWeightsRef = useRef(getMouthWeights)
+  getMouthWeightsRef.current = getMouthWeights
 
   useEffect(() => {
     const wrap = wrapRef.current
@@ -130,6 +198,7 @@ export default function VrmRenderer({ url, background = 'transparent', className
     let mixer: THREE.AnimationMixer | null = null
     let animationId: number
     let vrm: VRM | null = null
+    let jawNode: THREE.Object3D | null = null
     let initialized = false
     let modelReady = false
     const clock = new THREE.Clock()
@@ -137,14 +206,15 @@ export default function VrmRenderer({ url, background = 'transparent', className
     const saccade = makeSaccade()
 
     const scene = new THREE.Scene()
-    if (background !== 'transparent') scene.background = new THREE.Color(background)
+    if (background !== 'transparent' && !isImageUrl(background)) {
+      scene.background = new THREE.Color(background)
+    }
 
     scene.add(new THREE.AmbientLight(0xffffff, 1.5))
     const dir = new THREE.DirectionalLight(0xffffff, 1.0)
     dir.position.set(1, 2, 3)
     scene.add(dir)
 
-    // Load VRM
     const loader = new GLTFLoader()
     loader.register((parser) => new VRMLoaderPlugin(parser))
     loader.register((parser) => new VRMAnimationLoaderPlugin(parser))
@@ -171,8 +241,9 @@ export default function VrmRenderer({ url, background = 'transparent', className
 
         scene.add(loaded.scene)
         vrm = loaded
+        // Jaw bone is optional in VRM spec — gracefully absent on some models
+        jawNode = loaded.humanoid.getNormalizedBoneNode('jaw') ?? null
 
-        // Load idle animation
         try {
           const animGltf = await loader.loadAsync(idleAnimationUrl)
           const vrmAnims = animGltf.userData.vrmAnimations
@@ -201,6 +272,13 @@ export default function VrmRenderer({ url, background = 'transparent', className
         if (vrm) {
           updateBlink(blink, vrm, delta)
           updateSaccade(saccade, vrm, delta)
+          // Sample weights once — shared by expression morph targets + jaw bone.
+          // Both must be set BEFORE vrm.update() so humanoid sync picks them up.
+          if (getMouthWeightsRef.current) {
+            const weights = getMouthWeightsRef.current()
+            updateLipSync(vrm, weights)
+            if (jawNode) updateJaw(jawNode, weights)
+          }
           vrm.update(delta)
         }
         if (renderer && camera) renderer.render(scene, camera)
@@ -215,7 +293,7 @@ export default function VrmRenderer({ url, background = 'transparent', className
         if (!w || !h) continue
 
         if (!initialized) {
-          renderer = new THREE.WebGLRenderer({ antialias: true, alpha: background === 'transparent' })
+          renderer = new THREE.WebGLRenderer({ antialias: true, alpha: background === 'transparent' || isImageUrl(background) })
           renderer.setPixelRatio(window.devicePixelRatio)
           renderer.setSize(w, h)
           renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -251,6 +329,10 @@ export default function VrmRenderer({ url, background = 'transparent', className
       ro.disconnect()
       controls?.dispose()
       mixer?.stopAllAction()
+      if (jawNode) {
+        jawNode.rotation.x = 0
+        jawNode = null
+      }
       if (vrm) {
         VRMUtils.deepDispose(vrm.scene)
         scene.remove(vrm.scene)
@@ -260,11 +342,15 @@ export default function VrmRenderer({ url, background = 'transparent', className
     }
   }, [url, background])
 
+  const bgStyle = isImageUrl(background)
+    ? { backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : {}
+
   return (
     <div
       ref={wrapRef}
       className={className}
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: '100%', height: '100%', ...bgStyle }}
     />
   )
 }

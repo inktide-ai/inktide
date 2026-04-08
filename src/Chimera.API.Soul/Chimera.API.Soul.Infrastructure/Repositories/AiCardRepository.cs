@@ -30,7 +30,7 @@ public sealed class AiCardRepository : IAiCardRepository
     {
         return await _db.AiCards
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == id && c.IsActive, ct);
+            .FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null, ct);
     }
 
     public async Task<AiCard?> GetByIdWithRelationsAsync(Guid id, CancellationToken ct = default)
@@ -42,7 +42,7 @@ public sealed class AiCardRepository : IAiCardRepository
             .Include(c => c.TtsCatalog)
             .Include(c => c.Channels)
             .Include(c => c.Tools)
-            .FirstOrDefaultAsync(c => c.Id == id && c.IsActive, ct);
+            .FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null, ct);
     }
 
     public async Task<IReadOnlyList<AiCard>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
@@ -50,14 +50,14 @@ public sealed class AiCardRepository : IAiCardRepository
         return await _db.AiCards
             .AsNoTracking()
             .Include(c => c.LlmCatalog)
-            .Where(c => c.UserId == userId && c.IsActive)
+            .Where(c => c.UserId == userId && c.DeletedAt == null)
             .OrderByDescending(c => c.UpdatedAt)
             .ToListAsync(ct);
     }
 
     public async Task<int> CountByUserIdAsync(Guid userId, CancellationToken ct = default)
     {
-        return await _db.AiCards.CountAsync(c => c.UserId == userId && c.IsActive, ct);
+        return await _db.AiCards.CountAsync(c => c.UserId == userId && c.DeletedAt == null, ct);
     }
 
     public async Task<AiCard> CreateAsync(AiCard card, CancellationToken ct = default)
@@ -75,17 +75,17 @@ public sealed class AiCardRepository : IAiCardRepository
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
     {
-        var card = await _db.AiCards.FirstOrDefaultAsync(c => c.Id == id, ct);
+        var card = await _db.AiCards.FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null, ct);
         if (card is null) return;
 
-        card.IsActive = false;
+        card.DeletedAt = _time.GetUtcNow().UtcDateTime;
         card.UpdatedAt = _time.GetUtcNow().UtcDateTime;
         await _db.SaveChangesAsync(ct);
     }
 
     public async Task<bool> SlugExistsAsync(Guid userId, string slug, Guid? excludeCardId = null, CancellationToken ct = default)
     {
-        var query = _db.AiCards.Where(c => c.UserId == userId && c.Slug == slug && c.IsActive);
+        var query = _db.AiCards.Where(c => c.UserId == userId && c.Slug == slug && c.DeletedAt == null);
         if (excludeCardId.HasValue)
             query = query.Where(c => c.Id != excludeCardId.Value);
         return await query.AnyAsync(ct);

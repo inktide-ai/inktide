@@ -49,4 +49,11 @@ public sealed class TtsSynthesizeRequest
     /// </summary>
     [JsonProperty("stream")]
     public bool? Stream { get; set; }
+
+    /// <summary>
+    /// Provider-specific parameters forwarded verbatim to <c>SpeechOptions.ProviderParams</c>.
+    /// Example: <c>{ "stability": 0.5, "similarity_boost": 0.75, "style": 0.0, "use_speaker_boost": true }</c>
+    /// </summary>
+    [JsonProperty("provider_params")]
+    public Dictionary<string, object>? ProviderParams { get; set; }
 }

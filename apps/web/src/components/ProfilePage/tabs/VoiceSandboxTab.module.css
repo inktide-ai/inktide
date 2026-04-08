@@ -1,0 +1,74 @@
+/* Buffer bar chart for streaming playground */
+.bufferViz {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 48px;
+  padding: 4px 0;
+  overflow: hidden;
+}
+
+.bufferBar {
+  width: 8px;
+  border-radius: 2px 2px 0 0;
+  background: var(--accent-voice, #f0abfc);
+  opacity: 0.75;
+  min-height: 4px;
+  flex-shrink: 0;
+  transition: height 0.1s ease;
+}
+
+/* Native <audio> element tinted for dark theme */
+.audioPlayer {
+  width: 100%;
+  margin-top: 0.75rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  display: block;
+  filter: invert(0.85) hue-rotate(180deg);
+}
+
+/* Stream stats row */
+.streamStats {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.6875rem;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  color: var(--text-muted);
+  margin-top: 0.375rem;
+}
+
+.streamStatItem {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.streamStatLabel {
+  opacity: 0.6;
+}
+
+/* Inline loading spinner used inside buttons */
+.spinnerInline {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Provider loading state */
+.voiceLoadingHint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.375rem 0;
+  font-style: italic;
+}

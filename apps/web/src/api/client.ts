@@ -1,11 +1,29 @@
 import { API_BASE_URL } from './config'
-import { keycloak } from '../keycloak'
 
-function getAuthHeaders(): Record<string, string> {
-  const token = keycloak.token
-  if (!token) return {}
-  return { Authorization: `Bearer ${token}` }
+// ── Auth provider ─────────────────────────────────────────────────────────────
+//
+// The HTTP client is decoupled from Keycloak: it works with any token source.
+// Call `configureApiAuth` once at application bootstrap (see main.tsx).
+
+interface ApiAuthProvider {
+  getToken: () => string | undefined
+  isAuthenticated: () => boolean
+  refreshToken: () => Promise<boolean>
 }
+
+const noopAuth: ApiAuthProvider = {
+  getToken: () => undefined,
+  isAuthenticated: () => false,
+  refreshToken: async () => false,
+}
+
+let _auth: ApiAuthProvider = noopAuth
+
+export function configureApiAuth(provider: ApiAuthProvider): void {
+  _auth = provider
+}
+
+// ── Errors ────────────────────────────────────────────────────────────────────
 
 export class ApiError extends Error {
   constructor(
@@ -18,6 +36,8 @@ export class ApiError extends Error {
   }
 }
 
+// ── Core fetch ────────────────────────────────────────────────────────────────
+
 export async function apiFetch(
   path: string,
   init: RequestInit = {},
@@ -25,8 +45,8 @@ export async function apiFetch(
   const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`
 
   const headers = new Headers(init.headers)
-  const auth = getAuthHeaders()
-  for (const [k, v] of Object.entries(auth)) headers.set(k, v)
+  const token = _auth.getToken()
+  if (token) headers.set('Authorization', `Bearer ${token}`)
 
   if (!headers.has('Content-Type') && init.body && typeof init.body === 'string') {
     headers.set('Content-Type', 'application/json')
@@ -34,11 +54,12 @@ export async function apiFetch(
 
   let res = await fetch(url, { ...init, headers })
 
-  if (res.status === 401 && keycloak.authenticated) {
+  if (res.status === 401 && _auth.isAuthenticated()) {
     try {
-      const refreshed = await keycloak.updateToken(30)
+      const refreshed = await _auth.refreshToken()
       if (refreshed) {
-        headers.set('Authorization', `Bearer ${keycloak.token}`)
+        const newToken = _auth.getToken()
+        if (newToken) headers.set('Authorization', `Bearer ${newToken}`)
         res = await fetch(url, { ...init, headers })
       }
     } catch {
@@ -48,6 +69,8 @@ export async function apiFetch(
 
   return res
 }
+
+// ── Response helpers ──────────────────────────────────────────────────────────
 
 export async function jsonOrThrow<T>(res: Response): Promise<T> {
   if (!res.ok) {

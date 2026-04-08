@@ -8,3 +8,4 @@ name = "chimera_rendering"
 path = "src/lib.rs"
 
 [dependencies]
+chimera-lipsync = { path = "../chimera-lipsync" }

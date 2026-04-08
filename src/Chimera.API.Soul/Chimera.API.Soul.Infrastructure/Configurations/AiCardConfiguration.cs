@@ -56,8 +56,13 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
             .HasColumnName("tts_config")
             .HasColumnType("jsonb");
 
-        b.Property(e => e.Behavior)
-            .HasColumnName("behavior")
+        b.Property(e => e.Appearance)
+            .HasColumnName("appearance")
+            .HasColumnType("jsonb")
+            .IsRequired();
+
+        b.Property(e => e.ResponseBehavior)
+            .HasColumnName("response_behavior")
             .HasColumnType("jsonb")
             .IsRequired();
 
@@ -66,14 +71,22 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
             .HasColumnType("jsonb")
             .IsRequired();
 
-        b.Property(e => e.DonkeyEngine)
-            .HasColumnName("donkey_engine")
+        b.Property(e => e.AutoPilot)
+            .HasColumnName("auto_pilot")
             .HasColumnType("jsonb")
             .IsRequired();
+
+        b.Property(e => e.Visibility)
+            .HasColumnName("visibility")
+            .IsRequired()
+            .HasDefaultValue("private");
 
         b.Property(e => e.IsActive)
             .HasColumnName("is_active")
             .HasDefaultValue(true);
+
+        b.Property(e => e.DeletedAt)
+            .HasColumnName("deleted_at");
 
         b.Property(e => e.CreatedAt)
             .HasColumnName("created_at");
@@ -89,7 +102,11 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
 
         b.HasIndex(e => new { e.UserId, e.IsActive })
             .HasDatabaseName("idx_ai_cards_user_active")
-            .HasFilter("is_active = true");
+            .HasFilter("is_active = true AND deleted_at IS NULL");
+
+        b.HasIndex(e => e.DeletedAt)
+            .HasDatabaseName("idx_ai_cards_deleted_at")
+            .HasFilter("deleted_at IS NULL");
 
         b.HasOne(e => e.LlmCatalog)
             .WithMany()

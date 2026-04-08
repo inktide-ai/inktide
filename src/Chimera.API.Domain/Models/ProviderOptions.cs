@@ -25,6 +25,8 @@ public sealed class ProviderOptions
         get => _apiKey;
         set => _apiKey = value;
     }
+
+    public string? BaseUrl { get; set; }
     
     public Dictionary<string, string> Headers
     {

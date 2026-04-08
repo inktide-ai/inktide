@@ -19,10 +19,13 @@ public sealed class AiCard
     private string _llmConfig = "{}";
     private Guid? _ttsCatalogId;
     private string? _ttsConfig;
-    private string _behavior = "{}";
+    private string _appearance = "{}";
+    private string _responseBehavior = "{}";
     private string _memorySettings = "{}";
-    private string _donkeyEngine = "{}";
+    private string _autoPilot = "{}";
+    private string _visibility = "private";
     private bool _isActive = true;
+    private DateTime? _deletedAt;
     private DateTime _createdAt;
     private DateTime _updatedAt;
     private LlmCatalogEntry? _llmCatalog;
@@ -104,11 +107,18 @@ public sealed class AiCard
         set => _ttsConfig = value;
     }
 
-    /// <summary>Behavior knobs: response_delay_ms, max_response_length, language, etc.</summary>
-    public string Behavior
+    /// <summary>Visual/presentational settings: banner_color_index, model_type, model_file_name.</summary>
+    public string Appearance
     {
-        get => _behavior;
-        set => _behavior = value;
+        get => _appearance;
+        set => _appearance = value;
+    }
+
+    /// <summary>Runtime response knobs: response_delay_ms, max_response_length, language, key_phrases, etc.</summary>
+    public string ResponseBehavior
+    {
+        get => _responseBehavior;
+        set => _responseBehavior = value;
     }
 
     /// <summary>Memory settings: enabled, max_memories, retention_days, importance_threshold.</summary>
@@ -118,17 +128,32 @@ public sealed class AiCard
         set => _memorySettings = value;
     }
 
-    /// <summary>Donkey Engine config: idle_timeout, drives, mood defaults.</summary>
-    public string DonkeyEngine
+    /// <summary>Auto-pilot config: idle_timeout, min_interval, mood defaults.</summary>
+    public string AutoPilot
     {
-        get => _donkeyEngine;
-        set => _donkeyEngine = value;
+        get => _autoPilot;
+        set => _autoPilot = value;
     }
 
+    /// <summary>Visibility scope: 'private' | 'unlisted' | 'public'.</summary>
+    public string Visibility
+    {
+        get => _visibility;
+        set => _visibility = value;
+    }
+
+    /// <summary>Whether the card is enabled/running (not the same as deleted).</summary>
     public bool IsActive
     {
         get => _isActive;
         set => _isActive = value;
+    }
+
+    /// <summary>Soft-delete timestamp. NULL = not deleted.</summary>
+    public DateTime? DeletedAt
+    {
+        get => _deletedAt;
+        set => _deletedAt = value;
     }
 
     public DateTime CreatedAt

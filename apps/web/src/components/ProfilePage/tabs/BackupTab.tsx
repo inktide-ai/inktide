@@ -1,5 +1,5 @@
 import styles from '../ProfilePage.module.css'
-import type { AiCharacter } from '../types'
+import type { AiCharacter } from '../../../domain/character'
 
 interface BackupTabProps {
   character: AiCharacter

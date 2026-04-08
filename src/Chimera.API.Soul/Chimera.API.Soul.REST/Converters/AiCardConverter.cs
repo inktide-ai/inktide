@@ -26,9 +26,11 @@ public static class AiCardConverter
             TtsCatalogId = card.TtsCatalogId,
             TtsConfig = DeserializeJson(card.TtsConfig),
             TtsVoice = card.TtsCatalog is not null ? ToTtsResponse(card.TtsCatalog) : null,
-            Behavior = DeserializeJson(card.Behavior),
+            Appearance = DeserializeJson(card.Appearance),
+            ResponseBehavior = DeserializeJson(card.ResponseBehavior),
             MemorySettings = DeserializeJson(card.MemorySettings),
-            DonkeyEngine = DeserializeJson(card.DonkeyEngine),
+            AutoPilot = DeserializeJson(card.AutoPilot),
+            Visibility = card.Visibility,
             Channels = card.Channels?.Select(ToChannelResponse).ToList(),
             Tools = card.Tools?.Select(ToToolResponse).ToList(),
             IsActive = card.IsActive,
@@ -66,9 +68,10 @@ public static class AiCardConverter
             LlmConfig = SerializeJson(request.LlmConfig) ?? "{}",
             TtsCatalogId = request.TtsCatalogId,
             TtsConfig = SerializeJson(request.TtsConfig),
-            Behavior = SerializeJson(request.Behavior) ?? "{}",
+            Appearance = SerializeJson(request.Appearance) ?? "{}",
+            ResponseBehavior = SerializeJson(request.ResponseBehavior) ?? "{}",
             MemorySettings = SerializeJson(request.MemorySettings) ?? "{}",
-            DonkeyEngine = SerializeJson(request.DonkeyEngine) ?? "{}"
+            AutoPilot = SerializeJson(request.AutoPilot) ?? "{}"
         };
     }
 
@@ -85,10 +88,12 @@ public static class AiCardConverter
         if (request.LlmConfig is not null) existing.LlmConfig = SerializeJson(request.LlmConfig) ?? "{}";
         if (request.TtsCatalogId.HasValue) existing.TtsCatalogId = request.TtsCatalogId.Value;
         if (request.TtsConfig is not null) existing.TtsConfig = SerializeJson(request.TtsConfig);
-        if (request.Behavior is not null) existing.Behavior = SerializeJson(request.Behavior) ?? "{}";
+        if (request.Appearance is not null) existing.Appearance = SerializeJson(request.Appearance) ?? "{}";
+        if (request.ResponseBehavior is not null) existing.ResponseBehavior = SerializeJson(request.ResponseBehavior) ?? "{}";
         if (request.MemorySettings is not null) existing.MemorySettings = SerializeJson(request.MemorySettings) ?? "{}";
-        if (request.DonkeyEngine is not null) existing.DonkeyEngine = SerializeJson(request.DonkeyEngine) ?? "{}";
+        if (request.AutoPilot is not null) existing.AutoPilot = SerializeJson(request.AutoPilot) ?? "{}";
         if (request.IsActive.HasValue) existing.IsActive = request.IsActive.Value;
+        if (request.Visibility is not null) existing.Visibility = request.Visibility;
     }
 
     public static LlmModelResponse ToLlmResponse(LlmCatalogEntry e)

@@ -14,6 +14,12 @@ public interface ITtsSynthesisService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Lists available voices for a provider. Returns <see cref="GetVoicesResult.NotSupported"/>
+    /// if the provider does not expose voice listing.
+    /// </summary>
+    Task<GetVoicesResult> GetVoicesAsync(string? providerId, CancellationToken ct = default);
+
+    /// <summary>
     /// Returns the catalog of registered TTS providers, sorted by id.
     /// </summary>
     IReadOnlyCollection<SpeechProviderDescriptor> GetProviderCatalog();

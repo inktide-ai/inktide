@@ -1,7 +1,7 @@
 import styles from '../ProfilePage.module.css'
 import CustomSelect from '../CustomSelect'
 import SliderWithTicks from '../SliderWithTicks'
-import type { AiCharacter } from '../types'
+import type { AiCharacter } from '../../../domain/character'
 
 const LANGUAGE_OPTIONS = [
   { value: 'en', label: 'English' },
@@ -65,12 +65,12 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => (
                 <label className={styles.label}>Response delay</label>
                 <div className={styles.labelHint}>Time to wait before sending the reply to chat</div>
               </div>
-              <span className={styles.sliderValue}>{character.responseDelayMs}ms</span>
+              <span className={styles.sliderValue}>{character.behavior.responseDelayMs}ms</span>
             </div>
             <SliderWithTicks
               min={0} max={5000} step={100}
-              value={character.responseDelayMs}
-              onChange={(v) => onUpdate({ responseDelayMs: v })}
+              value={character.behavior.responseDelayMs}
+              onChange={(v) => onUpdate({ behavior: { ...character.behavior, responseDelayMs: v } })}
               formatValue={(v) => (v >= 1000 ? `${v / 1000}k` : String(v))}
               tickCount={6}
             />
@@ -81,12 +81,12 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => (
                 <label className={styles.label}>Max response length</label>
                 <div className={styles.labelHint}>Maximum number of characters per reply</div>
               </div>
-              <span className={styles.sliderValue}>{character.maxResponseLength} chars</span>
+              <span className={styles.sliderValue}>{character.behavior.maxResponseLength} chars</span>
             </div>
             <SliderWithTicks
               min={50} max={2000} step={50}
-              value={character.maxResponseLength}
-              onChange={(v) => onUpdate({ maxResponseLength: v })}
+              value={character.behavior.maxResponseLength}
+              onChange={(v) => onUpdate({ behavior: { ...character.behavior, maxResponseLength: v } })}
               formatValue={(v) => String(v)}
               tickCount={5}
             />
@@ -95,9 +95,9 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => (
             <label className={styles.label}>Language</label>
             <div className={styles.labelHint}>Primary language for AI responses</div>
             <CustomSelect
-              value={character.language}
+              value={character.behavior.language}
               options={LANGUAGE_OPTIONS}
-              onChange={(v) => onUpdate({ language: v })}
+              onChange={(v) => onUpdate({ behavior: { ...character.behavior, language: v } })}
             />
           </div>
           <div className={styles.toggleRow}>
@@ -106,7 +106,7 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => (
               <div className={styles.toggleHint}>Filter inappropriate content automatically</div>
             </div>
             <label className={styles.toggleControl}>
-              <input type="checkbox" checked={character.autoModerate} onChange={(e) => onUpdate({ autoModerate: e.target.checked })} />
+              <input type="checkbox" checked={character.behavior.autoModerate} onChange={(e) => onUpdate({ behavior: { ...character.behavior, autoModerate: e.target.checked } })} />
               <span className={styles.control} />
             </label>
           </div>
@@ -116,7 +116,7 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => (
               <div className={styles.toggleHint}>Show typing indicator before responding</div>
             </div>
             <label className={styles.toggleControl}>
-              <input type="checkbox" checked={character.typingSimulation} onChange={(e) => onUpdate({ typingSimulation: e.target.checked })} />
+              <input type="checkbox" checked={character.behavior.typingSimulation} onChange={(e) => onUpdate({ behavior: { ...character.behavior, typingSimulation: e.target.checked } })} />
               <span className={styles.control} />
             </label>
           </div>
@@ -124,9 +124,9 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => (
       </div>
     </div>
 
-    {/* ── Donkey Engine (Autonomous) ── */}
+    {/* ── Auto-Pilot (Autonomous) ── */}
     <div className={styles.section}>
-      <div className={styles.sectionTitle}>Donkey Engine</div>
+      <div className={styles.sectionTitle}>Auto-Pilot</div>
       <div className={styles.infoCard}>
         <div className={styles.infoCardContent}>
           <div className={styles.toggleRow}>
@@ -135,26 +135,26 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => (
               <div className={styles.toggleHint}>AI speaks on its own when chat is quiet</div>
             </div>
             <label className={styles.toggleControl}>
-              <input type="checkbox" checked={character.donkeyEnabled} onChange={(e) => onUpdate({ donkeyEnabled: e.target.checked })} />
+              <input type="checkbox" checked={character.autoPilot.enabled} onChange={(e) => onUpdate({ autoPilot: { ...character.autoPilot, enabled: e.target.checked } })} />
               <span className={styles.control} />
             </label>
           </div>
-          <div className={!character.donkeyEnabled ? styles.inactiveBlock : undefined}>
+          <div className={!character.autoPilot.enabled ? styles.inactiveBlock : undefined}>
             <div className={styles.sliderGroup}>
               <div className={styles.sliderHeader}>
                 <div className={styles.sliderLabelBlock}>
                   <label className={styles.label}>Idle timeout</label>
                   <div className={styles.labelHint}>Seconds of silence before AI can speak on its own</div>
                 </div>
-                <span className={styles.sliderValue}>{character.idleTimeoutSeconds}s</span>
+                <span className={styles.sliderValue}>{character.autoPilot.idleTimeoutSeconds}s</span>
               </div>
               <SliderWithTicks
                 min={30} max={600} step={10}
-                value={character.idleTimeoutSeconds}
-                onChange={(v) => onUpdate({ idleTimeoutSeconds: v })}
+                value={character.autoPilot.idleTimeoutSeconds}
+                onChange={(v) => onUpdate({ autoPilot: { ...character.autoPilot, idleTimeoutSeconds: v } })}
                 formatValue={(v) => `${v}s`}
                 tickCount={6}
-                disabled={!character.donkeyEnabled}
+                disabled={!character.autoPilot.enabled}
               />
             </div>
             <div className={styles.sliderGroup}>
@@ -163,25 +163,25 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => (
                   <label className={styles.label}>Min interval</label>
                   <div className={styles.labelHint}>Minimum seconds between autonomous messages</div>
                 </div>
-                <span className={styles.sliderValue}>{character.minIntervalSeconds}s</span>
+                <span className={styles.sliderValue}>{character.autoPilot.minIntervalSeconds}s</span>
               </div>
               <SliderWithTicks
                 min={10} max={300} step={10}
-                value={character.minIntervalSeconds}
-                onChange={(v) => onUpdate({ minIntervalSeconds: v })}
+                value={character.autoPilot.minIntervalSeconds}
+                onChange={(v) => onUpdate({ autoPilot: { ...character.autoPilot, minIntervalSeconds: v } })}
                 formatValue={(v) => `${v}s`}
                 tickCount={6}
-                disabled={!character.donkeyEnabled}
+                disabled={!character.autoPilot.enabled}
               />
             </div>
             <div className={styles.formGroup}>
               <label className={styles.label}>Mood</label>
               <div className={styles.labelHint}>Default emotional tone for autonomous messages</div>
               <CustomSelect
-                value={character.mood}
+                value={character.autoPilot.mood}
                 options={MOOD_OPTIONS}
-                onChange={(v) => onUpdate({ mood: v })}
-                disabled={!character.donkeyEnabled}
+                onChange={(v) => onUpdate({ autoPilot: { ...character.autoPilot, mood: v } })}
+                disabled={!character.autoPilot.enabled}
               />
             </div>
           </div>

@@ -10,6 +10,7 @@ public sealed class SpeechProviderCapabilities
     private bool _supportsVoiceListing;
     private bool _supportsStreaming;
     private bool _requiresApiKey;
+    private bool _supportsModelListing;
 
     #endregion
 
@@ -37,6 +38,16 @@ public sealed class SpeechProviderCapabilities
     {
         get => _supportsStreaming;
         set => _supportsStreaming = value;
+    }
+
+    /// <summary>
+    /// True if <c>GetModelsAsync</c> fetches live data from the provider API.
+    /// False means a static built-in list is returned.
+    /// </summary>
+    public bool SupportsModelListing
+    {
+        get => _supportsModelListing;
+        set => _supportsModelListing = value;
     }
 
     #endregion

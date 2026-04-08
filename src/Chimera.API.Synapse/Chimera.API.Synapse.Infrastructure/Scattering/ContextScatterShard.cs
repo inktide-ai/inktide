@@ -63,7 +63,15 @@ public sealed class ContextScatterShard : ISynapseScatterShard
             cardCtx.TtsProviderId,
             cardCtx.TtsVoiceId,
             cardCtx.TtsModelId,
-            cardCtx.TtsSpeed);
+            cardCtx.TtsSpeed,
+            cardCtx.ChunkingMode,
+            cardCtx.Language,
+            LlmTemperature:      cardCtx.LlmTemperature,
+            LlmMaxTokens:        cardCtx.LlmMaxTokens,
+            LlmTopP:             cardCtx.LlmTopP,
+            LlmFrequencyPenalty: cardCtx.LlmFrequencyPenalty,
+            LlmPresencePenalty:  cardCtx.LlmPresencePenalty,
+            ResponseDelayMs:     cardCtx.ResponseDelayMs);
 
         context.Set(payload);
 

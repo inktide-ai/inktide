@@ -30,23 +30,27 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("Appearance")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("appearance");
+
+                    b.Property<string>("AutoPilot")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("auto_pilot");
+
                     b.Property<string>("AvatarUrl")
                         .HasColumnType("text")
                         .HasColumnName("avatar_url");
-
-                    b.Property<string>("Behavior")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("behavior");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("DonkeyEngine")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("donkey_engine");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -80,6 +84,11 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                         .HasDefaultValue("")
                         .HasColumnName("personality");
 
+                    b.Property<string>("ResponseBehavior")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("response_behavior");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("text")
@@ -106,7 +115,18 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("private")
+                        .HasColumnName("visibility");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("DeletedAt")
+                        .HasDatabaseName("idx_ai_cards_deleted_at")
+                        .HasFilter("deleted_at IS NULL");
 
                     b.HasIndex("LlmCatalogId");
 
@@ -117,7 +137,7 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "IsActive")
                         .HasDatabaseName("idx_ai_cards_user_active")
-                        .HasFilter("is_active = true");
+                        .HasFilter("is_active = true AND deleted_at IS NULL");
 
                     b.HasIndex("UserId", "Slug")
                         .IsUnique();
@@ -246,6 +266,64 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                         .HasDatabaseName("idx_ai_card_models_user_card");
 
                     b.ToTable("ai_card_models", "soul");
+                });
+
+            modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCardScene", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AiCardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ai_card_id");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("original_file_name");
+
+                    b.Property<string>("PublicUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("public_url");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size_bytes");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("storage_key");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AiCardId")
+                        .HasDatabaseName("idx_ai_card_scenes_card");
+
+                    b.HasIndex("StorageKey")
+                        .IsUnique()
+                        .HasDatabaseName("idx_ai_card_scenes_storage_key");
+
+                    b.HasIndex("UserId", "AiCardId")
+                        .HasDatabaseName("idx_ai_card_scenes_user_card");
+
+                    b.ToTable("ai_card_scenes", "soul");
                 });
 
             modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCardTool", b =>
@@ -629,6 +707,17 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCardModel", b =>
+                {
+                    b.HasOne("Chimera.API.Soul.Domain.Entities.AiCard", "AiCard")
+                        .WithMany()
+                        .HasForeignKey("AiCardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AiCard");
+                });
+
+            modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCardScene", b =>
                 {
                     b.HasOne("Chimera.API.Soul.Domain.Entities.AiCard", "AiCard")
                         .WithMany()

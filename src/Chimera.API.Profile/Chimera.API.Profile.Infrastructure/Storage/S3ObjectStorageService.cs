@@ -121,6 +121,17 @@ public sealed class S3ObjectStorageService : IObjectStorageService
             var serviceUri = new Uri(_settings.ServiceUrl);
             if (serviceUri.Scheme == Uri.UriSchemeHttp)
                 url = url.Replace("https://", "http://", StringComparison.OrdinalIgnoreCase);
+
+            // When ServiceUrl is an internal address (e.g. http://minio:9000 inside Docker)
+            // but the browser needs a public address (e.g. http://localhost:9000),
+            // rewrite the origin in the presigned URL.
+            if (!string.IsNullOrWhiteSpace(_settings.PublicBaseUrl))
+            {
+                var internalOrigin = serviceUri.GetLeftPart(UriPartial.Authority);
+                var publicOrigin = new Uri(_settings.PublicBaseUrl).GetLeftPart(UriPartial.Authority);
+                if (!string.Equals(internalOrigin, publicOrigin, StringComparison.OrdinalIgnoreCase))
+                    url = url.Replace(internalOrigin, publicOrigin, StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         return url;

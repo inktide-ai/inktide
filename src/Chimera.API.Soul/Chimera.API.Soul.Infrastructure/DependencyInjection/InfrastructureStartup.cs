@@ -22,6 +22,8 @@ public sealed class InfrastructureStartup : IStartup
             options.UseNpgsql(connectionString);
         });
 
+        services.AddHostedService<DatabaseMigrationService>();
+
         services
             .AddHealthChecks()
             .AddNpgSql(connectionString, name: "soul-postgres", failureStatus: HealthStatus.Degraded);

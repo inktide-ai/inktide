@@ -22,6 +22,7 @@ public sealed class ApplicationServiceRegistrator : IServiceRegistrator
         registrator.Register<ICatalogService, CatalogService>(Reuse.Scoped);
         registrator.Register<IAiCardChannelLinkService, AiCardChannelLinkService>(Reuse.Scoped);
         registrator.Register<IAiCardModelUploadService, AiCardModelUploadService>(Reuse.Scoped);
+        registrator.Register<IAiCardSceneUploadService, AiCardSceneUploadService>(Reuse.Scoped);
     }
 
     #endregion

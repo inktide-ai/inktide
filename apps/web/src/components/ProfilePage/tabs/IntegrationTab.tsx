@@ -8,7 +8,7 @@ import {
   type IntegrationPlatform,
 } from '../../../api/soul'
 import { ApiError } from '../../../api/client'
-import type { AiCharacter } from '../types'
+import type { AiCharacter } from '../../../domain/character'
 import pageStyles from '../ProfilePage.module.css'
 import styles from './IntegrationTab.module.css'
 

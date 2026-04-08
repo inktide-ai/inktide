@@ -1,19 +1,50 @@
 
 #
-# Запуск core (БД + auth + redis): docker compose --profile core up -d
-# Запуск storage:                  docker compose --profile storage up -d
-# Запуск всего:                    docker compose --profile core --profile storage up -d
+# Запуск инфры:                    docker compose --profile core up -d
+# Запуск AI воркеров:              docker compose --profile workers up -d
+# Запуск всего:                    docker compose --profile core --profile workers up -d
 # Остановка:                       docker compose down
 # Логи сервиса:                    docker compose logs -f keycloak
-# Пересобрать один:                docker compose up -d --no-deps postgres
+# Пересобрать один:                docker compose up -d --no-deps --build dotnet
 
 # Сервисы и порты:
 #   postgres    5432   — основная БД приложения
 #   redis       6379   — кэш / pub-sub
 #   keycloak    8080   — SSO/OAuth2 (admin/admin)
 #   minio       9000   — S3-хранилище (консоль: 9001)
+#   dotnet      5001   — .NET API
+#   llm-worker  —      — Redis stream consumer (Ollama: нативно на хосте :11434)
+#   scribe      8001   — FastAPI факт-экстракция
+#   kokoro      8880   — Kokoro TTS
 
 services:
+
+  dotnet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/amd64   # Rhubarb ships x86-64 only; Rosetta handles emulation on Apple Silicon
+    profiles: [core]
+    env_file:
+      - .env
+    environment:
+      TtsProviders__Kokoro__Endpoint: http://kokoro:8880/v1
+      KeycloakSettings__MetadataAddress: http://keycloak:8080/realms/chimera/.well-known/openid-configuration
+      KeycloakAdminSettings__BaseUrl: http://keycloak:8080
+      Kestrel__Endpoints__Http__Url: http://+:5001
+      S3Settings__ServiceUrl: http://minio:9000
+      S3Settings__PublicBaseUrl: http://localhost:9000
+      S3Settings__AccessKey: ${MINIO_ROOT_USER}
+      S3Settings__SecretKey: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "5001:5001"
+    volumes:
+      - dotnet_dataprotection:/root/.aspnet/DataProtection-Keys
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   # База данных приложения
   postgres:
@@ -65,7 +96,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./themes:/opt/keycloak/providers
+      - ./keycloak-extensions:/opt/keycloak/providers
     depends_on:
       postgres-keycloak:
         condition: service_healthy
@@ -91,8 +122,55 @@ services:
     volumes:
       - minio_data:/data
 
+  llm-worker:
+    build:
+      context: fast-api/ai-worker/llm-worker
+      dockerfile: Dockerfile
+    profiles: [workers]
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    depends_on:
+      redis:
+        condition: service_started
+        required: false
+    restart: unless-stopped
+    develop:
+      watch:
+        - path: fast-api/ai-worker/llm-worker/pyproject.toml
+          action: rebuild
+        - path: fast-api/ai-worker/llm-worker/app
+          target: /app/app
+          action: sync+restart
+
+  # scribe:
+  #   build:
+  #     context: fast-api/ai-worker/embeddings/scribe-model
+  #     dockerfile: Dockerfile
+  #   profiles: [workers]
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     OLLAMA_BASE_URL: http://ollama:11434
+  #   ports:
+  #     - "8001:8000"
+  #   depends_on:
+  #     ollama:
+  #       condition: service_healthy
+  #   restart: unless-stopped
+
+  kokoro:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:v0.2.2
+    profiles: [workers]
+    ports:
+      - "8880:8880"
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   keycloak_postgres_data:
   redis_data:
   minio_data:
+  dotnet_dataprotection:

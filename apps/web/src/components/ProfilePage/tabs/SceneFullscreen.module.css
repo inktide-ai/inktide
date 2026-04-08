@@ -1,0 +1,39 @@
+.sceneToolbar {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+}
+
+.sceneToolbarBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(18, 18, 22, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.sceneToolbarBtn:hover {
+  background: rgba(255, 129, 129, 0.18);
+  transform: scale(1.06);
+}
+
+.sceneToolbarBtn:active {
+  transform: scale(0.96);
+}
+
+.sceneToolbarIcon {
+  width: 45px;
+  height: 45px;
+}

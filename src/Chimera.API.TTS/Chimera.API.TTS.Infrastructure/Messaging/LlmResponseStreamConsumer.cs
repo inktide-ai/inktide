@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Chimera.API.TTS.Application.Configuration;
 using Chimera.API.TTS.Application.Synthesis;
+using Chimera.API.TTS.Infrastructure.LipSync;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -49,6 +50,7 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
 
     private readonly IConnectionMultiplexer _redis;
     private readonly ITtsSynthesisService _tts;
+    private readonly IRhubarbService _rhubarb;
     private readonly LlmResponseStreamSettings _inSettings;
     private readonly TtsOutputStreamSettings _outSettings;
     private readonly ILogger<LlmResponseStreamConsumer> _logger;
@@ -61,12 +63,14 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
     public LlmResponseStreamConsumer(
         IConnectionMultiplexer redis,
         ITtsSynthesisService tts,
+        IRhubarbService rhubarb,
         IOptions<LlmResponseStreamSettings> inSettings,
         IOptions<TtsOutputStreamSettings> outSettings,
         ILogger<LlmResponseStreamConsumer> logger)
     {
-        _redis       = redis ?? throw new ArgumentNullException(nameof(redis));
-        _tts         = tts  ?? throw new ArgumentNullException(nameof(tts));
+        _redis       = redis    ?? throw new ArgumentNullException(nameof(redis));
+        _tts         = tts     ?? throw new ArgumentNullException(nameof(tts));
+        _rhubarb     = rhubarb ?? throw new ArgumentNullException(nameof(rhubarb));
         _inSettings  = inSettings?.Value  ?? throw new ArgumentNullException(nameof(inSettings));
         _outSettings = outSettings?.Value ?? throw new ArgumentNullException(nameof(outSettings));
         _logger      = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -313,7 +317,12 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
     {
         using var ms = new MemoryStream();
         await ok.Audio.CopyToAsync(ms, ct);
-        var audioBase64 = Convert.ToBase64String(ms.ToArray());
+        var wavBytes    = ms.ToArray();
+        var audioBase64 = Convert.ToBase64String(wavBytes);
+
+        // Run Rhubarb in parallel with Redis publish prep. Null when unavailable — the
+        // frontend falls back to real-time formant analysis transparently.
+        var visemeTimeline = await _rhubarb.AnalyzeAsync(wavBytes, ct);
 
         // Downstream shape — Realtime/Publisher Worker deserializes this from synapse.tts.ready.
         // sequenceNumber and isLast allow the consumer to reorder chunks and detect completion.
@@ -326,7 +335,8 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
             isLast         = response.IsLast,
             audioBase64,
             contentType    = ok.ContentType,
-            llmModel       = response.Model
+            llmModel       = response.Model,
+            visemeTimeline,   // VisemeCueDto[]? — null → frontend uses formant fallback
         });
 
         await db.StreamAddAsync(

@@ -5,7 +5,7 @@ import {
   apiResponseToCharacter,
   characterToUpdateRequest,
   type AiCharacter,
-} from './types'
+} from '../../domain/character'
 import styles from './CharacterEditPage.module.css'
 
 function PencilIcon() {
@@ -145,8 +145,8 @@ export default function CharacterEditPage() {
               disabled={avatarBusy}
               aria-label="Change avatar"
             >
-              {character.avatarUrl ? (
-                <img src={character.avatarUrl} alt="" className={styles.avatarImg} />
+              {character.appearance.avatarUrl ? (
+                <img src={character.appearance.avatarUrl} alt="" className={styles.avatarImg} />
               ) : (
                 <div className={styles.avatarFallback}>{initial}</div>
               )}
@@ -196,8 +196,8 @@ export default function CharacterEditPage() {
             <input
               id="ec-lang"
               className={styles.input}
-              value={character.language}
-              onChange={(e) => patch({ language: e.target.value })}
+              value={character.behavior.language}
+              onChange={(e) => patch({ behavior: { ...character.behavior, language: e.target.value } })}
               placeholder="en"
             />
 
@@ -207,8 +207,8 @@ export default function CharacterEditPage() {
             <input
               id="ec-phrases"
               className={styles.input}
-              value={character.keyPhrases}
-              onChange={(e) => patch({ keyPhrases: e.target.value })}
+              value={character.appearance.keyPhrases}
+              onChange={(e) => patch({ appearance: { ...character.appearance, keyPhrases: e.target.value } })}
               placeholder="Comma-separated"
             />
 

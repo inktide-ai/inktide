@@ -14,9 +14,10 @@ public sealed class CreateAiCardRequest
     private object? _llmConfig;
     private Guid? _ttsCatalogId;
     private object? _ttsConfig;
-    private object? _behavior;
+    private object? _appearance;
+    private object? _responseBehavior;
     private object? _memorySettings;
-    private object? _donkeyEngine;
+    private object? _autoPilot;
 
     #endregion
 
@@ -78,11 +79,18 @@ public sealed class CreateAiCardRequest
         set => _ttsConfig = value;
     }
 
-    [JsonProperty("behavior")]
-    public object? Behavior
+    [JsonProperty("appearance")]
+    public object? Appearance
     {
-        get => _behavior;
-        set => _behavior = value;
+        get => _appearance;
+        set => _appearance = value;
+    }
+
+    [JsonProperty("response_behavior")]
+    public object? ResponseBehavior
+    {
+        get => _responseBehavior;
+        set => _responseBehavior = value;
     }
 
     [JsonProperty("memory_settings")]
@@ -92,11 +100,11 @@ public sealed class CreateAiCardRequest
         set => _memorySettings = value;
     }
 
-    [JsonProperty("donkey_engine")]
-    public object? DonkeyEngine
+    [JsonProperty("auto_pilot")]
+    public object? AutoPilot
     {
-        get => _donkeyEngine;
-        set => _donkeyEngine = value;
+        get => _autoPilot;
+        set => _autoPilot = value;
     }
 
     #endregion
@@ -115,10 +123,12 @@ public sealed class UpdateAiCardRequest
     private object? _llmConfig;
     private Guid? _ttsCatalogId;
     private object? _ttsConfig;
-    private object? _behavior;
+    private object? _appearance;
+    private object? _responseBehavior;
     private object? _memorySettings;
-    private object? _donkeyEngine;
+    private object? _autoPilot;
     private bool? _isActive;
+    private string? _visibility;
 
     #endregion
 
@@ -187,11 +197,18 @@ public sealed class UpdateAiCardRequest
         set => _ttsConfig = value;
     }
 
-    [JsonProperty("behavior")]
-    public object? Behavior
+    [JsonProperty("appearance")]
+    public object? Appearance
     {
-        get => _behavior;
-        set => _behavior = value;
+        get => _appearance;
+        set => _appearance = value;
+    }
+
+    [JsonProperty("response_behavior")]
+    public object? ResponseBehavior
+    {
+        get => _responseBehavior;
+        set => _responseBehavior = value;
     }
 
     [JsonProperty("memory_settings")]
@@ -201,11 +218,11 @@ public sealed class UpdateAiCardRequest
         set => _memorySettings = value;
     }
 
-    [JsonProperty("donkey_engine")]
-    public object? DonkeyEngine
+    [JsonProperty("auto_pilot")]
+    public object? AutoPilot
     {
-        get => _donkeyEngine;
-        set => _donkeyEngine = value;
+        get => _autoPilot;
+        set => _autoPilot = value;
     }
 
     [JsonProperty("is_active")]
@@ -213,6 +230,13 @@ public sealed class UpdateAiCardRequest
     {
         get => _isActive;
         set => _isActive = value;
+    }
+
+    [JsonProperty("visibility")]
+    public string? Visibility
+    {
+        get => _visibility;
+        set => _visibility = value;
     }
 
     #endregion

@@ -18,9 +18,11 @@ public sealed class AiCardResponse
     private Guid? _ttsCatalogId;
     private object? _ttsConfig;
     private TtsVoiceResponse? _ttsVoice;
-    private object? _behavior;
+    private object? _appearance;
+    private object? _responseBehavior;
     private object? _memorySettings;
-    private object? _donkeyEngine;
+    private object? _autoPilot;
+    private string _visibility = "private";
     private IReadOnlyList<ChannelResponse>? _channels;
     private IReadOnlyList<ToolResponse>? _tools;
     private bool _isActive;
@@ -115,11 +117,18 @@ public sealed class AiCardResponse
         set => _ttsVoice = value;
     }
 
-    [JsonProperty("behavior")]
-    public object? Behavior
+    [JsonProperty("appearance")]
+    public object? Appearance
     {
-        get => _behavior;
-        set => _behavior = value;
+        get => _appearance;
+        set => _appearance = value;
+    }
+
+    [JsonProperty("response_behavior")]
+    public object? ResponseBehavior
+    {
+        get => _responseBehavior;
+        set => _responseBehavior = value;
     }
 
     [JsonProperty("memory_settings")]
@@ -129,11 +138,18 @@ public sealed class AiCardResponse
         set => _memorySettings = value;
     }
 
-    [JsonProperty("donkey_engine")]
-    public object? DonkeyEngine
+    [JsonProperty("auto_pilot")]
+    public object? AutoPilot
     {
-        get => _donkeyEngine;
-        set => _donkeyEngine = value;
+        get => _autoPilot;
+        set => _autoPilot = value;
+    }
+
+    [JsonProperty("visibility")]
+    public string Visibility
+    {
+        get => _visibility;
+        set => _visibility = value;
     }
 
     [JsonProperty("channels")]

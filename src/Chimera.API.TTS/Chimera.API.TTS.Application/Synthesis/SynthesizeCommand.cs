@@ -11,4 +11,5 @@ public sealed record SynthesizeCommand(
     float? Speed,
     bool Stream,
     string? AudioFormat = null,
-    string? UserId = null);
+    string? UserId = null,
+    IReadOnlyDictionary<string, object>? ProviderParams = null);

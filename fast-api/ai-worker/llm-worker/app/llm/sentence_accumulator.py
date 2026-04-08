@@ -1,72 +1,85 @@
 """
-Buffers raw LLM tokens into TTS-ready sentence chunks.
+Turns a raw LLM token stream into TTS-ready sentence chunks.
 
-Strategy
---------
-- Flush immediately at a hard char limit (avoid overlong TTS inputs).
-- Flush at strong sentence boundaries (". ", "! ", "? ") regardless of length.
-- Flush at weak boundaries (", ", "; ") only once the buffer is large enough
-  to avoid producing tiny audio clips.
-- Keep the FIRST chunk short: the first sentence that ends is emitted as-is
-  even if it's only a few words — this minimises time-to-first-audio.
+NARRATION mode — delegates to stream2sentence for lookahead-aware splitting:
+  context_size=120 gives enough runway to resolve abbreviations before committing
+  to a sentence boundary.  quick_yield_first_fragment keeps time-to-first-audio low.
+
+CHAT mode — buffers the entire LLM response and emits it as a single chunk.
+  Preserves cause-and-effect coherence for short conversational replies
+  (Twitch/Discord) where latency matters less than semantic integrity.
 """
 
 from __future__ import annotations
 
+import asyncio
+import logging
+import queue as sq
+import threading
+from enum import Enum
+from typing import AsyncIterator
 
-class SentenceAccumulator:
-    # Emit unconditionally at this length (catches run-on sentences from LLMs)
-    HARD_FLUSH_CHARS: int = 180
+from stream2sentence import generate_sentences
 
-    # Always flush after these endings (strong sentence boundary)
-    STRONG_ENDS: frozenset[str] = frozenset({". ", "! ", "? ", ".\n", "!\n", "?\n"})
+logger = logging.getLogger(__name__)
 
-    # Flush after these only when buffer is long enough (avoids 2-word clips)
-    WEAK_ENDS: frozenset[str] = frozenset({", ", "; ", ":\n", "\n\n"})
-    WEAK_THRESHOLD: int = 80
 
-    def __init__(self) -> None:
-        self._buf: str = ""
-        self._first_chunk_emitted: bool = False
+class ChunkingMode(str, Enum):
+    CHAT = "chat"
+    NARRATION = "narration"
 
-    def feed(self, token: str) -> str | None:
-        """
-        Append *token* to the internal buffer.
-        Returns a non-empty chunk string if a flush boundary was reached,
-        otherwise returns None.
-        """
-        self._buf += token
 
-        # Hard cap — flush regardless of punctuation
-        if len(self._buf) >= self.HARD_FLUSH_CHARS:
-            return self._flush()
+async def iter_sentences(
+    token_stream: AsyncIterator[str],
+    mode: ChunkingMode = ChunkingMode.NARRATION,
+) -> AsyncIterator[str]:
+    """
+    Async generator: consumes *token_stream* and yields TTS-ready sentence strings.
+    """
+    if mode == ChunkingMode.CHAT:
+        buf: list[str] = []
+        async for token in token_stream:
+            buf.append(token)
+        full = "".join(buf).strip()
+        if full:
+            yield full
+        return
 
-        # Strong sentence boundary — always flush
-        for end in self.STRONG_ENDS:
-            if self._buf.endswith(end):
-                return self._flush()
+    # NARRATION: bridge async token stream → sync generate_sentences (stream2sentence
+    # returns a sync generator, not async) → back to async via queue.
+    loop = asyncio.get_running_loop()
+    # Unbounded queue: tok_q.put() must never block the event loop thread.
+    # The split thread drains it continuously so it won't grow unbounded for
+    # any realistic LLM response (max_predict is typically ≤ 2048 tokens).
+    tok_q: sq.Queue[str | None] = sq.Queue()
+    sent_q: asyncio.Queue[str | None] = asyncio.Queue()
 
-        # Weak boundary — only flush once buffer is substantial
-        # (or once the first chunk has already been emitted, so subsequent
-        # pauses feel natural to the listener)
-        threshold = self.WEAK_THRESHOLD if not self._first_chunk_emitted else 40
-        if len(self._buf) >= threshold:
-            for end in self.WEAK_ENDS:
-                if self._buf.endswith(end):
-                    return self._flush()
+    async def _feed_tokens() -> None:
+        async for tok in token_stream:
+            tok_q.put_nowait(tok)
+        tok_q.put_nowait(None)
 
-        return None
+    def _split_thread() -> None:
+        def _gen():
+            while (tok := tok_q.get()) is not None:
+                yield tok
 
-    def flush(self) -> str | None:
-        """Force-flush whatever remains in the buffer (call at LLM stream end)."""
-        return self._flush()
+        try:
+            for s in generate_sentences(_gen(), context_size=120, minimum_sentence_length=10):
+                asyncio.run_coroutine_threadsafe(sent_q.put(s.strip()), loop).result()
+        except Exception:
+            logger.error("sentence splitter thread crashed", exc_info=True)
+        finally:
+            # Always send sentinel so the consumer loop is never stuck waiting.
+            asyncio.run_coroutine_threadsafe(sent_q.put(None), loop).result()
 
-    # ------------------------------------------------------------------
+    feeder = asyncio.create_task(_feed_tokens())
+    thread = threading.Thread(target=_split_thread, daemon=True)
+    thread.start()
 
-    def _flush(self) -> str | None:
-        chunk = self._buf.strip()
-        self._buf = ""
-        if not chunk:
-            return None
-        self._first_chunk_emitted = True
-        return chunk
+    while (sentence := await sent_q.get()) is not None:
+        if sentence:
+            yield sentence
+
+    await feeder
+    await asyncio.get_event_loop().run_in_executor(None, thread.join)

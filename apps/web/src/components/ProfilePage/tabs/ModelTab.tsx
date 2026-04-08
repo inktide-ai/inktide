@@ -3,7 +3,7 @@ import { uploadCardModelFile } from '../../../api/soul'
 import AvatarRenderer from '../../AvatarRenderer/AvatarRenderer'
 import { useCardModel } from '../../AvatarRenderer/hooks/useCardModel'
 import styles from '../ProfilePage.module.css'
-import type { AiCharacter, ModelType } from '../types'
+import type { AiCharacter, ModelType } from '../../../domain/character'
 
 const MODEL_TYPES: { value: ModelType; label: string; ext: string; hint: string }[] = [
   { value: 'live2d', label: 'Live2D', ext: '.model3.json', hint: 'Cubism 4 model folder (zip)' },
@@ -29,15 +29,14 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploadBusy, setUploadBusy] = useState(false)
   const [uploadHint, setUploadHint] = useState<string | null>(null)
-  // Refresh key — bump after upload so useCardModel re-fetches
   const [refreshKey, setRefreshKey] = useState(0)
   const { model, loading: modelLoading } = useCardModel(cardId, refreshKey)
-  const meta = MODEL_TYPES.find((m) => m.value === character.modelType)!
+  const meta = MODEL_TYPES.find((m) => m.value === character.appearance.modelType)!
 
   return (
     <div className={styles.tabRoot}>
       {/* Preview panel */}
-      {character.modelType !== 'none' && (
+      {character.appearance.modelType !== 'none' && (
         <div className={styles.section}>
           <div className={styles.sectionTitle}>Preview</div>
           <div className={styles.infoCard}>
@@ -48,7 +47,7 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
                 </div>
               ) : (
                 <AvatarRenderer
-                  modelType={character.modelType}
+                  modelType={character.appearance.modelType}
                   modelUrl={model?.public_url ?? null}
                   background="#0d0d0f"
                 />
@@ -70,8 +69,8 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
                   <button
                     key={m.value}
                     type="button"
-                    className={`${styles.modelTypeCard} ${character.modelType === m.value ? styles.modelTypeCardSelected : ''}`}
-                    onClick={() => onUpdate({ modelType: m.value, modelFileName: undefined })}
+                    className={`${styles.modelTypeCard} ${character.appearance.modelType === m.value ? styles.modelTypeCardSelected : ''}`}
+                    onClick={() => onUpdate({ appearance: { ...character.appearance, modelType: m.value, modelFileName: undefined } })}
                   >
                     <span className={styles.modelTypeLabel}>{m.label}</span>
                     <span className={styles.modelTypeHint}>{m.hint}</span>
@@ -80,20 +79,20 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
               </div>
             </div>
 
-            <div className={`${styles.formGroup}${character.modelType === 'none' ? ` ${styles.inactiveBlock}` : ''}`}>
+            <div className={`${styles.formGroup}${character.appearance.modelType === 'none' ? ` ${styles.inactiveBlock}` : ''}`}>
               <label className={styles.label}>Upload model</label>
               <div className={styles.labelHint}>Upload your 3D or Live2D model file</div>
               <div className={styles.modelUploadRow}>
                 <input
                   ref={fileRef}
                   type="file"
-                  accept={ACCEPT_MAP[character.modelType]}
+                  accept={ACCEPT_MAP[character.appearance.modelType]}
                   style={{ display: 'none' }}
                   onChange={async (e) => {
                     const file = e.target.files?.[0]
                     e.target.value = ''
                     if (!file) return
-                    onUpdate({ modelFileName: file.name })
+                    onUpdate({ appearance: { ...character.appearance, modelFileName: file.name } })
                     setUploadHint(null)
                     if (!cardId) {
                       setUploadHint('Save the character first — then uploads go to your project storage.')
@@ -115,22 +114,22 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
                   type="button"
                   className={styles.btnGhost}
                   onClick={() => fileRef.current?.click()}
-                  disabled={character.modelType === 'none' || uploadBusy}
+                  disabled={character.appearance.modelType === 'none' || uploadBusy}
                 >
                   {uploadBusy ? 'Uploading…' : 'Choose file'}
                 </button>
                 <span className={styles.modelFileName}>
-                  {character.modelFileName ?? (
+                  {character.appearance.modelFileName ?? (
                     <span style={{ color: 'var(--text-muted)' }}>
-                      No file — accepts {character.modelType !== 'none' ? meta.ext : '.zip, .vrm, .glb'}
+                      No file — accepts {character.appearance.modelType !== 'none' ? meta.ext : '.zip, .vrm, .glb'}
                     </span>
                   )}
                 </span>
-                {character.modelFileName && (
+                {character.appearance.modelFileName && (
                   <button
                     type="button"
                     className={styles.modelClearBtn}
-                    onClick={() => onUpdate({ modelFileName: undefined })}
+                    onClick={() => onUpdate({ appearance: { ...character.appearance, modelFileName: undefined } })}
                   >
                     Remove
                   </button>

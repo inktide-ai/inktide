@@ -15,4 +15,11 @@ public sealed class SpeechOptions
     /// Providers map this to their own format parameter. <c>null</c> → provider default.
     /// </summary>
     public string? AudioFormat { get; set; }
+
+    /// <summary>
+    /// Provider-specific parameters that don't fit the common fields.
+    /// Each provider reads the keys it understands and ignores the rest.
+    /// Example keys: <c>stability</c>, <c>similarity_boost</c>, <c>style</c>, <c>use_speaker_boost</c>.
+    /// </summary>
+    public IReadOnlyDictionary<string, object>? ProviderParams { get; set; }
 }

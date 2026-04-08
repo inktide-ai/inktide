@@ -1,4 +1,5 @@
 using Chimera.API.Core.DependencyInjection;
+using Chimera.API.Synapse.Infrastructure.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -16,7 +17,10 @@ public sealed class ChimeraChatProvidersStartup : Chimera.API.Core.IStartup
         ArgumentNullException.ThrowIfNull(ctx);
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddChimeraChatProviders(ctx.Configuration);
+        services.AddChimeraChatProviders(ctx.Configuration, (sp, list) =>
+        {
+            list.Add(sp.GetRequiredService<OllamaChatProvider>());
+        });
     }
 
     #endregion

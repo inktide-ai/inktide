@@ -63,9 +63,11 @@ export interface AiCardResponse {
   tts_catalog_id: string | null
   tts_config: Record<string, unknown> | null
   tts_voice: TtsVoiceResponse | null
-  behavior: Record<string, unknown> | null
+  appearance: Record<string, unknown> | null
+  response_behavior: Record<string, unknown> | null
   memory_settings: Record<string, unknown> | null
-  donkey_engine: Record<string, unknown> | null
+  auto_pilot: Record<string, unknown> | null
+  visibility: string
   channels: ChannelResponse[] | null
   tools: ToolResponse[] | null
   is_active: boolean
@@ -82,11 +84,11 @@ export interface CreateAiCardRequest {
   avatar_url?: string
   llm_catalog_id: string
   llm_config?: Record<string, unknown>
-  tts_catalog_id?: string
   tts_config?: Record<string, unknown>
-  behavior?: Record<string, unknown>
+  appearance?: Record<string, unknown>
+  response_behavior?: Record<string, unknown>
   memory_settings?: Record<string, unknown>
-  donkey_engine?: Record<string, unknown>
+  auto_pilot?: Record<string, unknown>
 }
 
 export interface UpdateAiCardRequest {
@@ -97,12 +99,13 @@ export interface UpdateAiCardRequest {
   avatar_url?: string
   llm_catalog_id?: string
   llm_config?: Record<string, unknown>
-  tts_catalog_id?: string
   tts_config?: Record<string, unknown>
-  behavior?: Record<string, unknown>
+  appearance?: Record<string, unknown>
+  response_behavior?: Record<string, unknown>
   memory_settings?: Record<string, unknown>
-  donkey_engine?: Record<string, unknown>
+  auto_pilot?: Record<string, unknown>
   is_active?: boolean
+  visibility?: string
 }
 
 // ── API functions ──
@@ -278,4 +281,86 @@ export async function uploadCardModelFile(cardId: string, file: File): Promise<A
 export async function listCardModels(cardId: string): Promise<AiCardModelResponse[]> {
   const res = await apiFetch(`/api/soul/cards/${cardId}/models`)
   return jsonOrThrow<AiCardModelResponse[]>(res)
+}
+
+// ── Scene (background image) assets (MinIO presigned PUT → PostgreSQL) ──
+
+export interface AiCardSceneResponse {
+  id: string
+  ai_card_id: string
+  storage_key: string
+  public_url: string
+  original_file_name: string
+  content_type: string
+  size_bytes: number
+  created_at: string
+}
+
+export async function listCardScenes(cardId: string): Promise<AiCardSceneResponse[]> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes`)
+  return jsonOrThrow<AiCardSceneResponse[]>(res)
+}
+
+export async function presignSceneUpload(
+  cardId: string,
+  body: { file_name: string; content_type: string; size_bytes: number },
+): Promise<BeginModelUploadResponse> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/presign`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  return jsonOrThrow<BeginModelUploadResponse>(res)
+}
+
+export async function completeSceneUpload(
+  cardId: string,
+  body: { storage_key: string; file_name: string; content_type: string; size_bytes: number },
+): Promise<AiCardSceneResponse> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/complete`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  return jsonOrThrow<AiCardSceneResponse>(res)
+}
+
+/** Presign → PUT to MinIO → complete registration. Replaces any existing scene. */
+export async function uploadCardSceneFile(cardId: string, file: File): Promise<AiCardSceneResponse> {
+  const contentType = file.type.trim() || 'image/jpeg'
+  const presign = await presignSceneUpload(cardId, {
+    file_name: file.name,
+    content_type: contentType,
+    size_bytes: file.size,
+  })
+  const putRes = await fetch(presign.upload_url, {
+    method: 'PUT',
+    headers: { 'Content-Type': presign.required_content_type },
+    body: file,
+  })
+  if (!putRes.ok) {
+    throw new ApiError(putRes.status, `Storage upload failed (${putRes.status})`)
+  }
+  return completeSceneUpload(cardId, {
+    storage_key: presign.storage_key,
+    file_name: file.name,
+    content_type: presign.required_content_type,
+    size_bytes: file.size,
+  })
+}
+
+export async function deleteCardScene(cardId: string, sceneId: string): Promise<void> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/${sceneId}`, { method: 'DELETE' })
+  await emptyOrThrow(res)
+}
+
+// ── Activity log ──
+
+export interface AiCardActivityItem {
+  id: string
+  action: string
+  created_at: string
+}
+
+export async function getCardActivity(cardId: string): Promise<AiCardActivityItem[]> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/activity`)
+  return jsonOrThrow<AiCardActivityItem[]>(res)
 }

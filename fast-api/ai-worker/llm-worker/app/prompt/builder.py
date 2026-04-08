@@ -20,15 +20,32 @@ def _build_system(envelope: SynapseAggregatedEnvelope) -> str:
     if ctx is None:
         return "You are a helpful AI assistant."
 
-    parts = [ctx.system_prompt]
+    _LANGUAGE_NAMES = {
+        "ru": "Russian", "en": "English", "de": "German",
+        "fr": "French", "es": "Spanish", "ja": "Japanese",
+        "zh": "Chinese", "uk": "Ukrainian",
+    }
 
-    if ctx.personality:
-        parts.append(ctx.personality)
+    parts = []
+
+    if ctx.language:
+        lang_name = _LANGUAGE_NAMES.get(ctx.language, ctx.language)
+        parts.append(
+            f"CRITICAL INSTRUCTION: You MUST respond exclusively in {lang_name}. "
+            f"This rule overrides everything else in this prompt, including the character's voice, style, "
+            f"and any language used in the system prompt. "
+            f"Never switch to another language under any circumstances."
+        )
+
+    parts.append(ctx.system_prompt)
 
     memories = envelope.rag.memories if envelope.rag else []
     if memories:
         memory_lines = "\n".join(f"- {m.text}" for m in memories)
-        parts.append(f"\nRelevant context from memory:\n{memory_lines}")
+        parts.append(f"Relevant context from memory:\n{memory_lines}")
+
+    if ctx.personality:
+        parts.append(ctx.personality)
 
     return "\n\n".join(parts)
 

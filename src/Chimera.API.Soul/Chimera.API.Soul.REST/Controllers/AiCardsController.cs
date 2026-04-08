@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Chimera.API.Soul.Application.Exceptions;
 using Chimera.API.Soul.Application.Interfaces;
+using Chimera.API.Soul.Domain.Repositories;
 using Chimera.API.Soul.REST.Converters;
 using Chimera.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -22,15 +23,17 @@ public sealed class AiCardsController : ControllerBase
 
     private readonly IAiCardService _cardService;
     private readonly IAiCardAvatarService _cardAvatar;
+    private readonly IAuditLogRepository _auditLog;
 
     #endregion
 
     #region Constructors
 
-    public AiCardsController(IAiCardService cardService, IAiCardAvatarService cardAvatar)
+    public AiCardsController(IAiCardService cardService, IAiCardAvatarService cardAvatar, IAuditLogRepository auditLog)
     {
         _cardService = cardService ?? throw new ArgumentNullException(nameof(cardService));
         _cardAvatar = cardAvatar ?? throw new ArgumentNullException(nameof(cardAvatar));
+        _auditLog = auditLog ?? throw new ArgumentNullException(nameof(auditLog));
     }
 
     #endregion
@@ -158,6 +161,26 @@ public sealed class AiCardsController : ControllerBase
         {
             return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
         }
+    }
+
+    [HttpGet("{cardId:guid}/activity")]
+    [ProducesResponseType(typeof(IReadOnlyList<AiCardActivityItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetActivity(Guid cardId, CancellationToken ct = default)
+    {
+        var userId = GetUserId();
+        var card = await _cardService.GetByIdAsync(userId, cardId, ct);
+        if (card is null)
+            return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
+
+        var logs = await _auditLog.GetByEntityAsync("ai_card", cardId, limit: 20, ct);
+        var items = logs.Select(l => new AiCardActivityItem
+        {
+            Id = l.Id,
+            Action = l.Action,
+            CreatedAt = l.CreatedAt,
+        }).ToList();
+        return Ok(items);
     }
 
     #endregion

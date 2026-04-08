@@ -19,4 +19,20 @@ public sealed record AiCardContext(
     /// <summary>Specific model override for TTS. Null = provider default.</summary>
     string? TtsModelId,
     /// <summary>Speech speed multiplier. 1.0 = normal.</summary>
-    float TtsSpeed);
+    float TtsSpeed,
+    /// <summary>"chat" — buffer full response as one TTS chunk; "narration" — sentence-based chunking.</summary>
+    string ChunkingMode = "narration",
+    /// <summary>BCP-47 language tag for LLM response language (e.g. "ru", "en"). Null = no override.</summary>
+    string? Language = null,
+    /// <summary>Sampling temperature passed to the LLM provider. Higher = more random.</summary>
+    float LlmTemperature = 0.7f,
+    /// <summary>Maximum number of tokens to generate (maps to num_predict in Ollama).</summary>
+    int LlmMaxTokens = 512,
+    /// <summary>Nucleus sampling probability mass (top-p).</summary>
+    float LlmTopP = 0.9f,
+    /// <summary>Penalty for token frequency — reduces repetition of the same phrases.</summary>
+    float LlmFrequencyPenalty = 0f,
+    /// <summary>Penalty for token presence — encourages talking about new topics.</summary>
+    float LlmPresencePenalty = 0f,
+    /// <summary>Milliseconds to wait before publishing the first TTS chunk after LLM generation completes.</summary>
+    int ResponseDelayMs = 0);

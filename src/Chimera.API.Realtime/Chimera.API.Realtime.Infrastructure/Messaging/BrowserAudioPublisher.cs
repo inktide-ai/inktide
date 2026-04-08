@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+#pragma warning disable CA1869 // cached JsonElement is read-only pass-through
 using Chimera.API.Realtime.Infrastructure.Configuration;
 using Chimera.API.Realtime.Infrastructure.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -19,12 +20,17 @@ public sealed class BrowserAudioPublisher : BackgroundService
     #region Private types
 
     private sealed record TtsReadyPayload(
-        [property: JsonPropertyName("correlationId")] string CorrelationId,
-        [property: JsonPropertyName("channelId")]     string ChannelId,
-        [property: JsonPropertyName("platformId")]    string PlatformId,
-        [property: JsonPropertyName("audioBase64")]   string AudioBase64,
-        [property: JsonPropertyName("contentType")]   string ContentType,
-        [property: JsonPropertyName("llmModel")]      string LlmModel);
+        [property: JsonPropertyName("correlationId")]   string        CorrelationId,
+        [property: JsonPropertyName("channelId")]       string        ChannelId,
+        [property: JsonPropertyName("platformId")]      string        PlatformId,
+        [property: JsonPropertyName("audioBase64")]     string        AudioBase64,
+        [property: JsonPropertyName("contentType")]     string        ContentType,
+        [property: JsonPropertyName("llmModel")]        string        LlmModel,
+        /// <summary>
+        /// Rhubarb viseme timeline, or <c>null</c> when Rhubarb is unavailable.
+        /// Passed through opaquely as a raw JSON element — no Realtime-layer parsing needed.
+        /// </summary>
+        [property: JsonPropertyName("visemeTimeline")]  JsonElement?  VisemeTimeline);
 
     #endregion
 
@@ -239,9 +245,10 @@ public sealed class BrowserAudioPublisher : BackgroundService
             "audioReceived",
             new
             {
-                correlationId = payload.CorrelationId,
-                audioBase64   = payload.AudioBase64,
-                contentType   = payload.ContentType,
+                correlationId  = payload.CorrelationId,
+                audioBase64    = payload.AudioBase64,
+                contentType    = payload.ContentType,
+                visemeTimeline = payload.VisemeTimeline,  // null → frontend uses formant fallback
             },
             ct);
 

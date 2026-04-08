@@ -1,5 +1,6 @@
 using Chimera.API.Core;
 using Chimera.API.TTS.Application.Configuration;
+using Chimera.API.TTS.Infrastructure.LipSync;
 using Chimera.API.TTS.Infrastructure.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,6 +21,7 @@ public sealed class ChimeraTtsStartup : IStartup
         ArgumentNullException.ThrowIfNull(services);
 
         services.AddChimeraTts(ctx.Configuration);
+        services.AddSingleton<IRhubarbService, RhubarbService>();
 
         // Stream consumer: LLM responses → TTS synthesis → audio output stream.
         // This lives here (not in Synapse) because TTS owns the synthesis pipeline.

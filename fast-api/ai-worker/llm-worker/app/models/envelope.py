@@ -60,6 +60,16 @@ class ContextShardPayload(_CamelModel):
     tts_voice_id: str | None = None
     tts_model_id: str | None = None
     tts_speed: float = 1.0
+    chunking_mode: str = "narration"
+    language: str | None = None
+    # LLM generation parameters — forwarded from AiCard.llm_config via Synapse pipeline
+    llm_temperature: float = 0.7
+    llm_max_tokens: int = 512
+    llm_top_p: float = 0.9
+    llm_frequency_penalty: float = 0.0
+    llm_presence_penalty: float = 0.0
+    # Response delay in milliseconds — applied before publishing the first TTS chunk
+    response_delay_ms: int = 0
 
 
 class SynapseAggregatedEnvelope(_CamelModel):

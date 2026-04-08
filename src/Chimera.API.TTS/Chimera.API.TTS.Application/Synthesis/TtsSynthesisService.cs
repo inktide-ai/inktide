@@ -46,6 +46,36 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
     #region Public Methods
 
     /// <inheritdoc />
+    public async Task<GetVoicesResult> GetVoicesAsync(string? providerId, CancellationToken ct = default)
+    {
+        if (!TryResolveProvider(providerId, out var provider, out var notFoundId))
+            return new GetVoicesResult.ProviderNotFound(notFoundId!);
+
+        if (!provider.Capabilities.SupportsVoiceListing)
+            return new GetVoicesResult.NotSupported(provider.Id);
+
+        var providerOptions = new ProviderOptions { ProviderId = provider.Id };
+
+        // Resolve API key so providers that require auth for voice listing (e.g. ElevenLabs) work.
+        try
+        {
+            var apiKey = _apiKeyResolver.Resolve(provider.Id);
+            if (!string.IsNullOrWhiteSpace(apiKey))
+                providerOptions.ApiKey = apiKey;
+        }
+        catch (ApiKeyMissingException)
+        {
+            return new GetVoicesResult.ApiKeyRequired(provider.Id);
+        }
+
+        var voices = await provider
+            .GetVoicesAsync(providerOptions, ct: ct)
+            .ConfigureAwait(false);
+
+        return new GetVoicesResult.Ok(voices);
+    }
+
+    /// <inheritdoc />
     public IReadOnlyCollection<SpeechProviderDescriptor> GetProviderCatalog()
     {
         return _speechProviderRegistry.Descriptors.Values
@@ -109,6 +139,7 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
             Model = string.IsNullOrWhiteSpace(command.ModelId) ? null : command.ModelId.Trim(),
             Speed = command.Speed ?? 1f,
             AudioFormat = audioFormat,
+            ProviderParams = command.ProviderParams,
         };
 
         try

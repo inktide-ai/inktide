@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Chimera.API.TTS.Application.Synthesis;
 using Chimera.API.TTS.REST.Extensions;
+
 using Chimera.API.TTS.Domain.Models;
 using Chimera.API.TTS.REST.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -50,6 +51,38 @@ public sealed class TtsController : ControllerBase
     }
 
     /// <summary>
+    /// Lists available voice IDs for a provider. Public — no auth required.
+    /// Returns 501 if the provider does not support voice listing.
+    /// </summary>
+    [HttpGet("voices")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IReadOnlyList<SpeechVoice>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status501NotImplemented)]
+    public async Task<IActionResult> GetVoicesAsync(
+        [FromQuery(Name = "provider_id")] string? providerId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _synthesisService
+            .GetVoicesAsync(providerId, cancellationToken)
+            .ConfigureAwait(false);
+
+        return result switch
+        {
+            GetVoicesResult.Ok ok =>
+                Ok(ok.Voices),
+            GetVoicesResult.ProviderNotFound e =>
+                Problem(detail: $"Speech provider '{e.ProviderId}' is not registered.", statusCode: StatusCodes.Status400BadRequest),
+            GetVoicesResult.NotSupported e =>
+                Problem(detail: $"Provider '{e.ProviderId}' does not support voice listing.", statusCode: StatusCodes.Status501NotImplemented),
+            GetVoicesResult.ApiKeyRequired =>
+                Problem(detail: "An API key is required to list voices for this provider. Supply it via the X-TTS-Api-Key header.", statusCode: StatusCodes.Status401Unauthorized),
+            _ =>
+                Problem(statusCode: StatusCodes.Status500InternalServerError),
+        };
+    }
+
+    /// <summary>
     /// Synthesizes speech. Pass <c>"stream": true</c> for a streaming response.
     /// </summary>
     [HttpPost("synthesize")]
@@ -94,7 +127,8 @@ public sealed class TtsController : ControllerBase
             request.Speed,
             request.Stream ?? false,
             request.AudioFormat,
-            userId);
+            userId,
+            request.ProviderParams);
 
         var result = await _synthesisService
             .SynthesizeAsync(command, cancellationToken)

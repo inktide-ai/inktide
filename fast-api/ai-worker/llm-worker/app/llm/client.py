@@ -23,10 +23,11 @@ class OllamaClient:
     _HOUSEKEEPING_TIMEOUT = httpx.Timeout(connect=10.0, read=30.0, write=10.0, pool=10.0)
 
     # Timeout for streaming LLM generation.
-    # read=None: no per-chunk read timeout — LLM inference has no predictable duration
-    # and the model may pause between tokens (especially at startup or on first generation).
-    # connect/write timeouts are still enforced so we fail fast on networking issues.
-    _STREAM_TIMEOUT = httpx.Timeout(connect=10.0, read=None, write=30.0, pool=10.0)
+    # read=300: per-chunk read timeout of 5 minutes. This is a per-token timeout, not
+    # a total generation timeout, so long responses are fine. It prevents the worker
+    # from hanging forever if Ollama stalls mid-generation (e.g. Metal memory pressure,
+    # KV-cache eviction hang, or GPU driver deadlock on Apple Silicon).
+    _STREAM_TIMEOUT = httpx.Timeout(connect=10.0, read=300.0, write=30.0, pool=10.0)
 
     def __init__(self) -> None:
         self._http = httpx.AsyncClient(
@@ -41,6 +42,7 @@ class OllamaClient:
         model: str,
         messages: list[dict[str, str]],
         correlation_id: str,
+        options: dict | None = None,
     ) -> AsyncGenerator[LlmChunk, None]:
         """
         Stream token-level responses from Ollama.
@@ -51,8 +53,14 @@ class OllamaClient:
 
         Uses ``read=None`` so slow model warm-up or long-running generations
         do not trigger a ``ReadTimeout`` mid-stream.
+
+        ``options`` is forwarded verbatim to Ollama's ``options`` field (temperature,
+        num_predict, top_p, repeat_penalty, etc.). Unrecognised keys are silently
+        ignored by Ollama.
         """
-        payload = {"model": model, "messages": messages, "stream": True}
+        payload: dict = {"model": model, "messages": messages, "stream": True}
+        if options:
+            payload["options"] = options
 
         logger.debug("Streaming Ollama model=%s correlation=%s", model, correlation_id)
 

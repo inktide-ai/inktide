@@ -34,7 +34,17 @@ async def main() -> None:
 
     consumer_task = asyncio.create_task(consumer.run())
 
-    await stop_event.wait()
+    # Wait for either a stop signal or the consumer task to die unexpectedly.
+    done, _ = await asyncio.wait(
+        [consumer_task, asyncio.create_task(stop_event.wait())],
+        return_when=asyncio.FIRST_COMPLETED,
+    )
+
+    if consumer_task in done and not consumer_task.cancelled():
+        exc = consumer_task.exception()
+        if exc:
+            logger.critical("Consumer task died unexpectedly: %s", exc, exc_info=exc)
+            raise SystemExit(1)
 
     logger.info("Shutdown signal received, stopping...")
     consumer_task.cancel()

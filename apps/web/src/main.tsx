@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import { AuthProvider } from './context/AuthContext'
 import { keycloak, initOptions } from './keycloak'
+import { configureApiAuth } from './api/client'
 import LoadingScreen from './components/LoadingScreen'
 import './index.css'
 
@@ -29,6 +30,12 @@ function WebBootstrap() {
 
     const cachedToken = localStorage.getItem(TOKEN_KEY)
     const cachedRefresh = localStorage.getItem(REFRESH_KEY)
+
+    configureApiAuth({
+      getToken: () => keycloak.token,
+      isAuthenticated: () => !!keycloak.authenticated,
+      refreshToken: () => keycloak.updateToken(30).then(Boolean).catch(() => false),
+    })
 
     keycloak
       .init({

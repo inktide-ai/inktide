@@ -1,8 +1,8 @@
-import { useCallback, useRef, useState, type ChangeEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { uploadCardAvatar } from '../../api/soul'
+import { getCardActivity, uploadCardAvatar, type AiCardActivityItem, type ChannelResponse } from '../../api/soul'
 import styles from './IdentityCard.module.css'
-import type { AiCharacter } from './types'
+import type { AiCharacter } from '../../domain/character'
 import { BANNER_PRESETS, getBannerGradient } from './bannerPresets'
 
 interface IdentityCardProps {
@@ -28,8 +28,33 @@ const IdentityCard = ({ character, onUpdate, onDelete }: IdentityCardProps) => {
   const [avatarBusy, setAvatarBusy] = useState(false)
   const [deactivateConfirm, setDeactivateConfirm] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [activity, setActivity] = useState<AiCardActivityItem[]>([])
 
-  const bannerIdx = character.bannerColorIndex ?? 0
+  useEffect(() => {
+    let cancelled = false
+    getCardActivity(character.id)
+      .then((items) => { if (!cancelled) setActivity(items) })
+      .catch(() => { /* silent — activity is non-critical */ })
+    return () => { cancelled = true }
+  }, [character.id])
+
+  // ── Connections: group active channels by platform ──
+  const PLATFORM_META: Record<string, { label: string; icon: string }> = {
+    discord:  { label: 'Discord',  icon: '💬' },
+    twitch:   { label: 'Twitch',   icon: '🎮' },
+    kick:     { label: 'Kick',     icon: '🟢' },
+    vk_video: { label: 'VK Video', icon: '📺' },
+  }
+  const channelsByPlatform = new Map<string, ChannelResponse[]>()
+  for (const ch of character.channels) {
+    if (!ch.is_active) continue
+    const arr = channelsByPlatform.get(ch.platform) ?? []
+    arr.push(ch)
+    channelsByPlatform.set(ch.platform, arr)
+  }
+  const connectionEntries = [...channelsByPlatform.entries()]
+
+  const bannerIdx = character.appearance.bannerColorIndex
   const initial = character.name.charAt(0).toUpperCase()
 
   const onAvatarFile = useCallback(
@@ -40,7 +65,7 @@ const IdentityCard = ({ character, onUpdate, onDelete }: IdentityCardProps) => {
       setAvatarBusy(true)
       try {
         const res = await uploadCardAvatar(character.id, file)
-        onUpdate({ avatarUrl: res.avatar_url })
+        onUpdate({ appearance: { ...character.appearance, avatarUrl: res.avatar_url } })
       } catch {
         /* optional toast */
       } finally {
@@ -64,7 +89,7 @@ const IdentityCard = ({ character, onUpdate, onDelete }: IdentityCardProps) => {
                 type="button"
                 className={`${styles.bannerDot} ${i === bannerIdx ? styles.bannerDotActive : ''}`}
                 style={{ background: i === bannerIdx ? '#fff' : 'rgba(255,255,255,0.3)' }}
-                onClick={() => onUpdate({ bannerColorIndex: i })}
+                onClick={() => onUpdate({ appearance: { ...character.appearance, bannerColorIndex: i } })}
                 aria-label={`Banner preset ${i + 1}`}
               />
             ))}
@@ -80,8 +105,8 @@ const IdentityCard = ({ character, onUpdate, onDelete }: IdentityCardProps) => {
               disabled={avatarBusy}
               aria-label="Change avatar"
             >
-              {character.avatarUrl ? (
-                <img src={character.avatarUrl} alt="" className={styles.avatarImg} />
+              {character.appearance.avatarUrl ? (
+                <img src={character.appearance.avatarUrl} alt="" className={styles.avatarImg} />
               ) : (
                 <div className={styles.avatar} style={{ background: getBannerGradient(bannerIdx) }}>
                   {initial}
@@ -106,8 +131,8 @@ const IdentityCard = ({ character, onUpdate, onDelete }: IdentityCardProps) => {
             <div className={styles.profileSlug}>/{character.slug}</div>
             <div className={styles.profileBadges}>
               <span className={styles.badge}>Bot</span>
-              {character.ttsEnabled && <span className={`${styles.badge} ${styles.badgePurple}`}>TTS</span>}
-              {character.memoryEnabled && <span className={`${styles.badge} ${styles.badgeCyan}`}>Memory</span>}
+              {character.tts.providerId && character.tts.providerId !== 'none' && <span className={`${styles.badge} ${styles.badgePurple}`}>TTS</span>}
+              {character.memory.enabled && <span className={`${styles.badge} ${styles.badgeCyan}`}>Memory</span>}
             </div>
           </div>
 
@@ -136,19 +161,19 @@ const IdentityCard = ({ character, onUpdate, onDelete }: IdentityCardProps) => {
         <div className={styles.sectionTitle}>Status</div>
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
-            <div className={styles.statValue}>{character.maxTokens}</div>
+            <div className={styles.statValue}>{character.llm.maxTokens}</div>
             <div className={styles.statLabel}>Max Tokens</div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statValue}>{character.temperature.toFixed(1)}</div>
+            <div className={styles.statValue}>{character.llm.temperature.toFixed(1)}</div>
             <div className={styles.statLabel}>Temperature</div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statValue}>{character.maxMemories}</div>
+            <div className={styles.statValue}>{character.memory.maxMemories}</div>
             <div className={styles.statLabel}>Memory Slots</div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statValue}>{character.responseDelayMs}ms</div>
+            <div className={styles.statValue}>{character.behavior.responseDelayMs}ms</div>
             <div className={styles.statLabel}>Response Delay</div>
           </div>
         </div>
@@ -157,19 +182,55 @@ const IdentityCard = ({ character, onUpdate, onDelete }: IdentityCardProps) => {
       <div className={styles.section}>
         <div className={styles.sectionTitle}>Connections</div>
         <div className={styles.infoCard}>
-          <ConnectionRow icon="🎮" name="Twitch Integration" value="Connected · @chimera_bot" />
-          <ConnectionRow icon="💬" name="Chat Bridge" value="Active · 3 channels" />
-          <ConnectionRow icon="🔔" name="Event Triggers" value="12 rules configured" isLast />
+          {connectionEntries.length === 0 ? (
+            <div className={`${styles.infoRow} ${styles.infoRowLast}`}>
+              <div className={styles.infoLeft}>
+                <div>
+                  <div className={styles.infoLabel}>No active connections</div>
+                  <div className={styles.infoValue}>Configure channels in the Connection tab</div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            connectionEntries.map(([platform, channels], idx) => {
+              const meta = PLATFORM_META[platform] ?? { label: platform, icon: '🔗' }
+              const isLast = idx === connectionEntries.length - 1
+              return (
+                <div key={platform} className={`${styles.infoRow} ${isLast ? styles.infoRowLast : ''}`}>
+                  <div className={styles.infoLeft}>
+                    <div className={styles.connectionIcon}>{meta.icon}</div>
+                    <div>
+                      <div className={styles.infoLabel}>{meta.label}</div>
+                      <div className={styles.infoValue}>
+                        {channels.length} {channels.length === 1 ? 'channel' : 'channels'} active
+                        {channels[0]?.bot_username ? ` · @${channels[0].bot_username}` : ''}
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.connectionStatus} />
+                </div>
+              )
+            })
+          )}
         </div>
       </div>
 
       <div className={styles.section}>
         <div className={styles.sectionTitle}>Recent Activity</div>
         <div className={styles.infoCard}>
-          <ActivityRow time="2 min ago" text="Responded to 14 chat messages during stream" />
-          <ActivityRow time="1 hr ago" text="Memory updated: viewer preference for dark humor noted" />
-          <ActivityRow time="3 hr ago" text="Voice synthesis used 47 times, avg latency 320ms" />
-          <ActivityRow time="Yesterday" text="Personality drift detected — auto-correction applied" isLast />
+          {activity.length === 0 ? (
+            <div className={`${styles.activityRow} ${styles.infoRowLast}`}>
+              <div className={styles.activityTime}>—</div>
+              <div className={styles.activityText}>No recent activity recorded.</div>
+            </div>
+          ) : (
+            activity.map((item, idx) => (
+              <div key={item.id} className={`${styles.activityRow} ${idx === activity.length - 1 ? styles.infoRowLast : ''}`}>
+                <div className={styles.activityTime}>{relativeTime(item.created_at)}</div>
+                <div className={styles.activityText}>{ACTION_LABELS[item.action] ?? item.action}</div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -265,37 +326,20 @@ const IdentityCard = ({ character, onUpdate, onDelete }: IdentityCardProps) => {
   )
 }
 
-interface ConnectionRowProps {
-  icon: string
-  name: string
-  value: string
-  isLast?: boolean
+const ACTION_LABELS: Record<string, string> = {
+  created: 'Character created',
+  updated: 'Settings updated',
+  deleted: 'Character deleted',
 }
 
-const ConnectionRow = ({ icon, name, value, isLast }: ConnectionRowProps) => (
-  <div className={`${styles.infoRow} ${isLast ? styles.infoRowLast : ''}`}>
-    <div className={styles.infoLeft}>
-      <div className={styles.connectionIcon}>{icon}</div>
-      <div>
-        <div className={styles.infoLabel}>{name}</div>
-        <div className={styles.infoValue}>{value}</div>
-      </div>
-    </div>
-    <div className={styles.connectionStatus} />
-  </div>
-)
-
-interface ActivityRowProps {
-  time: string
-  text: string
-  isLast?: boolean
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime()
+  const m = Math.floor(diff / 60_000)
+  if (m < 1) return 'just now'
+  if (m < 60) return `${m} min ago`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h} hr ago`
+  return `${Math.floor(h / 24)}d ago`
 }
-
-const ActivityRow = ({ time, text, isLast }: ActivityRowProps) => (
-  <div className={`${styles.activityRow} ${isLast ? styles.infoRowLast : ''}`}>
-    <div className={styles.activityTime}>{time}</div>
-    <div className={styles.activityText}>{text}</div>
-  </div>
-)
 
 export default IdentityCard

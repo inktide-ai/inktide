@@ -23,6 +23,7 @@ public sealed class SoulDbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<UsageDaily> UsageDaily => Set<UsageDaily>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<AiCardModel> AiCardModels => Set<AiCardModel>();
+    public DbSet<AiCardScene> AiCardScenes => Set<AiCardScene>();
 
     #endregion
 
@@ -39,6 +40,7 @@ public sealed class SoulDbContext : Microsoft.EntityFrameworkCore.DbContext
         modelBuilder.ApplyConfiguration(new UsageDailyConfiguration());
         modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
         modelBuilder.ApplyConfiguration(new AiCardModelConfiguration());
+        modelBuilder.ApplyConfiguration(new AiCardSceneConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }

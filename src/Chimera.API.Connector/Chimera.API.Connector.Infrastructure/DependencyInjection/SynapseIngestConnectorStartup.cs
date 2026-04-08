@@ -1,4 +1,5 @@
 using Chimera.API.Connector.Application.Contracts;
+using Chimera.API.Connector.Application.Interfaces;
 using Chimera.API.Connector.Infrastructure.Hosting;
 using Chimera.API.Connector.Infrastructure.Messaging;
 using Chimera.API.Core;
