@@ -1,0 +1,141 @@
+{
+  "grid": {
+    "title": "Voice Providers",
+    "desc": "Choose a TTS provider for your AI character. Each provider can be configured individually — select a voice, adjust speed, and set any required credentials.",
+    "search": "Search providers…",
+    "configure": "Configure →"
+  },
+  "sandbox": {
+    "title": "Voice Sandbox",
+    "desc": "Test any provider in the browser — synthesis, streaming, and voice tuning.",
+    "open": "Open →",
+    "streamingPlayground": "Streaming Playground",
+    "streamingDesc": "Tests chunked audio delivery. Each bar represents one received chunk — height is proportional to its byte size.",
+    "testVoice": "Test Voice",
+    "synthesizing": "Synthesizing…",
+    "testChunking": "Test chunking",
+    "streaming": "Streaming…"
+  },
+  "provider": {
+    "label": "Provider",
+    "hint": "Select the TTS provider to test",
+    "loading": "Loading providers…",
+    "none": "No providers registered"
+  },
+  "apiKey": {
+    "label": "API Key",
+    "hint": "Required for this provider",
+    "hintProvider": "API Key for {{provider}}",
+    "hintOpenAi": "Your OpenAI API key (sk-…)",
+    "hintCompatible": "API key (leave blank if not required by the server)",
+    "hintFishAudio": "Fish Audio API key",
+    "hintCartesia": "Cartesia API key (sk_car_…)",
+    "hintGoogleCloud": "Google Cloud API key with Text-to-Speech enabled"
+  },
+  "voice": {
+    "label": "Voice",
+    "hintList": "Choose from available voices",
+    "hintManual": "Enter the voice ID manually",
+    "hintKokoro": "Choose a Kokoro voice for synthesis",
+    "hintEnterKey": "Enter your API key to load available voices",
+    "hintEnterKeyAndRegion": "Enter your API key and region to load available voices",
+    "hintChoose": "Select from your ElevenLabs voices",
+    "hintOpenAi": "Select an OpenAI voice",
+    "hintCompatible": "Voice name as accepted by the server",
+    "hintFishAudio": "Select from Fish Audio voices",
+    "hintCartesia": "Select from your Cartesia voices",
+    "hintGoogleCloud": "Select a Google Cloud neural voice",
+    "hintAzure": "Select from Azure neural voices",
+    "loading": "Loading voices…",
+    "selectPlaceholder": "— Select a voice —",
+    "idPlaceholder": "e.g. af_bella or your-voice-id"
+  },
+  "speed": {
+    "label": "Speed",
+    "hintDefault": "0.5× – 2.0× (1.0 = normal)",
+    "hintOpenAi": "0.25× – 4.0× (1.0 = normal)",
+    "hintCartesia": "0.0× – 2.0× (1.0 = normal)",
+    "hintRate": "Speech rate adjustment"
+  },
+  "pitch": {
+    "label": "Pitch",
+    "hintElevenLabs": "Stored only — ElevenLabs does not support pitch adjustment",
+    "hintSemitones": "Pitch adjustment in semitones (−20 to +20)",
+    "hintAdjust": "Adjust synthesised speech pitch (higher/lower)"
+  },
+  "volume": {
+    "label": "Volume",
+    "hintElevenLabs": "Stored only — use your audio output settings for volume",
+    "hintDb": "Volume gain in dB (−10 to +10)",
+    "hintAdjust": "Speech volume adjustment"
+  },
+  "stability": {
+    "label": "Stability",
+    "hint": "Higher = more consistent, lower = more expressive"
+  },
+  "similarityBoost": {
+    "label": "Similarity Boost",
+    "hint": "Enhances similarity to the selected speaker voice"
+  },
+  "style": {
+    "label": "Style",
+    "hint": "Style exaggeration — 0 is recommended for most models"
+  },
+  "speakerBoost": {
+    "label": "Speaker Boost",
+    "hint": "Enhances similarity to the selected speaker voice"
+  },
+  "region": {
+    "label": "Region",
+    "hint": "Azure Speech Service region",
+    "customOption": "— custom (see Advanced) —"
+  },
+  "audioFormat": {
+    "label": "Audio Format"
+  },
+  "baseUrl": {
+    "label": "Base URL",
+    "hintKokoro": "Kokoro API endpoint",
+    "hintElevenLabs": "ElevenLabs API endpoint (override for enterprise)",
+    "hintCompatible": "OpenAI-compatible API endpoint (e.g. http://localhost:1234/v1)",
+    "hintAzure": "Region code (e.g. eastasia) or full endpoint URL. Overrides the region dropdown above."
+  },
+  "model": {
+    "label": "Model",
+    "loading": "Loading models…",
+    "hintCompatible": "Model ID used by the server (default: tts-1)"
+  },
+  "ssml": {
+    "toggle": "Custom SSML",
+    "toggleHint": "Enable to input raw SSML instead of plain text",
+    "inputLabel": "SSML Input",
+    "inputHint": "Enter SSML markup — must be wrapped in <speak>…</speak>",
+    "inputPlaceholder": "<speak>Hello <break time=\"500ms\"/> world!</speak>"
+  },
+  "text": {
+    "label": "Text",
+    "hint": "Text to synthesize",
+    "placeholder": "Enter text to synthesize…",
+    "defaultSample": "Hello! This is a test of the voice synthesis."
+  },
+  "validation": {
+    "textEmpty": "Text cannot be empty.",
+    "voiceRequired": "Please select a voice.",
+    "apiKeyRequired": "Enter API key to test voice."
+  },
+  "advanced": "Advanced",
+  "settings": "Settings",
+  "back": "Back",
+  "noSettings": "No settings for this provider.",
+  "providers": {
+    "none": "No voice output.",
+    "kokoro": "Local TTS — no API key required.",
+    "elevenlabs": "Cloud TTS — natural voices, API key required.",
+    "fishaudio": "Cloud TTS — voice cloning and multilingual voices, API key required.",
+    "openai": "OpenAI TTS — high-quality voices via api.openai.com.",
+    "openaiCompatible": "Any OpenAI-format TTS API — custom endpoint, free model selection.",
+    "cartesia": "Cartesia Sonic — ultra-low latency neural TTS, API key required.",
+    "googleCloud": "Google Cloud neural voices via gRPC — API key required.",
+    "azureSpeech": "Azure Cognitive Services TTS — neural voices, API key + region required."
+  }
+}

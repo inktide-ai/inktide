@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo, type ReactNode } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import {
   getCards,
@@ -12,7 +13,7 @@ import {
   type LlmModelResponse,
 } from '../../api/soul'
 import { deleteAccount } from '../../api/me'
-import logoSvg from '../../assets/icon.svg'
+import logoSvg from '../../assets/app/icon.svg'
 import caretDownSvg from '../../assets/icons/caret-down.svg'
 import { IconUser, IconSkills, IconBrain, IconMicrophone, IconPaint, IconIntegration, IconScene, IconMemory, IconBackup, IconWorkshop, IconSearch } from './TabIcons'
 import styles from './ProfilePage.module.css'
@@ -98,26 +99,17 @@ function LogoutIcon() {
   )
 }
 
-const BOT_TABS: { id: BotTabId; label: string; description: string; icon: ReactNode; accent: string }[] = [
-  { id: 'profile', label: 'Profile', description: 'Identity, info, connections & account settings', icon: <IconUser />, accent: '#ff5252' },
-  { id: 'skills', label: 'Skills', description: 'Thought process, vision, games & abilities', icon: <IconSkills />, accent: '#fbbf24' },
-  { id: 'avatars', label: 'Avatars', description: 'Live2D, VRM, GLB avatar configuration', icon: <IconPaint />, accent: '#f472b6' },
-  { id: 'scene', label: 'Scene', description: 'Configure the environment where your character lives', icon: <IconScene />, accent: '#c4b5fd' },
-  { id: 'memory', label: 'Memory', description: 'Storage and organization of memories', icon: <IconMemory />, accent: '#38bdf8' },
-  { id: 'brain', label: 'Brain', description: 'LLM models & generation parameters', icon: <IconBrain />, accent: '#34d399' },
-  { id: 'voice', label: 'Voice', description: 'TTS engine, voice selection & tuning', icon: <IconMicrophone />, accent: '#f0abfc' },
-  { id: 'connection', label: 'Connection', description: 'Configure WebSocket server & third-party integrations', icon: <IconIntegration />, accent: '#818cf8' },
-  { id: 'backup', label: 'Backup', description: 'Export & restore character configuration', icon: <IconBackup />, accent: '#94a3b8' },
-]
+// BOT_TABS is built inside the component via useMemo to support i18n
 
 function renderTabContent(
   tab: BotTabId,
   character: AiCharacter,
   onUpdate: (p: Partial<AiCharacter>) => void,
   onDelete: () => void,
+  onNavigateTab: (t: string) => void,
 ): ReactNode {
   const tabComponents: Record<BotTabId, ReactNode> = {
-    profile: <IdentityCard character={character} onUpdate={onUpdate} onDelete={onDelete} />,
+    profile: <IdentityCard character={character} onUpdate={onUpdate} onDelete={onDelete} onNavigateTab={onNavigateTab} />,
     skills: <SkillsTab character={character} onUpdate={onUpdate} />,
     avatars: <ModelTab character={character} onUpdate={onUpdate} />,
     scene: <SceneTab character={character} onUpdate={onUpdate} />,
@@ -134,6 +126,19 @@ const ProfilePage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { userEmail, user, isLoggedIn, logout, openAccountSettings } = useAuth()
+  const { t } = useTranslation(['common', 'profile'])
+
+  const BOT_TABS = useMemo((): { id: BotTabId; label: string; description: string; icon: ReactNode; accent: string }[] => [
+    { id: 'profile',    label: t('profile:tabs.profile.label'),    description: t('profile:tabs.profile.desc'),    icon: <IconUser />,        accent: '#ff5252' },
+    { id: 'skills',     label: t('profile:tabs.skills.label'),     description: t('profile:tabs.skills.desc'),     icon: <IconSkills />,      accent: '#fbbf24' },
+    { id: 'avatars',    label: t('profile:tabs.avatars.label'),    description: t('profile:tabs.avatars.desc'),    icon: <IconPaint />,       accent: '#f472b6' },
+    { id: 'scene',      label: t('profile:tabs.scene.label'),      description: t('profile:tabs.scene.desc'),      icon: <IconScene />,       accent: '#c4b5fd' },
+    { id: 'memory',     label: t('profile:tabs.memory.label'),     description: t('profile:tabs.memory.desc'),     icon: <IconMemory />,      accent: '#38bdf8' },
+    { id: 'brain',      label: t('profile:tabs.brain.label'),      description: t('profile:tabs.brain.desc'),      icon: <IconBrain />,       accent: '#34d399' },
+    { id: 'voice',      label: t('profile:tabs.voice.label'),      description: t('profile:tabs.voice.desc'),      icon: <IconMicrophone />,  accent: '#f0abfc' },
+    { id: 'connection', label: t('profile:tabs.connection.label'), description: t('profile:tabs.connection.desc'), icon: <IconIntegration />, accent: '#818cf8' },
+    { id: 'backup',     label: t('profile:tabs.backup.label'),     description: t('profile:tabs.backup.desc'),     icon: <IconBackup />,      accent: '#94a3b8' },
+  ], [t])
 
   const [cardList, setCardList] = useState<AiCardListItem[]>([])
   const [characters, setCharacters] = useState<Map<string, AiCharacter>>(new Map())
@@ -458,7 +463,7 @@ const ProfilePage = () => {
 
         <button type="button" className={styles.newCharacterBtn} onClick={startCreate}>
           <span className={styles.newCharacterIcon}>+</span>
-          Create new
+          {t('common:sidebar.createNew')}
         </button>
 
         <nav className={styles.sidebarNav}>
@@ -470,12 +475,12 @@ const ProfilePage = () => {
 
         <div className={styles.sidebarSearch}>
           <span className={styles.sidebarSearchIcon}><IconSearch /></span>
-          <input type="text" id="sidebar-search" name="search" placeholder="Search" className={styles.sidebarSearchInput} aria-label="Search" autoComplete="off" />
+          <input type="text" id="sidebar-search" name="search" placeholder={t('common:sidebar.search')} className={styles.sidebarSearchInput} aria-label={t('common:sidebar.search')} autoComplete="off" />
         </div>
 
         <div className={styles.botListSection}>
           <div className={styles.botListLabel}>
-            Projects
+            {t('common:sidebar.projects')}
           </div>
           <div className={styles.botList}>
             {cardList.map((c) => {
@@ -511,7 +516,7 @@ const ProfilePage = () => {
                           color: getBannerAccent(bannerIdx),
                         }}
                       >
-                        Bot
+                        {t('common:badge.bot')}
                       </span>
                     </div>
                     <div className={styles.botSlug}>/{c.slug}</div>
@@ -569,7 +574,7 @@ const ProfilePage = () => {
                   aria-hidden
                 />
                 <div className={styles.userMenu} role="menu" aria-label="Account menu">
-                  <div className={styles.userMenuSectionLabel}>Account</div>
+                  <div className={styles.userMenuSectionLabel}>{t('common:sidebar.account')}</div>
                   <button
                     type="button"
                     className={styles.userMenuItem}
@@ -579,7 +584,7 @@ const ProfilePage = () => {
                     <span className={styles.userMenuItemIcon} aria-hidden>
                       <IconUser />
                     </span>
-                    Profile
+                    {t('common:sidebar.profile')}
                   </button>
                   <button
                     type="button"
@@ -590,7 +595,7 @@ const ProfilePage = () => {
                     <span className={styles.userMenuItemIcon} aria-hidden>
                       <SettingsIcon />
                     </span>
-                    Settings
+                    {t('common:sidebar.settings')}
                   </button>
                   <button
                     type="button"
@@ -601,7 +606,7 @@ const ProfilePage = () => {
                     <span className={styles.userMenuItemIcon} aria-hidden>
                       <TrashIcon />
                     </span>
-                    Delete account
+                    {t('common:sidebar.deleteAccount')}
                   </button>
                   <div className={styles.userMenuDivider} />
                   <button
@@ -613,7 +618,7 @@ const ProfilePage = () => {
                     <span className={styles.userMenuItemIcon} aria-hidden>
                       <LogoutIcon />
                     </span>
-                    Log out
+                    {t('common:sidebar.logOut')}
                   </button>
                 </div>
               </>
@@ -626,7 +631,7 @@ const ProfilePage = () => {
         {loading && mainWorkspace !== 'account' ? (
           <div className={styles.loadingState}>
             <div className={styles.spinner} />
-            <div className={styles.loadingText}>Loading characters...</div>
+            <div className={styles.loadingText}>{t('common:emptyState.loadingCharacters')}</div>
           </div>
         ) : mainWorkspace === 'account' ? (
           <AccountAvatarPanel
@@ -641,7 +646,7 @@ const ProfilePage = () => {
         ) : loadError ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>⚠</div>
-            <div className={styles.emptyTitle}>Failed to load</div>
+            <div className={styles.emptyTitle}>{t('common:emptyState.failedToLoad')}</div>
             <p className={styles.emptyText}>{loadError}</p>
           </div>
         ) : isCreating ? (
@@ -662,7 +667,7 @@ const ProfilePage = () => {
                   <div
                     className={styles.statusDot}
                     style={{ background: selected.isActive ? '#22c55e' : 'var(--text-muted)' }}
-                    title={selected.isActive ? 'Active' : 'Inactive'}
+                    title={selected.isActive ? t('common:badge.active') : t('common:badge.inactive')}
                   />
                 </div>
               </div>
@@ -674,23 +679,23 @@ const ProfilePage = () => {
 
             {botTab === null ? (
               <div className={styles.tabCardsGrid}>
-                {BOT_TABS.map((t) => (
+                {BOT_TABS.map((tab) => (
                   <button
-                    key={t.id}
+                    key={tab.id}
                     type="button"
                     className={styles.tabCard}
-                    onClick={() => setBotTab(t.id)}
+                    onClick={() => setBotTab(tab.id)}
                     onMouseMove={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect()
                       e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`)
                       e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`)
                     }}
-                    style={{ '--tab-accent': t.accent } as React.CSSProperties}
+                    style={{ '--tab-accent': tab.accent } as React.CSSProperties}
                   >
-                    <div className={styles.tabCardIcon}>{t.icon}</div>
+                    <div className={styles.tabCardIcon}>{tab.icon}</div>
                     <div className={styles.tabCardBody}>
-                      <div className={styles.tabCardLabel}>{t.label}</div>
-                      <div className={styles.tabCardDesc}>{t.description}</div>
+                      <div className={styles.tabCardLabel}>{tab.label}</div>
+                      <div className={styles.tabCardDesc}>{tab.description}</div>
                     </div>
                   </button>
                 ))}
@@ -702,14 +707,14 @@ const ProfilePage = () => {
                   className={styles.backBtn}
                   onClick={() => setBotTab(null)}
                 >
-                  ← Back to sections
+                  {t('common:emptyState.backToSections')}
                 </button>
 
                 <h2 className={styles.sectionHeading}>
-                  {BOT_TABS.find((t) => t.id === botTab)?.label}
+                  {BOT_TABS.find((tab) => tab.id === botTab)?.label}
                 </h2>
 
-                {renderTabContent(botTab, selected, (p) => updateCharacter(selected.id, p), () => removeCharacter(selected.id))}
+                {renderTabContent(botTab, selected, (p) => updateCharacter(selected.id, p), () => removeCharacter(selected.id), (tab) => setBotTab(tab as BotTabId))}
               </div>
             )}
 
@@ -719,10 +724,10 @@ const ProfilePage = () => {
                   saveStatus === 'error' ? styles.saveBarTextError :
                   saveStatus === 'saved' ? styles.saveBarTextSuccess : ''
                 }`}>
-                  {saveStatus === 'saving' ? 'Saving...' :
-                   saveStatus === 'saved' ? 'Changes saved' :
-                   saveStatus === 'error' ? (saveError ?? 'Save failed') :
-                   'You have unsaved changes'}
+                  {saveStatus === 'saving' ? t('common:saveBar.saving') :
+                   saveStatus === 'saved' ? t('common:saveBar.saved') :
+                   saveStatus === 'error' ? (saveError ?? t('common:saveBar.failed')) :
+                   t('common:saveBar.unsaved')}
                 </span>
                 <button
                   type="button"
@@ -730,7 +735,7 @@ const ProfilePage = () => {
                   onClick={discardChanges}
                   disabled={saveStatus === 'saving'}
                 >
-                  Discard
+                  {t('common:saveBar.discard')}
                 </button>
                 <button
                   type="button"
@@ -738,7 +743,7 @@ const ProfilePage = () => {
                   onClick={handleSave}
                   disabled={saveStatus === 'saving'}
                 >
-                  {saveStatus === 'saving' ? 'Saving...' : 'Save Changes'}
+                  {saveStatus === 'saving' ? t('common:saveBar.saving') : t('common:saveBar.save')}
                 </button>
               </div>
             )}
@@ -746,13 +751,12 @@ const ProfilePage = () => {
         ) : (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>🤖</div>
-            <div className={styles.emptyTitle}>Select a character</div>
+            <div className={styles.emptyTitle}>{t('common:emptyState.selectCharacter')}</div>
             <p className={styles.emptyText}>
-              Choose a bot from the sidebar or create a new one to configure its identity, prompts,
-              behavior, voice and model.
+              {t('common:emptyState.selectCharacterDesc')}
             </p>
             <button type="button" className={styles.btnPrimary} onClick={startCreate}>
-              + Create new
+              {t('common:emptyState.createNew')}
             </button>
           </div>
         )}

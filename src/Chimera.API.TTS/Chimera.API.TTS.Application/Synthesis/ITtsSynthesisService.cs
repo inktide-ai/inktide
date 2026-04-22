@@ -7,7 +7,6 @@ namespace Chimera.API.TTS.Application.Synthesis;
 /// </summary>
 public interface ITtsSynthesisService
 {
-    #region Methods
 
     Task<SpeechResult> SynthesizeAsync(
         SynthesizeCommand command,
@@ -24,5 +23,4 @@ public interface ITtsSynthesisService
     /// </summary>
     IReadOnlyCollection<SpeechProviderDescriptor> GetProviderCatalog();
 
-    #endregion
 }

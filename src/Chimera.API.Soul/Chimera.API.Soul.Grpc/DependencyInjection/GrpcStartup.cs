@@ -11,7 +11,6 @@ namespace Chimera.API.Soul.Grpc.DependencyInjection;
 /// </summary>
 public sealed class GrpcStartup : IStartup
 {
-    #region Public Methods
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
@@ -21,5 +20,4 @@ public sealed class GrpcStartup : IStartup
         });
     }
 
-    #endregion
 }

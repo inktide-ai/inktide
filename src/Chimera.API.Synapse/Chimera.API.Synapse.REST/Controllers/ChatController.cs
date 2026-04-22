@@ -11,22 +11,15 @@ namespace Chimera.API.Synapse.REST.Controllers;
 [Produces("application/json")]
 public sealed class ChatController : ControllerBase
 {
-    #region Fields
 
     private readonly IChatProviderRegistry _registry;
 
-    #endregion
-
-    #region Constructors
 
     public ChatController(IChatProviderRegistry registry)
     {
         _registry = registry ?? throw new ArgumentNullException(nameof(registry));
     }
 
-    #endregion
-
-    #region Public Methods
 
     /// <summary>
     /// Catalog of registered chat providers (id, display name, capabilities). No auth required.
@@ -86,5 +79,4 @@ public sealed class ChatController : ControllerBase
         }
     }
 
-    #endregion
 }

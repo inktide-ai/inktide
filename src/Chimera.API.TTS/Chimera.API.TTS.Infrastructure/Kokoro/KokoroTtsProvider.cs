@@ -13,22 +13,15 @@ namespace Chimera.API.TTS.Infrastructure.Kokoro;
 public sealed class KokoroTtsProvider : ISpeechProvider
 {
     
-    #region Fields
 
     private readonly KokoroTtsClient _client;
 
-    #endregion
-
-    #region Constructors
 
     public KokoroTtsProvider(KokoroTtsClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => "kokoro";
 
@@ -43,9 +36,6 @@ public sealed class KokoroTtsProvider : ISpeechProvider
         SupportsStreaming = true,
     };
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -88,9 +78,6 @@ public sealed class KokoroTtsProvider : ISpeechProvider
             .ConfigureAwait(false);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private static KokoroSpeechOptions MapToKokoroOptions(SpeechOptions options)
     {
@@ -107,5 +94,4 @@ public sealed class KokoroTtsProvider : ISpeechProvider
         };
     }
 
-    #endregion
 }

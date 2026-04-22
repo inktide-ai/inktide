@@ -7,7 +7,6 @@ namespace Chimera.API.TTS.Infrastructure.Cartesia;
 /// </summary>
 internal sealed class CartesiaVoiceControls
 {
-    #region Properties
 
     /// <summary>
     /// Speech speed: <c>-1.0</c> (slowest) → <c>0.0</c> (normal) → <c>1.0</c> (fastest).
@@ -15,5 +14,4 @@ internal sealed class CartesiaVoiceControls
     [JsonPropertyName("speed")]
     public double Speed { get; set; } = 0.0;
 
-    #endregion
 }

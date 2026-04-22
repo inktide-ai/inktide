@@ -9,20 +9,13 @@ namespace Chimera.API.TTS.Infrastructure.Cartesia;
 /// </summary>
 public sealed class CartesiaTtsClient
 {
-    #region Constants
 
     public const string HttpClientName = "CartesiaTTS";
 
-    #endregion
-
-    #region Fields
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly CartesiaTtsClientSettings _settings;
 
-    #endregion
-
-    #region Constructor
 
     public CartesiaTtsClient(
         IHttpClientFactory httpClientFactory,
@@ -32,9 +25,6 @@ public sealed class CartesiaTtsClient
         _settings          = options.Value;
     }
 
-    #endregion
-
-    #region Public Methods
 
     /// <summary>
     /// Streams synthesised audio via <c>POST /tts/bytes</c>.
@@ -74,9 +64,6 @@ public sealed class CartesiaTtsClient
         return ParseVoices(doc.RootElement);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private HttpClient CreateClient() => _httpClientFactory.CreateClient(HttpClientName);
 
@@ -133,5 +120,4 @@ public sealed class CartesiaTtsClient
         return null;
     }
 
-    #endregion
 }

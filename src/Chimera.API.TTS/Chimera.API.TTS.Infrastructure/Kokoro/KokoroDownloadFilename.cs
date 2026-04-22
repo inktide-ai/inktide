@@ -5,7 +5,6 @@ namespace Chimera.API.TTS.Infrastructure.Kokoro;
 /// </summary>
 internal static class KokoroDownloadFilename
 {
-    #region Internal Methods
 
     internal static string Sanitize(string filename)
     {
@@ -30,5 +29,4 @@ internal static class KokoroDownloadFilename
         return trimmed;
     }
 
-    #endregion
 }

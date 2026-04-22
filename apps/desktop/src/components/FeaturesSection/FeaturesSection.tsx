@@ -2,7 +2,7 @@ import classnames from 'classnames'
 import GlitchText from '../GlitchText'
 import { useRevealOnScroll } from '../../hooks'
 import { CONTENT } from '../../constants'
-import ArrowIcon from '../../assets/arrow.svg'
+import ArrowIcon from '../../assets/app/arrow.svg'
 import styles from './FeaturesSection.module.css'
 
 const FeaturesSection = () => {

@@ -7,15 +7,11 @@ namespace Chimera.API.TTS.Infrastructure.Cartesia;
 /// </summary>
 internal sealed class CartesiaResponseStream : Stream
 {
-    #region Fields
 
     private readonly Stream _inner;
     private readonly HttpResponseMessage _response;
     private bool _disposed;
 
-    #endregion
-
-    #region Constructor
 
     internal CartesiaResponseStream(Stream inner, HttpResponseMessage response)
     {
@@ -23,9 +19,6 @@ internal sealed class CartesiaResponseStream : Stream
         _response = response;
     }
 
-    #endregion
-
-    #region Dispose
 
     protected override void Dispose(bool disposing)
     {
@@ -47,9 +40,6 @@ internal sealed class CartesiaResponseStream : Stream
         _response.Dispose();
     }
 
-    #endregion
-
-    #region Stream delegation
 
     public override bool CanRead  => _inner.CanRead;
     public override bool CanSeek  => _inner.CanSeek;
@@ -86,5 +76,4 @@ internal sealed class CartesiaResponseStream : Stream
     public override void Write(byte[] buffer, int offset, int count)
         => _inner.Write(buffer, offset, count);
 
-    #endregion
 }

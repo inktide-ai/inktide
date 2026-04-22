@@ -11,14 +11,10 @@ namespace Chimera.API.Connector.Infrastructure.Messaging;
 /// </summary>
 public sealed class SynapseIngestMessageHandler : IStreamMessageHandler
 {
-    #region Fields
 
     private readonly IChatMessageQueue _queue;
     private readonly ILogger<SynapseIngestMessageHandler> _logger;
 
-    #endregion
-
-    #region Constructors
 
     public SynapseIngestMessageHandler(IChatMessageQueue queue, ILogger<SynapseIngestMessageHandler> logger)
     {
@@ -26,9 +22,6 @@ public sealed class SynapseIngestMessageHandler : IStreamMessageHandler
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public Task HandleAsync(ChatMessage message, CancellationToken cancellationToken = default)
     {
@@ -48,5 +41,4 @@ public sealed class SynapseIngestMessageHandler : IStreamMessageHandler
         return Task.CompletedTask;
     }
 
-    #endregion
 }

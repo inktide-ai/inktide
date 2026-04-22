@@ -5,15 +5,11 @@ namespace Chimera.API.Domain.Models;
 /// </summary>
 public sealed class ChatProviderDescriptor
 {
-    #region Fields
 
     private string _id = string.Empty;
     private string _displayName = string.Empty;
     private ChatProviderCapabilities _capabilities = new();
 
-    #endregion
-
-    #region Properties
 
     public string Id
     {
@@ -33,5 +29,4 @@ public sealed class ChatProviderDescriptor
         set => _capabilities = value;
     }
 
-    #endregion
 }

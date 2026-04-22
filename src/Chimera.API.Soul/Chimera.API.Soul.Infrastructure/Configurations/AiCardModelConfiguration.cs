@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Infrastructure.Configurations;
 
 public sealed class AiCardModelConfiguration : IEntityTypeConfiguration<AiCardModel>
 {
-    #region Public Methods
 
     public void Configure(EntityTypeBuilder<AiCardModel> b)
     {
@@ -64,5 +63,4 @@ public sealed class AiCardModelConfiguration : IEntityTypeConfiguration<AiCardMo
             .OnDelete(DeleteBehavior.Cascade);
     }
 
-    #endregion
 }

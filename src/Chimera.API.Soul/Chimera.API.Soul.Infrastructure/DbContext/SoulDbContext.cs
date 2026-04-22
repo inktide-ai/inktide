@@ -6,13 +6,9 @@ namespace Chimera.API.Soul.Infrastructure.DbContext;
 
 public sealed class SoulDbContext : Microsoft.EntityFrameworkCore.DbContext
 {
-    #region Constructors
 
     public SoulDbContext(DbContextOptions<SoulDbContext> options) : base(options) { }
 
-    #endregion
-
-    #region Properties
 
     public DbSet<AiCard> AiCards => Set<AiCard>();
     public DbSet<AiCardChannel> AiCardChannels => Set<AiCardChannel>();
@@ -24,10 +20,9 @@ public sealed class SoulDbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<AiCardModel> AiCardModels => Set<AiCardModel>();
     public DbSet<AiCardScene> AiCardScenes => Set<AiCardScene>();
+    public DbSet<AiCardCustomSceneTag> AiCardCustomSceneTags => Set<AiCardCustomSceneTag>();
+    public DbSet<UserProviderCredential> UserProviderCredentials => Set<UserProviderCredential>();
 
-    #endregion
-
-    #region Protected Methods
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,9 +36,10 @@ public sealed class SoulDbContext : Microsoft.EntityFrameworkCore.DbContext
         modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
         modelBuilder.ApplyConfiguration(new AiCardModelConfiguration());
         modelBuilder.ApplyConfiguration(new AiCardSceneConfiguration());
+        modelBuilder.ApplyConfiguration(new AiCardCustomSceneTagConfiguration());
+        modelBuilder.ApplyConfiguration(new UserProviderCredentialConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }
 
-    #endregion
 }

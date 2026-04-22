@@ -56,14 +56,9 @@ public sealed class ChimeraChatConnector : IChatConnector, IChimeraChatInbox, IA
         });
     }
 
-    // ------------------------------------------------------------------
-    // IChimeraChatInbox
-    // ------------------------------------------------------------------
-
     public bool TryEnqueue(string channelId, string userId, string userName, string text)
     {
-        // Timestamp here, not at dequeue, so downstream pipeline sees when the message
-        // actually arrived rather than when the consumer loop got around to it.
+        // Timestamp here, not at dequeue: downstream sees actual arrival time, not when the consumer loop picked it up.
         var msg = new InboundMessage(channelId, userId, userName, text, DateTimeOffset.UtcNow);
 
         if (_queue.Writer.TryWrite(msg))
@@ -74,10 +69,6 @@ public sealed class ChimeraChatConnector : IChatConnector, IChimeraChatInbox, IA
             channelId, userId);
         return false;
     }
-
-    // ------------------------------------------------------------------
-    // IChatConnector
-    // ------------------------------------------------------------------
 
     public Task ConnectAsync(CancellationToken cancellationToken = default)
     {
@@ -98,10 +89,8 @@ public sealed class ChimeraChatConnector : IChatConnector, IChimeraChatInbox, IA
     {
         _logger.LogInformation("[ChimeraChat] Connector stopping...");
 
-        // Signal the channel as complete so ReadAllAsync drains and exits cleanly.
         _queue.Writer.TryComplete();
 
-        // Swap out and cancel/dispose the CTS atomically to guard against concurrent calls.
         var cts = Interlocked.Exchange(ref _cts, null);
         if (cts is not null)
         {
@@ -126,10 +115,6 @@ public sealed class ChimeraChatConnector : IChatConnector, IChimeraChatInbox, IA
 
         _logger.LogInformation("[ChimeraChat] Connector stopped.");
     }
-
-    // ------------------------------------------------------------------
-    // Background consumer
-    // ------------------------------------------------------------------
 
     private async Task ConsumeLoopAsync(CancellationToken ct)
     {
@@ -167,10 +152,6 @@ public sealed class ChimeraChatConnector : IChatConnector, IChimeraChatInbox, IA
 
         _logger.LogDebug("[ChimeraChat] Consumer loop exited.");
     }
-
-    // ------------------------------------------------------------------
-    // IAsyncDisposable
-    // ------------------------------------------------------------------
 
     public ValueTask DisposeAsync() => new(DisconnectAsync());
 }

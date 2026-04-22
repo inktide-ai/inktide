@@ -15,14 +15,10 @@ namespace Chimera.API.Profile.REST.Controllers;
 [Authorize]
 public sealed class MeController : ControllerBase
 {
-    #region Fields
 
     private readonly IUserAccountDeletionService _accountDeletion;
     private readonly IUserAvatarService _avatar;
 
-    #endregion
-
-    #region Constructors
 
     public MeController(IUserAccountDeletionService accountDeletion, IUserAvatarService avatar)
     {
@@ -30,9 +26,6 @@ public sealed class MeController : ControllerBase
         _avatar = avatar ?? throw new ArgumentNullException(nameof(avatar));
     }
 
-    #endregion
-
-    #region Public Methods
 
     [HttpGet]
     [ProducesResponseType(typeof(MeResponse), StatusCodes.Status200OK)]
@@ -111,9 +104,6 @@ public sealed class MeController : ControllerBase
         });
     }
 
-    #endregion
-
-    #region Nested Types
 
     public sealed class MeResponse
     {
@@ -142,5 +132,4 @@ public sealed class MeController : ControllerBase
         public string? Warning { get; init; }
     }
 
-    #endregion
 }

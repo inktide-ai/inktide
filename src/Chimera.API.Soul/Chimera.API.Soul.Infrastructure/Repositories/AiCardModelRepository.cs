@@ -7,22 +7,15 @@ namespace Chimera.API.Soul.Infrastructure.Repositories;
 
 public sealed class AiCardModelRepository : IAiCardModelRepository
 {
-    #region Fields
 
     private readonly SoulDbContext _db;
 
-    #endregion
-
-    #region Constructors
 
     public AiCardModelRepository(SoulDbContext db)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task<AiCardModel> AddAsync(AiCardModel model, CancellationToken ct = default)
     {
@@ -76,5 +69,4 @@ public sealed class AiCardModelRepository : IAiCardModelRepository
             .ConfigureAwait(false);
     }
 
-    #endregion
 }

@@ -9,21 +9,14 @@ namespace Chimera.API.TTS.Infrastructure.ElevenLabs;
 /// </summary>
 public sealed class ElevenLabsTtsClient
 {
-    #region Constants
 
     public const string HttpClientName = "ElevenLabsTTS";
 
-    #endregion
-
-    #region Fields
 
     private readonly IHttpClientFactory _httpClientFactory;
 
     private readonly Uri _baseUri;
 
-    #endregion
-
-    #region Constructor
 
     public ElevenLabsTtsClient(
         IHttpClientFactory httpClientFactory,
@@ -33,9 +26,6 @@ public sealed class ElevenLabsTtsClient
         _baseUri = options.Value.Endpoint;
     }
 
-    #endregion
-
-    #region Public Methods
 
     /// <summary>
     /// Streams synthesised audio via <c>POST /v1/text-to-speech/{voiceId}/stream</c>.
@@ -92,9 +82,6 @@ public sealed class ElevenLabsTtsClient
         return ParseModels(doc.RootElement);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private HttpClient CreateClient() => _httpClientFactory.CreateClient(HttpClientName);
 
@@ -211,5 +198,4 @@ public sealed class ElevenLabsTtsClient
         return new SpeechModelCollection("list", models);
     }
 
-    #endregion
 }

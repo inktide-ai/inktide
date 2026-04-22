@@ -11,7 +11,6 @@ namespace Chimera.API.Soul.Grpc.AiCards.Service.DependencyInjection;
 /// </summary>
 public sealed class GrpcAiCardsServiceRegistrator : IServiceRegistrator
 {
-    #region Public Methods
 
     public void Register(IRegistrator registrator, IConfiguration configuration)
     {
@@ -20,5 +19,4 @@ public sealed class GrpcAiCardsServiceRegistrator : IServiceRegistrator
         registrator.Register<IEndpointConfigurator, GrpcAiCardsEndpointConfigurator>(Reuse.Singleton);
     }
 
-    #endregion
 }

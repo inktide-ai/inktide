@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Infrastructure.Configurations;
 
 public sealed class MemoryMetadataConfiguration : IEntityTypeConfiguration<MemoryMetadata>
 {
-    #region Public Methods
 
     public void Configure(EntityTypeBuilder<MemoryMetadata> b)
     {
@@ -78,5 +77,4 @@ public sealed class MemoryMetadataConfiguration : IEntityTypeConfiguration<Memor
             .OnDelete(DeleteBehavior.Cascade);
     }
 
-    #endregion
 }

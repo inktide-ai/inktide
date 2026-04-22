@@ -11,12 +11,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Chimera.API.Core.Middleware;
 
-/// <summary>
-/// Registers a single global exception handler so controllers and filters do not need duplicate try/catch for unexpected failures.
-/// </summary>
 public static class GlobalExceptionHandlerExtensions
 {
-    #region Fields
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -24,9 +20,6 @@ public static class GlobalExceptionHandlerExtensions
         WriteIndented = false
     };
 
-    #endregion
-
-    #region Public Methods
 
     public static IApplicationBuilder UseChimeraGlobalExceptionHandler(this IApplicationBuilder app)
     {
@@ -79,5 +72,4 @@ public static class GlobalExceptionHandlerExtensions
         return app;
     }
 
-    #endregion
 }

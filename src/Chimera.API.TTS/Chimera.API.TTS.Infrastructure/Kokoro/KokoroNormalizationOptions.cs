@@ -8,7 +8,6 @@ namespace Chimera.API.TTS.Infrastructure.Kokoro;
 /// </summary>
 public sealed class KokoroNormalizationOptions
 {
-    #region Fields
 
     private bool _normalize = true;
 
@@ -24,9 +23,6 @@ public sealed class KokoroNormalizationOptions
 
     private bool _replaceRemainingSymbols = true;
 
-    #endregion
-
-    #region Properties
 
     [JsonPropertyName("normalize")]
     public bool Normalize
@@ -77,5 +73,4 @@ public sealed class KokoroNormalizationOptions
         set => _replaceRemainingSymbols = value;
     }
 
-    #endregion
 }

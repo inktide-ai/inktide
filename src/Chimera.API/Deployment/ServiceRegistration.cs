@@ -28,8 +28,6 @@ public sealed class ServicesRegistration
         registrator.RegisterDelegate<ILogger>(resolver =>
             resolver.Resolve<ILoggerFactory>().CreateLogger("Default"));
 
-        registrator.Register<App>(Reuse.Singleton);
-
         var registratorTypes = AppDomain.CurrentDomain.GetAssemblies()
             .Distinct()
             .SelectMany(a => a.DefinedTypes)

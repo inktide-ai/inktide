@@ -4,7 +4,7 @@ import styles from './Navigation.module.css'
 import { NAVIGATION_ITEMS, CONTENT } from '../../constants'
 import { useAuth } from '../../context/AuthContext'
 import { useHideOnScroll } from '../../hooks'
-import logoSvg from '../../assets/icon.svg'
+import logoSvg from '../../assets/app/icon.svg'
 
 interface NavigationProps {
   onLoginClick?: () => void

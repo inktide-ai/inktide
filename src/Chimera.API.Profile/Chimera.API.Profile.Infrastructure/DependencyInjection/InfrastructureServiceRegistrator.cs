@@ -12,7 +12,6 @@ namespace Chimera.API.Profile.Infrastructure.DependencyInjection;
 
 public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
 {
-    #region Public Methods
 
     public void Register(IRegistrator registrator, IConfiguration configuration)
     {
@@ -41,9 +40,6 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
         }
     }
 
-    #endregion
-
-    #region Private Methods
 
     private static bool IsObjectStorageReady(S3Settings s)
     {
@@ -73,5 +69,4 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
         return new AmazonS3Client(settings.AccessKey, settings.SecretKey, config);
     }
 
-    #endregion
 }

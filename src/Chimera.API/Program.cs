@@ -1,6 +1,5 @@
 using System.Reflection;
 using Chimera.API.Deployment;
-using DryIoc;
 using Serilog;
 
 namespace Chimera.API
@@ -23,18 +22,9 @@ namespace Chimera.API
             {
                 var host = Startup.CreateHostBuilder().Build();
 
-                Log.Logger?.Information("Application is starting up...");
+                Log.Logger?.Information("Application is starting...");
 
-                var container = host.Services.GetRequiredService<IContainer>();
-                
-                Log.Logger?.Information(
-                    "Dependency container has been initialized. Resolving application...");
-
-                var app = container.Resolve<App>();
-
-                Log.Logger?.Information("Application resolved from the container. Starting application...");
-
-                app.Start();
+                host.Run();
 
 
             }

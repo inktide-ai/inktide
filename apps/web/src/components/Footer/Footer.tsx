@@ -1,12 +1,9 @@
-import logoSvg from '../../assets/icon.svg'
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import logoSvg from '../../assets/app/icon.svg'
 import styles from './Footer.module.css'
 
-const FOOTER_LINKS = [
-  { label: 'Product', href: '#features' },
-  { label: 'Solutions', href: '#how' },
-  { label: 'How it works', href: '#how-it-works' },
-  { label: 'Documentation', href: '/docs' },
-]
+// FOOTER_LINKS is built inside Footer via useMemo to support i18n
 
 const SOCIAL_LINKS = [
   {
@@ -58,7 +55,17 @@ const SOCIAL_LINKS = [
 
 const EMAIL = 'hello@chimera.ai'
 
-const Footer = () => (
+const Footer = () => {
+  const { t } = useTranslation('landing')
+
+  const FOOTER_LINKS = useMemo(() => [
+    { label: t('footer.links.product'),     href: '#features' },
+    { label: t('footer.links.solutions'),   href: '#how' },
+    { label: t('footer.links.howItWorks'),  href: '#how-it-works' },
+    { label: t('footer.links.documentation'), href: '/docs' },
+  ], [t])
+
+  return (
   <footer className={styles.footer}>
     <div className={styles.container}>
       <div className={styles.top}>
@@ -76,7 +83,7 @@ const Footer = () => (
           </nav>
         </div>
         <div className={styles.socialBlock}>
-          <span className={styles.followUs}>Follow us</span>
+          <span className={styles.followUs}>{t('footer.followUs')}</span>
           <div className={styles.social}>
             {SOCIAL_LINKS.map(({ label, href, icon }) => (
             <a
@@ -101,11 +108,12 @@ const Footer = () => (
       </div>
       <div className={styles.bottom}>
         <p className={styles.copyright}>
-          © {new Date().getFullYear()} Chimera. All rights reserved.
+          {t('footer.copyright', { year: new Date().getFullYear() })}
         </p>
       </div>
     </div>
   </footer>
-)
+  )
+}
 
 export default Footer

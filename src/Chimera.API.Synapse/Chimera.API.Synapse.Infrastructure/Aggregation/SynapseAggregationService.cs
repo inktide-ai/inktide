@@ -2,6 +2,7 @@ using System.Text.Json;
 using Chimera.API.Synapse.Application.Configuration;
 using Chimera.API.Synapse.Application.Interfaces;
 using Chimera.API.Synapse.Application.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
@@ -11,7 +12,6 @@ namespace Chimera.API.Synapse.Infrastructure.Aggregation;
 /// <summary>Fan-in: publishes aggregated context envelope to the LLM Redis stream.</summary>
 public sealed class SynapseAggregationService : ISynapseAggregationService
 {
-    #region Fields
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -22,9 +22,6 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
     private readonly IOptions<SynapseAggregationOptions> _options;
     private readonly ILogger<SynapseAggregationService> _logger;
 
-    #endregion
-
-    #region Constructors
 
     public SynapseAggregationService(
         IConnectionMultiplexer redis,
@@ -36,9 +33,6 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task AggregateAsync(MessageProcessingContext context, CancellationToken cancellationToken = default)
     {
@@ -48,7 +42,9 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
             DateTimeOffset.UtcNow,
             context.Message,
             context.Get<RagContext>(),
-            context.Get<ContextShardPayload>());
+            BuildContextPayload(context),
+            context.Get<SessionContext>(),
+            context.Get<EmotionResult>());
 
         var json = JsonSerializer.Serialize(envelope, JsonOptions);
         var opt = _options.Value;
@@ -68,5 +64,41 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
             envelope.CorrelationId);
     }
 
-    #endregion
+    private static ContextShardPayload? BuildContextPayload(MessageProcessingContext context)
+    {
+        var cardCtx = context.Get<AiCardContext>();
+        if (cardCtx is null) return null;
+
+        const int maxPreview = 2000;
+        var preview = context.Message.Text is { Length: > maxPreview } t
+            ? t[..maxPreview] + "…"
+            : context.Message.Text;
+
+        return new ContextShardPayload(
+            cardCtx.AiCardId,
+            cardCtx.UserId,
+            context.Message.ChannelId,
+            context.Message.ChannelName,
+            cardCtx.SystemPrompt,
+            cardCtx.Personality,
+            cardCtx.LlmProviderId,
+            cardCtx.LlmModel,
+            cardCtx.MemoryEnabled,
+            cardCtx.MaxMemories,
+            preview,
+            cardCtx.TtsProviderId,
+            cardCtx.TtsVoiceId,
+            cardCtx.TtsModelId,
+            cardCtx.TtsSpeed,
+            cardCtx.ChunkingMode,
+            cardCtx.Language,
+            LlmTemperature:      cardCtx.LlmTemperature,
+            LlmMaxTokens:        cardCtx.LlmMaxTokens,
+            LlmTopP:             cardCtx.LlmTopP,
+            LlmFrequencyPenalty: cardCtx.LlmFrequencyPenalty,
+            LlmPresencePenalty:  cardCtx.LlmPresencePenalty,
+            ResponseDelayMs:     cardCtx.ResponseDelayMs,
+            LlmBaseUrl:          cardCtx.LlmBaseUrl);
+    }
+
 }

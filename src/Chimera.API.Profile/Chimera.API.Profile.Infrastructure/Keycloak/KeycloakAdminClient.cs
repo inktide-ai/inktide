@@ -9,15 +9,11 @@ namespace Chimera.API.Profile.Infrastructure.Keycloak;
 
 public sealed class KeycloakAdminClient : IKeycloakAdminClient
 {
-    #region Fields
 
     private readonly KeycloakAdminSettings _settings;
     private readonly ILogger<KeycloakAdminClient> _logger;
     private readonly HttpClient _http;
 
-    #endregion
-
-    #region Constructors
 
     public KeycloakAdminClient(KeycloakAdminSettings settings, ILogger<KeycloakAdminClient> logger)
     {
@@ -26,9 +22,6 @@ public sealed class KeycloakAdminClient : IKeycloakAdminClient
         _http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task<(bool Success, string? ErrorMessage)> TryDeleteUserAsync(Guid userId, CancellationToken ct = default)
     {
@@ -155,9 +148,6 @@ public sealed class KeycloakAdminClient : IKeycloakAdminClient
         return (false, $"Keycloak returned {(int)putRes.StatusCode}.");
     }
 
-    #endregion
-
-    #region Private Methods
 
     private async Task<string?> RequestTokenAsync(string baseUrl, CancellationToken ct)
     {
@@ -197,5 +187,4 @@ public sealed class KeycloakAdminClient : IKeycloakAdminClient
         return tokenEl.GetString();
     }
 
-    #endregion
 }

@@ -1,13 +1,11 @@
 using System.Security.Claims;
 using Chimera.API.Soul.Application.Exceptions;
 using Chimera.API.Soul.Application.Interfaces;
-using Chimera.API.Soul.Domain.Repositories;
-using Chimera.API.Soul.REST.Converters;
+using Chimera.API.Soul.REST.Mappers;
 using Chimera.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.Features;
 
 namespace Chimera.API.Soul.REST.Controllers;
 
@@ -19,90 +17,78 @@ public sealed class AiCardsController : ControllerBase
 {
     private const long MaxAvatarUploadBytes = 52_428_800;
 
-    #region Fields
-
     private readonly IAiCardService _cardService;
     private readonly IAiCardAvatarService _cardAvatar;
-    private readonly IAuditLogRepository _auditLog;
+    private readonly IAiCardBannerService _cardBanner;
+    private readonly IAiCardActivityService _activity;
 
-    #endregion
-
-    #region Constructors
-
-    public AiCardsController(IAiCardService cardService, IAiCardAvatarService cardAvatar, IAuditLogRepository auditLog)
+    public AiCardsController(
+        IAiCardService cardService,
+        IAiCardAvatarService cardAvatar,
+        IAiCardBannerService cardBanner,
+        IAiCardActivityService activity)
     {
         _cardService = cardService ?? throw new ArgumentNullException(nameof(cardService));
-        _cardAvatar = cardAvatar ?? throw new ArgumentNullException(nameof(cardAvatar));
-        _auditLog = auditLog ?? throw new ArgumentNullException(nameof(auditLog));
+        _cardAvatar  = cardAvatar  ?? throw new ArgumentNullException(nameof(cardAvatar));
+        _cardBanner  = cardBanner  ?? throw new ArgumentNullException(nameof(cardBanner));
+        _activity    = activity    ?? throw new ArgumentNullException(nameof(activity));
     }
-
-    #endregion
-
-    #region Public Methods
 
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<AiCardListItem>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAll(
-        CancellationToken ct = default)
+    public async Task<IActionResult> GetAll(CancellationToken ct = default)
     {
         var userId = GetUserId();
-        var cards = await _cardService.GetAllByUserAsync(userId, ct);
-        return Ok(cards.Select(AiCardConverter.ToListItem).ToList());
+        var cards  = await _cardService.GetAllByUserAsync(userId, ct);
+        return Ok(cards.Select(AiCardResponseMapper.ToListItem).ToList());
     }
 
     [HttpGet("{cardId:guid}")]
     [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetById(
-        Guid cardId, 
-        CancellationToken ct = default)
+    public async Task<IActionResult> GetById(Guid cardId, CancellationToken ct = default)
     {
         var userId = GetUserId();
-        var card = await _cardService.GetByIdAsync(userId, cardId, ct);
+        var card   = await _cardService.GetByIdAsync(userId, cardId, ct);
         if (card is null)
             return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
-        return Ok(AiCardConverter.ToResponse(card));
+        return Ok(AiCardResponseMapper.ToResponse(card));
     }
 
     [HttpPost]
     [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Create(
-        [FromBody] CreateAiCardRequest? request,
-        CancellationToken ct = default)
+    public async Task<IActionResult> Create([FromBody] CreateAiCardRequest? request, CancellationToken ct = default)
     {
         if (request is null)
             return BadRequest(ApiErrorResponse.From("Request body is required.", ErrorCodes.ValidationError));
 
-        var userId = GetUserId();
-        var entity = AiCardConverter.ToEntity(request);
+        var userId  = GetUserId();
+        var entity  = AiCardEntityFactory.ToEntity(request);
         var created = await _cardService.CreateAsync(userId, entity, ct);
-        return CreatedAtAction(nameof(GetById), new { cardId = created.Id }, AiCardConverter.ToResponse(created));
+        return CreatedAtAction(nameof(GetById), new { cardId = created.Id }, AiCardResponseMapper.ToResponse(created));
     }
 
     [HttpPut("{cardId:guid}")]
     [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Update(
-        Guid cardId, 
-        [FromBody] UpdateAiCardRequest? request,
-        CancellationToken ct = default)
+    public async Task<IActionResult> Update(Guid cardId, [FromBody] UpdateAiCardRequest? request, CancellationToken ct = default)
     {
         if (request is null)
             return BadRequest(ApiErrorResponse.From("Request body is required.", ErrorCodes.ValidationError));
 
         try
         {
-            var userId = GetUserId();
+            var userId   = GetUserId();
             var existing = await _cardService.GetByIdAsync(userId, cardId, ct);
             if (existing is null)
                 return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
 
-            AiCardConverter.ApplyUpdate(existing, request);
+            AiCardEntityFactory.ApplyUpdate(existing, request);
             var updated = await _cardService.UpdateAsync(userId, existing, ct);
-            return Ok(AiCardConverter.ToResponse(updated));
+            return Ok(AiCardResponseMapper.ToResponse(updated));
         }
         catch (AiCardNotFoundException)
         {
@@ -114,7 +100,24 @@ public sealed class AiCardsController : ControllerBase
         }
     }
 
-    /// <summary>Upload an image to S3 and set the card&apos;s avatar URL.</summary>
+    [HttpDelete("{cardId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(Guid cardId, CancellationToken ct)
+    {
+        try
+        {
+            var userId = GetUserId();
+            await _cardService.DeleteAsync(userId, cardId, ct);
+            return NoContent();
+        }
+        catch (AiCardNotFoundException)
+        {
+            return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
+        }
+    }
+
+    /// <summary>Upload an image to S3 and set the card's avatar URL.</summary>
     [HttpPost("{cardId:guid}/avatar")]
     [RequestSizeLimit(MaxAvatarUploadBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = MaxAvatarUploadBytes)]
@@ -140,27 +143,58 @@ public sealed class AiCardsController : ControllerBase
         {
             if (string.Equals(result.Error, "AI card not found.", StringComparison.Ordinal))
                 return NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound));
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, ApiErrorResponse.From(result.Error!, ErrorCodes.ServiceUnavailable));
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                ApiErrorResponse.From(result.Error!, ErrorCodes.ServiceUnavailable));
         }
 
-        return Ok(AiCardConverter.ToResponse(result.Card!));
+        return Ok(AiCardResponseMapper.ToResponse(result.Card!));
     }
 
-    [HttpDelete("{cardId:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    /// <summary>Upload an image to S3 and set the card's banner image URL.</summary>
+    [HttpPost("{cardId:guid}/banner")]
+    [RequestSizeLimit(MaxAvatarUploadBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = MaxAvatarUploadBytes)]
+    [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(Guid cardId, CancellationToken ct)
+    public async Task<IActionResult> UploadBanner(Guid cardId, IFormFile? file, CancellationToken ct)
     {
-        try
+        if (file is null || file.Length == 0)
+            return BadRequest(ApiErrorResponse.From("Image file is required.", ErrorCodes.ValidationError));
+
+        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            return BadRequest(ApiErrorResponse.From("File must be an image.", ErrorCodes.ValidationError));
+
+        var userId = GetUserId();
+        await using var stream = file.OpenReadStream();
+        var result = await _cardBanner
+            .UploadBannerAsync(userId, cardId, stream, file.FileName, file.ContentType, ct)
+            .ConfigureAwait(false);
+
+        if (!result.Success)
         {
-            var userId = GetUserId();
-            await _cardService.DeleteAsync(userId, cardId, ct);
-            return NoContent();
+            if (string.Equals(result.Error, "AI card not found.", StringComparison.Ordinal))
+                return NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound));
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                ApiErrorResponse.From(result.Error!, ErrorCodes.ServiceUnavailable));
         }
-        catch (AiCardNotFoundException)
-        {
-            return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
-        }
+
+        return Ok(AiCardResponseMapper.ToResponse(result.Card!));
+    }
+
+    /// <summary>Remove the card's banner image, reverting to the colour gradient.</summary>
+    [HttpDelete("{cardId:guid}/banner")]
+    [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveBanner(Guid cardId, CancellationToken ct)
+    {
+        var userId = GetUserId();
+        var result = await _cardBanner.RemoveBannerAsync(userId, cardId, ct).ConfigureAwait(false);
+
+        if (!result.Success)
+            return NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound));
+
+        return Ok(AiCardResponseMapper.ToResponse(result.Card!));
     }
 
     [HttpGet("{cardId:guid}/activity")]
@@ -169,23 +203,21 @@ public sealed class AiCardsController : ControllerBase
     public async Task<IActionResult> GetActivity(Guid cardId, CancellationToken ct = default)
     {
         var userId = GetUserId();
-        var card = await _cardService.GetByIdAsync(userId, cardId, ct);
+        var card   = await _cardService.GetByIdAsync(userId, cardId, ct);
         if (card is null)
             return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
 
-        var logs = await _auditLog.GetByEntityAsync("ai_card", cardId, limit: 20, ct);
-        var items = logs.Select(l => new AiCardActivityItem
+        var entries = await _activity.GetRecentAsync("ai_card", cardId, limit: 20, ct);
+        var items   = entries.Select(e => new AiCardActivityItem
         {
-            Id = l.Id,
-            Action = l.Action,
-            CreatedAt = l.CreatedAt,
+            Id        = e.Id,
+            Action    = e.Action,
+            CreatedAt = e.CreatedAt,
         }).ToList();
+
         return Ok(items);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private Guid GetUserId()
     {
@@ -193,6 +225,4 @@ public sealed class AiCardsController : ControllerBase
             ?? throw new UnauthorizedAccessException("User ID not found in token.");
         return Guid.Parse(sub);
     }
-
-    #endregion
 }

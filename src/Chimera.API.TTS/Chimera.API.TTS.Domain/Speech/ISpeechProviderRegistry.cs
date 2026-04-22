@@ -8,19 +8,14 @@ namespace Chimera.API.TTS.Domain.Speech;
 /// </summary>
 public interface ISpeechProviderRegistry
 {
-    #region Properties
 
     IReadOnlyDictionary<string, SpeechProviderDescriptor> Descriptors { get; }
 
     IReadOnlyList<ISpeechProvider> All { get; }
 
-    #endregion
-
-    #region Methods
 
     ISpeechProvider GetRequired(string providerId);
 
     bool TryGet(string providerId, [NotNullWhen(true)] out ISpeechProvider? provider);
 
-    #endregion
 }

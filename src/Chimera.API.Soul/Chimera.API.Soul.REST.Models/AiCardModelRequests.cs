@@ -4,15 +4,11 @@ namespace Chimera.API.Soul.REST.Models;
 
 public sealed class BeginModelUploadRequest
 {
-    #region Fields
 
     private string _fileName = string.Empty;
     private string _contentType = string.Empty;
     private long _sizeBytes;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("file_name")]
     public string FileName
@@ -35,21 +31,16 @@ public sealed class BeginModelUploadRequest
         set => _sizeBytes = value;
     }
 
-    #endregion
 }
 
 public sealed class CompleteModelUploadRequest
 {
-    #region Fields
 
     private string _storageKey = string.Empty;
     private string _fileName = string.Empty;
     private string _contentType = string.Empty;
     private long _sizeBytes;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("storage_key")]
     public string StorageKey
@@ -79,21 +70,16 @@ public sealed class CompleteModelUploadRequest
         set => _sizeBytes = value;
     }
 
-    #endregion
 }
 
 public sealed class BeginModelUploadResponse
 {
-    #region Fields
 
     private string _uploadUrl = string.Empty;
     private string _storageKey = string.Empty;
     private DateTimeOffset _expiresAt;
     private string _requiredContentType = string.Empty;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("upload_url")]
     public string UploadUrl
@@ -124,12 +110,10 @@ public sealed class BeginModelUploadResponse
         set => _requiredContentType = value;
     }
 
-    #endregion
 }
 
 public sealed class AiCardModelResponse
 {
-    #region Fields
 
     private Guid _id;
     private Guid _aiCardId;
@@ -140,9 +124,6 @@ public sealed class AiCardModelResponse
     private long _sizeBytes;
     private DateTime _createdAt;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("id")]
     public Guid Id
@@ -200,5 +181,4 @@ public sealed class AiCardModelResponse
         set => _createdAt = value;
     }
 
-    #endregion
 }

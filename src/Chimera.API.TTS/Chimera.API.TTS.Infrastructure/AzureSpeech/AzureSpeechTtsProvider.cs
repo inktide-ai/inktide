@@ -15,24 +15,17 @@ namespace Chimera.API.TTS.Infrastructure.AzureSpeech;
 /// </summary>
 public sealed class AzureSpeechTtsProvider : ISpeechProvider
 {
-    #region Constants
 
     private const float MinSpeed = 0.5f;
     private const float MaxSpeed = 2.0f;
 
     private static readonly SpeechModelCollection EmptyModels = new("list", []);
 
-    #endregion
-
-    #region Fields
 
     private readonly AzureSpeechTtsClient _client;
     private readonly IOptions<AzureSpeechTtsClientSettings> _settings;
     private readonly ILogger<AzureSpeechTtsProvider> _logger;
 
-    #endregion
-
-    #region Constructor
 
     public AzureSpeechTtsProvider(
         AzureSpeechTtsClient client,
@@ -44,9 +37,6 @@ public sealed class AzureSpeechTtsProvider : ISpeechProvider
         _logger   = logger   ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => "azure-speech";
 
@@ -62,9 +52,6 @@ public sealed class AzureSpeechTtsProvider : ISpeechProvider
         SupportsModelListing  = false,
     };
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -140,9 +127,6 @@ public sealed class AzureSpeechTtsProvider : ISpeechProvider
             .ConfigureAwait(false);
     }
 
-    #endregion
-
-    #region Private Methods
 
     /// <summary>
     /// Resolves a baseUrl/region value to a full Azure Speech endpoint URL.
@@ -209,5 +193,4 @@ public sealed class AzureSpeechTtsProvider : ISpeechProvider
             : defaultValue;
     }
 
-    #endregion
 }

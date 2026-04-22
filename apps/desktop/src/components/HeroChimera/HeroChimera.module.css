@@ -1,4 +1,4 @@
-/* Dark theme hero */
+/* ── Hero section ── */
 .heroSection {
   min-height: 100vh;
   padding-top: 72px;
@@ -26,17 +26,12 @@
   padding-bottom: 1rem;
 }
 
-/* MacBook и экраны с меньшей высотой — меньшие отступы, чтобы лента не улетала вниз */
 @media (max-height: 950px) {
-  .container {
-    margin-top: 1.5rem;
-  }
-
-  .logosWrapper {
-    margin-bottom: 1.5rem;
-  }
+  .container { margin-top: 1.5rem; }
+  .logosWrapper { margin-bottom: 1.5rem; }
 }
 
+/* ── Left column ── */
 .leftColumn {
   max-width: 540px;
 }
@@ -52,13 +47,7 @@
 }
 
 .titleAccent {
-  background: linear-gradient(
-    90deg,
-    #22D3EE,
-    #8B5CF6,
-    #EC4899,
-    #22D3EE
-  );
+  background: linear-gradient(90deg, #22D3EE, #8B5CF6, #EC4899, #22D3EE);
   background-size: 300% 100%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -67,12 +56,8 @@
 }
 
 @keyframes gradientShift {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
 }
 
 .subtitle {
@@ -103,9 +88,7 @@
   transform: translateY(-1px);
 }
 
-.downloadBlock {
-  margin-top: 1.5rem;
-}
+.downloadBlock { margin-top: 1.5rem; }
 
 .downloadLabel {
   font-family: var(--font-ui);
@@ -115,10 +98,7 @@
   margin: 0 0 0.75rem;
 }
 
-.osIcons {
-  display: flex;
-  gap: 1.5rem;
-}
+.osIcons { display: flex; gap: 1.5rem; }
 
 .osIcon {
   display: flex;
@@ -130,141 +110,456 @@
   transition: color 0.2s ease;
 }
 
-.osIcon:hover {
-  color: var(--text-primary);
-}
+.osIcon:hover { color: var(--text-primary); }
 
-/* App mockup window */
+/* ── Right column: app window shell ── */
 .rightColumn {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+/*
+ * The mockup renders its inner layout at 1200×700 then scales it to 60%.
+ * Effective display size: 720×420 (+40px chrome = 460px total height).
+ * overflow: hidden on appMockup clips anything beyond the window frame.
+ */
 .appMockup {
   width: 100%;
   max-width: 720px;
-  background: var(--bg-surface);
-  border-radius: 12px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.07);
   overflow: hidden;
+  background: var(--bg-dark);
 }
 
-.mockupHeader {
+/* macOS title bar */
+.mockupChrome {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
+  gap: 0.75rem;
+  padding: 0 1rem;
+  height: 40px;
+  background: var(--bg-deeper);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
 }
 
 .mockupControls {
   display: flex;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .mockupControls span {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #4a4f5a;
 }
 
-.mockupControls span:first-child {
-  background: #ff5f57;
-}
+.mockupControls span:nth-child(1) { background: #ff5f57; }
+.mockupControls span:nth-child(2) { background: #ffbd2e; }
+.mockupControls span:nth-child(3) { background: #28ca42; }
 
-.mockupControls span:nth-child(2) {
-  background: #ffbd2e;
-}
-
-.mockupControls span:last-child {
-  background: #28ca42;
-}
-
-.mockupTitle {
-  font-family: var(--font-ui);
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.mockupBody {
-  display: flex;
-  min-height: 340px;
-}
-
-.mockupSidebar {
-  width: 180px;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.2);
-  border-right: 1px solid var(--border);
-}
-
-.mockupItem {
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.25rem;
-  border-radius: 6px;
-}
-
-.mockupItemActive {
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.25rem;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.mockupMain {
+.mockupChromeTitle {
   flex: 1;
-  padding: 1.5rem 2rem;
-}
-
-.mockupField {
-  margin-bottom: 1.25rem;
-}
-
-.mockupLabel {
-  display: block;
   font-family: var(--font-ui);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  color: var(--text-muted);
-  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
 }
 
-.mockupInput {
-  height: 40px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+.mockupChromeStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  border-radius: 20px;
+  padding: 0.2rem 0.6rem;
+  flex-shrink: 0;
 }
 
-.mockupHint {
+/* Clips the scaled layout to visible area (700px * 0.6 = 420px) */
+.mockupViewport {
+  overflow: hidden;
+  height: 420px;
+}
+
+/* Full-size layout rendered at 1200×700, scaled down by 0.6 */
+.mockupLayout {
+  display: flex;
+  width: 1200px;
+  height: 700px;
+  transform: scale(0.6);
+  transform-origin: top left;
+  background: var(--bg-dark);
+}
+
+/* ══════════════════════════════════════════════
+   Mockup Sidebar  (mirrors ProfilePage exactly)
+   ══════════════════════════════════════════════ */
+.mSidebar {
+  width: 260px;
+  flex-shrink: 0;
+  height: 100%;
+  background: var(--bg-deeper);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.mSidebarHeader {
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.mLogoRow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.mLogoIcon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.mLogoText {
+  font-family: var(--font-ui);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mCreateBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.mCreateBtnIcon {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.mSidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.mNavItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.mNavIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+
+.mNavIcon svg { width: 18px; height: 18px; }
+
+.mSearch {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 1.5rem;
-  padding: 0.75rem 1rem;
-  background: rgba(237, 62, 62, 0.08);
-  border: 1px solid rgba(237, 62, 62, 0.2);
-  border-radius: 8px;
+  margin: 0 0.75rem 0.75rem;
+  padding: 0.5rem 0.875rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+}
+
+.mSearchIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.mSearchIcon svg { width: 16px; height: 16px; }
+
+.mSearchPlaceholder {
   font-family: var(--font-ui);
-  font-size: 0.9rem;
+  font-size: 0.8125rem;
   color: var(--text-muted);
 }
 
-.mockupPointer {
-  font-size: 1.1rem;
+.mBotSection {
+  flex: 1;
+  padding: 0 0.75rem;
+  overflow: hidden;
 }
 
+.mBotLabel {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0.25rem 0;
+  margin-bottom: 0.125rem;
+}
+
+.mBotRow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.mBotRowActive {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mBotAvatar {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.mBotAvatarInner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #fff;
+}
+
+.mBotStatus {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px var(--bg-deeper);
+}
+
+.mBotInfo { overflow: hidden; min-width: 0; }
+
+.mBotNameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mBotName {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mBotTag {
+  font-family: var(--font-ui);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 0.25rem;
+  background: rgba(139, 92, 246, 0.25);
+  color: #a78bfa;
+  flex-shrink: 0;
+}
+
+.mBotSlug {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  margin-top: 0.125rem;
+}
+
+.mSidebarFooter {
+  margin-top: auto;
+  padding: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.mUserBlock {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.mUserAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ED3E3E, #8B5CF6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.mUserInfo { overflow: hidden; min-width: 0; }
+
+.mUserName {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mUserSub {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.125rem;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════
+   Mockup Main area
+   ══════════════════════════════════════════════ */
+.mMain {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 2rem;
+  gap: 1.5rem;
+}
+
+.mPageHeader {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.mStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 999px;
+  padding: 0.375rem 0.875rem;
+}
+
+/* Tab card grid — mirrors ProfilePage exactly */
+.mTabGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.mTabCard {
+  --tab-accent: #ed3e3e;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding: 1.75rem 2rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  text-align: left;
+  overflow: hidden;
+  min-height: 120px;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.mTabCard:hover {
+  border-color: color-mix(in srgb, var(--tab-accent) 50%, transparent);
+  box-shadow: 0 0 24px -4px color-mix(in srgb, var(--tab-accent) 20%, transparent);
+}
+
+.mTabIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 0.875rem;
+  background: color-mix(in srgb, var(--tab-accent) 14%, transparent);
+  color: var(--tab-accent);
+  flex-shrink: 0;
+}
+
+.mTabIcon svg { width: 1.5rem; height: 1.5rem; }
+
+.mTabBody { min-width: 0; }
+
+.mTabLabel {
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.375rem;
+}
+
+.mTabDesc {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── Responsive ── */
 @media (max-width: 1024px) {
   .container {
     grid-template-columns: 1fr;
@@ -274,21 +569,10 @@
     gap: 2.5rem;
   }
 
-  .leftColumn {
-    max-width: 100%;
-  }
-
-  .osIcons {
-    justify-content: center;
-  }
-
-  .title {
-    font-size: 2.75rem;
-  }
-
-  .logosWrapper {
-    padding-top: 2rem;
-  }
+  .leftColumn { max-width: 100%; }
+  .osIcons { justify-content: center; }
+  .title { font-size: 2.75rem; }
+  .logosWrapper { padding-top: 2rem; }
 }
 
 @media (max-width: 768px) {
@@ -298,42 +582,22 @@
     gap: 2rem;
   }
 
-  .title {
-    font-size: 2rem;
+  .title { font-size: 2rem; }
+  .subtitle { font-size: 1rem; }
+  .appMockup { max-width: 100%; }
+
+  /* On small screens hide the sidebar inside the mockup by shifting scale origin */
+  .mockupViewport { height: 390px; }
+  .mockupLayout {
+    /* scale slightly smaller and offset to show main content area */
+    transform: scale(0.6) translateX(-260px);
   }
 
-  .subtitle {
-    font-size: 1rem;
-  }
-
-  .appMockup {
-    max-width: 100%;
-  }
-
-  .mockupBody {
-    flex-direction: column;
-    min-height: auto;
-  }
-
-  .mockupSidebar {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logosWrapper {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
-  }
+  .logosWrapper { padding-top: 1.5rem; padding-bottom: 1.5rem; }
 }
 
 @media (max-width: 480px) {
-  .heroSection {
-    padding-top: 60px;
-  }
+  .heroSection { padding-top: 60px; }
 
   .container {
     padding: 1rem 1rem 1.5rem;
@@ -341,30 +605,16 @@
     gap: 1.5rem;
   }
 
-  .title {
-    font-size: 1.75rem;
-  }
-
-  .subtitle {
-    font-size: 0.95rem;
-  }
+  .title { font-size: 1.75rem; }
+  .subtitle { font-size: 0.95rem; }
 
   .ctaButton {
     width: 100%;
     text-align: center;
   }
 
-  .mockupSidebar {
-    padding: 0.75rem;
-  }
-
-  .mockupItem,
-  .mockupItemActive {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.6rem;
-  }
-
-  .mockupMain {
-    padding: 1rem;
+  .mockupViewport { height: 345px; }
+  .mockupLayout {
+    transform: scale(0.53) translateX(-260px);
   }
 }

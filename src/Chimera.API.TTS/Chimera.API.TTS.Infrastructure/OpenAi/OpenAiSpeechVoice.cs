@@ -8,13 +8,9 @@ namespace Chimera.API.Domain.Enums;
 /// </summary>
 public readonly struct OpenAiSpeechVoice : IEquatable<OpenAiSpeechVoice>
 {
-    #region Fields
 
     private readonly string _value;
 
-    #endregion
-
-    #region Constants
 
     private const string AlloyValue   = "alloy";
     private const string AshValue     = "ash";
@@ -28,9 +24,6 @@ public readonly struct OpenAiSpeechVoice : IEquatable<OpenAiSpeechVoice>
     private const string ShimmerValue = "shimmer";
     private const string VerseValue   = "verse";
 
-    #endregion
-
-    #region Constructors
 
     public OpenAiSpeechVoice(string value)
     {
@@ -38,9 +31,6 @@ public readonly struct OpenAiSpeechVoice : IEquatable<OpenAiSpeechVoice>
         _value = value;
     }
 
-    #endregion
-
-    #region Properties
 
     public static OpenAiSpeechVoice Alloy   { get; } = new OpenAiSpeechVoice(AlloyValue);
     public static OpenAiSpeechVoice Ash     { get; } = new OpenAiSpeechVoice(AshValue);
@@ -54,9 +44,6 @@ public readonly struct OpenAiSpeechVoice : IEquatable<OpenAiSpeechVoice>
     public static OpenAiSpeechVoice Shimmer { get; } = new OpenAiSpeechVoice(ShimmerValue);
     public static OpenAiSpeechVoice Verse   { get; } = new OpenAiSpeechVoice(VerseValue);
 
-    #endregion
-
-    #region Operators
 
     public static bool operator ==(OpenAiSpeechVoice left, OpenAiSpeechVoice right) => left.Equals(right);
 
@@ -67,9 +54,6 @@ public readonly struct OpenAiSpeechVoice : IEquatable<OpenAiSpeechVoice>
     public static implicit operator OpenAiSpeechVoice?(string? value) =>
         value is null ? default : new OpenAiSpeechVoice(value);
 
-    #endregion
-
-    #region Object overrides
 
     public override bool Equals(object? obj) => obj is OpenAiSpeechVoice other && Equals(other);
 
@@ -81,9 +65,6 @@ public readonly struct OpenAiSpeechVoice : IEquatable<OpenAiSpeechVoice>
 
     public override string ToString() => _value;
 
-    #endregion
-
-    #region Static helpers
 
     /// <summary>Returns all known OpenAI TTS voices as a <see cref="SpeechVoiceCollection"/>.</summary>
     public static SpeechVoiceCollection ToCollection() => new(
@@ -93,5 +74,4 @@ public readonly struct OpenAiSpeechVoice : IEquatable<OpenAiSpeechVoice>
         new(SageValue),    new(ShimmerValue), new(VerseValue),
     ]);
 
-    #endregion
 }

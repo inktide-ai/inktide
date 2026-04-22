@@ -4,7 +4,6 @@ namespace Chimera.API.Soul.REST.Models;
 
 public sealed class LlmModelResponse
 {
-    #region Fields
 
     private Guid _id;
     private string _provider = string.Empty;
@@ -12,9 +11,6 @@ public sealed class LlmModelResponse
     private string _displayName = string.Empty;
     private string _tier = string.Empty;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("id")]
     public Guid Id
@@ -51,12 +47,10 @@ public sealed class LlmModelResponse
         set => _tier = value;
     }
 
-    #endregion
 }
 
 public sealed class TtsVoiceResponse
 {
-    #region Fields
 
     private Guid _id;
     private string _provider = string.Empty;
@@ -67,9 +61,6 @@ public sealed class TtsVoiceResponse
     private string? _sampleUrl;
     private string _tier = string.Empty;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("id")]
     public Guid Id
@@ -127,5 +118,4 @@ public sealed class TtsVoiceResponse
         set => _tier = value;
     }
 
-    #endregion
 }

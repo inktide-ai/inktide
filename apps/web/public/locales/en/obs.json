@@ -1,0 +1,33 @@
+{
+  "section": {
+    "title": "OBS Studio",
+    "requirements": "Requirements",
+    "channel": "Channel",
+    "browserUrl": "Browser Source URL",
+    "setup": "OBS Setup"
+  },
+  "intro": "Add your AI character as an OBS Browser Source. Audio, lipsync, and avatar rendering run entirely inside OBS — no virtual cable or extra software required.",
+  "requirements": {
+    "model": {
+      "label": "3D model uploaded",
+      "warn": "Go to Avatars tab and upload a VRM, GLB, or Live2D model"
+    },
+    "channel": {
+      "label": "Platform channel linked",
+      "warn": "Go to Connection tab and link a Discord, Twitch, or other channel"
+    }
+  },
+  "channelSelect": "Route audio from this channel into OBS",
+  "url": {
+    "copy": "Copy URL",
+    "copied": "✓ Copied",
+    "preview": "Preview in browser →",
+    "loading": "Loading…",
+    "incomplete": "Complete the requirements above to generate your OBS URL."
+  },
+  "steps": {
+    "1": { "title": "Add a Browser Source", "desc": "In OBS, click Sources → + and choose Browser." },
+    "2": { "title": "Paste the URL and enable transparency", "desc": "Paste the URL above. Check Allow transparency. Set width/height to match your avatar (e.g. 800 × 900 px)." },
+    "3": { "title": "Add Custom CSS (recommended)", "desc": "Paste into the OBS Custom CSS field to guarantee clean edges:" }
+  }
+}

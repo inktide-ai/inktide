@@ -1,29 +1,54 @@
-import { CONTENT } from '../../constants'
+import { useMemo } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import PartnerLogos from '../PartnerLogos'
+import logoSvg from '../../assets/app/icon.svg'
+import {
+  IconUser, IconSkills, IconBrain, IconMicrophone, IconPaint,
+  IconIntegration, IconScene, IconMemory, IconBackup, IconObs, IconSearch,
+} from '../ProfilePage/TabIcons'
 import styles from './HeroChimera.module.css'
 
 interface HeroChimeraProps {
   onSignUpClick: () => void
 }
 
+// MOCK_TABS is built inside HeroChimera via useMemo to support i18n
+
 const HeroChimera = ({ onSignUpClick }: HeroChimeraProps) => {
+  const { t } = useTranslation(['landing', 'profile', 'common'])
+
+  const MOCK_TABS = useMemo(() => [
+    { label: t('profile:tabs.profile.label'),    description: t('profile:tabs.profile.desc'),    icon: <IconUser />,        accent: '#ff5252' },
+    { label: t('profile:tabs.skills.label'),     description: t('profile:tabs.skills.desc'),     icon: <IconSkills />,      accent: '#fbbf24' },
+    { label: t('profile:tabs.avatars.label'),    description: t('profile:tabs.avatars.desc'),    icon: <IconPaint />,       accent: '#f472b6' },
+    { label: t('profile:tabs.scene.label'),      description: t('profile:tabs.scene.desc'),      icon: <IconScene />,       accent: '#c4b5fd' },
+    { label: t('profile:tabs.memory.label'),     description: t('profile:tabs.memory.desc'),     icon: <IconMemory />,      accent: '#38bdf8' },
+    { label: t('profile:tabs.brain.label'),      description: t('profile:tabs.brain.desc'),      icon: <IconBrain />,       accent: '#34d399' },
+    { label: t('profile:tabs.voice.label'),      description: t('profile:tabs.voice.desc'),      icon: <IconMicrophone />,  accent: '#f0abfc' },
+    { label: t('profile:tabs.connection.label'), description: t('profile:tabs.connection.desc'), icon: <IconIntegration />, accent: '#818cf8' },
+    { label: t('profile:tabs.obs.label'),        description: t('profile:tabs.obs.desc'),        icon: <IconObs />,         accent: '#e11d48' },
+    { label: t('profile:tabs.backup.label'),     description: t('profile:tabs.backup.desc'),     icon: <IconBackup />,      accent: '#94a3b8' },
+  ], [t])
+
   return (
     <section className={styles.heroSection}>
       <div className={styles.container}>
+
+        {/* ── Left column ── */}
         <div className={styles.leftColumn}>
           <h1 className={styles.title}>
-            Create your <span className={styles.titleAccent}>AI companion</span> for streaming
+            <Trans
+              i18nKey="hero.title"
+              ns="landing"
+              components={{ accent: <span className={styles.titleAccent} /> }}
+            />
           </h1>
-          <p className={styles.subtitle}>{CONTENT.hero.subtitle}</p>
-          <button
-            type="button"
-            className={styles.ctaButton}
-            onClick={onSignUpClick}
-          >
-            {CONTENT.hero.ctaPrimary}
+          <p className={styles.subtitle}>{t('hero.subtitle')}</p>
+          <button type="button" className={styles.ctaButton} onClick={onSignUpClick}>
+            {t('hero.ctaPrimary')}
           </button>
           <div className={styles.downloadBlock}>
-            <p className={styles.downloadLabel}>{CONTENT.hero.downloadLabel}</p>
+            <p className={styles.downloadLabel}>{t('hero.downloadLabel')}</p>
             <div className={styles.osIcons}>
               <a href="#" className={styles.osIcon} aria-label="Windows">
                 <svg width="40" height="40" viewBox="0 0 42 43" fill="none">
@@ -51,41 +76,109 @@ const HeroChimera = ({ onSignUpClick }: HeroChimeraProps) => {
           </div>
         </div>
 
+        {/* ── Right column: app mockup ── */}
         <div className={styles.rightColumn}>
           <div className={styles.appMockup}>
-            <div className={styles.mockupHeader}>
+
+            {/* macOS window chrome */}
+            <div className={styles.mockupChrome}>
               <div className={styles.mockupControls}>
-                <span />
-                <span />
-                <span />
+                <span /><span /><span />
               </div>
-              <span className={styles.mockupTitle}>Chimera — AI Setup</span>
+              <span className={styles.mockupChromeTitle}>Chimera</span>
             </div>
-            <div className={styles.mockupBody}>
-              <div className={styles.mockupSidebar}>
-                <div className={styles.mockupItem}>Characters</div>
-                <div className={styles.mockupItem}>Prompts</div>
-                <div className={styles.mockupItemActive}>Behavior</div>
-                <div className={styles.mockupItem}>Voice</div>
-                <div className={styles.mockupItem}>Appearance</div>
-              </div>
-              <div className={styles.mockupMain}>
-                <div className={styles.mockupField}>
-                  <span className={styles.mockupLabel}>Donation reactions</span>
-                  <div className={styles.mockupInput} />
-                </div>
-                <div className={styles.mockupField}>
-                  <span className={styles.mockupLabel}>Communication tone</span>
-                  <div className={styles.mockupInput} />
-                </div>
-                <div className={styles.mockupHint}>
-                  <span className={styles.mockupPointer}>👆</span>
-                  Customize AI parameters to match your style
-                </div>
+
+            {/* Scaled viewport — renders at 1200×700, displayed at 60% */}
+            <div className={styles.mockupViewport}>
+              <div className={styles.mockupLayout}>
+
+                {/* Sidebar */}
+                <aside className={styles.mSidebar}>
+                  <div className={styles.mSidebarHeader}>
+                    <div className={styles.mLogoRow}>
+                      <img src={logoSvg} alt="" className={styles.mLogoIcon} aria-hidden />
+                      <span className={styles.mLogoText}>Chimera</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.mCreateBtn}>
+                    <span className={styles.mCreateBtnIcon}>+</span>
+                    {t('hero.createNew')}
+                  </div>
+
+                  <nav className={styles.mSidebarNav}>
+                    <div className={styles.mNavItem}>
+                      <span className={styles.mNavIcon}><IconScene /></span>
+                      {t('hero.sandbox')}
+                    </div>
+                  </nav>
+
+                  <div className={styles.mSearch}>
+                    <span className={styles.mSearchIcon}><IconSearch /></span>
+                    <span className={styles.mSearchPlaceholder}>{t('hero.search')}</span>
+                  </div>
+
+                  <div className={styles.mBotSection}>
+                    <div className={styles.mBotLabel}>{t('hero.projects')}</div>
+                    <div className={`${styles.mBotRow} ${styles.mBotRowActive}`}>
+                      <div className={styles.mBotAvatar}>
+                        <div className={styles.mBotAvatarInner}>G</div>
+                        <span className={styles.mBotStatus} aria-hidden />
+                      </div>
+                      <div className={styles.mBotInfo}>
+                        <div className={styles.mBotNameRow}>
+                          <span className={styles.mBotName}>Garry Dubua</span>
+                          <span className={styles.mBotTag}>{t('common:badge.bot')}</span>
+                        </div>
+                        <div className={styles.mBotSlug}>/garry-dubua</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.mSidebarFooter}>
+                    <div className={styles.mUserBlock}>
+                      <div className={styles.mUserAvatar}>N</div>
+                      <div className={styles.mUserInfo}>
+                        <div className={styles.mUserName}>nikxprog</div>
+                        <div className={styles.mUserSub}>.nikxprog</div>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+
+                {/* Main area */}
+                <main className={styles.mMain}>
+                  <div className={styles.mPageHeader}>
+                    <div className={styles.mStatusBadge}>
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden>
+                        <circle cx="4" cy="4" r="3" fill="currentColor" />
+                      </svg>
+                      {t('common:badge.active')}
+                    </div>
+                  </div>
+
+                  <div className={styles.mTabGrid}>
+                    {MOCK_TABS.map(tab => (
+                      <div
+                        key={tab.label}
+                        className={styles.mTabCard}
+                        style={{ '--tab-accent': tab.accent } as React.CSSProperties}
+                      >
+                        <div className={styles.mTabIcon}>{tab.icon}</div>
+                        <div className={styles.mTabBody}>
+                          <div className={styles.mTabLabel}>{tab.label}</div>
+                          <div className={styles.mTabDesc}>{tab.description}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </main>
+
               </div>
             </div>
           </div>
         </div>
+
       </div>
       <div className={styles.logosWrapper}>
         <PartnerLogos />

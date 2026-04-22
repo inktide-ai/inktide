@@ -5,14 +5,10 @@ namespace Chimera.API.Soul.REST.Validation;
 
 public sealed class CreateChannelRequestValidator : AbstractValidator<CreateChannelRequest>
 {
-    #region Fields
 
     private static readonly string[] SupportedPlatforms =
         ["twitch", "discord", "youtube", "kick", "vk_video"];
 
-    #endregion
-
-    #region Constructors
 
     public CreateChannelRequestValidator()
     {
@@ -64,5 +60,4 @@ public sealed class CreateChannelRequestValidator : AbstractValidator<CreateChan
         return p is "twitch" or "kick" or "vk_video";
     }
 
-    #endregion
 }

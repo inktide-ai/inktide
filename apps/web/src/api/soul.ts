@@ -1,4 +1,4 @@
-import { ApiError, apiFetch, emptyOrThrow, jsonOrThrow } from './client'
+import { apiFetch, emptyOrThrow, jsonOrThrow } from './client'
 
 // ── Response types (match backend snake_case JSON) ──
 
@@ -188,6 +188,20 @@ export async function uploadCardAvatar(cardId: string, file: File): Promise<AiCa
   return jsonOrThrow<AiCardResponse>(res)
 }
 
+/** POST multipart image; sets banner_image_url inside appearance JSONB. */
+export async function uploadCardBanner(cardId: string, file: File): Promise<AiCardResponse> {
+  const body = new FormData()
+  body.append('file', file)
+  const res = await apiFetch(`/api/soul/cards/${cardId}/banner`, { method: 'POST', body })
+  return jsonOrThrow<AiCardResponse>(res)
+}
+
+/** DELETE banner image; reverts card to colour gradient. */
+export async function removeCardBanner(cardId: string): Promise<AiCardResponse> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/banner`, { method: 'DELETE' })
+  return jsonOrThrow<AiCardResponse>(res)
+}
+
 export async function getCatalogLlmModels(): Promise<LlmModelResponse[]> {
   const res = await apiFetch('/api/soul/catalog/llm-models')
   return jsonOrThrow<LlmModelResponse[]>(res)
@@ -254,29 +268,8 @@ export async function completeCardModelUpload(
   return jsonOrThrow<AiCardModelResponse>(res)
 }
 
-/** Presign → PUT to MinIO (no API auth on that request) → complete registration. */
-export async function uploadCardModelFile(cardId: string, file: File): Promise<AiCardModelResponse> {
-  const contentType = file.type.trim() || 'application/octet-stream'
-  const presign = await presignCardModelUpload(cardId, {
-    file_name: file.name,
-    content_type: contentType,
-    size_bytes: file.size,
-  })
-  const putRes = await fetch(presign.upload_url, {
-    method: 'PUT',
-    headers: { 'Content-Type': presign.required_content_type },
-    body: file,
-  })
-  if (!putRes.ok) {
-    throw new ApiError(putRes.status, `Storage upload failed (${putRes.status})`)
-  }
-  return completeCardModelUpload(cardId, {
-    storage_key: presign.storage_key,
-    file_name: file.name,
-    content_type: presign.required_content_type,
-    size_bytes: file.size,
-  })
-}
+// uploadCardModelFile перенесён в services/upload/CardModelUploader.ts + PresignedUploadService.ts
+// OCP: паттерн presign→PUT→complete написан один раз, не дублируется здесь
 
 export async function listCardModels(cardId: string): Promise<AiCardModelResponse[]> {
   const res = await apiFetch(`/api/soul/cards/${cardId}/models`)
@@ -294,6 +287,11 @@ export interface AiCardSceneResponse {
   content_type: string
   size_bytes: number
   created_at: string
+  /** Explicit filter tag; omit or null → client uses legacy hash category. */
+  tag?: string | null
+  /** Optional display title; when empty client falls back to file name. */
+  display_name?: string | null
+  description?: string | null
 }
 
 export async function listCardScenes(cardId: string): Promise<AiCardSceneResponse[]> {
@@ -314,7 +312,13 @@ export async function presignSceneUpload(
 
 export async function completeSceneUpload(
   cardId: string,
-  body: { storage_key: string; file_name: string; content_type: string; size_bytes: number },
+  body: {
+    storage_key: string
+    file_name: string
+    content_type: string
+    size_bytes: number
+    tag?: string | null
+  },
 ): Promise<AiCardSceneResponse> {
   const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/complete`, {
     method: 'POST',
@@ -323,29 +327,54 @@ export async function completeSceneUpload(
   return jsonOrThrow<AiCardSceneResponse>(res)
 }
 
-/** Presign → PUT to MinIO → complete registration. Replaces any existing scene. */
-export async function uploadCardSceneFile(cardId: string, file: File): Promise<AiCardSceneResponse> {
-  const contentType = file.type.trim() || 'image/jpeg'
-  const presign = await presignSceneUpload(cardId, {
-    file_name: file.name,
-    content_type: contentType,
-    size_bytes: file.size,
-  })
-  const putRes = await fetch(presign.upload_url, {
-    method: 'PUT',
-    headers: { 'Content-Type': presign.required_content_type },
-    body: file,
-  })
-  if (!putRes.ok) {
-    throw new ApiError(putRes.status, `Storage upload failed (${putRes.status})`)
-  }
-  return completeSceneUpload(cardId, {
-    storage_key: presign.storage_key,
-    file_name: file.name,
-    content_type: presign.required_content_type,
-    size_bytes: file.size,
-  })
+export interface CustomSceneTagDto {
+  label: string
+  color: string | null
 }
+
+export async function listCustomSceneTags(cardId: string): Promise<CustomSceneTagDto[]> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/custom-tags`)
+  return jsonOrThrow<CustomSceneTagDto[]>(res)
+}
+
+export async function addCustomSceneTag(cardId: string, label: string, color?: string): Promise<void> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/custom-tags`, {
+    method: 'POST',
+    body: JSON.stringify({ label, color: color ?? null }),
+  })
+  await emptyOrThrow(res)
+}
+
+export async function patchCardSceneTag(
+  cardId: string,
+  sceneId: string,
+  body: { tag: string | null },
+): Promise<AiCardSceneResponse> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/${sceneId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  })
+  return jsonOrThrow<AiCardSceneResponse>(res)
+}
+
+export async function putCardSceneMetadata(
+  cardId: string,
+  sceneId: string,
+  body: {
+    display_name?: string | null
+    description?: string | null
+    tag?: string | null
+  },
+): Promise<AiCardSceneResponse> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/${sceneId}/metadata`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  })
+  return jsonOrThrow<AiCardSceneResponse>(res)
+}
+
+// uploadCardSceneFile перенесён в services/upload/CardSceneUploader.ts + PresignedUploadService.ts
+// OCP: паттерн presign→PUT→complete написан один раз, не дублируется здесь
 
 export async function deleteCardScene(cardId: string, sceneId: string): Promise<void> {
   const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/${sceneId}`, { method: 'DELETE' })
@@ -363,4 +392,41 @@ export interface AiCardActivityItem {
 export async function getCardActivity(cardId: string): Promise<AiCardActivityItem[]> {
   const res = await apiFetch(`/api/soul/cards/${cardId}/activity`)
   return jsonOrThrow<AiCardActivityItem[]>(res)
+}
+
+// ── Provider credentials (BYOK) ──
+
+export interface CredentialResponse {
+  providerId: string
+  hasKey: boolean
+  baseUrl: string | null
+  config: string | null
+  updatedAt: string
+}
+
+export async function getCredentials(): Promise<CredentialResponse[]> {
+  const res = await apiFetch('/api/soul/credentials')
+  return jsonOrThrow<CredentialResponse[]>(res)
+}
+
+export async function upsertCredential(
+  providerId: string,
+  apiKey: string | null,
+  baseUrl?: string | null,
+  config?: Record<string, unknown> | null,
+): Promise<CredentialResponse> {
+  const res = await apiFetch(`/api/soul/credentials/${encodeURIComponent(providerId)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      apiKey:  apiKey ?? null,
+      baseUrl: baseUrl ?? null,
+      config:  config ? JSON.stringify(config) : null,
+    }),
+  })
+  return jsonOrThrow<CredentialResponse>(res)
+}
+
+export async function deleteCredential(providerId: string): Promise<void> {
+  await apiFetch(`/api/soul/credentials/${encodeURIComponent(providerId)}`, { method: 'DELETE' })
 }

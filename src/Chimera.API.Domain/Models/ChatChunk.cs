@@ -2,14 +2,10 @@ namespace Chimera.API.Domain.Models;
 
 public sealed class ChatChunk
 {
-    #region Fields
 
     private string _delta = string.Empty;
     private bool _isFinished;
 
-    #endregion
-
-    #region Properties
 
     public string Delta
     {
@@ -23,5 +19,4 @@ public sealed class ChatChunk
         set => _isFinished = value;
     }
 
-    #endregion
 }

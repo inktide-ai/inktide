@@ -2,15 +2,11 @@ namespace Chimera.API.Domain.Models;
 
 public sealed class ChatResponse
 {
-    #region Fields
 
     private string _text = string.Empty;
     private string _model = string.Empty;
     private TokenUsage? _usage;
 
-    #endregion
-
-    #region Properties
 
     public string Text
     {
@@ -30,5 +26,4 @@ public sealed class ChatResponse
         set => _usage = value;
     }
 
-    #endregion
 }

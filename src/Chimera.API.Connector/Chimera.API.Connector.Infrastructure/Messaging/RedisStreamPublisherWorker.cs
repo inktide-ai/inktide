@@ -13,15 +13,12 @@ namespace Chimera.API.Connector.Infrastructure.Messaging;
 /// </summary>
 public sealed class RedisStreamPublisherWorker : BackgroundService
 {
-    #region Constants
+
+
 
     private const int MaxRetries = 3;
 
     private const string QueueLabel = "synapse.ingest";
-
-    #endregion
-
-    #region Fields
 
     private static readonly TimeSpan[] RetryDelays =
     [
@@ -44,9 +41,6 @@ public sealed class RedisStreamPublisherWorker : BackgroundService
     private long _publishedCount;
     private long _errorCount;
 
-    #endregion
-
-    #region Constructors
 
     public RedisStreamPublisherWorker(
         IChatMessageQueue queue,
@@ -60,9 +54,6 @@ public sealed class RedisStreamPublisherWorker : BackgroundService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Protected Methods
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -70,31 +61,38 @@ public sealed class RedisStreamPublisherWorker : BackgroundService
             "Redis stream ingest publisher started. Stream={Stream}",
             _settings.StreamName);
 
-        await foreach (var message in _queue.ConsumeAllAsync(stoppingToken))
+        try
         {
-            try
+            await foreach (var message in _queue.ConsumeAllAsync(stoppingToken))
             {
-                await PublishWithRetryAsync(message, stoppingToken);
-
-                _publishedCount++;
-                if (_publishedCount % 1000 == 0)
+                try
                 {
-                    _logger.LogInformation(
-                        "({Queue}) publisher stats: {Published} published, {Errors} errors",
-                        QueueLabel, _publishedCount, _errorCount);
+                    await PublishWithRetryAsync(message, stoppingToken);
+
+                    _publishedCount++;
+                    if (_publishedCount % 1000 == 0)
+                    {
+                        _logger.LogInformation(
+                            "({Queue}) publisher stats: {Published} published, {Errors} errors",
+                            QueueLabel, _publishedCount, _errorCount);
+                    }
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _errorCount++;
+                    _logger.LogError(
+                        "({Queue}) Message permanently lost after {MaxRetries} retries. Platform={Platform} User={User}. {Error}",
+                        QueueLabel, MaxRetries, message.PlatformId, message.Sender.UserName, GetShortError(ex));
                 }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                _errorCount++;
-                _logger.LogError(
-                    "({Queue}) Message permanently lost after {MaxRetries} retries. Platform={Platform} User={User}. {Error}",
-                    QueueLabel, MaxRetries, message.PlatformId, message.Sender.UserName, GetShortError(ex));
-            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            // host is shutting down — ConsumeAllAsync threw on iterator teardown, not an error
         }
 
         _logger.LogInformation(
@@ -102,9 +100,6 @@ public sealed class RedisStreamPublisherWorker : BackgroundService
             _publishedCount, _errorCount);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private async Task PublishWithRetryAsync(ChatMessage message, CancellationToken ct)
     {
@@ -157,5 +152,4 @@ public sealed class RedisStreamPublisherWorker : BackgroundService
         return $"{inner.GetType().Name}: {inner.Message}";
     }
 
-    #endregion
 }

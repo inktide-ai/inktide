@@ -4,7 +4,6 @@ namespace Chimera.API.Soul.REST.Models;
 
 public sealed class CreateAiCardRequest
 {
-    #region Fields
 
     private string _name = string.Empty;
     private string? _personality;
@@ -19,9 +18,6 @@ public sealed class CreateAiCardRequest
     private object? _memorySettings;
     private object? _autoPilot;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("name")]
     public string Name
@@ -107,12 +103,10 @@ public sealed class CreateAiCardRequest
         set => _autoPilot = value;
     }
 
-    #endregion
 }
 
 public sealed class UpdateAiCardRequest
 {
-    #region Fields
 
     private string? _name;
     private string? _slug;
@@ -130,9 +124,6 @@ public sealed class UpdateAiCardRequest
     private bool? _isActive;
     private string? _visibility;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("name")]
     public string? Name
@@ -239,5 +230,4 @@ public sealed class UpdateAiCardRequest
         set => _visibility = value;
     }
 
-    #endregion
 }

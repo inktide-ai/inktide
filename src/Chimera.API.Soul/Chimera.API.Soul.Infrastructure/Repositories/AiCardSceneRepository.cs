@@ -7,22 +7,15 @@ namespace Chimera.API.Soul.Infrastructure.Repositories;
 
 public sealed class AiCardSceneRepository : IAiCardSceneRepository
 {
-    #region Fields
 
     private readonly SoulDbContext _db;
 
-    #endregion
-
-    #region Constructors
 
     public AiCardSceneRepository(SoulDbContext db)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task<AiCardScene> AddAsync(AiCardScene scene, CancellationToken ct = default)
     {
@@ -68,5 +61,50 @@ public sealed class AiCardSceneRepository : IAiCardSceneRepository
             .ConfigureAwait(false);
     }
 
-    #endregion
+
+    public async Task<IReadOnlyList<string>> ListDistinctTagsByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default)
+    {
+        return await _db.AiCardScenes
+            .AsNoTracking()
+            .Where(s => s.UserId == userId && s.AiCardId == aiCardId && s.Tag != null && s.Tag != "")
+            .Select(s => s.Tag!)
+            .Distinct()
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+
+    public async Task<bool> UpdateTagAsync(Guid userId, Guid aiCardId, Guid sceneId, string? tag, CancellationToken ct = default)
+    {
+        var affected = await _db.AiCardScenes
+            .Where(s => s.Id == sceneId && s.UserId == userId && s.AiCardId == aiCardId)
+            .ExecuteUpdateAsync(s => s.SetProperty(e => e.Tag, tag), ct)
+            .ConfigureAwait(false);
+
+        return affected > 0;
+    }
+
+    public async Task<bool> UpdateMetadataAsync(
+        Guid userId,
+        Guid aiCardId,
+        Guid sceneId,
+        string? displayName,
+        string? description,
+        string? tag,
+        CancellationToken ct = default)
+    {
+        var affected = await _db.AiCardScenes
+            .Where(s => s.Id == sceneId && s.UserId == userId && s.AiCardId == aiCardId)
+            .ExecuteUpdateAsync(
+                s => s
+                    .SetProperty(e => e.DisplayName, displayName)
+                    .SetProperty(e => e.Description, description)
+                    .SetProperty(e => e.Tag, tag),
+                ct)
+            .ConfigureAwait(false);
+
+        return affected > 0;
+    }
+
 }
+

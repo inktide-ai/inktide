@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Infrastructure.Configurations;
 
 public sealed class AiCardSceneConfiguration : IEntityTypeConfiguration<AiCardScene>
 {
-    #region Public Methods
 
     public void Configure(EntityTypeBuilder<AiCardScene> b)
     {
@@ -48,6 +47,18 @@ public sealed class AiCardSceneConfiguration : IEntityTypeConfiguration<AiCardSc
             .HasColumnName("created_at")
             .IsRequired();
 
+        b.Property(e => e.Tag)
+            .HasColumnName("tag")
+            .HasMaxLength(128);
+
+        b.Property(e => e.DisplayName)
+            .HasColumnName("display_name")
+            .HasMaxLength(200);
+
+        b.Property(e => e.Description)
+            .HasColumnName("description")
+            .HasMaxLength(2000);
+
         b.HasIndex(e => e.StorageKey)
             .IsUnique()
             .HasDatabaseName("idx_ai_card_scenes_storage_key");
@@ -64,5 +75,4 @@ public sealed class AiCardSceneConfiguration : IEntityTypeConfiguration<AiCardSc
             .OnDelete(DeleteBehavior.Cascade);
     }
 
-    #endregion
 }

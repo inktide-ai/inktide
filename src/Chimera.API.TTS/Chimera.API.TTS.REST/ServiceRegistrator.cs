@@ -6,11 +6,9 @@ namespace Chimera.API.TTS.REST;
 
 public sealed class ServiceRegistrator : IServiceRegistrator
 {
-    #region Public Methods
 
     public void Register(IRegistrator registrator, IConfiguration configuration)
     {
     }
 
-    #endregion
 }

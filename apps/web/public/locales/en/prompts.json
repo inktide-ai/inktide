@@ -1,0 +1,11 @@
+{
+  "section": {
+    "systemPrompt": "System Prompt"
+  },
+  "coreInstructions": {
+    "label": "Core instructions",
+    "hint": "Define the AI's personality, behavior, and context. Sent at the start of every conversation.",
+    "placeholder": "e.g. You are a friendly AI companion. Keep responses concise and engaging.",
+    "counter": "{{count}} characters · Sent at the start of every conversation"
+  }
+}

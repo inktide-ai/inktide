@@ -15,7 +15,6 @@ namespace Chimera.API.TTS.Infrastructure.FishAudio;
 /// </summary>
 public sealed class FishAudioTtsProvider : ISpeechProvider
 {
-    #region Constants
 
     private const double MinSpeed = 0.5;
     private const double MaxSpeed = 2.0;
@@ -26,17 +25,11 @@ public sealed class FishAudioTtsProvider : ISpeechProvider
         new("s2-pro", "model", DateTimeOffset.UnixEpoch, "fishaudio"),
     ]);
 
-    #endregion
-
-    #region Fields
 
     private readonly FishAudioTtsClient _client;
     private readonly IOptions<FishAudioTtsClientSettings> _settings;
     private readonly ILogger<FishAudioTtsProvider> _logger;
 
-    #endregion
-
-    #region Constructor
 
     public FishAudioTtsProvider(
         FishAudioTtsClient client,
@@ -48,9 +41,6 @@ public sealed class FishAudioTtsProvider : ISpeechProvider
         _logger   = logger   ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => "fishaudio";
 
@@ -66,9 +56,6 @@ public sealed class FishAudioTtsProvider : ISpeechProvider
         SupportsModelListing  = false,
     };
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -129,9 +116,6 @@ public sealed class FishAudioTtsProvider : ISpeechProvider
             .ConfigureAwait(false);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private FishAudioSpeechOptions MapSpeechOptions(SpeechOptions options)
     {
@@ -171,5 +155,4 @@ public sealed class FishAudioTtsProvider : ISpeechProvider
         return mapped;
     }
 
-    #endregion
 }

@@ -5,7 +5,6 @@ namespace Chimera.API.Profile.Infrastructure.Settings;
 /// </summary>
 public sealed class S3Settings
 {
-    #region Fields
 
     private bool _enabled;
     private string _serviceUrl = "http://127.0.0.1:9000";
@@ -16,9 +15,6 @@ public sealed class S3Settings
     private string _region = "us-east-1";
     private string _publicBaseUrl = string.Empty;
 
-    #endregion
-
-    #region Properties
 
     /// <summary>
     /// Optional public origin for object URLs shown in browsers (e.g. reverse proxy or MinIO API URL).
@@ -76,5 +72,4 @@ public sealed class S3Settings
         set => _region = value;
     }
 
-    #endregion
 }

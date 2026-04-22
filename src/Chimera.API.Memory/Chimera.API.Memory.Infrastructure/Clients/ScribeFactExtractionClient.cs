@@ -8,10 +8,12 @@ public sealed class ScribeFactExtractionClient : IFactExtractionClient
 {
     public const string HttpClientName = "scribe-extract";
 
-    private readonly IHttpClientFactory _factory;
+    private readonly HttpClient _client;
 
     public ScribeFactExtractionClient(IHttpClientFactory factory)
-        => _factory = factory;
+    {
+        _client = factory.CreateClient(HttpClientName);
+    }
 
     public async Task<IReadOnlyList<ExtractedFact>> ExtractFactsAsync(
         MemoryIngestionJob job,
@@ -19,7 +21,7 @@ public sealed class ScribeFactExtractionClient : IFactExtractionClient
     {
         var body = new ConversationTurnRequest
         {
-            UserMessage = new UserMessageDto
+            UserMessage = new UserMessage
             {
                 Sender = job.SenderName,
                 Text = job.UserMessage
@@ -29,12 +31,11 @@ public sealed class ScribeFactExtractionClient : IFactExtractionClient
             ChannelId = job.ChannelId,
             Timestamp = job.Timestamp
         };
-
-        var client = _factory.CreateClient(HttpClientName);
-        using var response = await client.PostAsJsonAsync("/api/v1/extract-facts", body, ct);
+        
+        using var response = await _client.PostAsJsonAsync("/api/v1/extract-facts", body, ct);
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<FactExtractionResponseDto>(ct);
+        var result = await response.Content.ReadFromJsonAsync<FactExtractionResponse>(ct);
         return result!.Facts
             .Select(f => new ExtractedFact(f.Text, f.Type, f.Entities, f.Importance))
             .ToList();

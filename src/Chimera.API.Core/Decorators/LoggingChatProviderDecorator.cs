@@ -5,19 +5,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Chimera.API.Core.Decorators;
 
-/// <summary>
-/// Cross-cutting logging around a concrete chat provider. Keeps transport and business logic in inner implementation.
-/// </summary>
 public sealed class LoggingChatProviderDecorator : IChatProvider
 {
-    #region Fields
 
     private readonly IChatProvider _inner;
     private readonly ILogger _logger;
 
-    #endregion
-
-    #region Constructors
 
     public LoggingChatProviderDecorator(
         IChatProvider inner,
@@ -27,9 +20,6 @@ public sealed class LoggingChatProviderDecorator : IChatProvider
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => _inner.Id;
 
@@ -39,9 +29,6 @@ public sealed class LoggingChatProviderDecorator : IChatProvider
 
     public ChatProviderCapabilities Capabilities => _inner.Capabilities;
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -90,5 +77,4 @@ public sealed class LoggingChatProviderDecorator : IChatProvider
         _logger.LogDebug("StreamAsync end {ProviderId}", Id);
     }
 
-    #endregion
 }

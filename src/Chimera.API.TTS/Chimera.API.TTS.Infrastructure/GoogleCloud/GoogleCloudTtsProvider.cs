@@ -16,7 +16,6 @@ namespace Chimera.API.TTS.Infrastructure.GoogleCloud;
 /// </summary>
 public sealed class GoogleCloudTtsProvider : ISpeechProvider
 {
-    #region Constants
 
     private const double MinSpeed  = 0.25;
     private const double MaxSpeed  = 4.0;
@@ -27,16 +26,10 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider
 
     private static readonly SpeechModelCollection EmptyModels = new("list", []);
 
-    #endregion
-
-    #region Fields
 
     private readonly GoogleCloudTtsClient _client;
     private readonly ILogger<GoogleCloudTtsProvider> _logger;
 
-    #endregion
-
-    #region Constructor
 
     public GoogleCloudTtsProvider(
         GoogleCloudTtsClient client,
@@ -46,9 +39,6 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider
         _logger = logger  ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => "google-cloud-tts";
 
@@ -64,9 +54,6 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider
         SupportsModelListing  = false,
     };
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -139,9 +126,6 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider
         return await _client.SynthesizeAsync(apiKey, request, ct).ConfigureAwait(false);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private AudioEncoding MapAudioEncoding(string? audioFormat)
     {
@@ -201,5 +185,4 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider
             : defaultValue;
     }
 
-    #endregion
 }

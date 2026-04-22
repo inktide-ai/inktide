@@ -1,0 +1,52 @@
+{
+  "action": {
+    "save": "Сохранить",
+    "saving": "Сохраняю…",
+    "cancel": "Отмена",
+    "back": "Назад",
+    "backToProfile": "← Назад к профилю",
+    "upload": "Загрузить",
+    "remove": "Удалить"
+  },
+  "status": {
+    "loading": "Загрузка…",
+    "invalidLink": "Неверная ссылка."
+  },
+  "sidebar": {
+    "createNew": "Создать нового",
+    "sandbox": "Песочница",
+    "search": "Поиск",
+    "projects": "Проекты",
+    "account": "Аккаунт",
+    "profile": "Профиль",
+    "settings": "Настройки",
+    "deleteAccount": "Удалить аккаунт",
+    "logOut": "Выйти",
+    "accountMenuAria": "Меню аккаунта"
+  },
+  "badge": {
+    "bot": "Бот",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "on": "Вкл",
+    "off": "Выкл"
+  },
+  "saveBar": {
+    "saving": "Сохраняю...",
+    "saved": "Изменения сохранены",
+    "failed": "Ошибка сохранения",
+    "unsaved": "Есть несохранённые изменения",
+    "discard": "Отменить",
+    "save": "Сохранить"
+  },
+  "emptyState": {
+    "loadingCharacters": "Загрузка персонажей...",
+    "noCharacterSelected": "Персонаж не выбран",
+    "noCharacterSelectedDesc": "Выберите персонажа из боковой панели для просмотра сцены.",
+    "failedToLoad": "Ошибка загрузки",
+    "selectCharacter": "Выберите персонажа",
+    "selectCharacterDesc": "Выберите бота из боковой панели или создайте нового для настройки личности, промптов, поведения, голоса и модели.",
+    "createNew": "+ Создать нового",
+    "backToSections": "К разделам"
+  }
+}

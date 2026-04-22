@@ -7,17 +7,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Chimera.API.Core.DependencyInjection;
 
-/// <summary>
-/// Registers chat providers via DI (no manual <c>Register()</c> store): one pass builds <see cref="IChatProviderRegistry"/>.
-/// </summary>
 public static class ChatProviderServiceCollectionExtensions
 {
-    #region Public Methods
-
-    /// <summary>
-    /// Registers built-in echo provider, optional decorators, and <see cref="IChatProviderRegistry"/>.
-    /// Add real providers by registering concrete <see cref="IChatProvider"/> types, then append them in <paramref name="configureChain"/>.
-    /// </summary>
     public static IServiceCollection AddChimeraChatProviders(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -59,5 +50,4 @@ public static class ChatProviderServiceCollectionExtensions
         return services;
     }
 
-    #endregion
 }

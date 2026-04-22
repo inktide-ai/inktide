@@ -6,7 +6,6 @@ namespace Chimera.API.TTS.REST.Validation;
 
 public sealed class TtsSynthesizeRequestValidator : AbstractValidator<TtsSynthesizeRequest>
 {
-    #region Constructors
 
     public TtsSynthesizeRequestValidator()
     {
@@ -32,5 +31,4 @@ public sealed class TtsSynthesizeRequestValidator : AbstractValidator<TtsSynthes
         
     }
 
-    #endregion
 }

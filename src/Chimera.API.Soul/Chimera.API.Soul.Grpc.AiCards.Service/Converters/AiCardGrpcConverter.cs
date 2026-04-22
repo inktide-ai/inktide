@@ -8,7 +8,6 @@ namespace Chimera.API.Soul.Grpc.AiCards.Service.Converters;
 /// </summary>
 internal static class AiCardGrpcConverter
 {
-    #region Public Methods
 
     /// <summary>Maps a domain <see cref="AiCard"/> to a gRPC <see cref="AiCardResponse"/>.</summary>
     public static AiCardResponse ToResponse(AiCard card)
@@ -98,5 +97,4 @@ internal static class AiCardGrpcConverter
         card.AvatarUrl        = request.HasAvatarUrl ? request.AvatarUrl : null;
     }
 
-    #endregion
 }

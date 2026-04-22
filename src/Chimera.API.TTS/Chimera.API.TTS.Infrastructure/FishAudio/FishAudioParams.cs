@@ -16,22 +16,14 @@ internal sealed class FishAudioParams
         DefaultIgnoreCondition      = JsonIgnoreCondition.WhenWritingNull,
     };
 
-    /// <summary>
-    /// Latency mode: <c>"normal"</c> (default) or <c>"balanced"</c> (lower TTFB, slightly lower quality).
-    /// </summary>
     [JsonPropertyName("latency")]
     public string? Latency { get; init; }
 
-    /// <summary>Whether to normalise text before synthesis. Defaults to <c>true</c>.</summary>
     [JsonPropertyName("normalize")]
     public bool? Normalize { get; init; }
 
-    // ── Effective values with domain defaults ────────────────────────────────
-
     public string GetLatency()   => Latency   ?? "normal";
     public bool   GetNormalize() => Normalize ?? true;
-
-    // ── Factory ──────────────────────────────────────────────────────────────
 
     internal static FishAudioParams From(IReadOnlyDictionary<string, object>? raw)
     {

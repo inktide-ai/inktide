@@ -9,7 +9,6 @@ namespace Chimera.API.Core.Providers;
 /// </summary>
 public sealed class EchoChatProvider : IChatProvider
 {
-    #region Fields
 
     private readonly ChatProviderCapabilities _capabilities = new()
     {
@@ -18,9 +17,6 @@ public sealed class EchoChatProvider : IChatProvider
         MaxContextTokens = 4096,
     };
 
-    #endregion
-
-    #region Properties
 
     public string Id => "echo";
 
@@ -30,9 +26,6 @@ public sealed class EchoChatProvider : IChatProvider
 
     public ChatProviderCapabilities Capabilities => _capabilities;
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -84,5 +77,4 @@ public sealed class EchoChatProvider : IChatProvider
         yield return new ChatChunk { IsFinished = true };
     }
 
-    #endregion
 }

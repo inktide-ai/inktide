@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getCard, updateCard, uploadCardAvatar } from '../../api/soul'
 import {
   apiResponseToCharacter,
   characterToUpdateRequest,
   type AiCharacter,
 } from '../../domain/character'
+import { BannerColorPicker } from './BannerColorPicker'
+import { getBannerAccent, getBannerStyle } from './bannerPresets'
+import { uploadCardBanner, removeCardBanner } from '../../api/soul'
+import BannerCropModal from './BannerCropModal'
 import styles from './CharacterEditPage.module.css'
 
 function PencilIcon() {
@@ -22,6 +27,7 @@ function PencilIcon() {
 export default function CharacterEditPage() {
   const { cardId } = useParams<{ cardId: string }>()
   const navigate = useNavigate()
+  const { t } = useTranslation(['profile', 'common'])
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [character, setCharacter] = useState<AiCharacter | null>(null)
@@ -29,6 +35,9 @@ export default function CharacterEditPage() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [avatarBusy, setAvatarBusy] = useState(false)
+  const [bannerBusy, setBannerBusy] = useState(false)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
+  const bannerFileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!cardId) return
@@ -80,7 +89,7 @@ export default function CharacterEditPage() {
       try {
         const res = await updateCard(cardId, characterToUpdateRequest(character))
         setCharacter(apiResponseToCharacter(res))
-        navigate('/profile', { state: { focusCardId: cardId } })
+        navigate('/profile', { state: { focusCardId: cardId, returnTab: 'profile' } })
       } catch (err) {
         setSaveError(err instanceof Error ? err.message : 'Save failed')
       } finally {
@@ -91,16 +100,65 @@ export default function CharacterEditPage() {
   )
 
   const goWorkshop = useCallback(() => {
-    if (cardId) navigate('/profile', { state: { focusCardId: cardId } })
+    if (cardId) navigate('/profile', { state: { focusCardId: cardId, returnTab: 'profile' } })
     else navigate('/profile')
   }, [cardId, navigate])
+
+  const onBannerFile = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      e.target.value = ''
+      if (!file || !character || !cardId) return
+      if (!file.type.startsWith('image/')) return
+      const objectUrl = URL.createObjectURL(file)
+      setCropSrc(objectUrl)
+    },
+    [character, cardId],
+  )
+
+  const onCropApply = useCallback(
+    async (blob: Blob) => {
+      if (!cardId) return
+      setCropSrc((src) => { if (src) URL.revokeObjectURL(src); return null })
+      setBannerBusy(true)
+      setSaveError(null)
+      try {
+        const file = new File([blob], 'banner.jpg', { type: 'image/jpeg' })
+        const res = await uploadCardBanner(cardId, file)
+        setCharacter(apiResponseToCharacter(res))
+      } catch (err) {
+        setSaveError(err instanceof Error ? err.message : 'Banner upload failed')
+      } finally {
+        setBannerBusy(false)
+      }
+    },
+    [cardId],
+  )
+
+  const onCropCancel = useCallback(() => {
+    setCropSrc((src) => { if (src) URL.revokeObjectURL(src); return null })
+  }, [])
+
+  const onBannerRemove = useCallback(async () => {
+    if (!cardId || !character) return
+    setBannerBusy(true)
+    setSaveError(null)
+    try {
+      const res = await removeCardBanner(cardId)
+      setCharacter(apiResponseToCharacter(res))
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to remove banner')
+    } finally {
+      setBannerBusy(false)
+    }
+  }, [cardId, character])
 
   const initial = character?.name?.charAt(0).toUpperCase() ?? '?'
 
   if (!cardId) {
     return (
       <div className={styles.page}>
-        <p className={styles.error}>Invalid link.</p>
+        <p className={styles.error}>{t('common:status.invalidLink')}</p>
       </div>
     )
   }
@@ -109,7 +167,7 @@ export default function CharacterEditPage() {
     return (
       <div className={styles.page}>
         <button type="button" className={styles.back} onClick={goWorkshop}>
-          ← Back
+          {t('common:action.back')}
         </button>
         <p className={styles.error}>{loadError}</p>
       </div>
@@ -128,14 +186,61 @@ export default function CharacterEditPage() {
 
   return (
     <div className={styles.page}>
+      {cropSrc && (
+        <BannerCropModal
+          imageSrc={cropSrc}
+          onApply={(blob) => void onCropApply(blob)}
+          onCancel={onCropCancel}
+        />
+      )}
       <button type="button" className={styles.back} onClick={goWorkshop}>
-        ← Back to workshop
+        {t('common:action.backToProfile')}
       </button>
 
-      <h1 className={styles.title}>Edit character</h1>
-      <p className={styles.lead}>Identity, language, and personality. Changes apply when you save.</p>
+      <h1 className={styles.title}>{t('profile:edit.title')}</h1>
+      <p className={styles.lead}>{t('profile:edit.lead')}</p>
 
       <form className={styles.card} onSubmit={onSubmit}>
+        {/* ── Banner ── */}
+        <div
+          className={styles.bannerPreview}
+          style={
+            character.appearance.bannerImageUrl
+              ? { backgroundImage: `url(${character.appearance.bannerImageUrl})` }
+              : { background: getBannerStyle(character.appearance.bannerColorIndex, character.appearance.bannerCustomColor) }
+          }
+        >
+          <button
+            type="button"
+            className={styles.bannerOverlay}
+            onClick={() => !bannerBusy && bannerFileRef.current?.click()}
+            disabled={bannerBusy}
+          >
+            <span className={styles.bannerOverlayMain}>
+              {bannerBusy ? '…' : t('profile:edit.banner.change')}
+            </span>
+          </button>
+
+          {character.appearance.bannerImageUrl && (
+            <button
+              type="button"
+              className={styles.bannerRemoveBtn}
+              onClick={onBannerRemove}
+              disabled={bannerBusy}
+            >
+              {t('profile:edit.banner.remove')}
+            </button>
+          )}
+        </div>
+
+        <input
+          ref={bannerFileRef}
+          type="file"
+          accept="image/*"
+          className={styles.hiddenFile}
+          onChange={onBannerFile}
+        />
+
         <div className={styles.cardGrid}>
           <div className={styles.avatarCol}>
             <button
@@ -143,7 +248,7 @@ export default function CharacterEditPage() {
               className={styles.avatarBtn}
               onClick={() => fileRef.current?.click()}
               disabled={avatarBusy}
-              aria-label="Change avatar"
+              aria-label={t('profile:edit.avatar.changeAriaLabel')}
             >
               {character.appearance.avatarUrl ? (
                 <img src={character.appearance.avatarUrl} alt="" className={styles.avatarImg} />
@@ -161,12 +266,22 @@ export default function CharacterEditPage() {
               className={styles.hiddenFile}
               onChange={onAvatar}
             />
-            <p className={styles.avatarHint}>PNG, JPG, WebP — stored in your project folder on S3.</p>
+            <p className={styles.avatarHint}>{t('profile:edit.avatar.hint')}</p>
+
+            <div className={styles.bannerColorField}>
+              <span className={styles.bannerColorLabel}>{t('profile:edit.banner.colorLabel')}</span>
+              <BannerColorPicker
+                value={character.appearance.bannerCustomColor ?? getBannerAccent(character.appearance.bannerColorIndex)}
+                onChange={(color) =>
+                  patch({ appearance: { ...character.appearance, bannerCustomColor: color } })
+                }
+              />
+            </div>
           </div>
 
           <div className={styles.fields}>
             <label className={styles.label} htmlFor="ec-name">
-              Display name
+              {t('profile:edit.field.displayName')}
             </label>
             <input
               id="ec-name"
@@ -177,7 +292,7 @@ export default function CharacterEditPage() {
             />
 
             <label className={styles.label} htmlFor="ec-slug">
-              Slug
+              {t('profile:edit.field.slug')}
             </label>
             <div className={styles.slugRow}>
               <span className={styles.slugPrefix}>/</span>
@@ -191,7 +306,7 @@ export default function CharacterEditPage() {
             </div>
 
             <label className={styles.label} htmlFor="ec-lang">
-              Language
+              {t('profile:edit.field.language')}
             </label>
             <input
               id="ec-lang"
@@ -202,18 +317,18 @@ export default function CharacterEditPage() {
             />
 
             <label className={styles.label} htmlFor="ec-phrases">
-              Key phrases
+              {t('profile:edit.field.keyPhrases')}
             </label>
             <input
               id="ec-phrases"
               className={styles.input}
               value={character.appearance.keyPhrases}
               onChange={(e) => patch({ appearance: { ...character.appearance, keyPhrases: e.target.value } })}
-              placeholder="Comma-separated"
+              placeholder={t('profile:edit.field.keyPhrasesPlaceholder')}
             />
 
             <label className={styles.label} htmlFor="ec-personality">
-              Personality description
+              {t('profile:edit.field.personality')}
             </label>
             <textarea
               id="ec-personality"
@@ -221,7 +336,7 @@ export default function CharacterEditPage() {
               value={character.personality}
               onChange={(e) => patch({ personality: e.target.value })}
               rows={6}
-              placeholder="Tone, quirks, how they speak…"
+              placeholder={t('profile:edit.field.personalityPlaceholder')}
             />
           </div>
         </div>
@@ -234,10 +349,10 @@ export default function CharacterEditPage() {
 
         <div className={styles.actions}>
           <button type="button" className={styles.btnGhost} onClick={goWorkshop}>
-            Cancel
+            {t('common:action.cancel')}
           </button>
           <button type="submit" className={styles.btnPrimary} disabled={saving}>
-            {saving ? 'Saving…' : 'Save changes'}
+            {saving ? t('common:action.saving') : t('common:action.save')}
           </button>
         </div>
       </form>

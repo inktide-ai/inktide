@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import classnames from 'classnames'
+import { useTranslation } from 'react-i18next'
 import styles from './Navigation.module.css'
-import { NAVIGATION_ITEMS, CONTENT } from '../../constants'
 import { useAuth } from '../../context/AuthContext'
 import { useHideOnScroll } from '../../hooks'
-import logoSvg from '../../assets/icon.svg'
+import logoSvg from '../../assets/app/icon.svg'
 
 interface NavigationProps {
   onLoginClick?: () => void
@@ -16,6 +16,13 @@ interface NavigationProps {
 const Navigation = (props: NavigationProps) => {
   const { isLoggedIn, userEmail, user, loginWithKeycloak, registerWithKeycloak, logout } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { t } = useTranslation('landing')
+
+  const NAVIGATION_ITEMS = useMemo(() => [
+    { label: t('nav.product'),    href: '#features',     withCaret: true },
+    { label: t('nav.solutions'),  href: '#how',          withCaret: true },
+    { label: t('nav.howItWorks'), href: '#how-it-works', withCaret: true },
+  ], [t])
 
   const onLoginClick = props.onLoginClick ?? loginWithKeycloak
   const onRegisterClick = props.onRegisterClick ?? registerWithKeycloak
@@ -80,11 +87,11 @@ const Navigation = (props: NavigationProps) => {
                 className={styles.navLink}
                 onClick={() => props.onGoToLanding?.('#demo')}
               >
-                {CONTENT.hero.docs}
+                {t('nav.docs')}
               </button>
             ) : (
               <a href="#demo" className={styles.navLink}>
-                {CONTENT.hero.docs}
+                {t('nav.docs')}
               </a>
             )}
             {isLoggedIn ? (
@@ -105,14 +112,14 @@ const Navigation = (props: NavigationProps) => {
                         .toUpperCase() || '?'
                     )}
                   </span>
-                  <span className={styles.profileText}>Profile</span>
+                  <span className={styles.profileText}>{t('nav.profile')}</span>
                 </button>
                 <button
                   type="button"
                   className={styles.logoutButton}
                   onClick={logout}
                 >
-                  Log out
+                  {t('nav.logOut')}
                 </button>
               </>
             ) : (
@@ -122,14 +129,14 @@ const Navigation = (props: NavigationProps) => {
                   className={styles.loginButton}
                   onClick={onLoginClick}
                 >
-                  {CONTENT.hero.logIn}
+                  {t('nav.logIn')}
                 </button>
                 <button
                   type="button"
                   className={styles.signupButton}
                   onClick={onRegisterClick}
                 >
-                  {CONTENT.hero.signUpFree}
+                  {t('nav.signUpFree')}
                 </button>
               </>
             )}
@@ -139,7 +146,7 @@ const Navigation = (props: NavigationProps) => {
             type="button"
             className={styles.burger}
             onClick={() => setMobileOpen((o) => !o)}
-            aria-label="Toggle menu"
+            aria-label={t('nav.toggleMenu')}
             aria-expanded={mobileOpen}
           >
             <span className={classnames(styles.burgerLine, { [styles.burgerOpen]: mobileOpen })} />
@@ -163,7 +170,7 @@ const Navigation = (props: NavigationProps) => {
             type="button"
             className={styles.mobileDrawerClose}
             onClick={closeMobile}
-            aria-label="Close menu"
+            aria-label={t('nav.closeMenu')}
           >
             <svg viewBox="0 0 14 14" aria-hidden>
               <line x1="1" y1="1" x2="13" y2="13" />
@@ -174,7 +181,7 @@ const Navigation = (props: NavigationProps) => {
 
         {/* Nav links */}
         <div className={styles.mobileMenu}>
-          <span className={styles.mobileMenuLabel}>Navigation</span>
+          <span className={styles.mobileMenuLabel}>{t('nav.navigation')}</span>
           {NAVIGATION_ITEMS.map((item) =>
             props.onGoToLanding ? (
               <button
@@ -222,14 +229,14 @@ const Navigation = (props: NavigationProps) => {
                 className={styles.mobileAuthButton}
                 onClick={() => { closeMobile(); props.onGoToApp?.() }}
               >
-                Go to Profile
+                {t('nav.goToProfile')}
               </button>
               <button
                 type="button"
                 className={styles.mobileAuthButtonOutline}
                 onClick={() => { closeMobile(); logout() }}
               >
-                Log out
+                {t('nav.logOut')}
               </button>
             </>
           ) : (
@@ -239,14 +246,14 @@ const Navigation = (props: NavigationProps) => {
                 className={styles.mobileAuthButton}
                 onClick={() => { closeMobile(); onRegisterClick() }}
               >
-                {CONTENT.hero.signUpFree}
+                {t('nav.signUpFree')}
               </button>
               <button
                 type="button"
                 className={styles.mobileAuthButtonOutline}
                 onClick={() => { closeMobile(); onLoginClick() }}
               >
-                {CONTENT.hero.logIn}
+                {t('nav.logIn')}
               </button>
             </>
           )}

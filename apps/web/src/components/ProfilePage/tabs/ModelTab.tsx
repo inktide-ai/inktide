@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react'
-import { uploadCardModelFile } from '../../../api/soul'
+import { useTranslation } from 'react-i18next'
+import { CardModelUploader } from '../../../services/upload/CardModelUploader'
+import { executePresignedUpload } from '../../../services/upload/PresignedUploadService'
 import AvatarRenderer from '../../AvatarRenderer/AvatarRenderer'
 import { useCardModel } from '../../AvatarRenderer/hooks/useCardModel'
 import styles from '../ProfilePage.module.css'
@@ -26,6 +28,7 @@ interface ModelTabProps {
 }
 
 const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
+  const { t } = useTranslation('model')
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploadBusy, setUploadBusy] = useState(false)
   const [uploadHint, setUploadHint] = useState<string | null>(null)
@@ -35,15 +38,14 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
 
   return (
     <div className={styles.tabRoot}>
-      {/* Preview panel */}
       {character.appearance.modelType !== 'none' && (
         <div className={styles.section}>
-          <div className={styles.sectionTitle}>Preview</div>
+          <div className={styles.sectionTitle}>{t('section.preview')}</div>
           <div className={styles.infoCard}>
             <div style={{ height: 380, borderRadius: 8, overflow: 'hidden', background: '#0d0d0f' }}>
               {modelLoading ? (
                 <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  Loading…
+                  {t('loading')}
                 </div>
               ) : (
                 <AvatarRenderer
@@ -58,12 +60,12 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
       )}
 
       <div className={styles.section}>
-        <div className={styles.sectionTitle}>Model</div>
+        <div className={styles.sectionTitle}>{t('section.model')}</div>
         <div className={styles.infoCard}>
           <div className={styles.infoCardContent}>
             <div className={styles.formGroup}>
-              <label className={styles.label}>Model type</label>
-              <div className={styles.labelHint}>Visual representation for your AI character</div>
+              <label className={styles.label}>{t('type.label')}</label>
+              <div className={styles.labelHint}>{t('type.hint')}</div>
               <div className={styles.modelTypeGrid}>
                 {MODEL_TYPES.map((m) => (
                   <button
@@ -80,8 +82,8 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
             </div>
 
             <div className={`${styles.formGroup}${character.appearance.modelType === 'none' ? ` ${styles.inactiveBlock}` : ''}`}>
-              <label className={styles.label}>Upload model</label>
-              <div className={styles.labelHint}>Upload your 3D or Live2D model file</div>
+              <label className={styles.label}>{t('upload.label')}</label>
+              <div className={styles.labelHint}>{t('upload.hint')}</div>
               <div className={styles.modelUploadRow}>
                 <input
                   ref={fileRef}
@@ -95,13 +97,13 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
                     onUpdate({ appearance: { ...character.appearance, modelFileName: file.name } })
                     setUploadHint(null)
                     if (!cardId) {
-                      setUploadHint('Save the character first — then uploads go to your project storage.')
+                      setUploadHint(t('upload.saveFirst'))
                       return
                     }
                     setUploadBusy(true)
                     try {
-                      await uploadCardModelFile(cardId, file)
-                      setUploadHint('Uploaded — preview updated.')
+                      await executePresignedUpload(new CardModelUploader(cardId), file)
+                      setUploadHint(t('upload.success'))
                       setRefreshKey((k) => k + 1)
                     } catch (err) {
                       setUploadHint(err instanceof Error ? err.message : 'Upload failed')
@@ -116,12 +118,12 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
                   onClick={() => fileRef.current?.click()}
                   disabled={character.appearance.modelType === 'none' || uploadBusy}
                 >
-                  {uploadBusy ? 'Uploading…' : 'Choose file'}
+                  {uploadBusy ? t('upload.busy') : t('upload.choose')}
                 </button>
                 <span className={styles.modelFileName}>
                   {character.appearance.modelFileName ?? (
                     <span style={{ color: 'var(--text-muted)' }}>
-                      No file — accepts {character.appearance.modelType !== 'none' ? meta.ext : '.zip, .vrm, .glb'}
+                      {t('upload.noFile', { ext: character.appearance.modelType !== 'none' ? meta.ext : '.zip, .vrm, .glb' })}
                     </span>
                   )}
                 </span>
@@ -131,7 +133,7 @@ const ModelTab = ({ character, onUpdate, cardId }: ModelTabProps) => {
                     className={styles.modelClearBtn}
                     onClick={() => onUpdate({ appearance: { ...character.appearance, modelFileName: undefined } })}
                   >
-                    Remove
+                    {t('upload.remove')}
                   </button>
                 )}
               </div>

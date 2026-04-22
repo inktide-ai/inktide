@@ -16,7 +16,6 @@ namespace Chimera.API.Connector.Infrastructure.DependencyInjection;
 /// <summary>Infrastructure startup — messaging pipeline (Redis Streams ingest) and health checks.</summary>
 public sealed class SynapseIngestConnectorStartup : IStartup
 {
-    #region Public Methods
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
@@ -46,5 +45,4 @@ public sealed class SynapseIngestConnectorStartup : IStartup
             .AddRedis(redisSettings.ToConnectionString(), name: "redis", tags: ["synapse-ingest", "cache"]);
     }
 
-    #endregion
 }

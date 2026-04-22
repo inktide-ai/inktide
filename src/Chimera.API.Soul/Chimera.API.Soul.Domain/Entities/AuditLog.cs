@@ -8,7 +8,6 @@ namespace Chimera.API.Soul.Domain.Entities;
 /// </summary>
 public sealed class AuditLog
 {
-    #region Fields
 
     private Guid _id;
     private Guid _userId;
@@ -19,9 +18,6 @@ public sealed class AuditLog
     private IPAddress? _ipAddress;
     private DateTime _createdAt;
 
-    #endregion
-
-    #region Properties
 
     public Guid Id
     {
@@ -74,5 +70,4 @@ public sealed class AuditLog
         set => _createdAt = value;
     }
 
-    #endregion
 }

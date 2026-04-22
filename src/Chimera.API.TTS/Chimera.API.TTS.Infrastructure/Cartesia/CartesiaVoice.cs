@@ -7,7 +7,6 @@ namespace Chimera.API.TTS.Infrastructure.Cartesia;
 /// </summary>
 internal sealed class CartesiaVoice
 {
-    #region Properties
 
     /// <summary>Selection mode. Always <c>"id"</c> for pre-built voices.</summary>
     [JsonPropertyName("mode")]
@@ -22,5 +21,4 @@ internal sealed class CartesiaVoice
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public CartesiaVoiceControls? ExperimentalControls { get; set; }
 
-    #endregion
 }

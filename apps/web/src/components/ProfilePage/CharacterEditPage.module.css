@@ -46,10 +46,80 @@
 
 .card {
   border-radius: 16px;
-  padding: 1.5rem;
+  overflow: hidden;
   background: var(--bg-surface);
   border: 1px solid var(--border);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+}
+
+/* ── Banner preview at the top of the edit form ── */
+.bannerPreview {
+  position: relative;
+  height: 110px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  padding: 0;
+  width: 100%;
+}
+
+.bannerPreview:hover .bannerOverlay {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.bannerOverlayMain {
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.bannerPreview:hover .bannerOverlayMain {
+  opacity: 1;
+}
+
+.bannerRemoveBtn {
+  position: absolute;
+  bottom: 0.625rem;
+  right: 0.75rem;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.65);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.15s ease;
+  backdrop-filter: blur(4px);
+}
+
+.bannerPreview:hover .bannerRemoveBtn {
+  opacity: 1;
+}
+
+.bannerRemoveBtn:hover {
+  color: #f87171;
 }
 
 .cardGrid {
@@ -57,6 +127,7 @@
   grid-template-columns: 160px 1fr;
   gap: 1.75rem;
   align-items: start;
+  padding: 1.5rem;
 }
 
 @media (max-width: 640px) {
@@ -152,6 +223,20 @@
   line-height: 1.4;
 }
 
+.bannerColorField {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.bannerColorLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 .fields {
   display: flex;
   flex-direction: column;
@@ -218,7 +303,7 @@
   justify-content: flex-end;
   gap: 0.75rem;
   margin-top: 1.5rem;
-  padding-top: 1.25rem;
+  padding: 1.25rem 1.5rem 1.5rem;
   border-top: 1px solid var(--border);
 }
 
@@ -243,12 +328,17 @@
   padding: 0.55rem 1.25rem;
   border-radius: 0.5rem;
   border: none;
-  background: linear-gradient(135deg, var(--accent-red), #c026d3);
+  background: #ED3E3E;
   color: #fff;
   font-family: var(--font-ui);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: #FF5252;
 }
 
 .btnPrimary:disabled {

@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Infrastructure.Configurations;
 
 public sealed class AiCardToolConfiguration : IEntityTypeConfiguration<AiCardTool>
 {
-    #region Public Methods
 
     public void Configure(EntityTypeBuilder<AiCardTool> b)
     {
@@ -43,5 +42,4 @@ public sealed class AiCardToolConfiguration : IEntityTypeConfiguration<AiCardToo
             .IsUnique();
     }
 
-    #endregion
 }

@@ -2,14 +2,10 @@ namespace Chimera.API.Domain.Models;
 
 public sealed class ModelInfo
 {
-    #region Fields
 
     private string _id = string.Empty;
     private string _name = string.Empty;
 
-    #endregion
-
-    #region Properties
 
     public string Id
     {
@@ -23,5 +19,4 @@ public sealed class ModelInfo
         set => _name = value;
     }
 
-    #endregion
 }

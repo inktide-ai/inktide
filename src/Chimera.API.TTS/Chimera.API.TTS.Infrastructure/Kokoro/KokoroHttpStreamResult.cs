@@ -5,7 +5,6 @@ namespace Chimera.API.TTS.Infrastructure.Kokoro;
 /// </summary>
 public sealed class KokoroHttpStreamResult
 {
-    #region Properties
 
     /// <summary>
     /// Response body stream; caller must dispose (e.g. <c>await using</c>).
@@ -14,5 +13,4 @@ public sealed class KokoroHttpStreamResult
 
     public string? MediaType { get; init; }
 
-    #endregion
 }

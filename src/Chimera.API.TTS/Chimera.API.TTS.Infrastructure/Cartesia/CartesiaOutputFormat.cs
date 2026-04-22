@@ -7,7 +7,6 @@ namespace Chimera.API.TTS.Infrastructure.Cartesia;
 /// </summary>
 internal sealed class CartesiaOutputFormat
 {
-    #region Properties
 
     /// <summary>Audio container: <c>mp3</c>, <c>wav</c>, <c>ogg</c>.</summary>
     [JsonPropertyName("container")]
@@ -23,5 +22,4 @@ internal sealed class CartesiaOutputFormat
     [JsonPropertyName("sample_rate")]
     public int SampleRate { get; set; } = 44100;
 
-    #endregion
 }

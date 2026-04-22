@@ -29,20 +29,11 @@ internal sealed class ElevenLabsParams
     [JsonPropertyName("use_speaker_boost")]
     public bool? UseSpeakerBoost { get; init; }
 
-    // ── Effective values with domain defaults ────────────────────────────────
-
     public double GetStability()       => Stability       ?? 0.5;
     public double GetSimilarityBoost() => SimilarityBoost ?? 0.75;
     public double GetStyle()           => Style           ?? 0.0;
     public bool   GetUseSpeakerBoost() => UseSpeakerBoost ?? true;
 
-    // ── Factory ──────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Deserializes provider-specific params from the loosely-typed dictionary.
-    /// Handles both boxed CLR primitives and <see cref="JsonElement"/> values.
-    /// Returns defaults when <paramref name="raw"/> is null or unparseable.
-    /// </summary>
     internal static ElevenLabsParams From(IReadOnlyDictionary<string, object>? raw)
     {
         if (raw is null) return new();

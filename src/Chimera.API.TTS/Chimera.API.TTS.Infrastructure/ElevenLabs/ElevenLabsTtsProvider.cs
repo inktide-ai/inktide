@@ -14,22 +14,15 @@ namespace Chimera.API.TTS.Infrastructure.ElevenLabs;
 /// </summary>
 public sealed class ElevenLabsTtsProvider : ISpeechProvider
 {
-    #region Constants
 
     private const string DefaultModelId    = "eleven_multilingual_v2";
     private const double MinSpeed          = 0.7;
     private const double MaxSpeed          = 1.2;
 
-    #endregion
-
-    #region Fields
 
     private readonly ElevenLabsTtsClient _client;
     private readonly ILogger<ElevenLabsTtsProvider> _logger;
 
-    #endregion
-
-    #region Constructor
 
     public ElevenLabsTtsProvider(
         ElevenLabsTtsClient client,
@@ -39,9 +32,6 @@ public sealed class ElevenLabsTtsProvider : ISpeechProvider
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => "elevenlabs";
 
@@ -57,9 +47,6 @@ public sealed class ElevenLabsTtsProvider : ISpeechProvider
         SupportsModelListing = true,
     };
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -128,9 +115,6 @@ public sealed class ElevenLabsTtsProvider : ISpeechProvider
             .ConfigureAwait(false);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private string MapOutputFormat(string? audioFormat)
     {
@@ -168,5 +152,4 @@ public sealed class ElevenLabsTtsProvider : ISpeechProvider
         };
     }
 
-    #endregion
 }

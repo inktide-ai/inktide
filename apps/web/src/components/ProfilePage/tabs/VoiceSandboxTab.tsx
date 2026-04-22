@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import styles from '../ProfilePage.module.css'
 import sandboxStyles from './VoiceSandboxTab.module.css'
 import SliderWithTicks from '../SliderWithTicks'
@@ -21,6 +22,8 @@ const AUDIO_FORMATS = ['mp3', 'wav', 'opus'] as const
 type AudioFormat = typeof AUDIO_FORMATS[number]
 
 const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
+  const { t } = useTranslation('voice')
+
   // ── Provider / voice catalog ──────────────────────────────────────────────
   const [providers, setProviders] = useState<SpeechProviderDescriptor[]>([])
   const [providersLoading, setProvidersLoading] = useState(true)
@@ -32,7 +35,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
   // ── Form state ────────────────────────────────────────────────────────────
   const [voiceId, setVoiceId] = useState(character.tts.voiceId ?? '')
   const [apiKey, setApiKey] = useState('')
-  const [text, setText] = useState('Hello! This is a test of the voice synthesis.')
+  const [text, setText] = useState(() => t('text.defaultSample'))
   const [ssmlMode, setSsmlMode] = useState(false)
   const [speed, setSpeed] = useState(character.tts.speed ?? 1.0)
   const [format, setFormat] = useState<AudioFormat>('mp3')
@@ -99,9 +102,9 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
 
   // ── Validation ────────────────────────────────────────────────────────────
   const validationErrors: string[] = []
-  if (!text.trim()) validationErrors.push('Text cannot be empty.')
-  if (!voiceId.trim()) validationErrors.push('Please select a voice.')
-  if (needsApiKey && !apiKey.trim()) validationErrors.push('Enter API key to test voice.')
+  if (!text.trim()) validationErrors.push(t('validation.textEmpty'))
+  if (!voiceId.trim()) validationErrors.push(t('validation.voiceRequired'))
+  if (needsApiKey && !apiKey.trim()) validationErrors.push(t('validation.apiKeyRequired'))
 
   const isBusy = state === 'loading' || state === 'streaming'
   const canTest = validationErrors.length === 0 && !isBusy
@@ -127,7 +130,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
         >
           ←
         </button>
-        <span className={styles.providerPageTitle}>Voice Sandbox</span>
+        <span className={styles.providerPageTitle}>{t('sandbox.title')}</span>
       </div>
 
       {/* ── Synthesis Panel ── */}
@@ -136,10 +139,10 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
 
           {/* Provider picker */}
           <div className={styles.formGroup}>
-            <label className={styles.label}>Provider</label>
-            <div className={styles.labelHint}>Select the TTS provider to test</div>
+            <label className={styles.label}>{t('provider.label')}</label>
+            <div className={styles.labelHint}>{t('provider.hint')}</div>
             {providersLoading ? (
-              <div className={sandboxStyles.voiceLoadingHint}>Loading providers…</div>
+              <div className={sandboxStyles.voiceLoadingHint}>{t('provider.loading')}</div>
             ) : (
               <div className={styles.voiceSelectWrap}>
                 <select
@@ -148,7 +151,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
                   onChange={(e) => handleProviderChange(e.target.value)}
                 >
                   {providers.length === 0 && (
-                    <option value="">No providers registered</option>
+                    <option value="">{t('provider.none')}</option>
                   )}
                   {providers.map((p) => (
                     <option key={p.id} value={p.id}>{p.displayName}</option>
@@ -164,8 +167,8 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
           {/* API key (only when required) */}
           {needsApiKey && (
             <div className={styles.formGroup}>
-              <label className={styles.label}>API Key</label>
-              <div className={styles.labelHint}>Required for this provider</div>
+              <label className={styles.label}>{t('apiKey.label')}</label>
+              <div className={styles.labelHint}>{t('apiKey.hint')}</div>
               <input
                 className={styles.input}
                 type="password"
@@ -179,13 +182,13 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
 
           {/* Voice selector — dropdown if provider supports listing, text input otherwise */}
           <div className={styles.formGroup}>
-            <label className={styles.label}>Voice</label>
+            <label className={styles.label}>{t('voice.label')}</label>
             <div className={styles.labelHint}>
-              {canListVoices ? 'Choose from available voices' : 'Enter the voice ID manually'}
+              {canListVoices ? t('voice.hintList') : t('voice.hintManual')}
             </div>
             {canListVoices ? (
               voicesLoading ? (
-                <div className={sandboxStyles.voiceLoadingHint}>Loading voices…</div>
+                <div className={sandboxStyles.voiceLoadingHint}>{t('voice.loading')}</div>
               ) : (
                 <div className={styles.voiceSelectWrap}>
                   <select
@@ -193,7 +196,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
                     value={voiceId}
                     onChange={(e) => setVoiceId(e.target.value)}
                   >
-                    <option value="">— Select a voice —</option>
+                    <option value="">{t('voice.selectPlaceholder')}</option>
                     {selectedProviderId === 'kokoro'
                       ? Array.from(VOICE_GROUPS.entries()).map(([lang, voiceOpts]) => (
                           <optgroup key={lang} label={LANG_LABELS[lang] ?? lang}>
@@ -216,7 +219,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
               <input
                 className={styles.input}
                 type="text"
-                placeholder="e.g. af_bella or your-voice-id"
+                placeholder={t('voice.idPlaceholder')}
                 value={voiceId}
                 onChange={(e) => setVoiceId(e.target.value)}
               />
@@ -225,7 +228,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
 
           {/* Audio format */}
           <div className={styles.formGroup}>
-            <label className={styles.label}>Audio Format</label>
+            <label className={styles.label}>{t('audioFormat.label')}</label>
             <div className={styles.voiceSelectWrap}>
               <select
                 className={styles.voiceSelect}
@@ -246,7 +249,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
           <div className={styles.sliderGroup}>
             <div className={styles.sliderHeader}>
               <div className={styles.sliderLabelBlock}>
-                <label className={styles.label}>Speed</label>
+                <label className={styles.label}>{t('speed.label')}</label>
               </div>
               <span className={styles.sliderValue}>{speed.toFixed(2)}×</span>
             </div>
@@ -262,8 +265,8 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
           {/* SSML toggle */}
           <div className={styles.toggleRow}>
             <div className={styles.toggleLabel}>
-              Custom SSML
-              <div className={styles.toggleHint}>Enable to input raw SSML instead of plain text</div>
+              {t('ssml.toggle')}
+              <div className={styles.toggleHint}>{t('ssml.toggleHint')}</div>
             </div>
             <label className={styles.toggleControl}>
               <input
@@ -277,17 +280,17 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
 
           {/* Text input */}
           <div className={styles.formGroup}>
-            <label className={styles.label}>{ssmlMode ? 'SSML Input' : 'Text'}</label>
+            <label className={styles.label}>{ssmlMode ? t('ssml.inputLabel') : t('text.label')}</label>
             <div className={styles.labelHint}>
               {ssmlMode
-                ? 'Enter SSML markup — must be wrapped in <speak>…</speak>'
-                : 'Text to synthesize'}
+                ? t('ssml.inputHint')
+                : t('text.hint')}
             </div>
             <textarea
               className={ssmlMode ? styles.textareaLarge : styles.textarea}
               placeholder={ssmlMode
-                ? '<speak>Hello <break time="500ms"/> world!</speak>'
-                : 'Enter text to synthesize…'}
+                ? t('ssml.inputPlaceholder')
+                : t('text.placeholder')}
               value={text}
               onChange={(e) => setText(e.target.value)}
               rows={ssmlMode ? 8 : 4}
@@ -326,7 +329,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
             style={{ width: '100%', marginTop: '0.5rem' }}
           >
             {isBusy && state === 'loading' && <span className={sandboxStyles.spinnerInline} />}
-            {isBusy && state === 'loading' ? 'Synthesizing…' : 'Test Voice'}
+            {isBusy && state === 'loading' ? t('sandbox.synthesizing') : t('sandbox.testVoice')}
           </button>
 
           {/* Audio player */}
@@ -346,10 +349,10 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
       {/* ── Streaming Playground (only for providers that support it) ── */}
       {canStream && (
         <div className={styles.section}>
-          <div className={styles.sectionTitle}>Streaming Playground</div>
+          <div className={styles.sectionTitle}>{t('sandbox.streamingPlayground')}</div>
           <div className={styles.infoCardContent}>
             <div className={styles.labelHint}>
-              Tests chunked audio delivery. Each bar represents one received chunk — height is proportional to its byte size.
+              {t('sandbox.streamingDesc')}
             </div>
 
             <button
@@ -371,7 +374,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
               style={{ marginTop: '0.5rem' }}
             >
               {isBusy && state === 'streaming' && <span className={sandboxStyles.spinnerInline} />}
-              {isBusy && state === 'streaming' ? 'Streaming…' : 'Test chunking'}
+              {isBusy && state === 'streaming' ? t('sandbox.streaming') : t('sandbox.testChunking')}
             </button>
 
             {/* Buffer visualization */}

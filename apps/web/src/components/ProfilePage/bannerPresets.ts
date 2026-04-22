@@ -17,3 +17,11 @@ export const getBannerGradient = (index: number) =>
 
 export const getBannerAccent = (index: number) =>
   BANNER_PRESETS[Math.max(0, index % BANNER_PRESETS.length)]?.accent ?? BANNER_PRESETS[0].accent
+
+export const getBannerStyle = (index: number, customColor?: string | null): string => {
+  if (customColor) {
+    const c = customColor.startsWith('#') ? customColor : `#${customColor}`
+    return `linear-gradient(135deg, ${c}55 0%, ${c} 100%)`
+  }
+  return getBannerGradient(index)
+}

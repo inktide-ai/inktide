@@ -3,16 +3,12 @@ namespace Chimera.API.Domain.Models;
 public sealed class ProviderOptions
 {
     
-    #region Fields
 
     private string _providerId = string.Empty;
     private string? _apiKey;
     private Dictionary<string, string> _headers = new();
     private Dictionary<string, object> _extra = new();
 
-    #endregion
-    
-    #region Properties
     
     public string ProviderId
     {
@@ -40,5 +36,4 @@ public sealed class ProviderOptions
         set => _extra = value;
     }
     
-    #endregion
 }

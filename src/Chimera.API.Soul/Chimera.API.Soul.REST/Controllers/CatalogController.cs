@@ -14,22 +14,15 @@ namespace Chimera.API.Soul.REST.Controllers;
 [Authorize]
 public sealed class CatalogController : ControllerBase
 {
-    #region Fields
 
     private readonly ICatalogService _catalogService;
 
-    #endregion
-
-    #region Constructors
 
     public CatalogController(ICatalogService catalogService)
     {
         _catalogService = catalogService ?? throw new ArgumentNullException(nameof(catalogService));
     }
 
-    #endregion
-
-    #region Public Methods
 
     [HttpGet("llm-models")]
     [ProducesResponseType(typeof(IReadOnlyList<LlmModelResponse>), StatusCodes.Status200OK)]
@@ -49,9 +42,6 @@ public sealed class CatalogController : ControllerBase
         return Ok(voices.Select(AiCardConverter.ToTtsResponse).ToList());
     }
 
-    #endregion
-
-    #region Private Methods
 
     private Guid GetUserId()
     {
@@ -60,5 +50,4 @@ public sealed class CatalogController : ControllerBase
         return Guid.Parse(sub);
     }
 
-    #endregion
 }

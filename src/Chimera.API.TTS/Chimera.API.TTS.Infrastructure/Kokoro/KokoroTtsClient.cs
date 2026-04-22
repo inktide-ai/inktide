@@ -10,15 +10,11 @@ namespace Chimera.API.TTS.Infrastructure.Kokoro;
 /// </summary>
 public sealed class KokoroTtsClient
 {
-    #region Constants
 
     private const string KokoroTtsV1Endpoint = "http://localhost:8880/v1";
 
     public const string HttpClientName = "KokoroTTS";
 
-    #endregion
-
-    #region Fields
 
     private readonly IHttpClientFactory _httpClientFactory;
 
@@ -26,9 +22,6 @@ public sealed class KokoroTtsClient
 
     private readonly Uri _endpoint;
 
-    #endregion
-
-    #region Constructor
 
     public KokoroTtsClient(
         IHttpClientFactory httpChannelFactory,
@@ -40,15 +33,9 @@ public sealed class KokoroTtsClient
         _endpoint = GetEndpoint(options.Value);
     }
 
-    #endregion
-
-    #region Properties
 
     public Uri Endpoint => _endpoint;
 
-    #endregion
-
-    #region Public Methods
 
     public async Task<Stream> GenerateSpeechAsync(
         KokoroSpeechOptions options,
@@ -127,18 +114,12 @@ public sealed class KokoroTtsClient
         return await SendAndReadBinaryResultAsync(httpRequest, cancellationToken).ConfigureAwait(false);
     }
 
-    #endregion
-
-    #region Internal Methods
 
     internal static Uri GetEndpoint(KokoroTtsClientSettings? options = null)
     {
         return options?.Endpoint ?? new(KokoroTtsV1Endpoint);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private HttpClient CreateClient() => _httpClientFactory.CreateClient(HttpClientName);
 
@@ -181,5 +162,4 @@ public sealed class KokoroTtsClient
         };
     }
 
-    #endregion
 }

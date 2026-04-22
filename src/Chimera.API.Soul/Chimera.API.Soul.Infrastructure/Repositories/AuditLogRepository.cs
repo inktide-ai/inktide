@@ -8,14 +8,10 @@ namespace Chimera.API.Soul.Infrastructure.Repositories;
 
 public sealed class AuditLogRepository : IAuditLogRepository
 {
-    #region Fields
 
     private readonly SoulDbContext _db;
     private readonly TimeProvider _time;
 
-    #endregion
-
-    #region Constructors
 
     public AuditLogRepository(SoulDbContext db, TimeProvider time)
     {
@@ -23,9 +19,6 @@ public sealed class AuditLogRepository : IAuditLogRepository
         _time = time ?? throw new ArgumentNullException(nameof(time));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task LogAsync(Guid userId, string entityType, Guid entityId, string action,
         string? changes = null, IPAddress? ipAddress = null, CancellationToken ct = default)
@@ -56,5 +49,4 @@ public sealed class AuditLogRepository : IAuditLogRepository
             .ToListAsync(ct);
     }
 
-    #endregion
 }

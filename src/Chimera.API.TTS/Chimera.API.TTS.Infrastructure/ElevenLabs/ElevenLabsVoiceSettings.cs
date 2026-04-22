@@ -7,7 +7,6 @@ namespace Chimera.API.TTS.Infrastructure.ElevenLabs;
 /// </summary>
 public sealed class ElevenLabsVoiceSettings
 {
-    #region Properties
 
     [JsonPropertyName("stability")]
     public double Stability { get; set; } = 0.5;
@@ -24,5 +23,4 @@ public sealed class ElevenLabsVoiceSettings
     [JsonPropertyName("speed")]
     public double Speed { get; set; } = 1.0;
 
-    #endregion
 }

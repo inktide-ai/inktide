@@ -8,18 +8,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Chimera.API.TTS.Infrastructure.DependencyInjection;
 
-/// <summary>
-/// Registers speech (TTS) providers and <see cref="ISpeechProviderRegistry"/>.
-/// Decorator chain (outermost → innermost): Caching → Logging → Provider.
-/// </summary>
 public static class TtsSpeechProviderServiceCollectionExtensions
 {
-    #region Public Methods
-
-    /// <summary>
-    /// Registers <see cref="ISpeechProvider"/> chain (with logging + caching decorators) and <see cref="ISpeechProviderRegistry"/>.
-    /// Add concrete providers in <paramref name="configureChain"/>.
-    /// </summary>
     public static IServiceCollection AddChimeraSpeechProviders(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -41,7 +31,6 @@ public static class TtsSpeechProviderServiceCollectionExtensions
             var wrapped = new List<ISpeechProvider>(list.Count);
             foreach (var provider in list)
             {
-                // Build decorator chain: Provider → Logging → Caching (outermost)
                 ISpeechProvider chain = provider;
 
                 chain = new LoggingSpeechProviderDecorator(
@@ -64,5 +53,4 @@ public static class TtsSpeechProviderServiceCollectionExtensions
         return services;
     }
 
-    #endregion
 }

@@ -4,15 +4,11 @@ namespace Chimera.API.Profile.Infrastructure.Storage;
 
 public sealed class DisabledObjectStorageService : IObjectStorageService
 {
-    #region Properties
 
     public bool IsEnabled => false;
 
     public string? DefaultBucket => null;
 
-    #endregion
-
-    #region Public Methods
 
     public Task DeleteObjectAsync(string objectKey, CancellationToken ct = default)
     {
@@ -44,5 +40,4 @@ public sealed class DisabledObjectStorageService : IObjectStorageService
         return Task.FromResult<ObjectStorageObjectInfo?>(null);
     }
 
-    #endregion
 }

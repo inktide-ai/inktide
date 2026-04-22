@@ -8,7 +8,6 @@ namespace Chimera.API.TTS.Application.Abstractions;
 /// </summary>
 public interface IApiKeyResolver
 {
-    #region Methods
 
     /// <summary>
     /// Returns <see langword="null"/> when the provider does not require an API key.
@@ -17,5 +16,4 @@ public interface IApiKeyResolver
     /// <param name="providerId">Registered <see cref="ISpeechProvider"/> id.</param>
     string? Resolve(string providerId);
 
-    #endregion
 }

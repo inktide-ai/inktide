@@ -2,13 +2,6 @@ namespace Chimera.API.Memory.Application.Configuration;
 
 public sealed class MemoryOptions
 {
-    public const string SectionName = "MemorySettings";
-
-    /// <summary>Default top-K for Qdrant semantic search.</summary>
-    public int TopK { get; set; } = 5;
-
-    /// <summary>Max conversation turns to keep in Redis session buffer.</summary>
-    public int MaxHistoryTurns { get; set; } = 30;
 
     /// <summary>Ingestion worker flushes when batch reaches this size.</summary>
     public int IngestionBatchSize { get; set; } = 5;
@@ -25,6 +18,7 @@ public sealed class MemoryOptions
     /// <summary>Facts below this importance score are discarded during ingestion.</summary>
     public double MinImportanceThreshold { get; set; } = 0.3;
 
-    /// <summary>Base URL of the Scribe Python worker (embedding + fact extraction).</summary>
+    /// <summary>Base URL of the Scribe Python worker (fact extraction only — embeddings are handled by Ollama via SK).</summary>
     public string ScribeBaseUrl { get; set; } = "http://localhost:8001";
+    
 }

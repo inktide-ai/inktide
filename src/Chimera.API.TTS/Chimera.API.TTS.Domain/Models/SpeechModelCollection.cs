@@ -5,13 +5,9 @@ namespace Chimera.API.TTS.Domain.Models;
 
 public class SpeechModelCollection : ReadOnlyCollection<SpeechModel>
 {
-    #region Fields
 
     private string _object = "list";
 
-    #endregion
-
-    #region Constructors
 
     internal SpeechModelCollection(
         string @object,
@@ -21,15 +17,9 @@ public class SpeechModelCollection : ReadOnlyCollection<SpeechModel>
         _object = @object;
     }
 
-    #endregion
-
-    #region Properties
 
     public string Object => _object;
 
-    #endregion
-
-    #region Internal Methods
 
     /// <summary>
     /// Parses an OpenAI-compatible <c>/v1/models</c> JSON payload (root object with <c>data</c> array, or a bare array).
@@ -76,5 +66,4 @@ public class SpeechModelCollection : ReadOnlyCollection<SpeechModel>
         return new SpeechModelCollection(objectType, list);
     }
 
-    #endregion
 }

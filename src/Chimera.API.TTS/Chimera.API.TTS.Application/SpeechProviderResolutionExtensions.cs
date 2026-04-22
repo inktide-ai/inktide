@@ -9,7 +9,6 @@ namespace Chimera.API.TTS.Application;
 /// </summary>
 public static class SpeechProviderResolutionExtensions
 {
-    #region Public Methods
 
     public static ISpeechProvider Resolve(
         this ISpeechProviderRegistry registry,
@@ -47,5 +46,4 @@ public static class SpeechProviderResolutionExtensions
         return registry.GetRequired(options.DefaultProviderId);
     }
 
-    #endregion
 }

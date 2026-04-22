@@ -8,6 +8,8 @@ export interface AiCharacter {
   slug: string
   avatarUrl?: string | null
   bannerColorIndex?: number
+  bannerCustomColor?: string | null
+  bannerImageUrl?: string | null
   personality: string
   keyPhrases: string
   modelType: ModelType

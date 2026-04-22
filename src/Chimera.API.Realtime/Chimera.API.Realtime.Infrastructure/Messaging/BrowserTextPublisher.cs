@@ -23,7 +23,6 @@ namespace Chimera.API.Realtime.Infrastructure.Messaging;
 /// </summary>
 public sealed class BrowserTextPublisher : BackgroundService
 {
-    #region Private types
 
     private sealed record LlmChunkPayload(
         [property: JsonPropertyName("correlationId")]   string CorrelationId,
@@ -32,9 +31,6 @@ public sealed class BrowserTextPublisher : BackgroundService
         [property: JsonPropertyName("sequenceNumber")]  int    SequenceNumber,
         [property: JsonPropertyName("isLast")]          bool   IsLast);
 
-    #endregion
-
-    #region Fields
 
     private readonly IConnectionMultiplexer _redis;
     private readonly IHubContext<AudioHub>  _hub;
@@ -42,9 +38,6 @@ public sealed class BrowserTextPublisher : BackgroundService
     private readonly ILogger<BrowserTextPublisher> _logger;
     private readonly string _consumerName;
 
-    #endregion
-
-    #region Constructor
 
     public BrowserTextPublisher(
         IConnectionMultiplexer redis,
@@ -60,9 +53,6 @@ public sealed class BrowserTextPublisher : BackgroundService
         _consumerName = $"{_settings.ConsumerNamePrefix}-{ResolveInstanceId()}";
     }
 
-    #endregion
-
-    #region BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -84,9 +74,6 @@ public sealed class BrowserTextPublisher : BackgroundService
         _logger.LogInformation("BrowserTextPublisher stopped.");
     }
 
-    #endregion
-
-    #region Consumer group bootstrap
 
     private async Task EnsureConsumerGroupAsync(IDatabase db, CancellationToken ct)
     {
@@ -115,9 +102,6 @@ public sealed class BrowserTextPublisher : BackgroundService
         }
     }
 
-    #endregion
-
-    #region Consume loop
 
     private async Task ConsumeLoopAsync(IDatabase db, CancellationToken ct)
     {
@@ -187,9 +171,6 @@ public sealed class BrowserTextPublisher : BackgroundService
         }
     }
 
-    #endregion
-
-    #region Per-message processing
 
     private async Task ProcessEntryAsync(IDatabase db, StreamEntry entry, CancellationToken ct)
     {
@@ -259,9 +240,6 @@ public sealed class BrowserTextPublisher : BackgroundService
             payload.ChannelId, payload.SequenceNumber, payload.IsLast, payload.CorrelationId);
     }
 
-    #endregion
-
-    #region Helpers
 
     private Task AckAsync(IDatabase db, RedisValue entryId)
         => db.StreamAcknowledgeAsync(_settings.StreamName, _settings.ConsumerGroup, entryId);
@@ -279,5 +257,4 @@ public sealed class BrowserTextPublisher : BackgroundService
            ?? Environment.GetEnvironmentVariable("K8S_POD_NAME")
            ?? Guid.NewGuid().ToString("N")[..8];
 
-    #endregion
 }

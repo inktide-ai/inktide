@@ -7,22 +7,15 @@ namespace Chimera.API.Soul.Infrastructure.Repositories;
 
 public sealed class CatalogRepository : ICatalogRepository
 {
-    #region Fields
 
     private readonly SoulDbContext _db;
 
-    #endregion
-
-    #region Constructors
 
     public CatalogRepository(SoulDbContext db)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task<IReadOnlyList<LlmCatalogEntry>> GetAvailableLlmModelsAsync(string? tier = null, CancellationToken ct = default)
     {
@@ -50,5 +43,4 @@ public sealed class CatalogRepository : ICatalogRepository
         return await _db.TtsCatalog.AsNoTracking().FirstOrDefaultAsync(v => v.Id == id, ct);
     }
 
-    #endregion
 }

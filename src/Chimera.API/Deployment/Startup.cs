@@ -72,14 +72,7 @@ public static class Startup
                             Assembly.LoadFrom(assemblyPath);
                         }
 
-                        var webHostConfigurators = AppDomain.CurrentDomain.GetAssemblies()
-                            .Distinct()
-                            .SelectMany(a => a.DefinedTypes)
-                            .Where(t => t.ImplementsServiceType<IWebHostConfigurator>())
-                            .Select(t => (IWebHostConfigurator)Activator.CreateInstance(t)!)
-                            .ToList();
-
-                        foreach (var configurator in webHostConfigurators)
+                        foreach (var configurator in ModuleScanner.ResolveAll<IWebHostConfigurator>())
                         {
                             configurator.Configure(webHostBuilder);
                         }

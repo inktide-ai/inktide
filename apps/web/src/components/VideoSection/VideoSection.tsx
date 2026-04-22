@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import GlitchText from '../GlitchText'
 import { CONTENT } from '../../constants'
 import styles from './VideoSection.module.css'
@@ -7,8 +8,18 @@ const VideoSection = () => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const imagePanelRef = useRef<HTMLDivElement>(null)
   const [activeStep, setActiveStep] = useState(0)
+  const { t } = useTranslation('landing')
 
-  const steps = CONTENT.demo.steps
+  type StepKey = '0' | '1' | '2' | '3' | '4'
+  const STEP_KEYS: StepKey[] = ['0', '1', '2', '3', '4']
+
+  const steps = useMemo(() =>
+    CONTENT.demo.steps.map((s, i) => ({
+      heading: t(`demo.steps.${STEP_KEYS[i]}.heading`),
+      description: t(`demo.steps.${STEP_KEYS[i]}.description`),
+      image: (s as { image?: string }).image ?? null,
+    })),
+  [t])
 
   useEffect(() => {
     const panel = imagePanelRef.current
@@ -50,7 +61,7 @@ const VideoSection = () => {
   }
 
   const activeStepData = steps[activeStep]
-  const activeImage = (activeStepData as { image?: string }).image
+  const activeImage = activeStepData?.image ?? null
 
   return (
     <section id="how-it-works" className={styles.section}>

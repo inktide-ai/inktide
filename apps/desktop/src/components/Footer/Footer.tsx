@@ -1,4 +1,4 @@
-import logoSvg from '../../assets/icon.svg'
+import logoSvg from '../../assets/app/icon.svg'
 import styles from './Footer.module.css'
 
 const FOOTER_LINKS = [

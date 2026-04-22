@@ -13,14 +13,10 @@ namespace Chimera.API.Soul.Grpc.Interceptors;
 /// </summary>
 public sealed class GrpcExceptionInterceptor : Interceptor
 {
-    #region Fields
 
     private readonly ILogger<GrpcExceptionInterceptor> _logger;
     private readonly bool _isDevelopment;
 
-    #endregion
-
-    #region Constructors
 
     public GrpcExceptionInterceptor(
         ILogger<GrpcExceptionInterceptor> logger,
@@ -30,9 +26,6 @@ public sealed class GrpcExceptionInterceptor : Interceptor
         _isDevelopment = (env ?? throw new ArgumentNullException(nameof(env))).IsDevelopment();
     }
 
-    #endregion
-
-    #region Public Methods
 
     public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(
         TRequest request,
@@ -67,5 +60,4 @@ public sealed class GrpcExceptionInterceptor : Interceptor
         }
     }
 
-    #endregion
 }

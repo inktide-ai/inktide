@@ -6,7 +6,6 @@ namespace Chimera.API.TTS.Infrastructure.Kokoro;
 
 internal sealed class SpeechServiceHttpError
 {
-    #region Constructors
 
     internal SpeechServiceHttpError(string? code, string? message, string? param, string? kind)
     {
@@ -16,9 +15,6 @@ internal sealed class SpeechServiceHttpError
         Kind = kind;
     }
 
-    #endregion
-
-    #region Properties
 
     public string? Code { get; }
 
@@ -28,10 +24,7 @@ internal sealed class SpeechServiceHttpError
     
     public string? Kind { get; }
 
-    #endregion
 
-    #region Public Methods
-    
     public string ToExceptionMessage(int httpStatus)
     {
         var messageBuilder = new StringBuilder();
@@ -46,10 +39,7 @@ internal sealed class SpeechServiceHttpError
         return messageBuilder.ToString();
     }
 
-    #endregion
 
-    #region Internal Methods
-    
     internal static SpeechServiceHttpError? TryCreateFromContent(string content)
     {
         try
@@ -68,9 +58,6 @@ internal sealed class SpeechServiceHttpError
         }
     }
 
-    #endregion
-
-    #region Private Methods
 
     private static SpeechServiceHttpErrorResponse? DeserializeSpeechServiceHttpErrorResponse(JsonElement element)
     {
@@ -147,23 +134,17 @@ internal sealed class SpeechServiceHttpError
         return new SpeechServiceHttpError(code, message, param, kind);
     }
 
-    #endregion
 }
 
 internal sealed class SpeechServiceHttpErrorResponse
 {
-    #region Constructors
 
     internal SpeechServiceHttpErrorResponse(SpeechServiceHttpError? error)
     {
         Error = error;
     }
 
-    #endregion
-
-    #region Properties
 
     internal SpeechServiceHttpError? Error { get; }
 
-    #endregion
 }

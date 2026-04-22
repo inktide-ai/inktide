@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Infrastructure.Configurations;
 
 public sealed class LlmCatalogConfiguration : IEntityTypeConfiguration<LlmCatalogEntry>
 {
-    #region Public Methods
 
     public void Configure(EntityTypeBuilder<LlmCatalogEntry> b)
     {
@@ -44,5 +43,4 @@ public sealed class LlmCatalogConfiguration : IEntityTypeConfiguration<LlmCatalo
             .IsUnique();
     }
 
-    #endregion
 }

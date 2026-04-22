@@ -6,35 +6,11 @@ using Serilog.Parsing;
 namespace Chimera.API.Core.Logging;
 
 
-/// <summary>
-/// An <see cref="ITextFormatter"/> that writes events in a compact JSON format.
-/// </summary>
-public sealed class CustomCompactJsonFormatter:
-    ITextFormatter
+public sealed class CustomCompactJsonFormatter : ITextFormatter
 {
-
-    #region Fields
-
-    /// <summary>
-    /// 
-    /// </summary>
     private readonly JsonValueFormatter _valueFormatter;
-
-    /// <summary>
-    /// 
-    /// </summary>
     private readonly bool _useUtcTimezone;
 
-    #endregion
-
-    #region Constructors
-
-    /// <summary>
-    /// Construct a <see cref="CustomCompactJsonFormatter"/>, optionally supplying a formatter for
-    /// <see cref="LogEventPropertyValue"/>s on the event.
-    /// </summary>
-    /// <param name="valueFormatter">A value formatter, or null.</param>
-    /// <param name="useUtcTimezone">If value true then use UTC timezone otherwise use local timezone</param>
     public CustomCompactJsonFormatter(
         JsonValueFormatter? valueFormatter = null,
         bool useUtcTimezone = false)
@@ -43,17 +19,7 @@ public sealed class CustomCompactJsonFormatter:
         _useUtcTimezone = useUtcTimezone;
     }
 
-    #endregion
 
-    #region Methods
-
-    /// <summary>
-    /// Format the log event into the output.
-    /// </summary>
-    /// <param name="logEvent">The event to format.</param>
-    /// <param name="output">The output.</param>
-    /// <param name="valueFormatter">A value formatter for <see cref="LogEventPropertyValue"/>s on the event.</param>
-    /// <param name="useUtcTimezone">If value true then use UTC timezone otherwise use local timezone</param>
     private static void FormatEvent(
         LogEvent logEvent,
         TextWriter output,
@@ -124,15 +90,7 @@ public sealed class CustomCompactJsonFormatter:
         output.Write('}');
     }
 
-    #endregion
 
-    #region Serilog.Formatting.ITextFormatter implementation
-
-    /// <summary>
-    /// Format the log event into the output. Subsequent events will be newline-delimited.
-    /// </summary>
-    /// <param name="logEvent">The event to format.</param>
-    /// <param name="output">The output.</param>
     public void Format(
         LogEvent logEvent,
         TextWriter output)
@@ -141,6 +99,5 @@ public sealed class CustomCompactJsonFormatter:
         output.WriteLine();
     }
 
-    #endregion
 
 }

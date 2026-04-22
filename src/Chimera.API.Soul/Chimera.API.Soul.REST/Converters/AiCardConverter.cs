@@ -7,7 +7,6 @@ namespace Chimera.API.Soul.REST.Converters;
 
 public static class AiCardConverter
 {
-    #region Public Methods
 
     public static AiCardResponse ToResponse(AiCard card)
     {
@@ -115,9 +114,6 @@ public static class AiCardConverter
         };
     }
 
-    #endregion
-
-    #region Private Methods
 
     private static ChannelResponse ToChannelResponse(AiCardChannel c) => new()
     {
@@ -130,7 +126,7 @@ public static class AiCardConverter
         ConnectedAt = c.ConnectedAt
     };
 
-    public static ChannelResponse ToChannelResponse(ChannelLinkDto d) =>
+    public static ChannelResponse ToChannelResponse(ChannelLink d) =>
         new()
         {
             Id = d.Id,
@@ -153,5 +149,4 @@ public static class AiCardConverter
     private static string? SerializeJson(object? obj) =>
         obj is null ? null : JsonConvert.SerializeObject(obj);
 
-    #endregion
 }

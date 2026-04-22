@@ -41,10 +41,24 @@ interface GlbRendererProps {
   url: string
   background?: string
   className?: string
+  modelVisible?: boolean
 }
 
-export default function GlbRenderer({ url, background = 'transparent', className }: GlbRendererProps) {
+export default function GlbRenderer({
+  url,
+  background = 'transparent',
+  className,
+  modelVisible = true,
+}: GlbRendererProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
+  const modelRootRef = useRef<THREE.Group | null>(null)
+  const modelVisibleRef = useRef(modelVisible)
+  modelVisibleRef.current = modelVisible
+
+  useEffect(() => {
+    const root = modelRootRef.current
+    if (root) root.visible = modelVisible
+  }, [modelVisible])
 
   useEffect(() => {
     const wrap = wrapRef.current
@@ -79,6 +93,8 @@ export default function GlbRenderer({ url, background = 'transparent', className
         }
 
         scene.add(loadedScene)
+        modelRootRef.current = loadedScene
+        loadedScene.visible = modelVisibleRef.current
         modelReady = true
 
         if (initialized) startLoop()
@@ -142,6 +158,7 @@ export default function GlbRenderer({ url, background = 'transparent', className
     return () => {
       cancelAnimationFrame(animationId)
       ro.disconnect()
+      modelRootRef.current = null
       controls?.dispose()
       if (loadedScene) {
         loadedScene.traverse((obj) => {

@@ -10,7 +10,6 @@ namespace Chimera.API.Soul.REST;
 
 public sealed class RestApiStartup : IStartup
 {
-    #region Public Methods
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
@@ -26,5 +25,4 @@ public sealed class RestApiStartup : IStartup
         services.AddValidatorsFromAssemblyContaining<RestApiStartup>();
     }
 
-    #endregion
 }

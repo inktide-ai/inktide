@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import {
   createCardChannel,
   deleteCardChannel,
@@ -31,7 +32,7 @@ interface PlatformConfig {
   theme: PanelTheme
   title: string
   subtitle: string
-  hint: React.ReactNode
+  hintLink?: string
   channelIdLabel: string
   channelIdPlaceholder: string
   channelIdHint: string
@@ -42,95 +43,7 @@ interface PlatformConfig {
   removeLabel: string
 }
 
-const PLATFORM_CONFIG: PlatformConfig[] = [
-  {
-    id: 'discord',
-    theme: 'discord',
-    title: 'Discord',
-    subtitle: 'Link a Discord server (guild) so the Chimera bot can route chat to this character.',
-    hint: (
-      <>
-        Ingest uses the <strong>guild id</strong> as <code>ChannelId</code> (same as the Discord connector). Add that
-        server id here and ensure your bot process allows this guild in <code>DiscordSettings:GuildIds</code>.{' '}
-        <a href="https://support.discord.com/hc/en-us/articles/206346498" target="_blank" rel="noreferrer">
-          How to enable Developer Mode
-        </a>
-      </>
-    ),
-    channelIdLabel: 'Server ID (guild snowflake)',
-    channelIdPlaceholder: 'e.g. 123456789012345678',
-    channelIdHint: 'Right‑click the server icon → Copy Server ID (Developer Mode on).',
-    addLabel: 'Add Discord server',
-    listTitle: 'Linked servers',
-    emptyList: 'No Discord servers linked yet.',
-    validateChannelId: (v) =>
-      DISCORD_SNOWFLAKE.test(v.trim())
-        ? null
-        : 'Use a numeric guild id (17–20 digits). Enable Developer Mode → Copy Server ID.',
-    removeLabel: 'Discord',
-  },
-  {
-    id: 'twitch',
-    theme: 'twitch',
-    title: 'Twitch',
-    subtitle: 'Link a Twitch channel so chat ingest can map to this character (broadcaster login or id).',
-    hint: (
-      <>
-        Store the same <code>ChannelId</code> your Twitch connector sends (often the channel login in lowercase or
-        numeric user id). Must match <code>TwitchSettings</code> / bot scope for that channel.
-      </>
-    ),
-    channelIdLabel: 'Channel id / login',
-    channelIdPlaceholder: 'e.g. channel_login or numeric id',
-    channelIdHint: 'Must match the identifier used in ChatMessage.ChannelId for Twitch.',
-    addLabel: 'Add Twitch channel',
-    listTitle: 'Linked Twitch channels',
-    emptyList: 'No Twitch channels linked yet.',
-    validateChannelId: (v) =>
-      INGEST_CHANNEL_ID.test(v.trim()) ? null : 'Use 1–100 characters: letters, digits, _ and - only.',
-    removeLabel: 'Twitch',
-  },
-  {
-    id: 'kick',
-    theme: 'kick',
-    title: 'Kick',
-    subtitle: 'Link a Kick channel for routing live chat to this character.',
-    hint: (
-      <>
-        Use the channel slug or id your Kick connector publishes as <code>ChannelId</code> in the unified chat message.
-      </>
-    ),
-    channelIdLabel: 'Channel id / slug',
-    channelIdPlaceholder: 'e.g. channelname',
-    channelIdHint: 'Same value as ingest ChannelId from the Kick connector.',
-    addLabel: 'Add Kick channel',
-    listTitle: 'Linked Kick channels',
-    emptyList: 'No Kick channels linked yet.',
-    validateChannelId: (v) =>
-      INGEST_CHANNEL_ID.test(v.trim()) ? null : 'Use 1–100 characters: letters, digits, _ and - only.',
-    removeLabel: 'Kick',
-  },
-  {
-    id: 'vk_video',
-    theme: 'vk',
-    title: 'VK Video',
-    subtitle: 'Link a VK Video (live) context so stream chat routes to this character.',
-    hint: (
-      <>
-        Use the stable channel or owner id string your VK connector sets as <code>ChannelId</code> for live comments.
-      </>
-    ),
-    channelIdLabel: 'Channel / owner id',
-    channelIdPlaceholder: 'e.g. -123456789 or public id',
-    channelIdHint: 'Must match ChatMessage.ChannelId from the VK Video ingest path.',
-    addLabel: 'Add VK Video link',
-    listTitle: 'Linked VK Video contexts',
-    emptyList: 'No VK Video links yet.',
-    validateChannelId: (v) =>
-      INGEST_CHANNEL_ID.test(v.trim()) ? null : 'Use 1–100 characters: letters, digits, _ and - only.',
-    removeLabel: 'VK Video',
-  },
-]
+// PLATFORM_CONFIG is built inside IntegrationTab via useMemo to support i18n
 
 function ChevronIcon({ expanded }: { expanded: boolean }) {
   return (
@@ -199,6 +112,68 @@ function PlatformMark({ theme }: { theme: PanelTheme }) {
 }
 
 const IntegrationTab = ({ character }: IntegrationTabProps) => {
+  const { t } = useTranslation('integrations')
+
+  const PLATFORM_CONFIG = useMemo((): PlatformConfig[] => [
+    {
+      id: 'discord',
+      theme: 'discord',
+      title: t('discord.title'),
+      subtitle: t('discord.subtitle'),
+      hintLink: t('discord.hintLink'),
+      channelIdLabel: t('discord.channelIdLabel'),
+      channelIdPlaceholder: t('discord.channelIdPlaceholder'),
+      channelIdHint: t('discord.channelIdHint'),
+      addLabel: t('discord.addLabel'),
+      listTitle: t('discord.listTitle'),
+      emptyList: t('discord.emptyList'),
+      validateChannelId: (v) => DISCORD_SNOWFLAKE.test(v.trim()) ? null : t('discord.validationError'),
+      removeLabel: t('discord.removeLabel'),
+    },
+    {
+      id: 'twitch',
+      theme: 'twitch',
+      title: t('twitch.title'),
+      subtitle: t('twitch.subtitle'),
+      channelIdLabel: t('twitch.channelIdLabel'),
+      channelIdPlaceholder: t('twitch.channelIdPlaceholder'),
+      channelIdHint: t('twitch.channelIdHint'),
+      addLabel: t('twitch.addLabel'),
+      listTitle: t('twitch.listTitle'),
+      emptyList: t('twitch.emptyList'),
+      validateChannelId: (v) => INGEST_CHANNEL_ID.test(v.trim()) ? null : t('twitch.validationError'),
+      removeLabel: t('twitch.removeLabel'),
+    },
+    {
+      id: 'kick',
+      theme: 'kick',
+      title: t('kick.title'),
+      subtitle: t('kick.subtitle'),
+      channelIdLabel: t('kick.channelIdLabel'),
+      channelIdPlaceholder: t('kick.channelIdPlaceholder'),
+      channelIdHint: t('kick.channelIdHint'),
+      addLabel: t('kick.addLabel'),
+      listTitle: t('kick.listTitle'),
+      emptyList: t('kick.emptyList'),
+      validateChannelId: (v) => INGEST_CHANNEL_ID.test(v.trim()) ? null : t('kick.validationError'),
+      removeLabel: t('kick.removeLabel'),
+    },
+    {
+      id: 'vk_video',
+      theme: 'vk',
+      title: t('vk_video.title'),
+      subtitle: t('vk_video.subtitle'),
+      channelIdLabel: t('vk_video.channelIdLabel'),
+      channelIdPlaceholder: t('vk_video.channelIdPlaceholder'),
+      channelIdHint: t('vk_video.channelIdHint'),
+      addLabel: t('vk_video.addLabel'),
+      listTitle: t('vk_video.listTitle'),
+      emptyList: t('vk_video.emptyList'),
+      validateChannelId: (v) => INGEST_CHANNEL_ID.test(v.trim()) ? null : t('vk_video.validationError'),
+      removeLabel: t('vk_video.removeLabel'),
+    },
+  ], [t])
+
   const [open, setOpen] = useState<Record<IntegrationPlatform, boolean>>({
     discord: false,
     twitch: false,
@@ -226,11 +201,11 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
       const card = await getCard(character.id)
       setChannels(card.channels ?? [])
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : 'Failed to load connections.'
+      const msg = e instanceof ApiError ? e.message : t('error.load')
       setLoadError(msg)
       setChannels([])
     }
-  }, [character.id])
+  }, [character.id, t])
 
   useEffect(() => {
     void refresh()
@@ -245,7 +220,7 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
       )
     }
     return map
-  }, [channels])
+  }, [channels, PLATFORM_CONFIG])
 
   const setForm = (platform: IntegrationPlatform, patch: Partial<FormFields>) => {
     setForms((prev) => ({ ...prev, [platform]: { ...prev[platform], ...patch } }))
@@ -264,11 +239,11 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
       return
     }
     if (!label) {
-      setActionError({ platform: cfg.id, message: 'Enter a display name for this connection.' })
+      setActionError({ platform: cfg.id, message: t('error.displayNameRequired') })
       return
     }
     if (!bot) {
-      setActionError({ platform: cfg.id, message: 'Enter the bot or service account name for this platform.' })
+      setActionError({ platform: cfg.id, message: t('error.botNameRequired') })
       return
     }
 
@@ -285,7 +260,7 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
       setActionError(null)
       await refresh()
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : 'Could not add connection.'
+      const msg = e instanceof ApiError ? e.message : t('error.add')
       setActionError({ platform: cfg.id, message: msg })
     } finally {
       setBusy(false)
@@ -306,7 +281,7 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
       await patchCardChannel(character.id, row.id, { is_active: next })
       await refresh()
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : 'Update failed.'
+      const msg = e instanceof ApiError ? e.message : t('error.update')
       const pl = platformFromRow(row)
       if (pl) setActionError({ platform: pl, message: msg })
     } finally {
@@ -315,14 +290,14 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
   }
 
   const removeRow = async (row: ChannelResponse, label: string) => {
-    if (!window.confirm(`Remove ${label} link “${row.channel_name}”?`)) return
+    if (!window.confirm(t('confirm', { label, channel: row.channel_name }))) return
     setRowBusy(row.id)
     setActionError(null)
     try {
       await deleteCardChannel(character.id, row.id)
       await refresh()
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : 'Remove failed.'
+      const msg = e instanceof ApiError ? e.message : t('error.remove')
       const pl = platformFromRow(row)
       if (pl) setActionError({ platform: pl, message: msg })
     } finally {
@@ -348,10 +323,9 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
   return (
     <div className={pageStyles.tabRoot}>
       <div className={pageStyles.section}>
-        <div className={pageStyles.sectionTitle}>Integration</div>
+        <div className={pageStyles.sectionTitle}>{t('section.title')}</div>
         <p className={styles.intro}>
-          Connect this character to live chat platforms. Each link stores the routing key Synapse uses to load this
-          card when messages arrive from that channel.
+          {t('intro')}
         </p>
       </div>
 
@@ -397,12 +371,24 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
               className={isOpen ? styles.panelBodyWrapOpen : styles.panelBodyWrap}
             >
               <div className={styles.panelBodyInner}>
-                <div className={styles.hintBox}>{cfg.hint}</div>
+                <div className={styles.hintBox}>
+                  <Trans
+                    i18nKey={`${cfg.id}.hint`}
+                    ns="integrations"
+                    components={{
+                      strong: <strong />,
+                      code: <code />,
+                      a: cfg.hintLink
+                        ? <a href={cfg.hintLink} target="_blank" rel="noreferrer" />
+                        : <span />,
+                    }}
+                  />
+                </div>
 
                 {loadError && <p className={styles.error}>{loadError}</p>}
 
                 {channels === null && !loadError && (
-                  <div className={styles.loading}>Loading connections…</div>
+                  <div className={styles.loading}>{t('status.loading')}</div>
                 )}
 
                 <div className={styles.form}>
@@ -422,27 +408,27 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
                   </div>
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`ch-name-${cfg.id}`}>
-                      Display name
+                      {t('form.displayName')}
                     </label>
                     <input
                       id={`ch-name-${cfg.id}`}
                       className={styles.input}
                       value={forms[cfg.id].displayName}
                       onChange={(e) => setForm(cfg.id, { displayName: e.target.value })}
-                      placeholder="Label in your dashboard"
+                      placeholder={t('form.displayNamePlaceholder')}
                       autoComplete="off"
                     />
                   </div>
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`ch-bot-${cfg.id}`}>
-                      Bot / service name
+                      {t('form.botName')}
                     </label>
                     <input
                       id={`ch-bot-${cfg.id}`}
                       className={styles.input}
                       value={forms[cfg.id].botUsername}
                       onChange={(e) => setForm(cfg.id, { botUsername: e.target.value })}
-                      placeholder="How the bot appears on this platform"
+                      placeholder={t('form.botNamePlaceholder')}
                       autoComplete="off"
                     />
                   </div>
@@ -453,7 +439,7 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
                       disabled={busy && busyPlatform === cfg.id}
                       onClick={() => void handleAdd(cfg)}
                     >
-                      {busy && busyPlatform === cfg.id ? 'Adding…' : cfg.addLabel}
+                      {busy && busyPlatform === cfg.id ? t('status.adding') : cfg.addLabel}
                     </button>
                   </div>
                   {actionError?.platform === cfg.id && (
@@ -472,7 +458,7 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
                           <p className={styles.rowName}>{row.channel_name}</p>
                           <p className={styles.rowMeta}>
                             id {row.channel_id ?? '—'} · {row.bot_username}
-                            {row.is_active ? '' : ' · paused'}
+                            {row.is_active ? '' : ` · ${t('status.paused')}`}
                           </p>
                         </div>
                         <div className={styles.rowActions}>
@@ -491,7 +477,7 @@ const IntegrationTab = ({ character }: IntegrationTabProps) => {
                             disabled={rowBusy === row.id}
                             onClick={() => void removeRow(row, cfg.removeLabel)}
                           >
-                            Remove
+                            {t('status.remove')}
                           </button>
                         </div>
                       </div>

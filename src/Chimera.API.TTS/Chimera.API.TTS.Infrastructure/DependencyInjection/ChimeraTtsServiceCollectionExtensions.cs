@@ -18,7 +18,6 @@ namespace Chimera.API.TTS.Infrastructure.DependencyInjection;
 /// </summary>
 public static class ChimeraTtsServiceCollectionExtensions
 {
-    #region Public Methods
 
     public static IServiceCollection AddChimeraTts(this IServiceCollection services, IConfiguration configuration)
     {
@@ -53,5 +52,4 @@ public static class ChimeraTtsServiceCollectionExtensions
         return services;
     }
 
-    #endregion
 }

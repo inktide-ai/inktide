@@ -1,33 +1,8 @@
 namespace Chimera.API.Settings;
 
-/// <summary>
-/// 
-/// </summary>
 internal sealed class ModuleInfo
 {
+    public string AssemblyName { get; set; }
 
-    #region Properties
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public string AssemblyName
-    {
-        get;
-
-        set;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool Enabled
-    {
-        get;
-
-        set;
-    }
-
-    #endregion
-
+    public bool Enabled { get; set; }
 }

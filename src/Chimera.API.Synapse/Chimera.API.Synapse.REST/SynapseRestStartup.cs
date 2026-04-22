@@ -11,7 +11,6 @@ namespace Chimera.API.Synapse.REST;
 /// </summary>
 public sealed class SynapseRestStartup : IStartup
 {
-    #region Public Methods
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
@@ -24,5 +23,4 @@ public sealed class SynapseRestStartup : IStartup
             });
     }
 
-    #endregion
 }

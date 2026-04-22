@@ -1,109 +1,104 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  getCards,
-  getCard,
-  createCard,
-  updateCard,
-  deleteCard,
-  getCatalogLlmModels,
-  type AiCardListItem,
-  type LlmModelResponse,
-} from '../api/soul'
-import type { AiCharacter } from '../domain/character'
-import {
-  apiResponseToCharacter,
-  characterToUpdateRequest,
-  characterToCreateRequest,
-} from '../domain/character'
+import type { AiCharacter } from '../domain/character/types'
+import { SoulCardRepository } from '../services/cards/SoulCardRepository'
+import { useCharacterList } from './characters/useCharacterList'
+import { useSelectedCharacter } from './characters/useSelectedCharacter'
+import { useDirtyState } from './characters/useDirtyState'
+import { useCharacterMutations } from './characters/useCharacterMutations'
 
-export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+export type { SaveStatus } from './characters/useCharacterMutations'
 
+/**
+ * Фасад (backward compat): составляет четыре фокусных хука в единый контракт,
+ * который ожидает CharactersContext. Внешний API не изменился.
+ *
+ * DIP: зависит от SoulCardRepository через ICardRepository интерфейс.
+ * OCP-тест: заменить REST→GraphQL = только поменять `new SoulCardRepository()`
+ *           ни один из четырёх суб-хуков не трогается.
+ */
 export function useCharacters() {
-  const [cardList, setCardList] = useState<AiCardListItem[]>([])
-  const [characters, setCharacters] = useState<Map<string, AiCharacter>>(new Map())
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [llmModels, setLlmModels] = useState<LlmModelResponse[]>([])
-  const [isDirty, setIsDirty] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
-  const [saveError, setSaveError] = useState<string | null>(null)
+  // DI через singleton ref — позволяет тестировать, подменяя реализацию
+  const repoRef = useRef(new SoulCardRepository())
+  const repo = repoRef.current
 
-  const snapshotRef = useRef<AiCharacter | null>(null)
+  // ── 4 фокусных хука ──────────────────────────────────────────────────────────
 
-  const selected = selectedId ? characters.get(selectedId) ?? null : null
+  const {
+    cardList,
+    llmModels,
+    loading,
+    loadError,
+    updateListItem,
+    addListItem,
+    removeListItem,
+  } = useCharacterList(repo)
 
-  // ── Load full card data ──
-  const loadFullCard = useCallback(async (id: string) => {
-    try {
-      const response = await getCard(id)
-      const char = apiResponseToCharacter(response)
-      setCharacters((prev) => new Map(prev).set(id, char))
-      snapshotRef.current = char
-    } catch {
-      /* card might have been deleted */
-    }
+  const {
+    characters,
+    selectedId,
+    setSelectedId,
+    selected,
+    selectCard: selectCardInternal,
+    reloadCard: reloadCardInternal,
+    setCharacter,
+    patchCharacter,
+    removeCharacterById,
+  } = useSelectedCharacter(repo)
+
+  const { isDirty, recordSnapshot, markDirty, clearDirty, getSnapshot } = useDirtyState()
+
+  // Plugin registry for side-effect saves (e.g. BYOK credentials from BrainTab)
+  const savePluginsRef = useRef(new Map<string, () => Promise<void>>())
+  const [externalDirty, setExternalDirty] = useState(false)
+
+  const registerSavePlugin = useCallback((key: string, fn: () => Promise<void>) => {
+    savePluginsRef.current.set(key, fn)
   }, [])
 
-  // ── Fetch card list + catalog on mount ──
-  useEffect(() => {
-    let cancelled = false
+  const unregisterSavePlugin = useCallback((key: string) => {
+    savePluginsRef.current.delete(key)
+  }, [])
 
-    async function load() {
-      setLoading(true)
-      setLoadError(null)
-      try {
-        const [cards, models] = await Promise.all([getCards(), getCatalogLlmModels()])
-        if (cancelled) return
-        setCardList(cards)
-        setLlmModels(models)
-        setLoading(false)
-        if (cards.length > 0) {
-          setSelectedId(cards[0].id)
-          void loadFullCard(cards[0].id)
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setLoadError(err instanceof Error ? err.message : 'Failed to load')
-          setLoading(false)
-        }
-      }
-    }
+  const markCredentialDirty = useCallback(() => setExternalDirty(true), [])
+  const clearCredentialDirty = useCallback(() => setExternalDirty(false), [])
 
-    void load()
-    return () => { cancelled = true }
-  }, [loadFullCard])
+  const { saveStatus, saveError, handleSave: handleSaveCard, addCharacter, removeCharacter } = useCharacterMutations({
+    repo,
+    llmModels,
+    selectedId,
+    selected,
+    onCharacterSaved: (id, char) => setCharacter(id, char),
+    onCharacterCreated: (char, listItem) => {
+      setCharacter(char.id, char)
+      addListItem(listItem)
+      setSelectedId(char.id)
+    },
+    onCharacterDeleted: (id) => {
+      removeListItem(id)
+      removeCharacterById(id)
+      setSelectedId((sid) => {
+        if (sid !== id) return sid
+        const remaining = cardList.filter((c) => c.id !== id)
+        return remaining[0]?.id ?? null
+      })
+    },
+    onSnapshotUpdate: recordSnapshot,
+    onListItemUpdate: (id, patch) => updateListItem(id, patch),
+  })
 
-  // ── Select a card (lazy-load full data on first visit) ──
+  // ── Публичные методы ─────────────────────────────────────────────────────────
+
   const selectCard = useCallback(async (id: string) => {
-    setSelectedId(id)
-    setIsDirty(false)
-    setSaveStatus('idle')
-    setSaveError(null)
-    if (!characters.has(id)) {
-      await loadFullCard(id)
-    } else {
-      snapshotRef.current = characters.get(id)!
-    }
-  }, [characters, loadFullCard])
+    clearDirty()
+    await selectCardInternal(id, recordSnapshot)
+  }, [selectCardInternal, clearDirty, recordSnapshot])
 
-  /** Force-reload a card and reset dirty state. Called when returning from CharacterEditPage. */
   const reloadCard = useCallback(async (id: string) => {
-    setSelectedId(id)
-    setIsDirty(false)
-    setSaveStatus('idle')
-    setSaveError(null)
-    try {
-      const response = await getCard(id)
-      const char = apiResponseToCharacter(response)
-      setCharacters((prev) => new Map(prev).set(id, char))
-      snapshotRef.current = char
-    } catch {
-      /* ignore */
-    }
-  }, [])
+    clearDirty()
+    await reloadCardInternal(id, recordSnapshot)
+  }, [reloadCardInternal, clearDirty, recordSnapshot])
 
-  // ── Patch local state (marks dirty, skips appearance.avatarUrl-only updates) ──
+  /** Патчит локальное состояние. Avatar-only патч не помечает dirty. */
   const updateCharacter = useCallback((id: string, patch: Partial<AiCharacter>) => {
     const newAvatarUrl = patch.appearance?.avatarUrl
     const avatarOnly =
@@ -112,134 +107,58 @@ export function useCharacters() {
       Object.keys(patch.appearance!).length === 1 &&
       Object.prototype.hasOwnProperty.call(patch.appearance, 'avatarUrl')
 
-    setCharacters((prev) => {
-      const existing = prev.get(id)
-      if (!existing) return prev
-      const merged = { ...existing, ...patch }
-      const next = new Map(prev)
-      next.set(id, merged)
-      if (newAvatarUrl !== undefined) snapshotRef.current = merged
-      return next
-    })
+    patchCharacter(id, patch)
 
     if (newAvatarUrl !== undefined) {
-      setCardList((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, avatar_url: newAvatarUrl ?? null } : c)),
-      )
+      updateListItem(id, { avatar_url: newAvatarUrl ?? null })
+      // Синхронизируем снимок при avatar-only обновлении
+      const current = characters.get(id)
+      if (current) recordSnapshot({ ...current, ...patch })
     }
 
-    if (!avatarOnly) {
-      setIsDirty(true)
-      setSaveStatus('idle')
-    }
-  }, [])
+    if (!avatarOnly) markDirty()
+  }, [characters, patchCharacter, updateListItem, recordSnapshot, markDirty])
 
-  // ── Discard — restore from last saved snapshot ──
-  const discardChanges = useCallback(() => {
-    if (selectedId && snapshotRef.current) {
-      setCharacters((prev) => new Map(prev).set(selectedId, snapshotRef.current!))
-    }
-    setIsDirty(false)
-    setSaveStatus('idle')
-    setSaveError(null)
-  }, [selectedId])
-
-  // ── Save to backend ──
   const handleSave = useCallback(async () => {
-    if (!selectedId || !selected) return
-    setSaveStatus('saving')
-    setSaveError(null)
-    try {
-      const response = await updateCard(selectedId, characterToUpdateRequest(selected))
-      const updated = apiResponseToCharacter(response)
-      setCharacters((prev) => new Map(prev).set(selectedId, updated))
-      snapshotRef.current = updated
-      setIsDirty(false)
-      setSaveStatus('saved')
-      setCardList((prev) =>
-        prev.map((c) =>
-          c.id === selectedId
-            ? { ...c, name: updated.name, slug: updated.slug, personality: updated.personality, is_active: updated.isActive }
-            : c,
-        ),
-      )
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    } catch (err) {
-      setSaveStatus('error')
-      setSaveError(err instanceof Error ? err.message : 'Save failed')
-    }
-  }, [selectedId, selected])
+    await handleSaveCard()
+    await Promise.allSettled([...savePluginsRef.current.values()].map((fn) => fn()))
+    clearCredentialDirty()
+  }, [handleSaveCard, clearCredentialDirty])
 
-  // ── Create a new character ──
-  const addCharacter = useCallback(async (c: Omit<AiCharacter, 'id'>) => {
-    const defaultLlm = llmModels[0]?.id
-    if (!defaultLlm) {
-      setSaveError('No LLM models available. Please seed the catalog first.')
-      setSaveStatus('error')
-      return
+  const discardChanges = useCallback(() => {
+    const snapshot = getSnapshot()
+    if (selectedId && snapshot) {
+      setCharacter(selectedId, snapshot)
     }
-    setSaveStatus('saving')
-    try {
-      const response = await createCard(characterToCreateRequest(c, defaultLlm))
-      const char = apiResponseToCharacter(response)
-      setCharacters((prev) => new Map(prev).set(char.id, char))
-      setCardList((prev) => [
-        ...prev,
-        {
-          id: char.id,
-          name: char.name,
-          slug: char.slug,
-          avatar_url: null,
-          personality: char.personality,
-          llm_model: null,
-          is_active: char.isActive,
-          updated_at: new Date().toISOString(),
-        },
-      ])
-      snapshotRef.current = char
-      setSelectedId(char.id)
-      setIsDirty(false)
-      setSaveStatus('idle')
-    } catch (err) {
-      setSaveStatus('error')
-      setSaveError(err instanceof Error ? err.message : 'Create failed')
-    }
-  }, [llmModels])
+    clearDirty()
+    clearCredentialDirty()
+  }, [selectedId, getSnapshot, setCharacter, clearDirty, clearCredentialDirty])
 
-  // ── Delete a character ──
-  const removeCharacter = useCallback(async (id: string) => {
-    try {
-      await deleteCard(id)
-      setCardList((prev) => prev.filter((c) => c.id !== id))
-      setCharacters((prev) => {
-        const next = new Map(prev)
-        next.delete(id)
-        return next
-      })
-      setSelectedId((sid) => {
-        if (sid !== id) return sid
-        const remaining = cardList.filter((c) => c.id !== id)
-        return remaining[0]?.id ?? null
-      })
-      setIsDirty(false)
-      setSaveStatus('idle')
-    } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Delete failed')
-      setSaveStatus('error')
+  // Auto-select первой карточки после первоначальной загрузки
+  const didAutoSelect = useRef(false)
+  useEffect(() => {
+    if (!loading && !didAutoSelect.current && cardList.length > 0 && selectedId === null) {
+      didAutoSelect.current = true
+      void selectCard(cardList[0].id)
     }
-  }, [cardList])
+  }, [loading, cardList, selectedId, selectCard])
 
   return {
+    // list
     cardList,
+    llmModels,
+    loading,
+    loadError,
+    // selection
     characters,
     selectedId,
     selected,
-    loading,
-    loadError,
-    llmModels,
-    isDirty,
+    // dirty
+    isDirty: isDirty || externalDirty,
+    // save
     saveStatus,
     saveError,
+    // methods
     selectCard,
     reloadCard,
     updateCharacter,
@@ -247,5 +166,8 @@ export function useCharacters() {
     handleSave,
     addCharacter,
     removeCharacter,
+    registerSavePlugin,
+    unregisterSavePlugin,
+    markCredentialDirty,
   }
 }

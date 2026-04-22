@@ -32,8 +32,6 @@ public sealed class OpenAiTtsProvider : ISpeechProvider
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
     }
 
-    // ── ISpeechProvider identity ──────────────────────────────────────────────
-
     public string Id => "openai";
 
     public string Name => "OpenAI";
@@ -46,8 +44,6 @@ public sealed class OpenAiTtsProvider : ISpeechProvider
         SupportsVoiceListing = true,
         SupportsStreaming = false,
     };
-
-    // ── ISpeechProvider methods ───────────────────────────────────────────────
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -99,8 +95,6 @@ public sealed class OpenAiTtsProvider : ISpeechProvider
             .ConfigureAwait(false);
     }
 
-    // ── Internal helper (shared logic) ───────────────────────────────────────
-
     internal static async Task<Stream> GenerateSpeechAsync(
         Uri endpoint,
         string apiKey,
@@ -130,8 +124,6 @@ public sealed class OpenAiTtsProvider : ISpeechProvider
 
         return result.Value.ToStream();
     }
-
-    // ── Private helpers ───────────────────────────────────────────────────────
 
     private static GeneratedSpeechFormat MapFormat(string? audioFormat)
         => audioFormat?.ToLowerInvariant() switch

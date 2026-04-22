@@ -16,22 +16,15 @@ namespace Chimera.API.Soul.REST.Controllers;
 [Authorize]
 public sealed class AiCardModelsController : ControllerBase
 {
-    #region Fields
 
     private readonly IAiCardModelUploadService _uploads;
 
-    #endregion
-
-    #region Constructors
 
     public AiCardModelsController(IAiCardModelUploadService uploads)
     {
         _uploads = uploads ?? throw new ArgumentNullException(nameof(uploads));
     }
 
-    #endregion
-
-    #region Public Methods
 
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<AiCardModelResponse>), StatusCodes.Status200OK)]
@@ -119,9 +112,6 @@ public sealed class AiCardModelsController : ControllerBase
         return NoContent();
     }
 
-    #endregion
-
-    #region Private Methods
 
     private bool TryGetUserId(out Guid userId)
     {
@@ -146,7 +136,7 @@ public sealed class AiCardModelsController : ControllerBase
             BadRequest(ApiErrorResponse.From(message, ErrorCodes.ValidationError))
     };
 
-    private static AiCardModelResponse ToResponse(AiCardModelDto dto)
+    private static AiCardModelResponse ToResponse(AiCardModel dto)
     {
         return new AiCardModelResponse
         {
@@ -161,5 +151,4 @@ public sealed class AiCardModelsController : ControllerBase
         };
     }
 
-    #endregion
 }

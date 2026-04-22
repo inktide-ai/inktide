@@ -5,7 +5,7 @@ namespace Chimera.API.Soul.Application.Interfaces;
 /// <summary>User-owned links between an AI card and external chat platforms (Discord, Twitch, …).</summary>
 public interface IAiCardChannelLinkService
 {
-    Task<ChannelLinkDto> CreateAsync(
+    Task<ChannelLink> CreateAsync(
         Guid userId,
         Guid cardId,
         CreateChannelLinkCommand command,
@@ -13,7 +13,7 @@ public interface IAiCardChannelLinkService
 
     Task DeleteAsync(Guid userId, Guid cardId, Guid linkId, CancellationToken cancellationToken = default);
 
-    Task<ChannelLinkDto> PatchAsync(
+    Task<ChannelLink> PatchAsync(
         Guid userId,
         Guid cardId,
         Guid linkId,

@@ -9,19 +9,18 @@ namespace Chimera.API.Soul.Grpc.WebHost;
 
 /// <summary>
 /// Configures a dedicated Kestrel HTTP/2 endpoint for Soul gRPC services.
-/// Reads settings from the "SoulGrpcServerSettings" configuration section.
+/// Reads settings from the <c>SoulGrpcServerSettings</c> configuration section.
 /// </summary>
 public sealed class GrpcWebHostConfigurator : IWebHostConfigurator
 {
-    #region Public Methods
 
     public void Configure(IWebHostBuilder webHostBuilder)
     {
         webHostBuilder.ConfigureKestrel((context, options) =>
         {
-            var settings = new GrpcServerSettings();
+            var settings = new SoulGrpcServerSettings();
             context.Configuration
-                .GetSection("SoulGrpcServerSettings")
+                .GetSection(nameof(SoulGrpcServerSettings))
                 .Bind(settings);
 
             if (settings.ListenPort == 0)
@@ -44,5 +43,4 @@ public sealed class GrpcWebHostConfigurator : IWebHostConfigurator
         });
     }
 
-    #endregion
 }

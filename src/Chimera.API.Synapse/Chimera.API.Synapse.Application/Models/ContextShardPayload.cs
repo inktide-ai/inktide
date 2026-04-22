@@ -8,6 +8,7 @@ namespace Chimera.API.Synapse.Application.Models;
 /// </summary>
 public sealed record ContextShardPayload(
     Guid AiCardId,
+    Guid UserId,
     string ChannelId,
     string ChannelName,
     string SystemPrompt,
@@ -40,4 +41,6 @@ public sealed record ContextShardPayload(
     /// <summary>Presence penalty — encourages new topics.</summary>
     float LlmPresencePenalty = 0f,
     /// <summary>Milliseconds to wait before publishing the first TTS chunk after generation completes.</summary>
-    int ResponseDelayMs = 0);
+    int ResponseDelayMs = 0,
+    /// <summary>Per-card base URL override — wins over global BYOK credential base URL.</summary>
+    string? LlmBaseUrl = null);

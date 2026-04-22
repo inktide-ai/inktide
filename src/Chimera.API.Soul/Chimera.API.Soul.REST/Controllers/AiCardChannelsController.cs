@@ -16,22 +16,13 @@ namespace Chimera.API.Soul.REST.Controllers;
 [Authorize]
 public sealed class AiCardChannelsController : ControllerBase
 {
-    #region Fields
 
     private readonly IAiCardChannelLinkService _channelLinks;
-
-    #endregion
-
-    #region Constructors
 
     public AiCardChannelsController(IAiCardChannelLinkService channelLinks)
     {
         _channelLinks = channelLinks ?? throw new ArgumentNullException(nameof(channelLinks));
     }
-
-    #endregion
-
-    #region Public Methods
 
     [HttpPost]
     [ProducesResponseType(typeof(ChannelResponse), StatusCodes.Status201Created)]
@@ -127,9 +118,6 @@ public sealed class AiCardChannelsController : ControllerBase
         }
     }
 
-    #endregion
-
-    #region Private Methods
 
     private Guid GetUserId()
     {
@@ -138,5 +126,4 @@ public sealed class AiCardChannelsController : ControllerBase
         return Guid.Parse(sub);
     }
 
-    #endregion
 }

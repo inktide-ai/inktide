@@ -9,7 +9,6 @@ namespace Chimera.API.TTS.Infrastructure.Kokoro;
 /// </summary>
 public sealed class KokoroSpeechOptions
 {
-    #region Fields
     
     private string _input = string.Empty;
 
@@ -33,9 +32,6 @@ public sealed class KokoroSpeechOptions
 
     private KokoroNormalizationOptions? _normalizationOptions;
 
-    #endregion
-
-    #region Properties
 
     [JsonPropertyName("input")]
     public string Input
@@ -116,5 +112,4 @@ public sealed class KokoroSpeechOptions
         set => _normalizationOptions = value;
     }
 
-    #endregion
 }

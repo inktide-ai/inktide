@@ -9,20 +9,13 @@ namespace Chimera.API.TTS.Infrastructure.FishAudio;
 /// </summary>
 public sealed class FishAudioTtsClient
 {
-    #region Constants
 
     public const string HttpClientName = "FishAudioTTS";
 
-    #endregion
-
-    #region Fields
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly FishAudioTtsClientSettings _settings;
 
-    #endregion
-
-    #region Constructor
 
     public FishAudioTtsClient(
         IHttpClientFactory httpClientFactory,
@@ -32,9 +25,6 @@ public sealed class FishAudioTtsClient
         _settings          = options.Value;
     }
 
-    #endregion
-
-    #region Public Methods
 
     /// <summary>
     /// Streams synthesised audio via <c>POST /v1/tts</c>.
@@ -79,9 +69,6 @@ public sealed class FishAudioTtsClient
         return ParseVoices(doc.RootElement);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private HttpClient CreateClient() => _httpClientFactory.CreateClient(HttpClientName);
 
@@ -160,5 +147,4 @@ public sealed class FishAudioTtsClient
         return null;
     }
 
-    #endregion
 }

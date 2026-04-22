@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Infrastructure.Configurations;
 
 public sealed class TtsCatalogConfiguration : IEntityTypeConfiguration<TtsCatalogEntry>
 {
-    #region Public Methods
 
     public void Configure(EntityTypeBuilder<TtsCatalogEntry> b)
     {
@@ -55,5 +54,4 @@ public sealed class TtsCatalogConfiguration : IEntityTypeConfiguration<TtsCatalo
             .IsUnique();
     }
 
-    #endregion
 }

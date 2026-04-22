@@ -8,7 +8,7 @@ public sealed record CreateChannelLinkCommand(
 
 public sealed record PatchChannelLinkCommand(bool IsActive);
 
-public sealed record ChannelLinkDto(
+public sealed record ChannelLink(
     Guid Id,
     string Platform,
     string ChannelName,

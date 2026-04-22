@@ -1,6 +1,7 @@
 using Chimera.API.Core;
 using Chimera.API.Soul.Infrastructure.DbContext;
 using Chimera.API.Soul.Infrastructure.Settings;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +12,6 @@ namespace Chimera.API.Soul.Infrastructure.DependencyInjection;
 
 public sealed class InfrastructureStartup : IStartup
 {
-    #region Public Methods
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
@@ -22,6 +22,9 @@ public sealed class InfrastructureStartup : IStartup
             options.UseNpgsql(connectionString);
         });
 
+        services.AddDataProtection()
+            .SetApplicationName("chimera");
+
         services.AddHostedService<DatabaseMigrationService>();
 
         services
@@ -29,9 +32,6 @@ public sealed class InfrastructureStartup : IStartup
             .AddNpgSql(connectionString, name: "soul-postgres", failureStatus: HealthStatus.Degraded);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private static string ResolveConnectionString(IConfiguration configuration)
     {
@@ -53,5 +53,4 @@ public sealed class InfrastructureStartup : IStartup
         return settings.ToConnectionString();
     }
 
-    #endregion
 }

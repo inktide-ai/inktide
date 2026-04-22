@@ -4,14 +4,10 @@ namespace Chimera.API.Soul.REST.Models;
 
 public sealed class ApiErrorResponse
 {
-    #region Fields
 
     private string _error = string.Empty;
     private string _code = string.Empty;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("error")]
     public string Error
@@ -27,11 +23,7 @@ public sealed class ApiErrorResponse
         set => _code = value;
     }
 
-    #endregion
-
-    #region Public Methods
 
     public static ApiErrorResponse From(string error, string code) => new() { Error = error, Code = code };
 
-    #endregion
 }

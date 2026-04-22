@@ -5,7 +5,6 @@ namespace Chimera.API.TTS.Domain.Exceptions;
 /// </summary>
 public sealed class ApiKeyMissingException : Exception
 {
-    #region Constructors
 
     public ApiKeyMissingException()
     {
@@ -21,5 +20,4 @@ public sealed class ApiKeyMissingException : Exception
     {
     }
 
-    #endregion
 }

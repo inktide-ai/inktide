@@ -22,7 +22,6 @@ public sealed class TtsRestApiStartup : IStartup
     /// <summary>Rate-limiter policy name applied to <c>POST /api/v1/tts/synthesize</c>.</summary>
     public const string SynthesizeRateLimitPolicy = "tts-synthesize";
 
-    #region Public Methods
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
@@ -40,5 +39,4 @@ public sealed class TtsRestApiStartup : IStartup
         services.AddMemoryCache();
     }
 
-    #endregion
 }

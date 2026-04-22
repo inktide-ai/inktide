@@ -5,15 +5,11 @@ namespace Chimera.API.TTS.Domain.Models;
 /// </summary>
 public sealed class SpeechProviderDescriptor
 {
-    #region Fields
 
     private string _id = string.Empty;
     private string _displayName = string.Empty;
     private SpeechProviderCapabilities _capabilities = new();
 
-    #endregion
-
-    #region Properties
 
     public string Id
     {
@@ -33,5 +29,4 @@ public sealed class SpeechProviderDescriptor
         set => _capabilities = value;
     }
 
-    #endregion
 }

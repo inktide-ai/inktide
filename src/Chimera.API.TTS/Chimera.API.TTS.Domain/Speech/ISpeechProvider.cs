@@ -10,16 +10,12 @@ namespace Chimera.API.TTS.Domain.Speech;
 /// </summary>
 public interface ISpeechProvider : IProvider
 {
-    #region Properties
 
     /// <summary>
     /// Declared capabilities for catalog / UI (not runtime guarantees).
     /// </summary>
     SpeechProviderCapabilities Capabilities { get; }
 
-    #endregion
-
-    #region Methods
 
     Task<SpeechModelCollection> GetModelsAsync(
         ProviderOptions options,
@@ -35,5 +31,4 @@ public interface ISpeechProvider : IProvider
         SpeechOptions speechOptions,
         CancellationToken ct = default);
 
-    #endregion
 }

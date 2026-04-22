@@ -14,21 +14,14 @@ namespace Chimera.API.TTS.Infrastructure.Decorators;
 /// </summary>
 public sealed class CachingSpeechProviderDecorator : ISpeechProvider
 {
-    #region Constants
 
     private static readonly TimeSpan DefaultTtl = TimeSpan.FromMinutes(15);
 
-    #endregion
-
-    #region Fields
 
     private readonly ISpeechProvider _inner;
     private readonly IMemoryCache _cache;
     private readonly ILogger<CachingSpeechProviderDecorator> _logger;
 
-    #endregion
-
-    #region Constructors
 
     public CachingSpeechProviderDecorator(
         ISpeechProvider inner,
@@ -40,9 +33,6 @@ public sealed class CachingSpeechProviderDecorator : ISpeechProvider
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => _inner.Id;
 
@@ -52,9 +42,6 @@ public sealed class CachingSpeechProviderDecorator : ISpeechProvider
 
     public SpeechProviderCapabilities Capabilities => _inner.Capabilities;
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options) => _inner.Validate(options);
 
@@ -99,5 +86,4 @@ public sealed class CachingSpeechProviderDecorator : ISpeechProvider
         CancellationToken ct = default)
         => _inner.SynthesizeAsync(providerOptions, speechOptions, ct);
 
-    #endregion
 }

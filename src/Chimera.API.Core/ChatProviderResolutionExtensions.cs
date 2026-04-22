@@ -3,12 +3,8 @@ using Microsoft.Extensions.Options;
 
 namespace Chimera.API.Core;
 
-/// <summary>
-/// Resolves which <see cref="IChatProvider"/> to use using optional request id + configured default.
-/// </summary>
 public static class ChatProviderResolutionExtensions
 {
-    #region Public Methods
 
     public static IChatProvider Resolve(
         this IChatProviderRegistry registry,
@@ -46,5 +42,4 @@ public static class ChatProviderResolutionExtensions
         return registry.GetRequired(options.DefaultProviderId);
     }
 
-    #endregion
 }

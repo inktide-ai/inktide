@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Domain.Entities;
 /// </summary>
 public sealed class AiCardChannel
 {
-    #region Fields
 
     private Guid _id;
     private Guid _aiCardId;
@@ -20,9 +19,6 @@ public sealed class AiCardChannel
     private DateTime _createdAt;
     private AiCard? _aiCard;
 
-    #endregion
-
-    #region Properties
 
     public Guid Id
     {
@@ -91,6 +87,5 @@ public sealed class AiCardChannel
         set => _aiCard = value;
     }
 
-    #endregion
     
 }

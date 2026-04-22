@@ -5,18 +5,14 @@ namespace Chimera.API.Soul.Grpc.Settings;
 /// Bound from the <c>SoulGrpcServerSettings</c> configuration section.
 /// Default port: 8084 (Identify.Grpc uses 8081, so each module gets its own port).
 /// </summary>
-public sealed class GrpcServerSettings
+public sealed class SoulGrpcServerSettings
 {
-    #region Fields
 
     private string _listenAddress = "127.0.0.1";
     private ushort _listenPort = 8084;
     private string? _certPath;
     private string? _certPassword;
 
-    #endregion
-
-    #region Properties
 
     /// <summary>
     /// Listen address (default: 127.0.0.1).
@@ -54,5 +50,4 @@ public sealed class GrpcServerSettings
         set => _certPassword = value;
     }
 
-    #endregion
 }

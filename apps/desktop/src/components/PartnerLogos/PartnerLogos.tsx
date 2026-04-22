@@ -1,12 +1,10 @@
 import { CONTENT } from '../../constants'
 import styles from './PartnerLogos.module.css'
-import deepseekLogo from '../../assets/deepseek.svg'
-import geminiLogo from '../../assets/gemini.svg'
-import grokLogo from '../../assets/grok.svg'
-import openAILogo from '../../assets/openai.svg'
+import deepseekLogo from '../../assets/partners/deepseek.svg'
+import geminiLogo from '../../assets/partners/gemini.svg'
+import grokLogo from '../../assets/partners/grok.svg'
 
 const LLM_MODELS = [
-  { name: 'OpenAI', url: 'https://openai.com', logo: openAILogo, style: { marginBottom: '-5px' } },
   { name: 'Gemini', url: 'https://ai.google.dev', logo: geminiLogo, style: { marginBottom: '10px' } },
   { name: 'Grok', url: 'https://x.ai', logo: grokLogo },
   { name: 'DeepSeek', url: 'https://www.deepseek.com', logo: deepseekLogo },

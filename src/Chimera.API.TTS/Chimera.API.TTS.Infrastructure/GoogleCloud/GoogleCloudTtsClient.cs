@@ -11,13 +11,9 @@ namespace Chimera.API.TTS.Infrastructure.GoogleCloud;
 /// </summary>
 public sealed class GoogleCloudTtsClient
 {
-    #region Fields
 
     private readonly ConcurrentDictionary<string, TextToSpeechClient> _clients = new();
 
-    #endregion
-
-    #region Public Methods
 
     /// <summary>
     /// Synthesises speech and returns the audio bytes as a <see cref="MemoryStream"/>.
@@ -55,9 +51,6 @@ public sealed class GoogleCloudTtsClient
         return MapVoices(response);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private TextToSpeechClient GetOrCreate(string apiKey) =>
         _clients.GetOrAdd(apiKey, k => new TextToSpeechClientBuilder { ApiKey = k }.Build());
@@ -80,5 +73,4 @@ public sealed class GoogleCloudTtsClient
         return new SpeechVoiceCollection(result);
     }
 
-    #endregion
 }

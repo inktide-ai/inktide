@@ -10,7 +10,6 @@ namespace Chimera.API.TTS.Infrastructure.DependencyInjection;
 /// </summary>
 public static class TtsKokoroServiceCollectionExtensions
 {
-    #region Public Methods
 
     public static IServiceCollection AddChimeraTtsKokoroClients(
         this IServiceCollection services,
@@ -34,5 +33,4 @@ public static class TtsKokoroServiceCollectionExtensions
         return services;
     }
 
-    #endregion
 }

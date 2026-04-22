@@ -17,8 +17,8 @@ public sealed class ChatConnectorHostedService : IHostedService
         ILogger<ChatConnectorHostedService> logger,
         IEnumerable<IChatConnector> connectors)
     {
-        _logger = logger;
-        _connectors = connectors;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _connectors = connectors ?? throw new ArgumentNullException(nameof(connectors));
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)

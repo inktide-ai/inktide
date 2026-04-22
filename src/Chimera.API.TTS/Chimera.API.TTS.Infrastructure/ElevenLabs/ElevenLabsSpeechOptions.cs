@@ -7,7 +7,6 @@ namespace Chimera.API.TTS.Infrastructure.ElevenLabs;
 /// </summary>
 public sealed class ElevenLabsSpeechOptions
 {
-    #region Properties
 
     [JsonPropertyName("text")]
     public string Text { get; set; } = string.Empty;
@@ -19,5 +18,4 @@ public sealed class ElevenLabsSpeechOptions
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public ElevenLabsVoiceSettings? VoiceSettings { get; set; }
 
-    #endregion
 }

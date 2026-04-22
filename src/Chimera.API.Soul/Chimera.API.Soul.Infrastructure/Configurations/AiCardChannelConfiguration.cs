@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Infrastructure.Configurations;
 
 public sealed class AiCardChannelConfiguration : IEntityTypeConfiguration<AiCardChannel>
 {
-    #region Public Methods
 
     public void Configure(EntityTypeBuilder<AiCardChannel> b)
     {
@@ -60,5 +59,4 @@ public sealed class AiCardChannelConfiguration : IEntityTypeConfiguration<AiCard
             .HasFilter("is_active = true");
     }
 
-    #endregion
 }

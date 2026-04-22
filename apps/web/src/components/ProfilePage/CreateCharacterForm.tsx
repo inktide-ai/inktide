@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useRef, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import styles from './ProfilePage.module.css'
 import type { AiCharacter } from '../../domain/character'
 import { IconUser, IconSkills, IconPaint, IconScene, IconMemory, IconBrain, IconMicrophone } from './TabIcons'
@@ -30,16 +31,6 @@ const PlusIcon = () => (
 
 type CreateTabId = 'profile' | 'skills' | 'avatars' | 'scene' | 'memory' | 'brain' | 'voice'
 
-const CREATE_TABS: { id: CreateTabId; label: string; icon: React.ReactNode }[] = [
-  { id: 'profile', label: 'Profile', icon: <IconUser /> },
-  { id: 'skills', label: 'Skills', icon: <IconSkills /> },
-  { id: 'avatars', label: 'Avatars', icon: <IconPaint /> },
-  { id: 'scene', label: 'Scene', icon: <IconScene /> },
-  { id: 'memory', label: 'Memory', icon: <IconMemory /> },
-  { id: 'brain', label: 'Brain', icon: <IconBrain /> },
-  { id: 'voice', label: 'Voice', icon: <IconMicrophone /> },
-]
-
 interface CreateCharacterFormProps {
   onSave: (c: Omit<AiCharacter, 'id'>) => void
   onCancel: () => void
@@ -47,10 +38,21 @@ interface CreateCharacterFormProps {
 }
 
 const CreateCharacterForm = ({ onSave, onCancel, defaultValues }: CreateCharacterFormProps) => {
+  const { t } = useTranslation('profile')
   const [draft, setDraft] = useState(defaultValues)
   const [greeting, setGreeting] = useState('')
   const [activeTab, setActiveTab] = useState<CreateTabId>('profile')
   const avatarRef = useRef<HTMLInputElement>(null)
+
+  const CREATE_TABS = useMemo((): { id: CreateTabId; label: string; icon: React.ReactNode }[] => [
+    { id: 'profile', label: t('tabs.profile.label'), icon: <IconUser /> },
+    { id: 'skills',  label: t('tabs.skills.label'),  icon: <IconSkills /> },
+    { id: 'avatars', label: t('tabs.avatars.label'), icon: <IconPaint /> },
+    { id: 'scene',   label: t('tabs.scene.label'),   icon: <IconScene /> },
+    { id: 'memory',  label: t('tabs.memory.label'),  icon: <IconMemory /> },
+    { id: 'brain',   label: t('tabs.brain.label'),   icon: <IconBrain /> },
+    { id: 'voice',   label: t('tabs.voice.label'),   icon: <IconMicrophone /> },
+  ], [t])
 
   const handleUpdate = (patch: Partial<AiCharacter>) => {
     setDraft((d) => ({ ...d, ...patch }))
@@ -90,7 +92,7 @@ const CreateCharacterForm = ({ onSave, onCancel, defaultValues }: CreateCharacte
         </div>
         <button type="button" className={styles.createFormSubmitBtn} onClick={handleSave}>
           <PlusIcon />
-          <span>Create new</span>
+          <span>{t('create.submit')}</span>
         </button>
       </div>
 
@@ -123,98 +125,101 @@ interface CreateIdentitySectionProps {
   avatarRef: React.RefObject<HTMLInputElement>
 }
 
-const CreateIdentitySection = ({ draft, greeting, onUpdate, setGreeting, avatarRef }: CreateIdentitySectionProps) => (
-  <div className={styles.tabRoot}>
-    <div className={styles.createFormBody}>
-      <div className={styles.createFormAvatarWrap}>
-        <div className={styles.createFormAvatar}>
-          <button
-            type="button"
-            className={styles.createFormAvatarEdit}
-            onClick={() => avatarRef.current?.click()}
-            aria-label="Edit avatar"
-          >
-            <PencilIcon />
-          </button>
-        </div>
-        <input
-          ref={avatarRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={(e) => {
-            const f = e.target.files?.[0]
-            if (f) e.target.value = ''
-          }}
-        />
-      </div>
-
-      <div className={styles.createFormFields}>
-        <div className={styles.createFormField}>
-          <label className={styles.label} htmlFor="create-name">Character name</label>
+const CreateIdentitySection = ({ draft, greeting, onUpdate, setGreeting, avatarRef }: CreateIdentitySectionProps) => {
+  const { t } = useTranslation('profile')
+  return (
+    <div className={styles.tabRoot}>
+      <div className={styles.createFormBody}>
+        <div className={styles.createFormAvatarWrap}>
+          <div className={styles.createFormAvatar}>
+            <button
+              type="button"
+              className={styles.createFormAvatarEdit}
+              onClick={() => avatarRef.current?.click()}
+              aria-label={t('create.backAriaLabel')}
+            >
+              <PencilIcon />
+            </button>
+          </div>
           <input
-            id="create-name"
-            className={styles.input}
-            placeholder="e.g. Albert Einstein"
-            value={draft.name}
-            onChange={(e) => onUpdate({ name: e.target.value.slice(0, 20) })}
-            maxLength={20}
+            ref={avatarRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              if (f) e.target.value = ''
+            }}
           />
-          <div className={styles.createFormCounter}>{draft.name.length}/20</div>
         </div>
 
-        <div className={styles.createFormField}>
-          <label className={styles.label} htmlFor="create-slug">Slug</label>
-          <input
-            id="create-slug"
-            className={styles.input}
-            placeholder="url-safe-name"
-            value={draft.slug}
-            onChange={(e) => onUpdate({ slug: e.target.value.slice(0, 50) })}
-            maxLength={50}
-          />
-          <div className={styles.createFormCounter}>{draft.slug.length}/50</div>
-        </div>
+        <div className={styles.createFormFields}>
+          <div className={styles.createFormField}>
+            <label className={styles.label} htmlFor="create-name">{t('create.field.name')}</label>
+            <input
+              id="create-name"
+              className={styles.input}
+              placeholder={t('create.field.namePlaceholder')}
+              value={draft.name}
+              onChange={(e) => onUpdate({ name: e.target.value.slice(0, 20) })}
+              maxLength={20}
+            />
+            <div className={styles.createFormCounter}>{draft.name.length}/20</div>
+          </div>
 
-        <div className={styles.createFormField}>
-          <label className={styles.label} htmlFor="create-personality">Description</label>
-          <textarea
-            id="create-personality"
-            className={styles.textarea}
-            placeholder="How would your character describe themselves?"
-            value={draft.personality}
-            onChange={(e) => onUpdate({ personality: e.target.value.slice(0, 500) })}
-            maxLength={500}
-          />
-          <div className={styles.createFormCounter}>{draft.personality.length}/500</div>
-        </div>
+          <div className={styles.createFormField}>
+            <label className={styles.label} htmlFor="create-slug">{t('create.field.slug')}</label>
+            <input
+              id="create-slug"
+              className={styles.input}
+              placeholder={t('create.field.slugPlaceholder')}
+              value={draft.slug}
+              onChange={(e) => onUpdate({ slug: e.target.value.slice(0, 50) })}
+              maxLength={50}
+            />
+            <div className={styles.createFormCounter}>{draft.slug.length}/50</div>
+          </div>
 
-        <div className={styles.createFormField}>
-          <label className={styles.label} htmlFor="create-greeting">Greeting</label>
-          <textarea
-            id="create-greeting"
-            className={styles.textarea}
-            placeholder="A neighbor just knocked. Says his power was cut... but why won't he leave?"
-            value={greeting}
-            onChange={(e) => setGreeting(e.target.value.slice(0, 500))}
-            maxLength={500}
-          />
-          <div className={styles.createFormCounter}>{greeting.length}/500</div>
-        </div>
+          <div className={styles.createFormField}>
+            <label className={styles.label} htmlFor="create-personality">{t('create.field.description')}</label>
+            <textarea
+              id="create-personality"
+              className={styles.textarea}
+              placeholder={t('create.field.descriptionPlaceholder')}
+              value={draft.personality}
+              onChange={(e) => onUpdate({ personality: e.target.value.slice(0, 500) })}
+              maxLength={500}
+            />
+            <div className={styles.createFormCounter}>{draft.personality.length}/500</div>
+          </div>
 
-        <div className={styles.createFormField}>
-          <label className={styles.label} htmlFor="create-phrases">Key phrases</label>
-          <input
-            id="create-phrases"
-            className={styles.input}
-            placeholder="hey chat, poggers, gg"
-            value={draft.appearance.keyPhrases}
-            onChange={(e) => onUpdate({ appearance: { ...draft.appearance, keyPhrases: e.target.value } })}
-          />
+          <div className={styles.createFormField}>
+            <label className={styles.label} htmlFor="create-greeting">{t('create.field.greeting')}</label>
+            <textarea
+              id="create-greeting"
+              className={styles.textarea}
+              placeholder={t('create.field.greetingPlaceholder')}
+              value={greeting}
+              onChange={(e) => setGreeting(e.target.value.slice(0, 500))}
+              maxLength={500}
+            />
+            <div className={styles.createFormCounter}>{greeting.length}/500</div>
+          </div>
+
+          <div className={styles.createFormField}>
+            <label className={styles.label} htmlFor="create-phrases">{t('create.field.keyPhrases')}</label>
+            <input
+              id="create-phrases"
+              className={styles.input}
+              placeholder={t('create.field.keyPhrasesPlaceholder')}
+              value={draft.appearance.keyPhrases}
+              onChange={(e) => onUpdate({ appearance: { ...draft.appearance, keyPhrases: e.target.value } })}
+            />
+          </div>
         </div>
       </div>
     </div>
-  </div>
-)
+  )
+}
 
 export default CreateCharacterForm

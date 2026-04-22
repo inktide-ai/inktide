@@ -18,14 +18,10 @@ namespace Chimera.API.TTS.REST.Controllers;
 [Authorize]
 public sealed class TtsController : ControllerBase
 {
-    #region Fields
 
     private readonly ITtsSynthesisService _synthesisService;
     private readonly ILogger<TtsController> _logger;
 
-    #endregion
-
-    #region Constructors
 
     public TtsController(
         ITtsSynthesisService synthesisService,
@@ -35,9 +31,6 @@ public sealed class TtsController : ControllerBase
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Public Methods
 
     /// <summary>
     /// Catalog of registered TTS providers (id, display name, capabilities). Public — no auth required.
@@ -153,9 +146,6 @@ public sealed class TtsController : ControllerBase
         };
     }
 
-    #endregion
-
-    #region Private Methods
 
     private IActionResult BuildAudioResponse(SpeechResult.Ok result, bool stream)
     {
@@ -169,5 +159,4 @@ public sealed class TtsController : ControllerBase
         return File(result.Audio, result.ContentType);
     }
 
-    #endregion
 }

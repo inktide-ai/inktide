@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import styles from '../ProfilePage.module.css'
 import SliderWithTicks from '../SliderWithTicks'
-import kokoroLogo from '../../../assets/kokoro.png'
-import elevenLabsLogo from '../../../assets/eleven_labs.svg'
-import openaiLogo from '../../../assets/openai.svg'
-import fishAudioLogo from '../../../assets/fish.svg'
-import azureLogo from '../../../assets/microsoft_azure.svg'
-import googleCloudLogo from '../../../assets/google_cloud.svg'
-import cartesiaLogo from '../../../assets/cartesia.svg'
+import kokoroLogo from '../../../assets/providers/voice/voice_providers/kokoro.svg'
+import elevenLabsLogo from '../../../assets/providers/voice/voice_providers/elevenlabs.svg'
+import openaiLogo from '../../../assets/providers/common/openai.svg'
+import fishAudioLogo from '../../../assets/providers/voice/voice_providers/fish.svg'
+import azureLogo from '../../../assets/providers/voice/voice_providers/microsoft_azure.svg'
+import googleCloudLogo from '../../../assets/providers/voice/voice_providers/google_cloud.svg'
+import cartesiaLogo from '../../../assets/providers/voice/voice_providers/cartesia.svg'
 import type { AiCharacter } from '../../../domain/character'
 import VoiceSandboxTab from './VoiceSandboxTab'
 import { LANG_LABELS, VOICE_GROUPS } from '../../../domain/kokoroVoices'
@@ -15,6 +17,12 @@ import { getTtsVoices, type SpeechVoice } from '../../../api/tts'
 
 // ── Provider registry ─────────────────────────────────────────────────────────
 // To add a new provider: add one entry here + a case in renderSettingsPanel().
+
+interface ProviderBadge {
+  label: string
+  /** Any CSS color value, e.g. '#06b6d4', 'hsl(…)'. Background + border are derived automatically. */
+  color: string
+}
 
 interface ProviderDef {
   id: string
@@ -24,90 +32,10 @@ interface ProviderDef {
   iconSrc?: string
   requiresApiKey: boolean
   hasSettings: boolean
+  badge?: ProviderBadge
 }
 
-const PROVIDERS: ProviderDef[] = [
-  {
-    id: 'none',
-    name: 'None',
-    description: 'No voice output.',
-    icon: '🔇',
-    requiresApiKey: false,
-    hasSettings: false,
-  },
-  {
-    id: 'kokoro',
-    name: 'Kokoro',
-    description: 'Local TTS — no API key required.',
-    icon: '',
-    iconSrc: kokoroLogo,
-    requiresApiKey: false,
-    hasSettings: true,
-  },
-  {
-    id: 'elevenlabs',
-    name: 'ElevenLabs',
-    description: 'Cloud TTS — natural voices, API key required.',
-    icon: '',
-    iconSrc: elevenLabsLogo,
-    requiresApiKey: true,
-    hasSettings: true,
-  },
-  {
-    id: 'fishaudio',
-    name: 'Fish Audio',
-    description: 'Cloud TTS — voice cloning and multilingual voices, API key required.',
-    icon: '',
-    iconSrc: fishAudioLogo,
-    requiresApiKey: true,
-    hasSettings: true,
-  },
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    description: 'OpenAI TTS — high-quality voices via api.openai.com.',
-    icon: '',
-    iconSrc: openaiLogo,
-    requiresApiKey: true,
-    hasSettings: true,
-  },
-  {
-    id: 'openai-compatible',
-    name: 'OpenAI Compatible',
-    description: 'Any OpenAI-format TTS API — custom endpoint, free model selection.',
-    icon: '',
-    iconSrc: openaiLogo,
-    requiresApiKey: true,
-    hasSettings: true,
-  },
-  {
-    id: 'cartesia',
-    name: 'Cartesia',
-    description: 'Cartesia Sonic — ultra-low latency neural TTS, API key required.',
-    icon: '',
-    iconSrc: cartesiaLogo,
-    requiresApiKey: true,
-    hasSettings: true,
-  },
-  {
-    id: 'google-cloud-tts',
-    name: 'Google Cloud TTS',
-    description: 'Google Cloud neural voices via gRPC — API key required.',
-    icon: '',
-    iconSrc: googleCloudLogo,
-    requiresApiKey: true,
-    hasSettings: true,
-  },
-  {
-    id: 'azure-speech',
-    name: 'Microsoft Azure Speech',
-    description: 'Azure Cognitive Services TTS — neural voices, API key + region required.',
-    icon: '',
-    iconSrc: azureLogo,
-    requiresApiKey: true,
-    hasSettings: true,
-  },
-]
+// PROVIDERS is built inside VoiceTab via useMemo to support i18n
 
 // ── Shared slider helper ──────────────────────────────────────────────────────
 
@@ -150,6 +78,7 @@ interface PanelProps {
 }
 
 const KokoroPanel = ({ character, onUpdate }: PanelProps) => {
+  const { t } = useTranslation('voice')
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const tts = character.tts
 
@@ -157,15 +86,15 @@ const KokoroPanel = ({ character, onUpdate }: PanelProps) => {
     <div className={styles.infoCardContent}>
       {/* Voice */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Voice</label>
-        <div className={styles.labelHint}>Choose a Kokoro voice for synthesis</div>
+        <label className={styles.label}>{t('voice.label')}</label>
+        <div className={styles.labelHint}>{t('voice.hintKokoro')}</div>
         <div className={styles.voiceSelectWrap}>
           <select
             className={styles.voiceSelect}
             value={tts.voiceId ?? ''}
             onChange={(e) => onUpdate({ tts: { ...tts, voiceId: e.target.value || null } })}
           >
-            <option value="">— Select a voice —</option>
+            <option value="">{t('voice.selectPlaceholder')}</option>
             {Array.from(VOICE_GROUPS.entries()).map(([lang, voices]) => (
               <optgroup key={lang} label={LANG_LABELS[lang] ?? lang}>
                 {voices.map((v) => (
@@ -182,7 +111,7 @@ const KokoroPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Speed */}
       <SliderField
-        label="Speed" value={tts.speed} min={0.5} max={2.0} step={0.05}
+        label={t('speed.label')} value={tts.speed} min={0.5} max={2.0} step={0.05}
         format={(v) => `${v.toFixed(2)}×`}
         onChange={(v) => onUpdate({ tts: { ...tts, speed: v } })}
       />
@@ -193,14 +122,14 @@ const KokoroPanel = ({ character, onUpdate }: PanelProps) => {
           width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
-        Advanced
+        {t('advanced')}
       </button>
 
       {advancedOpen && (
         <div className={styles.advancedPanel}>
           <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-            <label className={styles.label}>Base URL</label>
-            <div className={styles.labelHint}>Kokoro API endpoint</div>
+            <label className={styles.label}>{t('baseUrl.label')}</label>
+            <div className={styles.labelHint}>{t('baseUrl.hintKokoro')}</div>
             <input
               className={styles.input} type="text"
               placeholder="http://127.0.0.1:8880/v1"
@@ -226,13 +155,13 @@ const ELEVENLABS_MODELS = [
 ]
 
 const ElevenLabsPanel = ({ character, onUpdate }: PanelProps) => {
+  const { t } = useTranslation('voice')
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [voices, setVoices] = useState<SpeechVoice[]>([])
   const [voicesLoading, setVoicesLoading] = useState(false)
   const tts = character.tts
   const apiKey = tts.apiKey ?? ''
 
-  // Load voices whenever the API key changes (debounced)
   useEffect(() => {
     if (!apiKey.trim()) { setVoices([]); return }
     let cancelled = false
@@ -251,10 +180,12 @@ const ElevenLabsPanel = ({ character, onUpdate }: PanelProps) => {
   return (
     <div className={styles.infoCardContent}>
 
+      <ApiKeyCallout show={!apiKey.trim()} />
+
       {/* API Key */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>API Key</label>
-        <div className={styles.labelHint}>API Key for ElevenLabs</div>
+        <label className={styles.label}>{t('apiKey.label')}</label>
+        <div className={styles.labelHint}>{t('apiKey.hintProvider', { provider: 'ElevenLabs' })}</div>
         <input
           className={styles.input} type="password"
           placeholder="sk_…"
@@ -266,11 +197,11 @@ const ElevenLabsPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Voice */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Voice</label>
+        <label className={styles.label}>{t('voice.label')}</label>
         <div className={styles.labelHint}>
           {!apiKey.trim()
-            ? 'Enter your API key to load available voices'
-            : voicesLoading ? 'Loading voices…' : 'Select from your ElevenLabs voices'}
+            ? t('voice.hintEnterKey')
+            : voicesLoading ? t('voice.loading') : t('voice.hintChoose')}
         </div>
         <div className={styles.voiceSelectWrap}>
           <select
@@ -279,7 +210,7 @@ const ElevenLabsPanel = ({ character, onUpdate }: PanelProps) => {
             disabled={!apiKey.trim() || voicesLoading}
             onChange={(e) => patch({ voiceId: e.target.value || null })}
           >
-            <option value="">— Select a voice —</option>
+            <option value="">{t('voice.selectPlaceholder')}</option>
             {voices.map((v) => <option key={v.id} value={v.id}>{v.name ?? v.id}</option>)}
           </select>
           <svg className={styles.voiceSelectChevron} width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -290,7 +221,7 @@ const ElevenLabsPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Model */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Model</label>
+        <label className={styles.label}>{t('model.label')}</label>
         <div className={styles.voiceSelectWrap}>
           <select
             className={styles.voiceSelect}
@@ -307,7 +238,7 @@ const ElevenLabsPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Stability */}
       <SliderField
-        label="Stability" hint="Higher = more consistent, lower = more expressive"
+        label={t('stability.label')} hint={t('stability.hint')}
         value={tts.stability} min={0} max={1} step={0.01}
         format={(v) => v.toFixed(2)}
         onChange={(v) => patch({ stability: v })}
@@ -315,7 +246,7 @@ const ElevenLabsPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Similarity Boost */}
       <SliderField
-        label="Similarity Boost" hint="Усиление схожести с диктором"
+        label={t('similarityBoost.label')} hint={t('similarityBoost.hint')}
         value={tts.similarityBoost} min={0} max={1} step={0.01}
         format={(v) => v.toFixed(2)}
         onChange={(v) => patch({ similarityBoost: v })}
@@ -323,31 +254,31 @@ const ElevenLabsPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Style */}
       <SliderField
-        label="Style" hint="Style exaggeration — 0 is recommended for most models"
+        label={t('style.label')} hint={t('style.hint')}
         value={tts.style} min={0} max={1} step={0.01}
         format={(v) => v.toFixed(2)}
         onChange={(v) => patch({ style: v })}
       />
 
-      {/* Speed — clamped to 0.7–1.2 for ElevenLabs */}
+      {/* Speed */}
       <SliderField
-        label="Speed"
+        label={t('speed.label')}
         value={Math.min(1.2, Math.max(0.7, tts.speed))} min={0.7} max={1.2} step={0.01}
         format={(v) => `${v.toFixed(2)}×`}
         onChange={(v) => patch({ speed: v })}
       />
 
-      {/* Pitch (UI only — stored but not sent to ElevenLabs) */}
+      {/* Pitch */}
       <SliderField
-        label="Pitch" hint="Stored only — ElevenLabs does not support pitch adjustment"
+        label={t('pitch.label')} hint={t('pitch.hintElevenLabs')}
         value={tts.pitch} min={0.5} max={2.0} step={0.05}
         format={(v) => `${v.toFixed(2)}×`}
         onChange={(v) => patch({ pitch: v })}
       />
 
-      {/* Volume (UI only — stored but not sent to ElevenLabs) */}
+      {/* Volume */}
       <SliderField
-        label="Volume" hint="Stored only — use your audio output settings for volume"
+        label={t('volume.label')} hint={t('volume.hintElevenLabs')}
         value={tts.volume} min={0.1} max={2.0} step={0.05}
         format={(v) => `${v.toFixed(2)}×`}
         onChange={(v) => patch({ volume: v })}
@@ -356,8 +287,8 @@ const ElevenLabsPanel = ({ character, onUpdate }: PanelProps) => {
       {/* Speaker Boost */}
       <div className={styles.toggleRow}>
         <div className={styles.toggleLabel}>
-          Speaker Boost
-          <div className={styles.toggleHint}>Ускорение динамиков — усиление схожести с диктором</div>
+          {t('speakerBoost.label')}
+          <div className={styles.toggleHint}>{t('speakerBoost.hint')}</div>
         </div>
         <label className={styles.toggleControl}>
           <input
@@ -375,14 +306,14 @@ const ElevenLabsPanel = ({ character, onUpdate }: PanelProps) => {
           width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
-        Advanced
+        {t('advanced')}
       </button>
 
       {advancedOpen && (
         <div className={styles.advancedPanel}>
           <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-            <label className={styles.label}>Base URL</label>
-            <div className={styles.labelHint}>ElevenLabs API endpoint (override for enterprise)</div>
+            <label className={styles.label}>{t('baseUrl.label')}</label>
+            <div className={styles.labelHint}>{t('baseUrl.hintElevenLabs')}</div>
             <input
               className={styles.input} type="text"
               placeholder="https://api.elevenlabs.io"
@@ -409,16 +340,19 @@ const OPENAI_MODELS = [
 ]
 
 const OpenAiPanel = ({ character, onUpdate }: PanelProps) => {
+  const { t } = useTranslation('voice')
   const tts = character.tts
   const patch = (p: Partial<typeof tts>) => onUpdate({ tts: { ...tts, ...p } })
 
   return (
     <div className={styles.infoCardContent}>
 
+      <ApiKeyCallout show={!tts.apiKey?.trim()} />
+
       {/* API Key */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>API Key</label>
-        <div className={styles.labelHint}>Your OpenAI API key (sk-…)</div>
+        <label className={styles.label}>{t('apiKey.label')}</label>
+        <div className={styles.labelHint}>{t('apiKey.hintOpenAi')}</div>
         <input
           className={styles.input} type="password"
           placeholder="sk-…"
@@ -430,8 +364,8 @@ const OpenAiPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Voice */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Voice</label>
-        <div className={styles.labelHint}>Select an OpenAI voice</div>
+        <label className={styles.label}>{t('voice.label')}</label>
+        <div className={styles.labelHint}>{t('voice.hintOpenAi')}</div>
         <div className={styles.voiceSelectWrap}>
           <select
             className={styles.voiceSelect}
@@ -450,7 +384,7 @@ const OpenAiPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Model */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Model</label>
+        <label className={styles.label}>{t('model.label')}</label>
         <div className={styles.voiceSelectWrap}>
           <select
             className={styles.voiceSelect}
@@ -467,7 +401,7 @@ const OpenAiPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Speed */}
       <SliderField
-        label="Speed" hint="0.25× – 4.0× (1.0 = normal)"
+        label={t('speed.label')} hint={t('speed.hintOpenAi')}
         value={Math.min(4.0, Math.max(0.25, tts.speed))} min={0.25} max={4.0} step={0.05}
         format={(v) => `${v.toFixed(2)}×`}
         onChange={(v) => patch({ speed: v })}
@@ -480,6 +414,7 @@ const OpenAiPanel = ({ character, onUpdate }: PanelProps) => {
 // ── OpenAiCompatiblePanel ─────────────────────────────────────────────────────
 
 const OpenAiCompatiblePanel = ({ character, onUpdate }: PanelProps) => {
+  const { t } = useTranslation('voice')
   const tts = character.tts
   const patch = (p: Partial<typeof tts>) => onUpdate({ tts: { ...tts, ...p } })
 
@@ -488,8 +423,8 @@ const OpenAiCompatiblePanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Base URL (required) */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Base URL <span style={{ color: 'var(--accent)' }}>*</span></label>
-        <div className={styles.labelHint}>OpenAI-compatible API endpoint (e.g. http://localhost:1234/v1)</div>
+        <label className={styles.label}>{t('baseUrl.label')} <span style={{ color: 'var(--accent)' }}>*</span></label>
+        <div className={styles.labelHint}>{t('baseUrl.hintCompatible')}</div>
         <input
           className={styles.input} type="text"
           placeholder="http://localhost:1234/v1"
@@ -500,8 +435,8 @@ const OpenAiCompatiblePanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* API Key */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>API Key</label>
-        <div className={styles.labelHint}>API key (leave blank if not required by the server)</div>
+        <label className={styles.label}>{t('apiKey.label')}</label>
+        <div className={styles.labelHint}>{t('apiKey.hintCompatible')}</div>
         <input
           className={styles.input} type="password"
           placeholder="sk-…"
@@ -513,8 +448,8 @@ const OpenAiCompatiblePanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Voice (free text) */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Voice</label>
-        <div className={styles.labelHint}>Voice name as accepted by the server</div>
+        <label className={styles.label}>{t('voice.label')}</label>
+        <div className={styles.labelHint}>{t('voice.hintCompatible')}</div>
         <input
           className={styles.input} type="text"
           placeholder="alloy"
@@ -525,8 +460,8 @@ const OpenAiCompatiblePanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Model (free text) */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Model</label>
-        <div className={styles.labelHint}>Model ID used by the server (default: tts-1)</div>
+        <label className={styles.label}>{t('model.label')}</label>
+        <div className={styles.labelHint}>{t('model.hintCompatible')}</div>
         <input
           className={styles.input} type="text"
           placeholder="tts-1"
@@ -537,7 +472,7 @@ const OpenAiCompatiblePanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Speed */}
       <SliderField
-        label="Speed" hint="0.25× – 4.0× (1.0 = normal)"
+        label={t('speed.label')} hint={t('speed.hintOpenAi')}
         value={Math.min(4.0, Math.max(0.25, tts.speed))} min={0.25} max={4.0} step={0.05}
         format={(v) => `${v.toFixed(2)}×`}
         onChange={(v) => patch({ speed: v })}
@@ -555,6 +490,7 @@ const FISHAUDIO_MODELS = [
 ]
 
 const FishAudioPanel = ({ character, onUpdate }: PanelProps) => {
+  const { t } = useTranslation('voice')
   const [voices, setVoices] = useState<SpeechVoice[]>([])
   const [voicesLoading, setVoicesLoading] = useState(false)
   const tts = character.tts
@@ -578,10 +514,12 @@ const FishAudioPanel = ({ character, onUpdate }: PanelProps) => {
   return (
     <div className={styles.infoCardContent}>
 
+      <ApiKeyCallout show={!apiKey.trim()} />
+
       {/* API Key */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>API Key</label>
-        <div className={styles.labelHint}>Fish Audio API key</div>
+        <label className={styles.label}>{t('apiKey.label')}</label>
+        <div className={styles.labelHint}>{t('apiKey.hintFishAudio')}</div>
         <input
           className={styles.input} type="password"
           placeholder="Bearer token from fish.audio"
@@ -593,11 +531,11 @@ const FishAudioPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Voice */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Voice</label>
+        <label className={styles.label}>{t('voice.label')}</label>
         <div className={styles.labelHint}>
           {!apiKey.trim()
-            ? 'Enter your API key to load available voices'
-            : voicesLoading ? 'Loading voices…' : 'Select from Fish Audio voices'}
+            ? t('voice.hintEnterKey')
+            : voicesLoading ? t('voice.loading') : t('voice.hintFishAudio')}
         </div>
         <div className={styles.voiceSelectWrap}>
           <select
@@ -606,7 +544,7 @@ const FishAudioPanel = ({ character, onUpdate }: PanelProps) => {
             disabled={!apiKey.trim() || voicesLoading}
             onChange={(e) => patch({ voiceId: e.target.value || null })}
           >
-            <option value="">— Select a voice —</option>
+            <option value="">{t('voice.selectPlaceholder')}</option>
             {voices.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.name ?? v.id}{v.category ? ` · ${v.category}` : ''}
@@ -621,7 +559,7 @@ const FishAudioPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Model */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Model</label>
+        <label className={styles.label}>{t('model.label')}</label>
         <div className={styles.voiceSelectWrap}>
           <select
             className={styles.voiceSelect}
@@ -638,7 +576,7 @@ const FishAudioPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Speed */}
       <SliderField
-        label="Speed" hint="0.5× – 2.0× (1.0 = normal)"
+        label={t('speed.label')} hint={t('speed.hintDefault')}
         value={Math.min(2.0, Math.max(0.5, tts.speed))} min={0.5} max={2.0} step={0.05}
         format={(v) => `${v.toFixed(2)}×`}
         onChange={(v) => patch({ speed: v })}
@@ -656,6 +594,7 @@ const CARTESIA_MODELS = [
 ]
 
 const CartesiaPanel = ({ character, onUpdate }: PanelProps) => {
+  const { t } = useTranslation('voice')
   const [voices, setVoices] = useState<SpeechVoice[]>([])
   const [voicesLoading, setVoicesLoading] = useState(false)
   const tts = character.tts
@@ -679,10 +618,12 @@ const CartesiaPanel = ({ character, onUpdate }: PanelProps) => {
   return (
     <div className={styles.infoCardContent}>
 
+      <ApiKeyCallout show={!apiKey.trim()} />
+
       {/* API Key */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>API Key</label>
-        <div className={styles.labelHint}>Cartesia API key (sk_car_…)</div>
+        <label className={styles.label}>{t('apiKey.label')}</label>
+        <div className={styles.labelHint}>{t('apiKey.hintCartesia')}</div>
         <input
           className={styles.input} type="password"
           placeholder="sk_car_…"
@@ -694,11 +635,11 @@ const CartesiaPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Voice */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Voice</label>
+        <label className={styles.label}>{t('voice.label')}</label>
         <div className={styles.labelHint}>
           {!apiKey.trim()
-            ? 'Enter your API key to load available voices'
-            : voicesLoading ? 'Loading voices…' : 'Select from your Cartesia voices'}
+            ? t('voice.hintEnterKey')
+            : voicesLoading ? t('voice.loading') : t('voice.hintCartesia')}
         </div>
         <div className={styles.voiceSelectWrap}>
           <select
@@ -707,7 +648,7 @@ const CartesiaPanel = ({ character, onUpdate }: PanelProps) => {
             disabled={!apiKey.trim() || voicesLoading}
             onChange={(e) => patch({ voiceId: e.target.value || null })}
           >
-            <option value="">— Select a voice —</option>
+            <option value="">{t('voice.selectPlaceholder')}</option>
             {voices.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.name ?? v.id}{v.category ? ` · ${v.category}` : ''}
@@ -722,7 +663,7 @@ const CartesiaPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Model */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Model</label>
+        <label className={styles.label}>{t('model.label')}</label>
         <div className={styles.voiceSelectWrap}>
           <select
             className={styles.voiceSelect}
@@ -737,9 +678,9 @@ const CartesiaPanel = ({ character, onUpdate }: PanelProps) => {
         </div>
       </div>
 
-      {/* Speed — Cartesia maps 0–2× to its internal -1–1 range */}
+      {/* Speed */}
       <SliderField
-        label="Speed" hint="0.0× – 2.0× (1.0 = normal)"
+        label={t('speed.label')} hint={t('speed.hintCartesia')}
         value={Math.min(2.0, Math.max(0.0, tts.speed))} min={0.0} max={2.0} step={0.05}
         format={(v) => `${v.toFixed(2)}×`}
         onChange={(v) => patch({ speed: v })}
@@ -752,6 +693,7 @@ const CartesiaPanel = ({ character, onUpdate }: PanelProps) => {
 // ── GoogleCloudPanel ──────────────────────────────────────────────────────────
 
 const GoogleCloudPanel = ({ character, onUpdate }: PanelProps) => {
+  const { t } = useTranslation('voice')
   const [voices, setVoices] = useState<SpeechVoice[]>([])
   const [voicesLoading, setVoicesLoading] = useState(false)
   const tts = character.tts
@@ -775,10 +717,12 @@ const GoogleCloudPanel = ({ character, onUpdate }: PanelProps) => {
   return (
     <div className={styles.infoCardContent}>
 
+      <ApiKeyCallout show={!apiKey.trim()} />
+
       {/* API Key */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>API Key</label>
-        <div className={styles.labelHint}>Google Cloud API key with Text-to-Speech enabled</div>
+        <label className={styles.label}>{t('apiKey.label')}</label>
+        <div className={styles.labelHint}>{t('apiKey.hintGoogleCloud')}</div>
         <input
           className={styles.input} type="password"
           placeholder="AIza…"
@@ -790,11 +734,11 @@ const GoogleCloudPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Voice */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Voice</label>
+        <label className={styles.label}>{t('voice.label')}</label>
         <div className={styles.labelHint}>
           {!apiKey.trim()
-            ? 'Enter your API key to load available voices'
-            : voicesLoading ? 'Loading voices…' : 'Select a Google Cloud neural voice'}
+            ? t('voice.hintEnterKey')
+            : voicesLoading ? t('voice.loading') : t('voice.hintGoogleCloud')}
         </div>
         <div className={styles.voiceSelectWrap}>
           <select
@@ -803,7 +747,7 @@ const GoogleCloudPanel = ({ character, onUpdate }: PanelProps) => {
             disabled={!apiKey.trim() || voicesLoading}
             onChange={(e) => patch({ voiceId: e.target.value || null })}
           >
-            <option value="">— Select a voice —</option>
+            <option value="">{t('voice.selectPlaceholder')}</option>
             {voices.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.name ?? v.id}{v.category ? ` · ${v.category}` : ''}
@@ -816,9 +760,9 @@ const GoogleCloudPanel = ({ character, onUpdate }: PanelProps) => {
         </div>
       </div>
 
-      {/* Pitch — semitones, Google range -20 to +20 */}
+      {/* Pitch */}
       <SliderField
-        label="Pitch" hint="Pitch adjustment in semitones (−20 to +20)"
+        label={t('pitch.label')} hint={t('pitch.hintSemitones')}
         value={tts.pitch} min={-20} max={20} step={0.5}
         format={(v) => v > 0 ? `+${v}` : `${v}`}
         onChange={(v) => patch({ pitch: v })}
@@ -826,15 +770,15 @@ const GoogleCloudPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Speed */}
       <SliderField
-        label="Speed" hint="0.25× – 4.0× (1.0 = normal)"
+        label={t('speed.label')} hint={t('speed.hintOpenAi')}
         value={Math.min(4.0, Math.max(0.25, tts.speed))} min={0.25} max={4.0} step={0.05}
         format={(v) => `${v.toFixed(2)}×`}
         onChange={(v) => patch({ speed: v })}
       />
 
-      {/* Volume — dB gain, Google range -96 to +16, UI limited to ±10 */}
+      {/* Volume */}
       <SliderField
-        label="Volume" hint="Volume gain in dB (−10 to +10)"
+        label={t('volume.label')} hint={t('volume.hintDb')}
         value={tts.volume} min={-10} max={10} step={0.5}
         format={(v) => v > 0 ? `+${v} dB` : `${v} dB`}
         onChange={(v) => patch({ volume: v })}
@@ -862,6 +806,7 @@ const AZURE_REGIONS = [
 ]
 
 const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
+  const { t } = useTranslation('voice')
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [voices, setVoices] = useState<SpeechVoice[]>([])
   const [voicesLoading, setVoicesLoading] = useState(false)
@@ -871,7 +816,6 @@ const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
 
   const patch = (p: Partial<typeof tts>) => onUpdate({ tts: { ...tts, ...p } })
 
-  // Load voices when both API key and region are present
   useEffect(() => {
     if (!apiKey.trim() || !region.trim()) { setVoices([]); return }
     let cancelled = false
@@ -890,10 +834,12 @@ const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
   return (
     <div className={styles.infoCardContent}>
 
+      <ApiKeyCallout show={!apiKey.trim()} />
+
       {/* API Key */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>API Key</label>
-        <div className={styles.labelHint}>API Key for Microsoft Azure Speech</div>
+        <label className={styles.label}>{t('apiKey.label')}</label>
+        <div className={styles.labelHint}>{t('apiKey.hintProvider', { provider: 'Microsoft Azure Speech' })}</div>
         <input
           className={styles.input} type="password"
           placeholder="Azure subscription key"
@@ -905,8 +851,8 @@ const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Region */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Region <span style={{ color: 'var(--accent)' }}>*</span></label>
-        <div className={styles.labelHint}>Azure Speech Service region</div>
+        <label className={styles.label}>{t('region.label')} <span style={{ color: 'var(--accent)' }}>*</span></label>
+        <div className={styles.labelHint}>{t('region.hint')}</div>
         <div className={styles.voiceSelectWrap}>
           <select
             className={styles.voiceSelect}
@@ -916,7 +862,7 @@ const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
             }}
           >
             <option value="__custom__" disabled={AZURE_REGIONS.some((r) => r.code === region)}>
-              {AZURE_REGIONS.some((r) => r.code === region) ? '' : '— custom (see Advanced) —'}
+              {AZURE_REGIONS.some((r) => r.code === region) ? '' : t('region.customOption')}
             </option>
             {AZURE_REGIONS.map((r) => (
               <option key={r.code} value={r.code}>{r.label} ({r.code})</option>
@@ -930,11 +876,11 @@ const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Voice */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Voice</label>
+        <label className={styles.label}>{t('voice.label')}</label>
         <div className={styles.labelHint}>
           {!canLoadVoices
-            ? 'Enter your API key and region to load available voices'
-            : voicesLoading ? 'Loading voices…' : 'Select from Azure neural voices'}
+            ? t('voice.hintEnterKeyAndRegion')
+            : voicesLoading ? t('voice.loading') : t('voice.hintAzure')}
         </div>
         <div className={styles.voiceSelectWrap}>
           <select
@@ -943,7 +889,7 @@ const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
             disabled={!canLoadVoices || voicesLoading}
             onChange={(e) => patch({ voiceId: e.target.value || null })}
           >
-            <option value="">— Select a voice —</option>
+            <option value="">{t('voice.selectPlaceholder')}</option>
             {voices.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.name ?? v.id}{v.category ? ` · ${v.category}` : ''}
@@ -958,7 +904,7 @@ const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Pitch */}
       <SliderField
-        label="Pitch" hint="Adjust synthesised speech pitch (higher/lower)"
+        label={t('pitch.label')} hint={t('pitch.hintAdjust')}
         value={tts.pitch} min={-50} max={50} step={1}
         format={(v) => v > 0 ? `+${v}%` : `${v}%`}
         onChange={(v) => patch({ pitch: v })}
@@ -966,7 +912,7 @@ const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Speed */}
       <SliderField
-        label="Speed" hint="Speech rate adjustment"
+        label={t('speed.label')} hint={t('speed.hintRate')}
         value={Math.min(MaxSpeed, Math.max(MinSpeed, tts.speed))} min={0.5} max={2.0} step={0.05}
         format={(v) => `${v.toFixed(2)}×`}
         onChange={(v) => patch({ speed: v })}
@@ -974,7 +920,7 @@ const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
 
       {/* Volume */}
       <SliderField
-        label="Volume" hint="Speech volume adjustment"
+        label={t('volume.label')} hint={t('volume.hintAdjust')}
         value={tts.volume} min={-50} max={50} step={1}
         format={(v) => v > 0 ? `+${v}%` : `${v}%`}
         onChange={(v) => patch({ volume: v })}
@@ -986,17 +932,14 @@ const AzureSpeechPanel = ({ character, onUpdate }: PanelProps) => {
           width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
-        Advanced
+        {t('advanced')}
       </button>
 
       {advancedOpen && (
         <div className={styles.advancedPanel}>
           <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-            <label className={styles.label}>Base URL <span style={{ color: 'var(--accent)' }}>*</span></label>
-            <div className={styles.labelHint}>
-              Region code (e.g. <code>eastasia</code>) or full endpoint URL.
-              Overrides the region dropdown above.
-            </div>
+            <label className={styles.label}>{t('baseUrl.label')} <span style={{ color: 'var(--accent)' }}>*</span></label>
+            <div className={styles.labelHint}>{t('baseUrl.hintAzure')}</div>
             <input
               className={styles.input} type="text"
               placeholder="eastasia"
@@ -1014,7 +957,6 @@ const MinSpeed = 0.5
 const MaxSpeed = 2.0
 
 // ── Dispatcher ────────────────────────────────────────────────────────────────
-// Add a case here whenever a new provider with settings is added.
 
 function renderSettingsPanel(
   providerId: string,
@@ -1031,12 +973,30 @@ function renderSettingsPanel(
     case 'google-cloud-tts':  return <GoogleCloudPanel character={character} onUpdate={onUpdate} />
     case 'azure-speech':      return <AzureSpeechPanel character={character} onUpdate={onUpdate} />
     default:
-      return (
-        <div style={{ padding: '1rem 0', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-          No settings for this provider.
-        </div>
-      )
+      return <NoSettingsFallback />
   }
+}
+
+const NoSettingsFallback = () => {
+  const { t } = useTranslation('voice')
+  return (
+    <div style={{ padding: '1rem 0', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+      {t('noSettings')}
+    </div>
+  )
+}
+
+// ── API key callout (shown at top of settings panels when key is missing) ─────
+
+const ApiKeyCallout = ({ show }: { show: boolean }) => {
+  const { t } = useTranslation('voice')
+  if (!show) return null
+  return (
+    <div className={styles.apiKeyCallout} role="alert">
+      <span className={styles.apiKeyCalloutIcon}>⚠</span>
+      <span>{t('apiKey.missingCallout')}</span>
+    </div>
+  )
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -1046,45 +1006,64 @@ interface VoiceTabProps {
   onUpdate: (patch: Partial<AiCharacter>) => void
 }
 
-type VoiceView =
-  | { kind: 'grid' }
-  | { kind: 'settings'; providerId: string }
-  | { kind: 'sandbox' }
-
 const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
-  const [view, setView] = useState<VoiceView>({ kind: 'grid' })
+  const { t } = useTranslation('voice')
+  const navigate = useNavigate()
+  const { providerId } = useParams<{ providerId?: string }>()
   const [search, setSearch] = useState('')
 
+  const PROVIDERS = useMemo((): ProviderDef[] => [
+    { id: 'none',             name: 'None',                  description: t('providers.none'),            icon: '🔇', requiresApiKey: false, hasSettings: false },
+    { id: 'kokoro',           name: 'Kokoro',                description: t('providers.kokoro'),          icon: '', iconSrc: kokoroLogo,      requiresApiKey: false, hasSettings: true,  badge: { label: t('badges.free'),    color: '#d4a84a' } },
+    { id: 'elevenlabs',       name: 'ElevenLabs',            description: t('providers.elevenlabs'),      icon: '', iconSrc: elevenLabsLogo,  requiresApiKey: true,  hasSettings: true,  badge: { label: t('badges.popular'), color: '#c47fc4' } },
+    { id: 'fishaudio',        name: 'Fish Audio',            description: t('providers.fishaudio'),       icon: '', iconSrc: fishAudioLogo,   requiresApiKey: true,  hasSettings: true },
+    { id: 'openai',           name: 'OpenAI',                description: t('providers.openai'),          icon: '', iconSrc: openaiLogo,      requiresApiKey: true,  hasSettings: true },
+    { id: 'openai-compatible',name: 'OpenAI Compatible',     description: t('providers.openaiCompatible'),icon: '', iconSrc: openaiLogo,     requiresApiKey: true,  hasSettings: true },
+    { id: 'cartesia',         name: 'Cartesia',              description: t('providers.cartesia'),        icon: '', iconSrc: cartesiaLogo,    requiresApiKey: true,  hasSettings: true,  badge: { label: t('badges.fast'),    color: '#7aafd4' } },
+    { id: 'google-cloud-tts', name: 'Google Cloud TTS',      description: t('providers.googleCloud'),     icon: '', iconSrc: googleCloudLogo, requiresApiKey: true,  hasSettings: true },
+    { id: 'azure-speech',     name: 'Microsoft Azure Speech',description: t('providers.azureSpeech'),     icon: '', iconSrc: azureLogo,       requiresApiKey: true,  hasSettings: true },
+  ], [t])
+
   // ── Sandbox view ───────────────────────────────────────────────────────────
-  if (view.kind === 'sandbox') {
+  if (providerId === 'sandbox') {
     return (
       <VoiceSandboxTab
         character={character}
-        onBack={() => setView({ kind: 'grid' })}
+        onBack={() => navigate('/profile/settings/voice')}
       />
     )
   }
 
   // ── Settings view ──────────────────────────────────────────────────────────
-  if (view.kind === 'settings') {
-    const provider = PROVIDERS.find((p) => p.id === view.providerId)
+  if (providerId) {
+    const provider = PROVIDERS.find((p) => p.id === providerId)
     return (
       <div className={styles.tabRoot}>
         <div className={styles.providerPageHeader}>
           <button
             type="button"
             className={styles.providerBackBtn}
-            onClick={() => setView({ kind: 'grid' })}
-            aria-label="Back"
+            onClick={() => navigate('/profile/settings/voice')}
+            aria-label={t('back')}
           >
-            ←
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M9 11L5 7L9 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
-          <span className={styles.providerPageTitle}>
-            {provider?.icon} {provider?.name ?? view.providerId} — Settings
-          </span>
+          {provider && (
+            <div className={styles.providerPageIcon}>
+              {provider.iconSrc
+                ? <img src={provider.iconSrc} alt={provider.name} />
+                : <span className={styles.providerPageIconEmoji}>{provider.icon}</span>}
+            </div>
+          )}
+          <div>
+            <div className={styles.providerPageTitle}>{provider?.name ?? providerId}</div>
+            <div className={styles.providerPageSub}>{t('settings')}</div>
+          </div>
         </div>
         <div className={styles.section} style={{ borderTop: 'none', paddingTop: 0, marginTop: 0 }}>
-          {renderSettingsPanel(view.providerId, character, onUpdate)}
+          {renderSettingsPanel(providerId, character, onUpdate)}
         </div>
       </div>
     )
@@ -1098,14 +1077,14 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
       p.description.toLowerCase().includes(search.toLowerCase()),
   )
 
+  const activeProvider = PROVIDERS.find((p) => p.id === character.tts.providerId)
+  const needsApiKey = !!(activeProvider?.requiresApiKey && !character.tts.apiKey?.trim())
+
   return (
     <div className={styles.tabRoot}>
       <div className={styles.pgHeaderCard}>
-        <div className={styles.pgHeaderTitle}>Voice Providers</div>
-        <div className={styles.pgHeaderDesc}>
-          Choose a TTS provider for your AI character. Each provider can be configured
-          individually — select a voice, adjust speed, and set any required credentials.
-        </div>
+        <div className={styles.pgHeaderTitle}>{t('grid.title')}</div>
+        <div className={styles.pgHeaderDesc}>{t('grid.desc')}</div>
       </div>
 
       <div className={styles.providerSearchWrap}>
@@ -1116,11 +1095,38 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
         <input
           className={styles.providerSearchInput}
           type="text"
-          placeholder="Search providers…"
+          placeholder={t('grid.search')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
+
+      {needsApiKey && activeProvider && (
+        <div className={styles.apiKeyBanner} role="alert">
+          <div className={styles.apiKeyBannerIconWrap} aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1.5L12.5 11H1.5L7 1.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+              <path d="M7 5.5V8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+              <circle cx="7" cy="9.75" r="0.7" fill="currentColor"/>
+            </svg>
+          </div>
+          <div className={styles.apiKeyBannerBody}>
+            <div className={styles.apiKeyBannerTitle}>
+              {t('apiKeyBanner.title', { provider: activeProvider.name })}
+            </div>
+            <div className={styles.apiKeyBannerSub}>
+              {t('apiKeyBanner.subtitle')}
+            </div>
+          </div>
+          <button
+            type="button"
+            className={styles.apiKeyBannerBtn}
+            onClick={() => navigate(activeProvider.id)}
+          >
+            {t('apiKeyBanner.cta')}
+          </button>
+        </div>
+      )}
 
       <div className={styles.pgGrid}>
         {filtered.map((provider) => {
@@ -1128,7 +1134,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
           return (
             <div
               key={provider.id}
-              className={`${styles.pgCard} ${isActive ? styles.pgCardActive : ''}`}
+              className={`${styles.pgCard} ${isActive ? (isActive && provider.requiresApiKey && !character.tts.apiKey?.trim() ? styles.pgCardWarning : styles.pgCardActive) : ''}`}
               role="button"
               tabIndex={0}
               onClick={() => {
@@ -1142,25 +1148,48 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
                 }
               }}
             >
-              <div className={styles.pgGhostIcon}>
+              {provider.badge && (
+                <span
+                  className={styles.pgBadge}
+                  style={{
+                    color: provider.badge.color,
+                    background: `${provider.badge.color}14`,
+                    border: `1px solid ${provider.badge.color}30`,
+                  }}
+                >
+                  {provider.badge.label}
+                </span>
+              )}
+              <div className={`${styles.pgCardIcon} ${!provider.iconSrc ? styles.pgCardIconBox : ''}`}>
                 {provider.iconSrc
-                  ? <img src={provider.iconSrc} alt={provider.name} style={{ width: '2.25rem', height: '2.25rem', objectFit: 'contain' }} />
-                  : provider.icon}
+                  ? <img src={provider.iconSrc} alt={provider.name} />
+                  : <span className={styles.pgCardIconEmoji}>{provider.icon}</span>}
               </div>
               <div className={styles.pgName}>{provider.name}</div>
               <div className={styles.pgDesc}>{provider.description}</div>
               <div className={styles.pgFooter}>
-                <div className={`${styles.pgRadio} ${isActive ? styles.pgRadioActive : ''}`} />
+                <div className={`${styles.pgRadio} ${isActive ? (provider.requiresApiKey && !character.tts.apiKey?.trim() ? styles.pgRadioWarning : styles.pgRadioActive) : ''}`}>
+                  {isActive && !(provider.requiresApiKey && !character.tts.apiKey?.trim()) && (
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                      <path d="M1.5 4L3.5 6L6.5 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                  {isActive && provider.requiresApiKey && !character.tts.apiKey?.trim() && (
+                    <svg width="7" height="7" viewBox="0 0 7 7" fill="none">
+                      <path d="M3.5 2V4M3.5 5.5H3.51" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                </div>
                 {provider.hasSettings && (
                   <button
                     type="button"
                     className={styles.pgConfigure}
                     onClick={(e) => {
                       e.stopPropagation()
-                      setView({ kind: 'settings', providerId: provider.id })
+                      navigate(provider.id)
                     }}
                   >
-                    Configure →
+                    {t('grid.configure')}
                   </button>
                 )}
               </div>
@@ -1174,16 +1203,18 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
           className={styles.pgCard}
           role="button"
           tabIndex={0}
-          onClick={() => setView({ kind: 'sandbox' })}
+          onClick={() => navigate('sandbox')}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') setView({ kind: 'sandbox' })
+            if (e.key === 'Enter' || e.key === ' ') navigate('sandbox')
           }}
         >
-          <div className={styles.pgGhostIcon}>🎙</div>
-          <div className={styles.pgName}>Voice Sandbox</div>
-          <div className={styles.pgDesc}>Test any provider in the browser — synthesis, streaming, and voice tuning.</div>
+          <div className={`${styles.pgCardIcon} ${styles.pgCardIconBox}`}>
+            <span className={styles.pgCardIconEmoji}>🎙</span>
+          </div>
+          <div className={styles.pgName}>{t('sandbox.title')}</div>
+          <div className={styles.pgDesc}>{t('sandbox.desc')}</div>
           <div className={styles.pgFooter}>
-            <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>Open →</span>
+            <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{t('sandbox.open')}</span>
           </div>
         </div>
       </div>

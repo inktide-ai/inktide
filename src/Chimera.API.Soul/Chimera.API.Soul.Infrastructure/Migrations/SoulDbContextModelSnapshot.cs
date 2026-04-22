@@ -210,6 +210,54 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                     b.ToTable("ai_card_channels", "soul");
                 });
 
+            modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCardCustomSceneTag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AiCardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ai_card_id");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("color");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("label");
+
+                    b.Property<string>("LabelNormalized")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("label_normalized");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AiCardId")
+                        .HasDatabaseName("idx_ai_card_custom_scene_tags_card");
+
+                    b.HasIndex("AiCardId", "LabelNormalized")
+                        .IsUnique()
+                        .HasDatabaseName("idx_ai_card_custom_scene_tags_card_label_norm");
+
+                    b.ToTable("ai_card_custom_scene_tags", "soul");
+                });
+
             modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCardModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -288,6 +336,16 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("display_name");
+
                     b.Property<string>("OriginalFileName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -306,6 +364,11 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("storage_key");
+
+                    b.Property<string>("Tag")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("tag");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -678,6 +741,61 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                     b.ToTable("usage_daily", "soul");
                 });
 
+            modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.UserProviderCredential", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ApiKeyEnc")
+                        .HasColumnType("text")
+                        .HasColumnName("api_key_enc");
+
+                    b.Property<string>("BaseUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("base_url");
+
+                    b.Property<string>("Config")
+                        .HasColumnType("text")
+                        .HasColumnName("config");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("ProviderId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("provider_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("idx_user_provider_credentials_user");
+
+                    b.HasIndex("UserId", "ProviderId")
+                        .IsUnique()
+                        .HasDatabaseName("idx_user_provider_credentials_user_provider");
+
+                    b.ToTable("user_provider_credentials", "soul");
+                });
+
             modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCard", b =>
                 {
                     b.HasOne("Chimera.API.Soul.Domain.Entities.LlmCatalogEntry", "LlmCatalog")
@@ -699,6 +817,17 @@ namespace Chimera.API.Soul.Infrastructure.Migrations
                 {
                     b.HasOne("Chimera.API.Soul.Domain.Entities.AiCard", "AiCard")
                         .WithMany("Channels")
+                        .HasForeignKey("AiCardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AiCard");
+                });
+
+            modelBuilder.Entity("Chimera.API.Soul.Domain.Entities.AiCardCustomSceneTag", b =>
+                {
+                    b.HasOne("Chimera.API.Soul.Domain.Entities.AiCard", "AiCard")
+                        .WithMany()
                         .HasForeignKey("AiCardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

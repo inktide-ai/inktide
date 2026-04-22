@@ -10,15 +10,11 @@ namespace Chimera.API.TTS.Domain.Speech;
 /// </summary>
 public sealed class SpeechProviderRegistry : ISpeechProviderRegistry
 {
-    #region Fields
 
     private readonly IReadOnlyDictionary<string, ISpeechProvider> _byId;
     private readonly IReadOnlyDictionary<string, SpeechProviderDescriptor> _descriptors;
     private readonly IReadOnlyList<ISpeechProvider> _all;
 
-    #endregion
-
-    #region Constructors
 
     public SpeechProviderRegistry(IEnumerable<ISpeechProvider> providers)
     {
@@ -48,17 +44,11 @@ public sealed class SpeechProviderRegistry : ISpeechProviderRegistry
         _all = new ReadOnlyCollection<ISpeechProvider>(list);
     }
 
-    #endregion
-
-    #region Properties
 
     public IReadOnlyDictionary<string, SpeechProviderDescriptor> Descriptors => _descriptors;
 
     public IReadOnlyList<ISpeechProvider> All => _all;
 
-    #endregion
-
-    #region Public Methods
 
     public ISpeechProvider GetRequired(string providerId)
     {
@@ -73,9 +63,6 @@ public sealed class SpeechProviderRegistry : ISpeechProviderRegistry
     public bool TryGet(string providerId, [NotNullWhen(true)] out ISpeechProvider? provider)
         => _byId.TryGetValue(providerId, out provider);
 
-    #endregion
-
-    #region Private Methods
 
     private static SpeechProviderDescriptor BuildDescriptor(ISpeechProvider provider)
     {
@@ -93,5 +80,4 @@ public sealed class SpeechProviderRegistry : ISpeechProviderRegistry
         };
     }
 
-    #endregion
 }

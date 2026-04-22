@@ -20,7 +20,7 @@ public interface IAiCardModelUploadService
         CancellationToken ct = default);
 
     /// <summary>Null when the AI card does not exist or is not visible to the user.</summary>
-    Task<IReadOnlyList<AiCardModelDto>?> ListAsync(Guid userId, Guid cardId, CancellationToken ct = default);
+    Task<IReadOnlyList<AiCardModel>?> ListAsync(Guid userId, Guid cardId, CancellationToken ct = default);
 
     Task<DeleteModelResult> DeleteAsync(Guid userId, Guid cardId, Guid modelId, CancellationToken ct = default);
 }
@@ -55,10 +55,10 @@ public sealed record BeginModelUploadResult(
 public sealed record CompleteModelUploadResult(
     bool Success,
     ModelUploadError ErrorKind,
-    AiCardModelDto? Model,
+    AiCardModel? Model,
     string? Error)
 {
-    public static CompleteModelUploadResult Ok(AiCardModelDto model)
+    public static CompleteModelUploadResult Ok(AiCardModel model)
         => new(true, ModelUploadError.None, model, null);
 
     public static CompleteModelUploadResult Fail(ModelUploadError kind, string error)
@@ -74,7 +74,7 @@ public sealed record DeleteModelResult(
     public static DeleteModelResult Fail(ModelUploadError kind, string error) => new(false, kind, error);
 }
 
-public sealed record AiCardModelDto(
+public sealed record AiCardModel(
     Guid Id,
     Guid AiCardId,
     string StorageKey,

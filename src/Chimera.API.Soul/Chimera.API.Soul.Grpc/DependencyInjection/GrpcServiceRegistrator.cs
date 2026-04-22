@@ -10,12 +10,10 @@ namespace Chimera.API.Soul.Grpc.DependencyInjection;
 /// </summary>
 public sealed class GrpcServiceRegistrator : IServiceRegistrator
 {
-    #region Public Methods
 
     public void Register(IRegistrator registrator, IConfiguration configuration)
     {
         registrator.Register<IWebHostConfigurator, GrpcWebHostConfigurator>(Reuse.Singleton);
     }
 
-    #endregion
 }

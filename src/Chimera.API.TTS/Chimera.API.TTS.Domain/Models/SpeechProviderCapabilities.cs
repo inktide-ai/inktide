@@ -5,16 +5,12 @@ namespace Chimera.API.TTS.Domain.Models;
 /// </summary>
 public sealed class SpeechProviderCapabilities
 {
-    #region Fields
 
     private bool _supportsVoiceListing;
     private bool _supportsStreaming;
     private bool _requiresApiKey;
     private bool _supportsModelListing;
 
-    #endregion
-
-    #region Properties
 
     /// <summary>
     /// When true, the HTTP layer fills <c>ProviderOptions.ApiKey</c> from header <c>X-TTS-Api-Key</c> or config <c>TtsProviders:{providerId}:ApiKey</c>.
@@ -50,5 +46,4 @@ public sealed class SpeechProviderCapabilities
         set => _supportsModelListing = value;
     }
 
-    #endregion
 }

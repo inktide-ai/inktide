@@ -10,7 +10,6 @@ namespace Chimera.API.TTS.Infrastructure.Cartesia;
 /// </summary>
 internal sealed class CartesiaParams
 {
-    #region Fields
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -19,9 +18,6 @@ internal sealed class CartesiaParams
         DefaultIgnoreCondition      = JsonIgnoreCondition.WhenWritingNull,
     };
 
-    #endregion
-
-    #region Properties
 
     /// <summary>
     /// Latency hint: <c>"normal"</c> (default, balanced quality) or
@@ -30,15 +26,9 @@ internal sealed class CartesiaParams
     [JsonPropertyName("latency")]
     public string? Latency { get; init; }
 
-    #endregion
-
-    #region Effective values with domain defaults
 
     public string GetLatency() => Latency ?? "normal";
 
-    #endregion
-
-    #region Factory
 
     /// <summary>
     /// Deserializes provider-specific params from the loosely-typed dictionary.
@@ -58,5 +48,4 @@ internal sealed class CartesiaParams
         }
     }
 
-    #endregion
 }

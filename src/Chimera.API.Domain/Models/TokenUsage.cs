@@ -2,14 +2,10 @@ namespace Chimera.API.Domain.Models;
 
 public sealed class TokenUsage
 {
-    #region Fields
 
     private int _promptTokens;
     private int _completionTokens;
 
-    #endregion
-
-    #region Properties
 
     public int PromptTokens
     {
@@ -23,5 +19,4 @@ public sealed class TokenUsage
         set => _completionTokens = value;
     }
 
-    #endregion
 }

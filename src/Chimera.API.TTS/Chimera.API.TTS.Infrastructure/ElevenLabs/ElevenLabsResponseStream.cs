@@ -37,8 +37,6 @@ internal sealed class ElevenLabsResponseStream : Stream
         _response.Dispose();
     }
 
-    // ── Stream delegation ────────────────────────────────────────────────────
-
     public override bool CanRead  => _inner.CanRead;
     public override bool CanSeek  => _inner.CanSeek;
     public override bool CanWrite => _inner.CanWrite;

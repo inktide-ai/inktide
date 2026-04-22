@@ -15,7 +15,6 @@ namespace Chimera.API.TTS.Infrastructure.Cartesia;
 /// </summary>
 public sealed class CartesiaTtsProvider : ISpeechProvider
 {
-    #region Constants
 
     /// <summary>Cartesia speed range: -1.0 (slowest) to 1.0 (fastest), 0.0 = normal.</summary>
     private const double CartesiaMinSpeed = -1.0;
@@ -31,17 +30,11 @@ public sealed class CartesiaTtsProvider : ISpeechProvider
         new("sonic-turbo", "model", DateTimeOffset.UnixEpoch, "cartesia"),
     ]);
 
-    #endregion
-
-    #region Fields
 
     private readonly CartesiaTtsClient _client;
     private readonly IOptions<CartesiaTtsClientSettings> _settings;
     private readonly ILogger<CartesiaTtsProvider> _logger;
 
-    #endregion
-
-    #region Constructor
 
     public CartesiaTtsProvider(
         CartesiaTtsClient client,
@@ -53,9 +46,6 @@ public sealed class CartesiaTtsProvider : ISpeechProvider
         _logger   = logger   ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => "cartesia";
 
@@ -71,9 +61,6 @@ public sealed class CartesiaTtsProvider : ISpeechProvider
         SupportsModelListing  = true,
     };
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -159,9 +146,6 @@ public sealed class CartesiaTtsProvider : ISpeechProvider
             .ConfigureAwait(false);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private (string container, string encoding, int sampleRate) MapOutputFormat(string? audioFormat)
     {
@@ -186,5 +170,4 @@ public sealed class CartesiaTtsProvider : ISpeechProvider
         return mapped.Value;
     }
 
-    #endregion
 }

@@ -11,22 +11,15 @@ namespace Chimera.API.TTS.Infrastructure.AzureSpeech;
 /// </summary>
 public sealed class AzureSpeechTtsClient
 {
-    #region Constants
 
     public const string HttpClientName = "AzureSpeechTTS";
 
     private const string SubscriptionKeyHeader = "Ocp-Apim-Subscription-Key";
 
-    #endregion
-
-    #region Fields
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly AzureSpeechTtsClientSettings _settings;
 
-    #endregion
-
-    #region Constructor
 
     public AzureSpeechTtsClient(
         IHttpClientFactory httpClientFactory,
@@ -36,9 +29,6 @@ public sealed class AzureSpeechTtsClient
         _settings          = options.Value;
     }
 
-    #endregion
-
-    #region Public Methods
 
     /// <summary>
     /// Streams synthesised audio via
@@ -121,9 +111,6 @@ public sealed class AzureSpeechTtsClient
         return ParseVoices(doc.RootElement);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private HttpClient CreateClient() => _httpClientFactory.CreateClient(HttpClientName);
 
@@ -172,5 +159,4 @@ public sealed class AzureSpeechTtsClient
         return null;
     }
 
-    #endregion
 }

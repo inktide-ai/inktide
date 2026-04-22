@@ -6,16 +6,12 @@ namespace Chimera.API.Core.Settings;
 /// </summary>
 public sealed class KeycloakSettings
 {
-    #region Fields
 
     private string _authority = string.Empty;
     private string _audience = string.Empty;
     private bool _requireHttpsMetadata = true;
     private string? _metadataAddress;
 
-    #endregion
-
-    #region Properties
 
     /// <summary>
     /// Keycloak realm issuer URL, e.g. <c>http://localhost:8080/realms/chimera</c>.
@@ -57,5 +53,4 @@ public sealed class KeycloakSettings
         set => _metadataAddress = value;
     }
 
-    #endregion
 }

@@ -3,7 +3,8 @@
   top: 15px;
   right: 15px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 8px;
   z-index: 10;
 }
@@ -16,6 +17,7 @@
   background: rgba(18, 18, 22, 0.72);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.88);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -33,7 +35,76 @@
   transform: scale(0.96);
 }
 
+/* Active / pressed state — renderer panel open */
+.sceneToolbarBtn.sceneToolbarBtnActive {
+  background: rgba(102, 178, 255, 0.18);
+}
+
+.sceneToolbarBtn.sceneToolbarBtnActive .sceneToolbarIconSvg {
+  color: #66b2ff;
+}
+
+/* Profile: hover wash matches icon teal (same idea as brain + coral rgba) */
+.sceneToolbarBtn.sceneToolbarBtnProfile:hover {
+  background: rgba(110, 201, 196, 0.22);
+}
+
+.sceneToolbarBtn.sceneToolbarBtnProfile:hover .sceneToolbarIconSvg {
+  color: #8ee4dc;
+}
+
 .sceneToolbarIcon {
   width: 45px;
   height: 45px;
+}
+
+/* Sea-glass teal — pairs with brain coral; hover tint uses same hue */
+.sceneToolbarIconSvg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: #6ec9c4;
+  transition: color 0.15s ease;
+}
+
+.sceneRendererWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ── Look-at mode pill selector ─────────────────────────────────────────────── */
+
+.lookAtGroup {
+  display: flex;
+  gap: 3px;
+  background: rgba(18, 18, 22, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 999px;
+  padding: 5px;
+}
+
+.lookAtBtn {
+  padding: 5px 11px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.50);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.lookAtBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.lookAtBtnActive {
+  background: rgba(102, 178, 255, 0.18);
+  color: #66b2ff;
 }

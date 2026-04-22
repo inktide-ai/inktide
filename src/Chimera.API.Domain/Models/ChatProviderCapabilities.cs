@@ -5,15 +5,11 @@ namespace Chimera.API.Domain.Models;
 /// </summary>
 public sealed class ChatProviderCapabilities
 {
-    #region Fields
 
     private bool _supportsStreaming;
     private bool _supportsTools;
     private int? _maxContextTokens;
 
-    #endregion
-
-    #region Properties
 
     public bool SupportsStreaming
     {
@@ -36,5 +32,4 @@ public sealed class ChatProviderCapabilities
         set => _maxContextTokens = value;
     }
 
-    #endregion
 }

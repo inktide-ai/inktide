@@ -17,7 +17,6 @@ namespace Chimera.API.Realtime.Infrastructure.Messaging;
 /// </summary>
 public sealed class BrowserAudioPublisher : BackgroundService
 {
-    #region Private types
 
     private sealed record TtsReadyPayload(
         [property: JsonPropertyName("correlationId")]   string        CorrelationId,
@@ -30,11 +29,10 @@ public sealed class BrowserAudioPublisher : BackgroundService
         /// Rhubarb viseme timeline, or <c>null</c> when Rhubarb is unavailable.
         /// Passed through opaquely as a raw JSON element — no Realtime-layer parsing needed.
         /// </summary>
-        [property: JsonPropertyName("visemeTimeline")]  JsonElement?  VisemeTimeline);
+        [property: JsonPropertyName("visemeTimeline")]  JsonElement?  VisemeTimeline,
+        [property: JsonPropertyName("emotionId")]        string?       EmotionId        = null,
+        [property: JsonPropertyName("emotionIntensity")] float         EmotionIntensity = 0f);
 
-    #endregion
-
-    #region Fields
 
     private readonly IConnectionMultiplexer _redis;
     private readonly IHubContext<AudioHub> _hub;
@@ -42,9 +40,6 @@ public sealed class BrowserAudioPublisher : BackgroundService
     private readonly ILogger<BrowserAudioPublisher> _logger;
     private readonly string _consumerName;
 
-    #endregion
-
-    #region Constructor
 
     public BrowserAudioPublisher(
         IConnectionMultiplexer redis,
@@ -60,9 +55,6 @@ public sealed class BrowserAudioPublisher : BackgroundService
         _consumerName = $"{_settings.ConsumerNamePrefix}-{ResolveInstanceId()}";
     }
 
-    #endregion
-
-    #region BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -84,9 +76,6 @@ public sealed class BrowserAudioPublisher : BackgroundService
         _logger.LogInformation("BrowserAudioPublisher stopped.");
     }
 
-    #endregion
-
-    #region Consumer group bootstrap
 
     private async Task EnsureConsumerGroupAsync(IDatabase db, CancellationToken ct)
     {
@@ -115,9 +104,6 @@ public sealed class BrowserAudioPublisher : BackgroundService
         }
     }
 
-    #endregion
-
-    #region Consume loop
 
     private async Task ConsumeLoopAsync(IDatabase db, CancellationToken ct)
     {
@@ -187,9 +173,6 @@ public sealed class BrowserAudioPublisher : BackgroundService
         }
     }
 
-    #endregion
-
-    #region Per-message processing
 
     private async Task ProcessEntryAsync(IDatabase db, StreamEntry entry, CancellationToken ct)
     {
@@ -245,10 +228,12 @@ public sealed class BrowserAudioPublisher : BackgroundService
             "audioReceived",
             new
             {
-                correlationId  = payload.CorrelationId,
-                audioBase64    = payload.AudioBase64,
-                contentType    = payload.ContentType,
-                visemeTimeline = payload.VisemeTimeline,  // null → frontend uses formant fallback
+                correlationId    = payload.CorrelationId,
+                audioBase64      = payload.AudioBase64,
+                contentType      = payload.ContentType,
+                visemeTimeline   = payload.VisemeTimeline,  // null → frontend uses formant fallback
+                emotion          = payload.EmotionId,
+                emotionIntensity = payload.EmotionIntensity,
             },
             ct);
 
@@ -257,9 +242,6 @@ public sealed class BrowserAudioPublisher : BackgroundService
             payload.ChannelId, payload.CorrelationId);
     }
 
-    #endregion
-
-    #region Helpers
 
     private Task AckAsync(IDatabase db, RedisValue entryId)
         => db.StreamAcknowledgeAsync(_settings.StreamName, _settings.ConsumerGroup, entryId);
@@ -277,5 +259,4 @@ public sealed class BrowserAudioPublisher : BackgroundService
            ?? Environment.GetEnvironmentVariable("K8S_POD_NAME")
            ?? Guid.NewGuid().ToString("N")[..8];
 
-    #endregion
 }

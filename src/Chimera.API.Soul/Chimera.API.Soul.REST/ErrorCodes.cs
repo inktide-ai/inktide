@@ -2,7 +2,6 @@ namespace Chimera.API.Soul.REST;
 
 public static class ErrorCodes
 {
-    #region Constants
 
     public const string ValidationError = "VALIDATION_ERROR";
     public const string NotFound = "NOT_FOUND";
@@ -12,5 +11,4 @@ public static class ErrorCodes
 
     public const string ServiceUnavailable = "SERVICE_UNAVAILABLE";
 
-    #endregion
 }

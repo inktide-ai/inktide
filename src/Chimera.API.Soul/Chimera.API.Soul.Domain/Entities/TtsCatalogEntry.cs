@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Domain.Entities;
 /// </summary>
 public sealed class TtsCatalogEntry
 {
-    #region Fields
 
     private Guid _id;
     private string _provider = string.Empty;
@@ -19,9 +18,6 @@ public sealed class TtsCatalogEntry
     private bool _isAvailable = true;
     private DateTime _createdAt;
 
-    #endregion
-
-    #region Properties
 
     public Guid Id
     {
@@ -83,5 +79,4 @@ public sealed class TtsCatalogEntry
         set => _createdAt = value;
     }
 
-    #endregion
 }

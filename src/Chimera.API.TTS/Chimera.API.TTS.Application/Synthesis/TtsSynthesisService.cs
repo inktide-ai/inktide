@@ -15,7 +15,6 @@ namespace Chimera.API.TTS.Application.Synthesis;
 /// </summary>
 public sealed class TtsSynthesisService : ITtsSynthesisService
 {
-    #region Fields
 
     private readonly ISpeechProviderRegistry _speechProviderRegistry;
     private readonly IOptions<TtsProviderOptions> _ttsOptions;
@@ -23,9 +22,6 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
     private readonly ITtsUsageRecorder _usageRecorder;
     private readonly ILogger<TtsSynthesisService> _logger;
 
-    #endregion
-
-    #region Constructors
 
     public TtsSynthesisService(
         ISpeechProviderRegistry speechProviderRegistry,
@@ -41,9 +37,6 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Public Methods
 
     /// <inheritdoc />
     public async Task<GetVoicesResult> GetVoicesAsync(string? providerId, CancellationToken ct = default)
@@ -174,9 +167,6 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
         }
     }
 
-    #endregion
-
-    #region Private Methods
 
     private bool TryResolveProvider(string? requestedProviderId, out ISpeechProvider provider, out string? notFoundId)
     {
@@ -223,5 +213,4 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
         _      => "audio/mpeg",
     };
 
-    #endregion
 }

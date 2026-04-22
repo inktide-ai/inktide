@@ -9,15 +9,11 @@ namespace Chimera.API.Profile.Infrastructure.Storage;
 
 public sealed class S3ObjectStorageService : IObjectStorageService
 {
-    #region Fields
 
     private readonly IAmazonS3 _client;
     private readonly S3Settings _settings;
     private readonly ILogger<S3ObjectStorageService> _logger;
 
-    #endregion
-
-    #region Constructors
 
     public S3ObjectStorageService(
         IAmazonS3 client,
@@ -29,17 +25,11 @@ public sealed class S3ObjectStorageService : IObjectStorageService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Properties
 
     public bool IsEnabled => true;
 
     public string? DefaultBucket => _settings.DefaultBucket;
 
-    #endregion
-
-    #region Public Methods
 
     public async Task PutObjectAsync(string objectKey, Stream content, string? contentType, CancellationToken ct = default)
     {
@@ -165,5 +155,4 @@ public sealed class S3ObjectStorageService : IObjectStorageService
         }
     }
 
-    #endregion
 }

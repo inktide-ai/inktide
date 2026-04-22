@@ -6,6 +6,8 @@ import {
   characterToUpdateRequest,
   type AiCharacter,
 } from './types'
+import { BannerColorPicker } from './BannerColorPicker'
+import { getBannerAccent } from './bannerPresets'
 import styles from './CharacterEditPage.module.css'
 
 function PencilIcon() {
@@ -80,7 +82,7 @@ export default function CharacterEditPage() {
       try {
         const res = await updateCard(cardId, characterToUpdateRequest(character))
         setCharacter(apiResponseToCharacter(res))
-        navigate('/profile', { state: { focusCardId: cardId } })
+        navigate('/profile', { state: { focusCardId: cardId, returnTab: 'profile' } })
       } catch (err) {
         setSaveError(err instanceof Error ? err.message : 'Save failed')
       } finally {
@@ -91,7 +93,7 @@ export default function CharacterEditPage() {
   )
 
   const goWorkshop = useCallback(() => {
-    if (cardId) navigate('/profile', { state: { focusCardId: cardId } })
+    if (cardId) navigate('/profile', { state: { focusCardId: cardId, returnTab: 'profile' } })
     else navigate('/profile')
   }, [cardId, navigate])
 
@@ -129,7 +131,7 @@ export default function CharacterEditPage() {
   return (
     <div className={styles.page}>
       <button type="button" className={styles.back} onClick={goWorkshop}>
-        ← Back to workshop
+        ← Back to profile
       </button>
 
       <h1 className={styles.title}>Edit character</h1>
@@ -161,7 +163,15 @@ export default function CharacterEditPage() {
               className={styles.hiddenFile}
               onChange={onAvatar}
             />
-            <p className={styles.avatarHint}>PNG, JPG, WebP — stored in your project folder on S3.</p>
+            <p className={styles.avatarHint}>Click to upload a profile picture. PNG, JPG or WebP.</p>
+
+            <div className={styles.bannerColorField}>
+              <span className={styles.bannerColorLabel}>Banner color</span>
+              <BannerColorPicker
+                value={character.bannerCustomColor ?? getBannerAccent(character.bannerColorIndex ?? 0)}
+                onChange={(color) => patch({ bannerCustomColor: color })}
+              />
+            </div>
           </div>
 
           <div className={styles.fields}>

@@ -7,14 +7,10 @@ public sealed class TtsProviderOptions
 {
     public const string SectionName = "TtsProviders";
 
-    #region Fields
 
     private string _defaultProviderId = "kokoro";
     private Dictionary<string, bool>? _featureFlags;
 
-    #endregion
-
-    #region Properties
 
     /// <summary>
     /// Provider id when the caller does not specify one (must exist in the speech provider registry).
@@ -34,5 +30,4 @@ public sealed class TtsProviderOptions
         set => _featureFlags = value;
     }
 
-    #endregion
 }

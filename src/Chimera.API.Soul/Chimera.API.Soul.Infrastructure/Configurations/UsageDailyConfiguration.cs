@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Infrastructure.Configurations;
 
 public sealed class UsageDailyConfiguration : IEntityTypeConfiguration<UsageDaily>
 {
-    #region Public Methods
 
     public void Configure(EntityTypeBuilder<UsageDaily> b)
     {
@@ -68,5 +67,4 @@ public sealed class UsageDailyConfiguration : IEntityTypeConfiguration<UsageDail
             .OnDelete(DeleteBehavior.Cascade);
     }
 
-    #endregion
 }

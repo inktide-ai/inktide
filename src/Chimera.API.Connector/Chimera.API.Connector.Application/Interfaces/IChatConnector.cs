@@ -12,4 +12,5 @@ public interface IChatConnector
     Task ConnectAsync(CancellationToken cancellationToken = default);
 
     Task DisconnectAsync(CancellationToken cancellationToken = default);
+    
 }

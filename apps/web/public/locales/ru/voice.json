@@ -1,0 +1,155 @@
+{
+  "grid": {
+    "title": "Голосовые провайдеры",
+    "desc": "Выберите TTS-провайдера для вашего ИИ-персонажа. Каждый провайдер настраивается отдельно — выберите голос, скорость и укажите нужные учётные данные.",
+    "search": "Поиск провайдеров…",
+    "configure": "Настроить"
+  },
+  "sandbox": {
+    "title": "Голосовая песочница",
+    "desc": "Тестируйте любого провайдера в браузере — синтез, стриминг и настройка голоса.",
+    "open": "Открыть →",
+    "streamingPlayground": "Стриминг-тест",
+    "streamingDesc": "Тестирует чанковую доставку аудио. Каждый столбец — один полученный чанк, высота пропорциональна размеру.",
+    "testVoice": "Тест голоса",
+    "synthesizing": "Синтезирую…",
+    "testChunking": "Тест чанков",
+    "streaming": "Стримлю…"
+  },
+  "provider": {
+    "label": "Провайдер",
+    "hint": "Выберите TTS-провайдера для теста",
+    "loading": "Загрузка провайдеров…",
+    "none": "Нет зарегистрированных провайдеров"
+  },
+  "apiKey": {
+    "label": "API-ключ",
+    "hint": "Требуется для этого провайдера",
+    "hintProvider": "API-ключ для {{provider}}",
+    "hintOpenAi": "Ваш API-ключ OpenAI (sk-…)",
+    "hintCompatible": "API-ключ (оставьте пустым, если сервер не требует)",
+    "hintFishAudio": "API-ключ Fish Audio",
+    "hintCartesia": "API-ключ Cartesia (sk_car_…)",
+    "hintGoogleCloud": "API-ключ Google Cloud с включённым Text-to-Speech",
+    "missingCallout": "Введите API-ключ выше — без него провайдер не будет работать."
+  },
+  "apiKeyBanner": {
+    "title": "Требуется API-ключ {{provider}}",
+    "subtitle": "TTS не будет работать без настройки",
+    "cta": "Настроить →",
+    "dot": "Требуется API-ключ"
+  },
+  "voice": {
+    "label": "Голос",
+    "hintList": "Выберите из доступных голосов",
+    "hintManual": "Введите ID голоса вручную",
+    "hintKokoro": "Выберите голос Kokoro для синтеза",
+    "hintEnterKey": "Введите API-ключ для загрузки голосов",
+    "hintEnterKeyAndRegion": "Введите API-ключ и регион для загрузки голосов",
+    "hintChoose": "Выберите из ваших голосов ElevenLabs",
+    "hintOpenAi": "Выберите голос OpenAI",
+    "hintCompatible": "Имя голоса, принимаемое сервером",
+    "hintFishAudio": "Выберите из голосов Fish Audio",
+    "hintCartesia": "Выберите из ваших голосов Cartesia",
+    "hintGoogleCloud": "Выберите нейронный голос Google Cloud",
+    "hintAzure": "Выберите из нейронных голосов Azure",
+    "loading": "Загрузка голосов…",
+    "selectPlaceholder": "— Выберите голос —",
+    "idPlaceholder": "например af_bella или ваш voice-id"
+  },
+  "speed": {
+    "label": "Скорость",
+    "hintDefault": "0.5× – 2.0× (1.0 = норма)",
+    "hintOpenAi": "0.25× – 4.0× (1.0 = норма)",
+    "hintCartesia": "0.0× – 2.0× (1.0 = норма)",
+    "hintRate": "Регулировка темпа речи"
+  },
+  "pitch": {
+    "label": "Тональность",
+    "hintElevenLabs": "Только сохраняется — ElevenLabs не поддерживает регулировку тональности",
+    "hintSemitones": "Сдвиг тональности в полутонах (−20 до +20)",
+    "hintAdjust": "Регулировка тональности синтезированной речи"
+  },
+  "volume": {
+    "label": "Громкость",
+    "hintElevenLabs": "Только сохраняется — используйте настройки аудио для регулировки громкости",
+    "hintDb": "Усиление громкости в дБ (−10 до +10)",
+    "hintAdjust": "Регулировка громкости речи"
+  },
+  "stability": {
+    "label": "Стабильность",
+    "hint": "Выше = стабильнее, ниже = выразительнее"
+  },
+  "similarityBoost": {
+    "label": "Усиление схожести",
+    "hint": "Усиливает схожесть с выбранным диктором"
+  },
+  "style": {
+    "label": "Стиль",
+    "hint": "Преувеличение стиля — 0 рекомендуется для большинства моделей"
+  },
+  "speakerBoost": {
+    "label": "Ускорение динамиков",
+    "hint": "Усиливает схожесть с голосом выбранного диктора"
+  },
+  "region": {
+    "label": "Регион",
+    "hint": "Регион Azure Speech Service",
+    "customOption": "— произвольный (см. Дополнительно) —"
+  },
+  "audioFormat": {
+    "label": "Аудиоформат"
+  },
+  "baseUrl": {
+    "label": "Base URL",
+    "hintKokoro": "Эндпоинт Kokoro API",
+    "hintElevenLabs": "Эндпоинт ElevenLabs API (для корпоративного использования)",
+    "hintCompatible": "OpenAI-совместимый эндпоинт API (например http://localhost:1234/v1)",
+    "hintAzure": "Код региона (например eastasia) или полный URL. Переопределяет выпадающий список региона."
+  },
+  "model": {
+    "label": "Модель",
+    "loading": "Загрузка моделей…",
+    "hintCompatible": "ID модели на сервере (по умолчанию: tts-1)"
+  },
+  "ssml": {
+    "toggle": "Свой SSML",
+    "toggleHint": "Включите для ввода сырого SSML вместо обычного текста",
+    "inputLabel": "SSML-ввод",
+    "inputHint": "Введите SSML-разметку — должна быть обёрнута в <speak>…</speak>",
+    "inputPlaceholder": "<speak>Привет <break time=\"500ms\"/> мир!</speak>"
+  },
+  "text": {
+    "label": "Текст",
+    "hint": "Текст для синтеза",
+    "placeholder": "Введите текст для синтеза…",
+    "defaultSample": "Привет! Это тест синтеза голоса."
+  },
+  "validation": {
+    "textEmpty": "Текст не может быть пустым.",
+    "voiceRequired": "Выберите голос.",
+    "apiKeyRequired": "Введите API-ключ для теста голоса."
+  },
+  "advanced": "Дополнительно",
+  "settings": "Настройки",
+  "back": "Назад",
+  "noSettings": "Нет настроек для этого провайдера.",
+  "providers": {
+    "none": "Без голоса.",
+    "kokoro": "Локальный TTS — API-ключ не нужен.",
+    "elevenlabs": "Облачный TTS — естественные голоса, требуется API-ключ.",
+    "fishaudio": "Облачный TTS — клонирование голоса и многоязычные голоса, требуется API-ключ.",
+    "openai": "OpenAI TTS — высококачественные голоса через api.openai.com.",
+    "openaiCompatible": "Любой TTS API в формате OpenAI — произвольный endpoint, свободный выбор модели.",
+    "cartesia": "Cartesia Sonic — нейросетевой TTS с минимальной задержкой, требуется API-ключ.",
+    "googleCloud": "Нейронные голоса Google Cloud через gRPC — требуется API-ключ.",
+    "azureSpeech": "Azure Cognitive Services TTS — нейронные голоса, API-ключ + регион."
+  },
+  "badges": {
+    "fast": "Быстрый",
+    "popular": "Популярный",
+    "new": "Новый",
+    "local": "Локальный",
+    "free": "Бесплатный"
+  }
+}

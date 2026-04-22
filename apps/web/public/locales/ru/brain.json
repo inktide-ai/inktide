@@ -1,0 +1,31 @@
+{
+  "grid": {
+    "title": "Провайдеры мозга",
+    "desc": "Выберите LLM-провайдера для вашего ИИ-персонажа. Каждый настраивается отдельно — выберите модель и укажите учётные данные.",
+    "search": "Поиск провайдеров…",
+    "configure": "Настроить →"
+  },
+  "settings": "Настройки",
+  "llmParams": "Параметры LLM",
+  "baseUrl": {
+    "label": "Base URL",
+    "hint": "URL вашего Ollama-сервера (по умолчанию: http://localhost:11434)"
+  },
+  "model": {
+    "label": "Модель",
+    "loading": "Загрузка моделей…",
+    "error": "Не удалось подключиться к Ollama. Проверьте Base URL и что сервер запущен.",
+    "empty": "Модели не найдены. Загрузите модель: ollama pull llama3.1",
+    "hint": "Выберите модель из вашего локального Ollama",
+    "selectPlaceholder": "— Выберите модель —"
+  },
+  "providers": {
+    "ollama":    "Локальный Ollama-сервер — API-ключ не нужен.",
+    "anthropic": "Модели Claude через API Anthropic.",
+    "deepseek":  "Модели DeepSeek Chat и R1."
+  },
+  "remoteProvider": {
+    "keyHint":    "API-ключ управляется глобально в",
+    "manageLink": "Настройки → Провайдеры"
+  }
+}

@@ -7,22 +7,15 @@ namespace Chimera.API.Soul.Infrastructure.Repositories;
 
 public sealed class AiCardChannelRepository : IAiCardChannelRepository
 {
-    #region Fields
 
     private readonly SoulDbContext _db;
 
-    #endregion
-
-    #region Constructors
 
     public AiCardChannelRepository(SoulDbContext db)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task<IReadOnlyList<AiCardChannel>> GetByCardIdAsync(Guid aiCardId, CancellationToken ct = default)
     {
@@ -73,5 +66,4 @@ public sealed class AiCardChannelRepository : IAiCardChannelRepository
             .ToListAsync(ct);
     }
 
-    #endregion
 }

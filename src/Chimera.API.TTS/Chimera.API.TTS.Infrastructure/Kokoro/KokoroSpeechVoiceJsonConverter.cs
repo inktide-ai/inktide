@@ -9,7 +9,6 @@ namespace Chimera.API.TTS.Infrastructure.Kokoro;
 /// </summary>
 public sealed class KokoroSpeechVoiceJsonConverter : JsonConverter<KokoroSpeechVoice>
 {
-    #region Public Methods
 
     public override KokoroSpeechVoice Read(
         ref Utf8JsonReader reader,
@@ -30,5 +29,4 @@ public sealed class KokoroSpeechVoiceJsonConverter : JsonConverter<KokoroSpeechV
         writer.WriteStringValue(value.ToString());
     }
 
-    #endregion
 }

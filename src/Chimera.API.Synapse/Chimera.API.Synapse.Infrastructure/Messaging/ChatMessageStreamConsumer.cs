@@ -17,7 +17,6 @@ namespace Chimera.API.Synapse.Infrastructure.Messaging;
 /// </summary>
 public sealed class ChatMessageStreamConsumer : BackgroundService
 {
-    #region Fields
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -30,9 +29,6 @@ public sealed class ChatMessageStreamConsumer : BackgroundService
     private readonly ILogger<ChatMessageStreamConsumer> _logger;
     private readonly string _consumerName;
 
-    #endregion
-
-    #region Constructors
 
     public ChatMessageStreamConsumer(
         IServiceScopeFactory scopeFactory,
@@ -49,9 +45,6 @@ public sealed class ChatMessageStreamConsumer : BackgroundService
         _consumerName = _settings.FormatConsumerName(instanceId);
     }
 
-    #endregion
-
-    #region Protected Methods
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -78,9 +71,6 @@ public sealed class ChatMessageStreamConsumer : BackgroundService
         }
     }
 
-    #endregion
-
-    #region Private Methods
 
     /// <summary>
     /// Blocks until Redis accepts a command, with backoff. Avoids crashing the host when Redis is down at startup.
@@ -285,6 +275,18 @@ public sealed class ChatMessageStreamConsumer : BackgroundService
             return;
         }
 
+        // Drop messages that sat in the queue too long — stale replies have no value on a live stream.
+        if (DateTimeOffset.UtcNow - message.Timestamp > TimeSpan.FromSeconds(10))
+        {
+            _logger.LogInformation(
+                "Stale message dropped. Age={AgeMs}ms User={User} Channel={Channel}",
+                (long)(DateTimeOffset.UtcNow - message.Timestamp).TotalMilliseconds,
+                message.Sender.UserName,
+                message.ChannelName);
+            await db.StreamAcknowledgeAsync(_settings.StreamName, _settings.ConsumerGroup, entry.Id);
+            return;
+        }
+
         try
         {
             _logger.LogDebug(
@@ -361,5 +363,4 @@ public sealed class ChatMessageStreamConsumer : BackgroundService
             || msg.Contains("It was not possible to connect", StringComparison.OrdinalIgnoreCase);
     }
 
-    #endregion
 }

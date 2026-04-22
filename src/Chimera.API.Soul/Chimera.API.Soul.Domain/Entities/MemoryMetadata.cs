@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Domain.Entities;
 /// </summary>
 public sealed class MemoryMetadata
 {
-    #region Fields
 
     private Guid _id;
     private Guid _aiCardId;
@@ -21,9 +20,6 @@ public sealed class MemoryMetadata
     private DateTime? _expiresAt;
     private AiCard? _aiCard;
 
-    #endregion
-
-    #region Properties
 
     public Guid Id
     {
@@ -98,5 +94,4 @@ public sealed class MemoryMetadata
         set => _aiCard = value;
     }
 
-    #endregion
 }

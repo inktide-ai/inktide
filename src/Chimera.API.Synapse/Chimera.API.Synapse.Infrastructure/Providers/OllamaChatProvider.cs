@@ -13,7 +13,6 @@ namespace Chimera.API.Synapse.Infrastructure.Providers;
 /// </summary>
 public sealed class OllamaChatProvider : IChatProvider
 {
-    #region Fields
 
     private readonly HttpClient _http;
 
@@ -24,27 +23,18 @@ public sealed class OllamaChatProvider : IChatProvider
         MaxContextTokens = 128_000,
     };
 
-    #endregion
-
-    #region Constructors
 
     public OllamaChatProvider(HttpClient http)
     {
         _http = http ?? throw new ArgumentNullException(nameof(http));
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => "ollama";
     public string Name => "Ollama";
     public ProviderCategory Category => ProviderCategory.Chat;
     public ChatProviderCapabilities Capabilities => _capabilities;
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options) => new();
 
@@ -52,7 +42,9 @@ public sealed class OllamaChatProvider : IChatProvider
         ProviderOptions options,
         CancellationToken cancellationToken = default)
     {
-        var baseUrl = (options.BaseUrl ?? "http://localhost:11434").TrimEnd('/');
+        var baseUrl = System.Text.RegularExpressions.Regex.Replace(
+            (options.BaseUrl ?? "http://localhost:11434").TrimEnd('/'),
+            @"/v1/?$", string.Empty, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         var response = await _http
             .GetFromJsonAsync<OllamaTagsResponse>($"{baseUrl}/api/tags", cancellationToken)
             .ConfigureAwait(false);
@@ -81,9 +73,6 @@ public sealed class OllamaChatProvider : IChatProvider
         yield break;
     }
 
-    #endregion
-
-    #region Private Types
 
     private sealed class OllamaTagsResponse
     {
@@ -95,5 +84,4 @@ public sealed class OllamaChatProvider : IChatProvider
         public string Name { get; set; } = string.Empty;
     }
 
-    #endregion
 }

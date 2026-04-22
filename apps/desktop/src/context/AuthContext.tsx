@@ -8,8 +8,11 @@ import {
   type ReactNode,
 } from 'react'
 import Keycloak, { type KeycloakTokenParsed } from 'keycloak-js'
+import i18n from '../i18n/i18n'
 import { getMe } from '../api/me'
 import { readStoredNickname, writeStoredNickname } from '../utils/profileStorage'
+
+const SUPPORTED_LOCALES = new Set(['en', 'ru'])
 
 export interface UserInfo {
   userId: string
@@ -96,6 +99,16 @@ export function AuthProvider({ keycloak, children }: { keycloak: Keycloak; child
     keycloak.onAuthError = clear
     keycloak.onAuthRefreshError = clear
   }, [keycloak])
+
+  // Sync UI language from Keycloak locale claim.
+  useEffect(() => {
+    if (!state.isLoggedIn) return
+    const raw = keycloak.tokenParsed?.locale as string | undefined
+    const locale = raw?.split('-')[0] // 'ru-RU' → 'ru'
+    if (locale && SUPPORTED_LOCALES.has(locale)) {
+      void i18n.changeLanguage(locale)
+    }
+  }, [state.isLoggedIn, keycloak.tokenParsed?.locale])
 
   // Fetch avatar from /api/me once authenticated.
   useEffect(() => {

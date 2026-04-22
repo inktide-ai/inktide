@@ -4,7 +4,6 @@ namespace Chimera.API.Domain.Models;
 
 public sealed class ChatRequest
 {
-    #region Fields
 
     private string _model = string.Empty;
     private List<ChatMessage> _messages = [];
@@ -12,9 +11,6 @@ public sealed class ChatRequest
     private int? _maxTokens;
     private bool _stream;
 
-    #endregion
-
-    #region Properties
 
     public string Model
     {
@@ -46,5 +42,4 @@ public sealed class ChatRequest
         set => _stream = value;
     }
 
-    #endregion
 }

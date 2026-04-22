@@ -4,7 +4,6 @@ namespace Chimera.API.Soul.REST.Models;
 
 public sealed class AiCardResponse
 {
-    #region Fields
 
     private Guid _id;
     private string _name = string.Empty;
@@ -29,9 +28,6 @@ public sealed class AiCardResponse
     private DateTime _createdAt;
     private DateTime _updatedAt;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("id")]
     public Guid Id
@@ -187,12 +183,10 @@ public sealed class AiCardResponse
         set => _updatedAt = value;
     }
 
-    #endregion
 }
 
 public sealed class AiCardListItem
 {
-    #region Fields
 
     private Guid _id;
     private string _name = string.Empty;
@@ -203,9 +197,6 @@ public sealed class AiCardListItem
     private bool _isActive;
     private DateTime _updatedAt;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("id")]
     public Guid Id
@@ -263,5 +254,4 @@ public sealed class AiCardListItem
         set => _updatedAt = value;
     }
 
-    #endregion
 }

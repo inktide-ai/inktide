@@ -1,41 +1,45 @@
 import classnames from 'classnames'
+import { useTranslation } from 'react-i18next'
 import GlitchText from '../GlitchText'
 import { useRevealOnScroll } from '../../hooks'
-import { CONTENT } from '../../constants'
-import ArrowIcon from '../../assets/arrow.svg'
+import ArrowIcon from '../../assets/app/arrow.svg'
 import styles from './FeaturesSection.module.css'
+
+const FEATURE_ICONS = ['⚡', '✨', '🔌']
+const FEATURE_IDS = ['prompts', 'appearance', 'api'] as const
 
 const FeaturesSection = () => {
   const { ref, isVisible } = useRevealOnScroll()
+  const { t } = useTranslation('landing')
 
   return (
     <section id="features" className={styles.section} ref={ref}>
       <div className={styles.glow} />
       <div className={styles.container}>
         <div className={styles.header}>
-          <GlitchText text={CONTENT.features.heading} tag="h2" className={styles.heading} />
-          <p className={styles.subheading}>{CONTENT.features.subheading}</p>
+          <GlitchText text={t('features.heading')} tag="h2" className={styles.heading} />
+          <p className={styles.subheading}>{t('features.subheading')}</p>
           <div className={styles.actions}>
             <button type="button" className={styles.supportButton}>
-              {CONTENT.features.supportButton}
+              {t('features.supportButton')}
             </button>
-            <span className={styles.actionsSeparator}>and</span>
+            <span className={styles.actionsSeparator}>{t('features.and')}</span>
             <button type="button" className={styles.tryButton}>
-              <span>{CONTENT.features.tryButton}</span>
+              <span>{t('features.tryButton')}</span>
               <img src={ArrowIcon} alt="" className={styles.tryArrow} aria-hidden />
             </button>
           </div>
         </div>
         <div className={styles.grid}>
-          {CONTENT.features.items.map((item, i) => (
+          {FEATURE_IDS.map((id, i) => (
             <div
-              key={item.title}
+              key={id}
               className={classnames(styles.card, { [styles.revealed]: isVisible })}
               style={{ transitionDelay: `${i * 0.15}s` }}
             >
-              <span className={styles.icon}>{item.icon}</span>
-              <h3 className={styles.cardTitle}>{item.title}</h3>
-              <p className={styles.cardDesc}>{item.description}</p>
+              <span className={styles.icon}>{FEATURE_ICONS[i]}</span>
+              <h3 className={styles.cardTitle}>{t(`features.items.${id}.title`)}</h3>
+              <p className={styles.cardDesc}>{t(`features.items.${id}.description`)}</p>
             </div>
           ))}
         </div>

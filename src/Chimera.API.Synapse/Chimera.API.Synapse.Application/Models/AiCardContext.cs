@@ -6,6 +6,7 @@ namespace Chimera.API.Synapse.Application.Models;
 /// </summary>
 public sealed record AiCardContext(
     Guid AiCardId,
+    Guid UserId,
     string SystemPrompt,
     string Personality,
     string LlmProviderId,
@@ -35,4 +36,8 @@ public sealed record AiCardContext(
     /// <summary>Penalty for token presence — encourages talking about new topics.</summary>
     float LlmPresencePenalty = 0f,
     /// <summary>Milliseconds to wait before publishing the first TTS chunk after LLM generation completes.</summary>
-    int ResponseDelayMs = 0);
+    int ResponseDelayMs = 0,
+    /// <summary>Per-card base URL override — wins over global BYOK credential base URL.</summary>
+    string? LlmBaseUrl = null,
+    /// <summary>Multiplier applied to raw emotion intensity (0 = no emotion, 1 = normal, 2 = amplified).</summary>
+    float EmotionIntensityScale = 1.0f);

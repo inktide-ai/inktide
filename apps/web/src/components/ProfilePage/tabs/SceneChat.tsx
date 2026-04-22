@@ -1,26 +1,37 @@
 import { useEffect, useRef, useState } from 'react'
-import logoSvg from '../../../assets/icon.svg'
+import { useTranslation } from 'react-i18next'
+import logoSvg from '../../../assets/app/icon.svg'
 import caretSvg from '../../../assets/icons/caret-down.svg'
 import { useChatChannel } from '../../../hooks/useChatChannel'
 import type { LipSyncHandle } from '../../../hooks/useLipSync'
+import type { EmotionState } from '../../../ports/IVrmController'
 import styles from './SceneChat.module.css'
 
 interface SceneChatProps {
   cardId: string
   userId: string
   lipSync?: LipSyncHandle
+  /** Optional ref populated with the current emotion getter so a parent
+   *  component (SceneFullscreen) can forward it to AvatarRenderer. */
+  emotionGetterRef?: React.MutableRefObject<(() => EmotionState) | null>
 }
 
-const SceneChat = ({ cardId, userId, lipSync }: SceneChatProps) => {
-  // One composite channelId per (card, user) pair — SaaS isolation guarantee.
+const SceneChat = ({ cardId, userId, lipSync, emotionGetterRef }: SceneChatProps) => {
   const channelId = `${cardId}:${userId}`
+  const { t } = useTranslation('scene')
 
-  const { messages, send, retry } = useChatChannel(channelId, lipSync)
+  const { messages, send, retry, getEmotionState } = useChatChannel(channelId, lipSync)
+
+  // Register getter in parent ref so AvatarRenderer can poll it each frame
+  useEffect(() => {
+    if (!emotionGetterRef) return
+    emotionGetterRef.current = getEmotionState
+    return () => { emotionGetterRef.current = null }
+  }, [emotionGetterRef, getEmotionState])
   const [input, setInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll to bottom whenever message list grows.
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight
@@ -53,9 +64,9 @@ const SceneChat = ({ cardId, userId, lipSync }: SceneChatProps) => {
           <div className={styles.empty}>
             <img src={logoSvg} alt="Chimera" className={styles.emptyLogo} />
             <p className={styles.emptyText}>
-              Here you can test your character
+              {t('chat.emptyText')}
               <br />
-              Enter <span className={styles.emptyCmd}>/test</span> for testing chat
+              {t('chat.emptyCmd')}
             </p>
           </div>
         ) : (
@@ -69,7 +80,7 @@ const SceneChat = ({ cardId, userId, lipSync }: SceneChatProps) => {
               )}
               <div className={msg.status === 'failed' ? styles.msgBubbleFailed : styles.msgBubble}>
                 {msg.pending && !msg.content ? (
-                  <span className={styles.typingDots} aria-label="Thinking">
+                  <span className={styles.typingDots} aria-label={t('chat.thinking')}>
                     <span /><span /><span />
                   </span>
                 ) : (
@@ -79,9 +90,9 @@ const SceneChat = ({ cardId, userId, lipSync }: SceneChatProps) => {
                   <button
                     className={styles.retryBtn}
                     onClick={() => retry(msg.id)}
-                    aria-label="Retry"
+                    aria-label={t('chat.retry')}
                   >
-                    ↺ Retry
+                    {t('chat.retry')}
                   </button>
                 )}
               </div>
@@ -103,7 +114,7 @@ const SceneChat = ({ cardId, userId, lipSync }: SceneChatProps) => {
         <input
           className={styles.input}
           type="text"
-          placeholder="Enter somewhere"
+          placeholder={t('chat.inputPlaceholder')}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}

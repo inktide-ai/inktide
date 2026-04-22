@@ -9,11 +9,9 @@ namespace Chimera.API.Profile.Application.DependencyInjection;
 /// </summary>
 public sealed class ApplicationServiceRegistrator : IServiceRegistrator
 {
-    #region Public Methods
 
     public void Register(IRegistrator registrator, IConfiguration configuration)
     {
     }
 
-    #endregion
 }

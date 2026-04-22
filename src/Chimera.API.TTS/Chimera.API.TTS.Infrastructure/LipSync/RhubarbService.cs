@@ -8,7 +8,7 @@ namespace Chimera.API.TTS.Infrastructure.LipSync;
 /// <summary>
 /// Viseme cue for a single Rhubarb mouth shape, serialized to the frontend.
 /// </summary>
-public sealed record VisemeCueDto(
+public sealed record VisemeCue(
     [property: JsonPropertyName("startMs")] int    StartMs,
     [property: JsonPropertyName("viseme")]  string Viseme);
 
@@ -20,7 +20,7 @@ public interface IRhubarbService
     /// Analyses <paramref name="wavBytes"/> and returns a viseme timeline,
     /// or <c>null</c> when Rhubarb is unavailable or analysis fails.
     /// </summary>
-    Task<VisemeCueDto[]?> AnalyzeAsync(byte[] wavBytes, CancellationToken ct = default);
+    Task<VisemeCue[]?> AnalyzeAsync(byte[] wavBytes, CancellationToken ct = default);
 }
 
 /// <summary>
@@ -59,7 +59,7 @@ public sealed class RhubarbService : IRhubarbService
 
     public bool IsAvailable => _executable is not null;
 
-    public async Task<VisemeCueDto[]?> AnalyzeAsync(byte[] wavBytes, CancellationToken ct = default)
+    public async Task<VisemeCue[]?> AnalyzeAsync(byte[] wavBytes, CancellationToken ct = default)
     {
         if (_executable is null) return null;
 
@@ -84,9 +84,7 @@ public sealed class RhubarbService : IRhubarbService
         }
     }
 
-    // ── Internal ──────────────────────────────────────────────────────────────
-
-    private async Task<VisemeCueDto[]?> RunAsync(string wavPath, CancellationToken ct)
+    private async Task<VisemeCue[]?> RunAsync(string wavPath, CancellationToken ct)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         cts.CancelAfter(AnalysisTimeout);
@@ -120,22 +118,18 @@ public sealed class RhubarbService : IRhubarbService
         return ParseOutput(stdout);
     }
 
-    private VisemeCueDto[]? ParseOutput(string stdout)
+    private VisemeCue[]? ParseOutput(string stdout)
     {
         var parsed = JsonSerializer.Deserialize<RhubarbOutput>(stdout, JsonOpts);
         if (parsed?.MouthCues is null) return null;
 
         return parsed.MouthCues
-            .Select(c => new VisemeCueDto(
+            .Select(c => new VisemeCue(
                 StartMs: (int)(c.Start * 1000),
                 Viseme:  c.Value))
             .ToArray();
     }
 
-    /// <summary>
-    /// Searches <c>PATH</c> directories for <paramref name="name"/>.
-    /// Returns the full path, or <c>null</c> if not found.
-    /// </summary>
     private static string? FindInPath(string name)
     {
         var exeName = OperatingSystem.IsWindows() ? $"{name}.exe" : name;
@@ -149,8 +143,6 @@ public sealed class RhubarbService : IRhubarbService
 
         return null;
     }
-
-    // ── Rhubarb JSON contract ─────────────────────────────────────────────────
 
     private sealed record RhubarbOutput(
         [property: JsonPropertyName("metadata")]  RhubarbMetadata  Metadata,

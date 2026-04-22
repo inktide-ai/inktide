@@ -9,7 +9,6 @@ namespace Chimera.API.TTS.Infrastructure.OpenAi;
 /// </summary>
 public sealed class OpenAiSpeechVoiceJsonConverter : JsonConverter<OpenAiSpeechVoice>
 {
-    #region Public Methods
 
     public override OpenAiSpeechVoice Read(
         ref Utf8JsonReader reader,
@@ -30,5 +29,4 @@ public sealed class OpenAiSpeechVoiceJsonConverter : JsonConverter<OpenAiSpeechV
         writer.WriteStringValue(value.ToString());
     }
 
-    #endregion
 }

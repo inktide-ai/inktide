@@ -1,7 +1,7 @@
 namespace Chimera.API.Synapse.Application.Models;
 
 /// <summary>
-/// Fan-in payload: RAG and Context scatter results for one stream event.
+/// Fan-in payload: RAG, Session, Context and Emotion scatter results for one stream event.
 /// </summary>
 public sealed record SynapseAggregatedEnvelope(
     string TransportMessageId,
@@ -9,4 +9,6 @@ public sealed record SynapseAggregatedEnvelope(
     DateTimeOffset AggregatedAtUtc,
     ChatMessage Message,
     RagContext? Rag,
-    ContextShardPayload? Context);
+    ContextShardPayload? Context,
+    SessionContext? Session,
+    EmotionResult? Emotion = null);

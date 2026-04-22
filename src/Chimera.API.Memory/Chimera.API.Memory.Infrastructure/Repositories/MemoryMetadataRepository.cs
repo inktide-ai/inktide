@@ -13,7 +13,10 @@ public sealed class MemoryMetadataRepository : IMemoryMetadataRepository
 {
     private readonly SoulDbContext _db;
 
-    public MemoryMetadataRepository(SoulDbContext db) => _db = db;
+    public MemoryMetadataRepository(SoulDbContext db)
+    {
+        _db = db;
+    }
 
     public async Task UpsertAsync(
         Guid aiCardId,

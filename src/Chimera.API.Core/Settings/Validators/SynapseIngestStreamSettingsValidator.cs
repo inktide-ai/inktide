@@ -2,10 +2,8 @@ using Microsoft.Extensions.Options;
 
 namespace Chimera.API.Core.Settings.Validators;
 
-/// <summary>Validates <see cref="SynapseIngestStreamSettings"/> at startup.</summary>
 public sealed class SynapseIngestStreamSettingsValidator : IValidateOptions<SynapseIngestStreamSettings>
 {
-    #region Public Methods
 
     public ValidateOptionsResult Validate(string? name, SynapseIngestStreamSettings options)
     {
@@ -66,5 +64,4 @@ public sealed class SynapseIngestStreamSettingsValidator : IValidateOptions<Syna
             : ValidateOptionsResult.Success;
     }
 
-    #endregion
 }

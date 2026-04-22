@@ -5,16 +5,12 @@ namespace Chimera.API.TTS.Domain.Models;
 
 public class SpeechVoiceCollection : ReadOnlyCollection<SpeechVoice>
 {
-    #region Constructors
 
     internal SpeechVoiceCollection(IList<SpeechVoice> items)
         : base(items ?? new List<SpeechVoice>())
     {
     }
 
-    #endregion
-
-    #region Internal Methods
 
     /// <summary>
     /// Parses an OpenAI-compatible <c>/v1/audio/voices</c> JSON payload
@@ -68,5 +64,4 @@ public class SpeechVoiceCollection : ReadOnlyCollection<SpeechVoice>
         return new SpeechVoiceCollection(list);
     }
 
-    #endregion
 }

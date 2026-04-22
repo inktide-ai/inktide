@@ -5,20 +5,13 @@ using FluentValidation.Results;
 
 namespace Chimera.API.Core.Decorators;
 
-/// <summary>
-/// Lightweight OTEL-style metrics via <see cref="Meter"/>. For full APM, add exporters at host level.
-/// </summary>
 public sealed class MetricsChatProviderDecorator : IChatProvider
 {
-    #region Fields
 
     private readonly IChatProvider _inner;
     private readonly Counter<long> _requests;
     private readonly Counter<long> _failures;
 
-    #endregion
-
-    #region Constructors
 
     public MetricsChatProviderDecorator(IChatProvider inner)
         : this(inner, new Meter("Chimera.API.Chat", "1.0.0"))
@@ -34,9 +27,6 @@ public sealed class MetricsChatProviderDecorator : IChatProvider
         _failures = meter.CreateCounter<long>("chimera.chat.failures");
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => _inner.Id;
 
@@ -46,9 +36,6 @@ public sealed class MetricsChatProviderDecorator : IChatProvider
 
     public ChatProviderCapabilities Capabilities => _inner.Capabilities;
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -101,5 +88,4 @@ public sealed class MetricsChatProviderDecorator : IChatProvider
         }
     }
 
-    #endregion
 }

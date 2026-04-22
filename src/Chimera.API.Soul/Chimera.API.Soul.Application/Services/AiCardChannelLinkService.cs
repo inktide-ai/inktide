@@ -9,16 +9,12 @@ namespace Chimera.API.Soul.Application.Services;
 
 public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
 {
-    #region Fields
 
     private readonly IAiCardRepository _cardRepo;
     private readonly IAiCardChannelRepository _channelRepo;
     private readonly TimeProvider _time;
     private readonly ILogger<AiCardChannelLinkService> _logger;
 
-    #endregion
-
-    #region Constructors
 
     public AiCardChannelLinkService(
         IAiCardRepository cardRepo,
@@ -32,11 +28,8 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
 
-    #region Public Methods
-
-    public async Task<ChannelLinkDto> CreateAsync(
+    public async Task<ChannelLink> CreateAsync(
         Guid userId,
         Guid cardId,
         CreateChannelLinkCommand command,
@@ -123,7 +116,7 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
             cardId);
     }
 
-    public async Task<ChannelLinkDto> PatchAsync(
+    public async Task<ChannelLink> PatchAsync(
         Guid userId,
         Guid cardId,
         Guid linkId,
@@ -148,11 +141,8 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
         return ToDto(link);
     }
 
-    #endregion
 
-    #region Private Methods
-
-    private static ChannelLinkDto ToDto(AiCardChannel c) =>
+    private static ChannelLink ToDto(AiCardChannel c) =>
         new(
             c.Id,
             c.Platform,
@@ -162,5 +152,4 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
             c.IsActive,
             c.ConnectedAt);
 
-    #endregion
 }

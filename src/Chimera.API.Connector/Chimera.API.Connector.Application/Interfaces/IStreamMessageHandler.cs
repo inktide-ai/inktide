@@ -6,4 +6,5 @@ namespace Chimera.API.Connector.Application.Interfaces;
 public interface IStreamMessageHandler
 {
     Task HandleAsync(ChatMessage message, CancellationToken cancellationToken = default);
+    
 }

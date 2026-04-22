@@ -11,21 +11,14 @@ namespace Chimera.API.TTS.Infrastructure;
 /// </summary>
 public sealed class TtsApiKeyResolver : IApiKeyResolver
 {
-    #region Constants
 
     public const string TtsApiKeyHeader = "X-TTS-Api-Key";
 
-    #endregion
-
-    #region Fields
 
     private readonly ISpeechProviderRegistry _speechProviderRegistry;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IConfiguration _configuration;
 
-    #endregion
-
-    #region Constructors
 
     public TtsApiKeyResolver(
         ISpeechProviderRegistry speechProviderRegistry,
@@ -37,9 +30,6 @@ public sealed class TtsApiKeyResolver : IApiKeyResolver
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    #endregion
-
-    #region Public Methods
 
     /// <inheritdoc />
     public string? Resolve(string providerId)
@@ -69,5 +59,4 @@ public sealed class TtsApiKeyResolver : IApiKeyResolver
         return apiKey;
     }
 
-    #endregion
 }

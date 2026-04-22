@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Domain.Entities;
 /// </summary>
 public sealed class UsageDaily
 {
-    #region Fields
 
     private Guid _id;
     private Guid _aiCardId;
@@ -20,9 +19,6 @@ public sealed class UsageDaily
     private int _donkeyThoughts;
     private AiCard? _aiCard;
 
-    #endregion
-
-    #region Properties
 
     public Guid Id
     {
@@ -90,5 +86,4 @@ public sealed class UsageDaily
         set => _aiCard = value;
     }
 
-    #endregion
 }

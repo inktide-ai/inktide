@@ -4,7 +4,6 @@ namespace Chimera.API.Soul.REST.Models;
 
 public sealed class CreateChannelRequest
 {
-    #region Fields
 
     private string _platform = "twitch";
     private string _channelName = string.Empty;
@@ -12,9 +11,6 @@ public sealed class CreateChannelRequest
     private string _botUsername = string.Empty;
     private string? _oAuthToken;
 
-    #endregion
-
-    #region Properties
 
     /// <summary>
     /// Platform-specific stable id (e.g. Discord guild id — must match connector ingest <c>ChannelId</c>).
@@ -54,18 +50,13 @@ public sealed class CreateChannelRequest
         set => _oAuthToken = value;
     }
 
-    #endregion
 }
 
 public sealed class PatchChannelRequest
 {
-    #region Fields
 
     private bool _isActive;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("is_active")]
     public bool IsActive
@@ -74,12 +65,10 @@ public sealed class PatchChannelRequest
         set => _isActive = value;
     }
 
-    #endregion
 }
 
 public sealed class ChannelResponse
 {
-    #region Fields
 
     private Guid _id;
     private string _platform = string.Empty;
@@ -89,9 +78,6 @@ public sealed class ChannelResponse
     private bool _isActive;
     private DateTime? _connectedAt;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("channel_id")]
     public string? ChannelId
@@ -142,21 +128,16 @@ public sealed class ChannelResponse
         set => _connectedAt = value;
     }
 
-    #endregion
 }
 
 public sealed class ToolResponse
 {
-    #region Fields
 
     private Guid _id;
     private string _toolName = string.Empty;
     private object? _toolConfig;
     private bool _isEnabled;
 
-    #endregion
-
-    #region Properties
 
     [JsonProperty("id")]
     public Guid Id
@@ -186,5 +167,4 @@ public sealed class ToolResponse
         set => _isEnabled = value;
     }
 
-    #endregion
 }

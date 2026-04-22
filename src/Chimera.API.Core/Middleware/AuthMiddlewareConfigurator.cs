@@ -13,13 +13,9 @@ namespace Chimera.API.Core.Middleware;
 /// </summary>
 public sealed class AuthMiddlewareConfigurator : IMiddlewareConfigurator
 {
-    #region Fields
 
     private const string CorsPolicyName = "ChimeraPolicy";
 
-    #endregion
-
-    #region Public Methods
 
     public void Configure(IApplicationBuilder app)
     {
@@ -31,5 +27,4 @@ public sealed class AuthMiddlewareConfigurator : IMiddlewareConfigurator
         app.UseAuthorization();
     }
 
-    #endregion
 }

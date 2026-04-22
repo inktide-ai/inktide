@@ -6,7 +6,6 @@ namespace Chimera.API.Profile.Infrastructure.Settings;
 /// </summary>
 public sealed class KeycloakAdminSettings
 {
-    #region Fields
 
     private bool _enabled;
     private string _baseUrl = "http://localhost:8080";
@@ -14,9 +13,6 @@ public sealed class KeycloakAdminSettings
     private string _clientId = string.Empty;
     private string _clientSecret = string.Empty;
 
-    #endregion
-
-    #region Properties
 
     public bool Enabled
     {
@@ -50,5 +46,4 @@ public sealed class KeycloakAdminSettings
         set => _clientSecret = value;
     }
 
-    #endregion
 }

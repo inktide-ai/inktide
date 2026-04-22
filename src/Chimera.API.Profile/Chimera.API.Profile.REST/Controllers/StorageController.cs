@@ -15,24 +15,17 @@ namespace Chimera.API.Profile.REST.Controllers;
 [Authorize]
 public sealed class StorageController : ControllerBase
 {
-    #region Fields
 
     private const long MaxUploadBytes = 52_428_800;
 
     private readonly IObjectStorageService _storage;
 
-    #endregion
-
-    #region Constructors
 
     public StorageController(IObjectStorageService storage)
     {
         _storage = storage ?? throw new ArgumentNullException(nameof(storage));
     }
 
-    #endregion
-
-    #region Public Methods
 
     /// <summary>Whether S3 is configured and the default bucket name.</summary>
     [HttpGet("status")]
@@ -48,7 +41,7 @@ public sealed class StorageController : ControllerBase
 
     /// <summary>List objects under the current user's prefix.</summary>
     [HttpGet("objects")]
-    [ProducesResponseType(typeof(IReadOnlyList<ObjectStorageListItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IReadOnlyList<ObjectStorageListItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> ListObjects(CancellationToken ct)
     {
@@ -60,14 +53,7 @@ public sealed class StorageController : ControllerBase
             return Unauthorized();
 
         var items = await _storage.ListObjectsAsync(prefix, ct).ConfigureAwait(false);
-        var dto = items.Select(o => new ObjectStorageListItemDto
-        {
-            Key = o.Key,
-            Size = o.Size,
-            LastModified = o.LastModified
-        }).ToList();
-
-        return Ok(dto);
+        return Ok(items);
     }
 
     /// <summary>Download one object (must belong to the current user).</summary>
@@ -125,9 +111,6 @@ public sealed class StorageController : ControllerBase
         return Ok(new UploadResponse { Key = objectKey, Size = file.Length });
     }
 
-    #endregion
-
-    #region Private Methods
 
     private string? UserObjectPrefix()
     {
@@ -144,21 +127,11 @@ public sealed class StorageController : ControllerBase
         return string.IsNullOrEmpty(leaf) ? "file.bin" : leaf;
     }
 
-    #endregion
-
-    #region Nested Types
 
     public sealed class StorageStatusResponse
     {
         public bool Enabled { get; init; }
         public string? Bucket { get; init; }
-    }
-
-    public sealed class ObjectStorageListItemDto
-    {
-        public string Key { get; init; } = string.Empty;
-        public long Size { get; init; }
-        public DateTime? LastModified { get; init; }
     }
 
     public sealed class UploadResponse
@@ -167,5 +140,4 @@ public sealed class StorageController : ControllerBase
         public long Size { get; init; }
     }
 
-    #endregion
 }

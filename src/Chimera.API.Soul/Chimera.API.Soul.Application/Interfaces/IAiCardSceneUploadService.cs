@@ -17,10 +17,27 @@ public interface IAiCardSceneUploadService
         string fileName,
         string contentType,
         long sizeBytes,
+        string? tag = null,
         CancellationToken ct = default);
 
     /// <summary>Null when the AI card does not exist or is not visible to the user.</summary>
-    Task<IReadOnlyList<AiCardSceneDto>?> ListAsync(Guid userId, Guid cardId, CancellationToken ct = default);
+    Task<IReadOnlyList<AiCardScene>?> ListAsync(Guid userId, Guid cardId, CancellationToken ct = default);
+
+    /// <summary>Null when the AI card does not exist or is not visible to the user.</summary>
+    Task<IReadOnlyList<CustomSceneTagRecord>?> ListMergedCustomTagsAsync(Guid userId, Guid cardId, CancellationToken ct = default);
+
+    Task<AddCustomSceneTagResult> AddCustomSceneTagAsync(Guid userId, Guid cardId, string label, string? color = null, CancellationToken ct = default);
+
+    Task<PatchSceneTagResult> PatchSceneTagAsync(Guid userId, Guid cardId, Guid sceneId, string? tag, CancellationToken ct = default);
+
+    Task<PatchSceneTagResult> PutSceneMetadataAsync(
+        Guid userId,
+        Guid cardId,
+        Guid sceneId,
+        string? displayName,
+        string? description,
+        string? tag,
+        CancellationToken ct = default);
 
     Task<DeleteSceneResult> DeleteAsync(Guid userId, Guid cardId, Guid sceneId, CancellationToken ct = default);
 }
@@ -55,10 +72,10 @@ public sealed record BeginSceneUploadResult(
 public sealed record CompleteSceneUploadResult(
     bool Success,
     SceneUploadError ErrorKind,
-    AiCardSceneDto? Scene,
+    AiCardScene? Scene,
     string? Error)
 {
-    public static CompleteSceneUploadResult Ok(AiCardSceneDto scene)
+    public static CompleteSceneUploadResult Ok(AiCardScene scene)
         => new(true, SceneUploadError.None, scene, null);
 
     public static CompleteSceneUploadResult Fail(SceneUploadError kind, string error)
@@ -74,7 +91,32 @@ public sealed record DeleteSceneResult(
     public static DeleteSceneResult Fail(SceneUploadError kind, string error) => new(false, kind, error);
 }
 
-public sealed record AiCardSceneDto(
+public sealed record PatchSceneTagResult(
+    bool Success,
+    SceneUploadError ErrorKind,
+    AiCardScene? Scene,
+    string? Error)
+{
+    public static PatchSceneTagResult Ok(AiCardScene scene)
+        => new(true, SceneUploadError.None, scene, null);
+
+    public static PatchSceneTagResult Fail(SceneUploadError kind, string error)
+        => new(false, kind, null, error);
+}
+
+public sealed record AddCustomSceneTagResult(
+    bool Success,
+    SceneUploadError ErrorKind,
+    string? Error)
+{
+    public static AddCustomSceneTagResult Ok() => new(true, SceneUploadError.None, null);
+    public static AddCustomSceneTagResult Fail(SceneUploadError kind, string error) => new(false, kind, error);
+}
+
+/// <summary>Custom scene tag with optional user-chosen color.</summary>
+public sealed record CustomSceneTagRecord(string Label, string? Color);
+
+public sealed record AiCardScene(
     Guid Id,
     Guid AiCardId,
     string StorageKey,
@@ -82,4 +124,7 @@ public sealed record AiCardSceneDto(
     string OriginalFileName,
     string ContentType,
     long SizeBytes,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    string? Tag,
+    string? DisplayName,
+    string? Description);

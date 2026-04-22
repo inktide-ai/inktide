@@ -8,7 +8,6 @@ import {
   HeroChimera,
   LearnSection,
   Navigation,
-  ProfileSection,
   VideoSection,
 } from '../'
 import { useAuth } from '../../context/AuthContext'
@@ -45,7 +44,6 @@ const LandingPage = () => {
       <BenefitsSection />
       <LearnSection />
       <VideoSection />
-      <ProfileSection />
       <CTASection />
       <Footer />
     </>

@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Domain.Entities;
 /// </summary>
 public sealed class LlmCatalogEntry
 {
-    #region Fields
 
     private Guid _id;
     private string _provider = string.Empty;
@@ -16,9 +15,6 @@ public sealed class LlmCatalogEntry
     private bool _isAvailable = true;
     private DateTime _createdAt;
 
-    #endregion
-
-    #region Properties
 
     public Guid Id
     {
@@ -62,5 +58,4 @@ public sealed class LlmCatalogEntry
         set => _createdAt = value;
     }
 
-    #endregion
 }

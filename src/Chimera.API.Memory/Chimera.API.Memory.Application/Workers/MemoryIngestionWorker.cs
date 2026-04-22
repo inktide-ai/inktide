@@ -2,6 +2,7 @@ using System.Threading.Channels;
 using Chimera.API.Memory.Application.Configuration;
 using Chimera.API.Memory.Domain.Models;
 using Chimera.API.Memory.Domain.Ports;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,8 +18,8 @@ public sealed class MemoryIngestionWorker : BackgroundService
 {
     private readonly Channel<MemoryIngestionJob> _channel;
     private readonly IFactExtractionClient _scribe;
-    private readonly IEmbeddingClient _embedder;
-    private readonly IVectorStore _vectorStore;
+    private readonly IEmbeddingGenerator<string, Embedding<float>> _embedder;
+    private readonly IVectorMemoryRepository _vectorRepo;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IOptions<MemoryOptions> _options;
     private readonly ILogger<MemoryIngestionWorker> _logger;
@@ -26,19 +27,19 @@ public sealed class MemoryIngestionWorker : BackgroundService
     public MemoryIngestionWorker(
         Channel<MemoryIngestionJob> channel,
         IFactExtractionClient scribe,
-        IEmbeddingClient embedder,
-        IVectorStore vectorStore,
+        IEmbeddingGenerator<string, Embedding<float>> embedder,
+        IVectorMemoryRepository vectorRepo,
         IServiceScopeFactory scopeFactory,
         IOptions<MemoryOptions> options,
         ILogger<MemoryIngestionWorker> logger)
     {
-        _channel = channel;
-        _scribe = scribe;
-        _embedder = embedder;
-        _vectorStore = vectorStore;
-        _scopeFactory = scopeFactory;
-        _options = options;
-        _logger = logger;
+        _channel      = channel      ?? throw new ArgumentNullException(nameof(channel));
+        _scribe       = scribe       ?? throw new ArgumentNullException(nameof(scribe));
+        _embedder     = embedder     ?? throw new ArgumentNullException(nameof(embedder));
+        _vectorRepo   = vectorRepo   ?? throw new ArgumentNullException(nameof(vectorRepo));
+        _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
+        _options      = options      ?? throw new ArgumentNullException(nameof(options));
+        _logger       = logger       ?? throw new ArgumentNullException(nameof(logger));
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -96,39 +97,45 @@ public sealed class MemoryIngestionWorker : BackgroundService
     {
         var opts = _options.Value;
 
-        var facts = await _scribe.ExtractFactsAsync(job, ct);
+        var facts    = await _scribe.ExtractFactsAsync(job, ct);
         var eligible = facts.Where(f => f.Importance >= opts.MinImportanceThreshold).ToList();
 
         if (eligible.Count == 0) return;
 
-        var texts = eligible.Select(f => f.Text).ToList();
-        var vectors = await _embedder.EmbedBatchAsync(texts, ct);
+        var texts      = eligible.Select(f => f.Text).ToList();
+        var embeddings = await _embedder.GenerateAsync(texts, cancellationToken: ct);
 
-        var expiresAt = DateTime.UtcNow.AddDays(opts.RetentionDays);
         var rememberedAt = DateTime.UtcNow;
+        var expiresAt    = rememberedAt.AddDays(opts.RetentionDays);
 
         using var scope = _scopeFactory.CreateScope();
         var repo = scope.ServiceProvider.GetRequiredService<IMemoryMetadataRepository>();
 
         for (var i = 0; i < eligible.Count; i++)
         {
-            var fact = eligible[i];
+            var fact    = eligible[i];
             var pointId = Guid.NewGuid();
 
-            await _vectorStore.UpsertAsync(
-                pointId, vectors[i], fact.Text, job.AiCardId,
-                fact.Type, fact.Importance, rememberedAt, ct);
+            await _vectorRepo.UpsertAsync(
+                pointId:      pointId,
+                aiCardId:     job.AiCardId,
+                factText:     fact.Text,
+                category:     fact.Type,
+                importance:   fact.Importance,
+                rememberedAt: rememberedAt,
+                embedding:    embeddings[i].Vector,
+                ct:           ct);
 
             await repo.UpsertAsync(
-                aiCardId: job.AiCardId,
+                aiCardId:      job.AiCardId,
                 qdrantPointId: pointId.ToString(),
-                factText: fact.Text,
-                category: fact.Type,
-                sourceType: "chat",
-                importance: fact.Importance,
-                rememberedAt: rememberedAt,
-                expiresAt: expiresAt,
-                ct: ct);
+                factText:      fact.Text,
+                category:      fact.Type,
+                sourceType:    "chat",
+                importance:    fact.Importance,
+                rememberedAt:  rememberedAt,
+                expiresAt:     expiresAt,
+                ct:            ct);
         }
 
         _logger.LogDebug(

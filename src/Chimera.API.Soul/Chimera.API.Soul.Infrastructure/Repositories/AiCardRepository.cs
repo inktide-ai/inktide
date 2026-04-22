@@ -7,14 +7,10 @@ namespace Chimera.API.Soul.Infrastructure.Repositories;
 
 public sealed class AiCardRepository : IAiCardRepository
 {
-    #region Fields
 
     private readonly SoulDbContext _db;
     private readonly TimeProvider _time;
 
-    #endregion
-
-    #region Constructors
 
     public AiCardRepository(SoulDbContext db, TimeProvider time)
     {
@@ -22,9 +18,6 @@ public sealed class AiCardRepository : IAiCardRepository
         _time = time ?? throw new ArgumentNullException(nameof(time));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task<AiCard?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
@@ -91,5 +84,4 @@ public sealed class AiCardRepository : IAiCardRepository
         return await query.AnyAsync(ct);
     }
 
-    #endregion
 }

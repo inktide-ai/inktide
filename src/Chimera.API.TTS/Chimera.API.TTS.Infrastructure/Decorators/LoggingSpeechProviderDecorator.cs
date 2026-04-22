@@ -12,14 +12,10 @@ namespace Chimera.API.TTS.Infrastructure.Decorators;
 /// </summary>
 public sealed class LoggingSpeechProviderDecorator : ISpeechProvider
 {
-    #region Fields
 
     private readonly ISpeechProvider _inner;
     private readonly ILogger _logger;
 
-    #endregion
-
-    #region Constructors
 
     public LoggingSpeechProviderDecorator(
         ISpeechProvider inner,
@@ -29,9 +25,6 @@ public sealed class LoggingSpeechProviderDecorator : ISpeechProvider
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Properties
 
     public string Id => _inner.Id;
 
@@ -41,9 +34,6 @@ public sealed class LoggingSpeechProviderDecorator : ISpeechProvider
 
     public SpeechProviderCapabilities Capabilities => _inner.Capabilities;
 
-    #endregion
-
-    #region Public Methods
 
     public ValidationResult Validate(ProviderOptions options)
     {
@@ -95,5 +85,4 @@ public sealed class LoggingSpeechProviderDecorator : ISpeechProvider
         }
     }
 
-    #endregion
 }

@@ -5,7 +5,6 @@ namespace Chimera.API.TTS.Application.Synthesis;
 /// </summary>
 public abstract record SpeechResult
 {
-    #region Nested types
 
     public sealed record Ok(Stream Audio, string ContentType) : SpeechResult;
 
@@ -26,5 +25,4 @@ public abstract record SpeechResult
     /// </summary>
     public sealed record ApiKeyMissing(string ProviderId) : SpeechResult;
 
-    #endregion
 }

@@ -11,16 +11,12 @@ namespace Chimera.API.Synapse.Infrastructure.Aggregation;
 /// </summary>
 public sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
 {
-    #region Fields
 
     private readonly IChannelContextResolutionService _channelContext;
     private readonly IEnumerable<ISynapseScatterShard> _shards;
     private readonly ISynapseAggregationService _aggregation;
     private readonly ILogger<SynapseIngestOrchestrator> _logger;
 
-    #endregion
-
-    #region Constructors
 
     public SynapseIngestOrchestrator(
         IChannelContextResolutionService channelContext,
@@ -34,9 +30,6 @@ public sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task ProcessAsync(MessageProcessingContext context, CancellationToken cancellationToken = default)
     {
@@ -55,9 +48,6 @@ public sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
         await _aggregation.AggregateAsync(context, cancellationToken);
     }
 
-    #endregion
-
-    #region Private Methods
 
     private async Task RunShardSafeAsync(
         ISynapseScatterShard shard,
@@ -82,5 +72,4 @@ public sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
         }
     }
 
-    #endregion
 }

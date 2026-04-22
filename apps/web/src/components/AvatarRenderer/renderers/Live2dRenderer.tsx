@@ -16,15 +16,18 @@ interface Live2dRendererProps {
   url: string
   background?: string
   className?: string
+  modelVisible?: boolean
 }
 
-export default function Live2dRenderer({ className }: Live2dRendererProps) {
+export default function Live2dRenderer({ className, modelVisible = true }: Live2dRendererProps) {
   return (
     <div
       className={className}
       style={{
         width: '100%',
         height: '100%',
+        opacity: modelVisible ? 1 : 0,
+        pointerEvents: modelVisible ? 'auto' : 'none',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

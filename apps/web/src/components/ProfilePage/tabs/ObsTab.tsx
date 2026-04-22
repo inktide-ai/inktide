@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getCard, type ChannelResponse } from '../../../api/soul'
 import { useCardModel } from '../../AvatarRenderer/hooks/useCardModel'
 import { useCardScene } from '../../AvatarRenderer/hooks/useCardScene'
@@ -42,6 +43,7 @@ function CheckItem({
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ObsTab({ character, cardId }: ObsTabProps) {
+  const { t } = useTranslation('obs')
   const { model, loading: modelLoading } = useCardModel(cardId)
   const { scene, loading: sceneLoading } = useCardScene(cardId)
 
@@ -94,28 +96,27 @@ export default function ObsTab({ character, cardId }: ObsTabProps) {
 
       {/* ── Header ── */}
       <div className={pageStyles.section}>
-        <div className={pageStyles.sectionTitle}>OBS Studio</div>
+        <div className={pageStyles.sectionTitle}>{t('section.title')}</div>
         <p className={styles.intro}>
-          Add your AI character as an OBS Browser Source. Audio, lipsync, and avatar rendering run
-          entirely inside OBS — no virtual cable or extra software required.
+          {t('intro')}
         </p>
       </div>
 
       {/* ── Requirements ── */}
       <div className={pageStyles.section}>
-        <div className={pageStyles.sectionTitle}>Requirements</div>
+        <div className={pageStyles.sectionTitle}>{t('section.requirements')}</div>
         <div className={styles.checklist}>
           <CheckItem
             ok={hasModel}
-            label="3D model uploaded"
+            label={t('requirements.model.label')}
             okSub={`${character.appearance.modelType.toUpperCase()} · ${model?.original_file_name ?? ''}`}
-            warnSub="Go to Avatars tab and upload a VRM, GLB, or Live2D model"
+            warnSub={t('requirements.model.warn')}
           />
           <CheckItem
             ok={hasChannel}
-            label="Platform channel linked"
+            label={t('requirements.channel.label')}
             okSub={`${channels?.length ?? 0} active channel${(channels?.length ?? 0) !== 1 ? 's' : ''}`}
-            warnSub="Go to Connection tab and link a Discord, Twitch, or other channel"
+            warnSub={t('requirements.channel.warn')}
           />
         </div>
       </div>
@@ -123,11 +124,11 @@ export default function ObsTab({ character, cardId }: ObsTabProps) {
       {/* ── Channel selector (only when multiple active channels) ── */}
       {channels && channels.length > 1 && (
         <div className={pageStyles.section}>
-          <div className={pageStyles.sectionTitle}>Channel</div>
+          <div className={pageStyles.sectionTitle}>{t('section.channel')}</div>
           <div className={pageStyles.infoCard}>
             <div className={styles.channelSelectWrap}>
               <label className={styles.fieldLabel} htmlFor="obs-channel-select">
-                Route audio from this channel into OBS
+                {t('channelSelect')}
               </label>
               <select
                 id="obs-channel-select"
@@ -148,7 +149,7 @@ export default function ObsTab({ character, cardId }: ObsTabProps) {
 
       {/* ── URL card ── */}
       <div className={pageStyles.section}>
-        <div className={pageStyles.sectionTitle}>Browser Source URL</div>
+        <div className={pageStyles.sectionTitle}>{t('section.browserUrl')}</div>
         <div className={styles.urlCard}>
           {obsUrl ? (
             <>
@@ -161,18 +162,18 @@ export default function ObsTab({ character, cardId }: ObsTabProps) {
                   className={`${styles.btnCopy} ${copied ? styles.btnCopied : ''}`}
                   onClick={copyUrl}
                 >
-                  {copied ? '✓ Copied' : 'Copy URL'}
+                  {copied ? t('url.copied') : t('url.copy')}
                 </button>
                 <a className={styles.btnPreview} href={obsUrl} target="_blank" rel="noreferrer">
-                  Preview in browser →
+                  {t('url.preview')}
                 </a>
               </div>
             </>
           ) : (
             <div className={styles.urlPlaceholder}>
               {loading
-                ? 'Loading…'
-                : 'Complete the requirements above to generate your OBS URL.'}
+                ? t('url.loading')
+                : t('url.incomplete')}
             </div>
           )}
         </div>
@@ -180,33 +181,32 @@ export default function ObsTab({ character, cardId }: ObsTabProps) {
 
       {/* ── Setup guide ── */}
       <div className={pageStyles.section}>
-        <div className={pageStyles.sectionTitle}>OBS Setup</div>
+        <div className={pageStyles.sectionTitle}>{t('section.setup')}</div>
         <div className={styles.steps}>
           <div className={styles.step}>
             <span className={styles.stepNum}>1</span>
             <div className={styles.stepBody}>
-              <div className={styles.stepTitle}>Add a Browser Source</div>
+              <div className={styles.stepTitle}>{t('steps.1.title')}</div>
               <div className={styles.stepDesc}>
-                In OBS, click <strong>Sources → +</strong> and choose <strong>Browser</strong>.
+                {t('steps.1.desc')}
               </div>
             </div>
           </div>
           <div className={styles.step}>
             <span className={styles.stepNum}>2</span>
             <div className={styles.stepBody}>
-              <div className={styles.stepTitle}>Paste the URL and enable transparency</div>
+              <div className={styles.stepTitle}>{t('steps.2.title')}</div>
               <div className={styles.stepDesc}>
-                Paste the URL above. Check <strong>Allow transparency</strong>. Set width/height
-                to match your avatar (e.g. 800 × 900 px).
+                {t('steps.2.desc')}
               </div>
             </div>
           </div>
           <div className={styles.step}>
             <span className={styles.stepNum}>3</span>
             <div className={styles.stepBody}>
-              <div className={styles.stepTitle}>Add Custom CSS (recommended)</div>
+              <div className={styles.stepTitle}>{t('steps.3.title')}</div>
               <div className={styles.stepDesc}>
-                Paste into the OBS Custom CSS field to guarantee clean edges:
+                {t('steps.3.desc')}
               </div>
               <code className={styles.stepCode}>{'body { margin: 0; background: transparent; }'}</code>
             </div>

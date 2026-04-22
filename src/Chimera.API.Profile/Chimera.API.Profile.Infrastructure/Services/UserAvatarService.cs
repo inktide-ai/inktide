@@ -8,7 +8,6 @@ namespace Chimera.API.Profile.Infrastructure.Services;
 
 public sealed class UserAvatarService : IUserAvatarService
 {
-    #region Fields
 
     private const string PictureAttributeName = "picture";
 
@@ -17,9 +16,6 @@ public sealed class UserAvatarService : IUserAvatarService
     private readonly S3Settings _s3Settings;
     private readonly ILogger<UserAvatarService> _logger;
 
-    #endregion
-
-    #region Constructors
 
     public UserAvatarService(
         IKeycloakAdminClient keycloakAdmin,
@@ -33,9 +29,6 @@ public sealed class UserAvatarService : IUserAvatarService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task<UserAvatarUpdateResult> SetAvatarFromObjectKeyAsync(
         Guid userId,
@@ -78,5 +71,4 @@ public sealed class UserAvatarService : IUserAvatarService
         return new UserAvatarUpdateResult(true, publicUrl, null);
     }
 
-    #endregion
 }

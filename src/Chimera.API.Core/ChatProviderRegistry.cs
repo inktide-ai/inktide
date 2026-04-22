@@ -4,20 +4,13 @@ using Chimera.API.Domain.Models;
 
 namespace Chimera.API.Core;
 
-/// <summary>
-/// Single startup pass: validates unique <see cref="IProvider.Id"/>, exposes descriptors for UI/policy.
-/// </summary>
 public sealed class ChatProviderRegistry : IChatProviderRegistry
 {
-    #region Fields
 
     private readonly IReadOnlyDictionary<string, IChatProvider> _byId;
     private readonly IReadOnlyDictionary<string, ChatProviderDescriptor> _descriptors;
     private readonly IReadOnlyList<IChatProvider> _all;
 
-    #endregion
-
-    #region Constructors
 
     public ChatProviderRegistry(IEnumerable<IChatProvider> providers)
     {
@@ -47,17 +40,11 @@ public sealed class ChatProviderRegistry : IChatProviderRegistry
         _all = new ReadOnlyCollection<IChatProvider>(list);
     }
 
-    #endregion
-
-    #region Properties
 
     public IReadOnlyDictionary<string, ChatProviderDescriptor> Descriptors => _descriptors;
 
     public IReadOnlyList<IChatProvider> All => _all;
 
-    #endregion
-
-    #region Public Methods
 
     public IChatProvider GetRequired(string providerId)
     {
@@ -72,9 +59,6 @@ public sealed class ChatProviderRegistry : IChatProviderRegistry
     public bool TryGet(string providerId, [NotNullWhen(true)] out IChatProvider? provider)
         => _byId.TryGetValue(providerId, out provider);
 
-    #endregion
-
-    #region Private Methods
 
     private static ChatProviderDescriptor BuildDescriptor(IChatProvider provider)
     {
@@ -92,5 +76,4 @@ public sealed class ChatProviderRegistry : IChatProviderRegistry
         };
     }
 
-    #endregion
 }

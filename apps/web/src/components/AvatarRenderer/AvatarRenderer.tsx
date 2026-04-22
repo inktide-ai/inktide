@@ -1,12 +1,18 @@
 import { lazy, Suspense } from 'react'
 import type { ModelType } from '../../domain/character'
 import type { MouthWeights } from '../../hooks/useLipSync'
+import type { LookAtMode } from './renderers/VrmRenderer'
+import type { SceneRendererSettings } from '../../hooks/useSceneRendererSettings'
+import type { EmotionState } from '../../ports/IVrmController'
 import styles from './AvatarRenderer.module.css'
 
 // Lazy-load heavy renderers — three.js is ~600KB, don't load until needed
 const VrmRenderer   = lazy(() => import('./renderers/VrmRenderer'))
 const GlbRenderer   = lazy(() => import('./renderers/GlbRenderer'))
 const Live2dRenderer = lazy(() => import('./renderers/Live2dRenderer'))
+
+export type { LookAtMode }
+export type { SceneRendererSettings }
 
 export interface AvatarRendererProps {
   modelType: ModelType
@@ -17,9 +23,17 @@ export interface AvatarRendererProps {
   /**
    * Called every animation frame to obtain current mouth expression weights.
    * Only consumed by VrmRenderer — other renderers ignore it.
-   * Wire up via `useLipSync().getMouthWeights`.
    */
   getMouthWeights?: () => MouthWeights
+  /**
+   * Called every animation frame to obtain current emotion state.
+   * Only consumed by VrmRenderer — other renderers ignore it.
+   */
+  getEmotionState?: () => EmotionState
+  /** When false, only the avatar mesh is hidden; scene / CSS background stays visible. */
+  modelVisible?: boolean
+  /** Full renderer settings (camera, lights, model transform, look-at mode). VRM only. */
+  rendererSettings?: SceneRendererSettings
 }
 
 export default function AvatarRenderer({
@@ -28,6 +42,9 @@ export default function AvatarRenderer({
   background = 'transparent',
   className,
   getMouthWeights,
+  getEmotionState,
+  modelVisible = true,
+  rendererSettings,
 }: AvatarRendererProps) {
   if (!modelUrl || modelType === 'none') {
     return <NoModel className={className} />
@@ -42,13 +59,26 @@ export default function AvatarRenderer({
             background={background}
             className={styles.fill}
             getMouthWeights={getMouthWeights}
+            getEmotionState={getEmotionState}
+            modelVisible={modelVisible}
+            rendererSettings={rendererSettings}
           />
         )}
         {modelType === 'glb' && (
-          <GlbRenderer url={modelUrl} background={background} className={styles.fill} />
+          <GlbRenderer
+            url={modelUrl}
+            background={background}
+            className={styles.fill}
+            modelVisible={modelVisible}
+          />
         )}
         {modelType === 'live2d' && (
-          <Live2dRenderer url={modelUrl} background={background} className={styles.fill} />
+          <Live2dRenderer
+            url={modelUrl}
+            background={background}
+            className={styles.fill}
+            modelVisible={modelVisible}
+          />
         )}
       </Suspense>
     </div>

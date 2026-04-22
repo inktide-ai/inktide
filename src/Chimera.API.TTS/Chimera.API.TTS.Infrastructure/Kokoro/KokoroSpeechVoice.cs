@@ -6,13 +6,9 @@ namespace Chimera.API.Domain.Enums;
 /// </summary>
 public readonly struct KokoroSpeechVoice : IEquatable<KokoroSpeechVoice>
 {
-    #region Fields
 
     private readonly string _value;
 
-    #endregion
-
-    #region Constants
 
     private const string AfAlloyValue = "af_alloy";
     private const string AfAoedeValue = "af_aoede";
@@ -82,9 +78,6 @@ public readonly struct KokoroSpeechVoice : IEquatable<KokoroSpeechVoice>
     private const string ZmYunxiaValue = "zm_yunxia";
     private const string ZmYunyangValue = "zm_yunyang";
 
-    #endregion
-
-    #region Constructors
 
     public KokoroSpeechVoice(string value)
     {
@@ -92,9 +85,6 @@ public readonly struct KokoroSpeechVoice : IEquatable<KokoroSpeechVoice>
         _value = value;
     }
 
-    #endregion
-
-    #region Properties
 
     // American English, female
     public static KokoroSpeechVoice AfAlloy { get; } = new KokoroSpeechVoice(AfAlloyValue);
@@ -197,9 +187,6 @@ public readonly struct KokoroSpeechVoice : IEquatable<KokoroSpeechVoice>
     public static KokoroSpeechVoice ZmYunxia { get; } = new KokoroSpeechVoice(ZmYunxiaValue);
     public static KokoroSpeechVoice ZmYunyang { get; } = new KokoroSpeechVoice(ZmYunyangValue);
 
-    #endregion
-
-    #region Operators
 
     public static bool operator ==(KokoroSpeechVoice left, KokoroSpeechVoice right) => left.Equals(right);
 
@@ -210,9 +197,6 @@ public readonly struct KokoroSpeechVoice : IEquatable<KokoroSpeechVoice>
     public static implicit operator KokoroSpeechVoice?(string? value) =>
         value is null ? default : new KokoroSpeechVoice(value);
 
-    #endregion
-
-    #region Object overrides
 
     public override bool Equals(object? obj) => obj is KokoroSpeechVoice other && Equals(other);
 
@@ -224,5 +208,4 @@ public readonly struct KokoroSpeechVoice : IEquatable<KokoroSpeechVoice>
 
     public override string ToString() => _value;
 
-    #endregion
 }

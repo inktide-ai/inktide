@@ -13,7 +13,6 @@ namespace Chimera.API.Synapse.Infrastructure.ChannelContext;
 /// </summary>
 public sealed class ChannelContextResolutionService : IChannelContextResolutionService
 {
-    #region Fields
 
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
 
@@ -31,10 +30,6 @@ public sealed class ChannelContextResolutionService : IChannelContextResolutionS
     private readonly IMemoryCache _cache;
     private readonly ILogger<ChannelContextResolutionService> _logger;
 
-    #endregion
-
-    #region Constructors
-
     public ChannelContextResolutionService(
         SoulDbContext db,
         IMemoryCache cache,
@@ -45,9 +40,6 @@ public sealed class ChannelContextResolutionService : IChannelContextResolutionS
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task ResolveAsync(MessageProcessingContext context, CancellationToken cancellationToken = default)
     {
@@ -96,10 +88,11 @@ public sealed class ChannelContextResolutionService : IChannelContextResolutionS
 
             cardCtx = new AiCardContext(
                 AiCardId: card.Id,
+                UserId: card.UserId,
                 SystemPrompt: card.SystemPrompt,
                 Personality: card.Personality,
                 LlmProviderId: card.LlmCatalog?.Provider ?? "echo",
-                LlmModel: card.LlmCatalog?.ModelId ?? string.Empty,
+                LlmModel: NullIfEmpty(llmCfg.ModelId) ?? card.LlmCatalog?.ModelId ?? string.Empty,
                 MemoryEnabled: memSettings.Enabled,
                 MaxMemories: memSettings.MaxMemories,
                 TtsProviderId: ttsProvider,
@@ -113,7 +106,9 @@ public sealed class ChannelContextResolutionService : IChannelContextResolutionS
                 LlmTopP: llmCfg.TopP,
                 LlmFrequencyPenalty: llmCfg.FrequencyPenalty,
                 LlmPresencePenalty: llmCfg.PresencePenalty,
-                ResponseDelayMs: behavior.ResponseDelayMs);
+                ResponseDelayMs: behavior.ResponseDelayMs,
+                LlmBaseUrl: NullIfEmpty(llmCfg.BaseUrl),
+                EmotionIntensityScale: behavior.EmotionIntensityScale);
 
             _cache.Set(cacheKey, cardCtx, CacheTtl);
 
@@ -126,9 +121,6 @@ public sealed class ChannelContextResolutionService : IChannelContextResolutionS
         context.Set(cardCtx!);
     }
 
-    #endregion
-
-    #region Private Methods
 
     /// <summary>
     /// Chimera-chat bypass: <paramref name="channelId"/> is <c>"{cardId}:{userId}"</c>.
@@ -162,61 +154,63 @@ public sealed class ChannelContextResolutionService : IChannelContextResolutionS
         return card;
     }
 
-    private static MemorySettingsDto ParseMemorySettings(string json)
+    private static MemorySettings ParseMemorySettings(string json)
     {
-        try { return JsonSerializer.Deserialize<MemorySettingsDto>(json, JsonOpts) ?? new MemorySettingsDto(); }
-        catch { return new MemorySettingsDto(); }
+        try { return JsonSerializer.Deserialize<MemorySettings>(json, JsonOpts) ?? new MemorySettings(); }
+        catch { return new MemorySettings(); }
     }
 
-    private static BehaviorDto ParseBehavior(string json)
+    private static Behavior ParseBehavior(string json)
     {
-        try { return JsonSerializer.Deserialize<BehaviorDto>(json, JsonOpts) ?? new BehaviorDto(); }
-        catch { return new BehaviorDto(); }
+        try { return JsonSerializer.Deserialize<Behavior>(json, JsonOpts) ?? new Behavior(); }
+        catch { return new Behavior(); }
     }
 
-    private static LlmConfigDto ParseLlmConfig(string json)
+    private static LlmConfig ParseLlmConfig(string json)
     {
-        try { return JsonSerializer.Deserialize<LlmConfigDto>(json, JsonOpts) ?? new LlmConfigDto(); }
-        catch { return new LlmConfigDto(); }
+        try { return JsonSerializer.Deserialize<LlmConfig>(json, JsonOpts) ?? new LlmConfig(); }
+        catch { return new LlmConfig(); }
     }
 
-    private static TtsConfigDto ParseTtsConfig(string? json)
+    private static TtsConfig ParseTtsConfig(string? json)
     {
-        if (string.IsNullOrWhiteSpace(json)) return new TtsConfigDto();
-        try { return JsonSerializer.Deserialize<TtsConfigDto>(json, JsonOpts) ?? new TtsConfigDto(); }
-        catch { return new TtsConfigDto(); }
+        if (string.IsNullOrWhiteSpace(json)) return new TtsConfig();
+        try { return JsonSerializer.Deserialize<TtsConfig>(json, JsonOpts) ?? new TtsConfig(); }
+        catch { return new TtsConfig(); }
     }
 
     private static string? NullIfEmpty(string? s) =>
         string.IsNullOrWhiteSpace(s) ? null : s;
 
-    #endregion
 
-    #region Nested Types
-
-    private sealed class MemorySettingsDto
+    private sealed class MemorySettings
     {
         public bool Enabled { get; set; } = true;
         public int MaxMemories { get; set; } = 5;
     }
 
-    private sealed class BehaviorDto
+    private sealed class Behavior
     {
         public string ChunkingMode { get; set; } = "narration";
         public string? Language { get; set; }
         public int ResponseDelayMs { get; set; } = 0;
+        public float EmotionIntensityScale { get; set; } = 1.0f;
     }
 
-    private sealed class LlmConfigDto
+    private sealed class LlmConfig
     {
         public float Temperature { get; set; } = 0.7f;
         public int MaxTokens { get; set; } = 512;
         public float TopP { get; set; } = 0.9f;
         public float FrequencyPenalty { get; set; } = 0f;
         public float PresencePenalty { get; set; } = 0f;
+        /// <summary>Per-card model override stored by the frontend as llm_config.model_id.</summary>
+        public string? ModelId { get; set; }
+        /// <summary>Per-card endpoint override stored by the frontend as llm_config.base_url.</summary>
+        public string? BaseUrl { get; set; }
     }
 
-    private sealed class TtsConfigDto
+    private sealed class TtsConfig
     {
         public string? ProviderId { get; set; }
         public string? VoiceId { get; set; }
@@ -226,5 +220,4 @@ public sealed class ChannelContextResolutionService : IChannelContextResolutionS
         public string? BaseUrl { get; set; }
     }
 
-    #endregion
 }

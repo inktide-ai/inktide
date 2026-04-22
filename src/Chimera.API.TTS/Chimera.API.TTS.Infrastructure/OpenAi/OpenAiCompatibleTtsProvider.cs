@@ -20,8 +20,6 @@ public sealed class OpenAiCompatibleTtsProvider : ISpeechProvider
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
     }
 
-    // ── ISpeechProvider identity ──────────────────────────────────────────────
-
     public string Id => "openai-compatible";
 
     public string Name => "OpenAI Compatible";
@@ -34,8 +32,6 @@ public sealed class OpenAiCompatibleTtsProvider : ISpeechProvider
         SupportsVoiceListing = false,
         SupportsStreaming = false,
     };
-
-    // ── ISpeechProvider methods ───────────────────────────────────────────────
 
     public ValidationResult Validate(ProviderOptions options)
     {

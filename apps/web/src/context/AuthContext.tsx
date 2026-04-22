@@ -7,9 +7,13 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import Keycloak, { type KeycloakTokenParsed } from 'keycloak-js'
-import { getMe } from '../api/me'
-import { readStoredNickname, writeStoredNickname } from '../utils/profileStorage'
+import Keycloak from 'keycloak-js'
+import type { IAuthTokenParser } from '../ports/IAuthTokenParser'
+import type { ILocaleSync } from '../ports/ILocaleSync'
+import type { IAvatarService } from '../ports/IAvatarService'
+import { writeStoredNickname } from '../utils/profileStorage'
+
+// ── Domain types ──────────────────────────────────────────────────────────────
 
 export interface UserInfo {
   userId: string
@@ -37,86 +41,73 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-const IGNORED_ROLES = new Set(['offline_access', 'uma_authorization'])
-
-function userFromToken(parsed: KeycloakTokenParsed | undefined): UserInfo | null {
-  if (!parsed?.sub) return null
-  const userName = (parsed.preferred_username as string) ?? parsed.sub
-  const rawRoles = (parsed.realm_access as { roles?: string[] })?.roles ?? []
-  const meaningful = rawRoles.filter(
-    (r) => !IGNORED_ROLES.has(r) && !r.startsWith('default-roles-'),
-  )
-  const role = meaningful.includes('admin') ? 'admin' : meaningful[0] ?? 'user'
-  const pic = parsed.picture as string | undefined
-  const pictureUrl = pic?.trim() ? pic : null
-  return { userId: parsed.sub, userName, role, pictureUrl }
-}
-
-function nicknameFromToken(parsed: KeycloakTokenParsed): string | null {
-  const raw = (parsed as Record<string, unknown>).nickname
-  if (typeof raw !== 'string') return null
-  const t = raw.trim()
-  return t ? t.slice(0, 32) : null
-}
-
-function loadUserInfo(parsed: KeycloakTokenParsed): UserInfo | null {
-  const base = userFromToken(parsed)
-  if (!base || !parsed.sub) return null
-  const stored = readStoredNickname(parsed.sub)
-  const fromToken = nicknameFromToken(parsed)
-  const nickname = stored ?? fromToken ?? null
-  return { ...base, nickname }
-}
-
-function stateFromKeycloak(kc: Keycloak): AuthState {
-  if (kc.authenticated && kc.tokenParsed) {
-    const user = loadUserInfo(kc.tokenParsed)
-    const email = (kc.tokenParsed.email as string) ?? user?.userName ?? null
-    return { isLoggedIn: true, userEmail: email, user, isInitialized: true }
-  }
-  return { isLoggedIn: false, userEmail: null, user: null, isInitialized: true }
-}
-
 const LOGGED_OUT: AuthState = { isLoggedIn: false, userEmail: null, user: null, isInitialized: true }
 
-// ─── Provider ────────────────────────────────────────────────────────────────
+// ── Provider ──────────────────────────────────────────────────────────────────
 
-export function AuthProvider({ keycloak, children }: { keycloak: Keycloak; children: ReactNode }) {
-  // Keycloak is already initialized when this provider mounts — read current state immediately.
-  const [state, setState] = useState<AuthState>(() => stateFromKeycloak(keycloak))
+interface AuthProviderProps {
+  keycloak: Keycloak
+  tokenParser: IAuthTokenParser
+  localeSync: ILocaleSync
+  avatarService: IAvatarService
+  children: ReactNode
+}
 
-  // Subscribe to future Keycloak auth events.
+/**
+ * SRP: только React-state + wiring событий Keycloak.
+ * Делегирует:
+ *   - парсинг токена        → IAuthTokenParser (KeycloakTokenParser)
+ *   - синхронизацию локали  → ILocaleSync       (KeycloakLocaleSync)
+ *   - получение аватара     → IAvatarService    (MeAvatarService)
+ *
+ * DIP: зависит от интерфейсов, не от конкретных классов.
+ * main.tsx — composition root: передаёт реализации через props.
+ */
+export function AuthProvider({
+  keycloak,
+  tokenParser,
+  localeSync,
+  avatarService,
+  children,
+}: AuthProviderProps) {
+  const [state, setState] = useState<AuthState>(() => buildState(keycloak, tokenParser))
+
+  // ── Keycloak event handlers ───────────────────────────────────────────────
+
   useEffect(() => {
-    const sync = () => setState(stateFromKeycloak(keycloak))
+    const sync = () => setState(buildState(keycloak, tokenParser))
     const clear = () => setState(LOGGED_OUT)
 
-    keycloak.onAuthSuccess = sync
+    keycloak.onAuthSuccess      = sync
     keycloak.onAuthRefreshSuccess = sync
-    keycloak.onAuthLogout = clear
-    keycloak.onAuthError = clear
+    keycloak.onAuthLogout       = clear
+    keycloak.onAuthError        = clear
     keycloak.onAuthRefreshError = clear
-  }, [keycloak])
+  }, [keycloak, tokenParser])
 
-  // Fetch avatar from /api/me once authenticated.
+  // ── Locale sync ───────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!state.isLoggedIn) return
+    localeSync.sync(keycloak.tokenParsed?.locale as string | undefined)
+  }, [state.isLoggedIn, keycloak.tokenParsed?.locale, localeSync])
+
+  // ── Avatar fetch ──────────────────────────────────────────────────────────
+
   useEffect(() => {
     if (!state.isLoggedIn || !state.user) return
     let cancelled = false
-    ;(async () => {
-      try {
-        const me = await getMe()
-        if (cancelled) return
-        setState((s) => {
-          if (!s.user) return s
-          return { ...s, user: { ...s.user, pictureUrl: me.pictureUrl ?? s.user.pictureUrl ?? null } }
-        })
-      } catch {
-        /* avatar is optional */
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [state.isLoggedIn, state.user?.userId])
+    avatarService.getAvatarUrl(state.user.userId).then((url) => {
+      if (cancelled || !url) return
+      setState((s) => {
+        if (!s.user) return s
+        return { ...s, user: { ...s.user, pictureUrl: url } }
+      })
+    })
+    return () => { cancelled = true }
+  }, [state.isLoggedIn, state.user?.userId, avatarService])
+
+  // ── Auth actions ──────────────────────────────────────────────────────────
 
   const logout = useCallback(() => {
     setState(LOGGED_OUT)
@@ -142,26 +133,24 @@ export function AuthProvider({ keycloak, children }: { keycloak: Keycloak; child
     try {
       await keycloak.updateToken(60)
     } catch {
-      /* stale token may still allow getMe */
+      /* stale token may still allow avatar fetch */
     }
     const parsed = keycloak.tokenParsed
     if (!parsed) return
-    const merged = loadUserInfo(parsed)
-    const email = (parsed.email as string) ?? merged?.userName ?? null
-    let pictureUrl = merged?.pictureUrl ?? null
-    try {
-      const me = await getMe()
-      pictureUrl = me.pictureUrl ?? pictureUrl
-    } catch {
-      /* keep token picture */
-    }
+    const base = tokenParser.parse(parsed)
+    if (!base) return
+    const nickname = tokenParser.extractNickname(parsed, null)
+    const email = (parsed.email as string) ?? base.userName
+    let pictureUrl = base.pictureUrl ?? null
+    const url = await avatarService.getAvatarUrl(base.userId)
+    if (url) pictureUrl = url
     setState({
       isLoggedIn: true,
       userEmail: email,
-      user: merged ? { ...merged, pictureUrl } : null,
+      user: { ...base, nickname, pictureUrl },
       isInitialized: true,
     })
-  }, [keycloak])
+  }, [keycloak, tokenParser, avatarService])
 
   const setNickname = useCallback(
     (value: string) => {
@@ -197,4 +186,23 @@ export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function buildState(keycloak: Keycloak, tokenParser: IAuthTokenParser): AuthState {
+  if (!keycloak.authenticated || !keycloak.tokenParsed) {
+    return LOGGED_OUT
+  }
+  const parsed = keycloak.tokenParsed
+  const base = tokenParser.parse(parsed)
+  if (!base) return LOGGED_OUT
+  const nickname = tokenParser.extractNickname(parsed, null)
+  const email = (parsed.email as string) ?? base.userName ?? null
+  return {
+    isLoggedIn: true,
+    userEmail: email,
+    user: { ...base, nickname },
+    isInitialized: true,
+  }
 }

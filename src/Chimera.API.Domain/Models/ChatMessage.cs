@@ -4,14 +4,10 @@ namespace Chimera.API.Domain.Models;
 
 public sealed class ChatMessage
 {
-    #region Fields
 
     private ChatRole _role;
     private string _content = string.Empty;
 
-    #endregion
-
-    #region Properties
 
     public ChatRole Role
     {
@@ -25,5 +21,4 @@ public sealed class ChatMessage
         set => _content = value;
     }
 
-    #endregion
 }

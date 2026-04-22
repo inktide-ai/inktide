@@ -15,17 +15,13 @@ namespace Chimera.API.Core.DependencyInjection;
 /// </summary>
 public sealed class AuthStartup : IStartup
 {
-    #region Fields
 
     private const string CorsPolicyName = "ChimeraPolicy";
 
-    #endregion
-
-    #region Public Methods
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
-        var keycloakSection = ctx.Configuration.GetSection("KeycloakSettings");
+        var keycloakSection = ctx.Configuration.GetSection(nameof(KeycloakSettings));
         services.Configure<KeycloakSettings>(keycloakSection);
 
         var keycloak = keycloakSection.Get<KeycloakSettings>() ?? new KeycloakSettings();
@@ -71,7 +67,7 @@ public sealed class AuthStartup : IStartup
 
         services.AddAuthorization();
 
-        var corsSection = ctx.Configuration.GetSection("Cors");
+        var corsSection = ctx.Configuration.GetSection(nameof(CorsSettings));
         services.Configure<CorsSettings>(corsSection);
 
         var cors = corsSection.Get<CorsSettings>() ?? new CorsSettings();
@@ -116,9 +112,6 @@ public sealed class AuthStartup : IStartup
         });
     }
 
-    #endregion
-
-    #region Private Methods
 
     /// <summary>
     /// Keycloak puts the user ID in the "sub" claim. ASP.NET Core expects
@@ -140,5 +133,4 @@ public sealed class AuthStartup : IStartup
         }
     }
 
-    #endregion
 }

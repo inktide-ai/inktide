@@ -12,16 +12,12 @@ namespace Chimera.API.Profile.Infrastructure.Services;
 /// </summary>
 public sealed class UserAccountDeletionService : IUserAccountDeletionService
 {
-    #region Fields
 
     private readonly SoulDbContext _db;
     private readonly IKeycloakAdminClient _keycloakAdmin;
     private readonly KeycloakAdminSettings _adminSettings;
     private readonly ILogger<UserAccountDeletionService> _logger;
 
-    #endregion
-
-    #region Constructors
 
     public UserAccountDeletionService(
         SoulDbContext db,
@@ -35,9 +31,6 @@ public sealed class UserAccountDeletionService : IUserAccountDeletionService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task<UserAccountDeletionResult> DeleteAllDataForUserAsync(Guid userId, CancellationToken ct = default)
     {
@@ -87,5 +80,4 @@ public sealed class UserAccountDeletionService : IUserAccountDeletionService
             Warning: kcErr ?? "Keycloak user deletion failed.");
     }
 
-    #endregion
 }

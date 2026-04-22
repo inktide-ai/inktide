@@ -6,7 +6,6 @@ namespace Chimera.API.Soul.Infrastructure.Configurations;
 
 public sealed class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 {
-    #region Public Methods
 
     public void Configure(EntityTypeBuilder<AuditLog> b)
     {
@@ -51,5 +50,4 @@ public sealed class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
             .IsDescending(false, false, true);
     }
 
-    #endregion
 }

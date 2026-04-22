@@ -20,7 +20,6 @@ namespace Chimera.API.TTS.Infrastructure.Messaging;
 /// </summary>
 public sealed class LlmResponseStreamConsumer : BackgroundService
 {
-    #region Private types
 
     /// <summary>
     /// JSON shape published by the Python llm-worker to <c>synapse.llm.response</c>.
@@ -42,11 +41,12 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         /// <summary>TTS model override. Null = provider default.</summary>
         [property: JsonPropertyName("ttsModelId")]     string? TtsModelId,
         /// <summary>Speech speed. Null = 1.0.</summary>
-        [property: JsonPropertyName("ttsSpeed")]       float?  TtsSpeed);
+        [property: JsonPropertyName("ttsSpeed")]       float?  TtsSpeed,
+        /// <summary>Emotion the avatar should express. Null = no reaction.</summary>
+        [property: JsonPropertyName("emotionId")]        string? EmotionId        = null,
+        /// <summary>Emotion intensity 0.0–1.0.</summary>
+        [property: JsonPropertyName("emotionIntensity")] float   EmotionIntensity = 0f);
 
-    #endregion
-
-    #region Fields
 
     private readonly IConnectionMultiplexer _redis;
     private readonly ITtsSynthesisService _tts;
@@ -56,9 +56,6 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
     private readonly ILogger<LlmResponseStreamConsumer> _logger;
     private readonly string _consumerName;
 
-    #endregion
-
-    #region Constructor
 
     public LlmResponseStreamConsumer(
         IConnectionMultiplexer redis,
@@ -78,9 +75,6 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         _consumerName = $"{_inSettings.ConsumerNamePrefix}-{ResolveInstanceId()}";
     }
 
-    #endregion
-
-    #region BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -105,9 +99,6 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         _logger.LogInformation("LlmResponseStreamConsumer stopped.");
     }
 
-    #endregion
-
-    #region Consumer group bootstrap
 
     private async Task EnsureConsumerGroupAsync(IDatabase db, CancellationToken ct)
     {
@@ -139,9 +130,6 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         }
     }
 
-    #endregion
-
-    #region Consume loop
 
     private async Task ConsumeLoopAsync(IDatabase db, CancellationToken ct)
     {
@@ -217,9 +205,6 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         }
     }
 
-    #endregion
-
-    #region Per-message processing
 
     private async Task ProcessEntryAsync(IDatabase db, StreamEntry entry, CancellationToken ct)
     {
@@ -335,8 +320,10 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
             isLast         = response.IsLast,
             audioBase64,
             contentType    = ok.ContentType,
-            llmModel       = response.Model,
-            visemeTimeline,   // VisemeCueDto[]? — null → frontend uses formant fallback
+            llmModel         = response.Model,
+            visemeTimeline,   // VisemeCue[]? — null → frontend uses formant fallback
+            emotionId        = response.EmotionId,
+            emotionIntensity = response.EmotionIntensity,
         });
 
         await db.StreamAddAsync(
@@ -350,9 +337,6 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
             response.ChannelId, response.CorrelationId, response.SequenceNumber, response.IsLast, ms.Length);
     }
 
-    #endregion
-
-    #region Helpers
 
     private Task AckAsync(IDatabase db, RedisValue entryId)
         => db.StreamAcknowledgeAsync(_inSettings.StreamName, _inSettings.ConsumerGroup, entryId);
@@ -374,5 +358,4 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
            ?? Environment.GetEnvironmentVariable("K8S_POD_NAME")
            ?? Guid.NewGuid().ToString("N")[..8];
 
-    #endregion
 }

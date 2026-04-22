@@ -1,23 +1,34 @@
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import classnames from 'classnames'
+import { useTranslation } from 'react-i18next'
 import GlitchText from '../GlitchText'
 import { useRevealOnScroll } from '../../hooks'
-import { CONTENT } from '../../constants'
 import styles from './BenefitsSection.module.css'
+
+const TAB_IDS = ['engagement', 'performance', 'integration', 'growth'] as const
 
 const BenefitsSection = () => {
   const { ref, isVisible } = useRevealOnScroll()
   const [activeTab, setActiveTab] = useState(0)
   const gradientId = useId()
-  const { heading, subheading, tabs } = CONTENT.benefits
+  const { t } = useTranslation('landing')
+
+  const tabs = useMemo(() =>
+    TAB_IDS.map((id) => ({
+      id,
+      label: t(`benefits.tabs.${id}.label`),
+      description: t(`benefits.tabs.${id}.description`),
+    })),
+  [t])
+
   const active = tabs[activeTab]
 
   return (
     <section id="how" className={styles.section} ref={ref}>
       <div className={styles.container}>
         <div className={styles.header}>
-          <GlitchText text={heading} tag="h2" className={styles.heading} />
-          <p className={styles.subheading}>{subheading}</p>
+          <GlitchText text={t('benefits.heading')} tag="h2" className={styles.heading} />
+          <p className={styles.subheading}>{t('benefits.subheading')}</p>
         </div>
         <div
           className={classnames(styles.chartsBlock, { [styles.revealed]: isVisible })}

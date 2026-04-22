@@ -5,13 +5,9 @@ namespace Chimera.API.Soul.Domain.Entities;
 /// </summary>
 public sealed class AiCardModel
 {
-    #region Constructors
 
     private AiCardModel() { }
 
-    #endregion
-
-    #region Properties
 
     public Guid Id { get; private set; }
     public Guid UserId { get; private set; }
@@ -31,9 +27,6 @@ public sealed class AiCardModel
     // EF Core navigation
     public AiCard? AiCard { get; private set; }
 
-    #endregion
-
-    #region Factory
 
     public static AiCardModel Create(
         Guid userId,
@@ -65,5 +58,4 @@ public sealed class AiCardModel
         };
     }
 
-    #endregion
 }

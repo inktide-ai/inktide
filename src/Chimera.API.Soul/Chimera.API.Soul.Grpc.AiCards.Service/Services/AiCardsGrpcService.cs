@@ -12,22 +12,15 @@ namespace Chimera.API.Soul.Grpc.AiCards.Service.Services;
 /// </summary>
 public sealed class AiCardsGrpcService : AiCardService.AiCardServiceBase
 {
-    #region Fields
 
     private readonly IAiCardService _aiCardService;
 
-    #endregion
-
-    #region Constructors
 
     public AiCardsGrpcService(IAiCardService aiCardService)
     {
         _aiCardService = aiCardService ?? throw new ArgumentNullException(nameof(aiCardService));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public override async Task<AiCardResponse> GetCard(
         GetCardRequest request,
@@ -145,5 +138,4 @@ public sealed class AiCardsGrpcService : AiCardService.AiCardServiceBase
         return new DeleteCardResponse { Success = true };
     }
 
-    #endregion
 }

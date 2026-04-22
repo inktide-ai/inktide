@@ -5,7 +5,6 @@ namespace Chimera.API.Soul.REST.Validation;
 
 public sealed class CreateAiCardRequestValidator : AbstractValidator<CreateAiCardRequest>
 {
-    #region Constructors
 
     public CreateAiCardRequestValidator()
     {
@@ -24,5 +23,4 @@ public sealed class CreateAiCardRequestValidator : AbstractValidator<CreateAiCar
             .MaximumLength(1000);
     }
 
-    #endregion
 }

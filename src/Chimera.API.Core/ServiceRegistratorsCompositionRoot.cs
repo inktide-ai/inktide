@@ -3,19 +3,8 @@ using Microsoft.Extensions.Configuration;
 
 namespace Chimera.API.Core;
 
-/// <summary>
-/// Composition root that invokes all discovered <see cref="IServiceRegistrator"/> implementations.
-/// </summary>
 public sealed class ServiceRegistratorsCompositionRoot
 {
-    #region Constructors
-
-    /// <summary>
-    /// Invokes each service registrator to populate the DryIoc container.
-    /// </summary>
-    /// <param name="registrator">The DryIoc registrator.</param>
-    /// <param name="serviceRegistrators">Discovered service registrators.</param>
-    /// <param name="configuration">Application configuration.</param>
     public ServiceRegistratorsCompositionRoot(
         IRegistrator registrator,
         IEnumerable<IServiceRegistrator>? serviceRegistrators,
@@ -27,5 +16,4 @@ public sealed class ServiceRegistratorsCompositionRoot
         }
     }
 
-    #endregion
 }

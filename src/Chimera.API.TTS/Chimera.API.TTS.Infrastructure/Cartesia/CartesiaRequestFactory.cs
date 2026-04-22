@@ -7,7 +7,6 @@ namespace Chimera.API.TTS.Infrastructure.Cartesia;
 
 internal static class CartesiaRequestFactory
 {
-    #region Fields
 
     internal static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -15,9 +14,6 @@ internal static class CartesiaRequestFactory
         PropertyNamingPolicy   = null,
     };
 
-    #endregion
-
-    #region Request builders
 
     /// <summary>
     /// <c>POST /tts/bytes</c>
@@ -57,5 +53,4 @@ internal static class CartesiaRequestFactory
         return request;
     }
 
-    #endregion
 }

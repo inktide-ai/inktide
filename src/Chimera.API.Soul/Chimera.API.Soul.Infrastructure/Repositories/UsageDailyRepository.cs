@@ -7,22 +7,15 @@ namespace Chimera.API.Soul.Infrastructure.Repositories;
 
 public sealed class UsageDailyRepository : IUsageDailyRepository
 {
-    #region Fields
 
     private readonly SoulDbContext _db;
 
-    #endregion
-
-    #region Constructors
 
     public UsageDailyRepository(SoulDbContext db)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task<UsageDaily?> GetTodayAsync(Guid aiCardId, CancellationToken ct = default)
     {
@@ -63,5 +56,4 @@ public sealed class UsageDailyRepository : IUsageDailyRepository
             .ToListAsync(ct);
     }
 
-    #endregion
 }

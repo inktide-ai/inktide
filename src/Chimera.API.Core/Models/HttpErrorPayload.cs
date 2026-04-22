@@ -7,14 +7,10 @@ namespace Chimera.API.Core.Models;
 /// </summary>
 public sealed class HttpErrorPayload
 {
-    #region Fields
 
     private string _error = string.Empty;
     private string _code = string.Empty;
 
-    #endregion
-
-    #region Properties
 
     [JsonPropertyName("error")]
     public string Error
@@ -46,9 +42,6 @@ public sealed class HttpErrorPayload
         set;
     }
 
-    #endregion
-
-    #region Public Methods
 
     public static HttpErrorPayload Internal(string traceId, bool includeDetail, string? exceptionDetail)
     {
@@ -61,7 +54,6 @@ public sealed class HttpErrorPayload
         };
     }
 
-    #endregion
 }
 
 /// <summary>Stable machine-readable codes for Core HTTP JSON errors (global handler).</summary>

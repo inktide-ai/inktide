@@ -13,7 +13,6 @@ namespace Chimera.API.TTS.Infrastructure.DependencyInjection;
 /// </summary>
 public sealed class ChimeraTtsStartup : IStartup
 {
-    #region Public Methods
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
@@ -34,5 +33,4 @@ public sealed class ChimeraTtsStartup : IStartup
         services.AddHostedService<LlmResponseStreamConsumer>();
     }
 
-    #endregion
 }

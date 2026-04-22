@@ -4,7 +4,6 @@ namespace Chimera.API.Soul.Infrastructure.Settings;
 
 public sealed class PostgresSettings
 {
-    #region Fields
 
     private string _host = "localhost";
     private ushort _port = 5432;
@@ -14,9 +13,6 @@ public sealed class PostgresSettings
     private int _maxPoolSize = 200;
     private int _minPoolSize = 10;
 
-    #endregion
-
-    #region Properties
 
     [DefaultValue("localhost")]
     public string Host
@@ -65,13 +61,9 @@ public sealed class PostgresSettings
         set => _minPoolSize = value;
     }
 
-    #endregion
-
-    #region Public Methods
 
     public string ToConnectionString() =>
         $"Host={_host};Port={_port};Database={_database};Username={_username};Password={_password};" +
         $"Pooling=true;Minimum Pool Size={_minPoolSize};Maximum Pool Size={_maxPoolSize}";
 
-    #endregion
 }

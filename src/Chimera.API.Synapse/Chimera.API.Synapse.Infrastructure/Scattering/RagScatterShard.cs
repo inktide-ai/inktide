@@ -9,20 +9,13 @@ namespace Chimera.API.Synapse.Infrastructure.Scattering;
 /// <summary>Scatter shard: semantic memory retrieval via <see cref="IMemoryQueryService"/>.</summary>
 public sealed class RagScatterShard : ISynapseScatterShard
 {
-    #region Fields
 
     private readonly IMemoryQueryService _memory;
     private readonly ILogger<RagScatterShard> _logger;
 
-    #endregion
-
-    #region Properties
 
     public string ShardId => "rag";
 
-    #endregion
-
-    #region Constructors
 
     public RagScatterShard(IMemoryQueryService memory, ILogger<RagScatterShard> logger)
     {
@@ -30,9 +23,6 @@ public sealed class RagScatterShard : ISynapseScatterShard
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    #endregion
-
-    #region Public Methods
 
     public async Task ProcessAsync(MessageProcessingContext context, CancellationToken cancellationToken = default)
     {
@@ -45,6 +35,7 @@ public sealed class RagScatterShard : ISynapseScatterShard
         }
 
         IReadOnlyList<MemoryRecord> memories;
+        
         try
         {
             memories = await _memory.QueryAsync(
@@ -74,5 +65,4 @@ public sealed class RagScatterShard : ISynapseScatterShard
             context.CorrelationId);
     }
 
-    #endregion
 }
