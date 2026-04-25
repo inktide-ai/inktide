@@ -599,7 +599,7 @@ const BrainTab = ({ character, onUpdate }: BrainTabProps) => {
           <button
             type="button"
             className={styles.providerBackBtn}
-            onClick={() => navigate('/profile/settings/brain')}
+            onClick={() => navigate('/settings/brain')}
             aria-label="Back"
           >
             ←

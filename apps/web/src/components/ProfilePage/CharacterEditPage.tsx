@@ -89,7 +89,7 @@ export default function CharacterEditPage() {
       try {
         const res = await updateCard(cardId, characterToUpdateRequest(character))
         setCharacter(apiResponseToCharacter(res))
-        navigate('/profile', { state: { focusCardId: cardId, returnTab: 'profile' } })
+        navigate('/home', { state: { focusCardId: cardId, returnTab: 'profile' } })
       } catch (err) {
         setSaveError(err instanceof Error ? err.message : 'Save failed')
       } finally {
@@ -100,8 +100,8 @@ export default function CharacterEditPage() {
   )
 
   const goWorkshop = useCallback(() => {
-    if (cardId) navigate('/profile', { state: { focusCardId: cardId, returnTab: 'profile' } })
-    else navigate('/profile')
+    if (cardId) navigate('/home', { state: { focusCardId: cardId, returnTab: 'profile' } })
+    else navigate('/home')
   }, [cardId, navigate])
 
   const onBannerFile = useCallback(

@@ -1,7 +1,7 @@
 services:
   semantic-model:
     build: .
-    image: chimera-semantic-model:latest
+    image: inktide-semantic-model:latest
     ports:
       - "8000:8000"
     environment:

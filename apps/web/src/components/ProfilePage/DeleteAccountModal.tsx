@@ -30,7 +30,7 @@ export default function DeleteAccountModal({
           Delete account
         </h2>
         <p className={styles.accountModalText}>
-          This removes your characters and related data from Chimera. If the server is configured
+          This removes your characters and related data from Inktide. If the server is configured
           for it, your login identity is removed from Keycloak as well.
         </p>
         {error && (

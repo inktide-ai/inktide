@@ -1,9 +1,9 @@
-# Структура проекта Chimera
+# Структура проекта Inktide
 
 ## Компоненты
 
 - `LandingPage` — главная страница
-- `HeroChimera` — hero-секция с CTA и мок-апом
+- `HeroInktide` — hero-секция с CTA и мок-апом
 - `Navigation` — навигация
 - `FeaturesSection` — блок возможностей
 - `BenefitsSection` — преимущества

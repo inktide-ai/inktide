@@ -4,6 +4,11 @@
   background: var(--bg-dark);
 }
 
+.layoutExiting {
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
 /* ── Sidebar ── */
 .sidebar {
   position: fixed;
@@ -38,8 +43,8 @@
 }
 
 .logoIcon {
-  width: 28px;
-  height: 28px;
+  height: 20px;
+  width: auto;
   background: transparent;
   object-fit: contain;
 }
@@ -179,6 +184,7 @@
   font-weight: 500;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
   transition: background 0.15s, color 0.15s;
 }
 
@@ -223,6 +229,19 @@
   height: 1px;
   margin: 4px 0;
   background: var(--border);
+}
+
+.userMenuItemChevron {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  opacity: 0.25;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.userMenuItem:hover .userMenuItemChevron {
+  opacity: 0.55;
 }
 
 @keyframes menuIn {

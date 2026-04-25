@@ -48,13 +48,13 @@ const Navigation = (props: NavigationProps) => {
               className={styles.logoButton}
               onClick={() => onGoToLanding?.()}
             >
-              <img src={logoSvg} alt="Chimera" className={styles.logoIcon} />
-              <span className={styles.logoText}>Chimera</span>
+              <img src={logoSvg} alt="Inktide" className={styles.logoIcon} />
+              <span className={styles.logoText}>Inktide</span>
             </button>
           ) : (
             <a href="#" className={styles.logo}>
-              <img src={logoSvg} alt="Chimera" className={styles.logoIcon} />
-              <span className={styles.logoText}>Chimera</span>
+              <img src={logoSvg} alt="Inktide" className={styles.logoIcon} />
+              <span className={styles.logoText}>Inktide</span>
             </a>
           )}
 
@@ -162,8 +162,8 @@ const Navigation = (props: NavigationProps) => {
         {/* Header */}
         <div className={styles.mobileDrawerHeader}>
           <a href="#" className={styles.mobileDrawerLogo} onClick={closeMobile}>
-            <img src={logoSvg} alt="Chimera" className={styles.mobileDrawerLogoIcon} />
-            <span className={styles.mobileDrawerLogoText}>Chimera</span>
+            <img src={logoSvg} alt="Inktide" className={styles.mobileDrawerLogoIcon} />
+            <span className={styles.mobileDrawerLogoText}>Inktide</span>
           </a>
           <button
             type="button"
@@ -260,7 +260,7 @@ const Navigation = (props: NavigationProps) => {
 
         {/* Footer */}
         <div className={styles.mobileDrawerFooter}>
-          <span className={styles.mobileDrawerVersion}>CHIMERA © 2026</span>
+          <span className={styles.mobileDrawerVersion}>INKTIDE © 2026</span>
         </div>
       </div>
     </>

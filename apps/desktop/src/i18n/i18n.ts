@@ -18,7 +18,7 @@ i18n
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
-      lookupLocalStorage: 'chimera_lang',
+      lookupLocalStorage: 'inktide_lang',
     },
     interpolation: {
       escapeValue: false,

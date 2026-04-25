@@ -22,7 +22,7 @@
 .brandColumn {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.2rem;
 }
 
 .brand {
@@ -41,8 +41,8 @@
 }
 
 .logo {
-  width: 32px;
-  height: 32px;
+  height: 36px;
+  width: auto;
   object-fit: contain;
 }
 

@@ -197,7 +197,7 @@ const IdentityCard = ({ character, onUpdate, onDelete, onNavigateTab }: Identity
           <button
             type="button"
             className={styles.editProfileBtn}
-            onClick={() => navigate(`/profile/bot/${character.id}/edit`)}
+            onClick={() => navigate(`/home/bot/${character.id}/edit`)}
           >
             {t('identity.editCharacter')}
           </button>

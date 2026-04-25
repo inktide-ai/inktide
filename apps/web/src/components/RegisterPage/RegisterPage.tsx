@@ -11,7 +11,7 @@ const RegisterPage = () => {
   useEffect(() => {
     if (!isInitialized) return
     if (isLoggedIn) {
-      navigate('/profile', { replace: true })
+      navigate('/home', { replace: true })
       return
     }
     if (!redirectedRef.current) {

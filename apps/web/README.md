@@ -1,4 +1,4 @@
-# Chimera — Web Application
+# Inktide — Web Application
 
 Веб-приложение платформы ИИ-напарников для стриминга. React, TypeScript, Vite.
 
@@ -19,7 +19,7 @@ web/
 │   │   ├── CTASection/
 │   │   ├── FeaturesSection/
 │   │   ├── GlitchText/
-│   │   ├── HeroChimera/     # Hero-секция
+│   │   ├── HeroInktide/     # Hero-секция
 │   │   ├── LandingPage/
 │   │   ├── LoginModal/
 │   │   ├── Navigation/

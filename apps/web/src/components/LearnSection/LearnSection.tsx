@@ -87,7 +87,7 @@ const LearnSection = () => {
                   </div>
                 </div>
                 <div className={styles.cardLogos}>
-                  <span className={styles.logoText}>CHIMERA</span>
+                  <span className={styles.logoText}>INKTIDE</span>
                   <span className={styles.logoDivider} />
                   <span className={styles.logoText}>AI</span>
                 </div>

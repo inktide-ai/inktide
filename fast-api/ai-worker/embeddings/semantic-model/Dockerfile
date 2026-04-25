@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-LABEL org.opencontainers.image.title="Chimera Semantic Model"
+LABEL org.opencontainers.image.title="Inktide Semantic Model"
 LABEL org.opencontainers.image.description="REST API for semantic embeddings and classification"
 
 ENV PYTHONUNBUFFERED=1 \

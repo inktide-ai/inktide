@@ -1,4 +1,4 @@
-# Chimera Semantic Model
+# Inktide Semantic Model
 
 REST API for semantic text processing: embeddings and classification in real time.
 
@@ -124,8 +124,8 @@ Copy `.env.example` to `.env` and adjust as needed.
 ### Docker
 
 ```bash
-docker build -t chimera-semantic-model .
-docker run -p 8000:8000 chimera-semantic-model
+docker build -t inktide-semantic-model .
+docker run -p 8000:8000 inktide-semantic-model
 ```
 
 ### Docker Compose
@@ -156,4 +156,4 @@ pytest tests/ -v
 
 ## License
 
-Proprietary. Chimera.
+Proprietary. Inktide.

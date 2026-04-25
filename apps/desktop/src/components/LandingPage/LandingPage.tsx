@@ -5,7 +5,7 @@ import {
   CTASection,
   FeaturesSection,
   Footer,
-  HeroChimera,
+  HeroInktide,
   LearnSection,
   Navigation,
   ProfileSection,
@@ -40,7 +40,7 @@ const LandingPage = () => {
         onGoToLanding={isLoggedIn ? handleGoToLanding : undefined}
         onGoToApp={isLoggedIn ? () => navigate('/profile') : undefined}
       />
-      <HeroChimera onSignUpClick={() => navigate('/register')} />
+      <HeroInktide onSignUpClick={() => navigate('/register')} />
       <FeaturesSection />
       <BenefitsSection />
       <LearnSection />

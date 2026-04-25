@@ -40,7 +40,7 @@ function isValidLayout(parsed: unknown): parsed is CardLayout[] {
 }
 
 export function useHubLayout(characterId: string) {
-  const key = `chimera_hub_layout_${characterId}`
+  const key = `inktide_hub_layout_${characterId}`
 
   const [layout, setLayout] = useState<CardLayout[]>(() => {
     try {

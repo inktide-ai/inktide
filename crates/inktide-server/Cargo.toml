@@ -1,0 +1,14 @@
+[package]
+name = "inktide-server"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "inktide-server"
+path = "src/main.rs"
+
+[dependencies]
+inktide-lipsync = { path = "../inktide-lipsync" }
+inktide-animation = { path = "../inktide-animation" }
+inktide-audio = { path = "../inktide-audio" }
+inktide-rendering = { path = "../inktide-rendering" }

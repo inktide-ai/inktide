@@ -41,12 +41,12 @@
       },
       "api": {
         "title": "API and integrations",
-        "description": "Connect Chimera to Twitch, YouTube, Discord and other platforms. Set up once — works everywhere."
+        "description": "Connect Inktide to Twitch, YouTube, Discord and other platforms. Set up once — works everywhere."
       }
     }
   },
   "benefits": {
-    "heading": "Why Chimera",
+    "heading": "Why Inktide",
     "subheading": "Analytics and insights to grow your AI companion",
     "tabs": {
       "engagement": {
@@ -59,7 +59,7 @@
       },
       "integration": {
         "label": "Stream Integration Metrics",
-        "description": "See how Chimera integrates with Twitch, YouTube, and Discord. Track donation reactions, chat triggers, and community engagement. Data-driven decisions help you create the perfect AI companion for your channel."
+        "description": "See how Inktide integrates with Twitch, YouTube, and Discord. Track donation reactions, chat triggers, and community engagement. Data-driven decisions help you create the perfect AI companion for your channel."
       },
       "growth": {
         "label": "Channel Growth & Trends",
@@ -85,7 +85,7 @@
       "front": {
         "label": "THE IMPACT",
         "title": "AI Data",
-        "text": "Based on our analysis, we track how AI companions perform across streaming platforms. Each quarter, Chimera identifies engagement patterns and viewer interaction metrics to help streamers optimize their AI personalities.",
+        "text": "Based on our analysis, we track how AI companions perform across streaming platforms. Each quarter, Inktide identifies engagement patterns and viewer interaction metrics to help streamers optimize their AI personalities.",
         "highlight": "Streamers using AI companions see up to 40% higher viewer retention and increased chat activity. Our analytics help you understand what works.",
         "chartTitle": "AI Engagement by Platform"
       }
@@ -95,7 +95,7 @@
     "steps": {
       "0": {
         "heading": "See how it works",
-        "description": "Chimera sets up in minutes and integrates into your stream with no hassle. Connect the OBS plugin, add your AI, and go live."
+        "description": "Inktide sets up in minutes and integrates into your stream with no hassle. Connect the OBS plugin, add your AI, and go live."
       },
       "1": {
         "heading": "Ready out of the box",
@@ -116,8 +116,8 @@
     }
   },
   "cta": {
-    "badge": "Early adopter discount",
-    "heading": "Join early",
+    "badge": "Support project",
+    "heading": "Boost developer experience",
     "description": "Discounts and bonuses for early users and streamers. Start building your AI today.",
     "button": "Get early access"
   },
@@ -129,11 +129,11 @@
       "documentation": "Documentation"
     },
     "followUs": "Follow us",
-    "copyright": "© {{year}} Chimera. All rights reserved."
+    "copyright": "© {{year}} Inktide. All rights reserved."
   },
   "profileSection": {
     "title": "Profile",
-    "loggedIn": "You are logged in to Chimera",
+    "loggedIn": "You are logged in to Inktide",
     "logOut": "Log out"
   }
 }

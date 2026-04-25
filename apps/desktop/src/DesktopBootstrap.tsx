@@ -6,8 +6,8 @@ import LoadingScreen from './components/LoadingScreen'
 
 // Separate storage keys from the web app so that running both side-by-side
 // (e.g. in dev) doesn't cause token cross-contamination.
-const TOKEN_KEY = 'chimera_desktop_kc_token'
-const REFRESH_KEY = 'chimera_desktop_kc_refresh'
+const TOKEN_KEY = 'inktide_desktop_kc_token'
+const REFRESH_KEY = 'inktide_desktop_kc_refresh'
 
 export function DesktopBootstrap() {
   const [ready, setReady] = useState(false)

@@ -47,7 +47,7 @@ const PLATFORM_CONFIG: PlatformConfig[] = [
     id: 'discord',
     theme: 'discord',
     title: 'Discord',
-    subtitle: 'Link a Discord server (guild) so the Chimera bot can route chat to this character.',
+    subtitle: 'Link a Discord server (guild) so the Inktide bot can route chat to this character.',
     hint: (
       <>
         Ingest uses the <strong>guild id</strong> as <code>ChannelId</code> (same as the Discord connector). Add that

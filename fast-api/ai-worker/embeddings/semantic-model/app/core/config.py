@@ -8,7 +8,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    PROJECT_NAME: str = "Chimera Semantic Model"
+    PROJECT_NAME: str = "Inktide Semantic Model"
     API_V1_STR: str = "/api/v1"
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
     HF_TOKEN: str | None = None

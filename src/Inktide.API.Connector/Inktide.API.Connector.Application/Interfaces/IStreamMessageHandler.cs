@@ -1,0 +1,10 @@
+using Inktide.API.Connector.Application.Models;
+
+namespace Inktide.API.Connector.Application.Interfaces;
+
+/// <summary>Handles incoming chat messages from any platform (enqueue to Synapse ingest, log, etc.).</summary>
+public interface IStreamMessageHandler
+{
+    Task HandleAsync(ChatMessage message, CancellationToken cancellationToken = default);
+    
+}

@@ -1,4 +1,4 @@
-# Chimera Scribe Model
+# Inktide Scribe Model
 
 REST API for **conversation memory** — extracts facts, generates embeddings, and classifies text using **Qwen 2.5** via **Ollama**.
 
@@ -134,4 +134,4 @@ pytest tests/ -v
 
 ## License
 
-Proprietary. Chimera.
+Proprietary. Inktide.

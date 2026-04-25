@@ -1,8 +1,16 @@
 import type { VRM } from '@pixiv/three-vrm'
+import { MathUtils } from 'three'
 import type { IVrmController, VrmAnimationContext, VrmControllerSetup } from '../../../ports/IVrmController'
 
 // Только face expressions. Mouth expressions (aa/ih/ou/ee/oh) и blink — чужая ответственность.
-const MANAGED_EXPRESSIONS = ['happy', 'sad', 'angry', 'surprised', 'relaxed'] as const
+const MANAGED_EXPRESSIONS = [
+  'happy', 
+  'sad', 
+  'angry',
+  'surprised',
+  'relaxed'
+] as const
+
 type ManagedExpression = (typeof MANAGED_EXPRESSIONS)[number]
 
 const EMOTION_EXPRESSION_MAP: Record<string, ManagedExpression> = {
@@ -40,7 +48,7 @@ export class ExpressionController implements IVrmController {
     for (const expr of MANAGED_EXPRESSIONS) {
       const current = em.getValue(expr) ?? 0
       const target  = expr === targetExpr ? targetIntensity : 0
-      em.setValue(expr, lerp(current, target, delta * LERP_SPEED))
+      em.setValue(expr, MathUtils.lerp(current, target, delta * LERP_SPEED))
     }
   }
 
@@ -55,6 +63,3 @@ export class ExpressionController implements IVrmController {
   }
 }
 
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * Math.min(t, 1)
-}

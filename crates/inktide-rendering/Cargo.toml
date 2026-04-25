@@ -1,0 +1,11 @@
+[package]
+name = "inktide-rendering"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "inktide_rendering"
+path = "src/lib.rs"
+
+[dependencies]
+inktide-lipsync = { path = "../inktide-lipsync" }

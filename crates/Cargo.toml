@@ -1,9 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
-    "chimera-server",
-    "chimera-lipsync",
-    "chimera-animation",
-    "chimera-audio",
-    "chimera-rendering",
+    "inktide-server",
+    "inktide-lipsync",
+    "inktide-animation",
+    "inktide-audio",
+    "inktide-rendering",
 ]

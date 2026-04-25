@@ -1,4 +1,4 @@
-# Chimera Synapse — Архитектура с нуля
+# Inktide Synapse — Архитектура с нуля
 
 > Проектируем вокруг реального bottleneck, а не вокруг красивых паттернов.
 
@@ -442,21 +442,21 @@ services:
             - capabilities: [gpu]
 
   synapse-ingest:
-    image: chimera/synapse-ingest:latest
+    image: inktide/synapse-ingest:latest
     deploy:
       replicas: 3           # CPU-bound, stateless
       resources:
         limits: { cpus: "1", memory: 256M }
 
   synapse-pipeline:
-    image: chimera/synapse-pipeline:latest
+    image: inktide/synapse-pipeline:latest
     deploy:
       replicas: 4           # I/O bound + GPU calls
       resources:
         limits: { cpus: "2", memory: 1G }
 
   synapse-publisher:
-    image: chimera/synapse-publisher:latest
+    image: inktide/synapse-publisher:latest
     deploy:
       replicas: 2
       resources:

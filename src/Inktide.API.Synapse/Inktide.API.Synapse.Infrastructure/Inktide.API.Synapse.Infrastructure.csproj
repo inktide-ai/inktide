@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SemanticKernel" Version="1.*" />
+        <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.4" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.4" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.4" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.4" />
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
+        <ProjectReference Include="..\..\Inktide.API.Memory\Inktide.API.Memory.Domain\Inktide.API.Memory.Domain.csproj" />
+        <ProjectReference Include="..\..\Inktide.API.Soul\Inktide.API.Soul.Infrastructure\Inktide.API.Soul.Infrastructure.csproj" />
+        <ProjectReference Include="..\Inktide.API.Synapse.Application\Inktide.API.Synapse.Application.csproj" />
+    </ItemGroup>
+
+</Project>

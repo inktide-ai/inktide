@@ -456,8 +456,8 @@ const ProfilePage = () => {
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <button type="button" className={styles.logoRow} onClick={() => navigate('/')}>
-            <img src={logoSvg} alt="Chimera" className={styles.logoIcon} />
-            <span className={styles.logoText}>Chimera</span>
+            <img src={logoSvg} alt="Inktide" className={styles.logoIcon} />
+            <span className={styles.logoText}>Inktide</span>
           </button>
         </div>
 
@@ -779,7 +779,7 @@ const ProfilePage = () => {
               Delete account
             </h2>
             <p className={styles.accountModalText}>
-              This removes your characters and related data from Chimera. If the server is configured
+              This removes your characters and related data from Inktide. If the server is configured
               for it, your login identity is removed from Keycloak as well.
             </p>
             {accountDeleteError && (

@@ -1,14 +1,14 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /repo
 
-COPY Chimera.API.sln .
+COPY Inktide.API.sln .
 COPY src/ src/
 
 RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet restore Chimera.API.sln
+    dotnet restore Inktide.API.sln
 
 RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet publish src/Chimera.API/Chimera.API.csproj \
+    dotnet publish src/Inktide.API/Inktide.API.csproj \
     -c Release \
     -o /app/publish \
     --no-restore
@@ -40,4 +40,4 @@ EXPOSE 5000
 
 ENV ASPNETCORE_URLS=http://+:5000
 
-ENTRYPOINT ["./Chimera.API"]
+ENTRYPOINT ["./Inktide.API"]

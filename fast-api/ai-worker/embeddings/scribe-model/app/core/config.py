@@ -8,7 +8,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    PROJECT_NAME: str = "Chimera Scribe Model"
+    PROJECT_NAME: str = "Inktide Scribe Model"
     API_V1_STR: str = "/api/v1"
 
     OLLAMA_BASE_URL: str = "http://localhost:11434"

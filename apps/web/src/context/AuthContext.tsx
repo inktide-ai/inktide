@@ -12,6 +12,7 @@ import type { IAuthTokenParser } from '../ports/IAuthTokenParser'
 import type { ILocaleSync } from '../ports/ILocaleSync'
 import type { IAvatarService } from '../ports/IAvatarService'
 import { writeStoredNickname } from '../utils/profileStorage'
+import { HOME_ROUTE } from '../constants/settingsRoutes'
 
 // ── Domain types ──────────────────────────────────────────────────────────────
 
@@ -117,11 +118,11 @@ export function AuthProvider({
   }, [keycloak])
 
   const loginWithKeycloak = useCallback(() => {
-    keycloak.login({ redirectUri: `${window.location.origin}/profile` })
+    keycloak.login({ redirectUri: `${window.location.origin}${HOME_ROUTE}` })
   }, [keycloak])
 
   const registerWithKeycloak = useCallback(() => {
-    keycloak.login({ action: 'register', redirectUri: `${window.location.origin}/profile` })
+    keycloak.login({ action: 'register', redirectUri: `${window.location.origin}${HOME_ROUTE}` })
   }, [keycloak])
 
   const openAccountSettings = useCallback(() => {

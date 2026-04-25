@@ -63,7 +63,7 @@ export async function getAppVersion(): Promise<string> {
 
 /**
  * Listen for deep-link URL events (desktop only).
- * Used for OAuth callback: chimera://auth/callback?code=...
+ * Used for OAuth callback: inktide://auth/callback?code=...
  * Returns an unsubscribe function.
  */
 export async function onDeepLink(

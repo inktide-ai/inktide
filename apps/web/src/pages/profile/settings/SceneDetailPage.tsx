@@ -20,10 +20,10 @@ export default function SceneDetailPage() {
       character={selected}
       scene={scene}
       cardId={selected.id}
-      onBack={() => navigate('/profile/settings/scene')}
+      onBack={() => navigate('/settings/scene')}
       onScenesChanged={() => setRefresh(k => k + 1)}
-      onSceneReplaced={newId => navigate(`/profile/settings/scene/${newId}`, { replace: true })}
-      onSceneDeleted={() => navigate('/profile/settings/scene')}
+      onSceneReplaced={newId => navigate(`/settings/scene/${newId}`, { replace: true })}
+      onSceneDeleted={() => navigate('/settings/scene')}
     />
   )
 }

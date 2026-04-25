@@ -26,7 +26,7 @@
   "confirm": "Удалить ссылку {{label}} \"{{channel}}\"?",
   "discord": {
     "title": "Discord",
-    "subtitle": "Привяжите Discord-сервер (guild), чтобы бот Chimera маршрутизировал чат к этому персонажу.",
+    "subtitle": "Привяжите Discord-сервер (guild), чтобы бот Inktide маршрутизировал чат к этому персонажу.",
     "hint": "Ingest использует <strong>guild id</strong> как <code>ChannelId</code> (так же как Discord-коннектор). Добавьте ID сервера здесь и убедитесь, что бот разрешён в <code>DiscordSettings:GuildIds</code>. <a>Как включить режим разработчика</a>",
     "hintLink": "https://support.discord.com/hc/en-us/articles/206346498",
     "channelIdLabel": "ID сервера (guild snowflake)",

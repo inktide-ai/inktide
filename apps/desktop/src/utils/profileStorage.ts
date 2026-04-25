@@ -1,6 +1,6 @@
 /** Local profile prefs until Keycloak / API own nickname. */
 
-const key = (userId: string) => `chimera.profile.nickname.${userId}`
+const key = (userId: string) => `inktide.profile.nickname.${userId}`
 
 const MAX_LEN = 32
 

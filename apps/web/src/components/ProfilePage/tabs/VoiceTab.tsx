@@ -1029,7 +1029,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
     return (
       <VoiceSandboxTab
         character={character}
-        onBack={() => navigate('/profile/settings/voice')}
+        onBack={() => navigate('/settings/voice')}
       />
     )
   }
@@ -1043,7 +1043,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
           <button
             type="button"
             className={styles.providerBackBtn}
-            onClick={() => navigate('/profile/settings/voice')}
+            onClick={() => navigate('/settings/voice')}
             aria-label={t('back')}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

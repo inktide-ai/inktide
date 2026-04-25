@@ -2,18 +2,16 @@ import { useState, useCallback, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation, useMatch } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
-import { deleteAccount } from '../../api/me'
-import logoSvg from '../../assets/app/icon.svg'
+import LogoMark from '../../assets/app/icon_without_white.svg?react'
 import caretDownSvg from '../../assets/icons/caret-down.svg'
 import {
-  IconUser, IconScene, IconSettings, IconTrash, IconLogout, IconSearch,
+  IconUser, IconScene, IconSettings, IconLogout, IconSearch,
 } from '../../components/ProfilePage/TabIcons'
 import { useCharactersContext } from '../../context/CharactersContext'
 import { getBannerAccent, getBannerGradient } from '../../components/ProfilePage/bannerPresets'
 import CreateCharacterForm from '../../components/ProfilePage/CreateCharacterForm'
-import DeleteAccountModal from '../../components/ProfilePage/DeleteAccountModal'
 import { createDefaultCharacter } from '../../domain/character'
-import { TAB_TO_ROUTE } from '../../constants/settingsRoutes'
+import { HOME_ROUTE, TAB_TO_ROUTE, profileSettingsPath } from '../../constants/settingsRoutes'
 import styles from '../../components/ProfilePage/ProfilePage.module.css'
 
 function getSidebarHandle(rawUserName: string | undefined, email: string | null): string {
@@ -44,8 +42,8 @@ export default function ProfileShell() {
   const { t } = useTranslation(['common', 'profile'])
   const navigate = useNavigate()
   const location = useLocation()
-  const { userEmail, user, logout, openAccountSettings } = useAuth()
-  const isScene = !!useMatch({ path: '/profile', end: true })
+  const { userEmail, user, logout } = useAuth()
+  const isScene = !!useMatch({ path: HOME_ROUTE, end: true })
 
   const {
     cardList, characters, selected,
@@ -54,9 +52,7 @@ export default function ProfileShell() {
 
   const [isCreating, setIsCreating] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false)
-  const [accountDeleteError, setAccountDeleteError] = useState<string | null>(null)
+  const [exiting, setExiting] = useState(false)
 
   const sidebarHandle = getSidebarHandle(user?.userName, userEmail)
   const sidebarPrimaryTitle = user?.nickname?.trim() ? user.nickname.trim() : sidebarHandle
@@ -73,21 +69,21 @@ export default function ProfileShell() {
       if (!cancelled) await reloadCard(focus)
       const dest =
         returnTab && TAB_TO_ROUTE[returnTab]
-          ? `/profile/settings/${TAB_TO_ROUTE[returnTab]}`
-          : '/profile'
+          ? profileSettingsPath(TAB_TO_ROUTE[returnTab])
+          : HOME_ROUTE
       navigate(dest, { replace: true, state: {} })
     })()
     return () => { cancelled = true }
   }, [cardList, location.state, navigate, reloadCard])
 
   useEffect(() => {
-    if (!userMenuOpen && !deleteModalOpen) return
+    if (!userMenuOpen) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setUserMenuOpen(false); setDeleteModalOpen(false) }
+      if (e.key === 'Escape') setUserMenuOpen(false)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [userMenuOpen, deleteModalOpen])
+  }, [userMenuOpen])
 
   const handleSelectCard = useCallback(async (id: string) => {
     setIsCreating(false)
@@ -95,34 +91,19 @@ export default function ProfileShell() {
   }, [selectCard])
 
   const handleLogout = useCallback(() => { setUserMenuOpen(false); logout() }, [logout])
-  const handleOpenSettings = useCallback(() => { setUserMenuOpen(false); openAccountSettings() }, [openAccountSettings])
-  const handleOpenProfile = useCallback(() => { setUserMenuOpen(false); navigate('/profile/settings/account') }, [navigate])
-  const handleDeleteAccountClick = useCallback(() => {
-    setUserMenuOpen(false); setAccountDeleteError(null); setDeleteModalOpen(true)
-  }, [])
-  const handleDeleteAccountConfirm = useCallback(async () => {
-    setAccountDeleteError(null)
-    setIsDeletingAccount(true)
-    try {
-      const result = await deleteAccount()
-      setDeleteModalOpen(false)
-      if (result.warning) console.warn('[account]', result.warning)
-      logout()
-      navigate('/')
-    } catch (e) {
-      setAccountDeleteError(e instanceof Error ? e.message : 'Could not delete account')
-    } finally {
-      setIsDeletingAccount(false)
-    }
-  }, [logout, navigate])
+  const handleOpenSettings = useCallback(() => {
+    setUserMenuOpen(false)
+    setExiting(true)
+    setTimeout(() => navigate(profileSettingsPath('me/account')), 200)
+  }, [navigate])
+  const handleOpenProfile = useCallback(() => { setUserMenuOpen(false); navigate(profileSettingsPath('me')) }, [navigate])
 
   return (
-    <div className={styles.layout}>
+    <div className={`${styles.layout} ${exiting ? styles.layoutExiting : ''}`}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
-          <button type="button" className={styles.logoRow} onClick={() => navigate('/')}>
-            <img src={logoSvg} alt="Chimera" className={styles.logoIcon} />
-            <span className={styles.logoText}>Chimera</span>
+          <button type="button" className={styles.logoRow} onClick={() => navigate('/')} aria-label="inktide">
+            <LogoMark className={styles.logoIcon} aria-hidden />
           </button>
         </div>
 
@@ -133,7 +114,7 @@ export default function ProfileShell() {
 
         <nav className={styles.sidebarNav}>
           <NavLink
-            to="/profile"
+            to={HOME_ROUTE}
             end
             className={({ isActive }) =>
               `${styles.sidebarNavItem} ${isActive ? styles.sidebarNavItemActive : ''}`
@@ -266,15 +247,27 @@ export default function ProfileShell() {
                     {t('common:sidebar.settings')}
                   </button>
                   <div className={styles.userMenuDivider} />
-                  <button
-                    type="button"
-                    className={`${styles.userMenuItem} ${styles.userMenuItemDanger}`}
+                  <a
+                    href="https://docs.inktide.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.userMenuItem}
                     role="menuitem"
-                    onClick={handleDeleteAccountClick}
                   >
-                    <span className={styles.userMenuItemIcon} aria-hidden><IconTrash /></span>
-                    {t('common:sidebar.deleteAccount')}
-                  </button>
+                    <span className={styles.userMenuItemIcon} aria-hidden>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                      </svg>
+                    </span>
+                    Help
+                    <span className={styles.userMenuItemChevron} aria-hidden>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 18l6-6-6-6"/>
+                      </svg>
+                    </span>
+                  </a>
                   <button
                     type="button"
                     className={styles.userMenuItem}
@@ -303,14 +296,6 @@ export default function ProfileShell() {
         )}
       </main>
 
-      {deleteModalOpen && (
-        <DeleteAccountModal
-          isDeleting={isDeletingAccount}
-          error={accountDeleteError}
-          onClose={() => { setDeleteModalOpen(false); setAccountDeleteError(null) }}
-          onConfirm={() => void handleDeleteAccountConfirm()}
-        />
-      )}
     </div>
   )
 }

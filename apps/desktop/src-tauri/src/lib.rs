@@ -4,7 +4,7 @@ mod commands;
 pub fn run() {
     tauri::Builder::default()
         // ── Plugins ──────────────────────────────────────────────────────────
-        // Deep-link: handles chimera:// scheme (e.g. OAuth callbacks from OS browser)
+        // Deep-link: handles inktide:// scheme (e.g. OAuth callbacks from OS browser)
         .plugin(tauri_plugin_deep_link::init())
         // Shell: open URLs in the system browser (account management, docs, etc.)
         .plugin(tauri_plugin_shell::init())
@@ -16,7 +16,7 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::default().build())
         // ── Setup ────────────────────────────────────────────────────────────
         .setup(|app| {
-            // Register the chimera:// deep-link scheme so the OS routes it here.
+            // Register the inktide:// deep-link scheme so the OS routes it here.
             #[cfg(desktop)]
             {
                 use tauri_plugin_deep_link::DeepLinkExt;
@@ -30,5 +30,5 @@ pub fn run() {
             commands::get_platform,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running Chimera desktop");
+        .expect("error while running Inktide desktop");
 }

@@ -11,8 +11,8 @@ import { KeycloakLocaleSync } from './services/auth/KeycloakLocaleSync'
 import { MeAvatarService } from './services/auth/MeAvatarService'
 import './index.css'
 
-const TOKEN_KEY   = 'chimera_kc_token'
-const REFRESH_KEY = 'chimera_kc_refresh'
+const TOKEN_KEY   = 'inktide_kc_token'
+const REFRESH_KEY = 'inktide_kc_refresh'
 
 // ── Composition Root ──────────────────────────────────────────────────────────
 //

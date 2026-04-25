@@ -2,7 +2,7 @@ import type { IVisemeProvider, MouthWeights, RhubarbViseme, VisemeContext, Visem
 
 // ── Rhubarb → VRM blend-shape weights ────────────────────────────────────────
 //
-// Derived from crates/chimera-rendering/src/vrm_viseme.rs, adapted to the
+// Derived from crates/inktide-rendering/src/vrm_viseme.rs, adapted to the
 // five standard VRM expressions (aa / ih / ou / ee / oh).
 //
 //  X  — silence / rest

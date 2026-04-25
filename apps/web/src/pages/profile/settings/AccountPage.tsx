@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useCharactersContext } from '../../../context/CharactersContext'
 import AccountAvatarPanel from '../../../components/ProfilePage/AccountAvatarPanel'
+import { HOME_ROUTE } from '../../../constants/settingsRoutes'
 
 export default function AccountPage() {
   const navigate = useNavigate()
@@ -8,10 +9,10 @@ export default function AccountPage() {
 
   return (
     <AccountAvatarPanel
-      onBack={() => navigate('/profile')}
+      onBack={() => navigate(HOME_ROUTE)}
       projects={cardList}
       characters={characters}
-      onSelectProject={(id) => { void selectCard(id); navigate('/profile') }}
+      onSelectProject={(id) => { void selectCard(id); navigate(HOME_ROUTE) }}
     />
   )
 }

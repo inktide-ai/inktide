@@ -1,5 +1,5 @@
 [project]
-name = "chimera-semantic-model"
+name = "inktide-semantic-model"
 version = "0.1.0"
 description = "REST API for semantic text processing: embeddings and classification"
 readme = "README.md"

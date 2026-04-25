@@ -1,5 +1,5 @@
 /**
- * Chimera — AI companion platform for streaming
+ * Inktide — AI companion platform for streaming
  */
 
 export const VIDEO_CONFIG = {
@@ -48,13 +48,13 @@ export const CONTENT = {
       {
         title: 'API and integrations',
         description:
-          'Connect Chimera to Twitch, YouTube, Discord and other platforms. Set up once — works everywhere.',
+          'Connect Inktide to Twitch, YouTube, Discord and other platforms. Set up once — works everywhere.',
         icon: '🔌',
       },
     ],
   },
   benefits: {
-    heading: 'Why Chimera',
+    heading: 'Why Inktide',
     subheading: 'Analytics and insights to grow your AI companion',
     tabs: [
       {
@@ -73,7 +73,7 @@ export const CONTENT = {
         id: 'integration',
         label: 'Stream Integration Metrics',
         description:
-          'See how Chimera integrates with Twitch, YouTube, and Discord. Track donation reactions, chat triggers, and community engagement. Data-driven decisions help you create the perfect AI companion for your channel.',
+          'See how Inktide integrates with Twitch, YouTube, and Discord. Track donation reactions, chat triggers, and community engagement. Data-driven decisions help you create the perfect AI companion for your channel.',
       },
       {
         id: 'growth',
@@ -93,12 +93,12 @@ export const CONTENT = {
   demo: {
     heading: 'See how it works',
     description:
-      'Chimera sets up in minutes and integrates into your stream with no hassle.',
+      'Inktide sets up in minutes and integrates into your stream with no hassle.',
     steps: [
       {
         heading: 'See how it works',
         description:
-          'Chimera sets up in minutes and integrates into your stream with no hassle. Connect the OBS plugin, add your AI, and go live.',
+          'Inktide sets up in minutes and integrates into your stream with no hassle. Connect the OBS plugin, add your AI, and go live.',
         videoId: '',
         image: 'https://www.sandfield.co.nz/media/ocwmcnyw/bernd-dittrich-d_3ekbsg1tg-unsplash-1.webp?width=1920&height=1080&v=1d9745ecae6a000',
       },

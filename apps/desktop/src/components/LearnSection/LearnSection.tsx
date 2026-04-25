@@ -58,7 +58,7 @@ const LearnSection = () => {
                 <h4 className={styles.cardTitle}>AI Data</h4>
                 <p className={styles.cardText}>
                   Based on our analysis, we track how AI companions perform across streaming
-                  platforms. Each quarter, Chimera identifies engagement patterns and viewer
+                  platforms. Each quarter, Inktide identifies engagement patterns and viewer
                   interaction metrics to help streamers optimize their AI personalities.
                 </p>
                 <p className={styles.cardHighlight}>
@@ -88,7 +88,7 @@ const LearnSection = () => {
                   </div>
                 </div>
                 <div className={styles.cardLogos}>
-                  <span className={styles.logoText}>CHIMERA</span>
+                  <span className={styles.logoText}>INKTIDE</span>
                   <span className={styles.logoDivider} />
                   <span className={styles.logoText}>AI</span>
                 </div>

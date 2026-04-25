@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import logoSvg from '../../../assets/app/icon.svg'
+import LogoMark from '../../../assets/app/icon_without_white.svg?react'
 import caretSvg from '../../../assets/icons/caret-down.svg'
 import { useChatChannel } from '../../../hooks/useChatChannel'
 import type { LipSyncHandle } from '../../../hooks/useLipSync'
@@ -62,7 +62,7 @@ const SceneChat = ({ cardId, userId, lipSync, emotionGetterRef }: SceneChatProps
       <div className={styles.body} ref={listRef}>
         {messages.length === 0 ? (
           <div className={styles.empty}>
-            <img src={logoSvg} alt="Chimera" className={styles.emptyLogo} />
+            <LogoMark className={styles.emptyLogo} aria-hidden />
             <p className={styles.emptyText}>
               {t('chat.emptyText')}
               <br />
@@ -76,7 +76,7 @@ const SceneChat = ({ cardId, userId, lipSync, emotionGetterRef }: SceneChatProps
               className={msg.role === 'user' ? styles.msgUser : styles.msgAssistant}
             >
               {msg.role === 'assistant' && (
-                <img src={logoSvg} alt="" className={styles.msgAvatar} aria-hidden />
+                <LogoMark className={styles.msgAvatar} aria-hidden />
               )}
               <div className={msg.status === 'failed' ? styles.msgBubbleFailed : styles.msgBubble}>
                 {msg.pending && !msg.content ? (

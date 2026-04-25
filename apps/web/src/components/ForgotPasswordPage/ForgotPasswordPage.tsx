@@ -8,7 +8,7 @@ const ForgotPasswordPage = () => {
 
   useEffect(() => {
     if (!keycloak) return
-    const redirectUri = `${window.location.origin}/profile`
+    const redirectUri = `${window.location.origin}/home`
     void createForgotCredentialsLoginUrl(keycloak, redirectUri).then((url) => {
       window.location.assign(url)
     })

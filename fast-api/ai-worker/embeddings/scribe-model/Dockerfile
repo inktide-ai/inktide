@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-LABEL org.opencontainers.image.title="Chimera Scribe Model"
+LABEL org.opencontainers.image.title="Inktide Scribe Model"
 LABEL org.opencontainers.image.description="Conversation memory API: fact extraction, embeddings, classification"
 
 ENV PYTHONUNBUFFERED=1 \

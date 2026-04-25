@@ -1,8 +1,8 @@
-# Chimera — Полная архитектурная карта проекта
+# Inktide — Полная архитектурная карта проекта
 
-## Что такое Chimera
+## Что такое Inktide
 
-Chimera — **AI-стриминговая платформа**: виртуальный AI-компаньон, который читает чат Discord/Twitch, отвечает голосом через TTS, показывает 3D/2D аватар с синхронизацией губ. Полностью SaaS: каждый пользователь приносит свои API-ключи (BYOK).
+Inktide — **AI-стриминговая платформа**: виртуальный AI-компаньон, который читает чат Discord/Twitch, отвечает голосом через TTS, показывает 3D/2D аватар с синхронизацией губ. Полностью SaaS: каждый пользователь приносит свои API-ключи (BYOK).
 
 ---
 
@@ -26,8 +26,8 @@ Chimera — **AI-стриминговая платформа**: виртуаль
 ## Репозиторий
 
 ```
-chimera/
-├── src/                    # .NET 10 решение (Chimera.API.sln)
+inktide/
+├── src/                    # .NET 10 решение (Inktide.API.sln)
 ├── apps/
 │   ├── web/               # React 18 / Vite / TypeScript
 │   └── desktop/           # Tauri desktop app
@@ -47,7 +47,7 @@ chimera/
 |--------|------|-----------|
 | `postgres` | 5432 | Основная БД приложения |
 | `postgres-keycloak` | internal | БД для Keycloak |
-| `keycloak` | 8080 | SSO/OAuth2 (realm `chimera`) |
+| `keycloak` | 8080 | SSO/OAuth2 (realm `inktide`) |
 | `redis` | 6379 | Redis Streams + кэш |
 | `qdrant` | 6333/6334 | Векторная БД (semantic memory) |
 | `minio` | 9000/9001 | S3-совместимое хранилище файлов |
@@ -69,7 +69,7 @@ chimera/
 Program.cs → Startup.cs → App.cs
 ```
 
-**Startup.cs** (`src/Chimera.API/Deployment/Startup.cs`):
+**Startup.cs** (`src/Inktide.API/Deployment/Startup.cs`):
 - Читает секцию `Modules` из `appsettings.json`
 - Загружает DLL через reflection
 - Обнаруживает и вызывает все реализации интерфейсов:
@@ -81,7 +81,7 @@ Program.cs → Startup.cs → App.cs
 
 **appsettings.json — enabled modules:**
 ```
-Connector.Infrastructure, Connector.Discord, Connector.ChimeraChat
+Connector.Infrastructure, Connector.Discord, Connector.InktideChat
 Synapse.Infrastructure, Synapse.REST
 Profile.Application/Infrastructure/REST
 Soul.Application/Infrastructure/REST/Grpc/Grpc.AiCards.Service
@@ -107,7 +107,7 @@ Realtime.Infrastructure
 
 ### Soul — Управление AI-картами и BYOK-ключами
 
-**Расположение:** `src/Chimera.API.Soul/`
+**Расположение:** `src/Inktide.API.Soul/`
 
 **Ответственность:** Создание, настройка и хранение AI-компаньонов (AiCard). Управление пользовательскими API-ключами (BYOK). Каталог LLM/TTS моделей.
 
@@ -124,7 +124,7 @@ Realtime.Infrastructure
 
 **BYOK-шифрование:**
 - `ApiKeyProtector` (`Soul.Infrastructure/Security/ApiKeyProtector.cs`) — обёртка над ASP.NET Core Data Protection
-- Purpose string: `"chimera.llm-credentials.v1"` (версионировано для ротации ключей)
+- Purpose string: `"inktide.llm-credentials.v1"` (версионировано для ротации ключей)
 - `Protect(plainText)` / `Unprotect(cipherText)` — AES-256-CBC + HMAC
 
 **REST API:**
@@ -146,7 +146,7 @@ Realtime.Infrastructure
 
 ### Synapse — Оркестратор AI-пайплайна
 
-**Расположение:** `src/Chimera.API.Synapse/`
+**Расположение:** `src/Inktide.API.Synapse/`
 
 **Ответственность:** Принимает входящие сообщения из Redis, параллельно собирает контекст (история, память, конфиг персонажа), отправляет в LLM, публикует ответ по частям.
 
@@ -199,7 +199,7 @@ SynapseIngestOrchestrator
 
 ### Connector — Ингестия сообщений с платформ
 
-**Расположение:** `src/Chimera.API.Connector/`
+**Расположение:** `src/Inktide.API.Connector/`
 
 **Ответственность:** Получает сообщения из Discord/Twitch, помещает в Redis Stream.
 
@@ -221,7 +221,7 @@ RedisStreamPublisherWorker → XADD synapse.ingest
 
 ### TTS — Синтез речи
 
-**Расположение:** `src/Chimera.API.TTS/`
+**Расположение:** `src/Inktide.API.TTS/`
 
 **Ответственность:** Принимает текстовые чанки, синтезирует аудио, генерирует viseme-таймлайн для синхронизации губ.
 
@@ -250,7 +250,7 @@ synapse.tts.ready (audio base64 + viseme timeline)
 
 ### Memory — Семантическая память (RAG)
 
-**Расположение:** `src/Chimera.API.Memory/`
+**Расположение:** `src/Inktide.API.Memory/`
 
 **Ответственность:** Извлечение фактов из диалогов, векторное хранение, retrieval при генерации.
 
@@ -280,7 +280,7 @@ MemoryQueryService
 
 ### Realtime — Доставка аудио в браузер
 
-**Расположение:** `src/Chimera.API.Realtime/`
+**Расположение:** `src/Inktide.API.Realtime/`
 
 **Ответственность:** SignalR hub → push аудио + viseme timeline в браузер клиенту.
 
@@ -298,7 +298,7 @@ AudioHub (/audio)
 
 ### Profile — Аккаунт пользователя
 
-**Расположение:** `src/Chimera.API.Profile/`
+**Расположение:** `src/Inktide.API.Profile/`
 
 - `GET /api/profile/me` — информация о пользователе
 - Загрузка аватара/файлов → MinIO (S3)
@@ -346,10 +346,10 @@ main.tsx
         ↓
   AuthContext → парсит JWT: sub → userId, preferred_username, realm_access.roles
         ↓
-  ProtectedRoute → если !authenticated → редирект на Keycloak login (realm: chimera)
+  ProtectedRoute → если !authenticated → редирект на Keycloak login (realm: inktide)
 ```
 
-Токены: localStorage (`chimera_kc_token`, `chimera_kc_refresh`). Refresh: автоматически в `apiFetch` при 401.
+Токены: localStorage (`inktide_kc_token`, `inktide_kc_refresh`). Refresh: автоматически в `apiFetch` при 401.
 
 ### Доменная модель персонажа
 
@@ -407,18 +407,18 @@ interface AiCharacter {
 
 | Crate | Назначение |
 |-------|-----------|
-| `chimera-lipsync` | WAV → `VisemeTimeline`: Rhubarb CLI (высокое качество) или AmplitudeAnalyzer (fallback) |
-| `chimera-audio` | Виртуальный аудиовыход, буферизация |
-| `chimera-animation` | Анимации персонажа |
-| `chimera-rendering` | 3D/2D рендеринг аватара (использует lipsync) |
-| `chimera-server` | gRPC-сервер (точка входа, stub) |
+| `inktide-lipsync` | WAV → `VisemeTimeline`: Rhubarb CLI (высокое качество) или AmplitudeAnalyzer (fallback) |
+| `inktide-audio` | Виртуальный аудиовыход, буферизация |
+| `inktide-animation` | Анимации персонажа |
+| `inktide-rendering` | 3D/2D рендеринг аватара (использует lipsync) |
+| `inktide-server` | gRPC-сервер (точка входа, stub) |
 
 ---
 
 ## Keycloak
 
-**Realm:** `chimera` (для пользователей приложения), `chimera-backend-admin` (для admin API)
-**Клиент:** `chimera-web` (public, PKCE)
+**Realm:** `inktide` (для пользователей приложения), `inktide-backend-admin` (для admin API)
+**Клиент:** `inktide-web` (public, PKCE)
 
 ### Тема (`keycloak/theme/`)
 React + Vite + Keycloakify. Страницы: login, register, account, email-templates.

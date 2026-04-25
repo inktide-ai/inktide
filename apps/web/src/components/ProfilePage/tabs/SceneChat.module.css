@@ -52,8 +52,8 @@
 }
 
 .emptyLogo {
-  width: 72px;
-  height: 72px;
+  height: 60px;
+  width: auto;
   object-fit: contain;
   opacity: 0.9;
   margin-bottom: 6px;
@@ -87,12 +87,12 @@
 }
 
 .msgAvatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  height: 16px;
+  width: auto;
+  border-radius: 2px;
   object-fit: contain;
   flex-shrink: 0;
-  background: rgba(255,255,255,0.05);
+  opacity: 0.8;
 }
 
 .msgBubble {

@@ -4,12 +4,13 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 0.75rem 2rem;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  transition: transform 0.35s ease;
+  padding: 0 2rem;
+  height: 60px;
+  background: var(--nav-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--nav-border-color);
+  transition: transform 0.35s ease, background 0.25s ease, border-color 0.25s ease;
 }
 
 .navbar.hidden {
@@ -18,6 +19,7 @@
 
 .navbarContent {
   max-width: 1400px;
+  height: 100%;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -25,178 +27,166 @@
   gap: 2rem;
 }
 
+.leftGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── Logo ── */
 .logo,
 .logoButton {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.55rem;
   cursor: pointer;
   text-decoration: none;
-  transition: transform 0.3s ease;
   background: none;
   border: none;
   padding: 0;
-}
-
-.logo:hover,
-.logoButton:hover {
-  transform: scale(1.02);
-}
-
-.logoButton {
-  color: inherit;
+  flex-shrink: 0;
 }
 
 .logoIcon {
-  width: 48px;
-  height: 48px;
+  height: 28px;
+  width: auto;
   object-fit: contain;
+  margin-top: -4px;
+  transition: filter 0.25s ease;
 }
 
-.logoText {
-  font-family: var(--font-ui);
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: #fff;
-  letter-spacing: -0.5px;
-}
 
+/* ── Nav links ── */
 .menu {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  flex: 1;
-  justify-content: center;
+  gap: 0.25rem;
 }
 
 .menuItem {
   font-family: var(--font-ui);
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--nav-item-color);
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  transition: color 0.2s ease;
+  padding: 0.4rem 0.875rem;
+  border-radius: 7px;
+  transition: color 0.18s ease, background 0.18s ease;
   background: none;
   border: none;
-  padding: 0;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .menuItem:hover {
-  color: #fff;
+  color: var(--nav-item-hover-color);
+  background: var(--nav-item-hover-bg);
 }
 
-.menuItem::after {
-  display: none;
+.menuItemActive {
+  color: var(--nav-item-active-color) !important;
+  background: var(--nav-item-active-bg) !important;
 }
 
-.caret {
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid rgba(255, 255, 255, 0.7);
-  margin-left: 2px;
-}
-
+/* ── Auth panel ── */
 .authPanel {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.625rem;
+  flex-shrink: 0;
 }
 
-.navLink {
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.75);
-  text-decoration: none;
-  transition: color 0.2s ease;
+/* ── Theme toggle ── */
+.themeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
   background: none;
   border: none;
-  padding: 0;
+  border-radius: 8px;
+  color: var(--nav-theme-btn-color);
   cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease;
+  flex-shrink: 0;
 }
 
-.navLink:hover {
-  color: #fff;
+.themeToggle:hover {
+  color: var(--nav-theme-btn-hover);
+  background: var(--nav-item-hover-bg);
 }
 
 .loginButton {
-  padding: 0.5rem 1.25rem;
-  background: rgba(255, 255, 255, 0.12);
-  border: none;
+  padding: 0.45rem 1.1rem;
+  background: transparent;
+  border: 1px solid var(--nav-login-border);
   border-radius: 8px;
-  color: #fff;
+  color: var(--nav-login-color);
   font-family: var(--font-ui);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
 }
 
 .loginButton:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--nav-login-hover-bg);
 }
 
 .signupButton {
-  padding: 0.5rem 1.25rem;
-  background: var(--accent-red);
+  padding: 0.45rem 1.1rem;
+  background: var(--nav-signup-bg);
   border: none;
   border-radius: 8px;
-  color: #fff;
+  color: var(--nav-signup-color);
   font-family: var(--font-ui);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.18s ease;
+  white-space: nowrap;
 }
 
 .signupButton:hover {
-  background: var(--accent-red-bright);
-  transform: translateY(-1px);
+  background: var(--nav-signup-hover-bg);
 }
 
-.signupButton:active {
-  transform: translateY(0);
-}
-
+/* ── Profile / logout ── */
 .profileLink {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.4rem 0.9rem;
-  background: rgba(255, 255, 255, 0.12);
+  padding: 0.4rem 0.875rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  color: #fff;
+  color: var(--nav-login-color);
   font-family: var(--font-ui);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
-  border: none;
   cursor: pointer;
+  transition: background 0.18s ease;
 }
 
 .profileLink:hover {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.13);
 }
 
 .profileIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--accent-red);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .profileIconImg {
@@ -206,25 +196,24 @@
   display: block;
 }
 
+.profileText {
+  font-size: 0.875rem;
+}
+
 .logoutButton {
-  padding: 0.5rem 1.25rem;
+  padding: 0.45rem 1.1rem;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--nav-login-border);
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--nav-login-color);
   font-family: var(--font-ui);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.18s ease, color 0.18s ease;
 }
 
-.logoutButton:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #fff;
-}
-
-/* Hamburger button — hidden on desktop */
+/* ── Burger — hidden on desktop ── */
 .burger {
   display: none;
   flex-direction: column;
@@ -242,51 +231,30 @@
   display: block;
   width: 100%;
   height: 2px;
-  background: #fff;
+  background: var(--nav-login-color);
   border-radius: 1px;
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.burgerLine.burgerOpen:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
-}
+.burgerLine.burgerOpen:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.burgerLine.burgerOpen:nth-child(2) { opacity: 0; }
+.burgerLine.burgerOpen:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-.burgerLine.burgerOpen:nth-child(2) {
-  opacity: 0;
-}
-
-.burgerLine.burgerOpen:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
-}
-
-/* Mobile overlay + drawer — hidden on desktop */
-.mobileOverlay {
-  display: none;
-}
-
-.mobileDrawer {
-  display: none;
-}
+/* ── Mobile overlay + drawer — hidden on desktop ── */
+.mobileOverlay { display: none; }
+.mobileDrawer  { display: none; }
 
 @media (max-width: 1024px) {
-  .menu {
-    display: none;
-  }
-
-  .authPanel {
-    display: none;
-  }
-
-  .burger {
-    display: flex;
-  }
+  .menu     { display: none; }
+  .authPanel { display: none; }
+  .burger   { display: flex; }
 
   .mobileOverlay {
     display: block;
     position: fixed;
     inset: 0;
     z-index: 999;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     animation: overlayIn 0.25s ease forwards;
@@ -307,7 +275,7 @@
     z-index: 1001;
     width: 300px;
     max-width: 88vw;
-    background: #0d0d11;
+    background: #111110;
     border-left: 1px solid rgba(255, 255, 255, 0.07);
     transform: translateX(100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -315,11 +283,8 @@
     overflow-x: hidden;
   }
 
-  .mobileDrawerOpen {
-    transform: translateX(0);
-  }
+  .mobileDrawerOpen { transform: translateX(0); }
 
-  /* Drawer header with logo */
   .mobileDrawerHeader {
     display: flex;
     align-items: center;
@@ -332,19 +297,19 @@
   .mobileDrawerLogo {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.55rem;
     text-decoration: none;
   }
 
   .mobileDrawerLogoIcon {
-    width: 32px;
-    height: 32px;
+    height: 22px;
+    width: auto;
     object-fit: contain;
   }
 
   .mobileDrawerLogoText {
     font-family: var(--font-ui);
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #fff;
     letter-spacing: -0.3px;
@@ -361,13 +326,10 @@
     border-radius: 8px;
     cursor: pointer;
     transition: background 0.2s ease;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.55);
   }
 
-  .mobileDrawerClose:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-  }
+  .mobileDrawerClose:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
 
   .mobileDrawerClose svg {
     width: 14px;
@@ -377,7 +339,6 @@
     fill: none;
   }
 
-  /* Nav section */
   .mobileMenu {
     display: flex;
     flex-direction: column;
@@ -392,17 +353,17 @@
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.22);
     padding: 0.5rem 0.75rem 0.75rem;
   }
 
   .mobileMenuItem {
     font-family: var(--font-ui);
-    font-size: 0.975rem;
+    font-size: 0.95rem;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.65);
     text-decoration: none;
-    padding: 0.8rem 0.75rem;
+    padding: 0.75rem 0.875rem;
     border-radius: 10px;
     transition: background 0.18s ease, color 0.18s ease;
     background: none;
@@ -410,31 +371,13 @@
     text-align: left;
     cursor: pointer;
     width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .mobileMenuItem::before {
-    content: '';
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    flex-shrink: 0;
-    transition: background 0.18s ease;
   }
 
   .mobileMenuItem:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.06);
     color: #fff;
   }
 
-  .mobileMenuItem:hover::before {
-    background: var(--accent-red);
-  }
-
-  /* Auth section */
   .mobileAuth {
     display: flex;
     flex-direction: column;
@@ -444,7 +387,6 @@
     flex-shrink: 0;
   }
 
-  /* Profile block for logged-in state */
   .mobileProfileBlock {
     display: flex;
     align-items: center;
@@ -457,27 +399,22 @@
   }
 
   .mobileProfileAvatar {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background: var(--accent-red);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: var(--font-ui);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #fff;
     flex-shrink: 0;
     overflow: hidden;
   }
 
-  .mobileProfileAvatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
+  .mobileProfileAvatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   .mobileProfileName {
     font-family: var(--font-ui);
@@ -489,47 +426,38 @@
   .mobileAuthButton {
     width: 100%;
     padding: 0.8rem 1.25rem;
-    background: var(--accent-red);
+    background: #f5f4f0;
     border: none;
     border-radius: 10px;
-    color: #fff;
+    color: #141413;
     font-family: var(--font-ui);
     font-size: 0.925rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.15s ease;
-    letter-spacing: 0.01em;
+    transition: background 0.18s ease;
   }
 
-  .mobileAuthButton:hover {
-    background: var(--accent-red-bright);
-    transform: translateY(-1px);
-  }
-
-  .mobileAuthButton:active {
-    transform: translateY(0);
-  }
+  .mobileAuthButton:hover { background: #ffffff; }
 
   .mobileAuthButtonOutline {
     width: 100%;
     padding: 0.8rem 1.25rem;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 10px;
     color: rgba(255, 255, 255, 0.7);
     font-family: var(--font-ui);
     font-size: 0.925rem;
     font-weight: 500;
     cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease;
+    transition: border-color 0.18s ease, color 0.18s ease;
   }
 
   .mobileAuthButtonOutline:hover {
-    border-color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.35);
     color: #fff;
   }
 
-  /* Footer inside drawer */
   .mobileDrawerFooter {
     padding: 0.875rem 1.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.04);
@@ -539,26 +467,13 @@
   .mobileDrawerVersion {
     font-family: var(--font-mono);
     font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.18);
     letter-spacing: 0.05em;
   }
 }
 
 @media (max-width: 768px) {
-  .navbar {
-    padding: 0.75rem 1rem;
-  }
-
-  .navbarContent {
-    gap: 1rem;
-  }
-
-  .logoIcon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .logoText {
-    font-size: 1.15rem;
-  }
+  .navbar { padding: 0 1rem; }
+  .navbarContent { gap: 1rem; }
+  .logoIcon { height: 22px; }
 }

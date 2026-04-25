@@ -1,4 +1,4 @@
-# Chimera Synapse — Production Architecture
+# Inktide Synapse — Production Architecture
 
 > Engineering-grade design for 10K concurrent streamer channels.
 > No vendor lock-in. Self-hosted stack. Every decision justified.
@@ -151,7 +151,7 @@ Twitch / Discord
 ### Topic Topology
 
 ```
-Exchange:  chimera.streaming (Kafka cluster, replication factor: 3)
+Exchange:  inktide.streaming (Kafka cluster, replication factor: 3)
 
 Topic                  Partitions  Key          Retention  Consumers
 ─────────────────────  ──────────  ───────────  ─────────  ──────────────
@@ -1033,7 +1033,7 @@ public sealed class ContextWorkerHost : BackgroundService
 // Single ActivitySource for the whole Synapse module
 public static class Telemetry
 {
-    public static readonly ActivitySource ActivitySource = new("Chimera.Synapse", "1.0.0");
+    public static readonly ActivitySource ActivitySource = new("Inktide.Synapse", "1.0.0");
 }
 
 // traceId born in Gate, propagated via Kafka header
@@ -1206,7 +1206,7 @@ services:
 
   # ─── GATE ─────────────────────────────────────────────────────────────────
   synapse-gate:
-    image: chimera/synapse-gate:latest
+    image: inktide/synapse-gate:latest
     environment:
       KAFKA__BOOTSTRAP_SERVERS: kafka:9092
       KAFKA__INPUT_TOPIC:  chat.input
@@ -1220,7 +1220,7 @@ services:
 
   # ─── CONTEXT ──────────────────────────────────────────────────────────────
   synapse-context:
-    image: chimera/synapse-context:latest
+    image: inktide/synapse-context:latest
     environment:
       KAFKA__INPUT_TOPIC:  synapse.gate
       KAFKA__OUTPUT_TOPIC: synapse.context
@@ -1251,7 +1251,7 @@ services:
 
   # ─── LLM POOL ─────────────────────────────────────────────────────────────
   synapse-llm:
-    image: chimera/synapse-llm:latest
+    image: inktide/synapse-llm:latest
     environment:
       KAFKA__INPUT_TOPIC:   synapse.context
       KAFKA__OUTPUT_TOPIC:  synapse.response
@@ -1265,7 +1265,7 @@ services:
 
   # ─── OUTBOX RELAY ─────────────────────────────────────────────────────────
   synapse-outbox-relay:
-    image: chimera/synapse-outbox-relay:latest
+    image: inktide/synapse-outbox-relay:latest
     environment:
       OUTBOX__POLL_INTERVAL_MS: 100
       OUTBOX__BATCH_SIZE: 100

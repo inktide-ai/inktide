@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+option csharp_namespace = "Inktide.API.Soul.Grpc.Contracts.AiCards";
+
+package inktide.soul;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AiCard Service — internal gRPC API for AI companion card management.
+// Consumed by other backend services (e.g. Synapse, AutoPilot) that need to
+// read card configuration without going through the public REST API.
+// ─────────────────────────────────────────────────────────────────────────────
+
+service AiCardService {
+  // Returns a single AI card by its ID (for the given owner).
+  rpc GetCard (GetCardRequest) returns (AiCardResponse);
+
+  // Returns all AI cards owned by a user.
+  rpc ListCards (ListCardsRequest) returns (ListCardsResponse);
+
+  // Creates a new AI card.
+  rpc CreateCard (CreateCardRequest) returns (AiCardResponse);
+
+  // Updates an existing AI card (full replace of mutable fields).
+  rpc UpdateCard (UpdateCardRequest) returns (AiCardResponse);
+
+  // Soft-deletes an AI card.
+  rpc DeleteCard (DeleteCardRequest) returns (DeleteCardResponse);
+}
+
+// ─── Requests ────────────────────────────────────────────────────────────────
+
+message GetCardRequest {
+  string user_id = 1;
+  string card_id = 2;
+}
+
+message ListCardsRequest {
+  string user_id = 1;
+}
+
+message CreateCardRequest {
+  string user_id        = 1;
+  string name           = 2;
+  string slug           = 3;
+  string personality    = 4;
+  string system_prompt  = 5;
+  string llm_catalog_id = 6;
+  string llm_config     = 7;  // JSON blob
+  optional string tts_catalog_id  = 8;
+  optional string tts_config      = 9;  // JSON blob
+  string appearance        = 10; // JSON blob — visual settings
+  string response_behavior = 11; // JSON blob — runtime response knobs
+  string memory_settings   = 12; // JSON blob
+  string auto_pilot        = 13; // JSON blob
+  optional string avatar_url = 14;
+}
+
+message UpdateCardRequest {
+  string user_id        = 1;
+  string card_id        = 2;
+  string name           = 3;
+  string slug           = 4;
+  string personality    = 5;
+  string system_prompt  = 6;
+  string llm_catalog_id = 7;
+  string llm_config     = 8;
+  optional string tts_catalog_id  = 9;
+  optional string tts_config      = 10;
+  string appearance        = 11;
+  string response_behavior = 12;
+  string memory_settings   = 13;
+  string auto_pilot        = 14;
+  bool   is_active         = 15;
+  optional string avatar_url = 16;
+}
+
+message DeleteCardRequest {
+  string user_id = 1;
+  string card_id = 2;
+}
+
+// ─── Responses ───────────────────────────────────────────────────────────────
+
+message AiCardResponse {
+  string card_id        = 1;
+  string user_id        = 2;
+  string name           = 3;
+  string slug           = 4;
+  string personality    = 5;
+  string system_prompt  = 6;
+  string llm_catalog_id = 7;
+  string llm_config     = 8;
+  optional string tts_catalog_id  = 9;
+  optional string tts_config      = 10;
+  string appearance        = 11;
+  string response_behavior = 12;
+  string memory_settings   = 13;
+  string auto_pilot        = 14;
+  bool   is_active         = 15;
+  string created_at        = 16; // ISO-8601
+  string updated_at        = 17; // ISO-8601
+  optional string avatar_url = 18;
+}
+
+message ListCardsResponse {
+  repeated AiCardResponse cards = 1;
+}
+
+message DeleteCardResponse {
+  bool success = 1;
+}

@@ -11,6 +11,8 @@ import type { LipSyncHandle } from '../../hooks/useLipSync'
  * - передавать фиксированный handle через замыкание (useAudioStream)
  */
 export class WebAudioPlayer implements IAudioPlayer {
+
+
   private readonly _getLipSync: () => LipSyncHandle | undefined
   private _ownCtx: AudioContext | null = null
 
@@ -19,10 +21,11 @@ export class WebAudioPlayer implements IAudioPlayer {
   private _activeSource: AudioBufferSourceNode | null = null
   private _playing = false
   private _destroyed = false
-
+  
   constructor(getLipSync: () => LipSyncHandle | undefined) {
     this._getLipSync = getLipSync
   }
+
 
   enqueue(correlationId: string, audioBase64: string, timeline: VisemeCue[] | null): void {
     if (this._destroyed) return
@@ -44,7 +47,7 @@ export class WebAudioPlayer implements IAudioPlayer {
     }
   }
 
-  // ── Private ──────────────────────────────────────────────────────────────────
+
 
   private _getCtx(): AudioContext {
     const lipSync = this._getLipSync()
@@ -83,7 +86,7 @@ export class WebAudioPlayer implements IAudioPlayer {
     const lipSync = this._getLipSync()
     const bytes = base64ToBytes(item.base64)
 
-    ctx.decodeAudioData(bytes.buffer.slice(0) as ArrayBuffer)
+    ctx.decodeAudioData(bytes.buffer as ArrayBuffer)
       .then((buffer) => {
         if (this._destroyed || !this._playing) return
 
@@ -110,11 +113,11 @@ export class WebAudioPlayer implements IAudioPlayer {
         this._drain()
       })
   }
+
+
+
 }
 
 function base64ToBytes(base64: string): Uint8Array {
-  const binary = atob(base64)
-  const bytes = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-  return bytes
+  return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
 }

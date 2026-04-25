@@ -1,6 +1,5 @@
 import classnames from 'classnames'
 import { useTranslation } from 'react-i18next'
-import GlitchText from '../GlitchText'
 import { useRevealOnScroll } from '../../hooks'
 import ArrowIcon from '../../assets/app/arrow.svg'
 import styles from './FeaturesSection.module.css'
@@ -17,7 +16,7 @@ const FeaturesSection = () => {
       <div className={styles.glow} />
       <div className={styles.container}>
         <div className={styles.header}>
-          <GlitchText text={t('features.heading')} tag="h2" className={styles.heading} />
+          <h2 className={styles.heading}>{t('features.heading')}</h2>
           <p className={styles.subheading}>{t('features.subheading')}</p>
           <div className={styles.actions}>
             <button type="button" className={styles.supportButton}>

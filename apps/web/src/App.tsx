@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import LoadingScreen from './components/LoadingScreen'
 import ProtectedRoute from './components/ProtectedRoute'
 import { CharactersProvider } from './context/CharactersContext'
+import { ThemeProvider } from './context/ThemeContext'
 import ProfileShell from './layouts/ProfileShell/ProfileShell'
 import ProfileSettingsSectionLayout from './layouts/ProfileSettingsSectionLayout/ProfileSettingsSectionLayout'
 import './App.css'
@@ -29,60 +30,64 @@ const IntegrationsPage    = lazy(() => import('./pages/profile/settings/Integrat
 const ObsPage             = lazy(() => import('./pages/profile/settings/ObsPage'))
 const BackupPage          = lazy(() => import('./pages/profile/settings/BackupPage'))
 const AccountPage         = lazy(() => import('./pages/profile/settings/AccountPage'))
+const UserAccountPage     = lazy(() => import('./pages/profile/UserAccountPage'))
 
 function App() {
   return (
-    <BrowserRouter>
-      <Suspense fallback={<LoadingScreen />}>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
-          <Route path="/obs/scene" element={<ObsScenePage />} />
+    <ThemeProvider>
+      <BrowserRouter>
+        <Suspense fallback={<LoadingScreen />}>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/obs/scene" element={<ObsScenePage />} />
 
-          <Route
-            element={
-              <ProtectedRoute>
-                <CharactersProvider>
-                  <ProfileShell />
-                </CharactersProvider>
-              </ProtectedRoute>
-            }
-          >
-            <Route path="/profile" element={<DashboardPage />} />
-            <Route path="/profile/bot/:cardId/edit" element={<CharacterEditPage />} />
+            <Route
+              element={
+                <ProtectedRoute>
+                  <CharactersProvider>
+                    <ProfileShell />
+                  </CharactersProvider>
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/home" element={<DashboardPage />} />
+              <Route path="/home/bot/:cardId/edit" element={<CharacterEditPage />} />
 
-            <Route path="/profile/settings" element={<Outlet />}>
-              <Route index element={<SettingsHubPage />} />
-              <Route path="account" element={<AccountPage />} />
-              <Route element={<ProfileSettingsSectionLayout />}>
-                <Route path="identity"     element={<IdentityPage />} />
-                <Route path="skills"       element={<SkillsPage />} />
-                <Route path="model"        element={<ModelPage />} />
-                <Route path="scene"              element={<ScenePage />} />
-                <Route path="scene/:sceneId"    element={<SceneDetailPage />} />
-                <Route path="memory"            element={<MemoryPage />} />
-                <Route path="brain"             element={<BrainPage />} />
-                <Route path="brain/:providerId" element={<BrainPage />} />
-                <Route path="voice"             element={<VoicePage />} />
-                <Route path="voice/:providerId" element={<VoicePage />} />
-                <Route path="integrations"              element={<IntegrationsPage />} />
-                <Route path="obs"                       element={<ObsPage />} />
-                <Route path="backup"                    element={<BackupPage />} />
-                <Route path="providers"                 element={<Navigate to="/profile/settings/brain" replace />} />
-                <Route path="providers/:providerId"     element={<Navigate to="/profile/settings/brain" replace />} />
+              <Route path="/settings" element={<Outlet />}>
+                <Route index element={<SettingsHubPage />} />
+                <Route path="me" element={<AccountPage />} />
+              <Route path="me/account" element={<UserAccountPage />} />
+                <Route element={<ProfileSettingsSectionLayout />}>
+                  <Route path="identity"     element={<IdentityPage />} />
+                  <Route path="skills"       element={<SkillsPage />} />
+                  <Route path="model"        element={<ModelPage />} />
+                  <Route path="scene"              element={<ScenePage />} />
+                  <Route path="scene/:sceneId"    element={<SceneDetailPage />} />
+                  <Route path="memory"            element={<MemoryPage />} />
+                  <Route path="brain"             element={<BrainPage />} />
+                  <Route path="brain/:providerId" element={<BrainPage />} />
+                  <Route path="voice"             element={<VoicePage />} />
+                  <Route path="voice/:providerId" element={<VoicePage />} />
+                  <Route path="integrations"              element={<IntegrationsPage />} />
+                  <Route path="obs"                       element={<ObsPage />} />
+                  <Route path="backup"                    element={<BackupPage />} />
+                  <Route path="providers"                 element={<Navigate to="/settings/brain" replace />} />
+                  <Route path="providers/:providerId"     element={<Navigate to="/settings/brain" replace />} />
+                </Route>
               </Route>
+
+              <Route path="*" element={<Navigate to="/home" replace />} />
             </Route>
 
-            <Route path="*" element={<Navigate to="/profile" replace />} />
-          </Route>
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }
 

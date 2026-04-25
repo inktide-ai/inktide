@@ -1,6 +1,6 @@
-# Chimera
+# Inktide
 
-**Chimera** — AI-стример. Слушает Discord и Twitch чат, думает, отвечает голосом — в реальном времени, пока идёт стрим.
+**Inktide** — AI-стример. Слушает Discord и Twitch чат, думает, отвечает голосом — в реальном времени, пока идёт стрим.
 
 Не чат-бот. Не скрипт. Персонаж с памятью, голосом и реакцией на аудиторию.
 
@@ -46,17 +46,17 @@ Discord / Twitch
 ## Структура репозитория
 
 ```
-chimera/
+inktide/
 ├── src/                        .NET 10 — API host + bounded contexts
-│   ├── Chimera.API/            — host, module system, DI
-│   ├── Chimera.API.Connector/  — Discord / Twitch ingest → Redis Stream
-│   ├── Chimera.API.Synapse/    — pipeline orchestration (scatter-gather)
-│   ├── Chimera.API.Soul/       — AiCard управление, gRPC, S3 модели
-│   ├── Chimera.API.Memory/     — RAG: Qdrant + Ollama embeddings + Scribe
-│   ├── Chimera.API.TTS/        — Kokoro TTS, streaming synthesis
-│   ├── Chimera.API.Realtime/   — SignalR AudioHub (браузерный микрофон)
-│   ├── Chimera.API.Profile/    — пользователи, Keycloak Admin API, MinIO
-│   └── Chimera.API.Core/       — shared kernel
+│   ├── Inktide.API/            — host, module system, DI
+│   ├── Inktide.API.Connector/  — Discord / Twitch ingest → Redis Stream
+│   ├── Inktide.API.Synapse/    — pipeline orchestration (scatter-gather)
+│   ├── Inktide.API.Soul/       — AiCard управление, gRPC, S3 модели
+│   ├── Inktide.API.Memory/     — RAG: Qdrant + Ollama embeddings + Scribe
+│   ├── Inktide.API.TTS/        — Kokoro TTS, streaming synthesis
+│   ├── Inktide.API.Realtime/   — SignalR AudioHub (браузерный микрофон)
+│   ├── Inktide.API.Profile/    — пользователи, Keycloak Admin API, MinIO
+│   └── Inktide.API.Core/       — shared kernel
 │
 ├── apps/
 │   ├── web/                    React 18 / Vite / TypeScript
@@ -95,10 +95,10 @@ chimera/
 Архитектура следует DDD / Hexagonal. Каждый контекст — отдельный набор проектов:
 
 ```
-Chimera.API.{Context}.Domain         — сущности, репозитории (порты)
-Chimera.API.{Context}.Application    — use cases, интерфейсы сервисов
-Chimera.API.{Context}.Infrastructure — адаптеры (HTTP, DB, Redis, внешние API)
-Chimera.API.{Context}.REST           — контроллеры, валидация, DI wiring
+Inktide.API.{Context}.Domain         — сущности, репозитории (порты)
+Inktide.API.{Context}.Application    — use cases, интерфейсы сервисов
+Inktide.API.{Context}.Infrastructure — адаптеры (HTTP, DB, Redis, внешние API)
+Inktide.API.{Context}.REST           — контроллеры, валидация, DI wiring
 ```
 
 Главный хост загружает модули через reflection по списку в `appsettings.json`. Контейнер — DryIoc, с бриджом к MS DI для ASP.NET Core.
@@ -117,8 +117,8 @@ docker compose up -d
 ### .NET Backend
 
 ```bash
-dotnet build Chimera.API.sln
-dotnet run --project src/Chimera.API
+dotnet build Inktide.API.sln
+dotnet run --project src/Inktide.API
 ```
 
 ### Web

@@ -11,7 +11,7 @@ const AuthCallbackPage = () => {
     if (!isInitialized) return
 
     if (isLoggedIn) {
-      navigate('/profile', { replace: true })
+      navigate('/home', { replace: true })
     } else {
       navigate('/login', { replace: true })
     }

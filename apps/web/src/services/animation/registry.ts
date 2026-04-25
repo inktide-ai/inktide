@@ -6,7 +6,7 @@
 
 import type { IVrmController } from '../../ports/IVrmController'
 import { BlinkController } from './controllers/BlinkController'
-import { GazeController } from './controllers/GazeController'
+import { GazeController } from './controllers/gazeController/GazeController'
 import { AnimationStateMachineController } from './controllers/stateMachine'
 import { ExpressionController } from './controllers/ExpressionController'
 
@@ -14,11 +14,15 @@ import { ExpressionController } from './controllers/ExpressionController'
  * Фабрика — каждый VrmRenderer получает собственные экземпляры контроллеров.
  * Порядок важен: обновление идёт сверху вниз каждый кадр.
  */
+type ControllerFactory = () => IVrmController
+
+const CONTROLLER_FACTORIES: ControllerFactory[] = [
+  () => new BlinkController(),
+  () => new GazeController(),
+  () => new AnimationStateMachineController(),
+  () => new ExpressionController(),
+]
+
 export function createVrmControllers(): IVrmController[] {
-  return [
-    new BlinkController(),
-    new GazeController(),
-    new AnimationStateMachineController(),
-    new ExpressionController(),
-  ]
+  return CONTROLLER_FACTORIES.map(f => f())
 }

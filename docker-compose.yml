@@ -31,7 +31,7 @@ services:
       - .env
     environment:
       TtsProviders__Kokoro__Endpoint: http://kokoro:8880/v1
-      KeycloakSettings__MetadataAddress: http://keycloak:8080/realms/chimera/.well-known/openid-configuration
+      KeycloakSettings__MetadataAddress: http://keycloak:8080/realms/inktide/.well-known/openid-configuration
       KeycloakAdminSettings__BaseUrl: http://keycloak:8080
       Kestrel__Endpoints__Http__Url: http://+:5001
       S3Settings__ServiceUrl: http://minio:9000
@@ -64,9 +64,9 @@ services:
     image: postgres:16-alpine
     profiles: [core]
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-chimera}
-      POSTGRES_USER: ${POSTGRES_USER:-chimera}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-chimera}
+      POSTGRES_DB: ${POSTGRES_DB:-inktide}
+      POSTGRES_USER: ${POSTGRES_USER:-inktide}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-inktide}
     ports:
       - "5432:5432"
     volumes:

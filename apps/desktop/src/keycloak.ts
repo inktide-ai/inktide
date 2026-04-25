@@ -24,11 +24,11 @@ export async function createForgotCredentialsLoginUrl(
 
 export const keycloak = new Keycloak({
   url: import.meta.env.VITE_KEYCLOAK_URL ?? 'http://localhost:8080',
-  realm: import.meta.env.VITE_KEYCLOAK_REALM ?? 'chimera',
+  realm: import.meta.env.VITE_KEYCLOAK_REALM ?? 'inktide',
   // Use a dedicated Keycloak client with allowed redirect URIs:
   //   http://localhost:3001/*   ← dev (Vite)
   //   tauri://localhost/*       ← production Tauri WebView
-  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID ?? 'chimera-desktop',
+  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID ?? 'inktide-desktop',
 })
 
 export const initOptions = {

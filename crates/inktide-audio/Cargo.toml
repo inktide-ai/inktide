@@ -1,0 +1,10 @@
+[package]
+name = "inktide-audio"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "inktide_audio"
+path = "src/lib.rs"
+
+[dependencies]

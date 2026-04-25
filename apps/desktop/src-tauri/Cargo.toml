@@ -1,13 +1,13 @@
 [package]
-name = "chimera-desktop"
+name = "inktide-desktop"
 version = "0.1.0"
-description = "Chimera Desktop — AI companion for streaming"
+description = "Inktide Desktop — AI companion for streaming"
 authors = []
 edition = "2021"
 
 # The lib target is required by Tauri's code generation (mobile builds need cdylib).
 [lib]
-name = "chimera_desktop_lib"
+name = "inktide_desktop_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

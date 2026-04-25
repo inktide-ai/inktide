@@ -19,7 +19,7 @@ def _setup_logging() -> None:
 async def main() -> None:
     _setup_logging()
     logger = logging.getLogger(__name__)
-    logger.info("Starting Chimera LLM Worker")
+    logger.info("Starting Inktide LLM Worker")
 
     redis = aioredis.from_url(settings.redis_url, decode_responses=False)
     llm = OllamaClient()

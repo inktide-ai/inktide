@@ -10,7 +10,7 @@ test:
 	pytest tests/ -v
 
 build:
-	docker build -t chimera-semantic-model .
+	docker build -t inktide-semantic-model .
 
 up:
 	docker compose up -d

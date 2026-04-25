@@ -14,7 +14,7 @@ lint:
 	ruff format --check app/ tests/
 
 build:
-	docker build -t chimera-scribe-model .
+	docker build -t inktide-scribe-model .
 
 up:
 	docker compose up -d
