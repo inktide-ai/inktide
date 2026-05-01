@@ -1,0 +1,207 @@
+@import "tailwindcss";
+@import '@fontsource-variable/mona-sans';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg-dark: #1C1C1B;
+  --bg-deeper: #1C1C1B;
+  --sidebar-hover: #252524;
+  --sidebar-active: #2C2C2A;
+  --bg-surface: oklch(0.2163 0.0076 107.02);
+  --bg-card: oklch(0.2627 0.0091 107.01);
+  --text-primary: oklch(0.9293 0.008 106.55);
+  --text-muted: oklch(0.6349 0.0088 106.65);
+  --accent-primary: oklch(0.5979 0.1511 42.76);
+  --accent-primary-bright: oklch(0.6556 0.1645 44.13);
+  --accent-muted: oklch(0.5213 0.1331 42.74);
+  --accent-red: oklch(0.5979 0.1511 42.76);
+  --accent-red-bright: oklch(0.6556 0.1645 44.13);
+  --accent-yellow: oklch(0.5979 0.1511 42.76);
+  --accent-gold: oklch(0.5213 0.1331 42.74);
+  --border: #3E3E3B;
+  --gray: oklch(0.8452 0 0);
+  --color-gray-default: 139, 139, 133;
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+
+  /* Nav */
+  --nav-bg: oklch(0.1908 0.002 106.59);
+  --nav-border-color: oklch(1 0 0 / 0.07);
+  --nav-item-color: oklch(0.6319 0.0073 106.61);
+  --nav-item-hover-bg: oklch(1 0 0 / 0.07);
+  --nav-item-hover-color: oklch(1 0 0 / 0.9);
+  --nav-item-active-bg: oklch(0.2296 0.0057 106.84);
+  --nav-item-active-color: oklch(1 0 0);
+  --nav-login-border: oklch(0.4309 0.0066 95.21);
+  --nav-login-color: oklch(0.9293 0.008 106.55);
+  --nav-login-hover-bg: oklch(1 0 0 / 0.05);
+  --nav-signup-bg: oklch(0.9668 0.0054 95.1);
+  --nav-signup-color: oklch(0.1908 0.002 106.59);
+  --nav-signup-hover-bg: oklch(1 0 0);
+  --nav-theme-btn-color: oklch(1 0 0 / 0.55);
+  --nav-theme-btn-hover: oklch(1 0 0 / 0.85);
+
+  /* Hero */
+  --hero-subtitle-color: oklch(1 0 0 / 0.65);
+  --hero-cta-bg: oklch(0.6315 0.1661 38.88);
+  --hero-cta-hover-bg: oklch(0.6749 0.1635 39.35);
+  --hero-os-border: oklch(0.4309 0.0066 95.21);
+  --hero-os-hover-opacity: 1;
+  --support-color: oklch(0.6352 0.0073 106.61);
+  --hero-os-active-bg: oklch(0.9518 0.0054 95.1);
+  --hero-os-active-color: oklch(0.1908 0.002 106.59);
+  --hero-os-active-border: oklch(0.9518 0.0054 95.1);
+  --hero-os-active-hover-bg: oklch(1 0 0);
+  --hero-os-active-hover-border: oklch(1 0 0);
+  --hero-video-shadow: 0 32px 80px oklch(0 0 0 / 0.4), 0 0 0 1px oklch(1 0 0 / 0.08);
+
+  /* CTA section */
+  --cta-btn-bg: #F0EFEB;
+  --cta-btn-color: #141413;
+  --cta-btn-hover-bg: #ffffff;
+
+  /* Scrollbar */
+  --scrollbar-thumb: oklch(1 0 0 / 0.1);
+  --scrollbar-thumb-hover: oklch(1 0 0 / 0.2);
+}
+
+.light {
+  --bg-dark: oklch(0.9761 0 0);
+  --bg-deeper: oklch(0.9486 0.0027 106.45);
+  --bg-surface: oklch(0.9401 0 0);
+  --bg-card: oklch(0.9053 0.0067 106.53);
+  --text-primary: oklch(0.2296 0.0057 106.84);
+  --text-muted: oklch(0.6352 0.0073 106.61);
+  --border: oklch(0 0 0 / 0.07);
+
+  --nav-bg: oklch(0.1908 0.002 106.59);
+  --nav-border-color: oklch(1 0 0 / 0.07);
+  --nav-item-color: oklch(0.6319 0.0073 106.61);
+  --nav-item-hover-bg: oklch(1 0 0 / 0.07);
+  --nav-item-hover-color: oklch(1 0 0 / 0.9);
+  --nav-item-active-bg: oklch(0.2296 0.0057 106.84);
+  --nav-item-active-color: oklch(1 0 0);
+  --nav-login-border: oklch(0.4309 0.0066 95.21);
+  --nav-login-color: oklch(0.9293 0.008 106.55);
+  --nav-login-hover-bg: oklch(1 0 0 / 0.05);
+  --nav-signup-bg: oklch(0.9668 0.0054 95.1);
+  --nav-signup-color: oklch(0.1908 0.002 106.59);
+  --nav-signup-hover-bg: oklch(1 0 0);
+  --nav-theme-btn-color: oklch(1 0 0 / 0.55);
+  --nav-theme-btn-hover: oklch(1 0 0 / 0.85);
+
+  --hero-subtitle-color: oklch(0 0 0 / 0.65);
+  --hero-cta-bg: oklch(0.6315 0.1661 38.88);
+  --hero-cta-hover-bg: oklch(0.6749 0.1635 39.35);
+  --hero-os-border: oklch(0 0 0 / 0.55);
+  --support-color: oklch(0.6352 0.0073 106.61);
+  --hero-os-active-bg: oklch(0.2296 0.0057 106.84);
+  --hero-os-active-color: oklch(0.9761 0 0);
+  --hero-os-active-border: oklch(0.2296 0.0057 106.84);
+  --hero-os-active-hover-bg: oklch(0.32 0.0052 106.69);
+  --hero-os-active-hover-border: oklch(0.32 0.0052 106.69);
+  --hero-video-shadow: 0 24px 70px oklch(0 0 0 / 0.18), 0 4px 16px oklch(0 0 0 / 0.08), 0 0 0 1px oklch(0 0 0 / 0.09);
+
+  /* CTA section */
+  --cta-btn-bg: #1D1D1A;
+  --cta-btn-color: #F7F7F7;
+  --cta-btn-hover-bg: #333330;
+
+  /* Scrollbar */
+  --scrollbar-thumb: oklch(0 0 0 / 0.18);
+  --scrollbar-thumb-hover: oklch(0 0 0 / 0.32);
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@theme {
+  --animate-marquee: marquee 25s linear infinite;
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+}
+
+@layer base {
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+
+  p {
+    line-height: 1.6;
+  }
+
+  /* Thin scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+button:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
+code {
+  font-family: var(--font-mono);
+}

@@ -1,0 +1,44 @@
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
+
+const isBrowser = typeof window !== 'undefined'
+
+export async function initI18n() {
+  if (i18n.isInitialized) return i18n
+
+  if (isBrowser) {
+    const HttpBackend = (await import('i18next-http-backend')).default
+    i18n.use(HttpBackend)
+  }
+
+  i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+
+  await i18n.init({
+    fallbackLng: 'en',
+    supportedLngs: ['en', 'ru'],
+    defaultNS: 'common',
+    ns: ['common', 'landing', 'model', 'behavior', 'brain', 'backup', 'providers', 'obs', 'integrations', 'scene', 'prompts', 'voice', 'profile'],
+    backend: {
+      loadPath: '/locales/{{lng}}/{{ns}}.json',
+    },
+    detection: {
+      order: ['querystring', 'localStorage', 'navigator'],
+      caches: ['localStorage'],
+      lookupLocalStorage: 'inktide_lang',
+      lookupQuerystring: 'lang',
+    },
+    interpolation: {
+      escapeValue: false,
+    },
+    react: {
+      useSuspense: false,
+    },
+  })
+
+  return i18n
+}
+
+export default i18n

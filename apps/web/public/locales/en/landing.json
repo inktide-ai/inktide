@@ -135,5 +135,8 @@
     "title": "Profile",
     "loggedIn": "You are logged in to Inktide",
     "logOut": "Log out"
+  },
+  "partners": {
+    "heading": "Support for multiple LLM models"
   }
 }
