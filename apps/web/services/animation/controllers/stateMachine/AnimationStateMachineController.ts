@@ -117,6 +117,7 @@ export class AnimationStateMachineController implements IVrmController {
   }
 
   dispose(): void {
+    if (this._disposed) return
     this._disposed = true
     this._preloadAbort.abort()
     this.actor.stop()
@@ -238,9 +239,11 @@ export class AnimationStateMachineController implements IVrmController {
     if (!url) throw new Error(`[AnimSM] no URL registered for node '${nodeId}'`)
 
     const gltf = await this.loader!.loadAsync(url)
-    // Throw AbortError if dispose() was called while the load was in flight.
-    // This guarantees vrm and mixer are still valid below.
+    // Primary abort path: signal was aborted while load was in flight.
     signal?.throwIfAborted()
+    // Belt-and-suspenders: if dispose() ran but signal wasn't aborted (shouldn't happen, but
+    // vrm/mixer are null here and createVRMAnimationClip would crash without this guard).
+    if (this._disposed) throw new DOMException('Controller disposed', 'AbortError')
 
     const anims = gltf.userData.vrmAnimations as unknown[] | undefined
     if (!anims?.length) throw new Error(`[AnimSM] no VRM animations in ${url}`)
@@ -254,17 +257,19 @@ export class AnimationStateMachineController implements IVrmController {
   private async _preloadEmotes(signal: AbortSignal): Promise<void> {
     for (const node of this.config.nodes) {
       if (node.id === 'idle' || node.looping) continue
-      if (signal.aborted) return
+      if (this._disposed || signal.aborted) return
 
       try {
         const clip = await this._loadClip(node.id, signal)
-        if (!this.mixer) return
-        const action = this.mixer.clipAction(clip)
+        // Re-check after the async gap: dispose() may have run while loading.
+        if (this._disposed || signal.aborted) return
+        const action = this.mixer!.clipAction(clip)
         action.setLoop(THREE.LoopOnce, 1)
         action.clampWhenFinished = true
         this.registry.setAction(node.id, action)
       } catch (e) {
-        if (signal.aborted) return  // AbortError from throwIfAborted() — expected, exit cleanly
+        // AbortError from signal.throwIfAborted() or the _disposed guard — expected, exit cleanly.
+        if (signal.aborted || this._disposed) return
         console.warn(`[AnimSM] preload failed: ${node.id}`, e)
       }
     }
