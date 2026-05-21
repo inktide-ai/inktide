@@ -1,6 +1,6 @@
 'use client'
 import { useState, useCallback, useEffect } from 'react'
-import type { LookAtMode } from '../components/AvatarRenderer/AvatarRenderer'
+import type { LookAtMode } from '../components/avatar/avatar-renderer'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -54,7 +54,12 @@ function storageKey(cardId: string) {
 function loadFromStorage(cardId: string): SceneRendererSettings {
   try {
     const raw = localStorage.getItem(storageKey(cardId))
-    return raw ? { ...SCENE_RENDERER_DEFAULTS, ...JSON.parse(raw) } : SCENE_RENDERER_DEFAULTS
+    if (!raw) return SCENE_RENDERER_DEFAULTS
+    const parsed: unknown = JSON.parse(raw)
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      return SCENE_RENDERER_DEFAULTS
+    }
+    return { ...SCENE_RENDERER_DEFAULTS, ...(parsed as Partial<SceneRendererSettings>) }
   } catch {
     return SCENE_RENDERER_DEFAULTS
   }
