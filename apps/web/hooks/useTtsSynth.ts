@@ -54,11 +54,13 @@ export function useTtsSynth(): UseTtsSynthReturn {
 
   // Track previous blob URL so we can revoke it when replacing
   const prevUrlRef = useRef<string | null>(null)
+  const streamAbortRef = useRef<AbortController | null>(null)
 
-  // Revoke on unmount
+  // Revoke URL and cancel any in-flight stream on unmount
   useEffect(() => {
     return () => {
       if (prevUrlRef.current) URL.revokeObjectURL(prevUrlRef.current)
+      streamAbortRef.current?.abort()
     }
   }, [])
 
@@ -115,14 +117,21 @@ export function useTtsSynth(): UseTtsSynthReturn {
   }, [setNewUrl])
 
   const streamChunked = useCallback(async (req: TtsSynthRequest) => {
+    streamAbortRef.current?.abort()
+    const ctrl = new AbortController()
+    streamAbortRef.current = ctrl
+
     setState('streaming')
     setError(null)
     setChunks([])
     setNewUrl(null)
 
+    let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
+
     try {
       const res = await apiFetch('/api/v1/tts/synthesize', {
         method: 'POST',
+        signal: ctrl.signal,
         headers: buildHeaders(req.apiKey),
         body: JSON.stringify({
           text: req.text,
@@ -140,7 +149,7 @@ export function useTtsSynth(): UseTtsSynthReturn {
         throw new ApiError(res.status, body.message ?? body.error ?? `HTTP ${res.status}`, body.code)
       }
 
-      const reader = res.body?.getReader()
+      reader = res.body?.getReader()
       if (!reader) throw new Error('Response body is not readable')
 
       const parts: Uint8Array[] = []
@@ -148,21 +157,22 @@ export function useTtsSynth(): UseTtsSynthReturn {
 
       while (true) {
         const { done, value } = await reader.read()
-        if (done) break
+        if (done || ctrl.signal.aborted) break
         parts.push(value)
-        const meta: ChunkMeta = { index: chunkIndex++, byteLength: value.byteLength, receivedAt: Date.now() }
-        setChunks(prev => [...prev, meta])
+        setChunks(prev => [...prev, { index: chunkIndex++, byteLength: value.byteLength, receivedAt: Date.now() }])
       }
 
-      // Assemble and expose for playback
+      if (ctrl.signal.aborted) return
+
       const fullBlob = new Blob(parts as unknown as BlobPart[], { type: contentTypeForFormat(req.audioFormat) })
-      const url = URL.createObjectURL(fullBlob)
-      setNewUrl(url)
+      setNewUrl(URL.createObjectURL(fullBlob))
       setState('playing')
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Streaming failed'
-      setError(msg)
+      if (ctrl.signal.aborted) return
+      setError(err instanceof Error ? err.message : 'Streaming failed')
       setState('error')
+    } finally {
+      await reader?.cancel().catch(() => {})
     }
   }, [setNewUrl])
 
