@@ -1,0 +1,47 @@
+using System.Net;
+using Inktide.API.Core;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
+namespace Inktide.API.Billing.REST;
+
+public sealed class BillingRestApiStartup : IStartup, IMiddlewareConfigurator
+{
+    // Must run before AuthMiddlewareConfigurator (Order=10) which calls UseRouting().
+    // ForwardedHeaders must resolve RemoteIpAddress before routing touches the request.
+    public int Order => 5;
+
+    public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
+    {
+        services
+            .AddControllers()
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            });
+
+        services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            // Trust only the reverse proxy on the same host (nginx/caddy → loopback → Kestrel).
+            // Clear defaults first — ASP.NET Core adds loopback to KnownNetworks by default, but
+            // that would trust ANY source on loopback, not just a configured proxy.
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+            options.KnownProxies.Add(IPAddress.Loopback);
+            options.KnownProxies.Add(IPAddress.IPv6Loopback);
+            // Process only the rightmost XFF hop — attacker-supplied left-side entries are ignored.
+            options.ForwardLimit = 1;
+        });
+    }
+
+    public void Configure(IApplicationBuilder app)
+    {
+        app.UseForwardedHeaders();
+    }
+}
