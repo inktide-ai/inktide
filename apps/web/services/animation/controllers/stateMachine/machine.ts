@@ -29,9 +29,22 @@ function buildTransition(
   ctx: AnimationMachineContext,
   toNodeId: string,
   transitions: AnimationTransition[],
-): InTransitionState | null {
+): InTransitionState {
   const tr = findTransition(transitions, ctx.activeNodeId, toNodeId)
-  if (!tr) return null
+  if (!tr) {
+    console.warn(`[AnimSM] no transition defined from '${ctx.activeNodeId}' → '${toNodeId}', using direct jump`)
+    return {
+      fromNodeId: ctx.activeNodeId,
+      toNodeId,
+      progress: 0,
+      elapsed: 0,
+      totalDuration: 0,
+      crossFadeDuration: 0,
+      remainingKeyframes: [],
+      reversible: false,
+      paused: false,
+    }
+  }
   return {
     fromNodeId: ctx.activeNodeId,
     toNodeId,
@@ -109,17 +122,7 @@ export function buildAnimationMachine(transitions: AnimationTransition[]) {
 
       beginTransitionToIdle: assign({
         activeTransition: ({ context }) =>
-          buildTransition(context, 'idle', transitions) ?? {
-            fromNodeId: context.activeNodeId,
-            toNodeId: 'idle',
-            progress: 0,
-            elapsed: 0,
-            totalDuration: 0.3,
-            crossFadeDuration: 0.3,
-            remainingKeyframes: [],
-            reversible: false,
-            paused: false,
-          },
+          buildTransition(context, 'idle', transitions),
       }),
 
       completeTransition: assign({
