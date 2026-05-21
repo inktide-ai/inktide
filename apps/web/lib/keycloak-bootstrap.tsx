@@ -12,6 +12,9 @@ function clearAuthCookie() {
   document.cookie = 'inktide_auth=; path=/; SameSite=Lax; max-age=0'
 }
 
+const KC_TOKEN_KEY = 'v1_inktide_kc_token'
+const KC_REFRESH_KEY = 'v1_inktide_kc_refresh'
+
 let initialized = false
 
 export function KeycloakBootstrap({ children }: { children: ReactNode }) {
@@ -19,9 +22,16 @@ export function KeycloakBootstrap({ children }: { children: ReactNode }) {
     if (initialized) return
     initialized = true
 
+    // one-time migration from unversioned keys — preserves existing sessions on upgrade
+    for (const [oldKey, newKey] of [['inktide_kc_token', KC_TOKEN_KEY], ['inktide_kc_refresh', KC_REFRESH_KEY]] as const) {
+      const v = localStorage.getItem(oldKey)
+      if (v && !localStorage.getItem(newKey)) localStorage.setItem(newKey, v)
+      localStorage.removeItem(oldKey)
+    }
+
     const stored = {
-      token: localStorage.getItem('inktide_kc_token') ?? undefined,
-      refreshToken: localStorage.getItem('inktide_kc_refresh') ?? undefined,
+      token: localStorage.getItem(KC_TOKEN_KEY) ?? undefined,
+      refreshToken: localStorage.getItem(KC_REFRESH_KEY) ?? undefined,
     }
 
     keycloak
@@ -34,8 +44,8 @@ export function KeycloakBootstrap({ children }: { children: ReactNode }) {
       })
       .then(() => {
         if (keycloak.authenticated && keycloak.token) {
-          localStorage.setItem('inktide_kc_token', keycloak.token)
-          if (keycloak.refreshToken) localStorage.setItem('inktide_kc_refresh', keycloak.refreshToken)
+          localStorage.setItem(KC_TOKEN_KEY, keycloak.token)
+          if (keycloak.refreshToken) localStorage.setItem(KC_REFRESH_KEY, keycloak.refreshToken)
           setAuthCookie()
         } else {
           clearAuthCookie()
@@ -44,21 +54,21 @@ export function KeycloakBootstrap({ children }: { children: ReactNode }) {
         keycloak.onTokenExpired = () => {
           keycloak.updateToken(60).then(() => {
             if (keycloak.token) {
-              localStorage.setItem('inktide_kc_token', keycloak.token)
-              if (keycloak.refreshToken) localStorage.setItem('inktide_kc_refresh', keycloak.refreshToken)
+              localStorage.setItem(KC_TOKEN_KEY, keycloak.token)
+              if (keycloak.refreshToken) localStorage.setItem(KC_REFRESH_KEY, keycloak.refreshToken)
               setAuthCookie()
             }
           }).catch(() => {
-            localStorage.removeItem('inktide_kc_token')
-            localStorage.removeItem('inktide_kc_refresh')
+            localStorage.removeItem(KC_TOKEN_KEY)
+            localStorage.removeItem(KC_REFRESH_KEY)
             clearAuthCookie()
             keycloak.login({ redirectUri: window.location.href })
           })
         }
 
         keycloak.onAuthLogout = () => {
-          localStorage.removeItem('inktide_kc_token')
-          localStorage.removeItem('inktide_kc_refresh')
+          localStorage.removeItem(KC_TOKEN_KEY)
+          localStorage.removeItem(KC_REFRESH_KEY)
           clearAuthCookie()
         }
       })
@@ -72,8 +82,8 @@ export function KeycloakBootstrap({ children }: { children: ReactNode }) {
       })
 
     const forceRelogin = () => {
-      localStorage.removeItem('inktide_kc_token')
-      localStorage.removeItem('inktide_kc_refresh')
+      localStorage.removeItem(KC_TOKEN_KEY)
+      localStorage.removeItem(KC_REFRESH_KEY)
       clearAuthCookie()
       keycloak.login({ redirectUri: window.location.href })
     }

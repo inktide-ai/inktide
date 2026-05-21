@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 
-const KEY = 'inktide_favorites'
+const KEY = 'v1_inktide_favorites'
 
 export function useFavorites() {
   const [favs, setFavs] = useState<Set<string>>(() => {

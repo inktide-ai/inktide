@@ -48,7 +48,7 @@ export const SCENE_RENDERER_DEFAULTS: SceneRendererSettings = {
 // ── Storage ───────────────────────────────────────────────────────────────────
 
 function storageKey(cardId: string) {
-  return `inktide_scene_settings_${cardId}`
+  return `v1_inktide_scene_settings_${cardId}`
 }
 
 function loadFromStorage(cardId: string): SceneRendererSettings {
