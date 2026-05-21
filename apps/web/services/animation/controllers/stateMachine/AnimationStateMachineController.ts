@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { createVRMAnimationClip } from '@pixiv/three-vrm-animation'
+import { createVRMAnimationClip, VRMLookAtQuaternionProxy } from '@pixiv/three-vrm-animation'
 import type { VRM } from '@pixiv/three-vrm'
 import type { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
@@ -20,10 +20,12 @@ export class AnimationStateMachineController implements IVrmController {
   private readonly registry: ClipRegistry
   private readonly actor: AnimationActor
 
-  // Tracks which nodeId was last passed to Three.js blend calls to avoid redundant fades.
+  private _disposed = false
+  private _preloadAbort = new AbortController()
+
   private lastFadedTo: string | null = null
-  // Tracks emotion seen last frame to diff-send events.
   private lastEmotion: string | null = null
+  private activeVariation: string | null = null
 
   constructor(private readonly config: AnimationGraphConfig = DEFAULT_GRAPH_CONFIG) {
     this.registry = new ClipRegistry()
@@ -33,9 +35,22 @@ export class AnimationStateMachineController implements IVrmController {
   // ── IVrmController ────────────────────────────────────────────────────────────
 
   async init({ vrm, mixer, loader }: VrmControllerSetup): Promise<void> {
+    // Cancel any in-flight preload from a previous init (avatar swap).
+    this._preloadAbort.abort()
+    this._preloadAbort = new AbortController()
+    this._disposed = false
+
     this.vrm    = vrm
     this.mixer  = mixer
     this.loader = loader
+
+    // createVRMAnimationClip searches the scene for VRMLookAtQuaternionProxy by name.
+    // Creating and naming it explicitly suppresses both "not found" and "name not set" warnings.
+    if (vrm.lookAt) {
+      const lookAtProxy = new VRMLookAtQuaternionProxy(vrm.lookAt)
+      lookAtProxy.name = 'VRMLookAtQuaternionProxy'
+      vrm.scene.add(lookAtProxy)
+    }
 
     // Register all nodes before loading so getUrl() is available.
     for (const node of this.config.nodes) {
@@ -59,11 +74,11 @@ export class AnimationStateMachineController implements IVrmController {
     this.actor.send({ type: 'CLIP_READY', nodeId: 'idle' })
 
     // Pre-load all emote clips in the background — non-blocking.
-    void this._preloadEmotes()
+    void this._preloadEmotes(this._preloadAbort.signal)
   }
 
   update(delta: number, ctx: VrmAnimationContext): void {
-    if (!this.mixer) return
+    if (this._disposed || !this.mixer) return
 
     // 1. Advance Three.js mixer every frame regardless of state.
     this.mixer.update(delta)
@@ -82,6 +97,10 @@ export class AnimationStateMachineController implements IVrmController {
     // 3. Read snapshot and drive Three.js according to current state.
     const snap = this.actor.getSnapshot()
 
+    if (snap.value !== 'idle' && this.activeVariation !== null) {
+      this.activeVariation = null
+    }
+
     switch (snap.value) {
       case 'idle':
         this._driveIdle(delta)
@@ -98,13 +117,16 @@ export class AnimationStateMachineController implements IVrmController {
   }
 
   dispose(): void {
+    this._disposed = true
+    this._preloadAbort.abort()
     this.actor.stop()
     if (this.mixer) blend.stopAll(this.mixer)
-    this.vrm    = null
-    this.mixer  = null
-    this.loader = null
-    this.lastFadedTo  = null
-    this.lastEmotion  = null
+    this.vrm             = null
+    this.mixer           = null
+    this.loader          = null
+    this.lastFadedTo     = null
+    this.lastEmotion     = null
+    this.activeVariation = null
   }
 
   // ── State drivers ─────────────────────────────────────────────────────────────
@@ -113,14 +135,33 @@ export class AnimationStateMachineController implements IVrmController {
     const idleAction = this.registry.getAction('idle')
     if (!idleAction) return
 
-    // SelfTransition: roll probability die near end of idle cycle.
+    // If a variation is playing, wait for near-end then crossfade back to idle.
+    if (this.activeVariation) {
+      const varAction = this.registry.getAction(this.activeVariation)
+      if (varAction && blend.isActionNearEnd(varAction)) {
+        blend.crossFadeToLooping(varAction, idleAction, 0.3)
+        this.lastFadedTo = 'idle'
+        this.activeVariation = null
+      }
+      return
+    }
+
+    // Roll for a self-transition near the end of each idle loop.
+    const nearEnd = idleAction.time >= idleAction.getClip().duration - delta * 2
+    if (!nearEnd) return
+
     for (const st of this.config.selfTransitions) {
       if (st.nodeId !== 'idle') continue
-      const nearEnd = idleAction.time >= idleAction.getClip().duration - delta * 2
-      if (nearEnd && Math.random() < st.probability) {
-        this.actor.send({ type: 'IDLE_CYCLE_COMPLETE' })
-        // Variation clip playback handled in next update when state re-enters idle.
-      }
+      if (Math.random() >= st.probability) continue
+
+      const varAction = this.registry.getAction(st.variationClipId)
+      if (!varAction) continue
+
+      blend.crossFadeTo(idleAction, varAction, st.crossFadeDuration)
+      this.lastFadedTo = st.variationClipId
+      this.activeVariation = st.variationClipId
+      this.actor.send({ type: 'IDLE_CYCLE_COMPLETE' })
+      break
     }
   }
 
@@ -192,11 +233,15 @@ export class AnimationStateMachineController implements IVrmController {
 
   // ── Clip loading ──────────────────────────────────────────────────────────────
 
-  private async _loadClip(nodeId: string): Promise<THREE.AnimationClip> {
+  private async _loadClip(nodeId: string, signal?: AbortSignal): Promise<THREE.AnimationClip> {
     const url = this.registry.getUrl(nodeId)
     if (!url) throw new Error(`[AnimSM] no URL registered for node '${nodeId}'`)
 
-    const gltf  = await this.loader!.loadAsync(url)
+    const gltf = await this.loader!.loadAsync(url)
+    // Throw AbortError if dispose() was called while the load was in flight.
+    // This guarantees vrm and mixer are still valid below.
+    signal?.throwIfAborted()
+
     const anims = gltf.userData.vrmAnimations as unknown[] | undefined
     if (!anims?.length) throw new Error(`[AnimSM] no VRM animations in ${url}`)
 
@@ -206,18 +251,20 @@ export class AnimationStateMachineController implements IVrmController {
     )
   }
 
-  private async _preloadEmotes(): Promise<void> {
+  private async _preloadEmotes(signal: AbortSignal): Promise<void> {
     for (const node of this.config.nodes) {
       if (node.id === 'idle' || node.looping) continue
-      if (!this.mixer) return
+      if (signal.aborted) return
 
       try {
-        const clip   = await this._loadClip(node.id)
+        const clip = await this._loadClip(node.id, signal)
+        if (!this.mixer) return
         const action = this.mixer.clipAction(clip)
         action.setLoop(THREE.LoopOnce, 1)
         action.clampWhenFinished = true
         this.registry.setAction(node.id, action)
       } catch (e) {
+        if (signal.aborted) return  // AbortError from throwIfAborted() — expected, exit cleanly
         console.warn(`[AnimSM] preload failed: ${node.id}`, e)
       }
     }
