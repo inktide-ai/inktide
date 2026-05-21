@@ -1,25 +1,24 @@
-using Inktide.API.Memory.Domain.Models;
-using Inktide.API.Memory.Domain.Ports;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
+using Inktide.API.Synapse.Infrastructure.Constants;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Synapse.Infrastructure.Scattering;
 
-/// <summary>Scatter shard: semantic memory retrieval via <see cref="IMemoryQueryService"/>.</summary>
-public sealed class RagScatterShard : ISynapseScatterShard
+/// <summary>Scatter shard: semantic memory retrieval via <see cref="IRagQueryPort"/>.</summary>
+public sealed class RagScatterShard : IPipelineStage
 {
 
-    private readonly IMemoryQueryService _memory;
+    private readonly IRagQueryPort _rag;
     private readonly ILogger<RagScatterShard> _logger;
 
 
-    public string ShardId => "rag";
+    public string ShardId => SynapseConstants.ShardIds.Rag;
 
 
-    public RagScatterShard(IMemoryQueryService memory, ILogger<RagScatterShard> logger)
+    public RagScatterShard(IRagQueryPort rag, ILogger<RagScatterShard> logger)
     {
-        _memory = memory ?? throw new ArgumentNullException(nameof(memory));
+        _rag    = rag    ?? throw new ArgumentNullException(nameof(rag));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -34,12 +33,12 @@ public sealed class RagScatterShard : ISynapseScatterShard
             return;
         }
 
-        IReadOnlyList<MemoryRecord> memories;
-        
+        IReadOnlyList<SynapseMemoryFact> memories;
+
         try
         {
-            memories = await _memory.QueryAsync(
-                cardCtx.AiCardId,
+            memories = await _rag.QueryAsync(
+                cardCtx.CharacterId,
                 context.Message.Text,
                 cardCtx.MaxMemories,
                 cancellationToken);
@@ -54,6 +53,16 @@ public sealed class RagScatterShard : ISynapseScatterShard
             context.Set(new RagContext([]));
             return;
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "[Scatter:{ShardId}] Unexpected error during RAG retrieval — skipping. Correlation={Correlation}",
+                ShardId,
+                context.CorrelationId);
+            context.Set(new RagContext([]));
+            return;
+        }
 
         context.Set(new RagContext(memories));
 
@@ -61,7 +70,7 @@ public sealed class RagScatterShard : ISynapseScatterShard
             "[Scatter:{ShardId}] Retrieved {Count} memories for card {CardId}. Correlation={Correlation}",
             ShardId,
             memories.Count,
-            cardCtx.AiCardId,
+            cardCtx.CharacterId,
             context.CorrelationId);
     }
 

@@ -8,7 +8,7 @@
 
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Inktide.API.Memory\Inktide.API.Memory.Domain\Inktide.API.Memory.Domain.csproj" />
+        <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
     </ItemGroup>
 
 </Project>

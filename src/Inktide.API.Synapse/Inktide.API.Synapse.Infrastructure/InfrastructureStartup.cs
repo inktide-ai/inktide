@@ -4,6 +4,7 @@ using Inktide.API.Core.Settings;
 using Inktide.API.Core.Settings.Validators;
 using Inktide.API.Synapse.Application.Configuration;
 using Inktide.API.Synapse.Application.Interfaces;
+using Inktide.API.Synapse.Infrastructure.Adapters;
 using Inktide.API.Synapse.Infrastructure.Aggregation;
 using Inktide.API.Synapse.Infrastructure.ChannelContext;
 using Inktide.API.Synapse.Infrastructure.Emotion;
@@ -12,6 +13,7 @@ using Inktide.API.Synapse.Infrastructure.Providers;
 using Inktide.API.Synapse.Infrastructure.Scattering;
 using Inktide.API.Synapse.Infrastructure.Session;
 using Microsoft.Extensions.DependencyInjection;
+using SoulRuntimeImpl = Inktide.API.Synapse.Infrastructure.SoulRuntime.SoulRuntime;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
@@ -37,6 +39,10 @@ public sealed class InfrastructureStartup : IStartup
 
         services.AddSingleton<IValidateOptions<SynapseIngestStreamSettings>, SynapseIngestStreamSettingsValidator>();
 
+        services.AddSingleton<IChatMessageProcessor, ChatMessageProcessor>();
+        services.AddSingleton<RedisStreamConnectionMonitor>();
+        services.AddSingleton<RedisConsumerGroupInitializer>();
+        services.AddSingleton<RedisStreamAutoClaimer>();
         services.AddHostedService<ChatMessageStreamConsumer>();
 
         services.AddOptions<SynapseAggregationOptions>()
@@ -46,11 +52,23 @@ public sealed class InfrastructureStartup : IStartup
 
         services.AddSingleton<IConversationHistoryRepository, RedisConversationHistoryRepository>();
 
+        // ── ACL adapters — port contracts owned by Synapse, implemented here ─────
+        services.AddScoped<IRagQueryPort, MemoryRagAdapter>();
+        services.AddScoped<IMemoryIngestionPort, MemoryIngestionAdapter>();
+        services.AddScoped<IGraphPluginEnrichmentPort, GraphPluginEnrichmentAdapter>();
+        services.AddScoped<ILlmCredentialPort, LlmCredentialAdapter>();
+        services.AddScoped<ISynapseStatsPort, SynapseStatsAdapter>();
+
+        services.AddSingleton<ChannelContextCache>();
         services.AddScoped<IChannelContextResolutionService, ChannelContextResolutionService>();
-        services.AddScoped<ISynapseScatterShard, RagScatterShard>();
-        services.AddScoped<ISynapseScatterShard, SessionScatterShard>();
-        services.AddScoped<ISynapseScatterShard, EmotionScatterShard>();
+        services.AddScoped<IPipelineStage, RagScatterShard>();
+        services.AddScoped<IPipelineStage, SessionScatterShard>();
+        services.AddScoped<IPipelineStage, EmotionScatterShard>();
+        services.AddScoped<IPipelineStage, ScreenContextScatterShard>();
+        services.AddHttpClient<WebhookScatterShard>();
+        services.AddScoped<IPipelineStage, WebhookScatterShard>();
         services.AddScoped<ISynapseAggregationService, SynapseAggregationService>();
+        services.AddScoped<ISoulRuntime, SoulRuntimeImpl>();
         services.AddScoped<ISynapseIngestOrchestrator, SynapseIngestOrchestrator>();
 
         // ---------------------------------------------------------------
@@ -61,6 +79,7 @@ public sealed class InfrastructureStartup : IStartup
 
         services.AddHttpClient<OllamaEmotionClassifier>();
         services.AddSingleton<IEmotionClassificationService, OllamaEmotionClassifier>();
+        services.AddSingleton<IEmotionalStateService, RedisEmotionalStateService>();
 
         // OllamaChatProvider stays for ListModelsAsync (model catalog REST endpoint).
         // LLM inference is now handled by LlmStreamWorker via Semantic Kernel.

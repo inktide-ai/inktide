@@ -1,12 +1,11 @@
+using Inktide.API.Core.Generators;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
-using Inktide.API.Memory.Domain.Models;
-using Inktide.API.Memory.Domain.Ports;
-using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Synapse.Application.Configuration;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
+using Inktide.API.Synapse.Infrastructure.Emotion;
 using Inktide.API.Synapse.Infrastructure.Llm;
 using Inktide.API.Synapse.Infrastructure.Providers;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,7 +45,7 @@ public sealed class LlmStreamWorker : BackgroundService
 
     private readonly IConnectionMultiplexer _redis;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IMemoryIngestionService _memoryIngestion;
+    private readonly IMemoryIngestionPort _memoryIngestion;
     private readonly IConversationHistoryRepository _history;
     private readonly Kernel _kernel;
     private readonly ChatServiceFactoryRegistry _factoryRegistry;
@@ -56,13 +55,15 @@ public sealed class LlmStreamWorker : BackgroundService
 
     private const int MaxHistoryTurns = 20;
 
-    private readonly SemaphoreSlim _llmSem = new(1, 1);
+    // Concurrency guard — controlled by LlmStreamSettings.MaxConcurrentRequests.
+    // Initialized after settings are resolved in the constructor.
+    private readonly SemaphoreSlim _llmSem;
 
 
     public LlmStreamWorker(
         IConnectionMultiplexer redis,
         IServiceScopeFactory scopeFactory,
-        IMemoryIngestionService memoryIngestion,
+        IMemoryIngestionPort memoryIngestion,
         IConversationHistoryRepository history,
         Kernel kernel,
         ChatServiceFactoryRegistry factoryRegistry,
@@ -78,10 +79,13 @@ public sealed class LlmStreamWorker : BackgroundService
         _settings         = settings?.Value  ?? throw new ArgumentNullException(nameof(settings));
         _logger           = logger           ?? throw new ArgumentNullException(nameof(logger));
 
+        var concurrency = Math.Max(1, _settings.MaxConcurrentRequests);
+        _llmSem = new SemaphoreSlim(concurrency, concurrency);
+
         var instanceId = Environment.GetEnvironmentVariable("DOTNET_HOSTNAME")
                          ?? Environment.GetEnvironmentVariable("HOSTNAME")
                          ?? Environment.GetEnvironmentVariable("K8S_POD_NAME")
-                         ?? Guid.NewGuid().ToString("N")[..8];
+                         ?? IdGenerator.New().ToString("N")[..8];
         _consumerName = $"{_settings.ConsumerNamePrefix}-{instanceId}";
     }
 
@@ -271,29 +275,11 @@ public sealed class LlmStreamWorker : BackgroundService
         var ctx        = envelope.Context;
         var providerId = ctx?.LlmProviderId ?? _settings.FallbackProviderId;
         var modelId    = ctx?.LlmModel;
+        var userId     = ctx?.UserId ?? Guid.Empty;
 
         // Resolve chat completion service.
         // Priority: BYOK (user's own key) → platform provider registered in Kernel.
-        IChatCompletionService? chatService = null;
-        var userId = ctx?.UserId ?? Guid.Empty;
-
-        if (userId != Guid.Empty)
-        {
-            using var scope = _scopeFactory.CreateScope();
-            var credSvc     = scope.ServiceProvider.GetRequiredService<IUserProviderCredentialService>();
-            var cred        = await credSvc.GetDecryptedAsync(userId, providerId, ct);
-
-            if (cred is not null)
-            {
-                // Card-level base_url wins over the global BYOK credential base URL.
-                var effectiveBaseUrl = ctx?.LlmBaseUrl ?? cred.BaseUrl;
-                _logger.LogDebug(
-                    "LlmStreamWorker BYOK resolved. Provider={Provider} LlmBaseUrl={LlmBaseUrl} CredBaseUrl={CredBaseUrl} Effective={Effective}",
-                    providerId, ctx?.LlmBaseUrl, cred.BaseUrl, effectiveBaseUrl);
-                chatService = _factoryRegistry.CreateService(
-                    providerId, modelId ?? string.Empty, cred.ApiKey, effectiveBaseUrl);
-            }
-        }
+        var chatService = await ResolveChatServiceAsync(providerId, modelId, userId, ctx?.LlmBaseUrl, ct);
 
         // No BYOK — fall back to the platform provider registered in the Kernel (e.g. Ollama).
         if (chatService is null)
@@ -412,10 +398,10 @@ public sealed class LlmStreamWorker : BackgroundService
 
         _ = _history.AppendAsync(channelId, userMessage, botReply, MaxHistoryTurns);
 
-        if (ctx?.AiCardId is { } aiCardId && aiCardId != Guid.Empty)
+        if (ctx?.CharacterId is { } characterId && characterId != Guid.Empty)
         {
-            _ = _memoryIngestion.EnqueueAsync(new MemoryIngestionJob(
-                AiCardId:    aiCardId,
+            _ = _memoryIngestion.EnqueueAsync(new SynapseMemoryIngestionRequest(
+                CharacterId: characterId,
                 ChannelId:   channelId,
                 Platform:    envelope.Message.PlatformId,
                 UserMessage: userMessage,
@@ -429,6 +415,35 @@ public sealed class LlmStreamWorker : BackgroundService
         }
     }
 
+    /// <summary>
+    /// Resolves an <see cref="IChatCompletionService"/> for the given provider.
+    /// Tries BYOK first (user-supplied API key); returns null to signal fallback to the platform Kernel.
+    /// </summary>
+    private async Task<IChatCompletionService?> ResolveChatServiceAsync(
+        string providerId,
+        string? modelId,
+        Guid userId,
+        string? cardBaseUrl,
+        CancellationToken ct)
+    {
+        if (userId == Guid.Empty) return null;
+
+        using var scope = _scopeFactory.CreateScope();
+        var credPort    = scope.ServiceProvider.GetRequiredService<ILlmCredentialPort>();
+        var cred        = await credPort.GetDecryptedAsync(userId, providerId, ct);
+
+        if (cred is null) return null;
+
+        // Card-level base_url wins over the global BYOK credential base URL.
+        var effectiveBaseUrl = cardBaseUrl ?? cred.BaseUrl;
+        _logger.LogDebug(
+            "LlmStreamWorker BYOK resolved. Provider={Provider} LlmBaseUrl={LlmBaseUrl} CredBaseUrl={CredBaseUrl} Effective={Effective}",
+            providerId, cardBaseUrl, cred.BaseUrl, effectiveBaseUrl);
+
+        return _factoryRegistry.CreateService(providerId, modelId ?? string.Empty, cred.ApiKey, effectiveBaseUrl);
+    }
+
+
     private async Task PublishChunkAsync(
         IDatabase db,
         SynapseAggregatedEnvelope envelope,
@@ -439,6 +454,13 @@ public sealed class LlmStreamWorker : BackgroundService
         ContextShardPayload? ctx,
         CancellationToken ct)
     {
+        var emotionId        = envelope.Emotion?.CurrentEmotion;
+        var emotionIntensity = envelope.Emotion?.Intensity ?? 0f;
+        var speechProfile    = EmotionSpeechProfiles.Compute(
+            emotionId,
+            emotionIntensity,
+            envelope.Context?.EmotionResponsiveness ?? 0.7f);
+
         var payload = JsonSerializer.Serialize(new
         {
             correlationId  = envelope.CorrelationId,
@@ -452,8 +474,10 @@ public sealed class LlmStreamWorker : BackgroundService
             ttsProviderId    = ctx?.TtsProviderId,
             ttsModelId       = ctx?.TtsModelId,
             ttsSpeed         = ctx?.TtsSpeed ?? 1.0f,
-            emotionId        = envelope.Emotion?.Emotion,
-            emotionIntensity = envelope.Emotion?.Intensity ?? 0f,
+            emotionId,
+            emotionIntensity,
+            ttsSpeedModifier  = speechProfile.SpeedModifier,
+            ttsEnergyModifier = speechProfile.EnergyModifier,
         }, JsonOut);
 
         await db.StreamAddAsync(
@@ -481,6 +505,7 @@ public sealed class LlmStreamWorker : BackgroundService
 
     private Task AckAsync(IDatabase db, RedisValue id)
         => db.StreamAcknowledgeAsync(_settings.StreamIn, _settings.ConsumerGroup, id);
+
 
     private static string? ReadField(StreamEntry entry, string field)
     {
