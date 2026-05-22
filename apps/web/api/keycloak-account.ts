@@ -1,4 +1,5 @@
-import { keycloak } from '@/lib/keycloak'
+import { keycloakEnvConfig } from '@/lib/keycloak'
+import { getFreshAuthToken } from '@/api/client'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -46,13 +47,11 @@ export interface KcLinkedAccount {
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
 function kcAccountBase(): string {
-  const url = (process.env.NEXT_PUBLIC_KEYCLOAK_URL as string | undefined) ?? 'http://localhost:8080'
-  const realm = (process.env.NEXT_PUBLIC_KEYCLOAK_REALM as string | undefined) ?? 'inktide'
-  return `${url}/realms/${realm}/account`
+  return `${keycloakEnvConfig.url}/realms/${keycloakEnvConfig.realm}/account`
 }
 
 async function kcFetch(path: string, init?: RequestInit): Promise<Response> {
-  const token = keycloak.token
+  const token = await getFreshAuthToken()
   if (!token) throw new Error('Not authenticated')
   const base = kcAccountBase()
   const res = await fetch(`${base}${path}`, {

@@ -57,6 +57,9 @@ export function useCharacters() {
 
   const { isDirty, recordSnapshot, markDirty, clearDirty, getSnapshot } = useDirtyState()
 
+  const mountedRef = useRef(true)
+  useEffect(() => () => { mountedRef.current = false }, [])
+
   // Plugin registry for side-effect saves (e.g. BYOK credentials from BrainTab)
   const savePluginsRef = useRef(new Map<string, () => Promise<void>>())
   const [externalDirty, setExternalDirty] = useState(false)
@@ -154,7 +157,17 @@ export function useCharacters() {
 
   const handleSave = useCallback(async () => {
     await handleSaveCard()
-    const results = await Promise.allSettled([...savePluginsRef.current.values()].map((fn) => fn()))
+    // Snapshot entries so (a) new registrations mid-save are excluded,
+    // (b) already-unregistered plugins are skipped before execution starts.
+    // Note: filter runs before allSettled — it cannot cancel fns already mid-await.
+    // mountedRef guards the setState calls after allSettled completes.
+    const snapshot = [...savePluginsRef.current.entries()]
+    const results = await Promise.allSettled(
+      snapshot
+        .filter(([key]) => savePluginsRef.current.has(key))
+        .map(([, fn]) => fn()),
+    )
+    if (!mountedRef.current) return
     const failed = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected')
     if (failed.length > 0) {
       const msg = failed.map((r) => (r.reason as Error)?.message ?? 'Credential save failed').join('; ')

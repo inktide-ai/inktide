@@ -14,10 +14,15 @@ export type Visibility = 'private' | 'unlisted' | 'public'
 //   MemoryTab   → CharacterMemory
 //   AutoPilot   → CharacterAutoPilot
 
+export type ProjectStatus = 'active' | 'paused' | 'archived'
+
 export interface CharacterIdentity {
   id: string
   name: string
   slug: string
+  description: string
+  status: ProjectStatus
+  coverUrl: string | null
   personality: string
   systemPrompt: string
   isActive: boolean
@@ -26,13 +31,13 @@ export interface CharacterIdentity {
 }
 
 export interface CharacterAppearance {
-  avatarUrl?: string | null
+  avatarUrl: string | null
   bannerColorIndex: number
-  bannerCustomColor?: string | null
-  bannerImageUrl?: string | null
+  bannerCustomColor: string | null
+  bannerImageUrl: string | null
   modelType: ModelType
-  modelFileName?: string
-  keyPhrases: string
+  modelFileName: string | null
+  keyPhrases: string[]
   activeSceneId: string | null
 }
 
@@ -75,6 +80,21 @@ export interface CharacterBehavior {
   emotionIntensityScale: number
 }
 
+export interface CharacterPersonality {
+  warmth: number
+  playfulness: number
+  assertiveness: number
+  empathy: number
+  formality: number
+  sarcasm: number
+  emotionVolatility: number
+  emotionResponsiveness: number
+  emotionMemory: number
+  stressBehavior: string
+  baselineMood: string
+  presetId: string | null
+}
+
 export interface CharacterMemory {
   enabled: boolean
   maxMemories: number
@@ -100,6 +120,8 @@ export interface AiCharacter extends CharacterIdentity {
   behavior: CharacterBehavior
   memory: CharacterMemory
   autoPilot: CharacterAutoPilot
-  /** Flat list of channel links — managed via Integration tab, not via updateCard. */
+  /** Structured personality traits and emotional dynamics (distinct from free-text `personality` description). */
+  personalityConfig: CharacterPersonality
+  /** Flat list of channel links — managed via Channel tab, not via updateCard. */
   channels: ChannelResponse[]
 }

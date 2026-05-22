@@ -20,9 +20,11 @@ const noopAuth: ApiAuthProvider = {
 }
 
 let _auth: ApiAuthProvider = noopAuth
+let _bootstrapped = false
 
 export function configureApiAuth(provider: ApiAuthProvider): void {
   _auth = provider
+  _bootstrapped = true
 }
 
 /**
@@ -58,6 +60,9 @@ export async function apiFetch(
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
+  if (!_bootstrapped) {
+    throw new Error('apiFetch called before configureApiAuth — ensure KeycloakBootstrap has completed')
+  }
   const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`
 
   const headers = new Headers(init.headers)
