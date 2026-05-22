@@ -1,6 +1,19 @@
 import { ApiError } from '../../api/client'
 import type { IStorageUploader } from '@/types/IStorageUploader'
 
+const ALLOWED_CONTENT_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'model/gltf-binary',
+  'model/vrm',
+  'application/octet-stream',
+])
+
+// Browsers report application/octet-stream for .vrm and .glb — validate by extension
+// so a renamed .html cannot slip through the MIME check.
+const OCTET_STREAM_ALLOWED_EXTS = new Set(['vrm', 'glb'])
+
 /**
  * OCP + DRY: паттерн presign→PUT→complete написан ОДИН РАЗ.
  * Добавить новый тип медиазагрузки = создать новый класс `implements IStorageUploader<T>`.
@@ -12,6 +25,15 @@ export async function executePresignedUpload<TResult>(
   extra?: Record<string, unknown>,
 ): Promise<TResult> {
   const contentType = file.type.trim() || 'application/octet-stream'
+  if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
+    throw new ApiError(415, `Unsupported file type: ${contentType}`)
+  }
+  if (contentType === 'application/octet-stream') {
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+    if (!OCTET_STREAM_ALLOWED_EXTS.has(ext)) {
+      throw new ApiError(415, `Unsupported file type: ${contentType}`)
+    }
+  }
   const presign = await uploader.presign({
     file_name: file.name,
     content_type: contentType,
