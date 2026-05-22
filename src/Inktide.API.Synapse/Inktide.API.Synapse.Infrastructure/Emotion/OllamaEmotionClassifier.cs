@@ -1,6 +1,8 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Inktide.API.Graph.Application.Interfaces;
+using Inktide.API.Graph.Application.Models;
 using Inktide.API.Synapse.Application.Configuration;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
@@ -16,18 +18,18 @@ namespace Inktide.API.Synapse.Infrastructure.Emotion;
 /// SRP: only responsible for the HTTP call and response parsing.
 /// Never throws — returns <see cref="EmotionResult"/> with null emotion on any failure.
 /// </summary>
-public sealed class OllamaEmotionClassifier : IEmotionClassificationService
+public sealed class OllamaEmotionClassifier : IEmotionClassificationService, IEmotionClassifier
 {
 
     private static readonly string[] ValidEmotions =
-        ["angry", "sad", "surprised", "relax", "happy", "blush", "sleepy", "thinking"];
+        ["angry", "sad", "surprised", "relax", "happy", "blush", "sleepy", "thinking", "excited", "sarcastic"];
 
     private static readonly string SystemPrompt =
         "You are an emotion classifier for a VTuber AI character. " +
         "Given a chat message, choose the single most fitting emotional REACTION the character should show. " +
         "Respond ONLY with valid JSON matching this schema: " +
         "{\"emotion\": <string|null>, \"intensity\": <number>} " +
-        "where emotion is one of: angry, sad, surprised, relax, happy, blush, sleepy, thinking, null. " +
+        "where emotion is one of: angry, sad, surprised, relax, happy, blush, sleepy, thinking, excited, sarcastic, null. " +
         "Use null if the message requires no strong emotional reaction. " +
         "intensity is a float between 0.0 and 1.0.";
 
@@ -139,6 +141,13 @@ public sealed class OllamaEmotionClassifier : IEmotionClassificationService
         }
     }
 
+
+    async Task<EmotionClassification?> IEmotionClassifier.ClassifyAsync(
+        string message, string? personality, CancellationToken ct, float intensityScale)
+    {
+        var result = await ClassifyAsync(message, personality, ct, intensityScale);
+        return result.Emotion is not null ? new EmotionClassification(result.Emotion, result.Intensity) : null;
+    }
 
     private static EmotionResult None => new(null, 0f);
 

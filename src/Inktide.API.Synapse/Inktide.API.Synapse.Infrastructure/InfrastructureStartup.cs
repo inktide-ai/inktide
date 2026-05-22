@@ -2,6 +2,7 @@ using Inktide.API.Core;
 using Inktide.API.Core.DependencyInjection;
 using Inktide.API.Core.Settings;
 using Inktide.API.Core.Settings.Validators;
+using Inktide.API.Graph.Application.Interfaces;
 using Inktide.API.Synapse.Application.Configuration;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Infrastructure.Adapters;
@@ -12,6 +13,7 @@ using Inktide.API.Synapse.Infrastructure.Messaging;
 using Inktide.API.Synapse.Infrastructure.Providers;
 using Inktide.API.Synapse.Infrastructure.Scattering;
 using Inktide.API.Synapse.Infrastructure.Session;
+using Inktide.API.Synapse.Infrastructure.Startup;
 using Microsoft.Extensions.DependencyInjection;
 using SoulRuntimeImpl = Inktide.API.Synapse.Infrastructure.SoulRuntime.SoulRuntime;
 using Microsoft.Extensions.Hosting;
@@ -79,6 +81,10 @@ public sealed class InfrastructureStartup : IStartup
 
         services.AddHttpClient<OllamaEmotionClassifier>();
         services.AddSingleton<IEmotionClassificationService, OllamaEmotionClassifier>();
+        services.AddSingleton<IEmotionClassifier>(sp =>
+            sp.GetRequiredService<IEmotionClassificationService>() as IEmotionClassifier
+                ?? throw new InvalidOperationException(
+                    "IEmotionClassificationService implementation must also implement IEmotionClassifier."));
         services.AddSingleton<IEmotionalStateService, RedisEmotionalStateService>();
 
         // OllamaChatProvider stays for ListModelsAsync (model catalog REST endpoint).
@@ -163,6 +169,8 @@ public sealed class InfrastructureStartup : IStartup
         // ---------------------------------------------------------------
         services.AddSingleton<IChatServiceFactory, OpenAiCompatChatServiceFactory>();
         services.AddSingleton<ChatServiceFactoryRegistry>();
+
+        services.AddHostedService<ScatterShardValidator>();
 
         // ---------------------------------------------------------------
         // LLM stream worker (replaces Python llm-worker)
