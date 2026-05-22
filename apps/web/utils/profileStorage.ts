@@ -20,8 +20,8 @@ export function writeStoredNickname(userId: string, value: string | null): void 
     const t = value?.trim().slice(0, MAX_LEN) ?? ''
     if (!t) localStorage.removeItem(key(userId))
     else localStorage.setItem(key(userId), t)
-  } catch {
-    /* ignore quota / private mode */
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'QuotaExceededError') throw e
   }
 }
 

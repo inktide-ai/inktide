@@ -30,7 +30,7 @@ export class CardSceneUploader implements IStorageUploader<AiCardSceneResponse> 
       file_name: payload.file_name,
       content_type: payload.content_type,
       size_bytes: payload.size_bytes,
-      tag: this.tag?.trim() || null,
+      tag: this.tag?.trim() ?? null,
     })
   }
 }

@@ -32,6 +32,7 @@ export function getChatModels(
 ): Promise<ChatModelInfo[]> {
   const params = new URLSearchParams({ provider_id: providerId })
   if (baseUrl) params.set('base_url', baseUrl)
-  if (apiKey) params.set('api_key', apiKey)
-  return apiFetch(`/api/v1/chat/models?${params}`).then((r) => jsonOrThrow<ChatModelInfo[]>(r))
+  const headers: Record<string, string> = {}
+  if (apiKey) headers['X-Api-Key'] = apiKey
+  return apiFetch(`/api/v1/chat/models?${params}`, { headers }).then((r) => jsonOrThrow<ChatModelInfo[]>(r))
 }
