@@ -23,14 +23,31 @@ type Screen = 'templates' | 'steps' | 'llm' | 'tts' | 'channels' | 'finish'
 
 type StepSelection = { id: string; name: string; config?: Record<string, string> }
 
-function loadSelections(): Record<string, StepSelection> {
-  try { return JSON.parse(localStorage.getItem('v1_inktide_wizard_selections') ?? '{}') }
-  catch { return {} }
+const WIZARD_TTL_MS = 24 * 60 * 60 * 1000
+
+const WIZARD_KEYS = [
+  'v1_inktide_wizard_selections',
+  'v1_inktide_wizard_channels',
+  'v1_inktide_wizard_personality',
+  'v1_inktide_wizard_template',
+] as const
+
+function loadWithTTL<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return fallback
+    const { value, ts } = JSON.parse(raw) as { value: T; ts: number }
+    if (Date.now() - ts > WIZARD_TTL_MS) { localStorage.removeItem(key); return fallback }
+    return value
+  } catch { return fallback }
 }
 
-function loadChannels(): string[] {
-  try { return JSON.parse(localStorage.getItem('v1_inktide_wizard_channels') ?? '[]') }
-  catch { return [] }
+function saveWithTTL(key: string, value: unknown) {
+  try { localStorage.setItem(key, JSON.stringify({ value, ts: Date.now() })) } catch { /* ignore */ }
+}
+
+function clearWizardDraft() {
+  WIZARD_KEYS.forEach(k => localStorage.removeItem(k))
 }
 
 const screenVariants = {
@@ -56,13 +73,6 @@ const DEFAULT_PERSONALITY: CharacterPersonality = {
   stressBehavior: 'deflect', baselineMood: 'neutral', presetId: null,
 }
 
-function loadPersonality(): CharacterPersonality {
-  try {
-    const raw = localStorage.getItem('v1_inktide_wizard_personality')
-    if (raw) return JSON.parse(raw) as CharacterPersonality
-  } catch { /* ignore */ }
-  return DEFAULT_PERSONALITY
-}
 
 export interface SoulCreationWizardProps {
   onBack: () => void
@@ -76,13 +86,19 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
   const [screen, setScreen] = useState<Screen>('templates')
   const [direction, setDirection] = useState<1 | -1>(1)
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
-  const [stepSelections, setStepSelections] = useState<Record<string, StepSelection>>(loadSelections)
+  const [stepSelections, setStepSelections] = useState<Record<string, StepSelection>>(
+    () => loadWithTTL<Record<string, StepSelection>>('v1_inktide_wizard_selections', {}),
+  )
   const [personalityOpen, setPersonalityOpen] = useState(false)
-  const [personalityConfig, setPersonalityConfig] = useState<CharacterPersonality>(loadPersonality)
+  const [personalityConfig, setPersonalityConfig] = useState<CharacterPersonality>(
+    () => loadWithTTL<CharacterPersonality>('v1_inktide_wizard_personality', DEFAULT_PERSONALITY),
+  )
   const [personalityConfigured, setPersonalityConfigured] = useState(
     () => localStorage.getItem('v1_inktide_wizard_personality') !== null,
   )
-  const [channelsSelected, setChannelsSelected] = useState<string[]>(loadChannels)
+  const [channelsSelected, setChannelsSelected] = useState<string[]>(
+    () => loadWithTTL<string[]>('v1_inktide_wizard_channels', []),
+  )
 
   const navigate = (to: Screen, dir: 1 | -1) => {
     setDirection(dir)
@@ -101,9 +117,7 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
   const handleSelectTemplate = (tmpl: SoulTemplate | null) => {
     if (tmpl) {
       setSelectedTemplate(tmpl.id)
-      try {
-        localStorage.setItem('v1_inktide_wizard_template', JSON.stringify({ id: tmpl.id, personality: tmpl.personality }))
-      } catch { /* ignore */ }
+      saveWithTTL('v1_inktide_wizard_template', { id: tmpl.id, personality: tmpl.personality })
     } else {
       setSelectedTemplate(null)
       localStorage.removeItem('v1_inktide_wizard_template')
@@ -113,7 +127,7 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
 
   const handlePersonalityChange = (p: CharacterPersonality) => {
     setPersonalityConfig(p)
-    try { localStorage.setItem('v1_inktide_wizard_personality', JSON.stringify(p)) } catch { /* ignore */ }
+    saveWithTTL('v1_inktide_wizard_personality', p)
   }
 
   const handlePersonalityClose = () => {
@@ -154,7 +168,7 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
   const handleProviderSelect = (stepId: string, id: string, name: string, config?: Record<string, string>) => {
     const updated = { ...stepSelections, [stepId]: { id, name, config } }
     setStepSelections(updated)
-    try { localStorage.setItem('v1_inktide_wizard_selections', JSON.stringify(updated)) } catch { /* ignore */ }
+    saveWithTTL('v1_inktide_wizard_selections', updated)
     if (stepId === 'llm') onLlmSelect?.(id, config)
     if (stepId === 'tts') onTtsSelect?.(id, config)
     navigate('steps', -1)
@@ -164,7 +178,7 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
     if (personalityOpen) { setPersonalityOpen(false); return }
     if (screen === 'finish' || screen === 'llm' || screen === 'tts' || screen === 'channels') navigate('steps', -1)
     else if (screen === 'steps') navigate('templates', -1)
-    else onBack()
+    else { clearWizardDraft(); onBack() }
   }
 
   return (
@@ -439,11 +453,11 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
                 initialBotToken={stepSelections.channels?.config?.botToken}
                 onConfirm={(config) => {
                   setChannelsSelected(['discord'])
-                  try { localStorage.setItem('v1_inktide_wizard_channels', JSON.stringify(['discord'])) } catch { /* ignore */ }
+                  saveWithTTL('v1_inktide_wizard_channels', ['discord'])
                   if (config?.botToken) {
                     const updated = { ...stepSelections, channels: { id: 'discord', name: 'Discord', config: { botToken: config.botToken } } }
                     setStepSelections(updated)
-                    try { localStorage.setItem('v1_inktide_wizard_selections', JSON.stringify(updated)) } catch { /* ignore */ }
+                    saveWithTTL('v1_inktide_wizard_selections', updated)
                   }
                   navigate('steps', -1)
                 }}
@@ -461,6 +475,7 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
                   const char = buildCharacter(name)
                   const botToken = stepSelections.channels?.config?.botToken as string | undefined
                   await onFinish?.(char, botToken)
+                  clearWizardDraft()
                 }}
               />
             </motion.div>

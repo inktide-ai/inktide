@@ -9,6 +9,7 @@ export interface CharactersContextValue {
   characters: Map<string, AiCharacter>
   selectedId: string | null
   selected: AiCharacter | null
+  cardLoadError: string | null
   loading: boolean
   loadError: string | null
   llmModels: LlmModelResponse[]
@@ -20,11 +21,12 @@ export interface CharactersContextValue {
   updateCharacter: (id: string, patch: Partial<AiCharacter>) => void
   discardChanges: () => void
   handleSave: () => Promise<void>
-  addCharacter: (c: Omit<AiCharacter, 'id'>) => Promise<void>
+  addCharacter: (c: Omit<AiCharacter, 'id'>) => Promise<string | null>
   removeCharacter: (id: string) => Promise<void>
   registerSavePlugin: (key: string, fn: () => Promise<void>) => void
   unregisterSavePlugin: (key: string) => void
   markCredentialDirty: () => void
+  clearSelection: () => void
 }
 
 const CharactersContext = createContext<CharactersContextValue | null>(null)
@@ -42,4 +44,9 @@ export function useCharactersContext(): CharactersContextValue {
   const ctx = useContext(CharactersContext)
   if (!ctx) throw new Error('useCharactersContext must be used within <CharactersProvider>')
   return ctx
+}
+
+/** For UI that may render outside `CharactersProvider` (e.g. account modal on some shells). */
+export function useOptionalCharactersContext(): CharactersContextValue | null {
+  return useContext(CharactersContext)
 }

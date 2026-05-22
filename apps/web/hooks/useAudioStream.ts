@@ -6,6 +6,8 @@ import type { VisemeCue } from '@/types/IVisemeProvider'
 import { WebAudioPlayer } from '../services/audio/WebAudioPlayer'
 import type { LipSyncHandle } from './useLipSync'
 import type { EmotionState } from '@/types/IVrmController'
+import { useAuth } from '@/context/AuthContext'
+import { getFreshAuthToken } from '@/api/client'
 
 interface AudioPayload {
   correlationId: string
@@ -37,22 +39,28 @@ export function useAudioStream(
   options: UseAudioStreamOptions = {},
 ): UseAudioStreamResult {
   const { lipSync } = options
+  const { isLoggedIn, isInitialized } = useAuth()
 
   // Держим lipSync в ref — WebAudioPlayer читает через getter, не пересоздаётся при изменении
   const lipSyncRef = useRef<LipSyncHandle | undefined>(lipSync)
   useEffect(() => { lipSyncRef.current = lipSync }, [lipSync])
 
-  const emotionRef   = useRef<EmotionState>({ emotion: null, intensity: 0 })
-  const emotionReset = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const emotionRef    = useRef<EmotionState>({ emotion: null, intensity: 0 })
+  const emotionReset  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const generationRef = useRef(0)
 
   useEffect(() => {
-    if (!channelId) return
+    if (!channelId || !isInitialized || !isLoggedIn) return
+
+    const generation = ++generationRef.current
+    emotionRef.current = { emotion: null, intensity: 0 }
+    if (emotionReset.current) { clearTimeout(emotionReset.current); emotionReset.current = null }
 
     // DIP: создаём через IAudioPlayer — конкретный класс подменяем без изменения хука
     const player: IAudioPlayer = new WebAudioPlayer(() => lipSyncRef.current)
 
     const connection = new HubConnectionBuilder()
-      .withUrl('/hubs/audio')
+      .withUrl('/hubs/audio', { accessTokenFactory: getFreshAuthToken })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build()
@@ -60,7 +68,7 @@ export function useAudioStream(
     connection.on('audioReceived', (payload: AudioPayload) => {
       player.enqueue(payload.correlationId, payload.audioBase64, payload.visemeTimeline ?? null)
 
-      if (payload.emotion) {
+      if (payload.emotion && generation === generationRef.current) {
         if (emotionReset.current) clearTimeout(emotionReset.current)
         emotionRef.current = { emotion: payload.emotion, intensity: payload.emotionIntensity ?? 0.8 }
         emotionReset.current = setTimeout(() => {
@@ -88,7 +96,7 @@ export function useAudioStream(
         connection.stop()
       }
     }
-  }, [channelId]) // lipSync намеренно убран: WebAudioPlayer читает через getter
+  }, [channelId, isLoggedIn, isInitialized]) // lipSync намеренно убран: WebAudioPlayer читает через getter
 
   // Stable getter — reads from ref, safe to call every animation frame
   const getEmotionState = useCallback((): EmotionState => emotionRef.current, [])

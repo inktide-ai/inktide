@@ -195,5 +195,6 @@ export function useCharacters() {
     registerSavePlugin,
     unregisterSavePlugin,
     markCredentialDirty,
+    clearSelection: () => setSelectedId(null),
   }
 }
