@@ -1,5 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import equal from 'fast-deep-equal'
 import type { AiCharacter } from '@/lib/character/types'
 import { SoulCardRepository } from '../services/cards/SoulCardRepository'
 import { useCharacterList } from './characters/useCharacterList'
@@ -117,27 +118,39 @@ export function useCharacters() {
       Object.keys(patch.appearance!).length === 1 &&
       Object.prototype.hasOwnProperty.call(patch.appearance, 'avatarUrl')
 
+    const current = characters.get(id)  // pre-patch; patchCharacter queues setState, does not mutate Map
     patchCharacter(id, patch)
 
     if (newAvatarUrl !== undefined) {
       updateListItem(id, { avatar_url: newAvatarUrl ?? null })
       // Синхронизируем снимок при avatar-only обновлении
-      const current = characters.get(id)
       if (current) recordSnapshot({ ...current, ...patch })
     }
 
     if (!avatarOnly) {
-      markDirty()
-      // Auto-save: debounce so rapid edits (typing) collapse into one API call.
-      // Capture id at creation time; read latest char state at fire time — decouples save from selectedId.
-      if (autoSaveTimerRef.current !== null) clearTimeout(autoSaveTimerRef.current)
-      const capturedId = id
-      autoSaveTimerRef.current = setTimeout(() => {
-        const latestChar = charactersRef.current.get(capturedId)
-        if (latestChar) void handleSaveRef.current(capturedId, latestChar)
-      }, 600)
+      const next = current ? { ...current, ...patch } : null
+      const snapshot = getSnapshot()
+      const actuallyDirty = next === null || snapshot === null || !equal(next, snapshot)
+
+      if (actuallyDirty) {
+        markDirty()
+        // Auto-save: debounce so rapid edits (typing) collapse into one API call.
+        // Capture id at creation time; read latest char state at fire time — decouples save from selectedId.
+        if (autoSaveTimerRef.current !== null) clearTimeout(autoSaveTimerRef.current)
+        const capturedId = id
+        autoSaveTimerRef.current = setTimeout(() => {
+          const latestChar = charactersRef.current.get(capturedId)
+          if (latestChar) void handleSaveRef.current(capturedId, latestChar)
+        }, 600)
+      } else {
+        clearDirty()
+        if (autoSaveTimerRef.current !== null) {
+          clearTimeout(autoSaveTimerRef.current)
+          autoSaveTimerRef.current = null
+        }
+      }
     }
-  }, [characters, patchCharacter, updateListItem, recordSnapshot, markDirty])
+  }, [characters, patchCharacter, updateListItem, recordSnapshot, markDirty, getSnapshot, clearDirty])
 
   const handleSave = useCallback(async () => {
     await handleSaveCard()
