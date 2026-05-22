@@ -75,11 +75,13 @@ public sealed class QdrantMemoryRepository : IVectorMemoryRepository
         return hits
             .Select(h => new MemoryRecord(
                 PointId:      Guid.Parse(h.Id.Uuid),
-                FactText:     h.Payload["fact_text"].StringValue,
-                Category:     h.Payload["category"].StringValue,
-                Importance:   h.Payload["importance"].DoubleValue,
+                FactText:     h.Payload.TryGetValue("fact_text",     out var ft)  ? ft.StringValue  : string.Empty,
+                Category:     h.Payload.TryGetValue("category",      out var cat) ? cat.StringValue : string.Empty,
+                Importance:   h.Payload.TryGetValue("importance",    out var imp) ? imp.DoubleValue : 0d,
                 Score:        h.Score,
-                RememberedAt: DateTime.Parse(h.Payload["remembered_at"].StringValue)))
+                RememberedAt: h.Payload.TryGetValue("remembered_at", out var rat)
+                              && DateTime.TryParse(rat.StringValue, out var dt)
+                              ? dt : DateTime.UnixEpoch))
             .ToList();
     }
 }
