@@ -1,6 +1,8 @@
 using System.Threading.Channels;
 using Inktide.API.Core;
 using Inktide.API.Core.DependencyInjection;
+using Inktide.API.Memory.Infrastructure.DbContext;
+using Microsoft.EntityFrameworkCore;
 using Inktide.API.Memory.Application.Configuration;
 using Inktide.API.Memory.Application.Services;
 using Inktide.API.Memory.Application.Workers;
@@ -9,6 +11,8 @@ using Inktide.API.Memory.Domain.Ports;
 using Inktide.API.Memory.Infrastructure.Clients;
 using Inktide.API.Memory.Infrastructure.Ollama;
 using Inktide.API.Memory.Infrastructure.Qdrant;
+using Inktide.API.Memory.Application.Interfaces;
+using Inktide.API.Memory.Infrastructure.Messaging;
 using Inktide.API.Memory.Infrastructure.Workers;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +37,11 @@ public sealed class MemoryInfrastructureStartup : IStartup
 {
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
+        // ── MemoryDbContext (owns soul.memory_metadata table) ─────────────────
+        var connectionString = ctx.Configuration.GetConnectionString("Postgres")
+            ?? BuildConnectionString(ctx.Configuration);
+        services.AddDbContext<MemoryDbContext>(options => options.UseNpgsql(connectionString));
+
         services.Configure<MemoryOptions>(ctx.Configuration.GetSection(nameof(MemoryOptions)));
         services.Configure<QdrantSettings>(ctx.Configuration.GetSection(nameof(QdrantSettings)));
 
@@ -47,6 +56,8 @@ public sealed class MemoryInfrastructureStartup : IStartup
 
         services.AddSingleton<IVectorMemoryRepository, QdrantMemoryRepository>();
 
+        // Ensure soul.memory_metadata table exists (MemoryDbContext now owns it).
+        services.AddHostedService<MemoryDbInitializer>();
         // Ensure the Qdrant collection exists on startup.
         services.AddHostedService<VectorCollectionInitializer>();
 
@@ -92,9 +103,20 @@ public sealed class MemoryInfrastructureStartup : IStartup
                 });
         });
 
+        services.AddSingleton<IIngestionDlqPublisher, IngestionDlqPublisher>();
         services.AddSingleton<IMemoryIngestionService, MemoryIngestionService>();
         services.AddScoped<IMemoryQueryService, MemoryQueryService>();
         services.AddHostedService<MemoryIngestionWorker>();
         services.AddMemoryCache();
+    }
+
+    private static string BuildConnectionString(IConfiguration cfg)
+    {
+        var host     = cfg["PostgresSettings:Host"]     ?? "localhost";
+        var port     = cfg["PostgresSettings:Port"]     ?? "5432";
+        var db       = cfg["PostgresSettings:Database"] ?? "inktide";
+        var username = cfg["PostgresSettings:Username"] ?? throw new InvalidOperationException("PostgresSettings:Username required");
+        var password = cfg["PostgresSettings:Password"] ?? throw new InvalidOperationException("PostgresSettings:Password required");
+        return $"Host={host};Port={port};Database={db};Username={username};Password={password}";
     }
 }

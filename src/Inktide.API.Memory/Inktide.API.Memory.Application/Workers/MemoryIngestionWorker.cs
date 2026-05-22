@@ -1,5 +1,7 @@
+using Inktide.API.Core.Generators;
 using System.Threading.Channels;
 using Inktide.API.Memory.Application.Configuration;
+using Inktide.API.Memory.Application.Interfaces;
 using Inktide.API.Memory.Domain.Models;
 using Inktide.API.Memory.Domain.Ports;
 using Microsoft.Extensions.AI;
@@ -21,6 +23,7 @@ public sealed class MemoryIngestionWorker : BackgroundService
     private readonly IEmbeddingGenerator<string, Embedding<float>> _embedder;
     private readonly IVectorMemoryRepository _vectorRepo;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IIngestionDlqPublisher _dlq;
     private readonly IOptions<MemoryOptions> _options;
     private readonly ILogger<MemoryIngestionWorker> _logger;
 
@@ -30,6 +33,7 @@ public sealed class MemoryIngestionWorker : BackgroundService
         IEmbeddingGenerator<string, Embedding<float>> embedder,
         IVectorMemoryRepository vectorRepo,
         IServiceScopeFactory scopeFactory,
+        IIngestionDlqPublisher dlq,
         IOptions<MemoryOptions> options,
         ILogger<MemoryIngestionWorker> logger)
     {
@@ -38,6 +42,7 @@ public sealed class MemoryIngestionWorker : BackgroundService
         _embedder     = embedder     ?? throw new ArgumentNullException(nameof(embedder));
         _vectorRepo   = vectorRepo   ?? throw new ArgumentNullException(nameof(vectorRepo));
         _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
+        _dlq          = dlq          ?? throw new ArgumentNullException(nameof(dlq));
         _options      = options      ?? throw new ArgumentNullException(nameof(options));
         _logger       = logger       ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -84,17 +89,25 @@ public sealed class MemoryIngestionWorker : BackgroundService
             {
                 await ProcessJobAsync(job, ct);
             }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex,
                     "MemoryIngestionWorker: failed to process job for card {CardId}, channel {Channel}",
-                    job.AiCardId, job.ChannelId);
+                    job.CharacterId, job.ChannelId);
+                await _dlq.PublishAsync(job, ex.Message, ct);
             }
         }
     }
 
     private async Task ProcessJobAsync(MemoryIngestionJob job, CancellationToken ct)
     {
+        using var scope = _scopeFactory.CreateScope();
+        var repo = scope.ServiceProvider.GetRequiredService<IMemoryMetadataRepository>();
+
         var opts = _options.Value;
 
         var facts    = await _scribe.ExtractFactsAsync(job, ct);
@@ -108,17 +121,14 @@ public sealed class MemoryIngestionWorker : BackgroundService
         var rememberedAt = DateTime.UtcNow;
         var expiresAt    = rememberedAt.AddDays(opts.RetentionDays);
 
-        using var scope = _scopeFactory.CreateScope();
-        var repo = scope.ServiceProvider.GetRequiredService<IMemoryMetadataRepository>();
-
         for (var i = 0; i < eligible.Count; i++)
         {
             var fact    = eligible[i];
-            var pointId = Guid.NewGuid();
+            var pointId = IdGenerator.New();
 
             await _vectorRepo.UpsertAsync(
                 pointId:      pointId,
-                aiCardId:     job.AiCardId,
+                aiCardId:     job.CharacterId,
                 factText:     fact.Text,
                 category:     fact.Type,
                 importance:   fact.Importance,
@@ -127,7 +137,7 @@ public sealed class MemoryIngestionWorker : BackgroundService
                 ct:           ct);
 
             await repo.UpsertAsync(
-                aiCardId:      job.AiCardId,
+                aiCardId:      job.CharacterId,
                 qdrantPointId: pointId.ToString(),
                 factText:      fact.Text,
                 category:      fact.Type,
@@ -140,6 +150,6 @@ public sealed class MemoryIngestionWorker : BackgroundService
 
         _logger.LogDebug(
             "MemoryIngestionWorker: stored {Count} facts for card {CardId}",
-            eligible.Count, job.AiCardId);
+            eligible.Count, job.CharacterId);
     }
 }

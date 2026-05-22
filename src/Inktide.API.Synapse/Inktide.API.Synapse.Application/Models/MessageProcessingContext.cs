@@ -24,5 +24,9 @@ public sealed class MessageProcessingContext
     public bool IsAborted { get; private set; }
 
     public void Abort() => IsAborted = true;
-    
+
+    private readonly System.Collections.Concurrent.ConcurrentBag<string> _degradedShards = new();
+    public bool IsDegraded => !_degradedShards.IsEmpty;
+    public IReadOnlyCollection<string> DegradedShards => _degradedShards;
+    public void MarkDegraded(string shardId) => _degradedShards.Add(shardId);
 }

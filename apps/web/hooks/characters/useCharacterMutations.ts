@@ -1,5 +1,6 @@
 'use client'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import type { AiCharacter } from '@/lib/character/types'
 import type { AiCardListItem, LlmModelResponse } from '../../api/soul'
 import type { ICardRepository } from '@/types/ICardRepository'
@@ -19,11 +20,6 @@ interface MutationDeps {
   onListItemUpdate: (id: string, patch: Partial<Pick<AiCardListItem, 'name' | 'slug' | 'personality' | 'is_active'>>) => void
 }
 
-/**
- * ISP: единственная ответственность — CRUD-мутации (save, create, delete).
- * Принимает ICardRepository (DIP) — не зависит от конкретного soul.ts.
- * Не знает о dirty-state, snapshot или выборе.
- */
 export function useCharacterMutations({
   repo,
   llmModels,
@@ -35,43 +31,74 @@ export function useCharacterMutations({
   onSnapshotUpdate,
   onListItemUpdate,
 }: MutationDeps) {
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [saveError, setSaveError] = useState<string | null>(null)
+  // Tracks the transient 'saved' window (2s) that TanStack status doesn't provide natively
+  const [savedFlag, setSavedFlag] = useState(false)
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const handleSave = useCallback(async () => {
-    if (!selectedId || !selected) return
-    setSaveStatus('saving')
+  const saveMutation = useMutation({
+    mutationFn: ({ id, char }: { id: string; char: AiCharacter }) =>
+      repo.updateCard(id, characterToUpdateRequest(char)),
+  })
+
+  const createMutation = useMutation({
+    mutationFn: (req: Parameters<ICardRepository['createCard']>[0]) => repo.createCard(req),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => repo.deleteCard(id),
+  })
+
+  // Derive domain SaveStatus from mutation states
+  const saveStatus: SaveStatus =
+    saveMutation.isPending || createMutation.isPending ? 'saving' :
+    saveMutation.isError   || createMutation.isError   ? 'error'  :
+    savedFlag ? 'saved' :
+    'idle'
+
+  // Clear savedFlag when a new save starts
+  useEffect(() => {
+    if (saveMutation.isPending) {
+      setSavedFlag(false)
+      if (savedTimerRef.current) { clearTimeout(savedTimerRef.current); savedTimerRef.current = null }
+    }
+  }, [saveMutation.isPending])
+
+  const handleSave = useCallback(async (idOverride?: string, charOverride?: AiCharacter) => {
+    const id   = idOverride   ?? selectedId
+    const char = charOverride ?? selected
+    if (!id || !char) return
     setSaveError(null)
     try {
-      const response = await repo.updateCard(selectedId, characterToUpdateRequest(selected))
+      const response = await saveMutation.mutateAsync({ id, char })
       const updated = apiResponseToCharacter(response)
-      onCharacterSaved(selectedId, updated)
+      onCharacterSaved(id, updated)
       onSnapshotUpdate(updated)
-      onListItemUpdate(selectedId, {
+      onListItemUpdate(id, {
         name: updated.name,
         slug: updated.slug,
         personality: updated.personality,
         is_active: updated.isActive,
       })
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus('idle'), 2000)
+      setSavedFlag(true)
+      savedTimerRef.current = setTimeout(() => { setSavedFlag(false); saveMutation.reset() }, 2000)
     } catch (err) {
-      setSaveStatus('error')
       setSaveError(err instanceof Error ? err.message : 'Save failed')
     }
-  }, [selectedId, selected, repo, onCharacterSaved, onSnapshotUpdate, onListItemUpdate])
+  }, [selectedId, selected, saveMutation, onCharacterSaved, onSnapshotUpdate, onListItemUpdate])
 
-  const addCharacter = useCallback(async (c: Omit<AiCharacter, 'id'>) => {
-    const defaultLlm = llmModels[0]?.id
+  const addCharacter = useCallback(async (c: Omit<AiCharacter, 'id'>): Promise<string | null> => {
+    const defaultLlm = (
+      llmModels.find(m => m.provider === c.llm.providerId)?.id ??
+      llmModels[0]?.id
+    )
     if (!defaultLlm) {
       setSaveError('No LLM models available. Please seed the catalog first.')
-      setSaveStatus('error')
-      return
+      return null
     }
-    setSaveStatus('saving')
     setSaveError(null)
     try {
-      const response = await repo.createCard(characterToCreateRequest(c, defaultLlm))
+      const response = await createMutation.mutateAsync(characterToCreateRequest(c, defaultLlm))
       const char = apiResponseToCharacter(response)
       const listItem: AiCardListItem = {
         id: char.id,
@@ -80,34 +107,38 @@ export function useCharacterMutations({
         avatar_url: null,
         personality: char.personality,
         llm_model: null,
+        description: char.description,
+        status: char.status,
+        cover_url: char.coverUrl,
+        platforms: [],
         is_active: char.isActive,
         updated_at: new Date().toISOString(),
+        sort_key: char.id,
       }
       onCharacterCreated(char, listItem)
       onSnapshotUpdate(char)
-      setSaveStatus('idle')
+      return char.id
     } catch (err) {
-      setSaveStatus('error')
       setSaveError(err instanceof Error ? err.message : 'Create failed')
+      return null
     }
-  }, [llmModels, repo, onCharacterCreated, onSnapshotUpdate])
+  }, [llmModels, createMutation, onCharacterCreated, onSnapshotUpdate])
 
   const removeCharacter = useCallback(async (id: string) => {
     try {
-      await repo.deleteCard(id)
+      await deleteMutation.mutateAsync(id)
       onCharacterDeleted(id)
-      setSaveStatus('idle')
       setSaveError(null)
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Delete failed')
-      setSaveStatus('error')
     }
-  }, [repo, onCharacterDeleted])
+  }, [deleteMutation, onCharacterDeleted])
 
   const resetStatus = useCallback(() => {
-    setSaveStatus('idle')
     setSaveError(null)
-  }, [])
+    setSavedFlag(false)
+    saveMutation.reset()
+  }, [saveMutation])
 
   return { saveStatus, saveError, handleSave, addCharacter, removeCharacter, resetStatus }
 }

@@ -22,6 +22,13 @@ export function useCharacters() {
   const repoRef = useRef(new SoulCardRepository())
   const repo = repoRef.current
 
+  // Auto-save debounce (Figma-style: save 600ms after last change)
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Stable ref to handleSave to avoid circular dep in updateCharacter
+  const handleSaveRef = useRef<(id?: string, char?: AiCharacter) => Promise<void>>(() => Promise.resolve())
+  // Always-current map of characters — read at timer fire time for entity-bound save
+  const charactersRef = useRef<Map<string, AiCharacter>>(new Map())
+
   // ── 4 фокусных хука ──────────────────────────────────────────────────────────
 
   const {
@@ -39,6 +46,7 @@ export function useCharacters() {
     selectedId,
     setSelectedId,
     selected,
+    cardLoadError,
     selectCard: selectCardInternal,
     reloadCard: reloadCardInternal,
     setCharacter,
@@ -90,6 +98,7 @@ export function useCharacters() {
   // ── Публичные методы ─────────────────────────────────────────────────────────
 
   const selectCard = useCallback(async (id: string) => {
+    if (autoSaveTimerRef.current !== null) { clearTimeout(autoSaveTimerRef.current); autoSaveTimerRef.current = null }
     clearDirty()
     await selectCardInternal(id, recordSnapshot)
   }, [selectCardInternal, clearDirty, recordSnapshot])
@@ -117,7 +126,17 @@ export function useCharacters() {
       if (current) recordSnapshot({ ...current, ...patch })
     }
 
-    if (!avatarOnly) markDirty()
+    if (!avatarOnly) {
+      markDirty()
+      // Auto-save: debounce so rapid edits (typing) collapse into one API call.
+      // Capture id at creation time; read latest char state at fire time — decouples save from selectedId.
+      if (autoSaveTimerRef.current !== null) clearTimeout(autoSaveTimerRef.current)
+      const capturedId = id
+      autoSaveTimerRef.current = setTimeout(() => {
+        const latestChar = charactersRef.current.get(capturedId)
+        if (latestChar) void handleSaveRef.current(capturedId, latestChar)
+      }, 600)
+    }
   }, [characters, patchCharacter, updateListItem, recordSnapshot, markDirty])
 
   const handleSave = useCallback(async () => {
@@ -126,7 +145,12 @@ export function useCharacters() {
     clearCredentialDirty()
   }, [handleSaveCard, clearCredentialDirty])
 
+  // Keep refs in sync
+  useEffect(() => { handleSaveRef.current = handleSave }, [handleSave])
+  useEffect(() => { charactersRef.current = characters }, [characters])
+
   const discardChanges = useCallback(() => {
+    if (autoSaveTimerRef.current !== null) { clearTimeout(autoSaveTimerRef.current); autoSaveTimerRef.current = null }
     const snapshot = getSnapshot()
     if (selectedId && snapshot) {
       setCharacter(selectedId, snapshot)
@@ -154,6 +178,7 @@ export function useCharacters() {
     characters,
     selectedId,
     selected,
+    cardLoadError,
     // dirty
     isDirty: isDirty || externalDirty,
     // save
