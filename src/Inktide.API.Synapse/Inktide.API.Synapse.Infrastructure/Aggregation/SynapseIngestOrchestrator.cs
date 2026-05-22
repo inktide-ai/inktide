@@ -88,7 +88,7 @@ public sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
         // This preserves backwards-compatibility for souls without a saved graph.
         if (!graphEnriched)
         {
-            // Respect per-project plugin config. Missing entry = default ON (backwards compatible).
+            // Respect per-project plugin config. Missing entry = default OFF (opt-in per plugin).
             var plugins = cardCtx?.Plugins;
             bool IsPluginEnabled(string id) =>
                 plugins?.FirstOrDefault(p => p.PluginId == id)?.IsEnabled ?? false;

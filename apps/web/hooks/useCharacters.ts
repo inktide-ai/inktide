@@ -146,7 +146,7 @@ export function useCharacters() {
   }, [handleSaveCard, clearCredentialDirty])
 
   // Keep refs in sync
-  useEffect(() => { handleSaveRef.current = handleSave }, [handleSave])
+  useEffect(() => { handleSaveRef.current = handleSaveCard }, [handleSaveCard])
   useEffect(() => { charactersRef.current = characters }, [characters])
 
   const discardChanges = useCallback(() => {
