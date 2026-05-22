@@ -62,9 +62,7 @@ public sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
         {
             await _soulRuntime.EnrichAsync(context, cancellationToken);
 
-            // Detect if SoulRuntime actually produced any enrichment.
-            graphEnriched = context.Get<Application.Models.RagContext>() is not null
-                         || context.Get<Application.Models.EmotionResult>() is not null;
+            graphEnriched = context.SoulRuntimeExecuted;
 
             if (graphEnriched)
             {

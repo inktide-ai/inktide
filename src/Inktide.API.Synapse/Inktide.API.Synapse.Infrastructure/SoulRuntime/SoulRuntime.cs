@@ -49,6 +49,8 @@ public sealed class SoulRuntime : ISoulRuntime
         {
             ApplyOutputs(context, outputs);
         }
+
+        context.MarkSoulRuntimeExecuted();
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────────

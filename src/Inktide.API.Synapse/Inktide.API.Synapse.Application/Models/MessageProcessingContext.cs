@@ -29,4 +29,12 @@ public sealed class MessageProcessingContext
     public bool IsDegraded => !_degradedShards.IsEmpty;
     public IReadOnlyCollection<string> DegradedShards => _degradedShards;
     public void MarkDegraded(string shardId) => _degradedShards.Add(shardId);
+
+    /// <summary>
+    /// Set by <see cref="ISoulRuntime"/> when it successfully executed plugin nodes from the
+    /// soul's saved graph. Checked by the orchestrator to decide whether to fall back to
+    /// the legacy hardcoded scatter shards.
+    /// </summary>
+    public bool SoulRuntimeExecuted { get; private set; }
+    public void MarkSoulRuntimeExecuted() => SoulRuntimeExecuted = true;
 }
