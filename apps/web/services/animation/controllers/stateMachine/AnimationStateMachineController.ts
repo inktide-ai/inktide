@@ -239,19 +239,36 @@ export class AnimationStateMachineController implements IVrmController {
     if (!url) throw new Error(`[AnimSM] no URL registered for node '${nodeId}'`)
 
     const gltf = await this.loader!.loadAsync(url)
-    // Primary abort path: signal was aborted while load was in flight.
-    signal?.throwIfAborted()
-    // Belt-and-suspenders: if dispose() ran but signal wasn't aborted (shouldn't happen, but
-    // vrm/mixer are null here and createVRMAnimationClip would crash without this guard).
-    if (this._disposed) throw new DOMException('Controller disposed', 'AbortError')
+    try {
+      // Primary abort path: signal was aborted while load was in flight.
+      signal?.throwIfAborted()
+      // Belt-and-suspenders: if dispose() ran but signal wasn't aborted (shouldn't happen, but
+      // vrm/mixer are null here and createVRMAnimationClip would crash without this guard).
+      if (this._disposed) throw new DOMException('Controller disposed', 'AbortError')
 
-    const anims = gltf.userData.vrmAnimations as unknown[] | undefined
-    if (!anims?.length) throw new Error(`[AnimSM] no VRM animations in ${url}`)
+      const anims = gltf.userData.vrmAnimations as unknown[] | undefined
+      if (!anims?.length) throw new Error(`[AnimSM] no VRM animations in ${url}`)
 
-    return createVRMAnimationClip(
-      anims[0] as Parameters<typeof createVRMAnimationClip>[0],
-      this.vrm!,
-    )
+      return createVRMAnimationClip(
+        anims[0] as Parameters<typeof createVRMAnimationClip>[0],
+        this.vrm!,
+      )
+    } finally {
+      // Release GPU resources — only the AnimationClip is kept, not the GLTF scene.
+      gltf.scene.traverse((obj) => {
+        const mesh = obj as THREE.Mesh
+        mesh.geometry?.dispose()
+        const mats = mesh.material
+          ? (Array.isArray(mesh.material) ? mesh.material : [mesh.material])
+          : []
+        for (const m of mats as THREE.Material[]) {
+          for (const val of Object.values(m)) {
+            if (val instanceof THREE.Texture) val.dispose()
+          }
+          m.dispose()
+        }
+      })
+    }
   }
 
   private async _preloadEmotes(signal: AbortSignal): Promise<void> {

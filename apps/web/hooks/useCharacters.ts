@@ -72,7 +72,7 @@ export function useCharacters() {
   const markCredentialDirty = useCallback(() => setExternalDirty(true), [])
   const clearCredentialDirty = useCallback(() => setExternalDirty(false), [])
 
-  const { saveStatus, saveError, handleSave: handleSaveCard, addCharacter, removeCharacter } = useCharacterMutations({
+  const { saveStatus, saveError, handleSave: handleSaveCard, addCharacter, removeCharacter, reportPluginError } = useCharacterMutations({
     repo,
     llmModels,
     selectedId,
@@ -154,9 +154,15 @@ export function useCharacters() {
 
   const handleSave = useCallback(async () => {
     await handleSaveCard()
-    await Promise.allSettled([...savePluginsRef.current.values()].map((fn) => fn()))
+    const results = await Promise.allSettled([...savePluginsRef.current.values()].map((fn) => fn()))
+    const failed = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+    if (failed.length > 0) {
+      const msg = failed.map((r) => (r.reason as Error)?.message ?? 'Credential save failed').join('; ')
+      reportPluginError(msg)
+      return
+    }
     clearCredentialDirty()
-  }, [handleSaveCard, clearCredentialDirty])
+  }, [handleSaveCard, clearCredentialDirty, reportPluginError])
 
   // Keep refs in sync
   useEffect(() => { handleSaveRef.current = handleSaveCard }, [handleSaveCard])

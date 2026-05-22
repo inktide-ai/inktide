@@ -376,10 +376,16 @@ export default function NodeInspectorPanel({ node, onClose, onNameChange, onNode
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [node.id])
 
-  // Propagate LLM config changes back to node data
+  // Propagate LLM config changes back to node data.
+  // Debounced 800ms: prevents partial API keys and rapid field edits from firing a graph save
+  // on every keystroke. onNodeDataChange and node.id are excluded from deps intentionally —
+  // they do not change mid-edit and including them would reset the timer on unrelated renders.
   useEffect(() => {
     if (nodeData.pipelineType !== 'llm') return
-    onNodeDataChange?.(node.id, llmCfg as unknown as Record<string, unknown>)
+    const timer = setTimeout(() => {
+      onNodeDataChange?.(node.id, llmCfg as unknown as Record<string, unknown>)
+    }, 800)
+    return () => clearTimeout(timer)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [llmCfg])
 

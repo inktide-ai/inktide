@@ -32,6 +32,7 @@ export function useCharacterMutations({
   onListItemUpdate,
 }: MutationDeps) {
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [pluginError, setPluginError] = useState(false)
   // Tracks the transient 'saved' window (2s) that TanStack status doesn't provide natively
   const [savedFlag, setSavedFlag] = useState(false)
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -52,7 +53,7 @@ export function useCharacterMutations({
   // Derive domain SaveStatus from mutation states
   const saveStatus: SaveStatus =
     saveMutation.isPending || createMutation.isPending ? 'saving' :
-    saveMutation.isError   || createMutation.isError   ? 'error'  :
+    saveMutation.isError   || createMutation.isError   || pluginError ? 'error'  :
     savedFlag ? 'saved' :
     'idle'
 
@@ -69,6 +70,7 @@ export function useCharacterMutations({
     const char = charOverride ?? selected
     if (!id || !char) return
     setSaveError(null)
+    setPluginError(false)
     try {
       const response = await saveMutation.mutateAsync({ id, char })
       const updated = apiResponseToCharacter(response)
@@ -134,11 +136,17 @@ export function useCharacterMutations({
     }
   }, [deleteMutation, onCharacterDeleted])
 
+  const reportPluginError = useCallback((msg: string) => {
+    setSaveError(msg)
+    setPluginError(true)
+  }, [])
+
   const resetStatus = useCallback(() => {
     setSaveError(null)
+    setPluginError(false)
     setSavedFlag(false)
     saveMutation.reset()
   }, [saveMutation])
 
-  return { saveStatus, saveError, handleSave, addCharacter, removeCharacter, resetStatus }
+  return { saveStatus, saveError, handleSave, addCharacter, removeCharacter, resetStatus, reportPluginError }
 }

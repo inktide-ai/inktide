@@ -18,10 +18,12 @@ const EMOTION_EXPRESSION_MAP: Record<string, ManagedExpression> = {
   sad:       'sad',
   surprised: 'surprised',
   happy:     'happy',
+  excited:   'happy',
   blush:     'happy',
   relax:     'relaxed',
   sleepy:    'relaxed',
   thinking:  'relaxed',
+  sarcastic: 'relaxed',
 }
 
 const LERP_SPEED = 3 // скорость перехода (в секундах^-1)
@@ -39,9 +41,13 @@ export class ExpressionController implements IVrmController {
     const em = this.vrm?.expressionManager
     if (!em) return
 
-    const targetExpr = ctx.emotion.emotion
-      ? (EMOTION_EXPRESSION_MAP[ctx.emotion.emotion] ?? null)
-      : null
+    const mapped = ctx.emotion.emotion
+      ? EMOTION_EXPRESSION_MAP[ctx.emotion.emotion]
+      : undefined
+    if (ctx.emotion.emotion && !mapped) {
+      console.warn(`[ExpressionController] unknown emotion '${ctx.emotion.emotion}' — falling back to neutral`)
+    }
+    const targetExpr = mapped ?? null
 
     const targetIntensity = ctx.emotion.intensity
 

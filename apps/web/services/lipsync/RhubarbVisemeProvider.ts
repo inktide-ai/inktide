@@ -73,7 +73,7 @@ export class RhubarbVisemeProvider implements IVisemeProvider {
       else break
     }
 
-    const cur  = VISEME_WEIGHTS[cues[idx].viseme]
+    const cur  = this._safeWeights(cues[idx].viseme)
     const next = cues[idx + 1]
 
     if (!next) return { ...cur }
@@ -82,7 +82,7 @@ export class RhubarbVisemeProvider implements IVisemeProvider {
     const span = next.startMs - cues[idx].startMs
     const rawT = span > 0 ? Math.min((elapsedMs - cues[idx].startMs) / span, 1) : 0
     const t    = rawT < HOLD_RATIO ? 0 : (rawT - HOLD_RATIO) / (1 - HOLD_RATIO)
-    const nxt  = VISEME_WEIGHTS[next.viseme]
+    const nxt  = this._safeWeights(next.viseme)
 
     return {
       aa: cur.aa + (nxt.aa - cur.aa) * t,
@@ -91,6 +91,15 @@ export class RhubarbVisemeProvider implements IVisemeProvider {
       ee: cur.ee + (nxt.ee - cur.ee) * t,
       oh: cur.oh + (nxt.oh - cur.oh) * t,
     }
+  }
+
+  private _safeWeights(viseme: string): MouthWeights {
+    const w = (VISEME_WEIGHTS as Record<string, MouthWeights>)[viseme]
+    if (!w) {
+      console.warn(`[RhubarbVisemeProvider] unknown viseme '${viseme}' — falling back to X (silence)`)
+      return VISEME_WEIGHTS['X']
+    }
+    return w
   }
 
   private _smooth(target: MouthWeights, attack: number, decay: number): MouthWeights {
