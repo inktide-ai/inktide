@@ -121,6 +121,14 @@ class StreamConsumer:
             await self._ack(message_id)
             return
 
+        if envelope.schema_version != 1:
+            logger.error(
+                "Unknown schema version %d, dropping. id=%s correlation=%s",
+                envelope.schema_version, message_id, envelope.correlation_id,
+            )
+            await self._ack(message_id)
+            return
+
         try:
             async with self._llm_sem:
                 await self._stream_and_publish(envelope)

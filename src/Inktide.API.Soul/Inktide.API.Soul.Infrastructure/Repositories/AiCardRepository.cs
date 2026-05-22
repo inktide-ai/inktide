@@ -44,7 +44,21 @@ public sealed class AiCardRepository : IAiCardRepository
             .AsNoTracking()
             .Include(c => c.LlmCatalog)
             .Where(c => c.UserId == userId && c.DeletedAt == null)
-            .OrderByDescending(c => c.UpdatedAt)
+            .OrderBy(c => c.SortKey)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<AiCard>> GetSummaryListByUserIdAsync(Guid userId, CancellationToken ct = default)
+    {
+        // AsSplitQuery prevents a Cartesian explosion when joining LlmCatalog + Channels in one query.
+        // Global query filter (DeletedAt == null) is applied automatically.
+        return await _db.AiCards
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(c => c.LlmCatalog)
+            .Include(c => c.Channels.Where(ch => ch.IsActive))
+            .Where(c => c.UserId == userId)
+            .OrderBy(c => c.SortKey)
             .ToListAsync(ct);
     }
 
@@ -53,17 +67,16 @@ public sealed class AiCardRepository : IAiCardRepository
         return await _db.AiCards.CountAsync(c => c.UserId == userId && c.DeletedAt == null, ct);
     }
 
-    public async Task<AiCard> CreateAsync(AiCard card, CancellationToken ct = default)
+    public Task<AiCard> CreateAsync(AiCard card, CancellationToken ct = default)
     {
         _db.AiCards.Add(card);
-        await _db.SaveChangesAsync(ct);
-        return card;
+        return Task.FromResult(card);
     }
 
-    public async Task UpdateAsync(AiCard card, CancellationToken ct = default)
+    public Task UpdateAsync(AiCard card, CancellationToken ct = default)
     {
         _db.AiCards.Update(card);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
@@ -73,7 +86,6 @@ public sealed class AiCardRepository : IAiCardRepository
 
         card.DeletedAt = _time.GetUtcNow().UtcDateTime;
         card.UpdatedAt = _time.GetUtcNow().UtcDateTime;
-        await _db.SaveChangesAsync(ct);
     }
 
     public async Task<bool> SlugExistsAsync(Guid userId, string slug, Guid? excludeCardId = null, CancellationToken ct = default)
@@ -82,6 +94,46 @@ public sealed class AiCardRepository : IAiCardRepository
         if (excludeCardId.HasValue)
             query = query.Where(c => c.Id != excludeCardId.Value);
         return await query.AnyAsync(ct);
+    }
+
+    public async Task<AiCard?> GetPublicBySlugAsync(string slug, CancellationToken ct = default)
+    {
+        return await _db.AiCards
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(c => c.Channels.Where(ch => ch.IsActive))
+            .FirstOrDefaultAsync(c => c.Slug == slug && c.DeletedAt == null, ct);
+    }
+
+    public async Task<IReadOnlyList<(Guid Id, string SortKey)>> GetSortKeysAsync(Guid userId, CancellationToken ct = default)
+    {
+        var rows = await _db.AiCards
+            .AsNoTracking()
+            .Where(c => c.UserId == userId && c.DeletedAt == null)
+            .OrderBy(c => c.SortKey)
+            .Select(c => new { c.Id, c.SortKey })
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return rows.Select(r => (r.Id, r.SortKey)).ToList();
+    }
+
+    public async Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, CancellationToken ct = default)
+    {
+        // ExecuteUpdateAsync bypasses the EF change tracker — an explicit transaction is required.
+        // SaveChangesAsync's implicit transaction does NOT cover these calls.
+        // N round-trips inside one transaction. Acceptable for typical sort-list sizes.
+        await using var tx = await _db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+        foreach (var (id, sortKey) in updates)
+        {
+            await _db.AiCards
+                .Where(c => c.Id == id)
+                .ExecuteUpdateAsync(
+                    s => s.SetProperty(e => e.SortKey, sortKey),
+                    ct)
+                .ConfigureAwait(false);
+        }
+        await tx.CommitAsync(ct).ConfigureAwait(false);
     }
 
 }

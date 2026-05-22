@@ -27,11 +27,18 @@ services:
       dockerfile: Dockerfile
     platform: linux/amd64   # Rhubarb ships x86-64 only; Rosetta handles emulation on Apple Silicon
     profiles: [core]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1g
     env_file:
       - .env
     environment:
+      ASPNETCORE_ENVIRONMENT: Development
       TtsProviders__Kokoro__Endpoint: http://kokoro:8880/v1
-      KeycloakSettings__MetadataAddress: http://keycloak:8080/realms/inktide/.well-known/openid-configuration
+      KeycloakSettings__MetadataAddress: http://keycloak:8080/realms/chimera/.well-known/openid-configuration
       KeycloakAdminSettings__BaseUrl: http://keycloak:8080
       Kestrel__Endpoints__Http__Url: http://+:5001
       S3Settings__ServiceUrl: http://minio:9000
@@ -45,6 +52,7 @@ services:
       EmotionClassificationOptions__OllamaBaseUrl: http://host.docker.internal:11434
       # Scribe fact extraction (workers profile)
       MemorySettings__ScribeBaseUrl: http://scribe:8001
+      # SMTP settings come from .env (SmtpSettings__Host / Port / Username / Password)
     extra_hosts:
       - "host.docker.internal:host-gateway"   # Linux compatibility; no-op on Docker Desktop
     ports:
@@ -55,14 +63,22 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       qdrant:
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
 
   # База данных приложения
   postgres:
     image: postgres:16-alpine
     profiles: [core]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512m
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-inktide}
       POSTGRES_USER: ${POSTGRES_USER:-inktide}
@@ -81,6 +97,12 @@ services:
   postgres-keycloak:
     image: postgres:16-alpine
     profiles: [core]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256m
     environment:
       POSTGRES_DB: ${KC_POSTGRES_DB:-keycloak}
       POSTGRES_USER: ${KC_POSTGRES_USER:-keycloak}
@@ -96,6 +118,12 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.6
     profiles: [core]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 768m
     command: start-dev
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
@@ -107,9 +135,17 @@ services:
       KC_HOSTNAME: localhost
       KC_HTTP_ENABLED: "true"
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     volumes:
       - ./keycloak-extensions:/opt/keycloak/providers
+    healthcheck:
+      # Quarkus management port (9000) — available in Keycloak 17+ (this image: 25.0.6).
+      # /health/ready reports true only when all realms are loaded, unlike /realms/master.
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
     depends_on:
       postgres-keycloak:
         condition: service_healthy
@@ -117,6 +153,17 @@ services:
   redis:
     image: redis:7-alpine
     profiles: [core]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256m
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "6379:6379"
     volumes:
@@ -125,6 +172,12 @@ services:
   qdrant:
     image: qdrant/qdrant:v1.13.6
     profiles: [core]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512m
     ports:
       - "6333:6333"   # HTTP / REST
       - "6334:6334"   # gRPC
@@ -137,13 +190,27 @@ services:
       retries: 5
       start_period: 10s
 
+  mailhog:
+    image: mailhog/mailhog:latest
+    profiles: [dev]   # dev only — catches all outgoing emails locally (http://localhost:8025)
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
   minio:
     image: minio/minio:latest
     profiles: [core]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256m
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio12345}
+      MINIO_API_CORS_ALLOW_ORIGIN: "http://localhost:3000,http://localhost:5173,http://localhost:1420,tauri://localhost"
     ports:
       - "9000:9000"
       - "9001:9001"   # Web console

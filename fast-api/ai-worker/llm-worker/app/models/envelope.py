@@ -79,3 +79,4 @@ class SynapseAggregatedEnvelope(_CamelModel):
     message: ChatMessage
     rag: RagContext | None = None
     context: ContextShardPayload | None = None
+    schema_version: int = 1
