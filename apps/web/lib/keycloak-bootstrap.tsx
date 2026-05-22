@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, useEffect } from 'react'
+import { type ReactNode, useEffect, useRef } from 'react'
 import { configureApiAuth } from '@/api/client'
 import { keycloak } from '@/lib/keycloak'
 
@@ -15,12 +15,11 @@ function clearAuthCookie() {
 const KC_TOKEN_KEY = 'v1_inktide_kc_token'
 const KC_REFRESH_KEY = 'v1_inktide_kc_refresh'
 
-let initialized = false
-
 export function KeycloakBootstrap({ children }: { children: ReactNode }) {
+  const initializedRef = useRef(false)
   useEffect(() => {
-    if (initialized) return
-    initialized = true
+    if (initializedRef.current) return
+    initializedRef.current = true
 
     // one-time migration from unversioned keys — preserves existing sessions on upgrade
     for (const [oldKey, newKey] of [['inktide_kc_token', KC_TOKEN_KEY], ['inktide_kc_refresh', KC_REFRESH_KEY]] as const) {

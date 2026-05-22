@@ -89,6 +89,7 @@ export class WebAudioPlayer implements IAudioPlayer {
     ctx.decodeAudioData(bytes.buffer as ArrayBuffer)
       .then((buffer) => {
         if (this._destroyed || !this._playing) return
+        if (ctx.state === 'closed') return
 
         const destination = lipSync ? lipSync.getAnalyserNode() : ctx.destination
         const source = ctx.createBufferSource()

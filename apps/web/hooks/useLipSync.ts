@@ -42,7 +42,20 @@ export function useLipSync(): LipSyncHandle {
   const lastProviderIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    return () => { ctxRef.current?.close() }
+    if (!ctxRef.current || ctxRef.current.state === 'closed') {
+      const ctx      = new AudioContext()
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize               = FFT_SIZE
+      analyser.smoothingTimeConstant = 0.30
+      analyser.connect(ctx.destination)
+      ctxRef.current      = ctx
+      analyserRef.current = analyser
+    }
+    return () => {
+      ctxRef.current?.close()
+      ctxRef.current      = null
+      analyserRef.current = null
+    }
   }, [])
 
   const getOrCreate = useCallback((): { ctx: AudioContext; analyser: AnalyserNode } => {
