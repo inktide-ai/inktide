@@ -1,4 +1,5 @@
 using Inktide.API.Core.Generators;
+using Inktide.API.Core.Transactions;
 using Inktide.API.Project.Domain.Entities;
 using Inktide.API.Project.Domain.Repositories;
 using Inktide.API.Project.Domain.ValueObjects;
@@ -24,7 +25,8 @@ public sealed class ProjectServiceTests
         UpdatedAt = DateTime.UtcNow,
     };
 
-    private static ProjectService BuildService(IProjectRepository repo) => new(repo);
+    private static ProjectService BuildService(IProjectRepository repo) =>
+        new(repo, Substitute.For<ITransactionManager>(), TimeProvider.System);
 
     // ── ReorderAsync ─────────────────────────────────────────────────────────
 

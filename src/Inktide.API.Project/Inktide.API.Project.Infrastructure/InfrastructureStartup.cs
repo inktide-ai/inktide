@@ -1,11 +1,13 @@
 using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
+using Inktide.API.Core.Transactions;
 using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.Domain.Repositories;
 using Inktide.API.Project.Infrastructure.DependencyInjection;
 using Inktide.API.Project.Infrastructure.Persistence;
 using Inktide.API.Project.Infrastructure.Persistence.Repositories;
 using Inktide.API.Project.Infrastructure.Services;
+using Inktide.API.Project.Infrastructure.Transactions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +27,8 @@ public sealed class InfrastructureStartup : IStartup
             options.UseNpgsql(connectionString);
         });
 
+        services.AddSingleton(TimeProvider.System);
+        services.AddScoped<ITransactionManager, ProjectTransactionManager>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<ProjectService>();
         services.AddScoped<IProjectCrudService>(sp => sp.GetRequiredService<ProjectService>());

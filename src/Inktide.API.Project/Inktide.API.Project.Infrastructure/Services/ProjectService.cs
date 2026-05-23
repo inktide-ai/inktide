@@ -1,4 +1,5 @@
 using Inktide.API.Core.Ordering;
+using Inktide.API.Core.Transactions;
 using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.Domain.Entities;
 using Inktide.API.Project.Domain.Repositories;
@@ -8,11 +9,15 @@ namespace Inktide.API.Project.Infrastructure.Services;
 
 internal sealed class ProjectService : IProjectCrudService, IProjectOrderingService, IProjectPluginService
 {
-    private readonly IProjectRepository _repo;
+    private readonly IProjectRepository  _repo;
+    private readonly ITransactionManager _transactionManager;
+    private readonly TimeProvider        _time;
 
-    public ProjectService(IProjectRepository repo)
+    public ProjectService(IProjectRepository repo, ITransactionManager transactionManager, TimeProvider time)
     {
-        _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+        _repo               = repo               ?? throw new ArgumentNullException(nameof(repo));
+        _transactionManager = transactionManager ?? throw new ArgumentNullException(nameof(transactionManager));
+        _time               = time               ?? throw new ArgumentNullException(nameof(time));
     }
 
     public Task<IReadOnlyList<ProjectEntity>> ListAsync(Guid userId, CancellationToken ct = default)
@@ -47,7 +52,7 @@ internal sealed class ProjectService : IProjectCrudService, IProjectOrderingServ
         project.ActiveModelId = activeModelId;
         project.ActiveSceneId = activeSceneId;
         project.SystemPrompt  = systemPrompt;
-        project.UpdatedAt     = DateTime.UtcNow;
+        project.UpdatedAt     = _time.GetUtcNow().UtcDateTime;
 
         return await _repo.UpdateAsync(project, ct);
     }
@@ -65,7 +70,7 @@ internal sealed class ProjectService : IProjectCrudService, IProjectOrderingServ
             ?? throw new KeyNotFoundException($"Project {id} not found.");
 
         project.ActiveSoulId = soulId;
-        project.UpdatedAt    = DateTime.UtcNow;
+        project.UpdatedAt    = _time.GetUtcNow().UtcDateTime;
 
         return await _repo.UpdateAsync(project, ct);
     }
@@ -76,7 +81,7 @@ internal sealed class ProjectService : IProjectCrudService, IProjectOrderingServ
             ?? throw new KeyNotFoundException($"Project {id} not found.");
 
         project.ActiveSoulId = null;
-        project.UpdatedAt    = DateTime.UtcNow;
+        project.UpdatedAt    = _time.GetUtcNow().UtcDateTime;
 
         return await _repo.UpdateAsync(project, ct);
     }
@@ -99,7 +104,7 @@ internal sealed class ProjectService : IProjectCrudService, IProjectOrderingServ
 
         if (idx >= 0) plugins[idx] = plugin;
         else          plugins.Add(plugin);
-        project.UpdatedAt = DateTime.UtcNow;
+        project.UpdatedAt = _time.GetUtcNow().UtcDateTime;
         await _repo.UpdateAsync(project, ct);
         return plugin;
     }
@@ -123,7 +128,9 @@ internal sealed class ProjectService : IProjectCrudService, IProjectOrderingServ
 
         string newKey = FractionalIndexer.GenerateKeyBetween(prevKey, nextKey);
 
-        await _repo.BulkUpdateSortKeysAsync([(id, newKey)], ct).ConfigureAwait(false);
+        await _transactionManager.BeginTransactionAsync(ct).ConfigureAwait(false);
+        await _repo.BulkUpdateSortKeysAsync([(id, newKey)], _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
+        await _transactionManager.CommitTransactionAsync(ct).ConfigureAwait(false);
 
         project.SortKey = newKey;
         return project;

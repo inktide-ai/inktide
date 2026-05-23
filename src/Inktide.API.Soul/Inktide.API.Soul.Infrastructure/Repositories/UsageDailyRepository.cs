@@ -7,19 +7,19 @@ namespace Inktide.API.Soul.Infrastructure.Repositories;
 
 public sealed class UsageDailyRepository : IUsageDailyRepository
 {
-
     private readonly SoulDbContext _db;
+    private readonly TimeProvider  _time;
 
-
-    public UsageDailyRepository(SoulDbContext db)
+    public UsageDailyRepository(SoulDbContext db, TimeProvider time)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        _db   = db   ?? throw new ArgumentNullException(nameof(db));
+        _time = time ?? throw new ArgumentNullException(nameof(time));
     }
 
 
     public async Task<UsageDaily?> GetTodayAsync(Guid aiCardId, CancellationToken ct = default)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(_time.GetUtcNow().UtcDateTime);
         return await _db.UsageDaily
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.AiCardId == aiCardId && u.UsageDate == today, ct);
@@ -30,7 +30,7 @@ public sealed class UsageDailyRepository : IUsageDailyRepository
         int visionFramesProcessed = 0, int visionEventsDetected = 0,
         CancellationToken ct = default)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(_time.GetUtcNow().UtcDateTime);
 
         await _db.Database.ExecuteSqlInterpolatedAsync($"""
             INSERT INTO soul.usage_daily (id, ai_card_id, usage_date, llm_calls, tokens_prompt, tokens_completion,
