@@ -1,3 +1,4 @@
+using Inktide.API.Core.Contracts;
 using Inktide.API.Soul.Domain.Entities;
 
 namespace Inktide.API.Soul.Application.Interfaces;
@@ -32,4 +33,9 @@ public interface IAiCardService
     /// <summary>Move a card to a new position. previousId=null → beginning; nextId=null → end. Returns null when not found.</summary>
     Task<AiCard?> ReorderAsync(Guid userId, Guid cardId, Guid? previousId, Guid? nextId, CancellationToken ct = default);
 
+    /// <summary>
+    /// Creates a Soul from a cross-context import command. Returns the new Soul ID.
+    /// AiCard entity is built entirely inside Soul — callers never construct domain entities.
+    /// </summary>
+    Task<Guid> CreateFromImportAsync(Guid userId, ImportSoulCommand command, CancellationToken ct = default);
 }

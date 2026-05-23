@@ -33,6 +33,7 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
         registrator.Register<IApiKeyProtector, ApiKeyProtector>(Reuse.Scoped);
         registrator.Register<ICredentialTester, HttpCredentialTester>(Reuse.Scoped);
         registrator.Register<IAiCardChannelQueryService, AiCardChannelQueryService>(Reuse.Scoped);
+        registrator.Register<IMemoryStatsCache, RedisMemoryStatsCache>(Reuse.Scoped);
         registrator.Register<IDashboardStatsService, DashboardStatsService>(Reuse.Scoped);
         registrator.Register<IProjectImportService, ProjectImportService>(Reuse.Scoped);
         registrator.Register<IProjectExportDataQuery, ProjectExportDataQueryService>(Reuse.Scoped);

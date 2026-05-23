@@ -36,6 +36,10 @@ public sealed class LlmCatalogConfiguration : IEntityTypeConfiguration<LlmCatalo
             .HasColumnName("is_available")
             .HasDefaultValue(true);
 
+        b.Property(e => e.RequiresApiKey)
+            .HasColumnName("requires_api_key")
+            .HasDefaultValue(true);
+
         b.Property(e => e.CreatedAt)
             .HasColumnName("created_at");
 

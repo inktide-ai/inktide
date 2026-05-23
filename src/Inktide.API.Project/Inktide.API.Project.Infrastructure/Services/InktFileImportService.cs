@@ -1,40 +1,28 @@
-using Inktide.API.Core.Generators;
-using System.IO.Compression;
-using System.Text;
 using System.Text.Json;
 using Inktide.API.Core.Contracts;
+using Inktide.API.Core.Generators;
 using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.Domain.Entities;
 using Inktide.API.Project.Domain.Repositories;
 using Inktide.API.Soul.Application.Interfaces;
-using Inktide.API.Soul.Domain.Entities;
-using Inktide.API.Soul.Domain.Enums;
-using Inktide.API.Soul.Domain.Repositories;
-using Inktide.API.Soul.Domain.ValueObjects;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace Inktide.API.Project.Infrastructure.Services;
 
 internal sealed class InktFileImportService : IInktFileImportService
 {
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNameCaseInsensitive = true,
-    };
-
-    private const int CurrentFormatVersion = 1;
     private static readonly TimeSpan ParseTokenTtl = TimeSpan.FromMinutes(10);
 
     private readonly IProjectRepository _projectRepo;
     private readonly IAiCardService _cardService;
-    private readonly ICatalogRepository _catalog;
+    private readonly IProjectImportCatalogQuery _catalog;
     private readonly IGraphDefinitionImporter? _graphImporter;
     private readonly IDistributedCache _cache;
 
     public InktFileImportService(
         IProjectRepository projectRepo,
         IAiCardService cardService,
-        ICatalogRepository catalog,
+        IProjectImportCatalogQuery catalog,
         IDistributedCache cache,
         IGraphDefinitionImporter? graphImporter = null)
     {
@@ -50,181 +38,81 @@ internal sealed class InktFileImportService : IInktFileImportService
         Stream inktFileStream,
         CancellationToken ct = default)
     {
-        ZipArchive zip;
-        try { zip = new ZipArchive(inktFileStream, ZipArchiveMode.Read, leaveOpen: false); }
-        catch { return Error("File is not a valid .inkt archive."); }
+        InktArchiveData archive;
+        try { archive = InktArchiveParser.Extract(inktFileStream); }
+        catch (InvalidOperationException ex) { return Error(ex.Message); }
 
-        using (zip)
+        var warnings = new List<string>();
+        Guid? resolvedLlmId = null;
+        Guid? resolvedTtsId = null;
+
+        if (archive.SoulName is not null)
         {
-            // metadata.json (required)
-            var metaJson = ReadEntry(zip, "metadata.json");
-            if (metaJson is null) return Error("Missing metadata.json in archive.");
-
-            int formatVersion;
-            List<string> requiredFeatures;
-            try
+            if (!string.IsNullOrWhiteSpace(archive.SoulLlmModelId))
             {
-                using var metaDoc = JsonDocument.Parse(metaJson);
-                var root = metaDoc.RootElement;
-                if (!root.TryGetProperty("formatVersion", out var fv) || fv.ValueKind != JsonValueKind.Number)
-                    return Error("metadata.json is missing formatVersion.");
-                formatVersion = fv.GetInt32();
-                requiredFeatures = root.TryGetProperty("requiredFeatures", out var rf) && rf.ValueKind == JsonValueKind.Array
-                    ? rf.EnumerateArray().Select(x => x.GetString() ?? string.Empty).ToList()
-                    : [];
-            }
-            catch { return Error("metadata.json is corrupted or invalid."); }
-
-            if (formatVersion != CurrentFormatVersion)
-                return Error($"Unsupported format version {formatVersion}. This platform supports version {CurrentFormatVersion}.");
-
-            // project.json (required)
-            var projectJson = ReadEntry(zip, "project.json");
-            if (projectJson is null) return Error("Missing project.json in archive.");
-
-            string projectName;
-            string? projectDesc = null;
-            string? projectPrompt = null;
-            try
-            {
-                using var projDoc = JsonDocument.Parse(projectJson);
-                var root = projDoc.RootElement;
-                projectName = GetString(root, "name") ?? string.Empty;
-                projectDesc = GetString(root, "description");
-                projectPrompt = GetString(root, "systemPrompt");
-            }
-            catch { return Error("project.json is corrupted or invalid."); }
-
-            if (string.IsNullOrWhiteSpace(projectName))
-                return Error("project.json is missing a project name.");
-
-            // soul.json (optional) — parse into flat strings for Redis cache
-            var soulRaw  = ReadEntry(zip, "soul.json");
-            var brainRaw = ReadEntry(zip, "brain.json");
-            var connRaw  = ReadEntry(zip, "connectors.json");
-
-            string? soulName = null, soulPersonality = null, soulSystemPrompt = null;
-            string? soulDescription = null, soulStatus = null;
-            string? soulLlmModelId = null, soulLlmProvider = null, soulLlmConfig = null;
-            string? soulTtsVoiceId = null, soulTtsProvider = null, soulTtsConfig = null;
-            string? soulAppearance = null, soulResponseBehavior = null;
-            string? soulMemorySettings = null, soulAutoPilot = null, soulPersonalityConfig = null;
-
-            if (soulRaw is not null)
-            {
-                try
-                {
-                    using var soulDoc = JsonDocument.Parse(soulRaw);
-                    var root = soulDoc.RootElement;
-                    soulName             = GetString(root, "name");
-                    soulPersonality      = GetString(root, "personality");
-                    soulSystemPrompt     = GetString(root, "systemPrompt");
-                    soulDescription      = GetString(root, "description");
-                    soulStatus           = GetString(root, "status");
-                    soulLlmModelId       = GetString(root, "llmModelId");
-                    soulLlmProvider      = GetString(root, "llmProvider");
-                    soulTtsVoiceId       = GetString(root, "ttsVoiceId");
-                    soulTtsProvider      = GetString(root, "ttsProvider");
-                    // JSONB object fields — serialize back to string for caching
-                    soulLlmConfig        = GetRawJson(root, "llmConfig");
-                    soulTtsConfig        = GetRawJson(root, "ttsConfig");
-                    soulAppearance       = GetRawJson(root, "appearance");
-                    soulResponseBehavior = GetRawJson(root, "responseBehavior");
-                    soulMemorySettings   = GetRawJson(root, "memorySettings");
-                    soulAutoPilot        = GetRawJson(root, "autoPilot");
-                    soulPersonalityConfig = GetRawJson(root, "personalityConfig");
-                }
-                catch { /* treat as no soul */ }
+                var llmEntry = await _catalog.FindLlmByModelIdAsync(archive.SoulLlmModelId, ct).ConfigureAwait(false);
+                if (llmEntry is null)
+                    warnings.Add($"LLM model '{archive.SoulLlmModelId}' is not available on this platform — a fallback will be used.");
+                else
+                    resolvedLlmId = llmEntry.Id;
             }
 
-            int connectorCount = 0;
-            if (connRaw is not null)
+            if (!string.IsNullOrWhiteSpace(archive.SoulTtsVoiceId))
             {
-                try
-                {
-                    using var connDoc = JsonDocument.Parse(connRaw);
-                    if (connDoc.RootElement.ValueKind == JsonValueKind.Array)
-                        connectorCount = connDoc.RootElement.GetArrayLength();
-                }
-                catch { /* non-critical */ }
+                var ttsEntry = await _catalog.FindTtsByVoiceIdAsync(archive.SoulTtsVoiceId, ct).ConfigureAwait(false);
+                if (ttsEntry is null)
+                    warnings.Add($"TTS voice '{archive.SoulTtsVoiceId}' is not available on this platform — TTS will be disabled.");
+                else
+                    resolvedTtsId = ttsEntry.Id;
             }
-
-            var warnings = new List<string>();
-            Guid? resolvedLlmId = null;
-            Guid? resolvedTtsId = null;
-
-            if (soulName is not null)
-            {
-                if (!string.IsNullOrWhiteSpace(soulLlmModelId))
-                {
-                    var llmEntry = await _catalog.FindLlmByModelIdAsync(soulLlmModelId, ct).ConfigureAwait(false);
-                    if (llmEntry is null)
-                        warnings.Add($"LLM model '{soulLlmModelId}' is not available on this platform — a fallback will be used.");
-                    else
-                        resolvedLlmId = llmEntry.Id;
-                }
-
-                if (!string.IsNullOrWhiteSpace(soulTtsVoiceId))
-                {
-                    var ttsEntry = await _catalog.FindTtsByVoiceIdAsync(soulTtsVoiceId, ct).ConfigureAwait(false);
-                    if (ttsEntry is null)
-                        warnings.Add($"TTS voice '{soulTtsVoiceId}' is not available on this platform — TTS will be disabled.");
-                    else
-                        resolvedTtsId = ttsEntry.Id;
-                }
-            }
-
-            foreach (var feature in requiredFeatures)
-            {
-                if (feature.StartsWith("tts:local:", StringComparison.OrdinalIgnoreCase))
-                    warnings.Add($"This project uses a local TTS provider ({feature.Split(':').Last()}) which must be installed and running.");
-            }
-
-            var token = IdGenerator.New().ToString("N");
-            var context = new InktImportContext(
-                UserId:               userId,
-                ProjectName:          projectName,
-                ProjectDesc:          projectDesc,
-                ProjectPrompt:        projectPrompt,
-                BrainJson:            brainRaw,
-                ResolvedLlmId:        resolvedLlmId,
-                ResolvedTtsId:        resolvedTtsId,
-                SoulName:             soulName,
-                SoulPersonality:      soulPersonality,
-                SoulSystemPrompt:     soulSystemPrompt,
-                SoulDescription:      soulDescription,
-                SoulStatus:           soulStatus,
-                SoulLlmConfig:        soulLlmConfig,
-                SoulTtsConfig:        soulTtsConfig,
-                SoulAppearance:       soulAppearance,
-                SoulResponseBehavior: soulResponseBehavior,
-                SoulMemorySettings:   soulMemorySettings,
-                SoulAutoPilot:        soulAutoPilot,
-                SoulPersonalityConfig: soulPersonalityConfig);
-
-            var cacheOpts = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = ParseTokenTtl,
-            };
-            await _cache.SetStringAsync(
-                $"inkt:import:{token}",
-                JsonSerializer.Serialize(context),
-                cacheOpts,
-                ct).ConfigureAwait(false);
-
-            return new InktFileParseResult(
-                ProjectName:    projectName,
-                SoulName:       soulName,
-                HasGraph:       brainRaw is not null,
-                ConnectorCount: connectorCount,
-                LlmModelId:     soulLlmModelId,
-                LlmProvider:    soulLlmProvider,
-                TtsVoiceId:     soulTtsVoiceId,
-                TtsProvider:    soulTtsProvider,
-                Warnings:       warnings,
-                Errors:         [],
-                ParseToken:     token);
         }
+
+        warnings.AddRange(FeatureTagWarnings.Resolve(archive.RequiredFeatures));
+
+        var token = IdGenerator.New().ToString("N");
+        var context = new InktImportContext(
+            UserId:               userId,
+            ProjectName:          archive.ProjectName,
+            ProjectDesc:          archive.ProjectDesc,
+            ProjectPrompt:        archive.ProjectPrompt,
+            BrainJson:            archive.BrainJson,
+            ResolvedLlmId:        resolvedLlmId,
+            ResolvedTtsId:        resolvedTtsId,
+            SoulName:             archive.SoulName,
+            SoulPersonality:      archive.SoulPersonality,
+            SoulSystemPrompt:     archive.SoulSystemPrompt,
+            SoulDescription:      archive.SoulDescription,
+            SoulStatus:           archive.SoulStatus,
+            SoulLlmConfig:        archive.SoulLlmConfig,
+            SoulTtsConfig:        archive.SoulTtsConfig,
+            SoulAppearance:       archive.SoulAppearance,
+            SoulResponseBehavior: archive.SoulResponseBehavior,
+            SoulMemorySettings:   archive.SoulMemorySettings,
+            SoulAutoPilot:        archive.SoulAutoPilot,
+            SoulPersonalityConfig: archive.SoulPersonalityConfig);
+
+        var cacheOpts = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = ParseTokenTtl,
+        };
+        await _cache.SetStringAsync(
+            $"inkt:import:{token}",
+            JsonSerializer.Serialize(context),
+            cacheOpts,
+            ct).ConfigureAwait(false);
+
+        return new InktFileParseResult(
+            ProjectName:    archive.ProjectName,
+            SoulName:       archive.SoulName,
+            HasGraph:       archive.BrainJson is not null,
+            ConnectorCount: archive.ConnectorCount,
+            LlmModelId:     archive.SoulLlmModelId,
+            LlmProvider:    archive.SoulLlmProvider,
+            TtsVoiceId:     archive.SoulTtsVoiceId,
+            TtsProvider:    archive.SoulTtsProvider,
+            Warnings:       warnings,
+            Errors:         [],
+            ParseToken:     token);
     }
 
     public async Task<InktFileFinalizeResult> FinalizeAsync(
@@ -250,32 +138,28 @@ internal sealed class InktFileImportService : IInktFileImportService
             var llmCatalogId = context.ResolvedLlmId;
             if (llmCatalogId is null)
             {
-                var models = await _catalog.GetAvailableLlmModelsAsync(ct: ct).ConfigureAwait(false);
-                llmCatalogId = models.FirstOrDefault()?.Id
+                var firstLlm = await _catalog.GetFirstAvailableLlmAsync(ct).ConfigureAwait(false)
                     ?? throw new InvalidOperationException("No LLM catalog entries are available on this platform.");
+                llmCatalogId = firstLlm.Id;
             }
 
-            var card = new AiCard
-            {
-                Name             = context.SoulName,
-                Personality      = context.SoulPersonality      ?? string.Empty,
-                SystemPrompt     = context.SoulSystemPrompt     ?? string.Empty,
-                Description      = context.SoulDescription      ?? string.Empty,
-                Status           = Enum.TryParse<AiCardStatus>(context.SoulStatus, ignoreCase: true, out var st)
-                                       ? st : AiCardStatus.Active,
-                LlmCatalogId     = llmCatalogId.Value,
-                LlmConfig        = context.SoulLlmConfig        ?? "{}",
-                TtsCatalogId     = context.ResolvedTtsId,
-                TtsConfig        = context.SoulTtsConfig,
-                Appearance       = context.SoulAppearance       ?? "{}",
-                ResponseBehavior = context.SoulResponseBehavior ?? "{}",
-                MemorySettings   = context.SoulMemorySettings   ?? "{}",
-                AutoPilot        = context.SoulAutoPilot        ?? "{}",
-                PersonalityConfig = PersonalitySettings.Parse(context.SoulPersonalityConfig),
-            };
+            var cmd = new ImportSoulCommand(
+                Name:                 context.SoulName,
+                Personality:          context.SoulPersonality      ?? string.Empty,
+                SystemPrompt:         context.SoulSystemPrompt     ?? string.Empty,
+                Description:          context.SoulDescription      ?? string.Empty,
+                Status:               context.SoulStatus           ?? "active",
+                LlmCatalogId:         llmCatalogId.Value,
+                LlmConfig:            context.SoulLlmConfig        ?? "{}",
+                TtsCatalogId:         context.ResolvedTtsId,
+                TtsConfig:            context.SoulTtsConfig,
+                Appearance:           context.SoulAppearance       ?? "{}",
+                ResponseBehavior:     context.SoulResponseBehavior ?? "{}",
+                MemorySettings:       context.SoulMemorySettings   ?? "{}",
+                AutoPilot:            context.SoulAutoPilot        ?? "{}",
+                PersonalityConfigJson: context.SoulPersonalityConfig);
 
-            var created = await _cardService.CreateAsync(userId, card, ct: ct).ConfigureAwait(false);
-            soulId = created.Id;
+            soulId = await _cardService.CreateFromImportAsync(userId, cmd, ct).ConfigureAwait(false);
         }
 
         // 2. Create Project.
@@ -295,27 +179,6 @@ internal sealed class InktFileImportService : IInktFileImportService
         return new InktFileFinalizeResult(project.Id, soulId);
     }
 
-    // ── Helpers ──
-
-    private static string? ReadEntry(ZipArchive zip, string name)
-    {
-        var entry = zip.GetEntry(name);
-        if (entry is null) return null;
-        using var stream = entry.Open();
-        using var reader = new StreamReader(stream, Encoding.UTF8);
-        return reader.ReadToEnd();
-    }
-
-    private static string? GetString(JsonElement el, string prop) =>
-        el.TryGetProperty(prop, out var v) && v.ValueKind == JsonValueKind.String
-            ? v.GetString()
-            : null;
-
-    private static string? GetRawJson(JsonElement el, string prop) =>
-        el.TryGetProperty(prop, out var v) && v.ValueKind != JsonValueKind.Null
-            ? v.GetRawText()
-            : null;
-
     private static InktFileParseResult Error(string message) =>
         new(
             ProjectName:    string.Empty,
@@ -330,7 +193,6 @@ internal sealed class InktFileImportService : IInktFileImportService
             Errors:         [message],
             ParseToken:     string.Empty);
 
-    // Cached intermediate context stored in Redis between parse and finalize.
     private sealed record InktImportContext(
         Guid    UserId,
         string  ProjectName,

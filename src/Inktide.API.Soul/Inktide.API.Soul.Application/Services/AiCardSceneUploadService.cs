@@ -198,7 +198,7 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
 
         string newKey = FractionalIndexer.GenerateKeyBetween(prevKey, nextKey);
 
-        await _scenes.BulkUpdateSortKeysAsync([(sceneId, newKey)], ct).ConfigureAwait(false);
+        await _scenes.BulkUpdateSortKeysAsync([(sceneId, newKey)], _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
 
         return ToDto(scene) with { SortKey = newKey };
     }

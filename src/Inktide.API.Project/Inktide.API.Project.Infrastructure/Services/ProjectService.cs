@@ -6,7 +6,7 @@ using Inktide.API.Project.Domain.ValueObjects;
 
 namespace Inktide.API.Project.Infrastructure.Services;
 
-internal sealed class ProjectService : IProjectService
+internal sealed class ProjectService : IProjectCrudService, IProjectOrderingService, IProjectPluginService
 {
     private readonly IProjectRepository _repo;
 
@@ -85,7 +85,7 @@ internal sealed class ProjectService : IProjectService
     {
         var project = await _repo.FindByIdAndUserAsync(id, userId, ct)
             ?? throw new KeyNotFoundException($"Project {id} not found.");
-        return project.GetPlugins();
+        return project.Plugins;
     }
 
     public async Task<ProjectPlugin> UpsertPluginAsync(Guid id, Guid userId, string pluginId, bool isEnabled, Dictionary<string, string>? config, CancellationToken ct = default)
@@ -93,14 +93,12 @@ internal sealed class ProjectService : IProjectService
         var project = await _repo.FindByIdAndUserAsync(id, userId, ct)
             ?? throw new KeyNotFoundException($"Project {id} not found.");
 
-        var plugins = project.GetPlugins().ToList();
+        var plugins = project.Plugins;
         var idx     = plugins.FindIndex(p => p.PluginId == pluginId);
         var plugin  = new ProjectPlugin(pluginId, isEnabled, config ?? []);
 
         if (idx >= 0) plugins[idx] = plugin;
         else          plugins.Add(plugin);
-
-        project.SetPlugins(plugins);
         project.UpdatedAt = DateTime.UtcNow;
         await _repo.UpdateAsync(project, ct);
         return plugin;

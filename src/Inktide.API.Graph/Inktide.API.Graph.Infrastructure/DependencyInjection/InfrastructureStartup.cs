@@ -58,6 +58,7 @@ public sealed class InfrastructureStartup : IStartup
         services.AddScoped<IGraphService, GraphService>();
         services.AddSingleton<IGraphExecutor, GraphExecutorService>();
         services.AddScoped<IGraphDefinitionImporter, GraphDefinitionImporterService>();
+        services.AddScoped<IProjectGraphExportQuery, ProjectGraphExportQueryService>();
 
         services.AddHostedService<GraphDatabaseMigrationService>();
     }

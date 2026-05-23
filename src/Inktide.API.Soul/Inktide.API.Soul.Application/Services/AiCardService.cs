@@ -1,3 +1,4 @@
+using Inktide.API.Core.Contracts;
 using Inktide.API.Core.Generators;
 using Inktide.API.Core.Ordering;
 using Inktide.API.Core.Transactions;
@@ -5,9 +6,11 @@ using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Guards;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Domain.Entities;
+using Inktide.API.Soul.Domain.Enums;
 using Inktide.API.Soul.Domain.Events;
 using Inktide.API.Soul.Domain.IntegrationEvents;
 using Inktide.API.Soul.Domain.Repositories;
+using Inktide.API.Soul.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Soul.Application.Services;
@@ -157,9 +160,36 @@ public sealed class AiCardService : IAiCardService
 
         string newKey = FractionalIndexer.GenerateKeyBetween(prevKey, nextKey);
 
-        await _cardRepo.BulkUpdateSortKeysAsync([(cardId, newKey)], ct).ConfigureAwait(false);
+        await _cardRepo.BulkUpdateSortKeysAsync([(cardId, newKey)], _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
 
         card.SortKey = newKey;
         return card;
+    }
+
+    public async Task<Guid> CreateFromImportAsync(Guid userId, ImportSoulCommand cmd, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(cmd);
+
+        var card = new AiCard
+        {
+            Name             = cmd.Name,
+            Personality      = cmd.Personality,
+            SystemPrompt     = cmd.SystemPrompt,
+            Description      = cmd.Description,
+            Status           = Enum.TryParse<AiCardStatus>(cmd.Status, ignoreCase: true, out var st)
+                                   ? st : AiCardStatus.Active,
+            LlmCatalogId     = cmd.LlmCatalogId,
+            LlmConfig        = cmd.LlmConfig,
+            TtsCatalogId     = cmd.TtsCatalogId,
+            TtsConfig        = cmd.TtsConfig,
+            Appearance       = cmd.Appearance,
+            ResponseBehavior = cmd.ResponseBehavior,
+            MemorySettings   = cmd.MemorySettings,
+            AutoPilot        = cmd.AutoPilot,
+            PersonalityConfig = PersonalitySettings.Parse(cmd.PersonalityConfigJson),
+        };
+
+        var created = await CreateAsync(userId, card, ct: ct).ConfigureAwait(false);
+        return created.Id;
     }
 }

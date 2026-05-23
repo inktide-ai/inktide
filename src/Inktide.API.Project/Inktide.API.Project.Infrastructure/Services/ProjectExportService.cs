@@ -2,7 +2,6 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using Inktide.API.Core.Contracts;
-using Inktide.API.Graph.Domain.Contracts;
 using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.Domain.Repositories;
 
@@ -17,21 +16,21 @@ internal sealed class ProjectExportService : IProjectExportService
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
     };
 
-    private static readonly HashSet<string> LocalTtsProviders =
-        new(StringComparer.OrdinalIgnoreCase) { "kokoro", "piper", "coqui" };
-
     private readonly IProjectRepository _projectRepo;
     private readonly IProjectExportDataQuery _soulQuery;
-    private readonly IGraphRepository _graphRepo;
+    private readonly IProjectGraphExportQuery _graphQuery;
+    private readonly ILocalTtsProviderClassifier _ttsClassifier;
 
     public ProjectExportService(
         IProjectRepository projectRepo,
         IProjectExportDataQuery soulQuery,
-        IGraphRepository graphRepo)
+        IProjectGraphExportQuery graphQuery,
+        ILocalTtsProviderClassifier ttsClassifier)
     {
-        _projectRepo = projectRepo ?? throw new ArgumentNullException(nameof(projectRepo));
-        _soulQuery   = soulQuery   ?? throw new ArgumentNullException(nameof(soulQuery));
-        _graphRepo   = graphRepo   ?? throw new ArgumentNullException(nameof(graphRepo));
+        _projectRepo   = projectRepo   ?? throw new ArgumentNullException(nameof(projectRepo));
+        _soulQuery     = soulQuery     ?? throw new ArgumentNullException(nameof(soulQuery));
+        _graphQuery    = graphQuery    ?? throw new ArgumentNullException(nameof(graphQuery));
+        _ttsClassifier = ttsClassifier ?? throw new ArgumentNullException(nameof(ttsClassifier));
     }
 
     public async Task<ProjectExportResult?> ExportAsync(
@@ -49,11 +48,11 @@ internal sealed class ProjectExportService : IProjectExportService
                 .ConfigureAwait(false);
         }
 
-        var graph = await _graphRepo.FindByProjectIdAsync(projectId, ct).ConfigureAwait(false);
+        var graph = await _graphQuery.FindByProjectIdAsync(projectId, ct).ConfigureAwait(false);
 
         var requiredFeatures = new List<string>();
-        if (soul?.TtsProvider is not null && LocalTtsProviders.Contains(soul.TtsProvider))
-            requiredFeatures.Add($"tts:local:{soul.TtsProvider.ToLower()}");
+        if (_ttsClassifier.IsLocal(soul?.TtsProvider))
+            requiredFeatures.Add($"tts:local:{soul!.TtsProvider!.ToLower()}");
 
         var metadata = new
         {
@@ -95,18 +94,9 @@ internal sealed class ProjectExportService : IProjectExportService
             }
 
             if (graph is not null)
-            {
-                var brainJson = new
-                {
-                    nodes = graph.Nodes,
-                    edges = graph.Edges,
-                };
-                AddEntry(zip, "brain.json", brainJson);
-            }
+                AddRawEntry(zip, "brain.json", graph.BrainJson);
             else
-            {
                 AddEntry(zip, "brain.json", new { nodes = Array.Empty<object>(), edges = Array.Empty<object>() });
-            }
         }
 
         var slug = soul?.Slug ?? project.Name.ToLower().Replace(' ', '-');

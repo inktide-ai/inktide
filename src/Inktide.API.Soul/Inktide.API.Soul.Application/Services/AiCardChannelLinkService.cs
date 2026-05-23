@@ -8,14 +8,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Soul.Application.Services;
 
-public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
+public sealed class AiCardChannelLinkService :
+    IAiCardChannelCrudService,
+    IAiCardChannelLifecycleService,
+    IAiCardChannelConnectService
 {
-
     private readonly IAiCardRepository _cardRepo;
     private readonly IAiCardChannelRepository _channelRepo;
     private readonly TimeProvider _time;
     private readonly ILogger<AiCardChannelLinkService> _logger;
-
 
     public AiCardChannelLinkService(
         IAiCardRepository cardRepo,
@@ -29,27 +30,26 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    // ── IAiCardChannelCrudService ────────────────────────────────────────────
 
     public async Task<ChannelLink> CreateAsync(
         Guid userId,
         Guid cardId,
         CreateChannelLinkCommand command,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var card = await _cardRepo.GetByIdAsync(cardId, cancellationToken);
+        var card = await _cardRepo.GetByIdAsync(cardId, ct);
         if (card is null || card.UserId != userId)
-        {
             throw new AiCardNotFoundException(cardId);
-        }
 
         var platform = command.Platform.Trim().ToLowerInvariant();
         var channelName = command.ChannelName.Trim();
         var botUsername = command.BotUsername.Trim();
         var channelId = string.IsNullOrWhiteSpace(command.ChannelId) ? null : command.ChannelId.Trim();
 
-        var existing = await _channelRepo.GetByCardIdAsync(cardId, cancellationToken);
+        var existing = await _channelRepo.GetByCardIdAsync(cardId, ct);
         if (existing.Any(
                 c => string.Equals(c.Platform, platform, StringComparison.OrdinalIgnoreCase)
                      && string.Equals(c.ChannelName, channelName, StringComparison.Ordinal)))
@@ -82,39 +82,30 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
             CreatedAt = now
         };
 
-        await _channelRepo.CreateAsync(entity, cancellationToken);
+        await _channelRepo.CreateAsync(entity, ct);
 
         _logger.LogInformation(
             "User {UserId} linked card {CardId} to {Platform} channel {ChannelName}",
-            userId,
-            cardId,
-            platform,
-            channelName);
+            userId, cardId, platform, channelName);
 
         return ToDto(entity);
     }
 
-    public async Task DeleteAsync(Guid userId, Guid cardId, Guid linkId, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Guid userId, Guid cardId, Guid linkId, CancellationToken ct = default)
     {
-        var card = await _cardRepo.GetByIdAsync(cardId, cancellationToken);
+        var card = await _cardRepo.GetByIdAsync(cardId, ct);
         if (card is null || card.UserId != userId)
-        {
             throw new AiCardNotFoundException(cardId);
-        }
 
-        var link = await _channelRepo.GetByIdForUpdateAsync(linkId, cancellationToken);
+        var link = await _channelRepo.GetByIdForUpdateAsync(linkId, ct);
         if (link is null || link.AiCardId != cardId)
-        {
             throw new ChannelLinkNotFoundException();
-        }
 
-        await _channelRepo.DeleteAsync(linkId, cancellationToken);
+        await _channelRepo.DeleteAsync(linkId, ct);
 
         _logger.LogInformation(
             "User {UserId} removed channel link {LinkId} from card {CardId}",
-            userId,
-            linkId,
-            cardId);
+            userId, linkId, cardId);
     }
 
     public async Task<ChannelLink> PatchAsync(
@@ -122,175 +113,23 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
         Guid cardId,
         Guid linkId,
         PatchChannelLinkCommand command,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
-        var card = await _cardRepo.GetByIdAsync(cardId, cancellationToken);
+        var card = await _cardRepo.GetByIdAsync(cardId, ct);
         if (card is null || card.UserId != userId)
-        {
             throw new AiCardNotFoundException(cardId);
-        }
 
-        var link = await _channelRepo.GetByIdForUpdateAsync(linkId, cancellationToken);
+        var link = await _channelRepo.GetByIdForUpdateAsync(linkId, ct);
         if (link is null || link.AiCardId != cardId)
-        {
             throw new ChannelLinkNotFoundException();
-        }
 
         link.IsActive = command.IsActive;
-        await _channelRepo.UpdateAsync(link, cancellationToken);
+        await _channelRepo.UpdateAsync(link, ct);
 
         return ToDto(link);
     }
 
-
-    public async Task UpsertDiscordChannelAsync(
-        Guid userId,
-        Guid cardId,
-        string guildId,
-        string guildName,
-        string accessTokenEnc,
-        string refreshTokenEnc,
-        DateTime tokenExpiresAt,
-        CancellationToken ct = default)
-    {
-        var card = await _cardRepo.GetByIdAsync(cardId, ct);
-        if (card is null || card.UserId != userId)
-            throw new AiCardNotFoundException(cardId);
-
-        var existing = await _channelRepo.GetByCardIdAsync(cardId, ct);
-        var channel = existing.FirstOrDefault(c =>
-            c.Platform == "discord" && c.ChannelId == guildId);
-
-        var now = _time.GetUtcNow().UtcDateTime;
-
-        if (channel is null)
-        {
-            channel = new AiCardChannel
-            {
-                Id             = IdGenerator.New(),
-                AiCardId       = cardId,
-                Platform       = "discord",
-                ChannelId      = guildId,
-                ChannelName    = guildName,
-                BotUsername    = "Inktide",
-                OAuthTokenEnc  = accessTokenEnc,
-                RefreshTokenEnc = refreshTokenEnc,
-                TokenExpiresAt = tokenExpiresAt,
-                IsActive       = true,
-                ConnectedAt    = now,
-                CreatedAt      = now,
-            };
-            await _channelRepo.CreateAsync(channel, ct);
-        }
-        else
-        {
-            channel.ChannelName    = guildName;
-            channel.OAuthTokenEnc  = accessTokenEnc;
-            channel.RefreshTokenEnc = refreshTokenEnc;
-            channel.TokenExpiresAt = tokenExpiresAt;
-            channel.IsActive       = true;
-            channel.ConnectedAt    = now;
-            await _channelRepo.UpdateAsync(channel, ct);
-        }
-    }
-
-    public async Task UpsertTwitchChannelAsync(
-        Guid userId,
-        Guid cardId,
-        string channelLogin,
-        string botUsername,
-        string accessTokenEnc,
-        string refreshTokenEnc,
-        DateTime tokenExpiresAt,
-        CancellationToken ct = default)
-    {
-        var card = await _cardRepo.GetByIdAsync(cardId, ct);
-        if (card is null || card.UserId != userId)
-            throw new AiCardNotFoundException(cardId);
-
-        var existing = await _channelRepo.GetByCardIdAsync(cardId, ct);
-        var channel  = existing.FirstOrDefault(c =>
-            c.Platform == "twitch" && c.ChannelId == channelLogin);
-
-        var now = _time.GetUtcNow().UtcDateTime;
-
-        if (channel is null)
-        {
-            channel = new AiCardChannel
-            {
-                Id              = IdGenerator.New(),
-                AiCardId        = cardId,
-                Platform        = "twitch",
-                ChannelId       = channelLogin,
-                ChannelName     = channelLogin,
-                BotUsername     = botUsername,
-                OAuthTokenEnc   = accessTokenEnc,
-                RefreshTokenEnc = refreshTokenEnc,
-                TokenExpiresAt  = tokenExpiresAt,
-                IsActive        = true,
-                ConnectedAt     = now,
-                CreatedAt       = now,
-            };
-            await _channelRepo.CreateAsync(channel, ct);
-        }
-        else
-        {
-            channel.BotUsername     = botUsername;
-            channel.OAuthTokenEnc   = accessTokenEnc;
-            channel.RefreshTokenEnc = refreshTokenEnc;
-            channel.TokenExpiresAt  = tokenExpiresAt;
-            channel.IsActive        = true;
-            channel.ConnectedAt     = now;
-            await _channelRepo.UpdateAsync(channel, ct);
-        }
-    }
-
-    public async Task<Guid> UpsertTelegramChannelAsync(
-        Guid userId,
-        Guid cardId,
-        string chatId,
-        string chatName,
-        string encryptedBotToken,
-        CancellationToken ct = default)
-    {
-        var card = await _cardRepo.GetByIdAsync(cardId, ct);
-        if (card is null || card.UserId != userId)
-            throw new AiCardNotFoundException(cardId);
-
-        var existing = await _channelRepo.GetByCardIdAsync(cardId, ct);
-        var channel = existing.FirstOrDefault(c =>
-            c.Platform == "telegram" && c.ChannelId == chatId);
-
-        var now = _time.GetUtcNow().UtcDateTime;
-
-        if (channel is null)
-        {
-            channel = new AiCardChannel
-            {
-                Id            = IdGenerator.New(),
-                AiCardId      = cardId,
-                Platform      = "telegram",
-                ChannelId     = chatId,
-                ChannelName   = chatName,
-                BotUsername   = "TelegramBot",
-                OAuthTokenEnc = encryptedBotToken,
-                IsActive      = true,
-                ConnectedAt   = now,
-                CreatedAt     = now,
-            };
-            await _channelRepo.CreateAsync(channel, ct);
-        }
-        else
-        {
-            channel.ChannelName   = chatName;
-            channel.OAuthTokenEnc = encryptedBotToken;
-            channel.IsActive      = true;
-            channel.ConnectedAt   = now;
-            await _channelRepo.UpdateAsync(channel, ct);
-        }
-
-        return channel.Id;
-    }
+    // ── IAiCardChannelLifecycleService ───────────────────────────────────────
 
     public async Task<AiCardChannel?> GetByIdAsync(Guid userId, Guid channelId, CancellationToken ct = default)
     {
@@ -311,8 +150,8 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
         var card = await _cardRepo.GetByIdAsync(channel.AiCardId, ct);
         if (card is null || card.UserId != userId) return;
 
-        channel.IsActive       = false;
-        channel.OAuthTokenEnc  = null;
+        channel.IsActive = false;
+        channel.OAuthTokenEnc = null;
         channel.RefreshTokenEnc = null;
         channel.TokenExpiresAt = null;
         await _channelRepo.UpdateAsync(channel, ct);
@@ -330,6 +169,56 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
         await _channelRepo.UpdateAsync(channel, ct);
     }
 
+    // ── IAiCardChannelConnectService ─────────────────────────────────────────
+
+    public async Task<Guid> UpsertAsync(OAuthChannelUpsertCommand cmd, CancellationToken ct = default)
+    {
+        var card = await _cardRepo.GetByIdAsync(cmd.CardId, ct);
+        if (card is null || card.UserId != cmd.UserId)
+            throw new AiCardNotFoundException(cmd.CardId);
+
+        var existing = await _channelRepo.GetByCardIdAsync(cmd.CardId, ct);
+        var channel = existing.FirstOrDefault(c =>
+            c.Platform == cmd.Platform && c.ChannelId == cmd.ChannelId);
+
+        var now = _time.GetUtcNow().UtcDateTime;
+
+        if (channel is null)
+        {
+            channel = new AiCardChannel
+            {
+                Id              = IdGenerator.New(),
+                AiCardId        = cmd.CardId,
+                Platform        = cmd.Platform,
+                ChannelId       = cmd.ChannelId,
+                ChannelName     = cmd.ChannelName,
+                BotUsername     = cmd.BotUsername,
+                OAuthTokenEnc   = cmd.AccessTokenEnc,
+                RefreshTokenEnc = cmd.RefreshTokenEnc,
+                TokenExpiresAt  = cmd.TokenExpiresAt,
+                IsActive        = true,
+                ConnectedAt     = now,
+                CreatedAt       = now,
+            };
+            await _channelRepo.CreateAsync(channel, ct);
+        }
+        else
+        {
+            channel.ChannelName     = cmd.ChannelName;
+            channel.BotUsername     = cmd.BotUsername;
+            channel.OAuthTokenEnc   = cmd.AccessTokenEnc;
+            channel.RefreshTokenEnc = cmd.RefreshTokenEnc;
+            channel.TokenExpiresAt  = cmd.TokenExpiresAt;
+            channel.IsActive        = true;
+            channel.ConnectedAt     = now;
+            await _channelRepo.UpdateAsync(channel, ct);
+        }
+
+        return channel.Id;
+    }
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+
     private static ChannelLink ToDto(AiCardChannel c) =>
         new(
             c.Id,
@@ -340,5 +229,4 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
             c.IsActive,
             c.ConnectedAt,
             c.CustomBotTokenEnc is not null);
-
 }

@@ -3,6 +3,7 @@ using Inktide.API.Connector.Twitch.Gateway;
 using Inktide.API.Connector.Twitch.OAuth;
 using Inktide.API.Connector.Twitch.Settings;
 using Inktide.API.Soul.Application.Interfaces;
+using Inktide.API.Soul.Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,8 @@ public sealed class TwitchOAuthController : ControllerBase
 {
     private readonly ITwitchOAuthService _oauth;
     private readonly TwitchOAuthStateService _state;
-    private readonly IAiCardChannelLinkService _channels;
+    private readonly IAiCardChannelConnectService _connect;
+    private readonly IAiCardChannelLifecycleService _lifecycle;
     private readonly ITwitchChannelRegistry _registry;
     private readonly ITwitchConnector _connector;
     private readonly ILogger<TwitchOAuthController> _log;
@@ -28,18 +30,20 @@ public sealed class TwitchOAuthController : ControllerBase
     public TwitchOAuthController(
         ITwitchOAuthService oauth,
         TwitchOAuthStateService state,
-        IAiCardChannelLinkService channels,
+        IAiCardChannelConnectService connect,
+        IAiCardChannelLifecycleService lifecycle,
         ITwitchChannelRegistry registry,
         ITwitchConnector connector,
         ILogger<TwitchOAuthController> log,
         IOptions<TwitchSettings> settings)
     {
-        _oauth           = oauth     ?? throw new ArgumentNullException(nameof(oauth));
-        _state           = state     ?? throw new ArgumentNullException(nameof(state));
-        _channels        = channels  ?? throw new ArgumentNullException(nameof(channels));
-        _registry        = registry  ?? throw new ArgumentNullException(nameof(registry));
-        _connector       = connector ?? throw new ArgumentNullException(nameof(connector));
-        _log             = log       ?? throw new ArgumentNullException(nameof(log));
+        _oauth           = oauth      ?? throw new ArgumentNullException(nameof(oauth));
+        _state           = state      ?? throw new ArgumentNullException(nameof(state));
+        _connect         = connect    ?? throw new ArgumentNullException(nameof(connect));
+        _lifecycle       = lifecycle  ?? throw new ArgumentNullException(nameof(lifecycle));
+        _registry        = registry   ?? throw new ArgumentNullException(nameof(registry));
+        _connector       = connector  ?? throw new ArgumentNullException(nameof(connector));
+        _log             = log        ?? throw new ArgumentNullException(nameof(log));
         _frontendBaseUrl = settings.Value.FrontendBaseUrl.TrimEnd('/');
         _botUsername     = settings.Value.BotUsername;
     }
@@ -86,11 +90,17 @@ public sealed class TwitchOAuthController : ControllerBase
             var channelLogin = await _oauth.GetBroadcasterLoginAsync(tokens.AccessToken, ct).ConfigureAwait(false);
 
             // Persist connection
-            await _channels.UpsertTwitchChannelAsync(
-                ctx.UserId, ctx.CardId,
-                channelLogin, _botUsername,
-                accessTokenEnc, refreshTokenEnc,
-                DateTime.UtcNow.AddSeconds(tokens.ExpiresIn),
+            await _connect.UpsertAsync(
+                new OAuthChannelUpsertCommand(
+                    UserId:          ctx.UserId,
+                    CardId:          ctx.CardId,
+                    Platform:        "twitch",
+                    ChannelId:       channelLogin,
+                    ChannelName:     channelLogin,
+                    BotUsername:     _botUsername,
+                    AccessTokenEnc:  accessTokenEnc,
+                    RefreshTokenEnc: refreshTokenEnc,
+                    TokenExpiresAt:  DateTime.UtcNow.AddSeconds(tokens.ExpiresIn)),
                 ct).ConfigureAwait(false);
 
             // Register in-memory routing and join IRC channel (fire-and-forget: v1 known limitation)
@@ -118,7 +128,7 @@ public sealed class TwitchOAuthController : ControllerBase
     public async Task<IActionResult> Revoke(Guid channelId, CancellationToken ct)
     {
         var userId  = GetUserId();
-        var channel = await _channels.GetByIdAsync(userId, channelId, ct).ConfigureAwait(false);
+        var channel = await _lifecycle.GetByIdAsync(userId, channelId, ct).ConfigureAwait(false);
         if (channel is null) return NotFound();
 
         // Leave IRC and unregister before DB deactivation
@@ -128,7 +138,7 @@ public sealed class TwitchOAuthController : ControllerBase
             _registry.Unregister(channel.ChannelId);
         }
 
-        await _channels.DeactivateAsync(userId, channelId, ct).ConfigureAwait(false);
+        await _lifecycle.DeactivateAsync(userId, channelId, ct).ConfigureAwait(false);
 
         // Best-effort token revocation — failure is logged but does not block the response
         if (channel.OAuthTokenEnc is not null)
@@ -151,7 +161,7 @@ public sealed class TwitchOAuthController : ControllerBase
     public async Task<IActionResult> Reconnect(Guid channelId, CancellationToken ct)
     {
         var userId  = GetUserId();
-        var channel = await _channels.GetByIdAsync(userId, channelId, ct).ConfigureAwait(false);
+        var channel = await _lifecycle.GetByIdAsync(userId, channelId, ct).ConfigureAwait(false);
         if (channel is null) return NotFound();
 
         var stateToken = _state.CreateState(userId, channel.AiCardId);

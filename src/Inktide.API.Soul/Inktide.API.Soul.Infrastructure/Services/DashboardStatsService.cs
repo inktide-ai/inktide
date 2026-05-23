@@ -1,4 +1,3 @@
-using Inktide.API.Memory.Domain.Ports;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Domain.Repositories;
 
@@ -7,19 +6,25 @@ namespace Inktide.API.Soul.Infrastructure.Services;
 public sealed class DashboardStatsService : IDashboardStatsService
 {
     private readonly IUsageDailyRepository _usage;
-    private readonly IMemoryMetadataRepository _memory;
+    private readonly IMemoryStatsCache     _memoryStats;
+    private readonly TimeProvider          _time;
 
-    public DashboardStatsService(IUsageDailyRepository usage, IMemoryMetadataRepository memory)
+    public DashboardStatsService(
+        IUsageDailyRepository usage,
+        IMemoryStatsCache memoryStats,
+        TimeProvider time)
     {
-        _usage  = usage;
-        _memory = memory;
+        _usage       = usage       ?? throw new ArgumentNullException(nameof(usage));
+        _memoryStats = memoryStats ?? throw new ArgumentNullException(nameof(memoryStats));
+        _time        = time        ?? throw new ArgumentNullException(nameof(time));
     }
 
     public async Task<DashboardStats> GetAsync(CancellationToken ct = default)
     {
-        var monthStart    = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
-        var totalMemories = await _memory.CountTotalAsync(ct);
-        var apiCalls      = await _usage.SumLlmCallsSinceAsync(monthStart, ct);
+        var now           = _time.GetUtcNow();
+        var monthStart    = new DateOnly(now.Year, now.Month, 1);
+        var totalMemories = await _memoryStats.GetTotalCountAsync(ct).ConfigureAwait(false);
+        var apiCalls      = await _usage.SumLlmCallsSinceAsync(monthStart, ct).ConfigureAwait(false);
         return new DashboardStats(totalMemories, apiCalls);
     }
 }

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Inktide.API.Connector.Telegram.Services;
 using Inktide.API.Soul.Application.Interfaces;
+using Inktide.API.Soul.Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -15,18 +16,21 @@ namespace Inktide.API.Connector.Telegram.Controllers;
 public sealed class TelegramController : ControllerBase
 {
     private readonly ITelegramBotApiClient _telegram;
-    private readonly IAiCardChannelLinkService _channels;
+    private readonly IAiCardChannelConnectService _connect;
+    private readonly IAiCardChannelLifecycleService _lifecycle;
     private readonly IDataProtector _protector;
     private readonly ILogger<TelegramController> _log;
 
     public TelegramController(
         ITelegramBotApiClient telegram,
-        IAiCardChannelLinkService channels,
+        IAiCardChannelConnectService connect,
+        IAiCardChannelLifecycleService lifecycle,
         IDataProtectionProvider dp,
         ILogger<TelegramController> log)
     {
         _telegram  = telegram;
-        _channels  = channels;
+        _connect   = connect;
+        _lifecycle = lifecycle;
         _protector = dp.CreateProtector("Telegram.BotTokens");
         _log       = log;
     }
@@ -41,14 +45,14 @@ public sealed class TelegramController : ControllerBase
         {
             return Ok(
                 new ValidateTokenResponse(
-                    false, 
-                    null, 
+                    false,
+                    null,
                     "Bot token is required."));
         }
 
         var username = await _telegram
             .GetBotUsernameAsync(req.BotToken.Trim(), ct);
-        
+
         return Ok(username is not null
             ? new ValidateTokenResponse(true, username, null)
             : new ValidateTokenResponse(false, null, "Invalid bot token — Telegram rejected it."));
@@ -69,15 +73,18 @@ public sealed class TelegramController : ControllerBase
         if (string.IsNullOrWhiteSpace(req.ChatName))
             return BadRequest("Chat name is required.");
 
-        var userId          = GetUserId();
-        var encryptedToken  = _protector.Protect(req.BotToken.Trim());
+        var userId         = GetUserId();
+        var encryptedToken = _protector.Protect(req.BotToken.Trim());
 
-        var channelId = await _channels.UpsertTelegramChannelAsync(
-            userId,
-            req.CardId,
-            req.ChatId.Trim(),
-            req.ChatName.Trim(),
-            encryptedToken,
+        var channelId = await _connect.UpsertAsync(
+            new OAuthChannelUpsertCommand(
+                UserId:       userId,
+                CardId:       req.CardId,
+                Platform:     "telegram",
+                ChannelId:    req.ChatId.Trim(),
+                ChannelName:  req.ChatName.Trim(),
+                BotUsername:  "TelegramBot",
+                AccessTokenEnc: encryptedToken),
             ct);
 
         _log.LogInformation(
@@ -94,7 +101,7 @@ public sealed class TelegramController : ControllerBase
     public async Task<IActionResult> Revoke(Guid channelId, CancellationToken ct)
     {
         var userId = GetUserId();
-        await _channels.DeactivateAsync(userId, channelId, ct);
+        await _lifecycle.DeactivateAsync(userId, channelId, ct);
         return NoContent();
     }
 
@@ -109,5 +116,4 @@ public sealed class TelegramController : ControllerBase
     public sealed record ValidateTokenResponse(bool Valid, string? Username, string? Error);
     public sealed record CreateChannelRequest(Guid CardId, string BotToken, string ChatId, string ChatName);
     public sealed record CreateChannelResponse(Guid ChannelId);
-    
 }

@@ -1,3 +1,4 @@
+using Inktide.API.Core.Contracts;
 using Inktide.API.Core.Generators;
 using System.IO.Compression;
 using System.Text;
@@ -6,8 +7,6 @@ using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.Domain.Entities;
 using Inktide.API.Project.Domain.Repositories;
 using Inktide.API.Soul.Application.Interfaces;
-using Inktide.API.Soul.Domain.Entities;
-using Inktide.API.Soul.Domain.Repositories;
 using Inktide.API.Project.Infrastructure.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -99,11 +98,11 @@ public sealed class InktFileImportServiceTests
     }
 
     private static (IInktFileImportService svc, Dictionary<string, string> redisStore) BuildService(
-        ICatalogRepository? catalog  = null,
-        IAiCardService?     cardSvc  = null,
-        IProjectRepository? projRepo = null)
+        IProjectImportCatalogQuery? catalog  = null,
+        IAiCardService?             cardSvc  = null,
+        IProjectRepository?         projRepo = null)
     {
-        catalog  ??= Substitute.For<ICatalogRepository>();
+        catalog  ??= Substitute.For<IProjectImportCatalogQuery>();
         cardSvc  ??= Substitute.For<IAiCardService>();
         projRepo ??= Substitute.For<IProjectRepository>();
 
@@ -146,9 +145,9 @@ public sealed class InktFileImportServiceTests
     [Fact]
     public async Task ParseAsync_ReturnsWarning_WhenLlmModelNotInCatalog()
     {
-        var catalog = Substitute.For<ICatalogRepository>();
+        var catalog = Substitute.For<IProjectImportCatalogQuery>();
         catalog.FindLlmByModelIdAsync("gpt-4o", Arg.Any<CancellationToken>())
-               .Returns((LlmCatalogEntry?)null);
+               .Returns((CatalogEntryRef?)null);
 
         var (svc, _) = BuildService(catalog: catalog);
         using var stream = MakeValidInkt(includeSoul: true, llmModelId: "gpt-4o");
@@ -187,9 +186,9 @@ public sealed class InktFileImportServiceTests
     [Fact]
     public async Task ParseAsync_SetsSoulName_WhenSoulPresent()
     {
-        var catalog = Substitute.For<ICatalogRepository>();
+        var catalog = Substitute.For<IProjectImportCatalogQuery>();
         catalog.FindLlmByModelIdAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-               .Returns(new LlmCatalogEntry { Id = IdGenerator.New(), ModelId = "gpt-4o" });
+               .Returns(new CatalogEntryRef(IdGenerator.New()));
 
         var (svc, _) = BuildService(catalog: catalog);
         using var stream = MakeValidInkt(includeSoul: true);
@@ -214,18 +213,13 @@ public sealed class InktFileImportServiceTests
     public async Task FinalizeAsync_CreatesNewSoul_WhenTargetSoulIdIsNull()
     {
         var newCardId = IdGenerator.New();
-        var catalog   = Substitute.For<ICatalogRepository>();
+        var catalog   = Substitute.For<IProjectImportCatalogQuery>();
         catalog.FindLlmByModelIdAsync("gpt-4o", Arg.Any<CancellationToken>())
-               .Returns(new LlmCatalogEntry { Id = IdGenerator.New(), ModelId = "gpt-4o" });
+               .Returns(new CatalogEntryRef(IdGenerator.New()));
 
         var cardSvc = Substitute.For<IAiCardService>();
-        cardSvc.CreateAsync(UserId, Arg.Any<AiCard>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
-               .Returns(call =>
-               {
-                   var card = call.ArgAt<AiCard>(1);
-                   card.Id = newCardId;
-                   return Task.FromResult(card);
-               });
+        cardSvc.CreateFromImportAsync(UserId, Arg.Any<ImportSoulCommand>(), Arg.Any<CancellationToken>())
+               .Returns(newCardId);
 
         var (svc, _) = BuildService(catalog: catalog, cardSvc: cardSvc);
         using var stream = MakeValidInkt(includeSoul: true);
@@ -235,7 +229,7 @@ public sealed class InktFileImportServiceTests
             new InktFileFinalizeCommand(parseResult.ParseToken, TargetSoulId: null, ImportConnectorsDisabled: true));
 
         Assert.Equal(newCardId, finalize.SoulId);
-        await cardSvc.Received(1).CreateAsync(UserId, Arg.Any<AiCard>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
+        await cardSvc.Received(1).CreateFromImportAsync(UserId, Arg.Any<ImportSoulCommand>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -252,19 +246,19 @@ public sealed class InktFileImportServiceTests
             new InktFileFinalizeCommand(parseResult.ParseToken, TargetSoulId: existingSoulId, ImportConnectorsDisabled: true));
 
         Assert.Equal(existingSoulId, finalize.SoulId);
-        await cardSvc.DidNotReceive().CreateAsync(Arg.Any<Guid>(), Arg.Any<AiCard>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
+        await cardSvc.DidNotReceive().CreateFromImportAsync(Arg.Any<Guid>(), Arg.Any<ImportSoulCommand>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task FinalizeAsync_ThrowsOnSecondCall_AfterSuccessfulImport()
     {
-        var catalog = Substitute.For<ICatalogRepository>();
+        var catalog = Substitute.For<IProjectImportCatalogQuery>();
         catalog.FindLlmByModelIdAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-               .Returns(new LlmCatalogEntry { Id = IdGenerator.New(), ModelId = "gpt-4o" });
+               .Returns(new CatalogEntryRef(IdGenerator.New()));
 
         var cardSvc = Substitute.For<IAiCardService>();
-        cardSvc.CreateAsync(UserId, Arg.Any<AiCard>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
-               .Returns(call => { var c = call.ArgAt<AiCard>(1); c.Id = IdGenerator.New(); return Task.FromResult(c); });
+        cardSvc.CreateFromImportAsync(UserId, Arg.Any<ImportSoulCommand>(), Arg.Any<CancellationToken>())
+               .Returns(IdGenerator.New());
 
         var (svc, _) = BuildService(catalog: catalog, cardSvc: cardSvc);
         using var stream = MakeValidInkt(includeSoul: true);

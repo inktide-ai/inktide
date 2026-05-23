@@ -17,3 +17,14 @@ public sealed record ChannelLink(
     bool IsActive,
     DateTime? ConnectedAt,
     bool HasCustomBot = false);
+
+public sealed record OAuthChannelUpsertCommand(
+    Guid UserId,
+    Guid CardId,
+    string Platform,
+    string ChannelId,
+    string ChannelName,
+    string BotUsername,
+    string? AccessTokenEnc = null,
+    string? RefreshTokenEnc = null,
+    DateTime? TokenExpiresAt = null);

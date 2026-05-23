@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Inktide.API.Core.Generators;
 using Inktide.API.Project.Domain.ValueObjects;
 namespace Inktide.API.Project.Domain.Entities;
@@ -69,13 +68,8 @@ public sealed class ProjectEntity
     /// <summary>Fractional index key for drag-and-drop ordering. Sorts lexicographically ASC.</summary>
     public string SortKey { get; set; } = "a0";
 
-    public string PluginsJson { get; set; } = "[]";
-
-    public IReadOnlyList<ProjectPlugin> GetPlugins() =>
-        JsonSerializer.Deserialize<List<ProjectPlugin>>(PluginsJson) ?? [];
-
-    public void SetPlugins(IEnumerable<ProjectPlugin> plugins) =>
-        PluginsJson = JsonSerializer.Serialize(plugins);
+    /// <summary>EF Core value converter serializes this to/from plugins_json column.</summary>
+    public List<ProjectPlugin> Plugins { get; set; } = [];
 
     public void SetSortKey(string key)
     {

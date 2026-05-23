@@ -47,6 +47,10 @@ public sealed class TtsCatalogConfiguration : IEntityTypeConfiguration<TtsCatalo
             .HasColumnName("is_available")
             .HasDefaultValue(true);
 
+        b.Property(e => e.RequiresApiKey)
+            .HasColumnName("requires_api_key")
+            .HasDefaultValue(true);
+
         b.Property(e => e.CreatedAt)
             .HasColumnName("created_at");
 

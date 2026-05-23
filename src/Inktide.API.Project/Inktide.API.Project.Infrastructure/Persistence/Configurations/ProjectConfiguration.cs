@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Inktide.API.Project.Domain.Entities;
+using Inktide.API.Project.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -28,10 +30,12 @@ public sealed class ProjectConfiguration : IEntityTypeConfiguration<ProjectEntit
             .HasMaxLength(100)
             .HasDefaultValue("a0");
 
-        b.Property(e => e.PluginsJson)
+        b.Property(e => e.Plugins)
             .HasColumnName("plugins_json")
             .HasColumnType("jsonb")
-            .HasDefaultValue("[]")
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                v => JsonSerializer.Deserialize<List<ProjectPlugin>>(v, (JsonSerializerOptions?)null) ?? new List<ProjectPlugin>())
             .IsRequired();
 
         b.HasIndex(e => e.UserId).HasDatabaseName("idx_projects_user_id");

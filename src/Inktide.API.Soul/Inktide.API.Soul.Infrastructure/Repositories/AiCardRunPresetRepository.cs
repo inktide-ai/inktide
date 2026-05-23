@@ -65,14 +65,14 @@ public sealed class AiCardRunPresetRepository : IAiCardRunPresetRepository
             .ConfigureAwait(false);
     }
 
-    public async Task DeactivateAllAsync(Guid aiCardId, Guid? exceptId, CancellationToken ct = default)
+    public async Task DeactivateAllAsync(Guid aiCardId, Guid? exceptId, DateTime updatedAt, CancellationToken ct = default)
     {
         await _db.AiCardRunPresets
             .Where(p => p.AiCardId == aiCardId && p.IsActive && (exceptId == null || p.Id != exceptId))
             .ExecuteUpdateAsync(
                 s => s
                     .SetProperty(e => e.IsActive, false)
-                    .SetProperty(e => e.UpdatedAt, DateTime.UtcNow),
+                    .SetProperty(e => e.UpdatedAt, updatedAt),
                 ct)
             .ConfigureAwait(false);
     }
@@ -90,12 +90,8 @@ public sealed class AiCardRunPresetRepository : IAiCardRunPresetRepository
         return rows.Select(r => (r.Id, r.SortKey)).ToList();
     }
 
-    public async Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, CancellationToken ct = default)
+    public async Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default)
     {
-        // ExecuteUpdateAsync bypasses the EF change tracker — an explicit transaction is required.
-        // SaveChangesAsync's implicit transaction does NOT cover these calls.
-        // N round-trips inside one transaction. Acceptable for typical sort-list sizes.
-        await using var tx = await _db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
         foreach (var (id, sortKey) in updates)
         {
             await _db.AiCardRunPresets
@@ -103,11 +99,10 @@ public sealed class AiCardRunPresetRepository : IAiCardRunPresetRepository
                 .ExecuteUpdateAsync(
                     s => s
                         .SetProperty(e => e.SortKey, sortKey)
-                        .SetProperty(e => e.UpdatedAt, DateTime.UtcNow),
+                        .SetProperty(e => e.UpdatedAt, updatedAt),
                     ct)
                 .ConfigureAwait(false);
         }
-        await tx.CommitAsync(ct).ConfigureAwait(false);
     }
 
 }

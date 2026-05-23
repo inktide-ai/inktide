@@ -118,22 +118,19 @@ public sealed class AiCardRepository : IAiCardRepository
         return rows.Select(r => (r.Id, r.SortKey)).ToList();
     }
 
-    public async Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, CancellationToken ct = default)
+    public async Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default)
     {
-        // ExecuteUpdateAsync bypasses the EF change tracker — an explicit transaction is required.
-        // SaveChangesAsync's implicit transaction does NOT cover these calls.
-        // N round-trips inside one transaction. Acceptable for typical sort-list sizes.
-        await using var tx = await _db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
         foreach (var (id, sortKey) in updates)
         {
             await _db.AiCards
                 .Where(c => c.Id == id)
                 .ExecuteUpdateAsync(
-                    s => s.SetProperty(e => e.SortKey, sortKey),
+                    s => s
+                        .SetProperty(e => e.SortKey, sortKey)
+                        .SetProperty(e => e.UpdatedAt, updatedAt),
                     ct)
                 .ConfigureAwait(false);
         }
-        await tx.CommitAsync(ct).ConfigureAwait(false);
     }
 
 }

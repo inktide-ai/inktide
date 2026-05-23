@@ -1,5 +1,7 @@
 using Inktide.API.Core;
+using Inktide.API.Core.Contracts;
 using Inktide.API.Soul.Infrastructure.DbContext;
+using Inktide.API.Soul.Infrastructure.Services;
 using Inktide.API.Soul.Infrastructure.Messaging;
 using Inktide.API.Soul.Infrastructure.Outbox;
 using Inktide.API.Soul.Infrastructure.Security;
@@ -49,6 +51,9 @@ public sealed class InfrastructureStartup : IStartup
 
         services.AddHttpClient("credential-tester")
             .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10));
+
+        services.AddScoped<IProjectImportCatalogQuery, ProjectImportCatalogQueryService>();
+        services.AddScoped<ICardSummaryProvider, CardSummaryProviderService>();
 
         services.AddHostedService<DatabaseMigrationService>();
         services.AddHostedService<OutboxProcessorHostedService>();

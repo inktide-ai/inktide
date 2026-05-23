@@ -33,6 +33,6 @@ public interface IAiCardSceneRepository
     /// <summary>Returns all (id, sort_key) pairs for the card ordered by sort_key ASC.</summary>
     Task<IReadOnlyList<(Guid Id, string SortKey)>> GetSortKeysAsync(Guid aiCardId, CancellationToken ct = default);
 
-    /// <summary>Updates sort_key for each entry in the list.</summary>
-    Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, CancellationToken ct = default);
+    /// <summary>Updates sort_key for each entry in the list. Callers requiring multi-item atomicity must wrap in ITransactionManager.</summary>
+    Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default);
 }

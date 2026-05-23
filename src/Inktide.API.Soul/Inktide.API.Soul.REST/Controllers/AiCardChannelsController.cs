@@ -16,9 +16,9 @@ namespace Inktide.API.Soul.REST.Controllers;
 public sealed class AiCardChannelsController : ApiController
 {
 
-    private readonly IAiCardChannelLinkService _channelLinks;
+    private readonly IAiCardChannelCrudService _channelLinks;
 
-    public AiCardChannelsController(IAiCardChannelLinkService channelLinks)
+    public AiCardChannelsController(IAiCardChannelCrudService channelLinks)
     {
         _channelLinks = channelLinks ?? throw new ArgumentNullException(nameof(channelLinks));
     }

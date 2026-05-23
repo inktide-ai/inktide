@@ -12,16 +12,19 @@ public sealed class AiCardRunPresetService : IAiCardRunPresetService
     private readonly IAiCardRepository _cardRepo;
     private readonly IAiCardRunPresetRepository _presetRepo;
     private readonly ITransactionManager _txManager;
+    private readonly TimeProvider _time;
 
 
     public AiCardRunPresetService(
         IAiCardRepository cardRepo,
         IAiCardRunPresetRepository presetRepo,
-        ITransactionManager txManager)
+        ITransactionManager txManager,
+        TimeProvider time)
     {
         _cardRepo   = cardRepo   ?? throw new ArgumentNullException(nameof(cardRepo));
         _presetRepo = presetRepo ?? throw new ArgumentNullException(nameof(presetRepo));
         _txManager  = txManager  ?? throw new ArgumentNullException(nameof(txManager));
+        _time       = time       ?? throw new ArgumentNullException(nameof(time));
     }
 
 
@@ -108,10 +111,11 @@ public sealed class AiCardRunPresetService : IAiCardRunPresetService
         // DeactivateAllAsync uses ExecuteUpdateAsync (bypasses change tracker — commits immediately).
         // UpdateAsync stages preset.Activate() in the change tracker.
         // Must be atomic: if CommitTransactionAsync fails, deactivation rolls back too.
+        var now = _time.GetUtcNow().UtcDateTime;
         await _txManager.BeginTransactionAsync(ct).ConfigureAwait(false);
         try
         {
-            await _presetRepo.DeactivateAllAsync(cardId, presetId, ct).ConfigureAwait(false);
+            await _presetRepo.DeactivateAllAsync(cardId, presetId, now, ct).ConfigureAwait(false);
             preset.Activate();
             await _presetRepo.UpdateAsync(preset, ct).ConfigureAwait(false);
             await _txManager.CommitTransactionAsync(ct).ConfigureAwait(false);
@@ -127,7 +131,7 @@ public sealed class AiCardRunPresetService : IAiCardRunPresetService
     public async Task DeactivateActiveAsync(Guid userId, Guid cardId, CancellationToken ct = default)
     {
         // DeactivateAllAsync uses ExecuteUpdateAsync — commits immediately, no SaveChangesAsync needed.
-        await _presetRepo.DeactivateAllAsync(cardId, exceptId: null, ct).ConfigureAwait(false);
+        await _presetRepo.DeactivateAllAsync(cardId, exceptId: null, _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
     }
 
     public async Task<AiCardRunPreset?> ReorderAsync(

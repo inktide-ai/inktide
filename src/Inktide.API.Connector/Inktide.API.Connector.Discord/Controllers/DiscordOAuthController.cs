@@ -4,6 +4,7 @@ using Inktide.API.Connector.Discord.Gateway;
 using Inktide.API.Connector.Discord.OAuth;
 using Inktide.API.Connector.Discord.Settings;
 using Inktide.API.Soul.Application.Interfaces;
+using Inktide.API.Soul.Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,8 @@ public sealed class DiscordOAuthController : ControllerBase
 {
     private readonly IDiscordOAuthService _oauth;
     private readonly DiscordOAuthStateService _state;
-    private readonly IAiCardChannelLinkService _channels;
+    private readonly IAiCardChannelConnectService _connect;
+    private readonly IAiCardChannelLifecycleService _lifecycle;
     private readonly IGuildSoulRegistry _registry;
     private readonly ILogger<DiscordOAuthController> _log;
     private readonly IHttpClientFactory _http;
@@ -28,7 +30,8 @@ public sealed class DiscordOAuthController : ControllerBase
     public DiscordOAuthController(
         IDiscordOAuthService oauth,
         DiscordOAuthStateService state,
-        IAiCardChannelLinkService channels,
+        IAiCardChannelConnectService connect,
+        IAiCardChannelLifecycleService lifecycle,
         IGuildSoulRegistry registry,
         ILogger<DiscordOAuthController> log,
         IHttpClientFactory http,
@@ -36,7 +39,8 @@ public sealed class DiscordOAuthController : ControllerBase
     {
         _oauth           = oauth;
         _state           = state;
-        _channels        = channels;
+        _connect         = connect;
+        _lifecycle       = lifecycle;
         _registry        = registry;
         _log             = log;
         _http            = http;
@@ -85,15 +89,18 @@ public sealed class DiscordOAuthController : ControllerBase
             var resolvedGuildId = guildId ?? tokens.GuildId;
             var guildName       = tokens.GuildName;
 
-            await _channels.UpsertDiscordChannelAsync(
-                userId:          parsed.userId,
-                cardId:          parsed.cardId,
-                guildId:         resolvedGuildId,
-                guildName:       guildName,
-                accessTokenEnc:  _oauth.Protect(tokens.AccessToken),
-                refreshTokenEnc: _oauth.Protect(tokens.RefreshToken),
-                tokenExpiresAt:  DateTime.UtcNow.AddSeconds(tokens.ExpiresIn),
-                ct:              ct);
+            await _connect.UpsertAsync(
+                new OAuthChannelUpsertCommand(
+                    UserId:          parsed.userId,
+                    CardId:          parsed.cardId,
+                    Platform:        "discord",
+                    ChannelId:       resolvedGuildId,
+                    ChannelName:     guildName,
+                    BotUsername:     "Inktide",
+                    AccessTokenEnc:  _oauth.Protect(tokens.AccessToken),
+                    RefreshTokenEnc: _oauth.Protect(tokens.RefreshToken),
+                    TokenExpiresAt:  DateTime.UtcNow.AddSeconds(tokens.ExpiresIn)),
+                ct);
 
             _registry.Register(resolvedGuildId, parsed.cardId);
 
@@ -118,7 +125,7 @@ public sealed class DiscordOAuthController : ControllerBase
     public async Task<IActionResult> Revoke(Guid channelId, CancellationToken ct)
     {
         var userId = GetUserId();
-        var channel = await _channels.GetByIdAsync(userId, channelId, ct);
+        var channel = await _lifecycle.GetByIdAsync(userId, channelId, ct);
         if (channel is null) return NotFound();
 
         if (channel.OAuthTokenEnc is not null)
@@ -130,7 +137,7 @@ public sealed class DiscordOAuthController : ControllerBase
         if (channel.ChannelId is not null)
             _registry.Unregister(channel.ChannelId);
 
-        await _channels.DeactivateAsync(userId, channelId, ct);
+        await _lifecycle.DeactivateAsync(userId, channelId, ct);
         return NoContent();
     }
 
@@ -142,7 +149,7 @@ public sealed class DiscordOAuthController : ControllerBase
     public async Task<IActionResult> Reconnect(Guid channelId, CancellationToken ct)
     {
         var userId = GetUserId();
-        var channel = await _channels.GetByIdAsync(userId, channelId, ct);
+        var channel = await _lifecycle.GetByIdAsync(userId, channelId, ct);
         if (channel is null) return NotFound();
 
         var stateToken = _state.CreateState(userId, channel.AiCardId);
@@ -158,14 +165,14 @@ public sealed class DiscordOAuthController : ControllerBase
     public async Task<IActionResult> SetCustomBot(Guid channelId, [FromBody] SetCustomBotRequest req, CancellationToken ct)
     {
         var userId = GetUserId();
-        var channel = await _channels.GetByIdAsync(userId, channelId, ct);
+        var channel = await _lifecycle.GetByIdAsync(userId, channelId, ct);
         if (channel is null) return NotFound();
 
         var encryptedToken = string.IsNullOrWhiteSpace(req.BotToken)
             ? null
             : _oauth.Protect(req.BotToken);
 
-        await _channels.SetCustomBotTokenAsync(userId, channelId, encryptedToken, ct);
+        await _lifecycle.SetCustomBotTokenAsync(userId, channelId, encryptedToken, ct);
         return NoContent();
     }
 

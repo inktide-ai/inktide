@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Inktide.API.Project\Inktide.API.Project.Domain\Inktide.API.Project.Domain.csproj" />
     <ProjectReference Include="..\Inktide.API.Project\Inktide.API.Project.Application\Inktide.API.Project.Application.csproj" />
     <ProjectReference Include="..\Inktide.API.Project\Inktide.API.Project.Infrastructure\Inktide.API.Project.Infrastructure.csproj" />
+    <ProjectReference Include="..\Inktide.API.Project\Inktide.API.Project.REST\Inktide.API.Project.REST.csproj" />
     <ProjectReference Include="..\Inktide.API.Core\Inktide.API.Core.csproj" />
   </ItemGroup>
 

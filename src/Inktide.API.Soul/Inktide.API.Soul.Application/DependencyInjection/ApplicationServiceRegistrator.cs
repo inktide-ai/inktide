@@ -45,8 +45,11 @@ public sealed class ApplicationServiceRegistrator : IServiceRegistrator
         // --- Catalog ---
         registrator.Register<ICatalogService, CatalogService>(Reuse.Scoped);
 
-        // --- Channel links ---
-        registrator.Register<IAiCardChannelLinkService, AiCardChannelLinkService>(Reuse.Scoped);
+        // --- Channel links (ISP: three focused interfaces, one scoped instance via RegisterMapping) ---
+        registrator.Register<AiCardChannelLinkService>(Reuse.Scoped);
+        registrator.RegisterMapping<IAiCardChannelCrudService, AiCardChannelLinkService>();
+        registrator.RegisterMapping<IAiCardChannelLifecycleService, AiCardChannelLinkService>();
+        registrator.RegisterMapping<IAiCardChannelConnectService, AiCardChannelLinkService>();
 
         // --- BYOK provider credentials ---
         registrator.Register<IUserProviderCredentialService, UserProviderCredentialService>(Reuse.Scoped);

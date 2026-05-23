@@ -1,6 +1,5 @@
 using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
-using Inktide.API.Graph.Domain.Contracts;
 using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.Domain.Repositories;
 using Inktide.API.Project.Infrastructure.DependencyInjection;
@@ -27,12 +26,15 @@ public sealed class InfrastructureStartup : IStartup
         });
 
         services.AddScoped<IProjectRepository, ProjectRepository>();
-        services.AddScoped<IProjectService, ProjectService>();
+        services.AddScoped<ProjectService>();
+        services.AddScoped<IProjectCrudService>(sp => sp.GetRequiredService<ProjectService>());
+        services.AddScoped<IProjectOrderingService>(sp => sp.GetRequiredService<ProjectService>());
+        services.AddScoped<IProjectPluginService>(sp => sp.GetRequiredService<ProjectService>());
+        services.AddScoped<ILocalTtsProviderClassifier, LocalTtsProviderClassifier>();
         services.AddScoped<IProjectImportService, ProjectImportService>();
         services.AddScoped<IProjectBySoulQuery, ProjectBySoulQueryService>();
         services.AddScoped<IProjectExportService, ProjectExportService>();
         services.AddScoped<IInktFileImportService, InktFileImportService>();
-        services.AddScoped<ICardSummaryProvider, CardSummaryProvider>();
 
         // IDistributedCache backed by Redis for parse-token storage between import phases.
         // If Redis is not configured, fall back to in-memory (single-instance only).

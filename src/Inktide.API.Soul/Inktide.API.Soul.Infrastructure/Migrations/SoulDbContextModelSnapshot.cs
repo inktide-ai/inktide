@@ -672,6 +672,12 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("is_available");
 
+                    b.Property<bool>("RequiresApiKey")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("requires_api_key");
+
                     b.Property<string>("ModelId")
                         .IsRequired()
                         .HasColumnType("text")
@@ -761,6 +767,12 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("is_available");
+
+                    b.Property<bool>("RequiresApiKey")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("requires_api_key");
 
                     b.Property<string>("Language")
                         .IsRequired()

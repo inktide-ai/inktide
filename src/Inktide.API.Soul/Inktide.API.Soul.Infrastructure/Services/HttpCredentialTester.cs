@@ -65,7 +65,7 @@ public sealed class HttpCredentialTester : ICredentialTester
             "playht"      => await TestPlayHtAsync(client, apiKey, cts.Token),
             "google" or "vertex" => await TestGoogleAsync(client, apiKey, cts.Token),
             "azure-openai" or "azure" => await TestAzureAsync(client, apiKey, baseUrl, cts.Token),
-            "azure-speech" => await TestAzureSpeechAsync(client, apiKey, cts.Token),
+            "azure-speech" => await TestAzureSpeechAsync(client, apiKey, baseUrl, cts.Token),
             "ollama"      => await TestLocalAsync(client, baseUrl ?? "http://localhost:11434", "/api/tags", cts.Token),
             "lm-studio"   => await TestLocalAsync(client, baseUrl ?? "http://localhost:1234", "/v1/models", cts.Token),
             "kokoro"      => await TestLocalAsync(client, baseUrl ?? "http://localhost:8880", "/health", cts.Token),
@@ -188,14 +188,14 @@ public sealed class HttpCredentialTester : ICredentialTester
     }
 
     private static async Task<CredentialTestResult> TestAzureSpeechAsync(
-        HttpClient client, string apiKey, CancellationToken ct)
+        HttpClient client, string apiKey, string? baseUrl, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return new CredentialTestResult(false, "API key is required.");
 
-        // Azure Speech token endpoint — uses subscription key
+        var region = string.IsNullOrWhiteSpace(baseUrl) ? "eastus" : baseUrl.Trim();
         using var req = new HttpRequestMessage(HttpMethod.Post,
-            "https://eastus.api.cognitive.microsoft.com/sts/v1.0/issueToken");
+            $"https://{region}.api.cognitive.microsoft.com/sts/v1.0/issueToken");
         req.Headers.Add("Ocp-Apim-Subscription-Key", apiKey);
 
         var res = await client.SendAsync(req, ct);

@@ -28,7 +28,6 @@
     <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
     <ProjectReference Include="..\Inktide.API.Soul.Application\Inktide.API.Soul.Application.csproj" />
     <ProjectReference Include="..\Inktide.API.Soul.Domain\Inktide.API.Soul.Domain.csproj" />
-    <ProjectReference Include="..\..\Inktide.API.Memory\Inktide.API.Memory.Domain\Inktide.API.Memory.Domain.csproj" />
   </ItemGroup>
 
 </Project>

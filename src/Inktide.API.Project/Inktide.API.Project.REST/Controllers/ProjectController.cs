@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Inktide.API.Core.Contracts;
 using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.REST.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -14,20 +15,26 @@ namespace Inktide.API.Project.REST.Controllers;
 [Authorize]
 public sealed class ProjectController : ControllerBase
 {
-    private readonly IProjectService _projects;
+    private readonly IProjectCrudService _projects;
+    private readonly IProjectOrderingService _ordering;
+    private readonly IProjectPluginService _plugins;
     private readonly IProjectImportService _importer;
     private readonly IProjectExportService _exporter;
     private readonly IInktFileImportService _inktImporter;
     private readonly ICardSummaryProvider _cardSummaries;
 
     public ProjectController(
-        IProjectService projects,
+        IProjectCrudService projects,
+        IProjectOrderingService ordering,
+        IProjectPluginService plugins,
         IProjectImportService importer,
         IProjectExportService exporter,
         IInktFileImportService inktImporter,
         ICardSummaryProvider cardSummaries)
     {
         _projects      = projects      ?? throw new ArgumentNullException(nameof(projects));
+        _ordering      = ordering      ?? throw new ArgumentNullException(nameof(ordering));
+        _plugins       = plugins       ?? throw new ArgumentNullException(nameof(plugins));
         _importer      = importer      ?? throw new ArgumentNullException(nameof(importer));
         _exporter      = exporter      ?? throw new ArgumentNullException(nameof(exporter));
         _inktImporter  = inktImporter  ?? throw new ArgumentNullException(nameof(inktImporter));
@@ -44,7 +51,7 @@ public sealed class ProjectController : ControllerBase
             : await _projects.ListAsync(userId, ct);
         var souls = await _cardSummaries.GetSummariesAsync(
             projects.Where(p => p.ActiveSoulId.HasValue).Select(p => p.ActiveSoulId!.Value), ct);
-        return Ok(projects.Select(p => MapToResponse(p, souls)).ToList());
+        return Ok(projects.Select(p => ProjectMapper.MapToResponse(p, souls)).ToList());
     }
 
     [HttpPost]
@@ -57,7 +64,7 @@ public sealed class ProjectController : ControllerBase
 
         var userId  = GetUserId();
         var project = await _projects.CreateAsync(userId, request.Name, request.Description, request.ActiveSoulId, ct);
-        return Created($"/api/projects/{project.Id}", await MapToResponseWithSoulAsync(project, ct));
+        return Created($"/api/projects/{project.Id}", await ProjectMapper.MapToResponseWithSoulAsync(project, _cardSummaries, ct));
     }
 
     [HttpGet("{id:guid}")]
@@ -68,7 +75,7 @@ public sealed class ProjectController : ControllerBase
         var userId  = GetUserId();
         var project = await _projects.GetAsync(id, userId, ct);
         if (project is null) return NotFound();
-        return Ok(await MapToResponseWithSoulAsync(project, ct));
+        return Ok(await ProjectMapper.MapToResponseWithSoulAsync(project, _cardSummaries, ct));
     }
 
     [HttpPut("{id:guid}")]
@@ -80,7 +87,7 @@ public sealed class ProjectController : ControllerBase
         try
         {
             var project = await _projects.UpdateAsync(id, userId, request.Name, request.Description, request.Status, request.ActiveModelId, request.ActiveSceneId, request.SystemPrompt, ct);
-            return Ok(await MapToResponseWithSoulAsync(project, ct));
+            return Ok(await ProjectMapper.MapToResponseWithSoulAsync(project, _cardSummaries, ct));
         }
         catch (KeyNotFoundException)
         {
@@ -114,7 +121,7 @@ public sealed class ProjectController : ControllerBase
         try
         {
             var project = await _projects.BindSoulAsync(id, userId, request.SoulId, ct);
-            return Ok(await MapToResponseWithSoulAsync(project, ct));
+            return Ok(await ProjectMapper.MapToResponseWithSoulAsync(project, _cardSummaries, ct));
         }
         catch (KeyNotFoundException)
         {
@@ -131,7 +138,7 @@ public sealed class ProjectController : ControllerBase
         try
         {
             var project = await _projects.UnbindSoulAsync(id, userId, ct);
-            return Ok(await MapToResponseWithSoulAsync(project, ct));
+            return Ok(await ProjectMapper.MapToResponseWithSoulAsync(project, _cardSummaries, ct));
         }
         catch (KeyNotFoundException)
         {
@@ -275,8 +282,8 @@ public sealed class ProjectController : ControllerBase
         var userId = GetUserId();
         try
         {
-            var plugins = await _projects.GetPluginsAsync(id, userId, ct);
-            return Ok(plugins.Select(MapPluginToResponse).ToList());
+            var plugins = await _plugins.GetPluginsAsync(id, userId, ct);
+            return Ok(plugins.Select(ProjectMapper.MapPluginToResponse).ToList());
         }
         catch (KeyNotFoundException)
         {
@@ -293,8 +300,8 @@ public sealed class ProjectController : ControllerBase
         var userId = GetUserId();
         try
         {
-            var plugin = await _projects.UpsertPluginAsync(id, userId, pluginId, request.IsEnabled, request.Config, ct);
-            return Ok(MapPluginToResponse(plugin));
+            var plugin = await _plugins.UpsertPluginAsync(id, userId, pluginId, request.IsEnabled, request.Config, ct);
+            return Ok(ProjectMapper.MapPluginToResponse(plugin));
         }
         catch (KeyNotFoundException)
         {
@@ -309,13 +316,6 @@ public sealed class ProjectController : ControllerBase
         return Guid.Parse(sub);
     }
 
-    private static ProjectPluginResponse MapPluginToResponse(Domain.ValueObjects.ProjectPlugin p) => new()
-    {
-        PluginId  = p.PluginId,
-        IsEnabled = p.IsEnabled,
-        Config    = p.Config,
-    };
-
     /// <summary>Move a project to a new position. previousId=null → beginning; nextId=null → end.</summary>
     [HttpPut("{id:guid}/position")]
     [ProducesResponseType(typeof(ProjectResponse), StatusCodes.Status200OK)]
@@ -327,44 +327,9 @@ public sealed class ProjectController : ControllerBase
         if (body is null) return BadRequest(new { error = "Request body is required." });
         var userId = GetUserId();
 
-        var project = await _projects.ReorderAsync(id, userId, body.PreviousId, body.NextId, ct).ConfigureAwait(false);
+        var project = await _ordering.ReorderAsync(id, userId, body.PreviousId, body.NextId, ct).ConfigureAwait(false);
         if (project is null) return NotFound(new { error = "Project not found." });
 
-        return Ok(await MapToResponseWithSoulAsync(project, ct));
+        return Ok(await ProjectMapper.MapToResponseWithSoulAsync(project, _cardSummaries, ct));
     }
-
-    private async Task<ProjectResponse> MapToResponseWithSoulAsync(
-        Domain.Entities.ProjectEntity p, CancellationToken ct)
-    {
-        ActiveSoulSummaryDto? soul = null;
-        if (p.ActiveSoulId.HasValue)
-        {
-            var summaries = await _cardSummaries.GetSummariesAsync([p.ActiveSoulId.Value], ct);
-            if (summaries.TryGetValue(p.ActiveSoulId.Value, out var s))
-                soul = new ActiveSoulSummaryDto { Id = s.Id, Name = s.Name, AvatarUrl = s.AvatarUrl };
-        }
-        return MapToResponse(p, null, soul);
-    }
-
-    private static ProjectResponse MapToResponse(
-        Domain.Entities.ProjectEntity p,
-        IReadOnlyDictionary<Guid, CardSummary>? souls,
-        ActiveSoulSummaryDto? soulOverride = null) => new()
-    {
-        Id            = p.Id,
-        UserId        = p.UserId,
-        Name          = p.Name,
-        Description   = p.Description,
-        ActiveSoulId  = p.ActiveSoulId,
-        ActiveSoul    = soulOverride ?? (p.ActiveSoulId.HasValue && souls?.TryGetValue(p.ActiveSoulId.Value, out var s) == true
-            ? new ActiveSoulSummaryDto { Id = s!.Id, Name = s.Name, AvatarUrl = s.AvatarUrl }
-            : null),
-        ActiveModelId = p.ActiveModelId,
-        ActiveSceneId = p.ActiveSceneId,
-        SystemPrompt  = p.SystemPrompt,
-        Status        = p.Status,
-        CreatedAt     = p.CreatedAt,
-        UpdatedAt     = p.UpdatedAt,
-        SortKey       = p.SortKey,
-    };
 }

@@ -18,11 +18,11 @@ public interface IAiCardRunPresetRepository
     Task DeleteAsync(AiCardRunPreset preset, CancellationToken ct = default);
 
     /// <summary>Sets <c>is_active = false</c> for all presets of <paramref name="aiCardId"/> except <paramref name="exceptId"/>.</summary>
-    Task DeactivateAllAsync(Guid aiCardId, Guid? exceptId, CancellationToken ct = default);
+    Task DeactivateAllAsync(Guid aiCardId, Guid? exceptId, DateTime updatedAt, CancellationToken ct = default);
 
     /// <summary>Returns all (id, sort_key) pairs for the card ordered by sort_key ASC.</summary>
     Task<IReadOnlyList<(Guid Id, string SortKey)>> GetSortKeysAsync(Guid aiCardId, CancellationToken ct = default);
 
-    /// <summary>Updates sort_key for each entry in the list.</summary>
-    Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, CancellationToken ct = default);
+    /// <summary>Updates sort_key for each entry in the list. Callers requiring multi-item atomicity must wrap in ITransactionManager.</summary>
+    Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default);
 }

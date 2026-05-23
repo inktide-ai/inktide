@@ -58,13 +58,13 @@ public sealed class LlmCatalogEntry
         set => _createdAt = value;
     }
 
-    /// <summary>
-    /// True when the provider requires a BYOK API key.
-    /// Local/self-hosted providers (Ollama, LM Studio) don't require one.
-    /// </summary>
-    public bool RequiresApiKey => !LocalProviders.Contains(Provider);
+    private bool _requiresApiKey = true;
 
-    private static readonly HashSet<string> LocalProviders =
-        new(StringComparer.OrdinalIgnoreCase) { "ollama", "lm-studio", "llamacpp", "llamafile" };
+    /// <summary>True when the provider requires a BYOK API key. Persisted in DB; set to false for local/self-hosted providers.</summary>
+    public bool RequiresApiKey
+    {
+        get => _requiresApiKey;
+        set => _requiresApiKey = value;
+    }
 
 }
