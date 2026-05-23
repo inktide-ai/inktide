@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Models;
@@ -14,7 +13,7 @@ namespace Inktide.API.Soul.REST.Controllers;
 [Route("api/soul/cards/{cardId:guid}/channels")]
 [Produces("application/json")]
 [Authorize]
-public sealed class AiCardChannelsController : ControllerBase
+public sealed class AiCardChannelsController : ApiController
 {
 
     private readonly IAiCardChannelLinkService _channelLinks;
@@ -118,12 +117,5 @@ public sealed class AiCardChannelsController : ControllerBase
         }
     }
 
-
-    private Guid GetUserId()
-    {
-        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException("User ID not found in token.");
-        return Guid.Parse(sub);
-    }
 
 }

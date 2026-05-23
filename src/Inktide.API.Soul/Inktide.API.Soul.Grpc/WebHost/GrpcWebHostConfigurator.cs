@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Inktide.API.Core;
 using Inktide.API.Soul.Grpc.Settings;
 
@@ -27,6 +28,11 @@ public sealed class GrpcWebHostConfigurator : IWebHostConfigurator
             {
                 return;
             }
+
+            if (context.HostingEnvironment.IsProduction() && string.IsNullOrEmpty(settings.CertPath))
+                throw new InvalidOperationException(
+                    "SoulGrpcServerSettings.CertPath must be configured in production. " +
+                    "gRPC must use TLS. Set via SoulGrpcServerSettings__CertPath.");
 
             options.Listen(
                 IPAddress.Parse(settings.ListenAddress),

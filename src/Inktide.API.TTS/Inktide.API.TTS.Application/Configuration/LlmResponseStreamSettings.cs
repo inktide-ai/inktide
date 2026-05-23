@@ -8,7 +8,8 @@ public sealed class LlmResponseStreamSettings
 {
     public const string SectionName = "LlmResponseStream";
 
-    /// <summary>Redis stream key written by the Python llm-worker.</summary>
+    /// <summary>Redis stream key written by the LLM worker.
+    /// Default matches <c>Inktide.API.Core.Constants.StreamNames.LlmResponse</c>.</summary>
     public string StreamName { get; set; } = "synapse.llm.response";
 
     /// <summary>Consumer group for TTS workers.</summary>

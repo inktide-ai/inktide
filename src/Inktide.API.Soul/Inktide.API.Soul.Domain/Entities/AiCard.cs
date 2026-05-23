@@ -1,3 +1,6 @@
+using Inktide.API.Soul.Domain.Enums;
+using Inktide.API.Soul.Domain.ValueObjects;
+
 namespace Inktide.API.Soul.Domain.Entities;
 
 /// <summary>
@@ -22,11 +25,17 @@ public sealed class AiCard
     private string _responseBehavior = "{}";
     private string _memorySettings = "{}";
     private string _autoPilot = "{}";
-    private string _visibility = "private";
+    private string _screenAwarenessSettings = "{}";
+    private PersonalitySettings _personalityConfig = new();
+    private string _description = string.Empty;
+    private AiCardStatus _status = AiCardStatus.Active;
+    private string? _coverUrl;
+    private AiCardVisibility _visibility = AiCardVisibility.Private;
     private bool _isActive = true;
     private DateTime? _deletedAt;
     private DateTime _createdAt;
     private DateTime _updatedAt;
+    private string _sortKey = "a0";
     private LlmCatalogEntry? _llmCatalog;
     private TtsCatalogEntry? _ttsCatalog;
     private ICollection<AiCardChannel> _channels = [];
@@ -131,8 +140,41 @@ public sealed class AiCard
         set => _autoPilot = value;
     }
 
-    /// <summary>Visibility scope: 'private' | 'unlisted' | 'public'.</summary>
-    public string Visibility
+    /// <summary>Screen awareness config: enabled, hourly_budget_override, phash_threshold.</summary>
+    public string ScreenAwarenessSettings
+    {
+        get => _screenAwarenessSettings;
+        set => _screenAwarenessSettings = value;
+    }
+
+    /// <summary>Structured personality traits and emotional dynamics (warmth, playfulness, volatility, etc.).</summary>
+    public PersonalitySettings PersonalityConfig
+    {
+        get => _personalityConfig;
+        set => _personalityConfig = value;
+    }
+
+    /// <summary>Short project description shown on the project card.</summary>
+    public string Description
+    {
+        get => _description;
+        set => _description = value;
+    }
+
+    public AiCardStatus Status
+    {
+        get => _status;
+        set => _status = value;
+    }
+
+    /// <summary>URL of the cover image shown on the project card.</summary>
+    public string? CoverUrl
+    {
+        get => _coverUrl;
+        set => _coverUrl = value;
+    }
+
+    public AiCardVisibility Visibility
     {
         get => _visibility;
         set => _visibility = value;
@@ -162,6 +204,19 @@ public sealed class AiCard
     {
         get => _updatedAt;
         set => _updatedAt = value;
+    }
+
+    /// <summary>Fractional index key for drag-and-drop ordering. Sorts lexicographically ASC.</summary>
+    public string SortKey
+    {
+        get => _sortKey;
+        set => _sortKey = value;
+    }
+
+    public void SetSortKey(string key)
+    {
+        if (string.IsNullOrEmpty(key)) throw new ArgumentException("sort key required", nameof(key));
+        _sortKey = key;
     }
 
     public LlmCatalogEntry? LlmCatalog

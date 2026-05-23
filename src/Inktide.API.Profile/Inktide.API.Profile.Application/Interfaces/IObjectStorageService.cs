@@ -16,7 +16,7 @@ public interface IObjectStorageService
 
     Task DeleteObjectAsync(string objectKey, CancellationToken ct = default);
 
-    Task<IReadOnlyList<ObjectStorageListItem>> ListObjectsAsync(string? prefix, CancellationToken ct = default);
+    IAsyncEnumerable<ObjectStorageListItem> ListObjectsAsync(string? prefix, CancellationToken ct = default);
 
     /// <summary>
     /// MinIO / S3-compatible presigned PUT URL for direct browser upload.

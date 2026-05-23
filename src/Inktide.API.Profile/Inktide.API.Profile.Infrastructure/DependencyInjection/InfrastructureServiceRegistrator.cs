@@ -2,11 +2,13 @@ using Amazon.S3;
 using Inktide.API.Core;
 using Inktide.API.Profile.Application.Interfaces;
 using Inktide.API.Profile.Infrastructure.Keycloak;
+using Inktide.API.Profile.Infrastructure.Repositories;
 using Inktide.API.Profile.Infrastructure.Services;
 using Inktide.API.Profile.Infrastructure.Settings;
 using Inktide.API.Profile.Infrastructure.Storage;
 using DryIoc;
 using Microsoft.Extensions.Configuration;
+using StackExchange.Redis;
 
 namespace Inktide.API.Profile.Infrastructure.DependencyInjection;
 
@@ -21,7 +23,17 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
 
         registrator.Register<IKeycloakAdminClient, KeycloakAdminClient>(Reuse.Singleton);
         registrator.Register<IUserAccountDeletionService, UserAccountDeletionService>(Reuse.Scoped);
+        registrator.Register<IUserProfileRepository, UserProfileRepository>(Reuse.Scoped);
         registrator.Register<IUserAvatarService, UserAvatarService>(Reuse.Scoped);
+        registrator.Register<IImageProcessingService, ImageProcessingService>(Reuse.Singleton);
+
+        var smtpSettings = new SmtpSettings();
+        configuration.GetSection(nameof(SmtpSettings)).Bind(smtpSettings);
+        registrator.RegisterInstance(smtpSettings);
+        registrator.Register<IVerificationCodeGenerator, VerificationCodeGenerator>(Reuse.Singleton);
+        registrator.Register<IEmailVerificationStore, EmailVerificationStore>(Reuse.Scoped);
+        registrator.Register<IEmailChangeService, EmailChangeService>(Reuse.Scoped);
+
 
         var s3Settings = new S3Settings();
         configuration.GetSection(nameof(S3Settings)).Bind(s3Settings);

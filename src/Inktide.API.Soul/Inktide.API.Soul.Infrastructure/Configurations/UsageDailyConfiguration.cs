@@ -51,6 +51,14 @@ public sealed class UsageDailyConfiguration : IEntityTypeConfiguration<UsageDail
             .HasColumnName("donkey_thoughts")
             .HasDefaultValue(0);
 
+        b.Property(e => e.VisionFramesProcessed)
+            .HasColumnName("vision_frames_processed")
+            .HasDefaultValue(0);
+
+        b.Property(e => e.VisionEventsDetected)
+            .HasColumnName("vision_events_detected")
+            .HasDefaultValue(0);
+
         b.HasIndex(e => new { e.AiCardId, e.UsageDate })
             .IsUnique();
 

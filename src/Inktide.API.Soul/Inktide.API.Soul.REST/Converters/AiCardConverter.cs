@@ -1,5 +1,6 @@
 using Inktide.API.Soul.Application.Models;
 using Inktide.API.Soul.Domain.Entities;
+using Inktide.API.Soul.Domain.Enums;
 using Inktide.API.Soul.REST.Models;
 using Newtonsoft.Json;
 
@@ -20,16 +21,16 @@ public static class AiCardConverter
             Personality = card.Personality,
             SystemPrompt = card.SystemPrompt,
             LlmCatalogId = card.LlmCatalogId,
-            LlmConfig = DeserializeJson(card.LlmConfig),
+            LlmConfig = Deserialize<AiCardLlmConfigDto>(card.LlmConfig),
             LlmModel = card.LlmCatalog is not null ? ToLlmResponse(card.LlmCatalog) : null,
             TtsCatalogId = card.TtsCatalogId,
-            TtsConfig = DeserializeJson(card.TtsConfig),
+            TtsConfig = Deserialize<AiCardTtsConfigDto>(card.TtsConfig),
             TtsVoice = card.TtsCatalog is not null ? ToTtsResponse(card.TtsCatalog) : null,
-            Appearance = DeserializeJson(card.Appearance),
-            ResponseBehavior = DeserializeJson(card.ResponseBehavior),
-            MemorySettings = DeserializeJson(card.MemorySettings),
-            AutoPilot = DeserializeJson(card.AutoPilot),
-            Visibility = card.Visibility,
+            Appearance = Deserialize<AiCardAppearanceDto>(card.Appearance),
+            ResponseBehavior = Deserialize<AiCardBehaviorDto>(card.ResponseBehavior),
+            MemorySettings = Deserialize<AiCardMemoryDto>(card.MemorySettings),
+            AutoPilot = Deserialize<AiCardAutoPilotDto>(card.AutoPilot),
+            Visibility = card.Visibility.ToString().ToLowerInvariant(),
             Channels = card.Channels?.Select(ToChannelResponse).ToList(),
             Tools = card.Tools?.Select(ToToolResponse).ToList(),
             IsActive = card.IsActive,
@@ -92,7 +93,8 @@ public static class AiCardConverter
         if (request.MemorySettings is not null) existing.MemorySettings = SerializeJson(request.MemorySettings) ?? "{}";
         if (request.AutoPilot is not null) existing.AutoPilot = SerializeJson(request.AutoPilot) ?? "{}";
         if (request.IsActive.HasValue) existing.IsActive = request.IsActive.Value;
-        if (request.Visibility is not null) existing.Visibility = request.Visibility;
+        if (request.Visibility is not null && Enum.TryParse<AiCardVisibility>(request.Visibility, ignoreCase: true, out var vis))
+            existing.Visibility = vis;
     }
 
     public static LlmModelResponse ToLlmResponse(LlmCatalogEntry e)
@@ -140,13 +142,13 @@ public static class AiCardConverter
 
     private static ToolResponse ToToolResponse(AiCardTool t) => new()
     {
-        Id = t.Id, ToolName = t.ToolName, ToolConfig = DeserializeJson(t.ToolConfig), IsEnabled = t.IsEnabled
+        Id = t.Id, ToolName = t.ToolName, ToolConfig = Deserialize<object>(t.ToolConfig), IsEnabled = t.IsEnabled
     };
 
-    private static object? DeserializeJson(string? json) =>
-        string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject(json);
+    private static T? Deserialize<T>(string? json) where T : class =>
+        string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<T>(json);
 
-    private static string? SerializeJson(object? obj) =>
+    private static string? SerializeJson<T>(T? obj) where T : class =>
         obj is null ? null : JsonConvert.SerializeObject(obj);
 
 }

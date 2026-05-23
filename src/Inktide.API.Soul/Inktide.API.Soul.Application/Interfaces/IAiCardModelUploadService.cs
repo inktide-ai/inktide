@@ -23,6 +23,8 @@ public interface IAiCardModelUploadService
     Task<IReadOnlyList<AiCardModel>?> ListAsync(Guid userId, Guid cardId, CancellationToken ct = default);
 
     Task<DeleteModelResult> DeleteAsync(Guid userId, Guid cardId, Guid modelId, CancellationToken ct = default);
+
+    Task<SetActiveModelResult> SetActiveAsync(Guid userId, Guid cardId, Guid modelId, CancellationToken ct = default);
 }
 
 public enum ModelUploadError
@@ -74,6 +76,15 @@ public sealed record DeleteModelResult(
     public static DeleteModelResult Fail(ModelUploadError kind, string error) => new(false, kind, error);
 }
 
+public sealed record SetActiveModelResult(
+    bool Success,
+    ModelUploadError ErrorKind,
+    string? Error)
+{
+    public static SetActiveModelResult Ok() => new(true, ModelUploadError.None, null);
+    public static SetActiveModelResult Fail(ModelUploadError kind, string error) => new(false, kind, error);
+}
+
 public sealed record AiCardModel(
     Guid Id,
     Guid AiCardId,
@@ -82,4 +93,5 @@ public sealed record AiCardModel(
     string OriginalFileName,
     string ContentType,
     long SizeBytes,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    bool IsActive);

@@ -1,8 +1,14 @@
 using Inktide.API.Core;
+using Inktide.API.Core.Contracts;
+using Inktide.API.Core.Transactions;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Domain.Repositories;
+using Inktide.API.Soul.Infrastructure.Messaging;
+using Inktide.API.Soul.Infrastructure.Queries;
 using Inktide.API.Soul.Infrastructure.Repositories;
 using Inktide.API.Soul.Infrastructure.Security;
+using Inktide.API.Soul.Infrastructure.Services;
+using Inktide.API.Soul.Infrastructure.Transactions;
 using DryIoc;
 using Microsoft.Extensions.Configuration;
 
@@ -21,8 +27,23 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
         registrator.Register<IAiCardModelRepository, AiCardModelRepository>(Reuse.Scoped);
         registrator.Register<IAiCardSceneRepository, AiCardSceneRepository>(Reuse.Scoped);
         registrator.Register<IAiCardCustomSceneTagRepository, AiCardCustomSceneTagRepository>(Reuse.Scoped);
+        registrator.Register<IAiCardRunPresetRepository, AiCardRunPresetRepository>(Reuse.Scoped);
+        registrator.Register<IAiCardRunPresetQueryService, AiCardRunPresetQueryService>(Reuse.Scoped);
         registrator.Register<IUserProviderCredentialRepository, UserProviderCredentialRepository>(Reuse.Scoped);
         registrator.Register<IApiKeyProtector, ApiKeyProtector>(Reuse.Scoped);
+        registrator.Register<ICredentialTester, HttpCredentialTester>(Reuse.Scoped);
+        registrator.Register<IAiCardChannelQueryService, AiCardChannelQueryService>(Reuse.Scoped);
+        registrator.Register<IDashboardStatsService, DashboardStatsService>(Reuse.Scoped);
+        registrator.Register<IProjectImportService, ProjectImportService>(Reuse.Scoped);
+        registrator.Register<IProjectExportDataQuery, ProjectExportDataQueryService>(Reuse.Scoped);
+
+        // Transaction infrastructure — scoped per request
+        registrator.Register<IDomainEventCollector, DomainEventCollector>(Reuse.Scoped);
+        registrator.Register<IDomainEventDispatcher, InMemoryDomainEventDispatcher>(Reuse.Scoped);
+        registrator.Register<ITransactionManager, SoulTransactionManager>(Reuse.Scoped);
+
+        // Integration event publisher — singleton, stateless Redis client
+        registrator.Register<IIntegrationEventPublisher, RedisStreamsIntegrationEventPublisher>(Reuse.Singleton);
     }
 
 }

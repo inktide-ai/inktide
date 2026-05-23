@@ -1,0 +1,90 @@
+{
+  "section": {
+    "title": "Channels"
+  },
+  "intro": "Connect this character to live chat platforms. Each link stores the routing key Synapse uses to load this card when messages arrive from that channel.",
+  "form": {
+    "displayName": "Display name",
+    "displayNamePlaceholder": "Label in your dashboard",
+    "botName": "Bot / service name",
+    "botNamePlaceholder": "How the bot appears on this platform"
+  },
+  "status": {
+    "loading": "Loading connections…",
+    "adding": "Adding…",
+    "remove": "Remove",
+    "paused": "paused"
+  },
+  "error": {
+    "load": "Failed to load connections.",
+    "add": "Could not add connection.",
+    "update": "Update failed.",
+    "remove": "Remove failed.",
+    "displayNameRequired": "Enter a display name for this connection.",
+    "botNameRequired": "Enter the bot or service account name for this platform."
+  },
+  "confirm": "Remove {{label}} link \"{{channel}}\"?",
+  "discord": {
+    "title": "Discord",
+    "subtitle": "Link a Discord server (guild) so the Inktide bot can route chat to this character.",
+    "hint": "Ingest uses the <strong>guild id</strong> as <code>ChannelId</code> (same as the Discord connector). Add that server id here and ensure your bot process allows this guild in <code>DiscordSettings:GuildIds</code>. <a>How to enable Developer Mode</a>",
+    "hintLink": "https://support.discord.com/hc/en-us/articles/206346498",
+    "channelIdLabel": "Server ID (guild snowflake)",
+    "channelIdPlaceholder": "e.g. 123456789012345678",
+    "channelIdHint": "Right‑click the server icon → Copy Server ID (Developer Mode on).",
+    "addLabel": "Add Discord server",
+    "listTitle": "Linked servers",
+    "emptyList": "No Discord servers linked yet.",
+    "validationError": "Use a numeric guild id (17–20 digits). Enable Developer Mode → Copy Server ID.",
+    "removeLabel": "Discord"
+  },
+  "twitch": {
+    "title": "Twitch",
+    "subtitle": "Link a Twitch channel so chat ingest can map to this character (broadcaster login or id).",
+    "hint": "Store the same <code>ChannelId</code> your Twitch connector sends (often the channel login in lowercase or numeric user id). Must match <code>TwitchSettings</code> / bot scope for that channel.",
+    "channelIdLabel": "Channel id / login",
+    "channelIdPlaceholder": "e.g. channel_login or numeric id",
+    "channelIdHint": "Must match the identifier used in ChatMessage.ChannelId for Twitch.",
+    "addLabel": "Add Twitch channel",
+    "listTitle": "Linked Twitch channels",
+    "emptyList": "No Twitch channels linked yet.",
+    "validationError": "Use 1–100 characters: letters, digits, _ and - only.",
+    "removeLabel": "Twitch"
+  },
+  "kick": {
+    "title": "Kick",
+    "subtitle": "Link a Kick channel for routing live chat to this character.",
+    "hint": "Use the channel slug or id your Kick connector publishes as <code>ChannelId</code> in the unified chat message.",
+    "channelIdLabel": "Channel id / slug",
+    "channelIdPlaceholder": "e.g. channelname",
+    "channelIdHint": "Same value as ingest ChannelId from the Kick connector.",
+    "addLabel": "Add Kick channel",
+    "listTitle": "Linked Kick channels",
+    "emptyList": "No Kick channels linked yet.",
+    "validationError": "Use 1–100 characters: letters, digits, _ and - only.",
+    "removeLabel": "Kick"
+  },
+  "vk_video": {
+    "title": "VK Video",
+    "subtitle": "Link a VK Video (live) context so stream chat routes to this character.",
+    "hint": "Use the stable channel or owner id string your VK connector sets as <code>ChannelId</code> for live comments.",
+    "channelIdLabel": "Channel / owner id",
+    "channelIdPlaceholder": "e.g. -123456789 or public id",
+    "channelIdHint": "Must match ChatMessage.ChannelId from the VK Video ingest path.",
+    "addLabel": "Add VK Video link",
+    "listTitle": "Linked VK Video contexts",
+    "emptyList": "No VK Video links yet.",
+    "validationError": "Use 1–100 characters: letters, digits, _ and - only.",
+    "removeLabel": "VK Video"
+  },
+  "telegram": {
+    "title": "Telegram",
+    "subtitle": "Connect your Telegram account to route messages to this Soul.",
+    "hint": "Authorize via OAuth to link your Telegram account. The Soul will receive messages from chats where your bot is active.",
+    "addLabel": "Connect Telegram",
+    "listTitle": "Linked Telegram accounts",
+    "emptyList": "No Telegram accounts linked yet.",
+    "validationError": "Use 1–200 characters: letters, digits, _ and - only.",
+    "removeLabel": "Telegram"
+  }
+}

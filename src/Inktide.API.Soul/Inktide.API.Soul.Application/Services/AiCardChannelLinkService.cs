@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Models;
@@ -69,7 +70,7 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
         var now = _time.GetUtcNow().UtcDateTime;
         var entity = new AiCardChannel
         {
-            Id = Guid.NewGuid(),
+            Id = IdGenerator.New(),
             AiCardId = cardId,
             Platform = platform,
             ChannelName = channelName,
@@ -142,6 +143,142 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
     }
 
 
+    public async Task UpsertDiscordChannelAsync(
+        Guid userId,
+        Guid cardId,
+        string guildId,
+        string guildName,
+        string accessTokenEnc,
+        string refreshTokenEnc,
+        DateTime tokenExpiresAt,
+        CancellationToken ct = default)
+    {
+        var card = await _cardRepo.GetByIdAsync(cardId, ct);
+        if (card is null || card.UserId != userId)
+            throw new AiCardNotFoundException(cardId);
+
+        var existing = await _channelRepo.GetByCardIdAsync(cardId, ct);
+        var channel = existing.FirstOrDefault(c =>
+            c.Platform == "discord" && c.ChannelId == guildId);
+
+        var now = _time.GetUtcNow().UtcDateTime;
+
+        if (channel is null)
+        {
+            channel = new AiCardChannel
+            {
+                Id             = IdGenerator.New(),
+                AiCardId       = cardId,
+                Platform       = "discord",
+                ChannelId      = guildId,
+                ChannelName    = guildName,
+                BotUsername    = "Inktide",
+                OAuthTokenEnc  = accessTokenEnc,
+                RefreshTokenEnc = refreshTokenEnc,
+                TokenExpiresAt = tokenExpiresAt,
+                IsActive       = true,
+                ConnectedAt    = now,
+                CreatedAt      = now,
+            };
+            await _channelRepo.CreateAsync(channel, ct);
+        }
+        else
+        {
+            channel.ChannelName    = guildName;
+            channel.OAuthTokenEnc  = accessTokenEnc;
+            channel.RefreshTokenEnc = refreshTokenEnc;
+            channel.TokenExpiresAt = tokenExpiresAt;
+            channel.IsActive       = true;
+            channel.ConnectedAt    = now;
+            await _channelRepo.UpdateAsync(channel, ct);
+        }
+    }
+
+    public async Task<Guid> UpsertTelegramChannelAsync(
+        Guid userId,
+        Guid cardId,
+        string chatId,
+        string chatName,
+        string encryptedBotToken,
+        CancellationToken ct = default)
+    {
+        var card = await _cardRepo.GetByIdAsync(cardId, ct);
+        if (card is null || card.UserId != userId)
+            throw new AiCardNotFoundException(cardId);
+
+        var existing = await _channelRepo.GetByCardIdAsync(cardId, ct);
+        var channel = existing.FirstOrDefault(c =>
+            c.Platform == "telegram" && c.ChannelId == chatId);
+
+        var now = _time.GetUtcNow().UtcDateTime;
+
+        if (channel is null)
+        {
+            channel = new AiCardChannel
+            {
+                Id            = IdGenerator.New(),
+                AiCardId      = cardId,
+                Platform      = "telegram",
+                ChannelId     = chatId,
+                ChannelName   = chatName,
+                BotUsername   = "TelegramBot",
+                OAuthTokenEnc = encryptedBotToken,
+                IsActive      = true,
+                ConnectedAt   = now,
+                CreatedAt     = now,
+            };
+            await _channelRepo.CreateAsync(channel, ct);
+        }
+        else
+        {
+            channel.ChannelName   = chatName;
+            channel.OAuthTokenEnc = encryptedBotToken;
+            channel.IsActive      = true;
+            channel.ConnectedAt   = now;
+            await _channelRepo.UpdateAsync(channel, ct);
+        }
+
+        return channel.Id;
+    }
+
+    public async Task<AiCardChannel?> GetByIdAsync(Guid userId, Guid channelId, CancellationToken ct = default)
+    {
+        var channel = await _channelRepo.GetByIdForUpdateAsync(channelId, ct);
+        if (channel is null) return null;
+
+        var card = await _cardRepo.GetByIdAsync(channel.AiCardId, ct);
+        if (card is null || card.UserId != userId) return null;
+
+        return channel;
+    }
+
+    public async Task DeactivateAsync(Guid userId, Guid channelId, CancellationToken ct = default)
+    {
+        var channel = await _channelRepo.GetByIdForUpdateAsync(channelId, ct);
+        if (channel is null) return;
+
+        var card = await _cardRepo.GetByIdAsync(channel.AiCardId, ct);
+        if (card is null || card.UserId != userId) return;
+
+        channel.IsActive       = false;
+        channel.OAuthTokenEnc  = null;
+        channel.RefreshTokenEnc = null;
+        channel.TokenExpiresAt = null;
+        await _channelRepo.UpdateAsync(channel, ct);
+    }
+
+    public async Task SetCustomBotTokenAsync(Guid userId, Guid channelId, string? encryptedToken, CancellationToken ct = default)
+    {
+        var channel = await _channelRepo.GetByIdForUpdateAsync(channelId, ct);
+        if (channel is null) return;
+
+        var card = await _cardRepo.GetByIdAsync(channel.AiCardId, ct);
+        if (card is null || card.UserId != userId) return;
+
+        channel.CustomBotTokenEnc = encryptedToken;
+        await _channelRepo.UpdateAsync(channel, ct);
+    }
+
     private static ChannelLink ToDto(AiCardChannel c) =>
         new(
             c.Id,
@@ -150,6 +287,7 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
             c.ChannelId,
             c.BotUsername,
             c.IsActive,
-            c.ConnectedAt);
+            c.ConnectedAt,
+            c.CustomBotTokenEnc is not null);
 
 }

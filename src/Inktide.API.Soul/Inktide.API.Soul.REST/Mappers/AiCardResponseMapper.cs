@@ -1,4 +1,6 @@
 using Inktide.API.Soul.Domain.Entities;
+using Inktide.API.Soul.Domain.Enums;
+using Inktide.API.Soul.Domain.ValueObjects;
 using Inktide.API.Soul.REST.Models;
 using Newtonsoft.Json;
 
@@ -7,7 +9,6 @@ namespace Inktide.API.Soul.REST.Mappers;
 /// <summary>
 /// Maps AiCard domain entities to REST response models.
 /// SRP: one reason to change — AiCard read representation.
-/// OCP: adding LlmModel/TtsVoice fields only requires editing this file, not AiCardEntityFactory.
 /// </summary>
 public static class AiCardResponseMapper
 {
@@ -22,17 +23,22 @@ public static class AiCardResponseMapper
             AvatarUrl        = card.AvatarUrl,
             Personality      = card.Personality,
             SystemPrompt     = card.SystemPrompt,
+            Description      = card.Description,
+            Status           = EnumToString(card.Status),
+            CoverUrl         = card.CoverUrl,
             LlmCatalogId     = card.LlmCatalogId,
-            LlmConfig        = DeserializeJson(card.LlmConfig),
+            LlmConfig        = Deserialize<AiCardLlmConfigDto>(card.LlmConfig),
             LlmModel         = card.LlmCatalog is not null ? CatalogResponseMapper.ToLlmResponse(card.LlmCatalog) : null,
             TtsCatalogId     = card.TtsCatalogId,
-            TtsConfig        = DeserializeJson(card.TtsConfig),
+            TtsConfig        = Deserialize<AiCardTtsConfigDto>(card.TtsConfig),
             TtsVoice         = card.TtsCatalog is not null ? CatalogResponseMapper.ToTtsResponse(card.TtsCatalog) : null,
-            Appearance       = DeserializeJson(card.Appearance),
-            ResponseBehavior = DeserializeJson(card.ResponseBehavior),
-            MemorySettings   = DeserializeJson(card.MemorySettings),
-            AutoPilot        = DeserializeJson(card.AutoPilot),
-            Visibility       = card.Visibility,
+            Appearance         = Deserialize<AiCardAppearanceDto>(card.Appearance),
+            ResponseBehavior   = Deserialize<AiCardBehaviorDto>(card.ResponseBehavior),
+            MemorySettings     = Deserialize<AiCardMemoryDto>(card.MemorySettings),
+            AutoPilot          = Deserialize<AiCardAutoPilotDto>(card.AutoPilot),
+            ScreenAwareness    = Deserialize<AiCardScreenAwarenessDto>(card.ScreenAwarenessSettings),
+            PersonalityConfig  = MapPersonalityDto(card.PersonalityConfig),
+            Visibility       = EnumToString(card.Visibility),
             Channels         = card.Channels?.Select(ChannelResponseMapper.ToChannelResponse).ToList(),
             Tools            = card.Tools?.Select(ToolResponseMapper.ToToolResponse).ToList(),
             IsActive         = card.IsActive,
@@ -52,11 +58,39 @@ public static class AiCardResponseMapper
             AvatarUrl    = card.AvatarUrl,
             Personality  = card.Personality,
             LlmModelName = card.LlmCatalog?.DisplayName,
+            Description  = card.Description,
+            Status       = EnumToString(card.Status),
+            CoverUrl     = card.CoverUrl,
+            Platforms    = card.Channels
+                               .Where(c => c.IsActive && !string.IsNullOrEmpty(c.Platform))
+                               .Select(c => c.Platform)
+                               .Distinct()
+                               .ToList(),
             IsActive     = card.IsActive,
             UpdatedAt    = card.UpdatedAt,
+            SortKey      = card.SortKey,
         };
     }
 
-    private static object? DeserializeJson(string? json) =>
-        string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject(json);
+    private static AiCardPersonalityDto MapPersonalityDto(PersonalitySettings p) => new()
+    {
+        Warmth                = p.Warmth,
+        Playfulness           = p.Playfulness,
+        Assertiveness         = p.Assertiveness,
+        Empathy               = p.Empathy,
+        Formality             = p.Formality,
+        Sarcasm               = p.Sarcasm,
+        EmotionVolatility     = p.EmotionVolatility,
+        EmotionResponsiveness = p.EmotionResponsiveness,
+        EmotionMemory         = p.EmotionMemory,
+        StressBehavior        = p.StressBehavior,
+        BaselineMood          = p.BaselineMood,
+        PresetId              = p.PresetId,
+    };
+
+    private static T? Deserialize<T>(string? json) where T : class =>
+        string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<T>(json);
+
+    private static string EnumToString<TEnum>(TEnum value) where TEnum : struct, Enum =>
+        value.ToString().ToLowerInvariant();
 }

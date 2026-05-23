@@ -1,4 +1,8 @@
+using Inktide.API.Core.Generators;
+using Inktide.API.Core.Ordering;
+using Inktide.API.Core.Transactions;
 using Inktide.API.Profile.Application.Interfaces;
+using Inktide.API.Soul.Application.Constants;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Storage;
 using Inktide.API.Soul.Domain.Repositories;
@@ -16,11 +20,9 @@ namespace Inktide.API.Soul.Application.Services;
 /// </summary>
 public sealed class AiCardSceneUploadService : IAiCardSceneService
 {
-    private static readonly TimeSpan PresignTtl = TimeSpan.FromMinutes(15);
-
     private static readonly UploadConstraints Constraints = new()
     {
-        MaxBytes          = 52_428_800,
+        MaxBytes          = SoulConstants.Upload.MaxSceneBytes,
         AllowedExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" },
         FallbackFileName  = "background.jpg",
     };
@@ -28,6 +30,7 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
     private readonly IAiCardService _cards;
     private readonly IObjectStorageService _storage;
     private readonly IAiCardSceneRepository _scenes;
+    private readonly ITransactionManager _txManager;
     private readonly ObjectStorageSettings _s3;
     private readonly TimeProvider _time;
     private readonly ILogger<AiCardSceneUploadService> _logger;
@@ -36,16 +39,18 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
         IAiCardService cards,
         IObjectStorageService storage,
         IAiCardSceneRepository scenes,
+        ITransactionManager txManager,
         ObjectStorageSettings s3,
         TimeProvider time,
         ILogger<AiCardSceneUploadService> logger)
     {
-        _cards   = cards   ?? throw new ArgumentNullException(nameof(cards));
-        _storage = storage ?? throw new ArgumentNullException(nameof(storage));
-        _scenes  = scenes  ?? throw new ArgumentNullException(nameof(scenes));
-        _s3      = s3      ?? throw new ArgumentNullException(nameof(s3));
-        _time    = time    ?? throw new ArgumentNullException(nameof(time));
-        _logger  = logger  ?? throw new ArgumentNullException(nameof(logger));
+        _cards     = cards     ?? throw new ArgumentNullException(nameof(cards));
+        _storage   = storage   ?? throw new ArgumentNullException(nameof(storage));
+        _scenes    = scenes    ?? throw new ArgumentNullException(nameof(scenes));
+        _txManager = txManager ?? throw new ArgumentNullException(nameof(txManager));
+        _s3        = s3        ?? throw new ArgumentNullException(nameof(s3));
+        _time      = time      ?? throw new ArgumentNullException(nameof(time));
+        _logger    = logger    ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<BeginSceneUploadResult> BeginUploadAsync(
@@ -64,15 +69,15 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
             return BeginSceneUploadResult.Fail(SceneUploadError.CardNotFound, "AI card not found.");
 
         var safeName  = StorageFileHelper.SanitizeFileName(fileName, Constraints.FallbackFileName);
-        var objectKey = $"users/{userId:N}/cards/{cardId:N}/scenes/{Guid.NewGuid():N}_{safeName}";
+        var objectKey = $"users/{userId:N}/cards/{cardId:N}/scenes/{IdGenerator.New():N}_{safeName}";
         var ctNorm    = StorageFileHelper.InferContentType(contentType, fileName, "image/jpeg");
 
-        var uploadUrl = _storage.GetPreSignedPutUrl(objectKey, ctNorm, PresignTtl);
+        var uploadUrl = _storage.GetPreSignedPutUrl(objectKey, ctNorm, SoulConstants.Upload.PresignTtl);
         if (string.IsNullOrEmpty(uploadUrl))
             return BeginSceneUploadResult.Fail(SceneUploadError.StorageDisabled, "Could not create upload URL.");
 
         _logger.LogInformation("Presigned scene upload key={Key} card={CardId}", objectKey, cardId);
-        return BeginSceneUploadResult.Ok(uploadUrl, objectKey, _time.GetUtcNow().Add(PresignTtl), ctNorm);
+        return BeginSceneUploadResult.Ok(uploadUrl, objectKey, _time.GetUtcNow().Add(SoulConstants.Upload.PresignTtl), ctNorm);
     }
 
     public async Task<CompleteSceneUploadResult> CompleteUploadAsync(
@@ -122,6 +127,10 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
                 "Reported size does not match stored object.");
         }
 
+        var sortKeys = await _scenes.GetSortKeysAsync(cardId, ct).ConfigureAwait(false);
+        var sortKey  = FractionalIndexer.GenerateKeyBetween(
+            sortKeys.Count > 0 ? sortKeys[^1].SortKey : null, null);
+
         var publicUrl = ObjectStoragePublicUrl.Build(_s3.ServiceUrl, _s3.PublicBaseUrl, _s3.DefaultBucket, storageKey);
         var entity = AiCardSceneEntity.Create(
             userId, cardId, storageKey, publicUrl,
@@ -130,8 +139,10 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
             sizeBytes,
             _time.GetUtcNow().UtcDateTime,
             normalizedTag);
+        entity.SetSortKey(sortKey);
 
         await _scenes.AddAsync(entity, ct).ConfigureAwait(false);
+        await _txManager.SaveChangesAsync(ct).ConfigureAwait(false);
         _logger.LogInformation("Saved ai_card_scenes id={Id} key={Key}", entity.Id, storageKey);
 
         return CompleteSceneUploadResult.Ok(ToDto(entity));
@@ -168,9 +179,33 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
     }
 
 
+    public async Task<AiCardScene?> ReorderAsync(
+        Guid userId, Guid cardId, Guid sceneId,
+        Guid? previousId, Guid? nextId,
+        CancellationToken ct = default)
+    {
+        var scene = await _scenes.GetByIdAsync(userId, cardId, sceneId, ct).ConfigureAwait(false);
+        if (scene is null) return null;
+
+        var sortKeys = await _scenes.GetSortKeysAsync(cardId, ct).ConfigureAwait(false);
+
+        string? prevKey = previousId.HasValue
+            ? sortKeys.FirstOrDefault(x => x.Id == previousId.Value).SortKey
+            : null;
+        string? nextKey = nextId.HasValue
+            ? sortKeys.FirstOrDefault(x => x.Id == nextId.Value).SortKey
+            : null;
+
+        string newKey = FractionalIndexer.GenerateKeyBetween(prevKey, nextKey);
+
+        await _scenes.BulkUpdateSortKeysAsync([(sceneId, newKey)], ct).ConfigureAwait(false);
+
+        return ToDto(scene) with { SortKey = newKey };
+    }
+
     private static AiCardScene ToDto(AiCardSceneEntity s) =>
         new(s.Id, s.AiCardId, s.StorageKey, s.PublicUrl, s.OriginalFileName,
-            s.ContentType, s.SizeBytes, s.CreatedAt, s.Tag, s.DisplayName, s.Description);
+            s.ContentType, s.SizeBytes, s.CreatedAt, s.Tag, s.DisplayName, s.Description, s.SortKey);
 
     private static string? TryNormalizeTag(string? tag, out string? normalized)
     {

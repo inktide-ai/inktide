@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 namespace Inktide.API.Soul.Domain.Entities;
 
 /// <summary>
@@ -33,6 +34,9 @@ public sealed class AiCardScene
     /// <summary>Optional user-visible description for studio / lists.</summary>
     public string? Description { get; private set; }
 
+    /// <summary>Fractional index key for drag-and-drop ordering. Sorts lexicographically ASC.</summary>
+    public string SortKey { get; private set; } = "a0";
+
     // EF Core navigation
     public AiCard? AiCard { get; private set; }
 
@@ -56,7 +60,7 @@ public sealed class AiCardScene
 
         var scene = new AiCardScene
         {
-            Id = Guid.NewGuid(),
+            Id = IdGenerator.New(),
             UserId = userId,
             AiCardId = aiCardId,
             StorageKey = storageKey,
@@ -68,6 +72,13 @@ public sealed class AiCardScene
         };
         scene.SetTag(tag);
         return scene;
+    }
+
+
+    public void SetSortKey(string key)
+    {
+        if (string.IsNullOrEmpty(key)) throw new ArgumentException("sort key required", nameof(key));
+        SortKey = key;
     }
 
 

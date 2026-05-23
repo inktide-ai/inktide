@@ -36,6 +36,14 @@ public sealed class UserProviderCredentialConfiguration : IEntityTypeConfigurati
             .HasColumnName("config")
             .HasColumnType("text");
 
+        b.Property(e => e.VerifiedAt)
+            .HasColumnName("verified_at")
+            .HasColumnType("timestamp with time zone");
+
+        b.Property(e => e.LastError)
+            .HasColumnName("last_error")
+            .HasColumnType("text");
+
         b.Property(e => e.IsActive)
             .HasColumnName("is_active")
             .HasDefaultValue(true);

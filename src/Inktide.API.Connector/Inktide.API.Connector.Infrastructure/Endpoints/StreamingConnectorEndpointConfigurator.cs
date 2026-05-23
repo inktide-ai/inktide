@@ -10,16 +10,25 @@ using Inktide.API.Core;
 namespace Inktide.API.Connector.Infrastructure.Endpoints;
 
 /// <summary>
-/// Maps endpoints: /health and controllers.
+/// Maps health check endpoints and controllers.
+/// /health/live  — liveness probe: returns 200 if the process is running (no dependency checks).
+/// /health/ready — readiness probe: returns 200 only when all "ready"-tagged checks pass.
 /// </summary>
 public sealed class StreamingConnectorEndpointConfigurator : IEndpointConfigurator
 {
     public void Map(IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapHealthChecks("/health", new HealthCheckOptions
+        endpoints.MapHealthChecks("/health/live", new HealthCheckOptions
         {
-            ResponseWriter = WriteHealthResponse
+            Predicate = _ => false // process is alive iff this endpoint responds
         });
+
+        endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
+        {
+            Predicate        = check => check.Tags.Contains("ready"),
+            ResponseWriter   = WriteHealthResponse
+        });
+
         endpoints.MapControllers();
     }
 

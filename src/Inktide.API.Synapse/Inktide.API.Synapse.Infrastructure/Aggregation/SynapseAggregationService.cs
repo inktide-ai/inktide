@@ -22,7 +22,6 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
     private readonly IOptions<SynapseAggregationOptions> _options;
     private readonly ILogger<SynapseAggregationService> _logger;
 
-
     public SynapseAggregationService(
         IConnectionMultiplexer redis,
         IOptions<SynapseAggregationOptions> options,
@@ -32,7 +31,6 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
-
 
     public async Task AggregateAsync(MessageProcessingContext context, CancellationToken cancellationToken = default)
     {
@@ -44,7 +42,9 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
             context.Get<RagContext>(),
             BuildContextPayload(context),
             context.Get<SessionContext>(),
-            context.Get<EmotionResult>());
+            context.Get<EmotionalState>(),
+            Screen:   context.Get<ScreenContext>(),
+            Webhook:  context.Get<WebhookContext>());
 
         var json = JsonSerializer.Serialize(envelope, JsonOptions);
         var opt = _options.Value;
@@ -75,7 +75,7 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
             : context.Message.Text;
 
         return new ContextShardPayload(
-            cardCtx.AiCardId,
+            cardCtx.CharacterId,
             cardCtx.UserId,
             context.Message.ChannelId,
             context.Message.ChannelName,
@@ -97,8 +97,11 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
             LlmTopP:             cardCtx.LlmTopP,
             LlmFrequencyPenalty: cardCtx.LlmFrequencyPenalty,
             LlmPresencePenalty:  cardCtx.LlmPresencePenalty,
-            ResponseDelayMs:     cardCtx.ResponseDelayMs,
-            LlmBaseUrl:          cardCtx.LlmBaseUrl);
+            ResponseDelayMs:        cardCtx.ResponseDelayMs,
+            LlmBaseUrl:             cardCtx.LlmBaseUrl,
+            EmotionResponsiveness:  cardCtx.EmotionResponsiveness,
+            PersonalityDirective:   cardCtx.PersonalityDirective,
+            Plugins:                cardCtx.Plugins);
     }
 
 }

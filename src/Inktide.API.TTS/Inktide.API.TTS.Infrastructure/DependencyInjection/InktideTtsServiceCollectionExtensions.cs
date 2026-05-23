@@ -1,10 +1,12 @@
 using Inktide.API.TTS.Application.Abstractions;
 using Inktide.API.TTS.Application.Synthesis;
+using Inktide.API.TTS.Domain.Speech;
 using Inktide.API.TTS.Infrastructure.AzureSpeech;
 using Inktide.API.TTS.Infrastructure.Cartesia;
-using Inktide.API.TTS.Infrastructure.GoogleCloud;
+using Inktide.API.TTS.Infrastructure.Decorators;
 using Inktide.API.TTS.Infrastructure.ElevenLabs;
 using Inktide.API.TTS.Infrastructure.FishAudio;
+using Inktide.API.TTS.Infrastructure.GoogleCloud;
 using Inktide.API.TTS.Infrastructure.Kokoro;
 using Inktide.API.TTS.Infrastructure.OpenAi;
 using Inktide.API.TTS.Infrastructure.Telemetry;
@@ -13,9 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Inktide.API.TTS.Infrastructure.DependencyInjection;
 
-/// <summary>
-/// Registers the full TTS stack (composition root for this bounded context).
-/// </summary>
 public static class InktideTtsServiceCollectionExtensions
 {
 
@@ -37,17 +36,18 @@ public static class InktideTtsServiceCollectionExtensions
         services.AddInktideTtsAzureSpeechClients(configuration);
         services.AddInktideTtsGoogleCloudClients(configuration);
         services.AddInktideTtsCartesiaClients(configuration);
-        services.AddInktideSpeechProviders(configuration, (sp, list) =>
-        {
-            list.Add(sp.GetRequiredService<KokoroTtsProvider>());
-            list.Add(sp.GetRequiredService<ElevenLabsTtsProvider>());
-            list.Add(sp.GetRequiredService<FishAudioTtsProvider>());
-            list.Add(sp.GetRequiredService<OpenAiTtsProvider>());
-            list.Add(sp.GetRequiredService<OpenAiCompatibleTtsProvider>());
-            list.Add(sp.GetRequiredService<AzureSpeechTtsProvider>());
-            list.Add(sp.GetRequiredService<GoogleCloudTtsProvider>());
-            list.Add(sp.GetRequiredService<CartesiaTtsProvider>());
-        });
+
+        services.AddSingleton<SpeechProviderDecoratorApplicator>();
+        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<KokoroTtsProvider>()));
+        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<ElevenLabsTtsProvider>()));
+        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<FishAudioTtsProvider>()));
+        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<OpenAiTtsProvider>()));
+        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<OpenAiCompatibleTtsProvider>()));
+        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<AzureSpeechTtsProvider>()));
+        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<GoogleCloudTtsProvider>()));
+        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<CartesiaTtsProvider>()));
+
+        services.AddInktideSpeechProviders(configuration);
 
         return services;
     }

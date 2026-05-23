@@ -181,4 +181,7 @@ public sealed class AiCardModelResponse
         set => _createdAt = value;
     }
 
+    [JsonProperty("is_active")]
+    public bool IsActive { get; set; }
+
 }

@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Inktide.API.TTS.Application.Configuration;
@@ -45,7 +46,11 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         /// <summary>Emotion the avatar should express. Null = no reaction.</summary>
         [property: JsonPropertyName("emotionId")]        string? EmotionId        = null,
         /// <summary>Emotion intensity 0.0–1.0.</summary>
-        [property: JsonPropertyName("emotionIntensity")] float   EmotionIntensity = 0f);
+        [property: JsonPropertyName("emotionIntensity")] float   EmotionIntensity = 0f,
+        /// <summary>Speed multiplier from personality emotion responsiveness. Applied on top of TtsSpeed. Default 1.0 = no change.</summary>
+        [property: JsonPropertyName("ttsSpeedModifier")]  float  TtsSpeedModifier  = 1.0f,
+        /// <summary>Energy/style modifier for providers that support it (e.g. ElevenLabs style). Default 1.0 = no change.</summary>
+        [property: JsonPropertyName("ttsEnergyModifier")] float  TtsEnergyModifier = 1.0f);
 
 
     private readonly IConnectionMultiplexer _redis;
@@ -263,12 +268,17 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
             ? _inSettings.DefaultVoiceId
             : response.VoiceId;
 
+        // Apply emotion-driven speed modifier on top of the base TTS speed.
+        var effectiveSpeed = response.TtsSpeed is not null
+            ? response.TtsSpeed * response.TtsSpeedModifier
+            : (float?)null;
+
         var command = new SynthesizeCommand(
             ProviderId:  response.TtsProviderId,   // null → uses TtsProviders:DefaultProviderId
             Text:        response.Text,
             VoiceId:     voiceId,
             ModelId:     response.TtsModelId,
-            Speed:       response.TtsSpeed,
+            Speed:       effectiveSpeed,
             Stream:      false,
             AudioFormat: "wav");
 
@@ -300,7 +310,8 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         SpeechResult.Ok ok,
         CancellationToken ct)
     {
-        using var ms = new MemoryStream();
+        // Pre-size avoids repeated doubling for typical TTS clip sizes (~256 KB–1 MB).
+        using var ms = new MemoryStream(capacity: 512 * 1024);
         await ok.Audio.CopyToAsync(ms, ct);
         var wavBytes    = ms.ToArray();
         var audioBase64 = Convert.ToBase64String(wavBytes);
@@ -356,6 +367,6 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         => Environment.GetEnvironmentVariable("DOTNET_HOSTNAME")
            ?? Environment.GetEnvironmentVariable("HOSTNAME")
            ?? Environment.GetEnvironmentVariable("K8S_POD_NAME")
-           ?? Guid.NewGuid().ToString("N")[..8];
+           ?? IdGenerator.New().ToString("N")[..8];
 
 }

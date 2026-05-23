@@ -1,7 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { useCharactersContext } from '../../../context/CharactersContext'
-import IdentityCard from '../../../components/ProfilePage/IdentityCard'
+import IdentityCard from '../../../components/profile/identity-card'
 import { profileSettingsPath, TAB_TO_ROUTE } from '@/lib/routes'
 
 export default function IdentityPage() {

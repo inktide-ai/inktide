@@ -146,7 +146,7 @@ public sealed class AiCardSceneTagService : IAiCardSceneTagService
 
     private static AiCardScene ToDto(AiCardSceneEntity s) =>
         new(s.Id, s.AiCardId, s.StorageKey, s.PublicUrl, s.OriginalFileName,
-            s.ContentType, s.SizeBytes, s.CreatedAt, s.Tag, s.DisplayName, s.Description);
+            s.ContentType, s.SizeBytes, s.CreatedAt, s.Tag, s.DisplayName, s.Description, s.SortKey);
 
     /// <summary>Validates a scene tag (max 128 chars, nullable = clear). Returns null on success.</summary>
     private static string? TryNormalizeTag(string? tag, out string? normalized)

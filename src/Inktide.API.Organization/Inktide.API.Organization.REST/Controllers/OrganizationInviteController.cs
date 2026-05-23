@@ -1,0 +1,163 @@
+using System.Security.Claims;
+using Inktide.API.Organization.Application.Enums;
+using Inktide.API.Organization.Application.Exceptions;
+using Inktide.API.Organization.Application.Interfaces;
+using Inktide.API.Organization.REST.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Inktide.API.Organization.REST.Controllers;
+
+[ApiController]
+[Route("api/organization/invites")]
+[Produces("application/json")]
+[Authorize]
+public sealed class OrganizationInviteController : ControllerBase
+{
+    private readonly IOrganizationInviteService _service;
+
+    public OrganizationInviteController(IOrganizationInviteService service)
+    {
+        _service = service;
+    }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(PendingInvitesResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListPending(CancellationToken ct)
+    {
+        var userId = GetUserId();
+        try
+        {
+            var result = await _service.ListPendingAsync(userId, ct);
+            return Ok(new PendingInvitesResponse
+            {
+                OrganizationId = result.OrganizationId,
+                Invites = result.Invites.Select(MapDto).ToList(),
+            });
+        }
+        catch (NotAnAdminException)
+        {
+            return Forbid();
+        }
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(SendInvitesResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> SendInvites([FromBody] SendInvitesRequest dto, CancellationToken ct)
+    {
+        if (dto.Emails.Count == 0)
+            return BadRequest(new { error = "At least one email is required.", code = "VALIDATION_ERROR" });
+
+        var role = dto.Role.ToLower() == "admin" ? OrganizationRole.Admin : OrganizationRole.Member;
+        var userId = GetUserId();
+
+        try
+        {
+            var result = await _service.SendInvitesAsync(userId, dto.Emails, role, ct);
+            return StatusCode(StatusCodes.Status201Created, new SendInvitesResponse
+            {
+                OrganizationId = result.OrganizationId,
+                Invites = result.Invites.Select(MapDto).ToList(),
+            });
+        }
+        catch (NotAnAdminException)
+        {
+            return Forbid();
+        }
+    }
+
+    [HttpPost("{inviteId:guid}/resend")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ResendInvite(Guid inviteId, CancellationToken ct)
+    {
+        var userId = GetUserId();
+        try
+        {
+            await _service.ResendInviteAsync(userId, inviteId, ct);
+            return NoContent();
+        }
+        catch (InviteNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (NotAnAdminException)
+        {
+            return Forbid();
+        }
+    }
+
+    [HttpDelete("{inviteId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CancelInvite(Guid inviteId, CancellationToken ct)
+    {
+        var userId = GetUserId();
+        try
+        {
+            await _service.CancelInviteAsync(userId, inviteId, ct);
+            return NoContent();
+        }
+        catch (InviteNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (NotAnAdminException)
+        {
+            return Forbid();
+        }
+    }
+
+    [HttpPost("accept")]
+    [ProducesResponseType(typeof(AcceptInviteResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> AcceptInvite([FromBody] AcceptInviteRequest dto, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Token))
+            return BadRequest(new { error = "Token is required.", code = "VALIDATION_ERROR" });
+
+        var userId = GetUserId();
+        var result = await _service.AcceptInviteAsync(dto.Token, userId, ct);
+
+        if (result.Outcome == AcceptOutcome.TooManyInvalidAttempts)
+            return StatusCode(StatusCodes.Status429TooManyRequests,
+                new { error = "Too many attempts for this token.", code = "TOO_MANY_INVALID_ATTEMPTS" });
+
+        return Ok(new AcceptInviteResponse
+        {
+            Result           = MapOutcome(result.Outcome),
+            OrganizationId   = result.OrganizationId,
+            OrganizationName = result.OrganizationName,
+        });
+    }
+
+    private string GetUserId() =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier)
+        ?? throw new InvalidOperationException("User identity not found in token.");
+
+    private static InviteDto MapDto(InviteResult r) =>
+        new()
+        {
+            Id        = r.Id,
+            Email     = r.Email,
+            Role      = r.Role,
+            Status    = r.Status,
+            ExpiresAt = r.ExpiresAt,
+            CreatedAt = r.CreatedAt,
+        };
+
+    private static string MapOutcome(AcceptOutcome outcome) => outcome switch
+    {
+        AcceptOutcome.Success               => "success",
+        AcceptOutcome.AlreadyMember         => "already_member",
+        AcceptOutcome.Expired               => "expired",
+        AcceptOutcome.Invalid               => "invalid",
+        AcceptOutcome.TooManyInvalidAttempts => "too_many_invalid_attempts",
+        _                                   => "invalid",
+    };
+}

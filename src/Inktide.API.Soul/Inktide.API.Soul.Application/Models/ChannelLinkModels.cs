@@ -15,4 +15,5 @@ public sealed record ChannelLink(
     string? ChannelId,
     string BotUsername,
     bool IsActive,
-    DateTime? ConnectedAt);
+    DateTime? ConnectedAt,
+    bool HasCustomBot = false);

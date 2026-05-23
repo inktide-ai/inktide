@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 using System.Net;
 using Inktide.API.Soul.Domain.Entities;
 using Inktide.API.Soul.Domain.Repositories;
@@ -20,12 +21,12 @@ public sealed class AuditLogRepository : IAuditLogRepository
     }
 
 
-    public async Task LogAsync(Guid userId, string entityType, Guid entityId, string action,
+    public Task LogAsync(Guid userId, string entityType, Guid entityId, string action,
         string? changes = null, IPAddress? ipAddress = null, CancellationToken ct = default)
     {
         var entry = new AuditLog
         {
-            Id = Guid.NewGuid(),
+            Id = IdGenerator.New(),
             UserId = userId,
             EntityType = entityType,
             EntityId = entityId,
@@ -36,7 +37,7 @@ public sealed class AuditLogRepository : IAuditLogRepository
         };
 
         _db.AuditLogs.Add(entry);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
     public async Task<IReadOnlyList<AuditLog>> GetByEntityAsync(string entityType, Guid entityId, int limit = 50, CancellationToken ct = default)

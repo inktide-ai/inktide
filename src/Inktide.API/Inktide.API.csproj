@@ -6,7 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Inktide.API</RootNamespace>
-    <UserSecretsId>cc5ab1e7-8794-4c60-9bb9-4b4b4c2e6774</UserSecretsId>
   </PropertyGroup>
   
   <ItemGroup>
@@ -45,6 +44,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Inktide.API.Core\Inktide.API.Core.csproj" />
+    <ProjectReference Include="..\Inktide.API.Graph\Inktide.API.Graph.Application\Inktide.API.Graph.Application.csproj" />
+    <ProjectReference Include="..\Inktide.API.Graph\Inktide.API.Graph.Infrastructure\Inktide.API.Graph.Infrastructure.csproj" />
+    <ProjectReference Include="..\Inktide.API.Graph\Inktide.API.Graph.REST\Inktide.API.Graph.REST.csproj" />
     <ProjectReference Include="..\Inktide.API.Memory\Inktide.API.Memory.Infrastructure\Inktide.API.Memory.Infrastructure.csproj" />
     <ProjectReference Include="..\Inktide.API.TTS\Inktide.API.TTS.Application\Inktide.API.TTS.Application.csproj" />
     <ProjectReference Include="..\Inktide.API.TTS\Inktide.API.TTS.Infrastructure\Inktide.API.TTS.Infrastructure.csproj" />
@@ -52,6 +54,7 @@
     <!-- Connector -->
     <ProjectReference Include="..\Inktide.API.Connector\Inktide.API.Connector.Infrastructure\Inktide.API.Connector.Infrastructure.csproj" />
     <ProjectReference Include="..\Inktide.API.Connector\Inktide.API.Connector.Discord\Inktide.API.Connector.Discord.csproj" />
+    <ProjectReference Include="..\Inktide.API.Connector\Inktide.API.Connector.Telegram\Inktide.API.Connector.Telegram.csproj" />
     <ProjectReference Include="..\Inktide.API.Connector\Inktide.API.Connector.InktideChat\Inktide.API.Connector.InktideChat.csproj" />
     <!-- Profile (account / me / Keycloak admin) -->
     <ProjectReference Include="..\Inktide.API.Profile\Inktide.API.Profile.Application\Inktide.API.Profile.Application.csproj" />
@@ -68,6 +71,23 @@
     <ProjectReference Include="..\Inktide.API.Synapse\Inktide.API.Synapse.REST\Inktide.API.Synapse.REST.csproj" />
     <!-- Realtime: SignalR hub + TTS audio delivery to browser -->
     <ProjectReference Include="..\Inktide.API.Realtime\Inktide.API.Realtime.Infrastructure\Inktide.API.Realtime.Infrastructure.csproj" />
+    <!-- Billing: subscriptions + payment providers -->
+    <ProjectReference Include="..\Inktide.API.Billing\Inktide.API.Billing.Application\Inktide.API.Billing.Application.csproj" />
+    <ProjectReference Include="..\Inktide.API.Billing\Inktide.API.Billing.Infrastructure\Inktide.API.Billing.Infrastructure.csproj" />
+    <ProjectReference Include="..\Inktide.API.Billing\Inktide.API.Billing.REST\Inktide.API.Billing.REST.csproj" />
+    <!-- Project: channels, memory, pipeline config -->
+    <ProjectReference Include="..\Inktide.API.Project\Inktide.API.Project.Infrastructure\Inktide.API.Project.Infrastructure.csproj" />
+    <ProjectReference Include="..\Inktide.API.Project\Inktide.API.Project.REST\Inktide.API.Project.REST.csproj" />
+    <!-- Organization: invite system, workspace membership -->
+    <ProjectReference Include="..\Inktide.API.Organization\Inktide.API.Organization.Application\Inktide.API.Organization.Application.csproj" />
+    <ProjectReference Include="..\Inktide.API.Organization\Inktide.API.Organization.Infrastructure\Inktide.API.Organization.Infrastructure.csproj" />
+    <ProjectReference Include="..\Inktide.API.Organization\Inktide.API.Organization.REST\Inktide.API.Organization.REST.csproj" />
+    <!-- Marketplace: connector catalog + per-soul installations -->
+    <ProjectReference Include="..\Inktide.API.Marketplace\Inktide.API.Marketplace.Infrastructure\Inktide.API.Marketplace.Infrastructure.csproj" />
+    <ProjectReference Include="..\Inktide.API.Marketplace\Inktide.API.Marketplace.REST\Inktide.API.Marketplace.REST.csproj" />
+    <!-- ScreenAwareness: vision model + frame ingestion + scatter shard -->
+    <ProjectReference Include="..\Inktide.API.ScreenAwareness\Inktide.API.ScreenAwareness.Infrastructure\Inktide.API.ScreenAwareness.Infrastructure.csproj" />
+    <ProjectReference Include="..\Inktide.API.ScreenAwareness\Inktide.API.ScreenAwareness.REST\Inktide.API.ScreenAwareness.REST.csproj" />
   </ItemGroup>
 
 </Project>

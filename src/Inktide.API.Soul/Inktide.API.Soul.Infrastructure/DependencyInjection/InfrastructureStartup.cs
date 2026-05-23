@@ -1,7 +1,11 @@
 using Inktide.API.Core;
 using Inktide.API.Soul.Infrastructure.DbContext;
+using Inktide.API.Soul.Infrastructure.Messaging;
+using Inktide.API.Soul.Infrastructure.Outbox;
+using Inktide.API.Soul.Infrastructure.Security;
 using Inktide.API.Soul.Infrastructure.Settings;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.XmlEncryption;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,14 +26,37 @@ public sealed class InfrastructureStartup : IStartup
             options.UseNpgsql(connectionString);
         });
 
-        services.AddDataProtection()
-            .SetApplicationName("inktide");
+        if (ctx.HostingEnvironment.IsDevelopment())
+        {
+            services.AddDataProtection().UseEphemeralDataProtectionProvider();
+        }
+        else
+        {
+            var masterKeyBase64 = ctx.Configuration["DataProtection:MasterKey"]
+                ?? throw new InvalidOperationException(
+                    "DataProtection:MasterKey is not configured. Generate one with: openssl rand -base64 32");
+
+            var masterKey = Convert.FromBase64String(masterKeyBase64);
+            services.AddSingleton(new MasterKeyHolder(masterKey));
+            // IXmlEncryptor is resolved from DI by Data Protection automatically
+            services.AddSingleton<IXmlEncryptor>(new MasterKeyXmlEncryptor(masterKey));
+            services.AddSingleton<IXmlDecryptor, MasterKeyXmlDecryptor>();
+
+            services.AddDataProtection()
+                .SetApplicationName("inktide")
+                .PersistKeysToDbContext<SoulDbContext>();
+        }
+
+        services.AddHttpClient("credential-tester")
+            .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10));
 
         services.AddHostedService<DatabaseMigrationService>();
+        services.AddHostedService<OutboxProcessorHostedService>();
+        services.AddHostedService<UserAccountDeletedConsumer>();
 
         services
             .AddHealthChecks()
-            .AddNpgSql(connectionString, name: "soul-postgres", failureStatus: HealthStatus.Degraded);
+            .AddNpgSql(connectionString, name: "soul-postgres", failureStatus: HealthStatus.Degraded, tags: ["ready"]);
     }
 
 

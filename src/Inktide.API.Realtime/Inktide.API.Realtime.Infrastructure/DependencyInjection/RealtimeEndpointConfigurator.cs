@@ -9,5 +9,5 @@ namespace Inktide.API.Realtime.Infrastructure.DependencyInjection;
 public sealed class RealtimeEndpointConfigurator : IEndpointConfigurator
 {
     public void Map(IEndpointRouteBuilder endpoints)
-        => endpoints.MapHub<AudioHub>("/hubs/audio");
+        => endpoints.MapHub<AudioHub>("/hubs/audio").RequireAuthorization();
 }

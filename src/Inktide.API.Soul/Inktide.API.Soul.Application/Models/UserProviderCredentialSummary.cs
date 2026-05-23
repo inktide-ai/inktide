@@ -8,4 +8,6 @@ public sealed record UserProviderCredentialSummary(
     bool HasKey,
     string? BaseUrl,
     string? Config,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    DateTime? VerifiedAt,
+    string? LastError);

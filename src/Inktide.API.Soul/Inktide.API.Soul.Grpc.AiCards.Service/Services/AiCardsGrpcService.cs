@@ -1,6 +1,7 @@
 using Grpc.Core;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Grpc.AiCards.Service.Converters;
+using Inktide.API.Soul.Grpc.AiCards.Service.Parsing;
 using Inktide.API.Soul.Grpc.Contracts.AiCards;
 
 namespace Inktide.API.Soul.Grpc.AiCards.Service.Services;
@@ -26,22 +27,13 @@ public sealed class AiCardsGrpcService : AiCardService.AiCardServiceBase
         GetCardRequest request,
         ServerCallContext context)
     {
-        if (!Guid.TryParse(request.UserId, out var userId))
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid user_id format."));
-        }
-
-        if (!Guid.TryParse(request.CardId, out var cardId))
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid card_id format."));
-        }
+        if (!GrpcGuidParser.TryParse(request.UserId, "user_id", out var userId, out var err)) throw err!;
+        if (!GrpcGuidParser.TryParse(request.CardId, "card_id", out var cardId, out err)) throw err!;
 
         var card = await _aiCardService.GetByIdAsync(userId, cardId, context.CancellationToken);
 
         if (card is null)
-        {
             throw new RpcException(new Status(StatusCode.NotFound, $"AI card '{cardId}' not found."));
-        }
 
         return AiCardGrpcConverter.ToResponse(card);
     }
@@ -50,10 +42,7 @@ public sealed class AiCardsGrpcService : AiCardService.AiCardServiceBase
         ListCardsRequest request,
         ServerCallContext context)
     {
-        if (!Guid.TryParse(request.UserId, out var userId))
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid user_id format."));
-        }
+        if (!GrpcGuidParser.TryParse(request.UserId, "user_id", out var userId, out var err)) throw err!;
 
         var cards = await _aiCardService.GetAllByUserAsync(userId, context.CancellationToken);
 
@@ -67,26 +56,16 @@ public sealed class AiCardsGrpcService : AiCardService.AiCardServiceBase
         CreateCardRequest request,
         ServerCallContext context)
     {
-        if (!Guid.TryParse(request.UserId, out _))
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid user_id format."));
-        }
+        if (!GrpcGuidParser.TryParse(request.UserId, "user_id", out var userId, out var err)) throw err!;
 
         if (string.IsNullOrWhiteSpace(request.Name))
-        {
             throw new RpcException(new Status(StatusCode.InvalidArgument, "name is required."));
-        }
 
         if (string.IsNullOrWhiteSpace(request.Slug))
-        {
             throw new RpcException(new Status(StatusCode.InvalidArgument, "slug is required."));
-        }
 
-        var card = AiCardGrpcConverter.ToDomain(request);
-        var created = await _aiCardService.CreateAsync(
-            Guid.Parse(request.UserId),
-            card,
-            context.CancellationToken);
+        var card    = AiCardGrpcConverter.ToDomain(request);
+        var created = await _aiCardService.CreateAsync(userId, card, ct: context.CancellationToken);
 
         return AiCardGrpcConverter.ToResponse(created);
     }
@@ -95,22 +74,13 @@ public sealed class AiCardsGrpcService : AiCardService.AiCardServiceBase
         UpdateCardRequest request,
         ServerCallContext context)
     {
-        if (!Guid.TryParse(request.UserId, out var userId))
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid user_id format."));
-        }
-
-        if (!Guid.TryParse(request.CardId, out var cardId))
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid card_id format."));
-        }
+        if (!GrpcGuidParser.TryParse(request.UserId, "user_id", out var userId, out var err)) throw err!;
+        if (!GrpcGuidParser.TryParse(request.CardId, "card_id", out var cardId, out err)) throw err!;
 
         var existing = await _aiCardService.GetByIdAsync(userId, cardId, context.CancellationToken);
 
         if (existing is null)
-        {
             throw new RpcException(new Status(StatusCode.NotFound, $"AI card '{cardId}' not found."));
-        }
 
         AiCardGrpcConverter.ApplyUpdate(request, existing);
 
@@ -123,15 +93,8 @@ public sealed class AiCardsGrpcService : AiCardService.AiCardServiceBase
         DeleteCardRequest request,
         ServerCallContext context)
     {
-        if (!Guid.TryParse(request.UserId, out var userId))
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid user_id format."));
-        }
-
-        if (!Guid.TryParse(request.CardId, out var cardId))
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid card_id format."));
-        }
+        if (!GrpcGuidParser.TryParse(request.UserId, "user_id", out var userId, out var err)) throw err!;
+        if (!GrpcGuidParser.TryParse(request.CardId, "card_id", out var cardId, out err)) throw err!;
 
         await _aiCardService.DeleteAsync(userId, cardId, context.CancellationToken);
 

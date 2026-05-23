@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +14,7 @@ namespace Inktide.API.Soul.REST.Controllers;
 [Route("api/soul/credentials")]
 [Produces("application/json")]
 [Authorize]
-public sealed class CredentialsController : ControllerBase
+public sealed class CredentialsController : ApiController
 {
 
     private readonly IUserProviderCredentialService _service;
@@ -68,15 +67,22 @@ public sealed class CredentialsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{providerId}/test")]
+    [ProducesResponseType(typeof(CredentialTestResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Test(string providerId, CancellationToken ct = default)
+    {
+        var userId = GetUserId();
+        var result = await _service.TestAndPersistAsync(userId, providerId, ct);
+
+        if (result.Error == "No credential stored.")
+            return NotFound(ApiErrorResponse.From($"No credential found for provider '{providerId}'.", ErrorCodes.NotFound));
+
+        return Ok(new CredentialTestResponse(result.Success, result.Error, DateTime.UtcNow));
+    }
+
 
     private static CredentialResponse ToResponse(global::Inktide.API.Soul.Application.Models.UserProviderCredentialSummary s)
-        => new(s.ProviderId, s.HasKey, s.BaseUrl, s.Config, s.UpdatedAt);
-
-    private Guid GetUserId()
-    {
-        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException("User ID not found in token.");
-        return Guid.Parse(sub);
-    }
+        => new(s.ProviderId, s.HasKey, s.BaseUrl, s.Config, s.UpdatedAt, s.VerifiedAt, s.LastError);
 
 }

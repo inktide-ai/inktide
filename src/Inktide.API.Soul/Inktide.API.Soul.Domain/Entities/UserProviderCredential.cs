@@ -53,6 +53,12 @@ public sealed class UserProviderCredential
     /// <summary>Provider-specific config JSON (thinkingMode, custom headers, etc.).</summary>
     public string? Config { get; set; }
 
+    /// <summary>UTC timestamp of the last successful connectivity test. Null if never tested.</summary>
+    public DateTime? VerifiedAt { get; set; }
+
+    /// <summary>Error message from the last failed test. Null if last test succeeded or never tested.</summary>
+    public string? LastError { get; set; }
+
     public bool IsActive
     {
         get => _isActive;

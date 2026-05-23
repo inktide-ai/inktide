@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Inktide.API.Graph.REST</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
+    <ProjectReference Include="..\Inktide.API.Graph.Application\Inktide.API.Graph.Application.csproj" />
+    <ProjectReference Include="..\Inktide.API.Graph.Domain\Inktide.API.Graph.Domain.csproj" />
+    <ProjectReference Include="..\Inktide.API.Graph.Infrastructure\Inktide.API.Graph.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

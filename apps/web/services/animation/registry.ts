@@ -9,20 +9,14 @@ import { BlinkController } from './controllers/BlinkController'
 import { GazeController } from './controllers/gazeController/GazeController'
 import { AnimationStateMachineController } from './controllers/stateMachine'
 import { ExpressionController } from './controllers/ExpressionController'
+import { buildAnimationGraph } from './buildAnimationGraph'
 
-/**
- * Фабрика — каждый VrmRenderer получает собственные экземпляры контроллеров.
- * Порядок важен: обновление идёт сверху вниз каждый кадр.
- */
-type ControllerFactory = () => IVrmController
-
-const CONTROLLER_FACTORIES: ControllerFactory[] = [
-  () => new BlinkController(),
-  () => new GazeController(),
-  () => new AnimationStateMachineController(),
-  () => new ExpressionController(),
-]
-
-export function createVrmControllers(): IVrmController[] {
-  return CONTROLLER_FACTORIES.map(f => f())
+export function createVrmControllers(baselineMood?: string): IVrmController[] {
+  const graphConfig = buildAnimationGraph(baselineMood ?? 'neutral')
+  return [
+    new BlinkController(),
+    new GazeController(),
+    new AnimationStateMachineController(graphConfig),
+    new ExpressionController(),
+  ]
 }

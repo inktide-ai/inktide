@@ -27,15 +27,18 @@ public sealed class UsageDailyRepository : IUsageDailyRepository
 
     public async Task IncrementAsync(Guid aiCardId, int llmCalls = 0, int tokensPrompt = 0, int tokensCompletion = 0,
         int messagesReceived = 0, int messagesSent = 0, int ttsCharacters = 0, int donkeyThoughts = 0,
+        int visionFramesProcessed = 0, int visionEventsDetected = 0,
         CancellationToken ct = default)
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         await _db.Database.ExecuteSqlInterpolatedAsync($"""
             INSERT INTO soul.usage_daily (id, ai_card_id, usage_date, llm_calls, tokens_prompt, tokens_completion,
-                                          messages_received, messages_sent, tts_characters, donkey_thoughts)
+                                          messages_received, messages_sent, tts_characters, donkey_thoughts,
+                                          vision_frames_processed, vision_events_detected)
             VALUES (gen_random_uuid(), {aiCardId}, {today}, {llmCalls}, {tokensPrompt}, {tokensCompletion},
-                    {messagesReceived}, {messagesSent}, {ttsCharacters}, {donkeyThoughts})
+                    {messagesReceived}, {messagesSent}, {ttsCharacters}, {donkeyThoughts},
+                    {visionFramesProcessed}, {visionEventsDetected})
             ON CONFLICT (ai_card_id, usage_date) DO UPDATE SET
                 llm_calls = soul.usage_daily.llm_calls + EXCLUDED.llm_calls,
                 tokens_prompt = soul.usage_daily.tokens_prompt + EXCLUDED.tokens_prompt,
@@ -43,7 +46,9 @@ public sealed class UsageDailyRepository : IUsageDailyRepository
                 messages_received = soul.usage_daily.messages_received + EXCLUDED.messages_received,
                 messages_sent = soul.usage_daily.messages_sent + EXCLUDED.messages_sent,
                 tts_characters = soul.usage_daily.tts_characters + EXCLUDED.tts_characters,
-                donkey_thoughts = soul.usage_daily.donkey_thoughts + EXCLUDED.donkey_thoughts
+                donkey_thoughts = soul.usage_daily.donkey_thoughts + EXCLUDED.donkey_thoughts,
+                vision_frames_processed = soul.usage_daily.vision_frames_processed + EXCLUDED.vision_frames_processed,
+                vision_events_detected = soul.usage_daily.vision_events_detected + EXCLUDED.vision_events_detected
             """, ct);
     }
 
@@ -54,6 +59,14 @@ public sealed class UsageDailyRepository : IUsageDailyRepository
             .Where(u => u.AiCardId == aiCardId && u.UsageDate >= from && u.UsageDate <= to)
             .OrderByDescending(u => u.UsageDate)
             .ToListAsync(ct);
+    }
+
+    public async Task<int> SumLlmCallsSinceAsync(DateOnly from, CancellationToken ct = default)
+    {
+        return await _db.UsageDaily
+            .AsNoTracking()
+            .Where(u => u.UsageDate >= from)
+            .SumAsync(u => u.LlmCalls, ct);
     }
 
 }

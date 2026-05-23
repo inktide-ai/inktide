@@ -9,8 +9,13 @@ export interface AiCardListItem {
   avatar_url: string | null
   personality: string
   llm_model: string | null
+  description: string
+  status: 'active' | 'paused' | 'archived'
+  cover_url: string | null
+  platforms: string[]
   is_active: boolean
   updated_at: string
+  sort_key: string
 }
 
 export interface LlmModelResponse {
@@ -41,6 +46,7 @@ export interface ChannelResponse {
   bot_username: string
   is_active: boolean
   connected_at: string | null
+  has_custom_bot: boolean
 }
 
 export interface ToolResponse {
@@ -54,6 +60,9 @@ export interface AiCardResponse {
   id: string
   name: string
   slug: string
+  description: string
+  status: 'active' | 'paused' | 'archived'
+  cover_url: string | null
   avatar_url: string | null
   personality: string
   system_prompt: string
@@ -67,6 +76,7 @@ export interface AiCardResponse {
   response_behavior: Record<string, unknown> | null
   memory_settings: Record<string, unknown> | null
   auto_pilot: Record<string, unknown> | null
+  personality_config: Record<string, unknown> | null
   visibility: string
   channels: ChannelResponse[] | null
   tools: ToolResponse[] | null
@@ -89,11 +99,15 @@ export interface CreateAiCardRequest {
   response_behavior?: Record<string, unknown>
   memory_settings?: Record<string, unknown>
   auto_pilot?: Record<string, unknown>
+  personality_config?: Record<string, unknown>
 }
 
 export interface UpdateAiCardRequest {
   name?: string
   slug?: string
+  description?: string
+  status?: 'active' | 'paused' | 'archived'
+  cover_url?: string
   personality?: string
   system_prompt?: string
   avatar_url?: string
@@ -104,6 +118,7 @@ export interface UpdateAiCardRequest {
   response_behavior?: Record<string, unknown>
   memory_settings?: Record<string, unknown>
   auto_pilot?: Record<string, unknown>
+  personality_config?: Record<string, unknown>
   is_active?: boolean
   visibility?: string
 }
@@ -142,10 +157,10 @@ export async function deleteCard(id: string): Promise<void> {
 }
 
 /** Must match Soul ingest / Synapse routing (`ai_card_channels.platform` + `channel_id`). */
-export type IntegrationPlatform = 'discord' | 'twitch' | 'kick' | 'vk_video'
+export type ChannelPlatform = 'discord' | 'twitch' | 'kick' | 'vk_video' | 'telegram'
 
 export interface CreateChannelLinkRequest {
-  platform: IntegrationPlatform
+  platform: ChannelPlatform
   channel_name: string
   /** Routing key: guild id (Discord), channel/login/id string for Twitch/Kick/VK Video — same as connector ChatMessage.ChannelId. */
   channel_id: string
@@ -230,6 +245,7 @@ export interface AiCardModelResponse {
   content_type: string
   size_bytes: number
   created_at: string
+  is_active: boolean
 }
 
 export async function presignCardModelUpload(
@@ -276,6 +292,11 @@ export async function listCardModels(cardId: string): Promise<AiCardModelRespons
   return jsonOrThrow<AiCardModelResponse[]>(res)
 }
 
+export async function activateCardModel(cardId: string, modelId: string): Promise<void> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/models/${modelId}/activate`, { method: 'PATCH' })
+  if (!res.ok) throw new Error(`Failed to activate model: ${res.status}`)
+}
+
 // ── Scene (background image) assets (MinIO presigned PUT → PostgreSQL) ──
 
 export interface AiCardSceneResponse {
@@ -292,6 +313,7 @@ export interface AiCardSceneResponse {
   /** Optional display title; when empty client falls back to file name. */
   display_name?: string | null
   description?: string | null
+  sort_key: string
 }
 
 export async function listCardScenes(cardId: string): Promise<AiCardSceneResponse[]> {
@@ -402,6 +424,14 @@ export interface CredentialResponse {
   baseUrl: string | null
   config: string | null
   updatedAt: string
+  verifiedAt: string | null
+  lastError: string | null
+}
+
+export interface CredentialTestResponse {
+  success: boolean
+  error: string | null
+  testedAt: string
 }
 
 export async function getCredentials(): Promise<CredentialResponse[]> {
@@ -429,4 +459,230 @@ export async function upsertCredential(
 
 export async function deleteCredential(providerId: string): Promise<void> {
   await apiFetch(`/api/soul/credentials/${encodeURIComponent(providerId)}`, { method: 'DELETE' })
+}
+
+export async function testCredential(providerId: string): Promise<CredentialTestResponse> {
+  const res = await apiFetch(`/api/soul/credentials/${encodeURIComponent(providerId)}/test`, {
+    method: 'POST',
+  })
+  return jsonOrThrow<CredentialTestResponse>(res)
+}
+
+// ── Project export / import ───────────────────────────────────────────────────
+
+export async function exportProject(cardId: string): Promise<Blob> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/export`)
+  if (!res.ok) throw new Error(`Export failed: ${res.status}`)
+  return res.blob()
+}
+
+export async function importProject(data: object): Promise<{ character_id: string }> {
+  const res = await apiFetch('/api/projects/import', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  return jsonOrThrow<{ character_id: string }>(res)
+}
+
+export async function reorderCard(
+  cardId: string,
+  body: { previous_id: string | null; next_id: string | null },
+): Promise<void> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/position`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  })
+  return emptyOrThrow(res)
+}
+
+export async function reorderScene(
+  cardId: string,
+  sceneId: string,
+  body: { previous_id: string | null; next_id: string | null },
+): Promise<void> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/${sceneId}/position`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  })
+  return emptyOrThrow(res)
+}
+
+// ── Run presets (Scenes) ── runtime configuration overlay layer ──────────────
+
+export interface RunPreset {
+  id: string
+  ai_card_id: string
+  name: string
+  description: string | null
+  icon: string | null
+  is_active: boolean
+  override_llm_model_id: string | null
+  override_temperature: number | null
+  override_emotion_preset_id: string | null
+  override_voice_profile_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateRunPresetRequest {
+  name: string
+  description?: string | null
+  icon?: string | null
+  override_llm_model_id?: string | null
+  override_temperature?: number | null
+  override_emotion_preset_id?: string | null
+  override_voice_profile_id?: string | null
+}
+
+export async function listRunPresets(cardId: string): Promise<RunPreset[]> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets`)
+  return jsonOrThrow<RunPreset[]>(res)
+}
+
+export async function createRunPreset(cardId: string, body: CreateRunPresetRequest): Promise<RunPreset> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  return jsonOrThrow<RunPreset>(res)
+}
+
+export async function updateRunPreset(
+  cardId: string,
+  presetId: string,
+  body: Partial<CreateRunPresetRequest> & { name: string },
+): Promise<RunPreset> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets/${presetId}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  })
+  return jsonOrThrow<RunPreset>(res)
+}
+
+export async function deleteRunPreset(cardId: string, presetId: string): Promise<void> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets/${presetId}`, { method: 'DELETE' })
+  await emptyOrThrow(res)
+}
+
+export async function activateRunPreset(cardId: string, presetId: string): Promise<RunPreset> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets/${presetId}/activate`, { method: 'POST' })
+  return jsonOrThrow<RunPreset>(res)
+}
+
+export async function deactivateRunPreset(cardId: string): Promise<void> {
+  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets/active`, { method: 'DELETE' })
+  await emptyOrThrow(res)
+}
+
+// ── Discord OAuth2 ────────────────────────────────────────────────────────────
+
+export interface DiscordTokenValidationResponse {
+  valid: boolean
+  error: string | null
+}
+
+export async function validateDiscordToken(
+  botToken: string,
+): Promise<DiscordTokenValidationResponse> {
+  const res = await apiFetch('/api/connectors/discord/validate-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ botToken }),
+  })
+  return jsonOrThrow<DiscordTokenValidationResponse>(res)
+}
+
+export async function getDiscordInstallUrl(cardId: string): Promise<string> {
+  const res = await apiFetch(`/api/connectors/discord/install-url?cardId=${cardId}`)
+  const data = await jsonOrThrow<{ url: string }>(res)
+  return data.url
+}
+
+export async function revokeDiscordChannel(channelId: string): Promise<void> {
+  const res = await apiFetch(`/api/connectors/discord/revoke/${channelId}`, { method: 'POST' })
+  if (!res.ok) throw new Error(`Revoke failed: ${res.status}`)
+}
+
+export async function reconnectDiscordChannel(channelId: string): Promise<string> {
+  const res = await apiFetch(`/api/connectors/discord/reconnect/${channelId}`, { method: 'POST' })
+  const data = await jsonOrThrow<{ url: string }>(res)
+  return data.url
+}
+
+export async function saveDiscordCustomBot(channelId: string, botToken: string | null): Promise<void> {
+  const res = await apiFetch(`/api/connectors/discord/channels/${channelId}/custom-bot`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ botToken }),
+  })
+  if (!res.ok) throw new Error(`Failed to save custom bot: ${res.status}`)
+}
+
+export async function createDiscordCustomBotChannel(cardId: string, botToken: string): Promise<void> {
+  const channelRes = await createCardChannel(cardId, {
+    platform: 'discord',
+    channel_name: 'Custom Bot',
+    bot_username: '',
+    channel_id: '',
+  })
+  await saveDiscordCustomBot(channelRes.id, botToken)
+}
+
+// ── Telegram Bot Token ────────────────────────────────────────────────────────
+
+export interface TelegramValidateResponse {
+  valid: boolean
+  username?: string
+  error?: string
+}
+
+export async function validateTelegramBotToken(botToken: string): Promise<TelegramValidateResponse> {
+  const res = await apiFetch('/api/connectors/telegram/validate-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ botToken }),
+  })
+  return jsonOrThrow<TelegramValidateResponse>(res)
+}
+
+export async function createTelegramChannel(
+  cardId: string,
+  botToken: string,
+  chatId: string,
+  chatName: string,
+): Promise<void> {
+  const res = await apiFetch('/api/connectors/telegram/channels', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cardId, botToken, chatId, chatName }),
+  })
+  if (!res.ok) throw new Error(`Failed to create Telegram channel: ${res.status}`)
+}
+
+export async function revokeTelegramChannel(channelId: string): Promise<void> {
+  const res = await apiFetch(`/api/connectors/telegram/revoke/${channelId}`, { method: 'POST' })
+  if (!res.ok) throw new Error(`Revoke failed: ${res.status}`)
+}
+
+// ── Public profile (unauthenticated) ─────────────────────────────────────────
+
+export interface PublicAiCardResponse {
+  id: string
+  name: string
+  slug: string
+  description: string
+  avatar_url: string | null
+  cover_url: string | null
+  personality: string
+  status: string
+  is_active: boolean
+  platforms: string[]
+  created_at: string
+}
+
+export async function getPublicCard(slug: string): Promise<PublicAiCardResponse> {
+  const res = await fetch(`/api/soul/public/${encodeURIComponent(slug)}`)
+  if (!res.ok) throw new Error(`Soul not found: ${res.status}`)
+  return res.json() as Promise<PublicAiCardResponse>
 }

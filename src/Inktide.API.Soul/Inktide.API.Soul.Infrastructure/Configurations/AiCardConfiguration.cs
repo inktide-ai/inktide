@@ -1,11 +1,20 @@
+using System.Text.Json;
 using Inktide.API.Soul.Domain.Entities;
+using Inktide.API.Soul.Domain.Enums;
+using Inktide.API.Soul.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inktide.API.Soul.Infrastructure.Configurations;
 
 public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
 {
+
+    private static readonly JsonSerializerOptions PersonalityJsonOpts = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+    };
 
     public void Configure(EntityTypeBuilder<AiCard> b)
     {
@@ -75,10 +84,50 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
             .HasColumnType("jsonb")
             .IsRequired();
 
+        b.Property(e => e.ScreenAwarenessSettings)
+            .HasColumnName("screen_awareness_settings")
+            .HasColumnType("jsonb")
+            .IsRequired()
+            .HasDefaultValueSql("'{}'");
+
+        b.Property(e => e.PersonalityConfig)
+            .HasColumnName("personality_config")
+            .HasColumnType("jsonb")
+            .IsRequired()
+            .HasDefaultValueSql("'{}'")
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, PersonalityJsonOpts),
+                v => string.IsNullOrWhiteSpace(v)
+                    ? new PersonalitySettings()
+                    : JsonSerializer.Deserialize<PersonalitySettings>(v, PersonalityJsonOpts) ?? new PersonalitySettings());
+
+        b.Property(e => e.Description)
+            .HasColumnName("description")
+            .IsRequired()
+            .HasDefaultValue("");
+
+        // Store as lowercase string to preserve existing DB data ("active", "private").
+        // Case-insensitive parsing handles legacy rows if casing ever differs.
+        b.Property(e => e.Status)
+            .HasColumnName("status")
+            .HasConversion(
+                new ValueConverter<AiCardStatus, string>(
+                    v => v.ToString().ToLower(),
+                    s => Enum.Parse<AiCardStatus>(s, ignoreCase: true)))
+            .IsRequired()
+            .HasDefaultValue(AiCardStatus.Active);
+
+        b.Property(e => e.CoverUrl)
+            .HasColumnName("cover_url");
+
         b.Property(e => e.Visibility)
             .HasColumnName("visibility")
+            .HasConversion(
+                new ValueConverter<AiCardVisibility, string>(
+                    v => v.ToString().ToLower(),
+                    s => Enum.Parse<AiCardVisibility>(s, ignoreCase: true)))
             .IsRequired()
-            .HasDefaultValue("private");
+            .HasDefaultValue(AiCardVisibility.Private);
 
         b.Property(e => e.IsActive)
             .HasColumnName("is_active")
@@ -92,6 +141,17 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
 
         b.Property(e => e.UpdatedAt)
             .HasColumnName("updated_at");
+
+        b.Property(e => e.SortKey)
+            .HasColumnName("sort_key")
+            .IsRequired()
+            .HasMaxLength(100)
+            .HasDefaultValue("a0");
+
+        b.HasIndex(e => new { e.UserId, e.SortKey })
+            .HasDatabaseName("idx_ai_cards_sort")
+            .IsUnique()
+            .HasFilter("deleted_at IS NULL");
 
         b.HasIndex(e => e.UserId)
             .HasDatabaseName("idx_ai_cards_user_id");

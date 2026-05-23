@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Inktide.API.Marketplace.REST</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
+    <ProjectReference Include="..\Inktide.API.Marketplace.Application\Inktide.API.Marketplace.Application.csproj" />
+    <ProjectReference Include="..\Inktide.API.Marketplace.Infrastructure\Inktide.API.Marketplace.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

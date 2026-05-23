@@ -1,5 +1,4 @@
 using Inktide.API.Connector.Application.Contracts;
-using Inktide.API.Connector.Application.Interfaces;
 using Inktide.API.Connector.Discord.Settings;
 using Discord;
 using Discord.WebSocket;
@@ -8,11 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Discord;
 
-/// <summary>
-/// Discord chat connector via Gateway WebSocket (Discord.Net).
-/// Receives MESSAGE_CREATE events in real time and delegates to <see cref="IStreamMessageHandler"/>.
-/// </summary>
-public sealed class DiscordConnector : IChatConnector, IAsyncDisposable
+internal sealed class DiscordConnector : IChatConnector, IAsyncDisposable
 {
     public const string PlatformIdValue = "discord";
 
@@ -22,8 +17,7 @@ public sealed class DiscordConnector : IChatConnector, IAsyncDisposable
     private readonly ILogger<DiscordConnector> _logger;
     private readonly DiscordSocketClient _client;
     private readonly DiscordSettings _settings;
-    private readonly IStreamMessageHandler _messageHandler;
-    private readonly DiscordMessageMapper _mapper;
+    private readonly DiscordMessageHandler _messageHandler;
 
     private CancellationTokenSource? _cts;
     private TaskCompletionSource _readyTcs = new();
@@ -31,13 +25,11 @@ public sealed class DiscordConnector : IChatConnector, IAsyncDisposable
     public DiscordConnector(
         ILogger<DiscordConnector> logger,
         IOptions<DiscordSettings> settings,
-        IStreamMessageHandler messageHandler,
-        DiscordMessageMapper mapper)
+        DiscordMessageHandler messageHandler)
     {
-        _logger = logger;
-        _settings = settings.Value;
-        _messageHandler = messageHandler;
-        _mapper = mapper;
+        _logger         = logger ?? throw new ArgumentNullException(nameof(logger));
+        _settings       = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+        _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
 
         _client = new DiscordSocketClient(new DiscordSocketConfig
         {
@@ -51,7 +43,7 @@ public sealed class DiscordConnector : IChatConnector, IAsyncDisposable
         _client.Log += OnLog;
         _client.Ready += OnReady;
         _client.Disconnected += OnDisconnected;
-        _client.MessageReceived += OnMessageReceived;
+        _client.MessageReceived += _messageHandler.HandleAsync;
     }
 
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
@@ -97,11 +89,10 @@ public sealed class DiscordConnector : IChatConnector, IAsyncDisposable
         _client.Log -= OnLog;
         _client.Ready -= OnReady;
         _client.Disconnected -= OnDisconnected;
-        _client.MessageReceived -= OnMessageReceived;
+        _client.MessageReceived -= _messageHandler.HandleAsync;
 
-        if (_client.ConnectionState == ConnectionState.Connected) {
+        if (_client.ConnectionState == ConnectionState.Connected)
             await DisconnectAsync();
-        }
 
         _cts?.Dispose();
         await _client.DisposeAsync();
@@ -121,49 +112,13 @@ public sealed class DiscordConnector : IChatConnector, IAsyncDisposable
     private Task OnDisconnected(Exception? ex)
     {
         if (ex is TaskCanceledException or OperationCanceledException)
-        {
             _logger.LogInformation("Gateway disconnected (shutdown)");
-        }
         else
-        {
             _logger.LogWarning(
                 "Gateway disconnected. Discord.Net will auto-reconnect. {Error}",
                 ex?.Message ?? "Unknown");
-        }
+
         return Task.CompletedTask;
-    }
-
-    private async Task OnMessageReceived(SocketMessage rawMessage)
-    {
-        if (rawMessage is not SocketUserMessage message) {
-            return;
-        }
-
-        if (message.Author.IsBot && _settings.IgnoreBots) {
-            return;
-        }
-
-        if (message.Channel is not SocketTextChannel textChannel) {
-            return;
-        }
-
-        if (_settings.GuildIds.Count > 0 && !_settings.GuildIds.Contains(textChannel.Guild.Id)) {
-            return;
-        }
-
-        if (_settings.ChannelIds.Count > 0 && !_settings.ChannelIds.Contains(textChannel.Id)) {
-            return;
-        }
-
-        try
-        {
-            var chatMessage = _mapper.Map(message, textChannel.Name, textChannel.Guild.Id.ToString());
-            await _messageHandler.HandleAsync(chatMessage);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to handle Discord message from {Author}", message.Author.Username);
-        }
     }
 
     private Task OnLog(LogMessage log)
@@ -174,20 +129,10 @@ public sealed class DiscordConnector : IChatConnector, IAsyncDisposable
             return Task.CompletedTask;
         }
 
-        var level = log.Severity switch
-        {
-            LogSeverity.Critical => LogLevel.Critical,
-            LogSeverity.Error => LogLevel.Error,
-            LogSeverity.Warning => LogLevel.Warning,
-            LogSeverity.Info => LogLevel.Information,
-            LogSeverity.Verbose => LogLevel.Debug,
-            LogSeverity.Debug => LogLevel.Trace,
-            _ => LogLevel.Information
-        };
-
+        var level = DiscordLogLevelMapper.ToLogLevel(log.Severity);
         var msg = log.Exception is not null
             ? $"{log.Message}. {log.Exception.GetType().Name}: {log.Exception.Message}"
-            : $"{log.Message}";
+            : log.Message;
         _logger.Log(level, msg);
         return Task.CompletedTask;
     }

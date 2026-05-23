@@ -7,4 +7,8 @@
     <RootNamespace>Inktide.API.Soul.Domain</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
+  </ItemGroup>
+
 </Project>

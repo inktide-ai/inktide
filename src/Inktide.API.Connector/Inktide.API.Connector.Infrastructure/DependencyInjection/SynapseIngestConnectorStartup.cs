@@ -42,7 +42,7 @@ public sealed class SynapseIngestConnectorStartup : IStartup
 
         services
             .AddHealthChecks()
-            .AddRedis(redisSettings.ToConnectionString(), name: "redis", tags: ["synapse-ingest", "cache"]);
+            .AddRedis(redisSettings.ToConnectionString(), name: "redis", tags: ["ready", "synapse-ingest", "cache"]);
     }
 
 }

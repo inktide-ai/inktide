@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.6" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.4" />
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.*" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.*" />
@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Inktide.API.Memory.Domain\Inktide.API.Memory.Domain.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
   </ItemGroup>
 
 </Project>

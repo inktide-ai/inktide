@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.REST.Mappers;
@@ -13,25 +12,20 @@ namespace Inktide.API.Soul.REST.Controllers;
 [Route("api/soul/cards")]
 [Produces("application/json")]
 [Authorize]
-public sealed class AiCardsController : ControllerBase
+public sealed class AiCardsController : ApiController
 {
-    private const long MaxAvatarUploadBytes = 52_428_800;
-
     private readonly IAiCardService _cardService;
-    private readonly IAiCardAvatarService _cardAvatar;
-    private readonly IAiCardBannerService _cardBanner;
     private readonly IAiCardActivityService _activity;
+    private readonly IAiCardExportService _exportService;
 
     public AiCardsController(
         IAiCardService cardService,
-        IAiCardAvatarService cardAvatar,
-        IAiCardBannerService cardBanner,
-        IAiCardActivityService activity)
+        IAiCardActivityService activity,
+        IAiCardExportService exportService)
     {
-        _cardService = cardService ?? throw new ArgumentNullException(nameof(cardService));
-        _cardAvatar  = cardAvatar  ?? throw new ArgumentNullException(nameof(cardAvatar));
-        _cardBanner  = cardBanner  ?? throw new ArgumentNullException(nameof(cardBanner));
-        _activity    = activity    ?? throw new ArgumentNullException(nameof(activity));
+        _cardService   = cardService   ?? throw new ArgumentNullException(nameof(cardService));
+        _activity      = activity      ?? throw new ArgumentNullException(nameof(activity));
+        _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
     }
 
     [HttpGet]
@@ -64,10 +58,18 @@ public sealed class AiCardsController : ControllerBase
         if (request is null)
             return BadRequest(ApiErrorResponse.From("Request body is required.", ErrorCodes.ValidationError));
 
-        var userId  = GetUserId();
-        var entity  = AiCardEntityFactory.ToEntity(request);
-        var created = await _cardService.CreateAsync(userId, entity, ct);
-        return CreatedAtAction(nameof(GetById), new { cardId = created.Id }, AiCardResponseMapper.ToResponse(created));
+        var userId = GetUserId();
+
+        try
+        {
+            var entity  = AiCardEntityFactory.ToEntity(request);
+            var created = await _cardService.CreateAsync(userId, entity, request.LlmConfig?.ProviderId, ct);
+            return CreatedAtAction(nameof(GetById), new { cardId = created.Id }, AiCardResponseMapper.ToResponse(created));
+        }
+        catch (SoulCreationException ex)
+        {
+            return BadRequest(ApiErrorResponse.FromGuard(ex.ErrorCode, ex.Message, ex.Field));
+        }
     }
 
     [HttpPut("{cardId:guid}")]
@@ -117,86 +119,6 @@ public sealed class AiCardsController : ControllerBase
         }
     }
 
-    /// <summary>Upload an image to S3 and set the card's avatar URL.</summary>
-    [HttpPost("{cardId:guid}/avatar")]
-    [RequestSizeLimit(MaxAvatarUploadBytes)]
-    [RequestFormLimits(MultipartBodyLengthLimit = MaxAvatarUploadBytes)]
-    [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status503ServiceUnavailable)]
-    public async Task<IActionResult> UploadAvatar(Guid cardId, IFormFile? file, CancellationToken ct)
-    {
-        if (file is null || file.Length == 0)
-            return BadRequest(ApiErrorResponse.From("Image file is required.", ErrorCodes.ValidationError));
-
-        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-            return BadRequest(ApiErrorResponse.From("File must be an image.", ErrorCodes.ValidationError));
-
-        var userId = GetUserId();
-        await using var stream = file.OpenReadStream();
-        var result = await _cardAvatar
-            .UploadAvatarAsync(userId, cardId, stream, file.FileName, file.ContentType, ct)
-            .ConfigureAwait(false);
-
-        if (!result.Success)
-        {
-            if (string.Equals(result.Error, "AI card not found.", StringComparison.Ordinal))
-                return NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound));
-            return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                ApiErrorResponse.From(result.Error!, ErrorCodes.ServiceUnavailable));
-        }
-
-        return Ok(AiCardResponseMapper.ToResponse(result.Card!));
-    }
-
-    /// <summary>Upload an image to S3 and set the card's banner image URL.</summary>
-    [HttpPost("{cardId:guid}/banner")]
-    [RequestSizeLimit(MaxAvatarUploadBytes)]
-    [RequestFormLimits(MultipartBodyLengthLimit = MaxAvatarUploadBytes)]
-    [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UploadBanner(Guid cardId, IFormFile? file, CancellationToken ct)
-    {
-        if (file is null || file.Length == 0)
-            return BadRequest(ApiErrorResponse.From("Image file is required.", ErrorCodes.ValidationError));
-
-        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-            return BadRequest(ApiErrorResponse.From("File must be an image.", ErrorCodes.ValidationError));
-
-        var userId = GetUserId();
-        await using var stream = file.OpenReadStream();
-        var result = await _cardBanner
-            .UploadBannerAsync(userId, cardId, stream, file.FileName, file.ContentType, ct)
-            .ConfigureAwait(false);
-
-        if (!result.Success)
-        {
-            if (string.Equals(result.Error, "AI card not found.", StringComparison.Ordinal))
-                return NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound));
-            return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                ApiErrorResponse.From(result.Error!, ErrorCodes.ServiceUnavailable));
-        }
-
-        return Ok(AiCardResponseMapper.ToResponse(result.Card!));
-    }
-
-    /// <summary>Remove the card's banner image, reverting to the colour gradient.</summary>
-    [HttpDelete("{cardId:guid}/banner")]
-    [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RemoveBanner(Guid cardId, CancellationToken ct)
-    {
-        var userId = GetUserId();
-        var result = await _cardBanner.RemoveBannerAsync(userId, cardId, ct).ConfigureAwait(false);
-
-        if (!result.Success)
-            return NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound));
-
-        return Ok(AiCardResponseMapper.ToResponse(result.Card!));
-    }
-
     [HttpGet("{cardId:guid}/activity")]
     [ProducesResponseType(typeof(IReadOnlyList<AiCardActivityItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
@@ -219,10 +141,36 @@ public sealed class AiCardsController : ControllerBase
     }
 
 
-    private Guid GetUserId()
+    /// <summary>
+    /// Exports the full project (soul + graph) as a .inkt file download.
+    /// </summary>
+    [HttpGet("{cardId:guid}/export")]
+    [ProducesResponseType(typeof(InktProjectDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Export(Guid cardId, CancellationToken ct = default)
     {
-        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException("User ID not found in token.");
-        return Guid.Parse(sub);
+        var result = await _exportService.ExportAsync(GetUserId(), cardId, ct);
+        if (result is null)
+            return NotFound(ApiErrorResponse.From("Project not found.", ErrorCodes.NotFound));
+
+        return File(result.Content, result.ContentType, result.FileName);
     }
+
+    /// <summary>Move a soul to a new position. previousId=null → beginning; nextId=null → end.</summary>
+    [HttpPut("{cardId:guid}/position")]
+    [ProducesResponseType(typeof(AiCardListItem), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Reorder(
+        Guid cardId, [FromBody] ReorderCardRequest? body, CancellationToken ct = default)
+    {
+        if (body is null) return BadRequest(ApiErrorResponse.From("Request body is required.", ErrorCodes.ValidationError));
+        var userId = GetUserId();
+
+        var card = await _cardService.ReorderAsync(userId, cardId, body.PreviousId, body.NextId, ct).ConfigureAwait(false);
+        if (card is null) return NotFound(ApiErrorResponse.From("Soul not found.", ErrorCodes.NotFound));
+
+        return Ok(AiCardResponseMapper.ToListItem(card));
+    }
+
 }

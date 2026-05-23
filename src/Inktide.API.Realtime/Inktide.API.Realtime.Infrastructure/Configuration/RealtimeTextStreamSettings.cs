@@ -9,7 +9,7 @@ public sealed class RealtimeTextStreamSettings
     public const string SectionName = "RealtimeTextStream";
 
     /// <summary>Redis stream key produced by the LLM worker.</summary>
-    public string StreamName { get; set; } = "synapse.llm.response";
+    public string StreamName { get; set; } = Inktide.API.Core.Constants.StreamNames.LlmResponse;
 
     /// <summary>Consumer group name; separate from the TTS consumer group on the same stream.</summary>
     public string ConsumerGroup { get; set; } = "text-delivery-workers";

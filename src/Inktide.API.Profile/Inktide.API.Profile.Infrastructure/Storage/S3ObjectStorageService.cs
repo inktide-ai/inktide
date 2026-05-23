@@ -1,4 +1,5 @@
 using System.Net;
+using System.Runtime.CompilerServices;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Inktide.API.Profile.Application.Interfaces;
@@ -64,9 +65,10 @@ public sealed class S3ObjectStorageService : IObjectStorageService
         _logger.LogDebug("S3 DeleteObject key={Key}", objectKey);
     }
 
-    public async Task<IReadOnlyList<ObjectStorageListItem>> ListObjectsAsync(string? prefix, CancellationToken ct = default)
+    public async IAsyncEnumerable<ObjectStorageListItem> ListObjectsAsync(
+        string? prefix,
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
-        var list = new List<ObjectStorageListItem>();
         string? token = null;
         do
         {
@@ -77,16 +79,12 @@ public sealed class S3ObjectStorageService : IObjectStorageService
                 ContinuationToken = token
             };
             var response = await _client.ListObjectsV2Async(request, ct).ConfigureAwait(false);
-            
+
             foreach (var o in response.S3Objects)
-            {
-                list.Add(new ObjectStorageListItem(o.Key, o.Size, o.LastModified));
-            }
+                yield return new ObjectStorageListItem(o.Key, o.Size, o.LastModified);
 
             token = response.IsTruncated == true ? response.NextContinuationToken : null;
         } while (token != null);
-
-        return list;
     }
 
     public string? GetPreSignedPutUrl(string objectKey, string contentType, TimeSpan expires)

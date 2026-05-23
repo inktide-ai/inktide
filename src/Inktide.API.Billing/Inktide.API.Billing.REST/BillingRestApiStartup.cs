@@ -11,6 +11,10 @@ namespace Inktide.API.Billing.REST;
 
 public sealed class BillingRestApiStartup : IStartup, IMiddlewareConfigurator
 {
+    // Policy name constant — registered in Inktide.API/Deployment/TtsRateLimiterStartup.cs
+    // (AddRateLimiter requires Microsoft.NET.Sdk.Web which is unavailable in REST class-library projects)
+    public const string WebhookRateLimitPolicy = "billing-webhook";
+
     // Must run before AuthMiddlewareConfigurator (Order=10) which calls UseRouting().
     // ForwardedHeaders must resolve RemoteIpAddress before routing touches the request.
     public int Order => 5;

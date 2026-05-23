@@ -47,6 +47,11 @@ public sealed class AiCardModelConfiguration : IEntityTypeConfiguration<AiCardMo
             .HasColumnName("created_at")
             .IsRequired();
 
+        b.Property(e => e.IsActive)
+            .HasColumnName("is_active")
+            .IsRequired()
+            .HasDefaultValue(false);
+
         b.HasIndex(e => e.StorageKey)
             .IsUnique()
             .HasDatabaseName("idx_ai_card_models_storage_key");
@@ -56,6 +61,9 @@ public sealed class AiCardModelConfiguration : IEntityTypeConfiguration<AiCardMo
 
         b.HasIndex(e => new { e.UserId, e.AiCardId })
             .HasDatabaseName("idx_ai_card_models_user_card");
+
+        b.HasIndex(e => new { e.AiCardId, e.IsActive })
+            .HasDatabaseName("idx_ai_card_models_active");
 
         b.HasOne(e => e.AiCard)
             .WithMany()

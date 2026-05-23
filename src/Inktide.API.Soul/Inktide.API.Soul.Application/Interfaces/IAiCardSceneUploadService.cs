@@ -127,4 +127,5 @@ public sealed record AiCardScene(
     DateTime CreatedAt,
     string? Tag,
     string? DisplayName,
-    string? Description);
+    string? Description,
+    string SortKey);

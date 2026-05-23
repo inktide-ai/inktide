@@ -17,6 +17,8 @@ public sealed class UsageDaily
     private int _messagesSent;
     private int _ttsCharacters;
     private int _donkeyThoughts;
+    private int _visionFramesProcessed;
+    private int _visionEventsDetected;
     private AiCard? _aiCard;
 
 
@@ -78,6 +80,18 @@ public sealed class UsageDaily
     {
         get => _donkeyThoughts;
         set => _donkeyThoughts = value;
+    }
+
+    public int VisionFramesProcessed
+    {
+        get => _visionFramesProcessed;
+        set => _visionFramesProcessed = value;
+    }
+
+    public int VisionEventsDetected
+    {
+        get => _visionEventsDetected;
+        set => _visionEventsDetected = value;
     }
 
     public AiCard? AiCard

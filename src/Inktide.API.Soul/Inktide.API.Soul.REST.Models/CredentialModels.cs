@@ -7,4 +7,8 @@ public sealed record CredentialResponse(
     bool HasKey,
     string? BaseUrl,
     string? Config,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    DateTime? VerifiedAt,
+    string? LastError);
+
+public sealed record CredentialTestResponse(bool Success, string? Error, DateTime TestedAt);

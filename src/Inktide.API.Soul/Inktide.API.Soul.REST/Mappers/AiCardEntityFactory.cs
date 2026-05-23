@@ -1,4 +1,6 @@
 using Inktide.API.Soul.Domain.Entities;
+using Inktide.API.Soul.Domain.Enums;
+using Inktide.API.Soul.Domain.ValueObjects;
 using Inktide.API.Soul.REST.Models;
 using Newtonsoft.Json;
 
@@ -7,7 +9,6 @@ namespace Inktide.API.Soul.REST.Mappers;
 /// <summary>
 /// Constructs and patches AiCard domain entities from REST request models.
 /// SRP: one reason to change — write/mutate representation of an AiCard.
-/// OCP: adding a new request field only requires editing this file, not AiCardResponseMapper.
 /// </summary>
 public static class AiCardEntityFactory
 {
@@ -21,13 +22,15 @@ public static class AiCardEntityFactory
             SystemPrompt     = request.SystemPrompt,
             AvatarUrl        = request.AvatarUrl,
             LlmCatalogId     = request.LlmCatalogId,
-            LlmConfig        = SerializeJson(request.LlmConfig) ?? "{}",
+            LlmConfig        = Serialize(request.LlmConfig) ?? "{}",
             TtsCatalogId     = request.TtsCatalogId,
-            TtsConfig        = SerializeJson(request.TtsConfig),
-            Appearance       = SerializeJson(request.Appearance) ?? "{}",
-            ResponseBehavior = SerializeJson(request.ResponseBehavior) ?? "{}",
-            MemorySettings   = SerializeJson(request.MemorySettings) ?? "{}",
-            AutoPilot        = SerializeJson(request.AutoPilot) ?? "{}",
+            TtsConfig        = Serialize(request.TtsConfig),
+            Appearance         = Serialize(request.Appearance) ?? "{}",
+            ResponseBehavior   = Serialize(request.ResponseBehavior) ?? "{}",
+            MemorySettings          = Serialize(request.MemorySettings) ?? "{}",
+            AutoPilot               = Serialize(request.AutoPilot) ?? "{}",
+            ScreenAwarenessSettings = Serialize(request.ScreenAwareness) ?? "{}",
+            PersonalityConfig       = MapPersonality(request.PersonalityConfig),
         };
     }
 
@@ -42,17 +45,43 @@ public static class AiCardEntityFactory
         if (request.SystemPrompt     is not null) existing.SystemPrompt     = request.SystemPrompt;
         if (request.AvatarUrl        is not null) existing.AvatarUrl        = request.AvatarUrl;
         if (request.LlmCatalogId.HasValue)        existing.LlmCatalogId     = request.LlmCatalogId.Value;
-        if (request.LlmConfig        is not null) existing.LlmConfig        = SerializeJson(request.LlmConfig) ?? "{}";
+        if (request.LlmConfig        is not null) existing.LlmConfig        = Serialize(request.LlmConfig) ?? "{}";
         if (request.TtsCatalogId.HasValue)        existing.TtsCatalogId     = request.TtsCatalogId.Value;
-        if (request.TtsConfig        is not null) existing.TtsConfig        = SerializeJson(request.TtsConfig);
-        if (request.Appearance       is not null) existing.Appearance       = SerializeJson(request.Appearance) ?? "{}";
-        if (request.ResponseBehavior is not null) existing.ResponseBehavior = SerializeJson(request.ResponseBehavior) ?? "{}";
-        if (request.MemorySettings   is not null) existing.MemorySettings   = SerializeJson(request.MemorySettings) ?? "{}";
-        if (request.AutoPilot        is not null) existing.AutoPilot        = SerializeJson(request.AutoPilot) ?? "{}";
+        if (request.TtsConfig        is not null) existing.TtsConfig        = Serialize(request.TtsConfig);
+        if (request.Appearance       is not null) existing.Appearance       = Serialize(request.Appearance) ?? "{}";
+        if (request.ResponseBehavior is not null) existing.ResponseBehavior = Serialize(request.ResponseBehavior) ?? "{}";
+        if (request.MemorySettings   is not null) existing.MemorySettings          = Serialize(request.MemorySettings) ?? "{}";
+        if (request.AutoPilot        is not null) existing.AutoPilot               = Serialize(request.AutoPilot) ?? "{}";
+        if (request.ScreenAwareness  is not null) existing.ScreenAwarenessSettings = Serialize(request.ScreenAwareness) ?? "{}";
+        if (request.PersonalityConfig  is not null) existing.PersonalityConfig  = MapPersonality(request.PersonalityConfig);
+        if (request.Description        is not null) existing.Description        = request.Description;
+        if (request.CoverUrl         is not null) existing.CoverUrl         = request.CoverUrl;
         if (request.IsActive.HasValue)            existing.IsActive         = request.IsActive.Value;
-        if (request.Visibility       is not null) existing.Visibility       = request.Visibility;
+
+        if (request.Status is not null && Enum.TryParse<AiCardStatus>(request.Status, ignoreCase: true, out var status))
+            existing.Status = status;
+
+        if (request.Visibility is not null && Enum.TryParse<AiCardVisibility>(request.Visibility, ignoreCase: true, out var vis))
+            existing.Visibility = vis;
     }
 
-    private static string? SerializeJson(object? obj) =>
+    private static PersonalitySettings MapPersonality(AiCardPersonalityDto? dto) =>
+        dto is null ? new PersonalitySettings() : new PersonalitySettings
+        {
+            Warmth                = (float)dto.Warmth,
+            Playfulness           = (float)dto.Playfulness,
+            Assertiveness         = (float)dto.Assertiveness,
+            Empathy               = (float)dto.Empathy,
+            Formality             = (float)dto.Formality,
+            Sarcasm               = (float)dto.Sarcasm,
+            EmotionVolatility     = (float)dto.EmotionVolatility,
+            EmotionResponsiveness = (float)dto.EmotionResponsiveness,
+            EmotionMemory         = (float)dto.EmotionMemory,
+            StressBehavior        = dto.StressBehavior,
+            BaselineMood          = dto.BaselineMood,
+            PresetId              = dto.PresetId,
+        };
+
+    private static string? Serialize<T>(T? obj) where T : class =>
         obj is null ? null : JsonConvert.SerializeObject(obj);
 }

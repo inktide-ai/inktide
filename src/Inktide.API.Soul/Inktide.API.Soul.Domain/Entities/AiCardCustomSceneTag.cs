@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 namespace Inktide.API.Soul.Domain.Entities;
 
 /// <summary>
@@ -40,7 +41,7 @@ public sealed class AiCardCustomSceneTag
 
         return new AiCardCustomSceneTag
         {
-            Id = Guid.NewGuid(),
+            Id = IdGenerator.New(),
             UserId = userId,
             AiCardId = aiCardId,
             Label = trimmed,

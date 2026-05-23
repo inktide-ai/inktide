@@ -3,7 +3,8 @@ import { useState, useCallback } from 'react'
 
 export type HubTabId =
   | 'profile' | 'skills' | 'avatars' | 'scene' | 'memory'
-  | 'brain' | 'voice' | 'connection' | 'obs' | 'backup'
+  | 'brain' | 'voice' | 'connection' | 'obs'
+  | 'emotion'
 
 export interface CardLayout {
   i: HubTabId
@@ -23,10 +24,59 @@ export const DEFAULT_LAYOUT: CardLayout[] = [
   { i: 'voice',      x: 1, y: 2, w: 1, h: 1 },
   { i: 'connection', x: 2, y: 2, w: 1, h: 1 },
   { i: 'obs',        x: 3, y: 2, w: 1, h: 2 },
-  { i: 'backup',     x: 1, y: 3, w: 2, h: 1 },
 ]
 
 const ALL_IDS = new Set(DEFAULT_LAYOUT.map(d => d.i))
+
+export const SOUL_DEFAULT_LAYOUT: CardLayout[] = [
+  { i: 'profile',  x: 0, y: 0, w: 2, h: 2 },
+  { i: 'brain',    x: 2, y: 0, w: 1, h: 1 },
+  { i: 'voice',    x: 3, y: 0, w: 1, h: 1 },
+  { i: 'avatars',  x: 2, y: 1, w: 1, h: 1 },
+  { i: 'scene',    x: 3, y: 1, w: 1, h: 1 },
+  { i: 'emotion',  x: 0, y: 2, w: 1, h: 1 },
+]
+
+const SOUL_IDS = new Set(SOUL_DEFAULT_LAYOUT.map(d => d.i))
+
+function isValidSoulLayout(parsed: unknown): parsed is CardLayout[] {
+  if (!Array.isArray(parsed) || parsed.length !== SOUL_DEFAULT_LAYOUT.length) return false
+  return parsed.every(
+    item =>
+      item && typeof item === 'object' &&
+      typeof item.i === 'string' && SOUL_IDS.has(item.i as HubTabId) &&
+      typeof item.x === 'number' && typeof item.y === 'number' &&
+      typeof item.w === 'number' && typeof item.h === 'number' &&
+      item.w >= 1 && item.h >= 1
+  )
+}
+
+export function useSoulHubLayout(soulId: string) {
+  const key = `inktide_soul_hub_layout_${soulId}`
+
+  const [layout, setLayout] = useState<CardLayout[]>(() => {
+    try {
+      const raw = localStorage.getItem(key)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (isValidSoulLayout(parsed)) return parsed
+      }
+    } catch { /* ignore */ }
+    return SOUL_DEFAULT_LAYOUT
+  })
+
+  const updateLayout = useCallback((newLayout: CardLayout[]) => {
+    setLayout(newLayout)
+    try { localStorage.setItem(key, JSON.stringify(newLayout)) } catch { /* quota */ }
+  }, [key])
+
+  const resetLayout = useCallback(() => {
+    setLayout(SOUL_DEFAULT_LAYOUT)
+    try { localStorage.removeItem(key) } catch { /* quota */ }
+  }, [key])
+
+  return { layout, updateLayout, resetLayout }
+}
 
 function isValidLayout(parsed: unknown): parsed is CardLayout[] {
   if (!Array.isArray(parsed) || parsed.length !== DEFAULT_LAYOUT.length) return false

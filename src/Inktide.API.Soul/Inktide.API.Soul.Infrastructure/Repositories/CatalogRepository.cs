@@ -43,4 +43,16 @@ public sealed class CatalogRepository : ICatalogRepository
         return await _db.TtsCatalog.AsNoTracking().FirstOrDefaultAsync(v => v.Id == id, ct);
     }
 
+    public async Task<LlmCatalogEntry?> FindLlmByModelIdAsync(string modelId, CancellationToken ct = default)
+    {
+        return await _db.LlmCatalog.AsNoTracking()
+            .FirstOrDefaultAsync(m => m.ModelId == modelId && m.IsAvailable, ct);
+    }
+
+    public async Task<TtsCatalogEntry?> FindTtsByVoiceIdAsync(string voiceId, CancellationToken ct = default)
+    {
+        return await _db.TtsCatalog.AsNoTracking()
+            .FirstOrDefaultAsync(v => v.VoiceId == voiceId && v.IsAvailable, ct);
+    }
+
 }

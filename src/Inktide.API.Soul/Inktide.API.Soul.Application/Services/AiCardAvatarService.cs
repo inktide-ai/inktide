@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 using Inktide.API.Profile.Application.Interfaces;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Storage;
@@ -50,7 +51,7 @@ public sealed class AiCardAvatarService : IAiCardAvatarService
             return new AiCardAvatarUpdateResult(false, null, "AI card not found.");
 
         var safeName  = StorageFileHelper.SanitizeFileName(fileName, "avatar.bin");
-        var objectKey = $"users/{userId:N}/cards/{cardId:N}/{Guid.NewGuid():N}_{safeName}";
+        var objectKey = $"users/{userId:N}/cards/{cardId:N}/{IdGenerator.New():N}_{safeName}";
 
         await _storage.PutObjectAsync(objectKey, fileStream, contentType, ct).ConfigureAwait(false);
 

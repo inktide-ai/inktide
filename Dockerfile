@@ -1,24 +1,7 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-WORKDIR /repo
-
-COPY Inktide.API.sln .
-COPY src/ src/
-
-RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet restore Inktide.API.sln
-
-RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet publish src/Inktide.API/Inktide.API.csproj \
-    -c Release \
-    -o /app/publish \
-    --no-restore
-
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 # ── Rhubarb Lip Sync ──────────────────────────────────────────────────────────
-# Provides phoneme-accurate viseme timelines for avatar lip sync.
-# Falls back to frontend formant analysis automatically when absent.
 ARG RHUBARB_VERSION=1.14.0
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl unzip \
@@ -34,10 +17,8 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=build /app/publish .
+COPY publish/ .
 
 EXPOSE 5000
-
 ENV ASPNETCORE_URLS=http://+:5000
-
-ENTRYPOINT ["./Inktide.API"]
+ENTRYPOINT ["dotnet", "Inktide.API.dll"]

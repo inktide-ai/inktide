@@ -4,167 +4,72 @@ namespace Inktide.API.Soul.REST.Models;
 
 public sealed class CreateChannelRequest
 {
-
-    private string _platform = "twitch";
-    private string _channelName = string.Empty;
-    private string? _channelId;
-    private string _botUsername = string.Empty;
-    private string? _oAuthToken;
-
-
-    /// <summary>
-    /// Platform-specific stable id (e.g. Discord guild id — must match connector ingest <c>ChannelId</c>).
-    /// </summary>
+    /// <summary>Platform-specific stable id (e.g. Discord guild id).</summary>
     [JsonProperty("channel_id")]
-    public string? ChannelId
-    {
-        get => _channelId;
-        set => _channelId = value;
-    }
+    public string? ChannelId { get; set; }
 
     [JsonProperty("platform")]
-    public string Platform
-    {
-        get => _platform;
-        set => _platform = value;
-    }
+    public string Platform { get; set; } = "twitch";
 
     [JsonProperty("channel_name")]
-    public string ChannelName
-    {
-        get => _channelName;
-        set => _channelName = value;
-    }
+    public string ChannelName { get; set; } = string.Empty;
 
     [JsonProperty("bot_username")]
-    public string BotUsername
-    {
-        get => _botUsername;
-        set => _botUsername = value;
-    }
+    public string BotUsername { get; set; } = string.Empty;
 
     [JsonProperty("oauth_token")]
-    public string? OAuthToken
-    {
-        get => _oAuthToken;
-        set => _oAuthToken = value;
-    }
+    public string? OAuthToken { get; set; }
 
+    [JsonProperty("custom_bot_token")]
+    public string? CustomBotToken { get; set; }
 }
 
 public sealed class PatchChannelRequest
 {
-
-    private bool _isActive;
-
-
     [JsonProperty("is_active")]
-    public bool IsActive
-    {
-        get => _isActive;
-        set => _isActive = value;
-    }
-
+    public bool IsActive { get; set; }
 }
 
 public sealed class ChannelResponse
 {
-
-    private Guid _id;
-    private string _platform = string.Empty;
-    private string _channelName = string.Empty;
-    private string? _channelIdResponse;
-    private string _botUsername = string.Empty;
-    private bool _isActive;
-    private DateTime? _connectedAt;
-
-
-    [JsonProperty("channel_id")]
-    public string? ChannelId
-    {
-        get => _channelIdResponse;
-        set => _channelIdResponse = value;
-    }
-
     [JsonProperty("id")]
-    public Guid Id
-    {
-        get => _id;
-        set => _id = value;
-    }
+    public Guid Id { get; set; }
 
     [JsonProperty("platform")]
-    public string Platform
-    {
-        get => _platform;
-        set => _platform = value;
-    }
+    public string Platform { get; set; } = string.Empty;
 
     [JsonProperty("channel_name")]
-    public string ChannelName
-    {
-        get => _channelName;
-        set => _channelName = value;
-    }
+    public string ChannelName { get; set; } = string.Empty;
+
+    /// <summary>Platform-specific stable id (e.g. Discord guild id).</summary>
+    [JsonProperty("channel_id")]
+    public string? ChannelId { get; set; }
 
     [JsonProperty("bot_username")]
-    public string BotUsername
-    {
-        get => _botUsername;
-        set => _botUsername = value;
-    }
+    public string BotUsername { get; set; } = string.Empty;
 
     [JsonProperty("is_active")]
-    public bool IsActive
-    {
-        get => _isActive;
-        set => _isActive = value;
-    }
+    public bool IsActive { get; set; }
 
     [JsonProperty("connected_at")]
-    public DateTime? ConnectedAt
-    {
-        get => _connectedAt;
-        set => _connectedAt = value;
-    }
+    public DateTime? ConnectedAt { get; set; }
 
+    [JsonProperty("has_custom_bot")]
+    public bool HasCustomBot { get; set; }
 }
 
 public sealed class ToolResponse
 {
-
-    private Guid _id;
-    private string _toolName = string.Empty;
-    private object? _toolConfig;
-    private bool _isEnabled;
-
-
     [JsonProperty("id")]
-    public Guid Id
-    {
-        get => _id;
-        set => _id = value;
-    }
+    public Guid Id { get; set; }
 
     [JsonProperty("tool_name")]
-    public string ToolName
-    {
-        get => _toolName;
-        set => _toolName = value;
-    }
+    public string ToolName { get; set; } = string.Empty;
 
+    /// <summary>Tool-specific settings (flexible JSONB — shape varies per tool_name).</summary>
     [JsonProperty("tool_config")]
-    public object? ToolConfig
-    {
-        get => _toolConfig;
-        set => _toolConfig = value;
-    }
+    public object? ToolConfig { get; set; }
 
     [JsonProperty("is_enabled")]
-    public bool IsEnabled
-    {
-        get => _isEnabled;
-        set => _isEnabled = value;
-    }
-
+    public bool IsEnabled { get; set; }
 }

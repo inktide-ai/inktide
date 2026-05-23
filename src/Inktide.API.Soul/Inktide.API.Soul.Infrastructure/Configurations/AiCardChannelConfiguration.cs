@@ -38,6 +38,15 @@ public sealed class AiCardChannelConfiguration : IEntityTypeConfiguration<AiCard
         b.Property(e => e.OAuthTokenEnc)
             .HasColumnName("oauth_token_enc");
 
+        b.Property(e => e.CustomBotTokenEnc)
+            .HasColumnName("custom_bot_token_enc");
+
+        b.Property(e => e.RefreshTokenEnc)
+            .HasColumnName("refresh_token_enc");
+
+        b.Property(e => e.TokenExpiresAt)
+            .HasColumnName("token_expires_at");
+
         b.Property(e => e.IsActive)
             .HasColumnName("is_active")
             .HasDefaultValue(true);

@@ -1,5 +1,6 @@
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
+using Inktide.API.Synapse.Infrastructure.Constants;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Synapse.Infrastructure.Scattering;
@@ -9,14 +10,14 @@ namespace Inktide.API.Synapse.Infrastructure.Scattering;
 /// Runs in parallel with RAG and Context shards.
 /// Falls back to an empty history on any error — never aborts the pipeline.
 /// </summary>
-public sealed class SessionScatterShard : ISynapseScatterShard
+public sealed class SessionScatterShard : IPipelineStage
 {
     private const int DefaultMaxTurns = 20;
 
     private readonly IConversationHistoryRepository _history;
     private readonly ILogger<SessionScatterShard> _logger;
 
-    public string ShardId => "session";
+    public string ShardId => SynapseConstants.ShardIds.Session;
 
     public SessionScatterShard(
         IConversationHistoryRepository history,

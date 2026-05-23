@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 namespace Inktide.API.Soul.Domain.Entities;
 
 /// <summary>
@@ -23,10 +24,13 @@ public sealed class AiCardModel
     public string ContentType { get; private set; } = string.Empty;
     public long SizeBytes { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public bool IsActive { get; private set; }
 
     // EF Core navigation
     public AiCard? AiCard { get; private set; }
 
+    public void Activate()   => IsActive = true;
+    public void Deactivate() => IsActive = false;
 
     public static AiCardModel Create(
         Guid userId,
@@ -36,7 +40,8 @@ public sealed class AiCardModel
         string originalFileName,
         string contentType,
         long sizeBytes,
-        DateTime createdAt)
+        DateTime createdAt,
+        bool isActive = true)
     {
         if (userId == Guid.Empty) throw new ArgumentException("userId must not be empty.", nameof(userId));
         if (aiCardId == Guid.Empty) throw new ArgumentException("aiCardId must not be empty.", nameof(aiCardId));
@@ -46,7 +51,7 @@ public sealed class AiCardModel
 
         return new AiCardModel
         {
-            Id = Guid.NewGuid(),
+            Id = IdGenerator.New(),
             UserId = userId,
             AiCardId = aiCardId,
             StorageKey = storageKey,
@@ -55,6 +60,7 @@ public sealed class AiCardModel
             ContentType = string.IsNullOrWhiteSpace(contentType) ? "application/octet-stream" : contentType.Trim(),
             SizeBytes = sizeBytes,
             CreatedAt = createdAt,
+            IsActive = isActive,
         };
     }
 

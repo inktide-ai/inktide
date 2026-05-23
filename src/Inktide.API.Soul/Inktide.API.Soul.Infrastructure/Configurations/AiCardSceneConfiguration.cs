@@ -59,6 +59,16 @@ public sealed class AiCardSceneConfiguration : IEntityTypeConfiguration<AiCardSc
             .HasColumnName("description")
             .HasMaxLength(2000);
 
+        b.Property(e => e.SortKey)
+            .HasColumnName("sort_key")
+            .IsRequired()
+            .HasMaxLength(100)
+            .HasDefaultValue("a0");
+
+        b.HasIndex(e => new { e.AiCardId, e.SortKey })
+            .HasDatabaseName("idx_ai_card_scenes_sort")
+            .IsUnique();
+
         b.HasIndex(e => e.StorageKey)
             .IsUnique()
             .HasDatabaseName("idx_ai_card_scenes_storage_key");

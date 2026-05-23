@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { GeistSans } from 'geist/font/sans'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Providers } from '@/components/providers'
 import './globals.css'
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className="bg-[var(--bg-dark)] text-[var(--text-primary)] antialiased">
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className={GeistSans.variable}>
+      <body suppressHydrationWarning className="bg-[var(--bg-0)] text-[var(--text-primary)] antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

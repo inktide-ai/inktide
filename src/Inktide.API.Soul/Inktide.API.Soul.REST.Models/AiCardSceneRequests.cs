@@ -217,6 +217,21 @@ public sealed class AiCardSceneResponse
         set => _description = value;
     }
 
+    private string _sortKey = "a0";
+
+    [JsonProperty("sort_key")]
+    public string SortKey
+    {
+        get => _sortKey;
+        set => _sortKey = value;
+    }
+
+}
+
+public sealed class ReorderSceneRequest
+{
+    [JsonProperty("previous_id")] public Guid? PreviousId { get; set; }
+    [JsonProperty("next_id")]     public Guid? NextId     { get; set; }
 }
 
 public sealed class PutSceneMetadataRequest

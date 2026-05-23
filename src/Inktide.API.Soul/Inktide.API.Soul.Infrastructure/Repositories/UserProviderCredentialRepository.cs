@@ -45,7 +45,6 @@ public sealed class UserProviderCredentialRepository : IUserProviderCredentialRe
         else
             _db.UserProviderCredentials.Update(credential);
 
-        await _db.SaveChangesAsync(ct);
         return credential;
     }
 
@@ -55,10 +54,20 @@ public sealed class UserProviderCredentialRepository : IUserProviderCredentialRe
             .FirstOrDefaultAsync(c => c.UserId == userId && c.ProviderId == providerId, ct);
 
         if (cred is not null)
-        {
             _db.UserProviderCredentials.Remove(cred);
-            await _db.SaveChangesAsync(ct);
-        }
+    }
+
+    public async Task UpdateVerificationAsync(
+        Guid userId, string providerId, bool success, string? error, DateTime testedAt,
+        CancellationToken ct = default)
+    {
+        await _db.UserProviderCredentials
+            .Where(c => c.UserId == userId && c.ProviderId == providerId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(c => c.VerifiedAt, success ? testedAt : (DateTime?)null)
+                .SetProperty(c => c.LastError,  success ? null : error)
+                .SetProperty(c => c.UpdatedAt,  testedAt),
+                ct);
     }
 
 }

@@ -1,4 +1,5 @@
 using Inktide.API.Soul.Application.Models;
+using Inktide.API.Soul.Domain.Entities;
 
 namespace Inktide.API.Soul.Application.Interfaces;
 
@@ -19,4 +20,32 @@ public interface IAiCardChannelLinkService
         Guid linkId,
         PatchChannelLinkCommand command,
         CancellationToken cancellationToken = default);
+
+    // ── Discord OAuth2 ──────────────────────────────────────────────────────
+
+    Task UpsertDiscordChannelAsync(
+        Guid userId,
+        Guid cardId,
+        string guildId,
+        string guildName,
+        string accessTokenEnc,
+        string refreshTokenEnc,
+        DateTime tokenExpiresAt,
+        CancellationToken ct = default);
+
+    // ── Telegram Bot Token ──────────────────────────────────────────────────
+
+    Task<Guid> UpsertTelegramChannelAsync(
+        Guid userId,
+        Guid cardId,
+        string chatId,
+        string chatName,
+        string encryptedBotToken,
+        CancellationToken ct = default);
+
+    Task<AiCardChannel?> GetByIdAsync(Guid userId, Guid channelId, CancellationToken ct = default);
+
+    Task DeactivateAsync(Guid userId, Guid channelId, CancellationToken ct = default);
+
+    Task SetCustomBotTokenAsync(Guid userId, Guid channelId, string? encryptedToken, CancellationToken ct = default);
 }

@@ -20,7 +20,7 @@ public sealed class DisabledObjectStorageService : IObjectStorageService
         throw new InvalidOperationException("Object storage (S3) is disabled. Enable S3Settings:Enabled and configure MinIO/AWS.");
     }
 
-    public Task<IReadOnlyList<ObjectStorageListItem>> ListObjectsAsync(string? prefix, CancellationToken ct = default)
+    public IAsyncEnumerable<ObjectStorageListItem> ListObjectsAsync(string? prefix, CancellationToken ct = default)
     {
         throw new InvalidOperationException("Object storage (S3) is disabled. Enable S3Settings:Enabled and configure MinIO/AWS.");
     }

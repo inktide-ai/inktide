@@ -28,4 +28,7 @@ public interface IAiCardSceneService
     Task<IReadOnlyList<AiCardScene>?> ListAsync(Guid userId, Guid cardId, CancellationToken ct = default);
 
     Task<DeleteSceneResult> DeleteAsync(Guid userId, Guid cardId, Guid sceneId, CancellationToken ct = default);
+
+    /// <summary>Move a scene to a new position. previousId=null → beginning; nextId=null → end. Returns null when not found.</summary>
+    Task<AiCardScene?> ReorderAsync(Guid userId, Guid cardId, Guid sceneId, Guid? previousId, Guid? nextId, CancellationToken ct = default);
 }

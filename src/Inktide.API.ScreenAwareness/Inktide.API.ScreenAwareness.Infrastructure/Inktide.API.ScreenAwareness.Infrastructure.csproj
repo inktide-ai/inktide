@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Inktide.API.ScreenAwareness.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Inktide.API.ScreenAwareness.Application\Inktide.API.ScreenAwareness.Application.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Synapse\Inktide.API.Synapse.Application\Inktide.API.Synapse.Application.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Billing\Inktide.API.Billing.Application\Inktide.API.Billing.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+  </ItemGroup>
+
+</Project>

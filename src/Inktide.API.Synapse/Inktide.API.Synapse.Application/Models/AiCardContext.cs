@@ -1,3 +1,4 @@
+using Inktide.API.Core.Contracts;
 namespace Inktide.API.Synapse.Application.Models;
 
 /// <summary>
@@ -5,7 +6,7 @@ namespace Inktide.API.Synapse.Application.Models;
 /// Placed in <see cref="MessageProcessingContext"/> during channel context resolution (before scatter shards).
 /// </summary>
 public sealed record AiCardContext(
-    Guid AiCardId,
+    Guid CharacterId,
     Guid UserId,
     string SystemPrompt,
     string Personality,
@@ -40,4 +41,20 @@ public sealed record AiCardContext(
     /// <summary>Per-card base URL override — wins over global BYOK credential base URL.</summary>
     string? LlmBaseUrl = null,
     /// <summary>Multiplier applied to raw emotion intensity (0 = no emotion, 1 = normal, 2 = amplified).</summary>
-    float EmotionIntensityScale = 1.0f);
+    float EmotionIntensityScale = 1.0f,
+    /// <summary>Natural-language personality directive block injected into the LLM system prompt. Null = no personality configured.</summary>
+    string? PersonalityDirective = null,
+    /// <summary>How quickly emotions adapt to messages — scales TTS speed modulation. From PersonalitySettings.EmotionResponsiveness.</summary>
+    float EmotionResponsiveness = 0.7f,
+    /// <summary>Emotional dynamics parameters for the runtime emotional state blending.</summary>
+    EmotionDynamics? EmotionDynamics = null,
+    /// <summary>Project that has this Soul as its active execution profile. Null if no project is linked.</summary>
+    Guid? ProjectId = null,
+    /// <summary>ID of the currently active run preset applied to this context. Null if no preset is active.</summary>
+    Guid? ActiveRunPresetId = null,
+    /// <summary>Name of the active run preset, for logging and diagnostics. Null if no preset is active.</summary>
+    string? ActiveRunPresetName = null,
+    /// <summary>Whether the Screen Awareness feature is enabled for this AI card.</summary>
+    bool ScreenAwarenessEnabled = false,
+    /// <summary>Per-project plugin configuration. Default ON when empty (backwards compatible).</summary>
+    IReadOnlyList<ProjectPluginDto>? Plugins = null);

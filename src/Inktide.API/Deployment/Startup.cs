@@ -4,7 +4,6 @@ using Inktide.API.Settings;
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,8 +56,6 @@ public static class Startup
                                 true)
                             .AddEnvironmentVariables();
 
-                        configurationBuilder.AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true);
-
                         modules = new Dictionary<string, ModuleInfo>();
                         configurationBuilder.Build().Bind("Modules", modules);
 
@@ -69,7 +66,15 @@ public static class Startup
                             var assemblyPath = Path.IsPathRooted(kvp.Value.AssemblyName)
                                 ? kvp.Value.AssemblyName
                                 : Path.Combine(rootPath, kvp.Value.AssemblyName);
-                            Assembly.LoadFrom(assemblyPath);
+                            var resolvedPath = Path.GetFullPath(assemblyPath);
+                            var rootFull     = Path.GetFullPath(rootPath);
+                            if (!resolvedPath.StartsWith(rootFull + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                                && !resolvedPath.Equals(rootFull, StringComparison.OrdinalIgnoreCase))
+                            {
+                                throw new InvalidOperationException(
+                                    $"Module '{kvp.Key}': assembly path '{kvp.Value.AssemblyName}' resolves outside application root.");
+                            }
+                            Assembly.LoadFrom(resolvedPath);
                         }
 
                         foreach (var configurator in ModuleScanner.ResolveAll<IWebHostConfigurator>())
@@ -84,6 +89,7 @@ public static class Startup
                             .SelectMany(a => a.DefinedTypes)
                             .Where(t => t.ImplementsServiceType<IMiddlewareConfigurator>())
                             .Select(t => (IMiddlewareConfigurator)Activator.CreateInstance(t)!)
+                            .OrderBy(c => c.Order)
                             .ToList();
 
                         foreach (var middleware in middlewareConfigurators)
@@ -151,19 +157,15 @@ public static class Startup
             .AddOptions()
             .Configure<Dictionary<string, ModuleInfo>>(ctx.Configuration.GetSection("Modules"));
 
-        if (ctx.HostingEnvironment.IsDevelopment())
-        {
-            services.AddDataProtection().UseEphemeralDataProtectionProvider();
-        }
-        
     }
 
     private static void CatchUnhandledExceptions()
     {
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
-            Log.Logger?.Fatal("Unhandled exception occurred: {Message}",
-                (e.ExceptionObject as Exception)?.Message);
+            var ex = e.ExceptionObject as Exception;
+            Log.Logger?.Fatal(ex, "Unhandled exception — process terminating. IsTerminating={IsTerminating}", e.IsTerminating);
+            Log.CloseAndFlush();
         };
     }
 }

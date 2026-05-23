@@ -1,0 +1,387 @@
+'use client'
+
+import { useMemo, useState, useRef, useEffect, useCallback } from 'react'
+import { useRouter, useParams } from 'next/navigation'
+import { BrainProviderCard } from '@/components/soul/brain-provider-card'
+import { LLM_PROVIDER_CATALOG } from '@/data/llm-providers'
+import { useCharactersContext } from '@/context/CharactersContext'
+import { cn } from '@/lib/utils'
+import { getCredentials, type CredentialResponse } from '@/api/soul'
+import { statusFromCredential } from '@/components/soul/credential-status-badge'
+import { FeaturedIntegrations } from '@/components/featured-integrations'
+
+// ── Toolbar icons ─────────────────────────────────────────────────────────────
+
+const GridIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path d="M8.75 13.5C9.7165 13.5 10.5 14.2835 10.5 15.25V19.25C10.5 20.2165 9.7165 21 8.75 21H4.75C3.7835 21 3 20.2165 3 19.25V15.25C3 14.2835 3.7835 13.5 4.75 13.5H8.75ZM19.25 13.5C20.2165 13.5 21 14.2835 21 15.25V19.25C21 20.2165 20.2165 21 19.25 21H15.25C14.2835 21 13.5 20.2165 13.5 19.25V15.25C13.5 14.2835 14.2835 13.5 15.25 13.5H19.25ZM4.75 15C4.61193 15 4.5 15.1119 4.5 15.25V19.25C4.5 19.3881 4.61193 19.5 4.75 19.5H8.75C8.88807 19.5 9 19.3881 9 19.25V15.25C9 15.1119 8.88807 15 8.75 15H4.75ZM15.25 15C15.1119 15 15 15.1119 15 15.25V19.25C15 19.3881 15.1119 19.5 15.25 19.5H19.25C19.3881 19.5 19.5 19.3881 19.5 19.25V15.25C19.5 15.1119 19.3881 15 19.25 15H15.25ZM8.75 3C9.7165 3 10.5 3.7835 10.5 4.75V8.75C10.5 9.7165 9.7165 10.5 8.75 10.5H4.75C3.7835 10.5 3 9.7165 3 8.75V4.75C3 3.7835 3.7835 3 4.75 3H8.75ZM19.25 3C20.2165 3 21 3.7835 21 4.75V8.75C21 9.7165 20.2165 10.5 19.25 10.5H15.25C14.2835 10.5 13.5 9.7165 13.5 8.75V4.75C13.5 3.7835 14.2835 3 15.25 3H19.25ZM4.75 4.5C4.61193 4.5 4.5 4.61193 4.5 4.75V8.75C4.5 8.88807 4.61193 9 4.75 9H8.75C8.88807 9 9 8.88807 9 8.75V4.75C9 4.61193 8.88807 4.5 8.75 4.5H4.75ZM15.25 4.5C15.1119 4.5 15 4.61193 15 4.75V8.75C15 8.88807 15.1119 9 15.25 9H19.25C19.3881 9 19.5 8.88807 19.5 8.75V4.75C19.5 4.61193 19.3881 4.5 19.25 4.5H15.25Z" fill="currentColor"/>
+  </svg>
+)
+const CaretDownIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" clipRule="evenodd" d="M16.4697 8.96973C16.7626 8.67684 17.2373 8.67684 17.5302 8.96973C17.8231 9.26263 17.8231 9.7374 17.5302 10.0303L12.5302 15.0303C12.2373 15.3232 11.7626 15.3231 11.4697 15.0303L6.46967 10.0303C6.17678 9.73738 6.17678 9.26262 6.46967 8.96973C6.76256 8.67684 7.23732 8.67684 7.53022 8.96973L11.9999 13.4395L16.4697 8.96973Z" fill="currentColor"/>
+  </svg>
+)
+const SearchIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 2C14.4183 2 18 5.58172 18 10C18 11.939 17.3088 13.7158 16.1611 15.1006L21.7803 20.7197C22.073 21.0126 22.0731 21.4874 21.7803 21.7803C21.4874 22.0731 21.0126 22.073 20.7197 21.7803L15.1006 16.1611C13.7158 17.3088 11.939 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2ZM10 3.5C6.41015 3.5 3.5 6.41015 3.5 10C3.5 13.5899 6.41015 16.5 10 16.5C13.5899 16.5 16.5 13.5899 16.5 10C16.5 6.41015 13.5899 3.5 10 3.5Z" fill="currentColor"/>
+  </svg>
+)
+const ComputerIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" clipRule="evenodd" d="M16.8495 1.99961H7.15028C6.74265 1.99961 6.39113 1.99856 6.1034 2.02207C5.80701 2.0463 5.51207 2.10022 5.2284 2.24473C4.80513 2.4604 4.46073 2.80489 4.245 3.22813C4.10051 3.51172 4.04659 3.80682 4.02235 4.10313C3.99884 4.39079 3.99988 4.7425 3.99988 5.15V16.3492C3.99988 16.7567 3.99887 17.1084 4.02235 17.3961C4.04657 17.6924 4.10058 17.9875 4.245 18.2711C4.46068 18.6944 4.80514 19.0388 5.2284 19.2545C5.31761 19.2999 5.40877 19.3344 5.49988 19.3639V19.65C5.49988 19.9173 5.49983 20.1636 5.51649 20.3678C5.53391 20.5807 5.57317 20.8145 5.69031 21.0445C5.85802 21.3736 6.12596 21.6414 6.45496 21.8092C6.6851 21.9264 6.91871 21.9656 7.13172 21.983C7.33597 21.9997 7.58204 21.9996 7.84949 21.9996H16.1503C16.4178 21.9996 16.6638 21.9997 16.868 21.983C17.0811 21.9656 17.3146 21.9265 17.5448 21.8092C17.874 21.6414 18.1417 21.3728 18.3095 21.0436C18.4264 20.8136 18.4659 20.5806 18.4833 20.3678C18.5 20.1635 18.4999 19.9165 18.4999 19.649V19.3639C18.5911 19.3344 18.6821 19.3 18.7714 19.2545C19.1947 19.0388 19.5391 18.6944 19.7548 18.2711C19.8992 17.9875 19.9532 17.6924 19.9774 17.3961C20.0009 17.1084 19.9999 16.7567 19.9999 16.3492V5.15C19.9999 4.7425 20.0009 4.39079 19.9774 4.10313C19.9532 3.80682 19.8993 3.51172 19.7548 3.22813C19.539 2.80492 19.1946 2.46038 18.7714 2.24473C18.4877 2.10026 18.1927 2.0463 17.8964 2.02207C17.6086 1.99857 17.2571 1.99961 16.8495 1.99961ZM8.49989 11.4996H15.4999V6.49961H8.49989V11.4996Z" fill="currentColor"/>
+  </svg>
+)
+const LockIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C14.7614 2 17 4.23858 17 7V8.5H18.75C19.9926 8.5 21 9.50736 21 10.75V18.75C21 19.9926 19.9926 21 18.75 21H5.25C4.00736 21 3 19.9926 3 18.75V10.75C3 9.50736 4.00736 8.5 5.25 8.5H7V7C7 4.23858 9.23858 2 12 2ZM5.25 10C4.83579 10 4.5 10.3358 4.5 10.75V18.75C4.5 19.1642 4.83579 19.5 5.25 19.5H18.75C19.1642 19.5 19.5 19.1642 19.5 18.75V10.75C19.5 10.3358 19.1642 10 18.75 10H5.25ZM12 12C12.8284 12 13.5 12.6716 13.5 13.5C13.5 14.0953 13.152 14.6073 12.6494 14.8496L13.25 17.25H10.75L11.3496 14.8496C10.8474 14.6072 10.5 14.095 10.5 13.5C10.5 12.6716 11.1716 12 12 12ZM12 3.5C10.067 3.5 8.5 5.067 8.5 7V8.5H15.5V7C15.5 5.067 13.933 3.5 12 3.5Z" fill="currentColor"/>
+  </svg>
+)
+const CodeIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" clipRule="evenodd" d="M13.5342 4.52734C13.6571 4.13203 14.0772 3.91146 14.4727 4.03418C14.8679 4.15716 15.0885 4.57723 14.9658 4.97266L10.4658 19.4727C10.3428 19.8678 9.9227 20.0885 9.52734 19.9658C9.13211 19.8429 8.91161 19.4227 9.03418 19.0273L13.5342 4.52734ZM5.71973 7.21973C6.01262 6.92683 6.48738 6.92683 6.78027 7.21973C7.07304 7.51263 7.07313 7.98742 6.78027 8.28027L3.56055 11.5L6.78027 14.7197C7.07304 15.0126 7.07313 15.4874 6.78027 15.7803C6.48741 16.073 6.01259 16.073 5.71973 15.7803L1.96973 12.0303C1.82913 11.8897 1.75006 11.6988 1.75 11.5C1.75 11.3011 1.82915 11.1104 1.96973 10.9697L5.71973 7.21973ZM16.9697 7.21973C17.2626 6.92683 17.7374 6.92683 18.0303 7.21973L21.7803 10.9697C21.9208 11.1104 22 11.3011 22 11.5C21.9999 11.6988 21.9209 11.8897 21.7803 12.0303L18.0303 15.7803C17.7374 16.073 17.2626 16.073 16.9697 15.7803C16.6769 15.4874 16.677 15.0126 16.9697 14.7197L20.1895 11.5L16.9697 8.28027C16.6769 7.98742 16.677 7.51263 16.9697 7.21973Z" fill="currentColor"/>
+  </svg>
+)
+const GithubIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" clipRule="evenodd" d="M12 2.25C6.475 2.25 2 6.60878 2 11.9903C2 16.3004 4.8625 19.9408 8.8375 21.2314C9.3375 21.3166 9.525 21.0244 9.525 20.7687C9.525 20.5374 9.5125 19.7703 9.5125 18.9546C7 19.4051 6.35 18.358 6.15 17.8101C6.0375 17.5301 5.55 16.6656 5.125 16.4343C4.775 16.2517 4.275 15.8012 5.1125 15.789C5.9 15.7768 6.4625 16.4952 6.65 16.7874C7.55 18.2606 8.9875 17.8466 9.5625 17.591C9.65 16.9578 9.9125 16.5317 10.2 16.2882C7.975 16.0447 5.65 15.2046 5.65 11.4789C5.65 10.4197 6.0375 9.54304 6.675 8.86122C6.575 8.61772 6.225 7.61934 6.775 6.28005C6.775 6.28005 7.6125 6.02436 9.525 7.27843C10.325 7.05927 11.175 6.94969 12.025 6.94969C12.875 6.94969 13.725 7.05927 14.525 7.27843C16.4375 6.01219 17.275 6.28005 17.275 6.28005C17.825 7.61934 17.475 8.61772 17.375 8.86122C18.0125 9.54304 18.4 10.4075 18.4 11.4789C18.4 15.2168 16.0625 16.0447 13.8375 16.2882C14.2 16.5926 14.5125 17.177 14.5125 18.0901C14.5125 19.3929 14.5 20.44 14.5 20.7687C14.5 21.0244 14.6875 21.3288 15.1875 21.2314C19.1375 19.9408 22 16.2882 22 11.9903C22 6.60878 17.525 2.25 12 2.25Z" fill="currentColor"/>
+  </svg>
+)
+const StarIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" clipRule="evenodd" d="M12 2.25C12.2847 2.25 12.5451 2.41111 12.6719 2.66602L15.2774 7.90918L21.1074 8.75098C21.3905 8.79192 21.6258 8.99062 21.7139 9.2627C21.8018 9.53483 21.727 9.8333 21.5215 10.0322L17.3067 14.1123L18.3018 19.8721C18.3503 20.1532 18.2344 20.4373 18.0039 20.6055C17.7735 20.7735 17.4676 20.797 17.2149 20.665L12 17.9414L6.78517 20.665C6.53237 20.797 6.22649 20.7735 5.99611 20.6055C5.76576 20.4373 5.64973 20.1531 5.69826 19.8721L6.6924 14.1123L2.47853 10.0322C2.27311 9.83331 2.19823 9.53478 2.28615 9.2627C2.37417 8.99064 2.60964 8.79198 2.8926 8.75098L8.7217 7.90918L11.3281 2.66602L11.3819 2.5752C11.5204 2.37351 11.7509 2.25006 12 2.25ZM9.89064 8.92969L4.61916 10.0166L8.0215 13.3105C8.19965 13.483 8.28132 13.7322 8.23928 13.9766L7.43459 18.6328L11.6533 16.4316L11.7363 16.3936C11.9345 16.3192 12.1565 16.3325 12.3467 16.4316L16.5645 18.6328L15.7608 13.9766C15.7187 13.7323 15.8005 13.483 15.9785 13.3105L19.3799 10.0166L14.6738 9.33789C14.4302 9.30258 14.219 9.15018 14.1094 8.92969L12 4.68555L9.89064 8.92969Z" fill="currentColor"/>
+  </svg>
+)
+const TrustIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" clipRule="evenodd" d="M12.0001 1.99976C12.5704 1.99978 13.0179 2.12937 13.4103 2.35425C13.7669 2.55863 14.0677 2.84139 14.3058 3.05054C14.7811 3.46805 15.365 3.94429 16.7228 4.23608C17.384 4.37817 17.9092 4.49104 18.3097 4.59937C18.6964 4.70396 19.0616 4.82668 19.3468 5.03003C19.5528 5.17693 19.7372 5.33422 19.8986 5.53394C20.0597 5.73346 20.1743 5.94645 20.2746 6.17847C20.4067 6.48437 20.4551 6.81261 20.4777 7.15796C20.5001 7.50124 20.5001 7.92889 20.5001 8.44995V10.3064C20.5001 12.6094 20.5086 13.9294 20.1212 15.1228C19.7861 16.155 19.2376 17.106 18.5119 17.9128C17.6728 18.8455 16.5258 19.4982 14.5324 20.6511L13.6124 21.1833C13.2078 21.4173 12.8603 21.6295 12.4738 21.7087C12.157 21.7736 11.8298 21.769 11.5148 21.696C11.1303 21.607 10.7884 21.3867 10.3898 21.1423L9.20522 20.4167C7.29618 19.2467 6.19851 18.5831 5.39662 17.6589C4.70285 16.8593 4.17968 15.9261 3.86049 14.9167C3.49162 13.7502 3.50014 12.4672 3.50014 10.2283V8.44995C3.50014 7.92889 3.50013 7.50124 3.5226 7.15796C3.54522 6.81262 3.59359 6.48436 3.72572 6.17847C3.82597 5.94649 3.94056 5.73344 4.1017 5.53394C4.26305 5.33428 4.44748 5.1769 4.65346 5.03003C4.93866 4.82674 5.30396 4.70394 5.69057 4.59937C6.09107 4.49105 6.61638 4.37815 7.27748 4.23608C8.63518 3.94428 9.21916 3.46803 9.69447 3.05054C9.93256 2.8414 10.2335 2.55858 10.59 2.35425C10.9824 2.12942 11.43 1.99976 12.0001 1.99976ZM12.0001 3.49976C11.6803 3.49976 11.4916 3.56601 11.3361 3.65503C11.1449 3.76459 10.9849 3.91381 10.6847 4.17749C10.0827 4.7063 9.27401 5.34058 7.59291 5.7019C6.91502 5.84758 6.43554 5.95107 6.08217 6.04663C5.71538 6.14585 5.57616 6.215 5.52455 6.25171C5.38693 6.34984 5.31692 6.41669 5.26869 6.47632C5.22049 6.53598 5.16975 6.61893 5.10268 6.77417C5.07095 6.84779 5.03705 6.97569 5.01869 7.25562C5.00018 7.53842 5.00014 7.90869 5.00014 8.44995V10.2283C5.00014 12.5651 5.00862 13.571 5.29115 14.4646C5.54855 15.2784 5.97009 16.0308 6.52944 16.6755C7.14368 17.3835 7.99674 17.9161 9.9894 19.1375L11.174 19.863C11.6617 20.1619 11.7632 20.2141 11.8537 20.2351C11.9585 20.2593 12.0676 20.2606 12.173 20.239C12.2639 20.2203 12.367 20.1715 12.8615 19.8855L13.7814 19.3533C15.8626 18.1497 16.754 17.6234 17.3966 16.9089C17.9818 16.2583 18.4242 15.4922 18.6945 14.6599C18.9912 13.7459 19.0001 12.7105 19.0001 10.3064V8.44995C19.0001 7.90869 19.0001 7.53842 18.9816 7.25562C18.9632 6.97568 18.9293 6.8478 18.8976 6.77417C18.8305 6.61886 18.7798 6.53599 18.7316 6.47632C18.6834 6.41666 18.6134 6.34991 18.4757 6.25171C18.4243 6.21503 18.2853 6.14596 17.9181 6.04663C17.5647 5.95106 17.0853 5.8476 16.4074 5.7019C14.7261 5.34059 13.9176 4.70632 13.3156 4.17749C13.0153 3.91372 12.8554 3.76461 12.6642 3.65503C12.5087 3.56597 12.32 3.49977 12.0001 3.49976Z" fill="currentColor"/>
+    <path d="M8.75 12.25L11.25 15L15.25 9.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
+const XSmallIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" clipRule="evenodd" d="M16.2147 6.71961C16.5075 6.42679 16.9824 6.42695 17.2753 6.71961C17.5682 7.0125 17.5682 7.48726 17.2753 7.78015L13.0575 11.9969L17.2753 16.2147C17.5682 16.5076 17.5682 16.9834 17.2753 17.2762C16.9824 17.5687 16.5075 17.5689 16.2147 17.2762L11.997 13.0585L7.78016 17.2762C7.48738 17.5688 7.01246 17.5687 6.71962 17.2762C6.42698 16.9834 6.42691 16.5076 6.71962 16.2147L10.9364 11.9969L6.71962 7.78015C6.42683 7.48725 6.42676 7.01246 6.71962 6.71961C7.01248 6.42677 7.48727 6.42682 7.78016 6.71961L11.997 10.9364L16.2147 6.71961Z" fill="currentColor"/>
+  </svg>
+)
+
+const TYPE_ICONS: Record<string, ({ className }: { className?: string }) => JSX.Element> = {
+  'local':       ComputerIcon,
+  'api-key':     LockIcon,
+  'openai-v1':   CodeIcon,
+  'open-source': GithubIcon,
+  'recommended': StarIcon,
+  'enterprise':  TrustIcon,
+}
+
+// ── Type filter definitions ────────────────────────────────────────────────────
+
+const TYPE_DEFS = [
+  { id: 'local',       label: 'Local',           icon: '/images/icons/computer.svg' },
+  { id: 'api-key',     label: 'API Key',          icon: '/images/icons/lock.svg' },
+  { id: 'openai-v1',   label: 'OpenAI v1',        icon: '/images/icons/code.svg' },
+  { id: 'open-source', label: 'Open Source',      icon: '/images/icons/github.svg' },
+  { id: 'recommended', label: 'Recommended',      icon: '/images/icons/star.svg' },
+  { id: 'enterprise',  label: 'Enterprise',       icon: '/images/icons/trust.svg' },
+] as const
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+
+export default function SoulBrainPage() {
+  const { selected, selectedId, updateCharacter } = useCharactersContext()
+  const router = useRouter()
+  const params = useParams<{ id: string }>()
+
+  const [search, setSearch] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [typeOpen, setTypeOpen] = useState(false)
+  const [pendingTypes, setPendingTypes] = useState<Set<string>>(new Set())
+  const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set())
+
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const [credMap, setCredMap] = useState<Map<string, CredentialResponse>>(new Map())
+
+  useEffect(() => {
+    getCredentials().then((creds) => {
+      setCredMap(new Map(creds.map((c) => [c.providerId, c])))
+    }).catch(() => {})
+  }, [])
+
+  // counts per type across full catalog
+  const typeCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const t of TYPE_DEFS) counts[t.id] = 0
+    for (const p of LLM_PROVIDER_CATALOG) {
+      for (const t of p.types) if (t in counts) counts[t]++
+    }
+    return counts
+  }, [])
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return LLM_PROVIDER_CATALOG.filter((p) => {
+      const typeMatch = activeTypes.size === 0 || p.types.some((t) => activeTypes.has(t))
+      const searchMatch =
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        p.model.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.kind.toLowerCase().includes(q) ||
+        p.tags.some((t) => t.toLowerCase().includes(q))
+      return typeMatch && searchMatch
+    })
+  }, [search, activeTypes])
+
+  // close dropdown on outside click
+  useEffect(() => {
+    if (!typeOpen) return
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setTypeOpen(false)
+        setPendingTypes(new Set(activeTypes))
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [typeOpen, activeTypes])
+
+  // focus search input when opened
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus()
+  }, [searchOpen])
+
+  const toggleType = useCallback((id: string) => {
+    setPendingTypes((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }, [])
+
+  const applyTypes = () => {
+    setActiveTypes(new Set(pendingTypes))
+    setTypeOpen(false)
+  }
+
+  const clearTypes = () => {
+    setPendingTypes(new Set())
+  }
+
+  const selectAllTypes = () => {
+    setPendingTypes(new Set(TYPE_DEFS.map((t) => t.id)))
+  }
+
+  const removeActiveType = (id: string) => {
+    setActiveTypes((prev) => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+    setPendingTypes((prev) => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+  }
+
+  const handleSelectProvider = (providerId: string) => {
+    if (selected && selectedId) {
+      updateCharacter(selectedId, { llm: { ...selected.llm, providerId } })
+    }
+    router.push(`/souls/${params.id}/brain/${providerId}`)
+  }
+
+  const hasActiveFilters = activeTypes.size > 0
+  const isTypeActive = hasActiveFilters
+
+  return (
+    <div className="mx-auto w-full max-w-7xl px-24 pb-14 pt-9 xl:max-w-[90rem]">
+      <header className="mb-9">
+        <h1 className="text-[1.625rem] font-semibold leading-8 text-[var(--text-heading)]">Brain</h1>
+        <p className="mt-1 text-[1rem] leading-6 text-[var(--text-secondary)]">Manage language model providers and behavior settings.</p>
+      </header>
+      <FeaturedIntegrations baseHref={`/souls/${params.id}/brain`} type="brain" />
+      <div>
+      {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
+      <div className="mb-6">
+        <h2 className="text-[1.0625rem] font-semibold text-[var(--text-heading)]">Brain Providers</h2>
+        <p className="mt-0.5 text-[0.875rem] text-[var(--text-secondary)]">Choose a language model to power your soul&apos;s thinking.</p>
+      </div>
+      <div className="mb-4 flex items-center justify-between gap-2 py-1.5">
+        {/* Type filter button */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            type="button"
+            onClick={() => {
+              if (!typeOpen) setPendingTypes(new Set(activeTypes))
+              setTypeOpen((v) => !v)
+            }}
+            className={cn(
+              'flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[0.8125rem] font-medium transition-colors duration-150',
+              'border outline-none',
+              isTypeActive
+                ? 'border-[#3B82F6] bg-blue-500/10 text-[var(--text-primary)]'
+                : 'border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-card)] hover:text-[var(--text-primary)]',
+            )}
+          >
+            <GridIcon className="h-4 w-4 text-[var(--text-tertiary)]" />
+            Type
+            {isTypeActive && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#3B82F6] text-[10px] font-bold text-white leading-none">
+                {activeTypes.size}
+              </span>
+            )}
+            <CaretDownIcon className={cn('h-4 w-4 text-[var(--text-tertiary)] transition-transform duration-150', typeOpen && 'rotate-180')} />
+          </button>
+
+          {/* Dropdown */}
+          {typeOpen && (
+            <div className="absolute left-0 top-full z-50 mt-1 w-56 overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+              <div className="py-1">
+                {TYPE_DEFS.map((t) => {
+                  const checked = pendingTypes.has(t.id)
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => toggleType(t.id)}
+                      className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-[var(--surface-card-hover)]"
+                    >
+                      {/* Checkbox */}
+                      <span className={cn(
+                        'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
+                        checked
+                          ? 'border-[#3B82F6] bg-[#3B82F6]'
+                          : 'border-[var(--border-default)] bg-transparent',
+                      )}>
+                        {checked && (
+                          <svg viewBox="0 0 10 8" fill="none" className="h-2.5 w-2.5">
+                            <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </span>
+                      {(() => { const Icon = TYPE_ICONS[t.id]; return Icon ? <Icon className="h-4 w-4 shrink-0 text-[var(--text-secondary)]" /> : null })()}
+                      <span className="flex-1 text-[0.8125rem] text-[var(--text-primary)]">{t.label}</span>
+                      <span className="text-[0.75rem] text-[var(--text-tertiary)]">{typeCounts[t.id]}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="flex items-center justify-between border-t border-[var(--border-subtle)] px-3 py-2">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={selectAllTypes}
+                    className="text-[0.75rem] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    Select all
+                  </button>
+                  <span className="text-[var(--text-tertiary)]">·</span>
+                  <button
+                    type="button"
+                    onClick={clearTypes}
+                    className="text-[0.75rem] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    Clear
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={applyTypes}
+                  className="rounded-md bg-[#3B82F6] px-3 py-1 text-[0.75rem] font-semibold text-white hover:bg-blue-500 transition-colors"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Search */}
+        <div className="flex items-center gap-2">
+          {searchOpen && (
+            <input
+              ref={searchInputRef}
+              type="search"
+              placeholder="Search providers..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={cn(
+                'h-8 w-48 rounded-lg border border-[var(--border-default)] bg-[var(--surface-input)] px-3',
+                'text-[0.8125rem] text-[var(--text-primary)] outline-none transition-colors',
+                'placeholder:text-[var(--text-tertiary)] focus:border-[var(--border-strong)]',
+              )}
+            />
+          )}
+          <button
+            type="button"
+            onClick={() => { setSearchOpen((v) => !v); if (searchOpen) setSearch('') }}
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-md border transition-colors',
+              searchOpen
+                ? 'border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)]'
+                : 'border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-card)] hover:text-[var(--text-primary)]',
+            )}
+          >
+            <SearchIcon className="h-4 w-4 text-[var(--text-secondary)]" />
+          </button>
+        </div>
+      </div>
+
+      {/* ── Active filter chips ──────────────────────────────────────────────── */}
+      {hasActiveFilters && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {Array.from(activeTypes).map((id) => {
+            const def = TYPE_DEFS.find((t) => t.id === id)
+            if (!def) return null
+            return (
+              <span
+                key={id}
+                className="flex items-center gap-1.5 rounded-full border border-[var(--border-default)] bg-[var(--surface-card)] px-2.5 py-1 text-[0.75rem] font-medium text-[var(--text-primary)]"
+              >
+                {(() => { const Icon = TYPE_ICONS[id]; return Icon ? <Icon className="h-3.5 w-3.5 text-[var(--text-secondary)]" /> : null })()}
+                {def.label}
+                <button
+                  type="button"
+                  onClick={() => removeActiveType(id)}
+                  className="ml-0.5 opacity-50 hover:opacity-100 transition-opacity"
+                >
+                  <XSmallIcon className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                </button>
+              </span>
+            )
+          })}
+          <button
+            type="button"
+            onClick={() => { setActiveTypes(new Set()); setPendingTypes(new Set()) }}
+            className="text-[0.75rem] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
+
+      {/* ── Grid ────────────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-3 gap-4">
+        {filtered.map((provider) => {
+          const cred = credMap.get(provider.id)
+          return (
+            <BrainProviderCard
+              key={provider.id}
+              provider={provider}
+              selected={selected?.llm.providerId === provider.id}
+              onSelect={() => handleSelectProvider(provider.id)}
+              credentialStatus={cred ? statusFromCredential(cred.verifiedAt, cred.lastError) : undefined}
+              credentialError={cred?.lastError}
+            />
+          )
+        })}
+      </div>
+
+      {filtered.length === 0 && (
+        <p className="mt-8 text-center text-[0.875rem] text-[var(--text-tertiary)]">No providers match your filters.</p>
+      )}
+      </div>
+    </div>
+  )
+}

@@ -1,3 +1,4 @@
+using Inktide.API.Core.Contracts;
 namespace Inktide.API.Synapse.Application.Models;
 
 /// <summary>
@@ -7,7 +8,7 @@ namespace Inktide.API.Synapse.Application.Models;
 /// attach voice/provider metadata to each chunked response without an extra DB round-trip.
 /// </summary>
 public sealed record ContextShardPayload(
-    Guid AiCardId,
+    Guid CharacterId,
     Guid UserId,
     string ChannelId,
     string ChannelName,
@@ -43,4 +44,10 @@ public sealed record ContextShardPayload(
     /// <summary>Milliseconds to wait before publishing the first TTS chunk after generation completes.</summary>
     int ResponseDelayMs = 0,
     /// <summary>Per-card base URL override — wins over global BYOK credential base URL.</summary>
-    string? LlmBaseUrl = null);
+    string? LlmBaseUrl = null,
+    /// <summary>How quickly emotions adapt to messages — scales TTS speed modulation. From PersonalitySettings.</summary>
+    float EmotionResponsiveness = 0.7f,
+    /// <summary>Natural-language personality directive block injected into the LLM system prompt. Null = no personality configured.</summary>
+    string? PersonalityDirective = null,
+    /// <summary>Per-project plugin configuration. Null = all plugins default ON (backwards compatible).</summary>
+    IReadOnlyList<ProjectPluginDto>? Plugins = null);

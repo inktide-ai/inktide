@@ -18,7 +18,7 @@ public sealed class RedisStreamPublisherWorker : BackgroundService
 
     private const int MaxRetries = 3;
 
-    private const string QueueLabel = "synapse.ingest";
+    private const string QueueLabel = Core.Constants.StreamNames.SynapseIngest;
 
     private static readonly TimeSpan[] RetryDelays =
     [

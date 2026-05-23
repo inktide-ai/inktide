@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Inktide.API.Project.REST</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
+    <ProjectReference Include="..\Inktide.API.Project.Application\Inktide.API.Project.Application.csproj" />
+    <ProjectReference Include="..\Inktide.API.Project.Domain\Inktide.API.Project.Domain.csproj" />
+    <ProjectReference Include="..\Inktide.API.Project.Infrastructure\Inktide.API.Project.Infrastructure.csproj" />
+    <ProjectReference Include="..\Inktide.API.Project.REST.Models\Inktide.API.Project.REST.Models.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Soul\Inktide.API.Soul.Application\Inktide.API.Soul.Application.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Soul\Inktide.API.Soul.Domain\Inktide.API.Soul.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

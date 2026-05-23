@@ -13,4 +13,7 @@ public interface IAiCardChannelRepository
     Task UpdateAsync(AiCardChannel channel, CancellationToken ct = default);
     Task DeleteAsync(Guid id, CancellationToken ct = default);
     Task<IReadOnlyList<AiCardChannel>> GetActiveByPlatformAsync(string platform, CancellationToken ct = default);
+
+    /// <summary>Returns all active Discord channels with a non-null guild_id for registry population.</summary>
+    Task<IReadOnlyList<AiCardChannel>> GetActiveDiscordChannelsAsync(CancellationToken ct = default);
 }

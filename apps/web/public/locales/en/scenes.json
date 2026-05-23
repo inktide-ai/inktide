@@ -1,0 +1,58 @@
+{
+  "section": {
+    "title": "Scenes"
+  },
+  "header": {
+    "title": "Runtime Scenes",
+    "subtitle": "Named configuration presets that override your soul's defaults at runtime — without changing the base config.",
+    "active": "Active scene",
+    "none": "No active scene",
+    "defaults": "Running on soul defaults"
+  },
+  "preset": {
+    "live": "LIVE",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "edit": "Edit",
+    "delete": "Delete",
+    "model": "Model",
+    "temperature": "Temperature",
+    "emotion": "Emotion",
+    "voice": "Voice",
+    "default": "Soul default",
+    "switching": "Switching…"
+  },
+  "empty": {
+    "title": "No runtime scenes yet",
+    "subtitle": "Create a scene to switch your soul's model, temperature, emotion profile, or voice at runtime — without touching the base config."
+  },
+  "create": "Create Scene",
+  "form": {
+    "name": "Scene name",
+    "namePlaceholder": "e.g. Streaming Mode",
+    "description": "Description",
+    "descriptionPlaceholder": "Short tagline for this scene",
+    "icon": "Icon (emoji)",
+    "iconPlaceholder": "🎮",
+    "overrides": "Runtime overrides",
+    "overridesHint": "Leave empty to keep the soul's configured value.",
+    "llmModel": "LLM model",
+    "temperature": "Temperature",
+    "emotionProfile": "Emotion profile",
+    "voiceProfile": "Voice profile",
+    "useDefault": "Use soul default",
+    "save": "Save scene",
+    "cancel": "Cancel"
+  },
+  "error": {
+    "load": "Failed to load scenes.",
+    "create": "Could not create scene.",
+    "update": "Update failed.",
+    "delete": "Delete failed.",
+    "activate": "Activation failed.",
+    "nameRequired": "Scene name is required."
+  },
+  "confirm": {
+    "delete": "Delete scene \"{{name}}\"?"
+  }
+}

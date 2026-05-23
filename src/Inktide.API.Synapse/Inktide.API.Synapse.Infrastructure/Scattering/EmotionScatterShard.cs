@@ -1,34 +1,40 @@
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
+using Inktide.API.Synapse.Infrastructure.Constants;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Synapse.Infrastructure.Scattering;
 
 /// <summary>
-/// Scatter shard: classifies the emotional reaction for the inbound message.
-/// Runs in parallel with RAG and Session shards — adds zero latency to the pipeline
-/// because the aggregation waits for all shards via <c>Task.WhenAll</c>.
+/// Scatter shard: classifies the emotional reaction for the inbound message, then blends the result
+/// into the character's running <see cref="EmotionalState"/> stored in Redis.
 ///
-/// SRP: only performs emotion classification and stores the result.
-/// OCP: registered via <see cref="ISynapseScatterShard"/> — orchestrator is unaware of this type.
-/// Removing this feature = delete this file + remove the DI registration.
+/// The aggregated envelope carries <see cref="EmotionalState"/> (trajectory, momentum, blended intensity)
+/// rather than a raw per-message <see cref="EmotionResult"/>, so downstream components see emotional
+/// continuity across conversation turns.
+///
+/// SRP: classification + state update only.
+/// OCP: registered via <see cref="IPipelineStage"/> — removing this feature = delete file + DI.
 /// </summary>
-public sealed class EmotionScatterShard : ISynapseScatterShard
+public sealed class EmotionScatterShard : IPipelineStage
 {
 
     private readonly IEmotionClassificationService _classifier;
+    private readonly IEmotionalStateService _emotionalState;
     private readonly ILogger<EmotionScatterShard> _logger;
 
 
-    public string ShardId => "emotion";
+    public string ShardId => SynapseConstants.ShardIds.Emotion;
 
 
     public EmotionScatterShard(
         IEmotionClassificationService classifier,
+        IEmotionalStateService emotionalState,
         ILogger<EmotionScatterShard> logger)
     {
-        _classifier = classifier ?? throw new ArgumentNullException(nameof(classifier));
-        _logger     = logger     ?? throw new ArgumentNullException(nameof(logger));
+        _classifier     = classifier     ?? throw new ArgumentNullException(nameof(classifier));
+        _emotionalState = emotionalState ?? throw new ArgumentNullException(nameof(emotionalState));
+        _logger         = logger         ?? throw new ArgumentNullException(nameof(logger));
     }
 
 
@@ -38,23 +44,71 @@ public sealed class EmotionScatterShard : ISynapseScatterShard
 
         if (cardCtx is null)
         {
-            context.Set(new EmotionResult(null, 0f));
+            // No card context — store a neutral state so downstream code doesn't need null checks.
+            context.Set(new EmotionalState(
+                CharacterId:    Guid.Empty,
+                CurrentEmotion: null,
+                Intensity:      0f,
+                PreviousEmotion: null,
+                Momentum:       0f,
+                TrajectoryLabel: null,
+                LastUpdated:    DateTimeOffset.UtcNow));
             return;
         }
 
-        var result = await _classifier.ClassifyAsync(
-            context.Message.Text,
-            cardCtx.Personality,
-            cancellationToken,
-            cardCtx.EmotionIntensityScale);
+        EmotionalState updatedState;
+        try
+        {
+            var classified = await _classifier.ClassifyAsync(
+                context.Message.Text,
+                cardCtx.Personality,
+                cancellationToken,
+                cardCtx.EmotionIntensityScale);
 
-        context.Set(result);
+            var dynamics = cardCtx.EmotionDynamics ?? EmotionDynamics.Default;
+            updatedState = await _emotionalState.UpdateAsync(
+                cardCtx.CharacterId,
+                classified,
+                dynamics,
+                cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning(
+                "[Scatter:{ShardId}] Emotion service unavailable ({Reason}), using neutral state. Correlation={Correlation}",
+                ShardId,
+                ex.Message,
+                context.CorrelationId);
+            context.Set(new EmotionalState(
+                CharacterId: cardCtx.CharacterId, CurrentEmotion: null,
+                Intensity: 0f, PreviousEmotion: null, Momentum: 0f,
+                TrajectoryLabel: null, LastUpdated: DateTimeOffset.UtcNow));
+            return;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "[Scatter:{ShardId}] Unexpected error during emotion classification — using neutral state. Correlation={Correlation}",
+                ShardId,
+                context.CorrelationId);
+            context.Set(new EmotionalState(
+                CharacterId: cardCtx.CharacterId, CurrentEmotion: null,
+                Intensity: 0f, PreviousEmotion: null, Momentum: 0f,
+                TrajectoryLabel: null, LastUpdated: DateTimeOffset.UtcNow));
+            return;
+        }
+
+        context.Set(updatedState);
 
         _logger.LogDebug(
-            "[Scatter:{ShardId}] emotion={Emotion} intensity={Intensity:F2} Correlation={Correlation}",
+            "[Scatter:{ShardId}] {Prev}→{Curr} intensity={Intensity:F2} momentum={Momentum:F2} trajectory={Trajectory} Correlation={Correlation}",
             ShardId,
-            result.Emotion ?? "null",
-            result.Intensity,
+            updatedState.PreviousEmotion ?? "null",
+            updatedState.CurrentEmotion  ?? "null",
+            updatedState.Intensity,
+            updatedState.Momentum,
+            updatedState.TrajectoryLabel ?? "-",
             context.CorrelationId);
     }
 

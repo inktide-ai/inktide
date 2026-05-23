@@ -14,4 +14,10 @@ public interface IUserProviderCredentialService
     /// Called by LlmStreamWorker via IServiceScopeFactory — key is never serialised to Redis.
     /// </summary>
     Task<DecryptedCredential?> GetDecryptedAsync(Guid userId, string providerId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Tests the stored credential against the real provider API and persists the result.
+    /// Returns the test outcome. Use after <see cref="UpsertAsync"/> to verify the key is valid.
+    /// </summary>
+    Task<CredentialTestResult> TestAndPersistAsync(Guid userId, string providerId, CancellationToken ct = default);
 }

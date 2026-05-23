@@ -8,7 +8,8 @@ public sealed class TtsOutputStreamSettings
 {
     public const string SectionName = "TtsOutputStream";
 
-    /// <summary>Redis stream key where audio payloads are published.</summary>
+    /// <summary>Redis stream key where audio payloads are published.
+    /// Default matches <c>Inktide.API.Core.Constants.StreamNames.TtsReady</c>.</summary>
     public string StreamName { get; set; } = "synapse.tts.ready";
 
     /// <summary>Approximate MAXLEN (~N) to keep memory bounded.</summary>

@@ -8,4 +8,5 @@ public interface IUserProviderCredentialRepository
     Task<UserProviderCredential?> GetByUserAndProviderAsync(Guid userId, string providerId, CancellationToken ct = default);
     Task<UserProviderCredential> UpsertAsync(UserProviderCredential credential, CancellationToken ct = default);
     Task DeleteAsync(Guid userId, string providerId, CancellationToken ct = default);
+    Task UpdateVerificationAsync(Guid userId, string providerId, bool success, string? error, DateTime testedAt, CancellationToken ct = default);
 }

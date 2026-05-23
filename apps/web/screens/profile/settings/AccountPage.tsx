@@ -1,7 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { useCharactersContext } from '../../../context/CharactersContext'
-import AccountAvatarPanel from '../../../components/ProfilePage/AccountAvatarPanel'
+import AccountAvatarPanel from '../../../components/profile/account-avatar-panel'
 import { HOME_ROUTE } from '@/lib/routes'
 
 export default function AccountPage() {

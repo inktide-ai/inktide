@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Inktide.API.Profile.Application.Interfaces;
@@ -51,7 +52,7 @@ public sealed class AiCardBannerService : IAiCardBannerService
             return new AiCardBannerUpdateResult(false, null, "AI card not found.");
 
         var safeName  = StorageFileHelper.SanitizeFileName(fileName, "banner.bin");
-        var objectKey = $"users/{userId:N}/cards/{cardId:N}/banner_{Guid.NewGuid():N}_{safeName}";
+        var objectKey = $"users/{userId:N}/cards/{cardId:N}/banner_{IdGenerator.New():N}_{safeName}";
 
         await _storage.PutObjectAsync(objectKey, fileStream, contentType, ct).ConfigureAwait(false);
 

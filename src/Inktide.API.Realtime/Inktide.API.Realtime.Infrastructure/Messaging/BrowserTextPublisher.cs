@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Inktide.API.Realtime.Infrastructure.Configuration;
@@ -255,6 +256,6 @@ public sealed class BrowserTextPublisher : BackgroundService
         => Environment.GetEnvironmentVariable("DOTNET_HOSTNAME")
            ?? Environment.GetEnvironmentVariable("HOSTNAME")
            ?? Environment.GetEnvironmentVariable("K8S_POD_NAME")
-           ?? Guid.NewGuid().ToString("N")[..8];
+           ?? IdGenerator.New().ToString("N")[..8];
 
 }

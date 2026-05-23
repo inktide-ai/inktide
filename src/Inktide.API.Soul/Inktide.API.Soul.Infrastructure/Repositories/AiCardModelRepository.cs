@@ -17,11 +17,10 @@ public sealed class AiCardModelRepository : IAiCardModelRepository
     }
 
 
-    public async Task<AiCardModel> AddAsync(AiCardModel model, CancellationToken ct = default)
+    public Task<AiCardModel> AddAsync(AiCardModel model, CancellationToken ct = default)
     {
         _db.AiCardModels.Add(model);
-        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
-        return model;
+        return Task.FromResult(model);
     }
 
     public async Task<IReadOnlyList<AiCardModel>> ListByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default)
@@ -66,6 +65,30 @@ public sealed class AiCardModelRepository : IAiCardModelRepository
             .AsNoTracking()
             .Where(m => m.UserId == userId && m.AiCardId == aiCardId && m.Id != excludeId)
             .ToListAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task DeactivateAllByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default)
+    {
+        await _db.AiCardModels
+            .Where(m => m.UserId == userId && m.AiCardId == aiCardId && m.IsActive)
+            .ExecuteUpdateAsync(s => s.SetProperty(m => m.IsActive, false), ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task ActivateByIdAsync(Guid userId, Guid aiCardId, Guid modelId, CancellationToken ct = default)
+    {
+        await _db.AiCardModels
+            .Where(m => m.UserId == userId && m.AiCardId == aiCardId && m.Id == modelId)
+            .ExecuteUpdateAsync(s => s.SetProperty(m => m.IsActive, true), ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<AiCardModel?> GetActiveByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default)
+    {
+        return await _db.AiCardModels
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.UserId == userId && m.AiCardId == aiCardId && m.IsActive, ct)
             .ConfigureAwait(false);
     }
 

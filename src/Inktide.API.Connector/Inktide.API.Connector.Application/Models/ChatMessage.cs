@@ -8,4 +8,11 @@ public sealed record ChatMessage(
     UserMetadata Sender,
     string Text,
     DateTimeOffset Timestamp,
-    StreamInfo? Stream = null);
+    StreamInfo? Stream = null)
+{
+    /// <summary>
+    /// When set, routes this message to a specific character (AI card).
+    /// Populated by the GuildSoulRegistry for Discord messages.
+    /// </summary>
+    public Guid? CharacterId { get; init; }
+}

@@ -1,8 +1,11 @@
+using Inktide.API.Core.Generators;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Models;
 using Inktide.API.Soul.Domain.Entities;
 using Inktide.API.Soul.Domain.Repositories;
 using Microsoft.Extensions.Logging;
+
+// ReSharper disable ConvertIfStatementToReturnStatement
 
 namespace Inktide.API.Soul.Application.Services;
 
@@ -11,6 +14,7 @@ public sealed class UserProviderCredentialService : IUserProviderCredentialServi
 
     private readonly IUserProviderCredentialRepository _repo;
     private readonly IApiKeyProtector _protector;
+    private readonly ICredentialTester _tester;
     private readonly TimeProvider _time;
     private readonly ILogger<UserProviderCredentialService> _logger;
 
@@ -18,11 +22,13 @@ public sealed class UserProviderCredentialService : IUserProviderCredentialServi
     public UserProviderCredentialService(
         IUserProviderCredentialRepository repo,
         IApiKeyProtector protector,
+        ICredentialTester tester,
         TimeProvider time,
         ILogger<UserProviderCredentialService> logger)
     {
         _repo      = repo      ?? throw new ArgumentNullException(nameof(repo));
         _protector = protector ?? throw new ArgumentNullException(nameof(protector));
+        _tester    = tester    ?? throw new ArgumentNullException(nameof(tester));
         _time      = time      ?? throw new ArgumentNullException(nameof(time));
         _logger    = logger    ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -33,7 +39,9 @@ public sealed class UserProviderCredentialService : IUserProviderCredentialServi
     {
         var creds = await _repo.GetByUserIdAsync(userId, ct);
         return creds
-            .Select(c => new UserProviderCredentialSummary(c.ProviderId, c.ApiKeyEnc is not null, c.BaseUrl, c.Config, c.UpdatedAt))
+            .Select(c => new UserProviderCredentialSummary(
+                c.ProviderId, c.ApiKeyEnc is not null, c.BaseUrl, c.Config,
+                c.UpdatedAt, c.VerifiedAt, c.LastError))
             .ToList();
     }
 
@@ -49,17 +57,20 @@ public sealed class UserProviderCredentialService : IUserProviderCredentialServi
         var existing = await _repo.GetByUserAndProviderAsync(userId, providerId, ct);
         if (existing is not null)
         {
-            existing.ApiKeyEnc = encryptedKey;
-            existing.BaseUrl   = baseUrl;
-            existing.Config    = config;
-            existing.UpdatedAt = now;
+            existing.ApiKeyEnc  = encryptedKey;
+            existing.BaseUrl    = baseUrl;
+            existing.Config     = config;
+            existing.UpdatedAt  = now;
+            // Key changed — clear previous test result so guard doesn't act on stale data
+            existing.VerifiedAt = null;
+            existing.LastError  = null;
             await _repo.UpsertAsync(existing, ct);
         }
         else
         {
             var credential = new UserProviderCredential
             {
-                Id         = Guid.NewGuid(),
+                Id         = IdGenerator.New(),
                 UserId     = userId,
                 ProviderId = providerId,
                 ApiKeyEnc  = encryptedKey,
@@ -104,6 +115,25 @@ public sealed class UserProviderCredentialService : IUserProviderCredentialServi
                 userId, providerId);
             return null;
         }
+    }
+
+    public async Task<CredentialTestResult> TestAndPersistAsync(
+        Guid userId, string providerId, CancellationToken ct = default)
+    {
+        var decrypted = await GetDecryptedAsync(userId, providerId, ct);
+        if (decrypted is null)
+            return new CredentialTestResult(false, "No credential stored.");
+
+        var result  = await _tester.TestAsync(providerId, decrypted.ApiKey, decrypted.BaseUrl, decrypted.Config, ct);
+        var testedAt = _time.GetUtcNow().UtcDateTime;
+
+        await _repo.UpdateVerificationAsync(userId, providerId, result.Success, result.Error, testedAt, ct);
+
+        _logger.LogInformation(
+            "Credential test for user {UserId} provider {ProviderId}: {Result}",
+            userId, providerId, result.Success ? "OK" : $"FAILED — {result.Error}");
+
+        return result;
     }
 
 }

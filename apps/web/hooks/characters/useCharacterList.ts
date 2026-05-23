@@ -1,56 +1,41 @@
 'use client'
-import { useCallback, useEffect, useState } from 'react'
-import type { AiCardListItem, LlmModelResponse } from '../../api/soul'
+import { useCallback } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import type { AiCardListItem } from '../../api/soul'
 import type { ICardRepository } from '@/types/ICardRepository'
+import { queryKeys } from '@/lib/query/keys'
 
-/**
- * ISP: единственная ответственность — загрузка и кеш списка карточек + каталога LLM.
- * Не знает о выборе, грязном состоянии или мутациях.
- */
 export function useCharacterList(repo: ICardRepository) {
-  const [cardList, setCardList] = useState<AiCardListItem[]>([])
-  const [llmModels, setLlmModels] = useState<LlmModelResponse[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    let cancelled = false
+  const { data: cardList = [], isLoading: loading, error } = useQuery({
+    queryKey: queryKeys.souls.all,
+    queryFn: () => repo.listCards(),
+  })
 
-    async function load() {
-      setLoading(true)
-      setLoadError(null)
-      try {
-        const [cards, models] = await Promise.all([repo.listCards(), repo.listLlmModels()])
-        if (cancelled) return
-        setCardList(cards)
-        setLlmModels(models)
-      } catch (err) {
-        if (!cancelled) {
-          setLoadError(err instanceof Error ? err.message : 'Failed to load')
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
+  const { data: llmModels = [] } = useQuery({
+    queryKey: queryKeys.catalog.llmModels,
+    queryFn: () => repo.listLlmModels(),
+  })
 
-    void load()
-    return () => { cancelled = true }
-  }, [repo])
+  const loadError = error instanceof Error ? error.message : error ? 'Failed to load' : null
 
   const updateListItem = useCallback((
     id: string,
     patch: Partial<Pick<AiCardListItem, 'name' | 'slug' | 'personality' | 'is_active' | 'avatar_url'>>,
   ) => {
-    setCardList((prev) => prev.map((c) => c.id === id ? { ...c, ...patch } : c))
-  }, [])
+    queryClient.setQueryData<AiCardListItem[]>(queryKeys.souls.all, (prev = []) =>
+      prev.map((c) => c.id === id ? { ...c, ...patch } : c),
+    )
+  }, [queryClient])
 
   const addListItem = useCallback((item: AiCardListItem) => {
-    setCardList((prev) => [...prev, item])
-  }, [])
+    queryClient.setQueryData<AiCardListItem[]>(queryKeys.souls.all, (prev = []) => [...prev, item])
+  }, [queryClient])
 
   const removeListItem = useCallback((id: string) => {
-    setCardList((prev) => prev.filter((c) => c.id !== id))
-  }, [])
+    queryClient.setQueryData<AiCardListItem[]>(queryKeys.souls.all, (prev = []) => prev.filter((c) => c.id !== id))
+  }, [queryClient])
 
   return { cardList, llmModels, loading, loadError, updateListItem, addListItem, removeListItem }
 }

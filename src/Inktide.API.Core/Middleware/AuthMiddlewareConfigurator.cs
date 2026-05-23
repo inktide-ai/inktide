@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Builder;
 
 namespace Inktide.API.Core.Middleware;
 
@@ -13,18 +12,18 @@ namespace Inktide.API.Core.Middleware;
 /// </summary>
 public sealed class AuthMiddlewareConfigurator : IMiddlewareConfigurator
 {
-
     private const string CorsPolicyName = "InktidePolicy";
 
+    public int Order => 10;
 
     public void Configure(IApplicationBuilder app)
     {
         app.UseInktideGlobalExceptionHandler();
         app.UseCors(CorsPolicyName);
         app.UseRouting();
-        app.UseRateLimiter();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseRateLimiter();
     }
 
 }

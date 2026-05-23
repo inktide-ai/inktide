@@ -3,6 +3,7 @@ using Inktide.API.Billing.Infrastructure.Settings;
 using Inktide.API.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Billing.REST.Controllers;
@@ -13,6 +14,7 @@ namespace Inktide.API.Billing.REST.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/billing/webhook")]
+[EnableRateLimiting(BillingRestApiStartup.WebhookRateLimitPolicy)]
 public sealed class WebhookController : ControllerBase
 {
     private readonly IEnumerable<IWebhookProcessor> _processors;

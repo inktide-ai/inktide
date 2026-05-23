@@ -1,6 +1,6 @@
 'use client'
 import { useCharactersContext } from '../../../context/CharactersContext'
-import MemoryTab from '../../../components/ProfilePage/tabs/MemoryTab'
+import MemoryTab from '../../../components/profile/tabs/memory-tab'
 
 export default function MemoryPage() {
   const { selected, updateCharacter } = useCharactersContext()

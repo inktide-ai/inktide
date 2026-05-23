@@ -1,8 +1,7 @@
 namespace Inktide.API.Memory.Domain.Ports;
 
 /// <summary>
-/// Outbound port — PostgreSQL mirror of Qdrant vectors via <c>SoulDbContext.MemoryMetadata</c>.
-/// Implementation lives in Memory.Infrastructure and uses Soul.Domain entity directly.
+/// Outbound port — PostgreSQL mirror of Qdrant vectors, owned by the Memory bounded context.
 /// </summary>
 public interface IMemoryMetadataRepository
 {
@@ -23,4 +22,6 @@ public interface IMemoryMetadataRepository
         CancellationToken ct = default);
 
     Task DeleteExpiredAsync(CancellationToken ct = default);
+
+    Task<int> CountTotalAsync(CancellationToken ct = default);
 }

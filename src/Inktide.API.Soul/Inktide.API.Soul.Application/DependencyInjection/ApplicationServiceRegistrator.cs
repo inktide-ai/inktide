@@ -1,6 +1,8 @@
 using Inktide.API.Core;
+using Inktide.API.Soul.Application.Guards;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Policies;
+using Inktide.API.Soul.Application.Queries;
 using Inktide.API.Soul.Application.Services;
 using Inktide.API.Soul.Application.Storage;
 using DryIoc;
@@ -20,7 +22,10 @@ public sealed class ApplicationServiceRegistrator : IServiceRegistrator
 
         // --- Core services ---
         registrator.Register<ISlugGenerator, DefaultSlugGenerator>(Reuse.Singleton);
+        registrator.Register<IAiCardSlugService, AiCardSlugService>(Reuse.Singleton);
         registrator.Register<IAiCardService, AiCardService>(Reuse.Scoped);
+        registrator.Register<SoulCreationValidationQueryService>(Reuse.Scoped);
+        registrator.Register<SoulCreationGuard>(Reuse.Scoped);
         registrator.Register<IAiCardActivityService, AiCardActivityService>(Reuse.Scoped);
 
         // --- Upload services ---
@@ -28,8 +33,9 @@ public sealed class ApplicationServiceRegistrator : IServiceRegistrator
         registrator.Register<IAiCardBannerService, AiCardBannerService>(Reuse.Scoped);
 
         // --- Model upload + retention policy ---
-        // OCP: swap SingleActiveModelRetentionPolicy for another IModelRetentionPolicy — no other file changes.
-        registrator.Register<IModelRetentionPolicy, SingleActiveModelRetentionPolicy>(Reuse.Scoped);
+        // OCP: NoOpModelRetentionPolicy keeps all models; active selection managed via SetActiveAsync.
+        // Swap back to SingleActiveModelRetentionPolicy to restore one-model-per-card behavior.
+        registrator.Register<IModelRetentionPolicy, NoOpModelRetentionPolicy>(Reuse.Scoped);
         registrator.Register<IAiCardModelUploadService, AiCardModelUploadService>(Reuse.Scoped);
 
         // --- Scene upload + tag management (ISP: two focused interfaces) ---
@@ -44,5 +50,8 @@ public sealed class ApplicationServiceRegistrator : IServiceRegistrator
 
         // --- BYOK provider credentials ---
         registrator.Register<IUserProviderCredentialService, UserProviderCredentialService>(Reuse.Scoped);
+
+        // --- Runtime presets (Scenes) ---
+        registrator.Register<IAiCardRunPresetService, AiCardRunPresetService>(Reuse.Scoped);
     }
 }

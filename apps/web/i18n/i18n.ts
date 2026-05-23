@@ -20,7 +20,7 @@ export async function initI18n() {
     fallbackLng: 'en',
     supportedLngs: ['en', 'ru'],
     defaultNS: 'common',
-    ns: ['common', 'landing', 'model', 'behavior', 'brain', 'backup', 'providers', 'obs', 'integrations', 'scene', 'prompts', 'voice', 'profile'],
+    ns: ['common', 'landing', 'model', 'behavior', 'brain', 'backup', 'providers', 'obs', 'channels', 'scene', 'scenes', 'prompts', 'voice', 'profile'],
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },

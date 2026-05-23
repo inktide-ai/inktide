@@ -14,6 +14,8 @@ public sealed class AiCardChannel
     private string? _channelId;
     private string _botUsername = string.Empty;
     private string? _oAuthTokenEnc;
+    private string? _refreshTokenEnc;
+    private DateTime? _tokenExpiresAt;
     private bool _isActive = true;
     private DateTime? _connectedAt;
     private DateTime _createdAt;
@@ -56,11 +58,34 @@ public sealed class AiCardChannel
         set => _botUsername = value;
     }
 
-    /// <summary>Encrypted at application layer — never stored in plaintext.</summary>
+    /// <summary>Encrypted access token — never stored in plaintext.</summary>
     public string? OAuthTokenEnc
     {
         get => _oAuthTokenEnc;
         set => _oAuthTokenEnc = value;
+    }
+
+    /// <summary>Encrypted refresh token — never stored in plaintext.</summary>
+    public string? RefreshTokenEnc
+    {
+        get => _refreshTokenEnc;
+        set => _refreshTokenEnc = value;
+    }
+
+    private string? _customBotTokenEnc;
+
+    /// <summary>Encrypted user-supplied bot token — never stored in plaintext.</summary>
+    public string? CustomBotTokenEnc
+    {
+        get => _customBotTokenEnc;
+        set => _customBotTokenEnc = value;
+    }
+
+    /// <summary>UTC expiry of the access token.</summary>
+    public DateTime? TokenExpiresAt
+    {
+        get => _tokenExpiresAt;
+        set => _tokenExpiresAt = value;
     }
 
     public bool IsActive

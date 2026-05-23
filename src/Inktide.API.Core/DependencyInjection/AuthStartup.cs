@@ -2,6 +2,7 @@ using System.Linq;
 using System.Security.Claims;
 using Inktide.API.Core.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -61,6 +62,19 @@ public sealed class AuthStartup : IStartup
                     {
                         MapKeycloakSubClaim(context);
                         return Task.CompletedTask;
+                    },
+                    // SignalR: browsers cannot set Authorization headers on WebSocket connections.
+                    // Read the bearer token from the ?access_token= query param for hub connections.
+                    OnMessageReceived = context =>
+                    {
+                        var token = context.Request.Query["access_token"];
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            var path = context.HttpContext.Request.Path;
+                            if (path.StartsWithSegments("/hubs"))
+                                context.Token = token;
+                        }
+                        return Task.CompletedTask;
                     }
                 };
             });
@@ -102,14 +116,21 @@ public sealed class AuthStartup : IStartup
                         builder.AllowCredentials();
                     }
                 }
-                else
+                else if (!ctx.HostingEnvironment.IsProduction())
                 {
+                    // Development/staging only: allow all origins when no list is configured.
+                    // In production, AllowedOrigins must be explicitly set (validated below).
                     builder.AllowAnyOrigin()
                            .AllowAnyMethod()
                            .AllowAnyHeader();
                 }
             });
         });
+
+        if (ctx.HostingEnvironment.IsProduction() && cors.AllowedOrigins.Length == 0)
+            throw new InvalidOperationException(
+                "CorsSettings.AllowedOrigins must be configured in production. " +
+                "Set via environment variable: CorsSettings__AllowedOrigins__0=https://your-domain.com");
     }
 
 

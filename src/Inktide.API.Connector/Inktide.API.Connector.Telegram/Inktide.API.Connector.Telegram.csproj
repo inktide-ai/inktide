@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Inktide.API.Connector.Telegram</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Inktide.API.Connector.Application\Inktide.API.Connector.Application.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Soul\Inktide.API.Soul.Domain\Inktide.API.Soul.Domain.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Soul\Inktide.API.Soul.Application\Inktide.API.Soul.Application.csproj" />
+  </ItemGroup>
+
+</Project>

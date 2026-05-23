@@ -1,9 +1,10 @@
-
-
 using Inktide.API.Connector.Application.Contracts;
+using Inktide.API.Connector.Discord.Gateway;
 using Inktide.API.Connector.Discord.Health;
+using Inktide.API.Connector.Discord.OAuth;
 using Inktide.API.Connector.Discord.Settings;
 using Inktide.API.Core;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
@@ -12,6 +13,7 @@ namespace Inktide.API.Connector.Discord;
 
 /// <summary>
 /// Registers Discord connector (IChatConnector) — Gateway WebSocket via Discord.Net.
+/// Also registers Discord OAuth2 services and the REST controller.
 /// </summary>
 public sealed class DiscordStartup : IStartup
 {
@@ -22,14 +24,31 @@ public sealed class DiscordStartup : IStartup
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        // ── Guild routing registry ────────────────────────────────────────────
+        services.AddSingleton<IGuildSoulRegistry, GuildSoulRegistry>();
+        services.AddHostedService<GuildRegistryLoader>();
+
+        // ── Connector ─────────────────────────────────────────────────────────
         services.AddSingleton<DiscordMessageMapper>();
+        services.AddSingleton<DiscordMessageHandler>();
         services.AddSingleton<IChatConnector, DiscordConnector>();
 
+        // ── OAuth2 services ───────────────────────────────────────────────────
+        services.AddSingleton<DiscordOAuthStateService>();
+        services.AddHttpClient<IDiscordOAuthService, DiscordOAuthService>();
+        services.AddHttpClient("discord-validate")
+            .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(5));
+
+        // ── REST controller (in this assembly) ───────────────────────────────
+        services.AddControllers()
+            .PartManager.ApplicationParts.Add(
+                new AssemblyPart(typeof(DiscordStartup).Assembly));
+
+        // ── Health check ──────────────────────────────────────────────────────
         services.AddHealthChecks()
             .AddCheck<DiscordHealthCheck>(
                 "discord",
                 failureStatus: HealthStatus.Degraded,
                 tags: ["streaming", "discord"]);
-        
     }
 }

@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -16,7 +15,7 @@ namespace Inktide.API.Soul.REST.Controllers;
 [Route("api/soul/cards/{cardId:guid}/scenes")]
 [Produces("application/json")]
 [Authorize]
-public sealed class AiCardScenesController : ControllerBase
+public sealed class AiCardScenesController : ApiController
 {
     private readonly IAiCardSceneService _scenes;
     private readonly IAiCardSceneTagService _tags;
@@ -161,14 +160,23 @@ public sealed class AiCardScenesController : ControllerBase
         return NoContent();
     }
 
-
-    private bool TryGetUserId(out Guid userId)
+    /// <summary>Move a scene to a new position. previousId=null → beginning; nextId=null → end.</summary>
+    [HttpPut("{sceneId:guid}/position")]
+    [ProducesResponseType(typeof(AiCardSceneResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Reorder(
+        Guid cardId, Guid sceneId, [FromBody] ReorderSceneRequest? body, CancellationToken ct)
     {
-        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (sub is not null && Guid.TryParse(sub, out userId)) return true;
-        userId = default;
-        return false;
+        if (body is null) return BadRequest(ApiErrorResponse.From("Request body is required.", ErrorCodes.ValidationError));
+        if (!TryGetUserId(out var userId)) return Unauthorized();
+
+        var scene = await _scenes.ReorderAsync(userId, cardId, sceneId, body.PreviousId, body.NextId, ct).ConfigureAwait(false);
+        if (scene is null) return NotFound(ApiErrorResponse.From("Scene not found.", ErrorCodes.NotFound));
+
+        return Ok(ToResponse(scene));
     }
+
 
     private IActionResult MapSceneError(SceneUploadError kind, string message) => kind switch
     {
@@ -196,5 +204,6 @@ public sealed class AiCardScenesController : ControllerBase
         Tag              = dto.Tag,
         DisplayName      = dto.DisplayName,
         Description      = dto.Description,
+        SortKey          = dto.SortKey,
     };
 }

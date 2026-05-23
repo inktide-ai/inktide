@@ -9,7 +9,7 @@ public sealed class RealtimeStreamSettings
     public const string SectionName = "RealtimeStream";
 
     /// <summary>Redis stream key produced by the TTS bounded context.</summary>
-    public string StreamName { get; set; } = "synapse.tts.ready";
+    public string StreamName { get; set; } = Inktide.API.Core.Constants.StreamNames.TtsReady;
 
     /// <summary>Consumer group name; multiple Realtime instances share work.</summary>
     public string ConsumerGroup { get; set; } = "realtime-workers";

@@ -16,13 +16,14 @@ public static class ChannelResponseMapper
         ArgumentNullException.ThrowIfNull(channel);
         return new ChannelResponse
         {
-            Id          = channel.Id,
-            Platform    = channel.Platform,
-            ChannelName = channel.ChannelName,
-            ChannelId   = channel.ChannelId,
-            BotUsername = channel.BotUsername,
-            IsActive    = channel.IsActive,
-            ConnectedAt = channel.ConnectedAt,
+            Id           = channel.Id,
+            Platform     = channel.Platform,
+            ChannelName  = channel.ChannelName,
+            ChannelId    = channel.ChannelId,
+            BotUsername  = channel.BotUsername,
+            IsActive     = channel.IsActive,
+            ConnectedAt  = channel.ConnectedAt,
+            HasCustomBot = channel.CustomBotTokenEnc is not null,
         };
     }
 
@@ -31,13 +32,14 @@ public static class ChannelResponseMapper
         ArgumentNullException.ThrowIfNull(dto);
         return new ChannelResponse
         {
-            Id          = dto.Id,
-            Platform    = dto.Platform,
-            ChannelName = dto.ChannelName,
-            ChannelId   = dto.ChannelId,
-            BotUsername = dto.BotUsername,
-            IsActive    = dto.IsActive,
-            ConnectedAt = dto.ConnectedAt,
+            Id           = dto.Id,
+            Platform     = dto.Platform,
+            ChannelName  = dto.ChannelName,
+            ChannelId    = dto.ChannelId,
+            BotUsername  = dto.BotUsername,
+            IsActive     = dto.IsActive,
+            ConnectedAt  = dto.ConnectedAt,
+            HasCustomBot = dto.HasCustomBot,
         };
     }
 }

@@ -1,0 +1,411 @@
+// Inktide — Database Schema
+// Import at https://dbdiagram.io
+
+// ============================================================
+//  SOUL
+// ============================================================
+
+Table soul.llm_catalog {
+  id           uuid        [pk, not null]
+  provider     text        [not null]
+  model_id     text        [not null]
+  display_name text        [not null]
+  tier         text        [not null, default: 'free']
+  is_available boolean     [not null, default: true]
+  created_at   timestamptz
+
+  indexes {
+    (provider, model_id) [unique, name: 'uq_llm_catalog_provider_model']
+  }
+}
+
+Table soul.tts_catalog {
+  id           uuid        [pk, not null]
+  provider     text        [not null]
+  voice_id     text        [not null]
+  display_name text        [not null]
+  language     text        [not null, default: 'en']
+  gender       text
+  sample_url   text
+  tier         text        [not null, default: 'free']
+  is_available boolean     [not null, default: true]
+  created_at   timestamptz
+
+  indexes {
+    (provider, voice_id) [unique, name: 'uq_tts_catalog_provider_voice']
+  }
+}
+
+Table soul.user_profiles {
+  user_id    varchar(64)   [pk, not null]
+  avatar_url varchar(2048)
+}
+
+Table soul.ai_cards {
+  id                 uuid    [pk, not null]
+  user_id            uuid    [not null]
+  name               text    [not null]
+  slug               text    [not null]
+  avatar_url         text
+  personality        text    [not null, default: '']
+  system_prompt      text    [not null]
+  llm_catalog_id     uuid    [not null, ref: > soul.llm_catalog.id]
+  llm_config         jsonb   [not null]
+  tts_catalog_id     uuid    [ref: > soul.tts_catalog.id]
+  tts_config         jsonb
+  appearance         jsonb   [not null]
+  response_behavior  jsonb   [not null]
+  memory_settings    jsonb   [not null]
+  auto_pilot         jsonb   [not null]
+  personality_config jsonb   [not null, default: '{}']
+  description        text    [not null, default: '']
+  status             text    [not null, default: 'active', note: 'active | paused | archived']
+  cover_url          text
+  visibility         text    [not null, default: 'private', note: 'public | private']
+  is_active          boolean [not null, default: true]
+  deleted_at         timestamptz
+  created_at         timestamptz
+  updated_at         timestamptz
+
+  indexes {
+    (user_id, slug) [unique, name: 'uq_ai_cards_user_slug']
+    user_id         [name: 'idx_ai_cards_user_id']
+  }
+}
+
+Table soul.ai_card_channels {
+  id                   uuid    [pk, not null]
+  ai_card_id           uuid    [not null, ref: > soul.ai_cards.id]
+  platform             text    [not null, default: 'twitch']
+  channel_name         text    [not null]
+  channel_id           text
+  bot_username         text    [not null]
+  oauth_token_enc      text
+  custom_bot_token_enc text
+  refresh_token_enc    text
+  token_expires_at     timestamptz
+  is_active            boolean [not null, default: true]
+  connected_at         timestamptz
+  created_at           timestamptz
+
+  indexes {
+    (ai_card_id, platform, channel_name) [unique, name: 'uq_ai_card_channels_card_platform_name']
+  }
+}
+
+Table soul.ai_card_tools {
+  id          uuid    [pk, not null]
+  ai_card_id  uuid    [not null, ref: > soul.ai_cards.id]
+  tool_name   text    [not null]
+  tool_config jsonb   [not null]
+  is_enabled  boolean [not null, default: true]
+  created_at  timestamptz
+
+  indexes {
+    (ai_card_id, tool_name) [unique, name: 'uq_ai_card_tools_card_tool_name']
+  }
+}
+
+Table soul.ai_card_models {
+  id                 uuid        [pk, not null]
+  user_id            uuid        [not null]
+  ai_card_id         uuid        [not null, ref: > soul.ai_cards.id]
+  storage_key        text        [not null]
+  public_url         text        [not null]
+  original_file_name text        [not null]
+  content_type       text        [not null]
+  size_bytes         bigint      [not null]
+  created_at         timestamptz [not null]
+}
+
+Table soul.ai_card_scenes {
+  id                 uuid          [pk, not null]
+  user_id            uuid          [not null]
+  ai_card_id         uuid          [not null, ref: > soul.ai_cards.id]
+  storage_key        text          [not null]
+  public_url         text          [not null]
+  original_file_name text          [not null]
+  content_type       text          [not null]
+  size_bytes         bigint        [not null]
+  tag                varchar(128)
+  display_name       varchar(200)
+  description        varchar(2000)
+  created_at         timestamptz   [not null]
+}
+
+Table soul.ai_card_custom_scene_tags {
+  id               uuid         [pk, not null]
+  user_id          uuid         [not null]
+  ai_card_id       uuid         [not null, ref: > soul.ai_cards.id]
+  label            varchar(128) [not null]
+  label_normalized varchar(128) [not null]
+  color            varchar(7)
+  created_at       timestamptz  [not null]
+
+  indexes {
+    (ai_card_id, label_normalized) [unique, name: 'uq_ai_card_custom_scene_tags_card_label_norm']
+  }
+}
+
+Table soul.ai_card_run_presets {
+  id                         uuid         [pk, not null]
+  user_id                    uuid         [not null]
+  ai_card_id                 uuid         [not null, ref: > soul.ai_cards.id]
+  name                       varchar(200) [not null]
+  description                varchar(1000)
+  icon                       varchar(64)
+  is_active                  boolean      [not null, default: false]
+  override_llm_model_id      varchar(200)
+  override_temperature       real
+  override_emotion_preset_id varchar(100)
+  override_voice_profile_id  varchar(200)
+  created_at                 timestamptz
+  updated_at                 timestamptz
+}
+
+Table soul.usage_daily {
+  id                uuid    [pk, not null]
+  ai_card_id        uuid    [not null, ref: > soul.ai_cards.id]
+  usage_date        date    [not null]
+  llm_calls         integer [not null, default: 0]
+  tokens_prompt     integer [not null, default: 0]
+  tokens_completion integer [not null, default: 0]
+  messages_received integer [not null, default: 0]
+  messages_sent     integer [not null, default: 0]
+  tts_characters    integer [not null, default: 0]
+  donkey_thoughts   integer [not null, default: 0]
+
+  indexes {
+    (ai_card_id, usage_date) [unique, name: 'uq_usage_daily_card_date']
+  }
+}
+
+Table soul.audit_log {
+  id          uuid        [pk, not null]
+  user_id     uuid        [not null]
+  entity_type text        [not null]
+  entity_id   uuid        [not null]
+  action      text        [not null]
+  changes     jsonb
+  ip_address  inet
+  created_at  timestamptz
+}
+
+Table soul.outbox_events {
+  id           uuid         [pk, not null]
+  event_type   varchar(100) [not null]
+  payload      text         [not null]
+  created_at   timestamptz
+  processed_at timestamptz
+  error        text
+}
+
+Table soul.user_provider_credentials {
+  id          uuid        [pk, not null]
+  user_id     uuid        [not null]
+  provider_id varchar(64) [not null]
+  api_key_enc text
+  base_url    text
+  config      text
+  verified_at timestamptz
+  last_error  text
+  is_active   boolean     [not null, default: true]
+  created_at  timestamptz
+  updated_at  timestamptz
+
+  indexes {
+    (user_id, provider_id) [unique, name: 'uq_user_provider_credentials_user_provider']
+  }
+}
+
+Table soul.memory_metadata {
+  id               uuid        [pk, not null]
+  ai_card_id       uuid        [not null, ref: > soul.ai_cards.id]
+  qdrant_point_id  uuid        [not null]
+  fact_text        text        [not null]
+  category         text        [not null, default: 'general']
+  source_type      text        [not null, default: 'chat']
+  importance       float       [not null, default: 0.5]
+  remembered_at    timestamptz
+  last_recalled_at timestamptz
+  recall_count     integer     [not null, default: 0]
+  expires_at       timestamptz
+
+  indexes {
+    (ai_card_id, qdrant_point_id) [unique, name: 'uq_memory_card_point']
+  }
+}
+
+// ============================================================
+//  MARKETPLACE
+// ============================================================
+
+Table marketplace.connectors {
+  id           uuid         [pk, not null]
+  slug         varchar(64)  [not null]
+  name         varchar(128) [not null]
+  description  varchar(512) [not null]
+  category     varchar(64)  [not null]
+  icon_url     varchar(512) [not null]
+  is_available boolean      [not null, default: true]
+  sort_order   integer      [not null, default: 0]
+
+  indexes {
+    slug [unique, name: 'uq_connectors_slug']
+  }
+}
+
+Table marketplace.connector_installations {
+  id           uuid        [pk, not null]
+  soul_id      uuid        [not null, note: 'soft-ref → soul.ai_cards.id (no FK, cross-schema)']
+  connector_id uuid        [not null, ref: > marketplace.connectors.id]
+  installed_at timestamptz [not null]
+
+  indexes {
+    (soul_id, connector_id) [unique, name: 'uq_connector_installations_soul_connector']
+  }
+}
+
+// ============================================================
+//  PROJECT
+// ============================================================
+
+Table project.projects {
+  id              uuid         [pk, not null]
+  user_id         uuid         [not null]
+  name            varchar(200) [not null]
+  description     text
+  active_soul_id  uuid         [note: 'soft-ref → soul.ai_cards.id']
+  active_model_id uuid         [note: 'soft-ref → soul.ai_card_models.id']
+  active_scene_id uuid         [note: 'soft-ref → soul.ai_card_scenes.id']
+  system_prompt   text
+  status          varchar(50)  [not null]
+  created_at      timestamptz
+  updated_at      timestamptz
+}
+
+// ============================================================
+//  BILLING
+// ============================================================
+
+Table billing.user_subscriptions {
+  id                   uuid         [pk, not null]
+  user_id              varchar(64)  [not null]
+  plan                 varchar(16)  [not null, note: 'Free | Pro | Enterprise']
+  status               varchar(16)  [not null, note: 'Active | Trialing | PastDue | Canceled']
+  provider             varchar(32)  [not null]
+  provider_sub_id      varchar(128)
+  provider_customer_id varchar(128)
+  current_period_end   timestamptz
+  created_at           timestamptz  [not null]
+  updated_at           timestamptz  [not null]
+
+  indexes {
+    user_id [unique, name: 'uq_user_subscriptions_user_id']
+  }
+}
+
+// ============================================================
+//  ORGANIZATION
+// ============================================================
+
+Table organization.organizations {
+  id         uuid         [pk, not null]
+  name       varchar(256) [not null]
+  owner_id   varchar(64)  [not null]
+  created_at timestamptz
+
+  indexes {
+    owner_id [unique, name: 'uq_organizations_owner_id']
+  }
+}
+
+Table organization.organization_members {
+  id              uuid        [pk, not null]
+  organization_id uuid        [not null, ref: > organization.organizations.id]
+  user_id         varchar(64) [not null]
+  role            varchar(16) [not null, note: 'Owner | Admin | Member']
+  joined_at       timestamptz
+
+  indexes {
+    (organization_id, user_id) [unique, name: 'uq_organization_members_org_user']
+  }
+}
+
+Table organization.organization_invites {
+  id              uuid         [pk, not null]
+  organization_id uuid         [not null, ref: > organization.organizations.id]
+  email           varchar(256) [not null]
+  role            varchar(16)  [not null, note: 'Owner | Admin | Member']
+  token           varchar(128) [not null]
+  invited_by      varchar(64)  [not null]
+  status          varchar(16)  [not null, note: 'Pending | Accepted | Expired']
+  expires_at      timestamptz
+  created_at      timestamptz
+
+  indexes {
+    token [unique, name: 'uq_organization_invites_token']
+  }
+}
+
+// ============================================================
+//  GRAPH
+// ============================================================
+
+Table graph.graph_definitions {
+  id         uuid        [pk, not null]
+  project_id uuid        [not null, note: 'soft-ref → project.projects.id']
+  user_id    uuid        [not null]
+  nodes      jsonb       [not null]
+  edges      jsonb       [not null]
+  updated_at timestamptz
+
+  indexes {
+    project_id [unique, name: 'uq_graph_definitions_project_id']
+  }
+}
+
+// ============================================================
+//  VISUAL GROUPING
+// ============================================================
+
+TableGroup soul {
+  soul.llm_catalog
+  soul.tts_catalog
+  soul.user_profiles
+  soul.ai_cards
+  soul.ai_card_channels
+  soul.ai_card_tools
+  soul.ai_card_models
+  soul.ai_card_scenes
+  soul.ai_card_custom_scene_tags
+  soul.ai_card_run_presets
+  soul.usage_daily
+  soul.audit_log
+  soul.outbox_events
+  soul.user_provider_credentials
+  soul.memory_metadata
+}
+
+TableGroup marketplace {
+  marketplace.connectors
+  marketplace.connector_installations
+}
+
+TableGroup project {
+  project.projects
+}
+
+TableGroup billing {
+  billing.user_subscriptions
+}
+
+TableGroup organization {
+  organization.organizations
+  organization.organization_members
+  organization.organization_invites
+}
+
+TableGroup graph {
+  graph.graph_definitions
+}

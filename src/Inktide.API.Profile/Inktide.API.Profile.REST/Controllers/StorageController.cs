@@ -1,4 +1,6 @@
+using Inktide.API.Core.Generators;
 using System.Security.Claims;
+using Inktide.API.Core;
 using Inktide.API.Profile.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -7,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.Profile.REST.Controllers;
 
 /// <summary>
-/// S3 / MinIO uploads for testing (objects scoped under <c>users/{sub}/</c>).
+/// S3 / MinIO uploads for testing (objects scoped under <c>users/{userId:N}/</c>, same as avatar ownership checks).
 /// </summary>
 [ApiController]
 [Route("api/storage")]
@@ -19,11 +21,13 @@ public sealed class StorageController : ControllerBase
     private const long MaxUploadBytes = 52_428_800;
 
     private readonly IObjectStorageService _storage;
+    private readonly IImageProcessingService _imageProcessor;
 
 
-    public StorageController(IObjectStorageService storage)
+    public StorageController(IObjectStorageService storage, IImageProcessingService imageProcessor)
     {
         _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+        _imageProcessor = imageProcessor ?? throw new ArgumentNullException(nameof(imageProcessor));
     }
 
 
@@ -52,7 +56,9 @@ public sealed class StorageController : ControllerBase
         if (prefix is null)
             return Unauthorized();
 
-        var items = await _storage.ListObjectsAsync(prefix, ct).ConfigureAwait(false);
+        var items = new List<ObjectStorageListItem>();
+        await foreach (var item in _storage.ListObjectsAsync(prefix, ct).ConfigureAwait(false))
+            items.Add(item);
         return Ok(items);
     }
 
@@ -68,7 +74,7 @@ public sealed class StorageController : ControllerBase
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "Object storage is not configured." });
 
         if (string.IsNullOrWhiteSpace(key))
-            return BadRequest(new { message = "Query \"key\" is required." });
+            return BadRequest(ApiErrorResponse.From("Query \"key\" is required.", "VALIDATION_ERROR"));
 
         var prefix = UserObjectPrefix();
         if (prefix is null)
@@ -82,7 +88,7 @@ public sealed class StorageController : ControllerBase
         return File(stream, "application/octet-stream", fileName);
     }
 
-    /// <summary>Upload a file into <c>users/{sub}/...</c>.</summary>
+    /// <summary>Upload a file into <c>users/{userId:N}/...</c>.</summary>
     [HttpPost("upload")]
     [RequestSizeLimit(MaxUploadBytes)]
     [ProducesResponseType(typeof(UploadResponse), StatusCodes.Status200OK)]
@@ -94,39 +100,47 @@ public sealed class StorageController : ControllerBase
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "Object storage is not configured." });
 
         if (file is null || file.Length == 0)
-            return BadRequest(new { message = "File is required." });
+            return BadRequest(ApiErrorResponse.From("File is required.", "VALIDATION_ERROR"));
 
         var prefix = UserObjectPrefix();
         if (prefix is null)
             return Unauthorized();
 
-        var safeName = SanitizeFileName(file.FileName);
-        var objectKey = $"{prefix}{Guid.NewGuid():N}_{safeName}";
-
-        await using (var read = file.OpenReadStream())
+        // Process images: resize 200×200, convert to WebP, strip EXIF
+        if (file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
         {
-            await _storage.PutObjectAsync(objectKey, read, file.ContentType, ct).ConfigureAwait(false);
+            await using var inputStream = file.OpenReadStream();
+            var processed = await _imageProcessor.ResizeAvatarAsync(inputStream, ct).ConfigureAwait(false);
+            if (processed is not null)
+            {
+                using (processed)
+                {
+                    var objectKey = $"{prefix}{IdGenerator.New():N}{processed.Extension}";
+                    await _storage.PutObjectAsync(objectKey, processed.Data, processed.ContentType, ct).ConfigureAwait(false);
+                    return Ok(new UploadResponse { Key = objectKey, Size = processed.Data.Length });
+                }
+            }
         }
 
-        return Ok(new UploadResponse { Key = objectKey, Size = file.Length });
+        // Non-image or unrecognized format: store as-is
+        var fallbackExt = FileExtensionMapper.FromContentTypeOrFileName(file.ContentType, file.FileName);
+        var fallbackKey = $"{prefix}{IdGenerator.New():N}{fallbackExt}";
+        await using (var read = file.OpenReadStream())
+        {
+            await _storage.PutObjectAsync(fallbackKey, read, file.ContentType, ct).ConfigureAwait(false);
+        }
+        return Ok(new UploadResponse { Key = fallbackKey, Size = file.Length });
     }
 
 
     private string? UserObjectPrefix()
     {
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return sub is null ? null : $"users/{sub}/";
+        if (sub is null || !Guid.TryParse(sub, out var userId))
+            return null;
+        // Match IUserAvatarService ownership check: users/{userId:N}/ (no dashes).
+        return $"users/{userId:N}/";
     }
-
-    private static string SanitizeFileName(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return "file.bin";
-
-        var leaf = Path.GetFileName(name);
-        return string.IsNullOrEmpty(leaf) ? "file.bin" : leaf;
-    }
-
 
     public sealed class StorageStatusResponse
     {

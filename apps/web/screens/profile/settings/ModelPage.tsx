@@ -1,6 +1,6 @@
 'use client'
 import { useCharactersContext } from '../../../context/CharactersContext'
-import ModelTab from '../../../components/ProfilePage/tabs/ModelTab'
+import ModelTab from '../../../components/profile/tabs/model-tab'
 
 export default function ModelPage() {
   const { selected, updateCharacter } = useCharactersContext()

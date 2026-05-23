@@ -40,10 +40,10 @@ public sealed class AiCardCustomSceneTagRepository : IAiCardCustomSceneTagReposi
     }
 
 
-    public async Task AddAsync(AiCardCustomSceneTag row, CancellationToken ct = default)
+    public Task AddAsync(AiCardCustomSceneTag row, CancellationToken ct = default)
     {
         _db.AiCardCustomSceneTags.Add(row);
-        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+        return Task.CompletedTask;
     }
 
 }

@@ -1,22 +1,16 @@
+using Inktide.API.Core.Generators;
+using Inktide.API.Memory.Domain.Models;
 using Inktide.API.Memory.Domain.Ports;
-using Inktide.API.Soul.Domain.Entities;
-using Inktide.API.Soul.Infrastructure.DbContext;
+using Inktide.API.Memory.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inktide.API.Memory.Infrastructure.Repositories;
 
-/// <summary>
-/// PostgreSQL mirror of Qdrant vectors via Soul's <see cref="SoulDbContext"/>.
-/// Registered as Scoped in DryIoc so it shares the EF context lifetime.
-/// </summary>
 public sealed class MemoryMetadataRepository : IMemoryMetadataRepository
 {
-    private readonly SoulDbContext _db;
+    private readonly MemoryDbContext _db;
 
-    public MemoryMetadataRepository(SoulDbContext db)
-    {
-        _db = db;
-    }
+    public MemoryMetadataRepository(MemoryDbContext db) => _db = db;
 
     public async Task UpsertAsync(
         Guid aiCardId,
@@ -30,21 +24,21 @@ public sealed class MemoryMetadataRepository : IMemoryMetadataRepository
         CancellationToken ct = default)
     {
         var exists = await _db.MemoryMetadata
-            .AnyAsync(m => m.AiCardId == aiCardId && m.QdrantPointId == qdrantPointId, ct);
+            .AnyAsync(m => m.CharacterId == aiCardId && m.QdrantPointId == qdrantPointId, ct);
 
         if (!exists)
         {
             _db.MemoryMetadata.Add(new MemoryMetadata
             {
-                Id = Guid.NewGuid(),
-                AiCardId = aiCardId,
+                Id            = IdGenerator.New(),
+                CharacterId      = aiCardId,
                 QdrantPointId = qdrantPointId,
-                FactText = factText,
-                Category = category,
-                SourceType = sourceType,
-                Importance = importance,
-                RememberedAt = rememberedAt,
-                ExpiresAt = expiresAt
+                FactText      = factText,
+                Category      = category,
+                SourceType    = sourceType,
+                Importance    = importance,
+                RememberedAt  = rememberedAt,
+                ExpiresAt     = expiresAt,
             });
 
             await _db.SaveChangesAsync(ct);
@@ -59,7 +53,7 @@ public sealed class MemoryMetadataRepository : IMemoryMetadataRepository
         var pointStrings = qdrantPointIds.Select(p => p.ToString()).ToList();
 
         await _db.MemoryMetadata
-            .Where(m => m.AiCardId == aiCardId && pointStrings.Contains(m.QdrantPointId))
+            .Where(m => m.CharacterId == aiCardId && pointStrings.Contains(m.QdrantPointId))
             .ExecuteUpdateAsync(s => s
                 .SetProperty(m => m.LastRecalledAt, DateTime.UtcNow)
                 .SetProperty(m => m.RecallCount, m => m.RecallCount + 1),
@@ -72,4 +66,7 @@ public sealed class MemoryMetadataRepository : IMemoryMetadataRepository
             .Where(m => m.ExpiresAt != null && m.ExpiresAt < DateTime.UtcNow)
             .ExecuteDeleteAsync(ct);
     }
+
+    public Task<int> CountTotalAsync(CancellationToken ct = default) =>
+        _db.MemoryMetadata.CountAsync(ct);
 }

@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 namespace Inktide.API.Core.Settings;
 
 /// <summary>
@@ -6,7 +7,7 @@ namespace Inktide.API.Core.Settings;
 public sealed class SynapseIngestStreamSettings
 {
 
-    private string _streamName = "synapse.ingest";
+    private string _streamName = Constants.StreamNames.SynapseIngest;
     private string _consumerGroup = "pipeline-workers";
     private string _consumerNamePrefix = "pipeline";
     private string _payloadFieldName = "payload";
@@ -85,7 +86,7 @@ public sealed class SynapseIngestStreamSettings
         return Environment.GetEnvironmentVariable("DOTNET_HOSTNAME")
             ?? Environment.GetEnvironmentVariable("HOSTNAME")
             ?? Environment.GetEnvironmentVariable("K8S_POD_NAME")
-            ?? Guid.NewGuid().ToString("N")[..8];
+            ?? IdGenerator.New().ToString("N")[..8];
     }
 
     public string FormatConsumerName(string instanceId)

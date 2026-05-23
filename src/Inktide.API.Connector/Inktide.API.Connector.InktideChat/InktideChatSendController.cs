@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Inktide.API.Core;
 using Inktide.API.Connector.Application.Contracts;
 using Inktide.API.Connector.InktideChat.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -39,11 +40,11 @@ public sealed class InktideChatSendController : ControllerBase
         if (userId is null)
             return Unauthorized();
 
-        if (!ChannelBelongsToUser(request.ChannelId, userId))
-            return BadRequest(new { error = "channelId must be in the format '{cardId}:{userId}' where userId matches the authenticated user." });
+        if (!InktideChatChannelId.BelongsToUser(request.ChannelId, userId))
+            return BadRequest(ApiErrorResponse.From("channelId must be in the format '{cardId}:{userId}' where userId matches the authenticated user.", "VALIDATION_ERROR"));
 
         if (string.IsNullOrWhiteSpace(request.Text))
-            return BadRequest(new { error = "Text must not be empty or whitespace-only." });
+            return BadRequest(ApiErrorResponse.From("Text must not be empty or whitespace-only.", "VALIDATION_ERROR"));
 
         var userName = User.FindFirstValue("preferred_username")
                        ?? User.FindFirstValue(ClaimTypes.Name)
@@ -66,12 +67,4 @@ public sealed class InktideChatSendController : ControllerBase
         return Accepted();
     }
 
-    // channelId format: "{cardId}:{userId}" — verify the userId segment matches the token subject.
-    private static bool ChannelBelongsToUser(string channelId, string userId)
-    {
-        var sep = channelId.IndexOf(':');
-        if (sep < 0) return false;
-
-        return channelId.AsSpan(sep + 1).Equals(userId.AsSpan(), StringComparison.Ordinal);
-    }
 }

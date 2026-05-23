@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +13,7 @@ namespace Inktide.API.Soul.REST.Controllers;
 [Route("api/soul/cards/{cardId:guid}/models")]
 [Produces("application/json")]
 [Authorize]
-public sealed class AiCardModelsController : ControllerBase
+public sealed class AiCardModelsController : ApiController
 {
 
     private readonly IAiCardModelUploadService _uploads;
@@ -112,16 +111,22 @@ public sealed class AiCardModelsController : ControllerBase
         return NoContent();
     }
 
-
-    private bool TryGetUserId(out Guid userId)
+    [HttpPatch("{modelId:guid}/activate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Activate(Guid cardId, Guid modelId, CancellationToken ct)
     {
-        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (sub is not null && Guid.TryParse(sub, out userId))
-            return true;
+        if (!TryGetUserId(out var userId))
+            return Unauthorized();
 
-        userId = default;
-        return false;
+        var result = await _uploads.SetActiveAsync(userId, cardId, modelId, ct).ConfigureAwait(false);
+
+        if (!result.Success)
+            return MapError(result.ErrorKind, result.Error!);
+
+        return NoContent();
     }
+
 
     private IActionResult MapError(ModelUploadError kind, string message) => kind switch
     {
@@ -147,7 +152,8 @@ public sealed class AiCardModelsController : ControllerBase
             OriginalFileName = dto.OriginalFileName,
             ContentType = dto.ContentType,
             SizeBytes = dto.SizeBytes,
-            CreatedAt = dto.CreatedAt
+            CreatedAt = dto.CreatedAt,
+            IsActive = dto.IsActive,
         };
     }
 

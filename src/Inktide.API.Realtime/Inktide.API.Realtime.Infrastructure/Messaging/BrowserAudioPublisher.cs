@@ -1,7 +1,9 @@
+using Inktide.API.Core.Generators;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 #pragma warning disable CA1869 // cached JsonElement is read-only pass-through
 using Inktide.API.Realtime.Infrastructure.Configuration;
+using Inktide.API.Realtime.Infrastructure.Constants;
 using Inktide.API.Realtime.Infrastructure.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
@@ -225,7 +227,7 @@ public sealed class BrowserAudioPublisher : BackgroundService
         var group = AudioHub.GroupKey(payload.ChannelId);
 
         await _hub.Clients.Group(group).SendAsync(
-            "audioReceived",
+            RealtimeConstants.HubMethods.AudioReceived,
             new
             {
                 correlationId    = payload.CorrelationId,
@@ -257,6 +259,6 @@ public sealed class BrowserAudioPublisher : BackgroundService
         => Environment.GetEnvironmentVariable("DOTNET_HOSTNAME")
            ?? Environment.GetEnvironmentVariable("HOSTNAME")
            ?? Environment.GetEnvironmentVariable("K8S_POD_NAME")
-           ?? Guid.NewGuid().ToString("N")[..8];
+           ?? IdGenerator.New().ToString("N")[..8];
 
 }

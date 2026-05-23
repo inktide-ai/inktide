@@ -9,10 +9,12 @@ public sealed class LlmStreamSettings
 {
     public const string SectionName = "LlmStream";
 
-    /// <summary>Redis stream to read from (published by SynapseAggregationService).</summary>
+    /// <summary>Redis stream to read from (published by SynapseAggregationService).
+    /// Default matches <c>Inktide.API.Core.Constants.StreamNames.LlmReady</c>.</summary>
     public string StreamIn { get; set; } = "synapse.llm.ready";
 
-    /// <summary>Redis stream to publish sentence chunks to (consumed by TTS LlmResponseStreamConsumer).</summary>
+    /// <summary>Redis stream to publish sentence chunks to (consumed by TTS LlmResponseStreamConsumer).
+    /// Default matches <c>Inktide.API.Core.Constants.StreamNames.LlmResponse</c>.</summary>
     public string StreamOut { get; set; } = "synapse.llm.response";
 
     public string ConsumerGroup { get; set; } = "llm-workers";
@@ -30,4 +32,12 @@ public sealed class LlmStreamSettings
 
     /// <summary>Approximate MAXLEN for the output stream.</summary>
     public long ApproximateMaxLength { get; set; } = 50_000;
+
+    /// <summary>
+    /// Maximum number of LLM requests processed concurrently by this worker instance.
+    /// Default 1 (serial) is safe for single-tenant dev; raise to 3–5 for production
+    /// with a fast LLM provider. Higher values increase throughput at the cost of
+    /// proportionally higher LLM API spend and memory.
+    /// </summary>
+    public int MaxConcurrentRequests { get; set; } = 1;
 }

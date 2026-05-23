@@ -79,4 +79,10 @@ public sealed class TtsCatalogEntry
         set => _createdAt = value;
     }
 
+    /// <summary>True when the provider requires a BYOK API key (i.e. is not a local/free provider).</summary>
+    public bool RequiresApiKey => !LocalTtsProviders.Contains(Provider);
+
+    private static readonly HashSet<string> LocalTtsProviders =
+        new(StringComparer.OrdinalIgnoreCase) { "kokoro", "piper", "coqui" };
+
 }

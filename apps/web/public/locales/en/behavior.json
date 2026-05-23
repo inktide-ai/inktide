@@ -1,9 +1,94 @@
 {
   "section": {
+    "personality": "Personality Engine",
     "response": "Response",
     "llmConfig": "LLM Config",
     "memory": "Memory",
     "autoPilot": "Auto-Pilot"
+  },
+  "personality": {
+    "presetsLabel": "Presets",
+    "traitsTitle": "Core Traits",
+    "dynamicsTitle": "Emotional Dynamics",
+    "preset": {
+      "streamer": "Streamer",
+      "mentor": "Mentor",
+      "comedian": "Comedian",
+      "philosopher": "Philosopher",
+      "tsundere": "Tsundere",
+      "custom": "Custom"
+    },
+    "warmth": {
+      "label": "Warmth",
+      "hint": "How warm and caring vs. distant and detached",
+      "low": "Cold",
+      "high": "Warm"
+    },
+    "playfulness": {
+      "label": "Playfulness",
+      "hint": "How much the character uses humor, banter, and wit",
+      "low": "Serious",
+      "high": "Playful"
+    },
+    "assertiveness": {
+      "label": "Assertiveness",
+      "hint": "How direct and confident vs. passive and agreeable",
+      "low": "Passive",
+      "high": "Assertive"
+    },
+    "empathy": {
+      "label": "Empathy",
+      "hint": "How much the character acknowledges others' emotions",
+      "low": "Detached",
+      "high": "Empathetic"
+    },
+    "formality": {
+      "label": "Formality",
+      "hint": "How formal or casual the character's speech is",
+      "low": "Casual",
+      "high": "Formal"
+    },
+    "sarcasm": {
+      "label": "Sarcasm",
+      "hint": "How sincere vs. ironic and sarcastic the character is",
+      "low": "Sincere",
+      "high": "Sarcastic"
+    },
+    "volatility": {
+      "label": "Mood Volatility",
+      "hint": "How widely and quickly the character's mood swings",
+      "low": "Stable",
+      "high": "Volatile"
+    },
+    "responsiveness": {
+      "label": "Emotional Responsiveness",
+      "hint": "How strongly the character reacts emotionally to messages",
+      "low": "Reserved",
+      "high": "Reactive"
+    },
+    "emotionMemory": {
+      "label": "Emotional Memory",
+      "hint": "How long past emotions linger across conversation turns",
+      "low": "Forgetful",
+      "high": "Persistent"
+    },
+    "stressBehavior": {
+      "label": "Stress Behavior",
+      "hint": "How the character responds when overwhelmed or spammed",
+      "deflect": "Deflect",
+      "humor": "Humor",
+      "withdraw": "Withdraw",
+      "confront": "Confront"
+    },
+    "baselineMood": {
+      "label": "Baseline Mood",
+      "hint": "Default emotional tone when no specific emotion is active",
+      "neutral": "Neutral",
+      "happy": "Happy",
+      "chill": "Chill",
+      "melancholic": "Melancholic",
+      "hyped": "Hyped"
+    }
   },
   "response": {
     "delay": {

@@ -1,3 +1,4 @@
+using Inktide.API.Core.Generators;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -63,7 +64,7 @@ public sealed class RhubarbService : IRhubarbService
     {
         if (_executable is null) return null;
 
-        var tmp = Path.Combine(Path.GetTempPath(), $"inktide-rhubarb-{Guid.NewGuid():N}.wav");
+        var tmp = Path.Combine(Path.GetTempPath(), $"inktide-rhubarb-{IdGenerator.New():N}.wav");
         try
         {
             await File.WriteAllBytesAsync(tmp, wavBytes, ct);
@@ -80,7 +81,8 @@ public sealed class RhubarbService : IRhubarbService
         }
         finally
         {
-            try { File.Delete(tmp); } catch { /* best-effort */ }
+            try { File.Delete(tmp); }
+            catch (Exception ex) { _logger.LogDebug(ex, "Failed to delete Rhubarb temp file {Path}", tmp); }
         }
     }
 

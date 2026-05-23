@@ -25,6 +25,7 @@ obj/
 
 # Node.js
 node_modules/
+.next/
 jspm_packages/
 dist/
 dist-ssr/
@@ -58,10 +59,10 @@ venv/
 src-tauri/target/
 src-tauri/gen/
 
-# Environment
+# Environment — never commit real secrets
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # Logs
 *.log

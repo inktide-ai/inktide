@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Inktide.API.Core;
 using Inktide.API.Profile.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -30,7 +31,7 @@ public sealed class MeController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(MeResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult GetMe()
+    public async Task<IActionResult> GetMe(CancellationToken ct)
     {
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (sub is null)
@@ -41,16 +42,14 @@ public sealed class MeController : ControllerBase
             ?? sub;
 
         var role = User.FindFirstValue(ClaimTypes.Role) ?? "user";
-        var picture =
-            User.FindFirstValue("picture")
-            ?? User.FindFirstValue("Picture");
+        var avatarUrl = await _avatar.GetAvatarUrlAsync(sub, ct).ConfigureAwait(false);
 
         return Ok(new MeResponse
         {
             UserId = sub,
             UserName = userName,
             Role = role,
-            PictureUrl = string.IsNullOrWhiteSpace(picture) ? null : picture
+            PictureUrl = avatarUrl
         });
     }
 
@@ -65,7 +64,7 @@ public sealed class MeController : ControllerBase
     public async Task<IActionResult> PatchAvatar([FromBody] PatchAvatarRequest body, CancellationToken ct)
     {
         if (body is null || string.IsNullOrWhiteSpace(body.ObjectKey))
-            return BadRequest(new { message = "objectKey is required." });
+            return BadRequest(ApiErrorResponse.From("objectKey is required.", "VALIDATION_ERROR"));
 
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (sub is null || !Guid.TryParse(sub, out var userId))

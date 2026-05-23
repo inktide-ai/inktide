@@ -23,7 +23,13 @@ public sealed class ApiErrorResponse
         set => _code = value;
     }
 
+    [JsonProperty("field", NullValueHandling = NullValueHandling.Ignore)]
+    public string? Field { get; set; }
+
 
     public static ApiErrorResponse From(string error, string code) => new() { Error = error, Code = code };
+
+    public static ApiErrorResponse FromGuard(string code, string error, string? field) =>
+        new() { Code = code, Error = error, Field = field };
 
 }

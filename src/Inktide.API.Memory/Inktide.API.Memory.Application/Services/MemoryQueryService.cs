@@ -43,10 +43,14 @@ public sealed class MemoryQueryService : IMemoryQueryService
         if (records.Count > 0)
         {
             var pointIds = records.Select(r => r.PointId).ToList();
-            _ = _metaRepo.UpdateRecallAsync(aiCardId, pointIds, CancellationToken.None)
-                .ContinueWith(
-                    t => _logger.LogWarning(t.Exception, "MemoryQueryService: recall update failed for card {CardId}", aiCardId),
-                    TaskContinuationOptions.OnlyOnFaulted);
+            try
+            {
+                await _metaRepo.UpdateRecallAsync(aiCardId, pointIds, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "MemoryQueryService: recall update failed for card {CardId}", aiCardId);
+            }
         }
 
         _logger.LogDebug("MemoryQueryService: retrieved {Count} memories for card {CardId}", records.Count, aiCardId);

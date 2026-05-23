@@ -50,8 +50,7 @@ namespace Inktide.API
             Environment.SetEnvironmentVariable("BASEDIR", rootPath);
 
             var environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
-            var isDevelopment = string.IsNullOrEmpty(environment) || environment.ToLower() == "development";
-           
+
             var builder = new ConfigurationBuilder()
                 .SetBasePath(rootPath)
                 .AddJsonFile("appsettings.json", false, true)
@@ -59,11 +58,6 @@ namespace Inktide.API
                 .AddJsonFile($"appsettings.{environment}.User.json", true)
                 .AddEnvironmentVariables();
 
-            if (isDevelopment)
-            {
-                builder.AddUserSecrets<Program>();
-            }
-            
             return builder.Build();
 
         }

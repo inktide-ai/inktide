@@ -7,6 +7,8 @@ import type { VisemeCue } from '@/types/IVisemeProvider'
 import { WebAudioPlayer } from '../services/audio/WebAudioPlayer'
 import type { LipSyncHandle } from './useLipSync'
 import type { EmotionState } from '@/types/IVrmController'
+import { useAuth } from '@/context/AuthContext'
+import { getFreshAuthToken } from '@/api/client'
 
 // ── Public types ──────────────────────────────────────────────────────────────
 
@@ -69,6 +71,7 @@ export function useChatChannel(
 ): UseChatChannelResult {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [connected, setConnected] = useState(false)
+  const { isLoggedIn, isInitialized } = useAuth()
 
   const chunkBuffers = useRef<Map<string, ChunkBuffer>>(new Map())
 
@@ -86,14 +89,14 @@ export function useChatChannel(
   useEffect(() => { lipSyncRef.current = lipSync }, [lipSync])
 
   useEffect(() => {
-    if (!channelId) return
+    if (!channelId || !isInitialized || !isLoggedIn) return
 
     // DIP: создаём через интерфейс — можно подменить реализацию
     const player: IAudioPlayer = new WebAudioPlayer(() => lipSyncRef.current)
     playerRef.current = player
 
     const connection = new HubConnectionBuilder()
-      .withUrl('/hubs/audio')
+      .withUrl('/hubs/audio', { accessTokenFactory: getFreshAuthToken })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build()
@@ -190,7 +193,7 @@ export function useChatChannel(
         connection.stop().catch(() => {})
       }
     }
-  }, [channelId])
+  }, [channelId, isLoggedIn, isInitialized])
 
   const send = useCallback(
     async (text: string) => {

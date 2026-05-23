@@ -9,6 +9,7 @@ export type {
   CharacterBehavior,
   CharacterMemory,
   CharacterAutoPilot,
+  CharacterPersonality,
 } from './character/types'
 
 export { DEFAULTS, createDefaultCharacter } from './character/defaults'

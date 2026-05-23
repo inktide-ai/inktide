@@ -5,7 +5,7 @@ namespace Inktide.API.Memory.Domain.Models;
 /// Processed asynchronously by <c>MemoryIngestionWorker</c>.
 /// </summary>
 public sealed record MemoryIngestionJob(
-    Guid AiCardId,
+    Guid CharacterId,
     string ChannelId,
     string Platform,
     string UserMessage,

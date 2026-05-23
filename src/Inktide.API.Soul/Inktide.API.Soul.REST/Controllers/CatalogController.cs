@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.REST.Converters;
 using Inktide.API.Soul.REST.Models;
@@ -12,7 +11,7 @@ namespace Inktide.API.Soul.REST.Controllers;
 [Route("api/soul/catalog")]
 [Produces("application/json")]
 [Authorize]
-public sealed class CatalogController : ControllerBase
+public sealed class CatalogController : ApiController
 {
 
     private readonly ICatalogService _catalogService;
@@ -42,12 +41,5 @@ public sealed class CatalogController : ControllerBase
         return Ok(voices.Select(AiCardConverter.ToTtsResponse).ToList());
     }
 
-
-    private Guid GetUserId()
-    {
-        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException("User ID not found in token.");
-        return Guid.Parse(sub);
-    }
 
 }

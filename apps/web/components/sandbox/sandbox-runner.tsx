@@ -1,0 +1,71 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { ChevronLeft } from 'lucide-react'
+import { useCharactersContext } from '@/context/CharactersContext'
+import SceneFullscreen from '@/components/profile/tabs/scene-fullscreen'
+import { PROFILE_SETTINGS_BASE } from '@/lib/routes'
+import { useProjectRuntime } from '@/hooks/useProjectRuntime'
+
+interface SandboxRunnerProps {
+  projectId: string
+}
+
+export default function SandboxRunner({ projectId }: SandboxRunnerProps) {
+  const router = useRouter()
+  const { selected, selectCard, loading: soulLoading } = useCharactersContext()
+
+  const { project, activeModel, activeScene, loading } = useProjectRuntime(projectId)
+
+  useEffect(() => {
+    if (project?.active_soul_id && selected?.id !== project.active_soul_id) {
+      selectCard(project.active_soul_id)
+    }
+  }, [project?.active_soul_id, selected?.id, selectCard])
+
+  if (loading || soulLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--border-subtle)] border-t-[var(--accent-primary)]" />
+      </div>
+    )
+  }
+
+  if (!project?.active_soul_id) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 text-[14px] text-[var(--text-tertiary)]">
+        <p>No soul bound — go to the project settings to link one.</p>
+        <button
+          type="button"
+          onClick={() => router.push('/edit/sandbox')}
+          className="flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] px-3 py-1.5 text-[14px] text-[var(--text-secondary)] hover:bg-[var(--surface-1)] hover:text-[var(--text-primary)] transition-colors"
+        >
+          <ChevronLeft size={14} />
+          Back to projects
+        </button>
+      </div>
+    )
+  }
+
+  if (!selected) {
+    return (
+      <div className="flex h-full items-center justify-center text-[14px] text-[var(--text-tertiary)]">
+        Loading soul…
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative h-full w-full overflow-hidden">
+      <SceneFullscreen
+        character={selected}
+        cardId={selected.id}
+        onOpenSettings={() => router.push(PROFILE_SETTINGS_BASE)}
+        overrideModelUrl={activeModel?.public_url ?? null}
+        overrideSceneUrl={activeScene?.public_url ?? null}
+        showChat
+      />
+    </div>
+  )
+}
