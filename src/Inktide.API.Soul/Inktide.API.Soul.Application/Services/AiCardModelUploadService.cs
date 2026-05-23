@@ -1,4 +1,7 @@
+using Inktide.API.Core.Generators;
+using Inktide.API.Core.Transactions;
 using Inktide.API.Profile.Application.Interfaces;
+using Inktide.API.Soul.Application.Constants;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Storage;
 using Inktide.API.Soul.Domain.Repositories;
@@ -15,12 +18,9 @@ namespace Inktide.API.Soul.Application.Services;
 /// </summary>
 public sealed class AiCardModelUploadService : IAiCardModelUploadService
 {
-    private const int MaxModelsPerCard = 20;
-    private static readonly TimeSpan PresignTtl = TimeSpan.FromMinutes(15);
-
     private static readonly UploadConstraints Constraints = new()
     {
-        MaxBytes           = 209_715_200,
+        MaxBytes           = SoulConstants.Upload.MaxModelBytes,
         AllowedExtensions  = new HashSet<string> { ".vrm", ".glb", ".gltf", ".zip", ".json" },
         FallbackFileName   = "model.bin",
     };
@@ -29,6 +29,7 @@ public sealed class AiCardModelUploadService : IAiCardModelUploadService
     private readonly IObjectStorageService _storage;
     private readonly IAiCardModelRepository _models;
     private readonly IModelRetentionPolicy _retentionPolicy;
+    private readonly ITransactionManager _txManager;
     private readonly ObjectStorageSettings _s3;
     private readonly TimeProvider _time;
     private readonly ILogger<AiCardModelUploadService> _logger;
@@ -38,6 +39,7 @@ public sealed class AiCardModelUploadService : IAiCardModelUploadService
         IObjectStorageService storage,
         IAiCardModelRepository models,
         IModelRetentionPolicy retentionPolicy,
+        ITransactionManager txManager,
         ObjectStorageSettings s3,
         TimeProvider time,
         ILogger<AiCardModelUploadService> logger)
@@ -46,6 +48,7 @@ public sealed class AiCardModelUploadService : IAiCardModelUploadService
         _storage         = storage         ?? throw new ArgumentNullException(nameof(storage));
         _models          = models          ?? throw new ArgumentNullException(nameof(models));
         _retentionPolicy = retentionPolicy ?? throw new ArgumentNullException(nameof(retentionPolicy));
+        _txManager       = txManager       ?? throw new ArgumentNullException(nameof(txManager));
         _s3              = s3              ?? throw new ArgumentNullException(nameof(s3));
         _time            = time            ?? throw new ArgumentNullException(nameof(time));
         _logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
@@ -67,20 +70,20 @@ public sealed class AiCardModelUploadService : IAiCardModelUploadService
             return BeginModelUploadResult.Fail(ModelUploadError.CardNotFound, "AI card not found.");
 
         var existingCount = await _models.CountByCardAsync(userId, cardId, ct).ConfigureAwait(false);
-        if (existingCount >= MaxModelsPerCard)
+        if (existingCount >= SoulConstants.Upload.MaxModelsPerCard)
             return BeginModelUploadResult.Fail(ModelUploadError.Validation,
-                $"Model limit reached ({MaxModelsPerCard} per card).");
+                $"Model limit reached ({SoulConstants.Upload.MaxModelsPerCard} per card).");
 
         var safeName    = StorageFileHelper.SanitizeFileName(fileName, Constraints.FallbackFileName);
-        var objectKey   = $"users/{userId:N}/cards/{cardId:N}/models/{Guid.NewGuid():N}_{safeName}";
+        var objectKey   = $"users/{userId:N}/cards/{cardId:N}/models/{IdGenerator.New():N}_{safeName}";
         var ctNorm      = StorageFileHelper.InferContentType(contentType, fileName, "application/octet-stream");
 
-        var uploadUrl = _storage.GetPreSignedPutUrl(objectKey, ctNorm, PresignTtl);
+        var uploadUrl = _storage.GetPreSignedPutUrl(objectKey, ctNorm, SoulConstants.Upload.PresignTtl);
         if (string.IsNullOrEmpty(uploadUrl))
             return BeginModelUploadResult.Fail(ModelUploadError.StorageDisabled, "Could not create upload URL.");
 
         _logger.LogInformation("Presigned model upload key={Key} card={CardId}", objectKey, cardId);
-        return BeginModelUploadResult.Ok(uploadUrl, objectKey, _time.GetUtcNow().Add(PresignTtl), ctNorm);
+        return BeginModelUploadResult.Ok(uploadUrl, objectKey, _time.GetUtcNow().Add(SoulConstants.Upload.PresignTtl), ctNorm);
     }
 
     public async Task<CompleteModelUploadResult> CompleteUploadAsync(
@@ -132,9 +135,25 @@ public sealed class AiCardModelUploadService : IAiCardModelUploadService
             StorageFileHelper.SanitizeFileName(fileName, Constraints.FallbackFileName),
             StorageFileHelper.InferContentType(contentType, fileName, "application/octet-stream"),
             sizeBytes,
-            _time.GetUtcNow().UtcDateTime);
+            _time.GetUtcNow().UtcDateTime,
+            isActive: true);
 
-        await _models.AddAsync(entity, ct).ConfigureAwait(false);
+        // DeactivateAllByCardAsync uses ExecuteUpdateAsync (bypasses change tracker — commits immediately).
+        // AddAsync stages the new entity in the change tracker.
+        // Both must be inside one explicit transaction so a SaveChangesAsync failure doesn't
+        // leave all models deactivated with no new active model.
+        await _txManager.BeginTransactionAsync(ct).ConfigureAwait(false);
+        try
+        {
+            await _models.DeactivateAllByCardAsync(userId, cardId, ct).ConfigureAwait(false);
+            await _models.AddAsync(entity, ct).ConfigureAwait(false);
+            await _txManager.CommitTransactionAsync(ct).ConfigureAwait(false);
+        }
+        catch
+        {
+            await _txManager.RollbackAsync(ct).ConfigureAwait(false);
+            throw;
+        }
         _logger.LogInformation("Saved ai_card_models id={Id} key={Key}", entity.Id, storageKey);
 
         await _retentionPolicy.EnforceAsync(userId, cardId, entity.Id, ct).ConfigureAwait(false);
@@ -172,6 +191,30 @@ public sealed class AiCardModelUploadService : IAiCardModelUploadService
         return DeleteModelResult.Ok();
     }
 
+    public async Task<SetActiveModelResult> SetActiveAsync(Guid userId, Guid cardId, Guid modelId, CancellationToken ct = default)
+    {
+        var exists = await _models.GetByIdAsync(userId, cardId, modelId, ct).ConfigureAwait(false);
+        if (exists is null)
+            return SetActiveModelResult.Fail(ModelUploadError.ModelNotFound, "Model not found.");
+
+        // Both are ExecuteUpdateAsync (bypass change tracker — each commits immediately without explicit tx).
+        await _txManager.BeginTransactionAsync(ct).ConfigureAwait(false);
+        try
+        {
+            await _models.DeactivateAllByCardAsync(userId, cardId, ct).ConfigureAwait(false);
+            await _models.ActivateByIdAsync(userId, cardId, modelId, ct).ConfigureAwait(false);
+            await _txManager.CommitTransactionAsync(ct).ConfigureAwait(false);
+        }
+        catch
+        {
+            await _txManager.RollbackAsync(ct).ConfigureAwait(false);
+            throw;
+        }
+        _logger.LogInformation("Set active ai_card_model id={Id} card={CardId}", modelId, cardId);
+
+        return SetActiveModelResult.Ok();
+    }
+
     private static AiCardModel ToDto(AiCardModelEntity m) =>
-        new(m.Id, m.AiCardId, m.StorageKey, m.PublicUrl, m.OriginalFileName, m.ContentType, m.SizeBytes, m.CreatedAt);
+        new(m.Id, m.AiCardId, m.StorageKey, m.PublicUrl, m.OriginalFileName, m.ContentType, m.SizeBytes, m.CreatedAt, m.IsActive);
 }

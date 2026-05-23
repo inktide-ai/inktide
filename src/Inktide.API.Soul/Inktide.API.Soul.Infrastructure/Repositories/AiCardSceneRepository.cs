@@ -17,11 +17,10 @@ public sealed class AiCardSceneRepository : IAiCardSceneRepository
     }
 
 
-    public async Task<AiCardScene> AddAsync(AiCardScene scene, CancellationToken ct = default)
+    public Task<AiCardScene> AddAsync(AiCardScene scene, CancellationToken ct = default)
     {
         _db.AiCardScenes.Add(scene);
-        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
-        return scene;
+        return Task.FromResult(scene);
     }
 
     public async Task<IReadOnlyList<AiCardScene>> ListByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default)
@@ -29,7 +28,7 @@ public sealed class AiCardSceneRepository : IAiCardSceneRepository
         return await _db.AiCardScenes
             .AsNoTracking()
             .Where(s => s.UserId == userId && s.AiCardId == aiCardId)
-            .OrderByDescending(s => s.CreatedAt)
+            .OrderBy(s => s.SortKey)
             .ToListAsync(ct)
             .ConfigureAwait(false);
     }
@@ -104,6 +103,37 @@ public sealed class AiCardSceneRepository : IAiCardSceneRepository
             .ConfigureAwait(false);
 
         return affected > 0;
+    }
+
+    public async Task<IReadOnlyList<(Guid Id, string SortKey)>> GetSortKeysAsync(Guid aiCardId, CancellationToken ct = default)
+    {
+        var rows = await _db.AiCardScenes
+            .AsNoTracking()
+            .Where(s => s.AiCardId == aiCardId)
+            .OrderBy(s => s.SortKey)
+            .Select(s => new { s.Id, s.SortKey })
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        return rows.Select(r => (r.Id, r.SortKey)).ToList();
+    }
+
+    public async Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, CancellationToken ct = default)
+    {
+        // ExecuteUpdateAsync bypasses the EF change tracker — an explicit transaction is required.
+        // SaveChangesAsync's implicit transaction does NOT cover these calls.
+        // N round-trips inside one transaction. Acceptable for typical sort-list sizes.
+        await using var tx = await _db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+        foreach (var (id, sortKey) in updates)
+        {
+            await _db.AiCardScenes
+                .Where(s => s.Id == id)
+                .ExecuteUpdateAsync(
+                    s => s.SetProperty(e => e.SortKey, sortKey),
+                    ct)
+                .ConfigureAwait(false);
+        }
+        await tx.CommitAsync(ct).ConfigureAwait(false);
     }
 
 }
