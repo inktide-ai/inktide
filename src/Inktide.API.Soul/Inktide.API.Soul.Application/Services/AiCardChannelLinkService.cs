@@ -194,6 +194,57 @@ public sealed class AiCardChannelLinkService : IAiCardChannelLinkService
         }
     }
 
+    public async Task UpsertTwitchChannelAsync(
+        Guid userId,
+        Guid cardId,
+        string channelLogin,
+        string botUsername,
+        string accessTokenEnc,
+        string refreshTokenEnc,
+        DateTime tokenExpiresAt,
+        CancellationToken ct = default)
+    {
+        var card = await _cardRepo.GetByIdAsync(cardId, ct);
+        if (card is null || card.UserId != userId)
+            throw new AiCardNotFoundException(cardId);
+
+        var existing = await _channelRepo.GetByCardIdAsync(cardId, ct);
+        var channel  = existing.FirstOrDefault(c =>
+            c.Platform == "twitch" && c.ChannelId == channelLogin);
+
+        var now = _time.GetUtcNow().UtcDateTime;
+
+        if (channel is null)
+        {
+            channel = new AiCardChannel
+            {
+                Id              = IdGenerator.New(),
+                AiCardId        = cardId,
+                Platform        = "twitch",
+                ChannelId       = channelLogin,
+                ChannelName     = channelLogin,
+                BotUsername     = botUsername,
+                OAuthTokenEnc   = accessTokenEnc,
+                RefreshTokenEnc = refreshTokenEnc,
+                TokenExpiresAt  = tokenExpiresAt,
+                IsActive        = true,
+                ConnectedAt     = now,
+                CreatedAt       = now,
+            };
+            await _channelRepo.CreateAsync(channel, ct);
+        }
+        else
+        {
+            channel.BotUsername     = botUsername;
+            channel.OAuthTokenEnc   = accessTokenEnc;
+            channel.RefreshTokenEnc = refreshTokenEnc;
+            channel.TokenExpiresAt  = tokenExpiresAt;
+            channel.IsActive        = true;
+            channel.ConnectedAt     = now;
+            await _channelRepo.UpdateAsync(channel, ct);
+        }
+    }
+
     public async Task<Guid> UpsertTelegramChannelAsync(
         Guid userId,
         Guid cardId,

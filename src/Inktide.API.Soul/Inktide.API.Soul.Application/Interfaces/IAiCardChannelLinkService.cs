@@ -33,6 +33,18 @@ public interface IAiCardChannelLinkService
         DateTime tokenExpiresAt,
         CancellationToken ct = default);
 
+    // ── Twitch OAuth2 ───────────────────────────────────────────────────────
+
+    Task UpsertTwitchChannelAsync(
+        Guid userId,
+        Guid cardId,
+        string channelLogin,
+        string botUsername,
+        string accessTokenEnc,
+        string refreshTokenEnc,
+        DateTime tokenExpiresAt,
+        CancellationToken ct = default);
+
     // ── Telegram Bot Token ──────────────────────────────────────────────────
 
     Task<Guid> UpsertTelegramChannelAsync(

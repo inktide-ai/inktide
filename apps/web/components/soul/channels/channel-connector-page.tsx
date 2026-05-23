@@ -18,6 +18,7 @@ import {
 import { resolveOAuthReturn, oauthPendingKey } from './resolve-oauth-return'
 import { DiscordChannelManager }  from './discord-channel-manager'
 import { TelegramChannelManager } from './telegram-channel-manager'
+import { TwitchChannelManager }   from './twitch-channel-manager'
 import { GenericChannelForm }     from './generic-channel-form'
 
 type PanelTheme = ChannelStaticConfig['theme']
@@ -212,7 +213,11 @@ export default function ChannelConnectorPage() {
 
             {justConnected && (
               <div className="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-[14px] text-green-400">
-                {connectorId === 'discord' ? 'Discord server connected successfully!' : 'Connected successfully!'}
+                {connectorId === 'discord'
+                  ? 'Discord server connected successfully!'
+                  : connectorId === 'twitch'
+                  ? 'Twitch channel connected! The bot will join shortly.'
+                  : 'Connected successfully!'}
               </div>
             )}
 
@@ -222,7 +227,10 @@ export default function ChannelConnectorPage() {
             {connectorId === 'telegram' && (
               <TelegramChannelManager soulId={soulId} channels={platformChannels} />
             )}
-            {connectorId !== 'discord' && connectorId !== 'telegram' && (
+            {connectorId === 'twitch' && (
+              <TwitchChannelManager soulId={soulId} channels={platformChannels} />
+            )}
+            {connectorId !== 'discord' && connectorId !== 'telegram' && connectorId !== 'twitch' && (
               <GenericChannelForm
                 soulId={soulId}
                 connectorId={connectorId}
