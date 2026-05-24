@@ -28,7 +28,9 @@ public sealed class SynapseIngestConnectorStartup : IStartup
 
         services.AddSingleton<IValidateOptions<SynapseIngestStreamSettings>, SynapseIngestStreamSettingsValidator>();
 
-        var channel = new ChatMessageChannel();
+        // 10 000-message bounded channel provides backpressure between IRC ingest and Redis publisher.
+        // Increase ChatMessageChannel capacity here if you observe drops under burst load.
+        var channel = new ChatMessageChannel(capacity: 10_000);
         services.AddSingleton(channel);
         services.AddSingleton<IChatMessageQueue>(channel);
         services.AddSingleton<IStreamMessageHandler, SynapseIngestMessageHandler>();

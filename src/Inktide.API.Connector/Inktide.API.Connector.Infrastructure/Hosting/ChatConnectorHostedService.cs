@@ -6,7 +6,7 @@ namespace Inktide.API.Connector.Infrastructure.Hosting;
 
 /// <summary>
 /// Starts all registered IChatConnector instances (Twitch, YouTube, etc.) on application startup.
-/// Disposes connectors that implement IAsyncDisposable on shutdown.
+/// On shutdown calls DisconnectAsync on each connector; DisposeAsync is handled by the DI container.
 /// </summary>
 public sealed class ChatConnectorHostedService : IHostedService
 {
@@ -28,7 +28,7 @@ public sealed class ChatConnectorHostedService : IHostedService
             list.Count,
             string.Join(", ", list.Select(c => c.PlatformId)));
 
-        foreach (var connector in list)
+        await Task.WhenAll(list.Select(async connector =>
         {
             try
             {
@@ -39,20 +39,19 @@ public sealed class ChatConnectorHostedService : IHostedService
             {
                 _logger.LogError(ex, "Failed to connect {PlatformId}", connector.PlatformId);
             }
-        }
+        }));
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        // DisposeAsync is intentionally NOT called here — connectors are DI singletons and the
+        // container calls DisposeAsync on IAsyncDisposable instances when it is disposed.
+        // Calling it here would cause double-dispose.
         foreach (var connector in _connectors)
         {
             try
             {
                 await connector.DisconnectAsync(cancellationToken);
-
-                if (connector is IAsyncDisposable disposable) {
-                    await disposable.DisposeAsync();
-                }
             }
             catch (Exception ex)
             {
