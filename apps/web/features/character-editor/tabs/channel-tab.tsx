@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   getCard,
   type ChannelResponse,
-} from '@/features/soul/api/index'
+} from '@/features/soul/api/index' // fsd:cross-feature-ok — soul editor
 import { ApiError } from '../../../api/client'
 import type { AiCharacter } from '@/shared/lib/character'
 

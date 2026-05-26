@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+// fsd:cross-feature-ok — renderer composition in soul editor
 import { useCardScene } from '@/features/avatar/hooks/use-card-scene'
 import { SceneGrid } from './scene-grid'
 import type { AiCharacter } from '@/shared/lib/character'

@@ -12,7 +12,7 @@ import type { EmotionState, VrmAnimationContext } from '@/shared/types/IVrmContr
 import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import { createVrmControllers } from '@/shared/services/animation/registry'
 
-export type LookAtMode = 'idle' | 'camera' | 'mouse' | 'disabled'
+export type { LookAtMode } from '@/shared/types/IVrmController'
 
 interface VrmRendererProps {
   url: string

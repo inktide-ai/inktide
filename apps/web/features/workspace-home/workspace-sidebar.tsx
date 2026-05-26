@@ -8,6 +8,7 @@ import { useBilling } from '@/entities/billing/context/BillingContext'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { listProjects, type ProjectListItem as ProjectItem } from '@/entities/project/api'
 import { ProPlanCard } from '@/features/workspace-home/pro-plan-card'
+// fsd:cross-feature-ok — sidebar composes account settings modal
 import AccountSettingsModal from '@/features/account/account-settings-modal'
 import InviteMembersModal from '@/components/organization/invite-members-modal'
 import type { PageId } from '@/features/account/user-account-settings'

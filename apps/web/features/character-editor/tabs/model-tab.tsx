@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { CardModelUploader } from '@/entities/soul/services/upload/CardModelUploader'
 import { executePresignedUpload } from '@/shared/services/upload/PresignedUploadService'
+// fsd:cross-feature-ok — renderer composition in soul editor
 import AvatarRenderer from '@/features/avatar/avatar-renderer'
 import { useCardModel } from '@/features/avatar/hooks/use-card-model'
 import { listCardModels, activateCardModel, type AiCardModelResponse } from '@/features/soul/api/index'

@@ -8,6 +8,7 @@ import { CardSceneUploader } from '@/entities/soul/services/upload/CardSceneUplo
 import { executePresignedUpload } from '@/shared/services/upload/PresignedUploadService'
 import type { AiCharacter } from '@/shared/lib/character'
 import { inferModelType } from '@/lib/utils/model-type'
+// fsd:cross-feature-ok — renderer composition in soul editor
 import AvatarRenderer from '@/features/avatar/avatar-renderer'
 import { useCardModel } from '@/features/avatar/hooks/use-card-model'
 import { useSceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'

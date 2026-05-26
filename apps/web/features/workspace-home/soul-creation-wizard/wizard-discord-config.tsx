@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { validateDiscordToken } from '@/entities/soul/api'
+// fsd:cross-feature-ok — wizard uses soul credential badge during soul setup
 import { CredentialStatusBadge, type CredentialStatus } from '@/features/soul/components/credential-status-badge'
 
 const iconCls = 'w-5 h-5'

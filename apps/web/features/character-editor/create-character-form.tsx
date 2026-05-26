@@ -9,6 +9,7 @@ import SkillsTab from './tabs/skills-tab'
 import ModelTab from './tabs/model-tab'
 import SceneTab from './tabs/scene-tab'
 import MemoryTab from './tabs/memory-tab'
+// fsd:cross-feature-ok — character-editor IS the soul editor; brain-tab is composed here
 import BrainTab from '@/features/brain/components/brain-tab'
 import VoiceTab from './tabs/voice-tab'
 

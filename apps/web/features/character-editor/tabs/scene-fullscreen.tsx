@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageSquare, Settings2, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
+// fsd:cross-feature-ok — renderer composition in soul editor
 import AvatarRenderer from '@/features/avatar/avatar-renderer'
 import { useCardModel } from '@/features/avatar/hooks/use-card-model'
 import { useCardScene } from '@/features/avatar/hooks/use-card-scene'

@@ -1,5 +1,5 @@
 'use client'
-import { useProjectPreviewUrl } from '@/shared/hooks/useProjectPreviewUrl'
+import { useProjectPreviewUrl } from '@/features/projects/hooks/useProjectPreviewUrl'
 import { ProjectGridCard, type ProjectStatus } from './project-grid-card'
 import type { ProjectListItem } from '@/features/projects/api/projects'
 

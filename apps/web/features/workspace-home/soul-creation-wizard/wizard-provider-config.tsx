@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { PROVIDER_DEFS } from '@/lib/providers'
 import { VOICE_PROVIDER_CATALOG } from '@/shared/data/voice-providers'
 import { upsertCredential, testCredential } from '@/entities/soul/api'
+// fsd:cross-feature-ok — wizard uses soul credential badge during soul setup
 import { CredentialStatusBadge, type CredentialStatus } from '@/features/soul/components/credential-status-badge'
 import { DynamicField } from './dynamic-field'
 import type { WizardProviderItem } from './wizard-provider-card'

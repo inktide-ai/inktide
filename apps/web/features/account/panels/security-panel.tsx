@@ -9,7 +9,7 @@ import {
   type KcCredential,
 } from '@/api/keycloak-account'
 import { deleteAccount } from '@/api/me'
-import DeleteAccountModal from '@/features/character-editor/delete-account-modal'
+import DeleteAccountModal from '@/features/account/delete-account-modal'
 import { cn } from '@/lib/utils'
 import { useAccountNav } from '../user-account-settings'
 

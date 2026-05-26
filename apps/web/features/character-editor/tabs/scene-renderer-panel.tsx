@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import { SCENE_RENDERER_DEFAULTS } from '@/shared/hooks/useSceneRendererSettings'
+// fsd:cross-feature-ok — renderer composition in soul editor
 import type { LookAtMode } from '@/features/avatar/avatar-renderer'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

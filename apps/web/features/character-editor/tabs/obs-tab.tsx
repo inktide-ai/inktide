@@ -2,8 +2,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { getCard, type ChannelResponse } from '@/features/soul/api/index'
+import { getCard, type ChannelResponse } from '@/features/soul/api/index' // fsd:cross-feature-ok — soul editor
+// fsd:cross-feature-ok — renderer composition in soul editor
 import { useCardModel } from '@/features/avatar/hooks/use-card-model'
+// fsd:cross-feature-ok — renderer composition in soul editor
 import { useCardScene } from '@/features/avatar/hooks/use-card-scene'
 import type { AiCharacter } from '@/shared/lib/character'
 import { buildObsSceneUrl } from '@/lib/utils/obs-url'

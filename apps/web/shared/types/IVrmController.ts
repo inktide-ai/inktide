@@ -9,7 +9,7 @@ import type { VRM } from '@pixiv/three-vrm'
 import type * as THREE from 'three'
 import type { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { MouthWeights } from './IVisemeProvider'
-import type { LookAtMode } from '@/features/avatar/renderers/vrm-renderer'
+export type LookAtMode = 'idle' | 'camera' | 'mouse' | 'disabled'
 
 export interface EmotionState {
   /** null = нет активной эмоции */
