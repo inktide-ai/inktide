@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { listProjects, type ProjectListItem } from '@/features/projects/api/projects'
+import { listProjects, type ProjectListItem } from '@/entities/project/api'
 import { cn } from '@/lib/utils'
 import { useOptionalCharactersContext } from '@/entities/character/context/CharactersContext'
 

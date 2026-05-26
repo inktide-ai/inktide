@@ -1,37 +1,15 @@
 import { apiFetch, emptyOrThrow, jsonOrThrow } from '@/api/client'
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// Re-export shared entity types and functions so app/ consumers don't need to change imports
+export type {
+  ProjectActiveSoul,
+  ProjectListItem,
+  Project,
+  CreateProjectRequest,
+} from '@/entities/project/api'
+export { listProjects, createProject, getProject } from '@/entities/project/api'
 
-export interface ProjectActiveSoul {
-  id: string
-  name: string
-  avatar_url: string | null
-}
-
-export interface ProjectListItem {
-  id: string
-  name: string
-  description: string | null
-  status: 'active' | 'paused' | 'archived'
-  active_soul_id: string | null
-  active_soul: ProjectActiveSoul | null
-  active_model_id: string | null
-  active_scene_id: string | null
-  system_prompt: string | null
-  updated_at: string
-  sort_key: string
-}
-
-export interface Project extends ProjectListItem {
-  user_id: string
-  created_at: string
-}
-
-export interface CreateProjectRequest {
-  name: string
-  description?: string
-  active_soul_id?: string
-}
+// ── Feature-specific types ─────────────────────────────────────────────────────
 
 export interface UpdateProjectRequest {
   name: string
@@ -47,33 +25,20 @@ export interface ImportProjectResponse {
   soul_id: string | null
 }
 
-// ── API calls ──────────────────────────────────────────────────────────────────
+// ── Feature-specific API calls ─────────────────────────────────────────────────
 
-export async function listProjects(soulId?: string): Promise<ProjectListItem[]> {
-  const url = soulId ? `/api/projects?soulId=${soulId}` : '/api/projects'
-  const res = await apiFetch(url)
-  return jsonOrThrow<ProjectListItem[]>(res)
-}
+// Note: updateProject, deleteProject, bindSoul, unbindSoul are project-management
+// operations used by app/ pages directly — kept here as feature-level API.
 
-export async function createProject(data: CreateProjectRequest): Promise<Project> {
-  const res = await apiFetch('/api/projects', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  })
-  return jsonOrThrow<Project>(res)
-}
-
-export async function getProject(id: string): Promise<Project> {
-  const res = await apiFetch(`/api/projects/${id}`)
-  return jsonOrThrow<Project>(res)
-}
-
-export async function updateProject(id: string, data: UpdateProjectRequest): Promise<Project> {
+export async function updateProject(
+  id: string,
+  data: UpdateProjectRequest,
+): Promise<import('@/entities/project/api').Project> {
   const res = await apiFetch(`/api/projects/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
-  return jsonOrThrow<Project>(res)
+  return jsonOrThrow(res)
 }
 
 export async function deleteProject(id: string): Promise<void> {
@@ -81,17 +46,22 @@ export async function deleteProject(id: string): Promise<void> {
   return emptyOrThrow(res)
 }
 
-export async function bindSoul(projectId: string, soulId: string): Promise<Project> {
+export async function bindSoul(
+  projectId: string,
+  soulId: string,
+): Promise<import('@/entities/project/api').Project> {
   const res = await apiFetch(`/api/projects/${projectId}/soul`, {
     method: 'PUT',
     body: JSON.stringify({ soul_id: soulId }),
   })
-  return jsonOrThrow<Project>(res)
+  return jsonOrThrow(res)
 }
 
-export async function unbindSoul(projectId: string): Promise<Project> {
+export async function unbindSoul(
+  projectId: string,
+): Promise<import('@/entities/project/api').Project> {
   const res = await apiFetch(`/api/projects/${projectId}/soul`, { method: 'DELETE' })
-  return jsonOrThrow<Project>(res)
+  return jsonOrThrow(res)
 }
 
 export async function importProjectFile(data: object): Promise<ImportProjectResponse> {

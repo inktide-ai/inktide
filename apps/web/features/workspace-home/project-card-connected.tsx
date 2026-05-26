@@ -2,7 +2,7 @@
 import type { ReactNode } from 'react'
 import { useProjectPreviewUrl } from '@/shared/hooks/useProjectPreviewUrl'
 import { ProjectCard } from './project-card'
-import type { ProjectListItem } from '@/features/projects/api/projects'
+import type { ProjectListItem } from '@/entities/project/api'
 
 interface ProjectCardConnectedProps {
   project: ProjectListItem
