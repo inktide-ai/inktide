@@ -8,7 +8,7 @@ import { Shield, RefreshCw, Sparkles, Crown, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { fadeUp } from '@/lib/motion'
 import { useAuth } from '@/context/AuthContext'
-import { useBilling } from '@/features/billing/BillingContext'
+import { useBilling } from '@/entities/billing/context/BillingContext'
 import PlanCard, { type PlanCardConfig } from './plan-card'
 
 type PlanKey = 'free' | 'starter' | 'pro'
