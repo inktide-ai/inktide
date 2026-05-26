@@ -4,12 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence } from 'framer-motion'
-import { Bell, ChevronDown, LayoutGrid, List, Search, Upload } from 'lucide-react'
+import { Bell, ChevronDown, List, Search, Upload } from 'lucide-react'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { StatCard } from '@/components/workspace/stat-card'
 import { ProjectGridCardConnected } from '@/components/projects/project-grid-card-connected'
+import { ProjectListRowConnected } from '@/components/projects/project-list-row-connected'
 import { type ProjectStatus } from '@/components/projects/project-grid-card'
 import { ProjectCreationWizard } from '@/components/workspace/project-creation-wizard'
 import {
@@ -57,6 +58,31 @@ function SortableProjectCard({ project, coverUrlFallback, onOpen, onExport }: So
   )
 }
 
+function SortableProjectListRow({ project, coverUrlFallback, onOpen, onExport }: SortableProjectCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: project.id })
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 10 : undefined,
+        cursor: isDragging ? 'grabbing' : 'grab',
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <ProjectListRowConnected
+        project={project}
+        coverUrlFallback={coverUrlFallback}
+        onOpen={onOpen}
+        onExport={onExport}
+      />
+    </div>
+  )
+}
+
 export default function ProjectsPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -66,6 +92,7 @@ export default function ProjectsPage() {
   const [search, setSearch]       = useState('')
   const [showWizard, setShowWizard] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [viewMode, setViewMode]   = useState<'grid' | 'list'>('grid')
 
   const activeSoul = selectedId ? cardList.find(c => c.id === selectedId) ?? null : null
 
@@ -120,6 +147,48 @@ export default function ProjectsPage() {
       console.error('Export failed:', err)
     }
   }
+
+  const listContainer = 'rounded-2xl overflow-hidden border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]'
+
+  const projectList = loading ? (
+    <div className={listContainer}>
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="h-16 animate-pulse bg-[hsla(var(--bg-1),_1)]" />
+      ))}
+    </div>
+  ) : filtered.length === 0 ? (
+    <div className="flex h-[200px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-[14px] text-[var(--text-tertiary)]">
+      {search ? 'No projects match your search' : 'No projects yet — click "+ New Project" to get started'}
+    </div>
+  ) : isDndEnabled ? (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={filtered.map(p => p.id)} strategy={rectSortingStrategy}>
+        <div className={listContainer}>
+          {filtered.map(project => (
+            <SortableProjectListRow
+              key={project.id}
+              project={project}
+              coverUrlFallback={activeSoul?.avatar_url ?? project.active_soul?.avatar_url ?? undefined}
+              onOpen={() => router.push(`/projects/${project.id}`)}
+              onExport={() => handleExport(project)}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
+  ) : (
+    <div className={listContainer}>
+      {filtered.map(project => (
+        <ProjectListRowConnected
+          key={project.id}
+          project={project}
+          coverUrlFallback={activeSoul?.avatar_url ?? project.active_soul?.avatar_url ?? undefined}
+          onOpen={() => router.push(`/projects/${project.id}`)}
+          onExport={() => handleExport(project)}
+        />
+      ))}
+    </div>
+  )
 
   const projectGrid = loading ? (
     <div className="grid grid-cols-4 gap-3">
@@ -184,7 +253,7 @@ export default function ProjectsPage() {
       <div className="mx-auto max-w-[1300px]">
         <header className="mb-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-[36px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">Projects</h1>
+            <h1 className="font-serif text-[36px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">Projects</h1>
             <p className="mt-1 text-[14px] text-[var(--text-secondary)]">
               Organize and manage your AI projects and pipelines
             </p>
@@ -240,7 +309,7 @@ export default function ProjectsPage() {
         <section className="mb-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <h2 className="text-[30px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">Your Projects</h2>
+              <h2 className="font-serif text-[30px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">Your Projects</h2>
               <div className="flex items-center gap-2">
                 {(['all', 'active', 'paused', 'archived'] as const).map(tab => (
                   <button
@@ -258,22 +327,26 @@ export default function ProjectsPage() {
                 ))}
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button type="button" className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--sidebar-active)] text-[var(--accent-hover)]">
-                <LayoutGrid size={14} />
-              </button>
-              <button type="button" className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--surface-1)] text-[var(--text-tertiary)] hover:bg-[var(--surface-2)]">
-                <List size={14} />
-              </button>
-            </div>
+            <button
+              type="button"
+              title={viewMode === 'list' ? 'Switch to grid view' : 'Switch to list view'}
+              onClick={() => setViewMode(v => v === 'list' ? 'grid' : 'list')}
+              className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-[var(--sidebar-active)] text-[var(--accent-hover)]'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--surface-2)]'
+              }`}
+            >
+              <List size={14} />
+            </button>
           </div>
 
-          {projectGrid}
+          {viewMode === 'list' ? projectList : projectGrid}
         </section>
 
         <section className="rounded-2xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)]">
           <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-4 py-3">
-            <h3 className="text-[30px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">Recent Activity</h3>
+            <h3 className="font-serif text-[30px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">Recent Activity</h3>
             <button type="button" className="text-[14px] font-medium text-[var(--accent-hover)] hover:text-[var(--accent-primary)]">
               View All Activity
             </button>

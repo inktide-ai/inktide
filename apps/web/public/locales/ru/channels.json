@@ -1,0 +1,90 @@
+{
+  "section": {
+    "title": "Каналы"
+  },
+  "intro": "Подключите персонажа к платформам живого чата. Каждая ссылка хранит ключ маршрутизации, который Synapse использует для загрузки этой карточки при получении сообщений.",
+  "form": {
+    "displayName": "Отображаемое имя",
+    "displayNamePlaceholder": "Метка в дашборде",
+    "botName": "Бот / имя сервиса",
+    "botNamePlaceholder": "Как бот отображается на этой платформе"
+  },
+  "status": {
+    "loading": "Загрузка подключений…",
+    "adding": "Добавляю…",
+    "remove": "Удалить",
+    "paused": "на паузе"
+  },
+  "error": {
+    "load": "Не удалось загрузить подключения.",
+    "add": "Не удалось добавить подключение.",
+    "update": "Ошибка обновления.",
+    "remove": "Ошибка удаления.",
+    "displayNameRequired": "Введите отображаемое имя для этого подключения.",
+    "botNameRequired": "Введите имя бота или сервисного аккаунта для этой платформы."
+  },
+  "confirm": "Удалить ссылку {{label}} \"{{channel}}\"?",
+  "discord": {
+    "title": "Discord",
+    "subtitle": "Привяжите Discord-сервер (guild), чтобы бот Inktide маршрутизировал чат к этому персонажу.",
+    "hint": "Ingest использует <strong>guild id</strong> как <code>ChannelId</code> (так же как Discord-коннектор). Добавьте ID сервера здесь и убедитесь, что бот разрешён в <code>DiscordSettings:GuildIds</code>. <a>Как включить режим разработчика</a>",
+    "hintLink": "https://support.discord.com/hc/en-us/articles/206346498",
+    "channelIdLabel": "ID сервера (guild snowflake)",
+    "channelIdPlaceholder": "например 123456789012345678",
+    "channelIdHint": "Правый клик по иконке сервера → Скопировать ID сервера (нужен режим разработчика).",
+    "addLabel": "Добавить Discord-сервер",
+    "listTitle": "Привязанные серверы",
+    "emptyList": "Нет привязанных Discord-серверов.",
+    "validationError": "Используйте числовой guild id (17–20 цифр). Включите режим разработчика → Скопировать ID сервера.",
+    "removeLabel": "Discord"
+  },
+  "twitch": {
+    "title": "Twitch",
+    "subtitle": "Привяжите Twitch-канал, чтобы ingest мог маршрутизировать чат к этому персонажу (логин стримера или ID).",
+    "hint": "Укажите тот же <code>ChannelId</code>, который отправляет ваш Twitch-коннектор (обычно логин канала в нижнем регистре или числовой user id). Должно совпадать с <code>TwitchSettings</code> / областью действия бота для этого канала.",
+    "channelIdLabel": "ID канала / логин",
+    "channelIdPlaceholder": "например channel_login или числовой id",
+    "channelIdHint": "Должно совпадать с идентификатором в ChatMessage.ChannelId для Twitch.",
+    "addLabel": "Добавить Twitch-канал",
+    "listTitle": "Привязанные Twitch-каналы",
+    "emptyList": "Нет привязанных Twitch-каналов.",
+    "validationError": "Используйте 1–100 символов: буквы, цифры, _ и - только.",
+    "removeLabel": "Twitch"
+  },
+  "kick": {
+    "title": "Kick",
+    "subtitle": "Привяжите Kick-канал для маршрутизации живого чата к этому персонажу.",
+    "hint": "Используйте slug или id канала, который ваш Kick-коннектор публикует как <code>ChannelId</code> в унифицированном сообщении чата.",
+    "channelIdLabel": "ID канала / slug",
+    "channelIdPlaceholder": "например channelname",
+    "channelIdHint": "То же значение, что ingest ChannelId от Kick-коннектора.",
+    "addLabel": "Добавить Kick-канал",
+    "listTitle": "Привязанные Kick-каналы",
+    "emptyList": "Нет привязанных Kick-каналов.",
+    "validationError": "Используйте 1–100 символов: буквы, цифры, _ и - только.",
+    "removeLabel": "Kick"
+  },
+  "vk_video": {
+    "title": "VK Video",
+    "subtitle": "Привяжите контекст VK Video (live), чтобы чат стрима маршрутизировался к этому персонажу.",
+    "hint": "Используйте стабильный id канала или владельца, который ваш VK-коннектор устанавливает как <code>ChannelId</code> для комментариев прямого эфира.",
+    "channelIdLabel": "ID канала / владельца",
+    "channelIdPlaceholder": "например -123456789 или public id",
+    "channelIdHint": "Должно совпадать с ChatMessage.ChannelId из пути ingest VK Video.",
+    "addLabel": "Добавить VK Video",
+    "listTitle": "Привязанные VK Video",
+    "emptyList": "Нет привязанных VK Video.",
+    "validationError": "Используйте 1–100 символов: буквы, цифры, _ и - только.",
+    "removeLabel": "VK Video"
+  },
+  "telegram": {
+    "title": "Telegram",
+    "subtitle": "Подключите ваш аккаунт Telegram для маршрутизации сообщений к этому Soul.",
+    "hint": "Авторизуйтесь через OAuth для привязки аккаунта Telegram. Soul будет получать сообщения из чатов, где активен ваш бот.",
+    "addLabel": "Подключить Telegram",
+    "listTitle": "Привязанные аккаунты Telegram",
+    "emptyList": "Нет привязанных аккаунтов Telegram.",
+    "validationError": "Используйте 1–200 символов: буквы, цифры, _ и - только.",
+    "removeLabel": "Telegram"
+  }
+}

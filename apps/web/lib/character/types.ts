@@ -28,6 +28,9 @@ export interface CharacterIdentity {
   isActive: boolean
   visibility: Visibility
   llmCatalogId?: string
+  createdAt: string
+  category: string | null
+  tags: string[]
 }
 
 export interface CharacterAppearance {

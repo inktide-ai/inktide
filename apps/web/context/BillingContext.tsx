@@ -12,11 +12,11 @@ import { queryKeys } from '@/lib/query/keys'
 import { useAuth } from './AuthContext'
 
 interface BillingContextValue {
-  plan: 'free' | 'pro'
+  plan: 'free' | 'starter' | 'pro'
   status: SubscriptionDto['status']
   periodEnd: Date | null
   isLoading: boolean
-  openCheckout: () => Promise<void>
+  openCheckout: (plan: 'starter' | 'pro') => Promise<void>
   openPortal: () => Promise<void>
   refresh: () => Promise<void>
 }
@@ -35,11 +35,11 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     placeholderData: FREE_SUB,
   })
 
-  const checkoutMutation = useMutation({ mutationFn: createCheckout })
-  const portalMutation   = useMutation({ mutationFn: createPortal   })
+  const checkoutMutation = useMutation({ mutationFn: ({ plan }: { plan: 'starter' | 'pro' }) => createCheckout(plan) })
+  const portalMutation   = useMutation({ mutationFn: createPortal })
 
-  const openCheckout = useCallback(async () => {
-    const { checkoutUrl } = await checkoutMutation.mutateAsync(undefined)
+  const openCheckout = useCallback(async (plan: 'starter' | 'pro') => {
+    const { checkoutUrl } = await checkoutMutation.mutateAsync({ plan })
     if (!checkoutUrl) throw new Error('No checkout URL returned')
     window.location.href = checkoutUrl
   }, [checkoutMutation])

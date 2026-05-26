@@ -1,14 +1,15 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bot, Folder, Mic, Radio, Siren } from 'lucide-react'
-import { type SoulCardData, type SoulPlatform } from '@/components/hub/soul-card'
+import type { SoulCardData } from '@/components/hub/soul-card'
 import { SoulCardVertical } from '@/components/hub/soul-card-vertical'
 import { SoulCardVerticalSkeleton } from '@/components/soul/soul-card-vertical-skeleton'
-import { splitPersonalityForSoulCard } from '@/lib/soul-card-personality'
+import { TwitchIcon } from '@/components/icons/twitch-icon'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useCharactersContext } from '@/context/CharactersContext'
 import { fetchDashboardStats } from '@/api/stats'
@@ -22,47 +23,28 @@ import { createDiscordCustomBotChannel } from '@/api/soul'
 import { StatCard } from '@/components/workspace/stat-card'
 import { TemplateCard } from '@/components/workspace/template-card'
 import { WorkspaceTopBar } from '@/components/workspace/workspace-topbar'
-import { statusFromCard, accentFromCard } from '@/lib/home-utils'
+import { toSoulCardData } from '@/lib/home-utils'
 import { buildSpark } from '@/lib/spark'
+import { formatApiCalls, editedLabel } from '@/lib/format-utils'
+import { HOME_TEMPLATES } from '@/data/home-templates'
 
-function TwitchIcon({ size = 14 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" fill="currentColor"/>
-    </svg>
-  )
+const TEMPLATE_ICONS: Record<string, React.ReactNode> = {
+  twitch: <TwitchIcon size={16} />,
+  bot:    <Bot size={16} />,
+  radio:  <Radio size={16} />,
+  mic:    <Mic size={16} />,
+  siren:  <Siren size={16} />,
 }
-
-const DEFAULT_SOUL_PLATFORMS: SoulPlatform[] = ['twitch', 'discord', 'telegram']
-
-function formatApiCalls(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`
-  return String(n)
-}
-
-function editedLabel(iso: string): string {
-  const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
-  if (m < 60) return `Edited ${m}m ago`
-  const h = Math.floor(m / 60)
-  if (h < 24) return `Edited ${h}h ago`
-  return `Edited ${Math.floor(h / 24)}d ago`
-}
-
-const DEMO_TEMPLATES = [
-  { id: '1', title: 'Twitch Chat Bot',   subtitle: 'Ready to use', icon: <TwitchIcon size={16} /> },
-  { id: '2', title: 'Discord Assistant', subtitle: 'Ready to use', icon: <Bot size={16} /> },
-  { id: '3', title: 'AI VTuber',         subtitle: 'Ready to use', icon: <Radio size={16} /> },
-  { id: '4', title: 'Voice Assistant',   subtitle: 'Ready to use', icon: <Mic size={16} /> },
-  { id: '5', title: 'Alert System',      subtitle: 'Ready to use', icon: <Siren size={16} /> },
-]
 
 export default function HomePage() {
+  const { t } = useTranslation('common')
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { favs, toggle } = useFavorites()
   const { cardList, loading, addCharacter } = useCharactersContext()
   const [showWizard, setShowWizard] = useState(false)
   const [showProjectWizard, setShowProjectWizard] = useState(false)
+  const [showUpgraded, setShowUpgraded] = useState(searchParams.get('upgraded') === '1')
 
   const { data: stats = null } = useQuery({
     queryKey: queryKeys.stats.dashboard,
@@ -81,25 +63,16 @@ export default function HomePage() {
     [allProjects],
   )
 
-  const visible = useMemo<SoulCardData[]>(() => {
-    return cardList.map(card => {
-      const { subtitle, description } = splitPersonalityForSoulCard(card.personality)
-      return {
-        id: card.id,
-        name: card.name,
-        subtitle,
-        ...(description ? { description } : {}),
-        avatarUrl: card.avatar_url || '/avatars/nova.png',
-        accentColor: accentFromCard(card.id),
-        status: statusFromCard(card.id, card.is_active),
-        platforms: DEFAULT_SOUL_PLATFORMS,
-      }
-    }).sort((a, b) => {
-      const af = favs.has(a.id) ? 0 : 1
-      const bf = favs.has(b.id) ? 0 : 1
-      return af - bf || a.name.localeCompare(b.name)
-    })
-  }, [cardList, favs])
+  const visible = useMemo<SoulCardData[]>(
+    () => cardList
+      .map(toSoulCardData)
+      .sort((a, b) => {
+        const af = favs.has(a.id) ? 0 : 1
+        const bf = favs.has(b.id) ? 0 : 1
+        return af - bf || a.name.localeCompare(b.name)
+      }),
+    [cardList, favs],
+  )
 
   const activeChannels = useMemo(
     () => cardList.reduce((n, c) => n + (c.is_active ? 1 : 0), 0),
@@ -108,6 +81,15 @@ export default function HomePage() {
 
   return (
     <div className="home-font-split relative h-full min-h-screen overflow-hidden bg-[var(--bg-0)]">
+      {showUpgraded && (
+        <div
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl px-5 py-3 text-[13px] font-medium shadow-lg whitespace-nowrap"
+          style={{ background: '#166534', color: '#dcfce7', border: '1px solid #15803d' }}
+        >
+          <span>{t('billing.subscriptionActivated')}</span>
+          <button type="button" onClick={() => setShowUpgraded(false)} style={{ opacity: 0.7, lineHeight: 1 }}>✕</button>
+        </div>
+      )}
       <AnimatePresence>
         {showProjectWizard && (
           <ProjectCreationWizard
@@ -251,12 +233,12 @@ export default function HomePage() {
               <section>
                 <SectionHeader title="Start from a template" withArrows={false} />
                 <div className="grid grid-cols-6 gap-2">
-                  {DEMO_TEMPLATES.map(template => (
+                  {HOME_TEMPLATES.map(template => (
                     <TemplateCard
                       key={template.id}
                       title={template.title}
                       subtitle={template.subtitle}
-                      icon={template.icon}
+                      icon={TEMPLATE_ICONS[template.icon]}
                     />
                   ))}
                   <TemplateCard title="Blank Project" subtitle="Start from scratch" icon={<span className="text-[18px]">+</span>} />

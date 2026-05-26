@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
 
 function resolve(obj: Record<string, unknown>, key: string): string | undefined {
   let cur: unknown = obj
@@ -20,9 +20,17 @@ function loadLocale(locale: string, ns: string): Record<string, unknown> {
 }
 
 export async function getTranslations(ns: string) {
-  const h = await headers()
-  const al = h.get('accept-language') ?? ''
-  const locale = /\bru\b/.test(al) ? 'ru' : 'en'
+  const jar = await cookies()
+  const fromCookie = jar.get('inktide_lang')?.value
+
+  let locale: string
+  if (fromCookie && ['en', 'ru'].includes(fromCookie)) {
+    locale = fromCookie
+  } else {
+    const h = await headers()
+    const al = h.get('accept-language') ?? ''
+    locale = /\bru\b/.test(al) ? 'ru' : 'en'
+  }
 
   const data = loadLocale(locale, ns)
   const fallback = locale !== 'en' ? loadLocale('en', ns) : {}

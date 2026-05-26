@@ -1,19 +1,38 @@
 'use client'
 
-import { useMemo, useRef, useState, type ChangeEvent } from 'react'
-import { MoreHorizontal, Pencil, Share2 } from 'lucide-react'
+import { useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react'
+import { MoreHorizontal, Share2, X } from 'lucide-react'
 import type { AiCharacter } from '@/lib/character'
 import { uploadCardAvatar } from '@/api/soul'
 import { useCharactersContext } from '@/context/CharactersContext'
+
+const SOUL_CATEGORIES = [
+  'Assistant', 'Character', 'Streamer', 'Companion',
+  'Detective', 'Warrior', 'Narrator', 'Guide',
+] as const
+
+const STATUS_STYLES: Record<string, { dot: string; text: string; label: string }> = {
+  active:   { dot: 'bg-[var(--success-text)]',  text: 'text-[var(--success-text)]',  label: 'Active'   },
+  paused:   { dot: 'bg-amber-400',               text: 'text-amber-400',               label: 'Paused'   },
+  archived: { dot: 'bg-[var(--text-tertiary)]',  text: 'text-[var(--text-tertiary)]', label: 'Archived' },
+}
 
 interface SoulCharacterCardProps {
   character: AiCharacter
 }
 
-function Tag({ label }: { label: string }) {
+function Tag({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="inline-flex items-center rounded-md border border-[var(--border-default)] bg-[var(--surface-1)] px-2 py-0.5 text-[14px] text-[var(--text-secondary)]">
+    <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-[var(--surface-1)] px-2 py-0.5 text-[14px] text-[var(--text-secondary)]">
       {label}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="ml-0.5 rounded text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+        aria-label={`Remove tag ${label}`}
+      >
+        <X size={11} />
+      </button>
     </span>
   )
 }
@@ -24,6 +43,7 @@ export function SoulCharacterCard({ character }: SoulCharacterCardProps) {
   const [avatarBusy, setAvatarBusy] = useState(false)
   const [nameDraft, setNameDraft] = useState(character.name)
   const [personalityDraft, setPersonalityDraft] = useState(character.personality)
+  const [tagInput, setTagInput] = useState('')
   const [copied, setCopied] = useState(false)
 
   const handleShare = () => {
@@ -33,9 +53,16 @@ export function SoulCharacterCard({ character }: SoulCharacterCardProps) {
   }
 
   const modelName = useMemo(
-    () => character.llm.modelId ?? 'Claude 3.5 Sonnet',
+    () => character.llm.modelId ?? 'No model',
     [character.llm.modelId],
   )
+
+  const createdLabel = useMemo(
+    () => new Date(character.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    [character.createdAt],
+  )
+
+  const statusStyle = STATUS_STYLES[character.status] ?? STATUS_STYLES.active
 
   const onAvatarFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -59,6 +86,28 @@ export function SoulCharacterCard({ character }: SoulCharacterCardProps) {
   const commitPersonality = () => {
     if (personalityDraft !== character.personality) {
       updateCharacter(character.id, { personality: personalityDraft })
+    }
+  }
+
+  const handleCategoryChange = (value: string) => {
+    updateCharacter(character.id, { category: value || null })
+  }
+
+  const addTag = (raw: string) => {
+    const tag = raw.trim()
+    if (!tag || character.tags.includes(tag)) return
+    updateCharacter(character.id, { tags: [...character.tags, tag] })
+    setTagInput('')
+  }
+
+  const removeTag = (tag: string) => {
+    updateCharacter(character.id, { tags: character.tags.filter(t => t !== tag) })
+  }
+
+  const handleTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      addTag(tagInput)
     }
   }
 
@@ -119,30 +168,31 @@ export function SoulCharacterCard({ character }: SoulCharacterCardProps) {
           <div className="grid grid-cols-4 gap-x-6 text-[14px]">
             <div>
               <p className="mb-1 text-[12px] text-[var(--text-secondary)]">Created</p>
-              <p className="text-[var(--text-primary)]">Jan 15, 2024</p>
+              <p className="text-[var(--text-primary)]">{createdLabel}</p>
             </div>
             <div>
               <p className="mb-1 text-[12px] text-[var(--text-secondary)]">Status</p>
-              <div className="flex items-center gap-1.5 text-[var(--success-text)]">
-                <span className="inline-block h-2 w-2 rounded-full bg-[var(--success-text)]" />
-                Active
+              <div className={`flex items-center gap-1.5 ${statusStyle.text}`}>
+                <span className={`inline-block h-2 w-2 rounded-full ${statusStyle.dot}`} />
+                {statusStyle.label}
               </div>
             </div>
             <div>
               <p className="mb-1 text-[12px] text-[var(--text-secondary)]">Model</p>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[var(--text-primary)]">{modelName}</span>
-                <button type="button" className="text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-primary)]">
-                  <Pencil size={11} />
-                </button>
-              </div>
+              <span className="text-[var(--text-primary)]">{modelName}</span>
             </div>
             <div>
               <p className="mb-1 text-[12px] text-[var(--text-secondary)]">Type</p>
-              <div className="flex items-center gap-3">
-                <p className="text-[var(--text-primary)]">Detective AI</p>
-                <span className="rounded bg-[var(--accent-violet-bg)] px-2 py-0.5 text-[12px] font-medium text-[var(--accent-violet-text)]">AI</span>
-              </div>
+              <select
+                value={character.category ?? ''}
+                onChange={e => handleCategoryChange(e.target.value)}
+                className="w-full cursor-pointer bg-transparent text-[14px] text-[var(--text-primary)] outline-none"
+              >
+                <option value="">— None —</option>
+                {SOUL_CATEGORIES.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -150,10 +200,17 @@ export function SoulCharacterCard({ character }: SoulCharacterCardProps) {
           <div>
             <p className="mb-1.5 text-[12px] text-[var(--text-secondary)]">Tags</p>
             <div className="flex flex-wrap gap-1.5">
-              <Tag label="Core" />
-              <Tag label="Detective" />
-              <Tag label="Sarcastic" />
-              <Tag label="Rebel" />
+              {character.tags.map(tag => (
+                <Tag key={tag} label={tag} onRemove={() => removeTag(tag)} />
+              ))}
+              <input
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                onBlur={() => { if (tagInput.trim()) addTag(tagInput) }}
+                placeholder="Add tag…"
+                className="min-w-[80px] bg-transparent text-[14px] text-[var(--text-secondary)] placeholder:text-[var(--text-tertiary)] outline-none"
+              />
             </div>
           </div>
 

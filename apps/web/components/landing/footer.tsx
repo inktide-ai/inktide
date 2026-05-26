@@ -59,7 +59,7 @@ export default async function Footer() {
   ];
 
   return (
-    <footer className="px-8 pt-12 pb-8 bg-[#030306] border-t border-[var(--border)]">
+    <footer className="px-8 pt-12 pb-8 border-t border-[var(--border)] transition-[background] duration-[250ms]" style={{ backgroundColor: 'var(--bg-dark)' }}>
       <div className="max-w-[1200px] mx-auto">
         <div className="flex flex-wrap items-center justify-between gap-8 pb-8 border-b border-[var(--border)] max-sm:flex-col max-sm:items-start max-sm:gap-6">
           <div className="flex flex-col gap-5">
@@ -68,7 +68,8 @@ export default async function Footer() {
               className="flex items-center gap-3 no-underline text-[var(--text-primary)] transition-opacity duration-200 hover:opacity-90"
               aria-label="inktide"
             >
-              <img src="/logo/icon_main_white.svg" className="h-9 w-auto object-contain" alt="" aria-hidden />
+              <img src="/logo/icon_main_white.svg" className="logo-dark h-9 w-auto object-contain" alt="" aria-hidden />
+              <img src="/logo/icon_main.svg"       className="logo-light h-9 w-auto object-contain" alt="" aria-hidden />
             </a>
             <nav className="flex flex-wrap gap-x-5 gap-y-1">
               {footerLinks.map(({ label, href }) => (
@@ -84,7 +85,7 @@ export default async function Footer() {
           </div>
 
           <div className="flex flex-col items-center gap-3 max-sm:items-start">
-            <span className="text-white font-bold text-[0.95rem]">{t('footer.followUs')}</span>
+            <span className="font-bold text-[0.95rem] text-[var(--text-primary)] transition-[color] duration-[250ms]">{t('footer.followUs')}</span>
             <div className="flex items-center gap-4">
               {SOCIAL_LINKS.map(({ label, href, icon }) => (
                 <a

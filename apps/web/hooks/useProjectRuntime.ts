@@ -7,7 +7,20 @@ import {
   bindSoul as apiBind,
   unbindSoul as apiUnbind,
   type Project,
+  type UpdateProjectRequest,
 } from '@/api/projects'
+
+function buildUpdate(project: Project | null, overrides: Partial<UpdateProjectRequest>): UpdateProjectRequest {
+  return {
+    name: project?.name ?? '',
+    description: project?.description ?? null,
+    status: project?.status,
+    active_model_id: project?.active_model_id ?? null,
+    active_scene_id: project?.active_scene_id ?? null,
+    system_prompt: project?.system_prompt ?? null,
+    ...overrides,
+  }
+}
 import { getCard, listCardModels, listCardScenes, type AiCardResponse, type AiCardModelResponse, type AiCardSceneResponse, type ChannelResponse } from '@/api/soul'
 import { queryKeys } from '@/lib/query/keys'
 import { buildProjectPreviewUrl } from '@/lib/project-preview'
@@ -24,8 +37,8 @@ export interface ProjectRuntime {
   loading: boolean
   bindSoul(soulId: string): Promise<void>
   unbindSoul(): Promise<void>
-  setActiveModel(modelId: string): Promise<void>
-  setActiveScene(sceneId: string): Promise<void>
+  setActiveModel(modelId: string | null): Promise<void>
+  setActiveScene(sceneId: string | null): Promise<void>
   updateProjectMeta(data: { name: string; description?: string | null }): Promise<void>
   toggleStatus(): Promise<void>
 }
@@ -123,29 +136,26 @@ export function useProjectRuntime(projectId: string): ProjectRuntime {
   })
 
   const setActiveModelMutation = useMutation({
-    mutationFn: (modelId: string) =>
-      updateProject(projectId, { name: project?.name ?? '', active_model_id: modelId }),
+    mutationFn: (modelId: string | null) =>
+      updateProject(projectId, buildUpdate(project, { active_model_id: modelId })),
     onSuccess: invalidateAll,
   })
 
   const setActiveSceneMutation = useMutation({
-    mutationFn: (sceneId: string) =>
-      updateProject(projectId, { name: project?.name ?? '', active_scene_id: sceneId }),
+    mutationFn: (sceneId: string | null) =>
+      updateProject(projectId, buildUpdate(project, { active_scene_id: sceneId })),
     onSuccess: invalidateAll,
   })
 
   const updateProjectMetaMutation = useMutation({
     mutationFn: (data: { name: string; description?: string | null }) =>
-      updateProject(projectId, { name: data.name, description: data.description }),
+      updateProject(projectId, buildUpdate(project, { name: data.name, description: data.description })),
     onSuccess: invalidateAll,
   })
 
   const toggleStatusMutation = useMutation({
     mutationFn: () =>
-      updateProject(projectId, {
-        name: project?.name ?? '',
-        status: project?.status === 'active' ? 'paused' : 'active',
-      }),
+      updateProject(projectId, buildUpdate(project, { status: project?.status === 'active' ? 'paused' : 'active' })),
     onSuccess: invalidateAll,
   })
 

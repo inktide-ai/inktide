@@ -8,10 +8,9 @@ import ProfilePanel from './panels/profile-panel'
 import SecurityPanel from './panels/security-panel'
 import SessionsPanel from './panels/sessions-panel'
 import AppearancePanel from './panels/appearance-panel'
-import NotificationsPanel from './panels/notifications-panel'
 import ConnectionsPanel from './panels/connections-panel'
 
-export type PageId = 'profile' | 'security' | 'sessions' | 'appearance' | 'notif' | 'conn'
+export type PageId = 'profile' | 'security' | 'sessions' | 'appearance' | 'conn'
 
 interface NavItem {
   id: PageId
@@ -72,19 +71,6 @@ const NAV: NavItem[] = [
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="12" cy="12" r="5"/>
         <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'notif',
-    section: 'Workspace',
-    label: 'Notifications',
-    title: 'Notifications',
-    sub: 'Choose what you want to be notified about',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
       </svg>
     ),
   },
@@ -231,11 +217,6 @@ export default function UserAccountSettings({ initialPage, onClose }: UserAccoun
               <Tabs.Content value="appearance" className="mt-0 outline-none">
                 <div className="flex flex-col px-[26px] pb-6">
                   <AppearancePanel />
-                </div>
-              </Tabs.Content>
-              <Tabs.Content value="notif" className="mt-0 outline-none">
-                <div className="flex flex-col px-[26px] pb-6">
-                  <NotificationsPanel />
                 </div>
               </Tabs.Content>
               <Tabs.Content value="conn" className="mt-0 outline-none">

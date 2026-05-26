@@ -25,10 +25,13 @@ export async function initI18n() {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
     detection: {
-      order: ['querystring', 'localStorage', 'navigator'],
-      caches: ['localStorage'],
+      order: ['cookie', 'querystring', 'localStorage', 'navigator'],
+      caches: ['cookie', 'localStorage'],
+      lookupCookie: 'inktide_lang',
       lookupLocalStorage: 'inktide_lang',
       lookupQuerystring: 'lang',
+      cookieMinutes: 60 * 24 * 365,
+      cookieDomain: typeof window !== 'undefined' ? window.location.hostname : undefined,
     },
     interpolation: {
       escapeValue: false,

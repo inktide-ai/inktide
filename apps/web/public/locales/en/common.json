@@ -39,6 +39,9 @@
     "discard": "Discard",
     "save": "Save Changes"
   },
+  "billing": {
+    "subscriptionActivated": "Subscription activated"
+  },
   "emptyState": {
     "loadingCharacters": "Loading characters...",
     "noCharacterSelected": "No character selected",

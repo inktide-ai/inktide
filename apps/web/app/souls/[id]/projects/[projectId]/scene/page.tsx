@@ -1,10 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { useParams } from 'next/navigation'
 import { Check, ImageIcon, Box } from 'lucide-react'
-import { getProject, updateProject, type Project } from '@/api/projects'
-import { listCardModels, listCardScenes, type AiCardModelResponse, type AiCardSceneResponse } from '@/api/soul'
+import { useProjectRuntimeContext } from '@/context/ProjectRuntimeContext'
 
 function inferModelLabel(fileName: string): string {
   if (fileName.endsWith('.vrm')) return 'VRM'
@@ -13,64 +10,7 @@ function inferModelLabel(fileName: string): string {
 }
 
 export default function SoulProjectScenePage() {
-  const { projectId } = useParams<{ id: string; projectId: string }>()
-
-  const [project, setProject] = useState<Project | null>(null)
-  const [models, setModels]   = useState<AiCardModelResponse[]>([])
-  const [scenes, setScenes]   = useState<AiCardSceneResponse[]>([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving]   = useState(false)
-
-  useEffect(() => {
-    getProject(projectId)
-      .then(async p => {
-        setProject(p)
-        if (p.active_soul_id) {
-          const [m, s] = await Promise.all([
-            listCardModels(p.active_soul_id),
-            listCardScenes(p.active_soul_id),
-          ])
-          setModels(m)
-          setScenes(s)
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [projectId])
-
-  const selectModel = useCallback(async (modelId: string | null) => {
-    if (!project || saving) return
-    setSaving(true)
-    try {
-      const updated = await updateProject(projectId, {
-        name: project.name,
-        active_model_id: modelId,
-        active_scene_id: project.active_scene_id,
-      })
-      setProject(updated)
-    } catch (err) {
-      console.error('Failed to update model:', err)
-    } finally {
-      setSaving(false)
-    }
-  }, [project, saving, projectId])
-
-  const selectScene = useCallback(async (sceneId: string | null) => {
-    if (!project || saving) return
-    setSaving(true)
-    try {
-      const updated = await updateProject(projectId, {
-        name: project.name,
-        active_model_id: project.active_model_id,
-        active_scene_id: sceneId,
-      })
-      setProject(updated)
-    } catch (err) {
-      console.error('Failed to update scene:', err)
-    } finally {
-      setSaving(false)
-    }
-  }, [project, saving, projectId])
+  const { project, models, scenes, loading, setActiveModel, setActiveScene } = useProjectRuntimeContext()
 
   if (loading) {
     return (
@@ -118,8 +58,7 @@ export default function SoulProjectScenePage() {
                 <button
                   key={model.id}
                   type="button"
-                  disabled={saving}
-                  onClick={() => selectModel(active ? null : model.id)}
+                  onClick={() => setActiveModel(active ? null : model.id)}
                   className={`relative flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-all ${
                     active
                       ? 'border-[var(--accent-primary)] bg-[var(--sidebar-active)]'
@@ -170,8 +109,7 @@ export default function SoulProjectScenePage() {
                 <button
                   key={scene.id}
                   type="button"
-                  disabled={saving}
-                  onClick={() => selectScene(active ? null : scene.id)}
+                  onClick={() => setActiveScene(active ? null : scene.id)}
                   className={`relative overflow-hidden rounded-xl border transition-all ${
                     active
                       ? 'border-[var(--accent-primary)]'

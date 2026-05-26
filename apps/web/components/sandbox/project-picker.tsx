@@ -115,7 +115,7 @@ export default function ProjectPicker() {
       <div className="w-full max-w-[860px]">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-[28px] font-semibold tracking-tight text-[var(--text-primary)]">
+          <h1 className="font-serif text-[28px] font-semibold tracking-tight text-[var(--text-primary)]">
             Select a project
           </h1>
           <p className="mt-2 text-[14px] text-[var(--text-secondary)]">

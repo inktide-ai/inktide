@@ -256,7 +256,42 @@
   --inspector-bg:       var(--ds-gray-100);
   --inspector-section-separator: var(--ds-gray-alpha-100);
   --inspector-row-label: var(--ds-gray-600);
+
+  /* ── Pricing section ───────────────────── */
+  --pricing-card-bg:             #0D0D11;
+  --pricing-pro-card-bg:         #0D0E23;
+  --pricing-card-border:         rgba(255,255,255,0.08);
+  --pricing-card-shadow:         none;
+  --pricing-title:               #ffffff;
+  --pricing-subtitle:            rgba(255,255,255,0.45);
+  --pricing-price:               #ffffff;
+  --pricing-price-muted:         rgba(255,255,255,0.35);
+  --pricing-billing:             rgba(255,255,255,0.35);
+  --pricing-feature:             rgba(255,255,255,0.65);
+  --pricing-badge-border:        rgba(255,255,255,0.10);
+  --pricing-badge-bg:            rgba(255,255,255,0.05);
+  --pricing-badge-color:         #FEFEFE;
+  --pricing-toggle-border:       rgba(255,255,255,0.09);
+  --pricing-toggle-bg:           rgba(255,255,255,0.04);
+  --pricing-toggle-active-bg:    rgba(255,255,255,0.10);
+  --pricing-toggle-active-color: #ffffff;
+  --pricing-toggle-inactive:     rgba(255,255,255,0.40);
+  --pricing-btn-border:          rgba(255,255,255,0.15);
+  --pricing-btn-color:           #ffffff;
+  --pricing-btn-hover-bg:        rgba(255,255,255,0.07);
+  --pricing-trust-title:         #ffffff;
+  --pricing-trust-desc:          rgba(255,255,255,0.50);
+  --pricing-icon-purple-bg:      #160d38;
+  --pricing-icon-purple-border:  #2d1a6e;
+  --pricing-icon-orange-bg:      #2d1500;
+  --pricing-icon-orange-border:  #5c3000;
 }
+
+/* ── Theme-aware logo swap ─────────────────────────────────────────────────── */
+.logo-dark  { display: block; }
+.logo-light { display: none;  }
+.light .logo-dark  { display: none;  }
+.light .logo-light { display: block; }
 
 .light {
   /* ── Vercel Geist Design Tokens (light) ───────────────────────────────── */
@@ -474,6 +509,35 @@
   --graph-node-active-border: color-mix(in srgb, var(--accent-base) 42%, transparent);
   --mood-gradient-from: color-mix(in srgb, var(--accent-base) 24%, white);
   --mood-gradient-via: color-mix(in srgb, var(--accent-base) 14%, white);
+
+  /* ── Pricing section (light) ───────────── */
+  --pricing-card-bg:             #ffffff;
+  --pricing-pro-card-bg:         #f0eeff;
+  --pricing-card-border:         rgba(0,0,0,0.07);
+  --pricing-card-shadow:         0 2px 16px rgba(0,0,0,0.06);
+  --pricing-title:               #111111;
+  --pricing-subtitle:            rgba(0,0,0,0.50);
+  --pricing-price:               #111111;
+  --pricing-price-muted:         rgba(0,0,0,0.38);
+  --pricing-billing:             rgba(0,0,0,0.38);
+  --pricing-feature:             rgba(0,0,0,0.65);
+  --pricing-badge-border:        rgba(0,0,0,0.09);
+  --pricing-badge-bg:            rgba(0,0,0,0.04);
+  --pricing-badge-color:         #111111;
+  --pricing-toggle-border:       rgba(0,0,0,0.09);
+  --pricing-toggle-bg:           rgba(0,0,0,0.04);
+  --pricing-toggle-active-bg:    rgba(0,0,0,0.08);
+  --pricing-toggle-active-color: #111111;
+  --pricing-toggle-inactive:     rgba(0,0,0,0.38);
+  --pricing-btn-border:          rgba(0,0,0,0.14);
+  --pricing-btn-color:           #111111;
+  --pricing-btn-hover-bg:        rgba(0,0,0,0.05);
+  --pricing-trust-title:         #111111;
+  --pricing-trust-desc:          rgba(0,0,0,0.50);
+  --pricing-icon-purple-bg:      #ede9ff;
+  --pricing-icon-purple-border:  #c4b8ff;
+  --pricing-icon-orange-bg:      #fff0e8;
+  --pricing-icon-orange-border:  #ffd0ad;
 }
 
 @keyframes marquee {

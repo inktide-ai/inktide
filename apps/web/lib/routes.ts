@@ -12,7 +12,7 @@ export const TAB_TO_ROUTE: Record<string, string> = {
   backup: 'backup',
 }
 
-export const HOME_ROUTE = '/edit/sandbox'
+export const HOME_ROUTE = '/home'
 export const GRAPH_ROUTE = '/edit/graph'
 
 export const PROFILE_SETTINGS_BASE = '/edit/settings'

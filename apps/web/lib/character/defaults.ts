@@ -47,6 +47,9 @@ export const createDefaultCharacter = (): Omit<AiCharacter, 'id'> => ({
   isActive: false,
   visibility: 'private',
   systemPrompt: DEFAULTS.systemPrompt,
+  createdAt: new Date().toISOString(),
+  category: null,
+  tags: [],
   appearance: {
     avatarUrl: null,
     bannerColorIndex: 0,

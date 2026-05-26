@@ -80,6 +80,8 @@ export interface AiCardResponse {
   visibility: string
   channels: ChannelResponse[] | null
   tools: ToolResponse[] | null
+  category: string | null
+  tags: string[]
   is_active: boolean
   created_at: string
   updated_at: string
@@ -121,6 +123,8 @@ export interface UpdateAiCardRequest {
   personality_config?: Record<string, unknown>
   is_active?: boolean
   visibility?: string
+  category?: string | null
+  tags?: string[]
 }
 
 // ── API functions ──

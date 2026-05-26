@@ -14,7 +14,7 @@ export function WorkspaceTopBar({ onCreateSoul }: WorkspaceTopBarProps = {}) {
   return (
     <header className="mb-5 flex items-start justify-between gap-4">
       <div>
-        <h1 className="home-heading-font text-[34px] font-bold tracking-[-0.03em] text-[var(--text-primary)]">Dashboard</h1>
+        <h1 className="font-serif text-[34px] font-bold tracking-[-0.03em] text-[var(--text-primary)]">Dashboard</h1>
         <p className="home-ui-font mt-1 text-[15px] font-medium text-[var(--text-secondary)]">
           All your souls, projects and creations in one place.
         </p>

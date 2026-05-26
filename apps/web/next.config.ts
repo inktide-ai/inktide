@@ -14,6 +14,8 @@ import path from 'path'
 }
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
+  allowedDevOrigins: ['disburse-womanhood-thicken.ngrok-free.dev'],
   async headers() {
     return [
       {
@@ -26,6 +28,12 @@ const nextConfig: NextConfig = {
           ...(process.env.NODE_ENV === 'production' ? [
             { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
           ] : []),
+        ],
+      },
+      {
+        source: '/obs/:path*',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
         ],
       },
     ]

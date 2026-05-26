@@ -7,7 +7,9 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Inktide — AI Streaming Platform',
   description: 'AI-powered streaming platform with reactive VRM avatars',
-
+  other: {
+    enot: 'd1ef7c50',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

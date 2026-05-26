@@ -4,19 +4,20 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
-import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { Bell, ChevronDown, ChevronLeft, ChevronRight, LayoutGrid, Rows3, Search, SquareDashedBottom } from 'lucide-react'
-import { type SoulCardData, type SoulPlatform, type SoulStatus } from '@/components/hub/soul-card'
+import { SortableContext, rectSortingStrategy, arrayMove } from '@dnd-kit/sortable'
+import { Bell, ChevronDown, ChevronLeft, ChevronRight, Rows3, Search } from 'lucide-react'
+import type { SoulCardData } from '@/components/hub/soul-card'
 import { SoulCardVertical } from '@/components/hub/soul-card-vertical'
-import { splitPersonalityForSoulCard } from '@/lib/soul-card-personality'
+import { SoulListRow } from '@/components/hub/soul-list-row'
+import { SortableSoulCard } from '@/components/hub/sortable-soul-card'
 import { useCharactersContext } from '@/context/CharactersContext'
 import { useFavorites } from '@/hooks/useFavorites'
 import { reorderCard, type AiCardListItem } from '@/api/soul'
 import { queryKeys } from '@/lib/query/keys'
+import { toSoulCardData } from '@/lib/home-utils'
 
 type SoulsFilter = 'all' | 'active' | 'idle' | 'archived'
-type SoulsView = 'grid' | 'list' | 'compact'
+type SoulsView = 'grid' | 'list'
 
 const FILTERS: Array<{ id: SoulsFilter, label: string }> = [
   { id: 'all', label: 'All' },
@@ -25,64 +26,6 @@ const FILTERS: Array<{ id: SoulsFilter, label: string }> = [
   { id: 'archived', label: 'Archived' },
 ]
 
-const ACCENT_PALETTE = ['#8b5cf6', '#22d3ee', '#f43f5e', '#ec4899', '#f97316', '#60a5fa', '#a78bfa']
-
-function statusFromCard(id: string, isActive: boolean): SoulStatus {
-  if (!isActive) return 'idle'
-  const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  return hash % 2 === 0 ? 'active' : 'online'
-}
-
-function accentFromCard(id: string): string {
-  const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  return ACCENT_PALETTE[hash % ACCENT_PALETTE.length]
-}
-
-function toSoulCardData(card: AiCardListItem): SoulCardData {
-  const { subtitle, description } = splitPersonalityForSoulCard(card.personality)
-  return {
-    id: card.id,
-    name: card.name,
-    subtitle,
-    ...(description ? { description } : {}),
-    avatarUrl: card.avatar_url || '/avatars/nova.png',
-    accentColor: accentFromCard(card.id),
-    status: statusFromCard(card.id, card.is_active),
-    platforms: ['twitch', 'discord', 'telegram'] as SoulPlatform[],
-  }
-}
-
-interface SortableSoulCardProps {
-  soul: SoulCardData
-  isFavorite: boolean
-  onFavoriteToggle: () => void
-  onOpen: () => void
-}
-
-function SortableSoulCard({ soul, isFavorite, onFavoriteToggle, onOpen }: SortableSoulCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: soul.id })
-  return (
-    <div
-      ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-        zIndex: isDragging ? 10 : undefined,
-        cursor: isDragging ? 'grabbing' : 'grab',
-      }}
-      {...attributes}
-      {...listeners}
-    >
-      <SoulCardVertical
-        data={soul}
-        isFavorite={isFavorite}
-        onFavoriteToggle={onFavoriteToggle}
-        onOpen={onOpen}
-      />
-    </div>
-  )
-}
 
 export default function SoulsListPage() {
   const router = useRouter()
@@ -94,7 +37,7 @@ export default function SoulsListPage() {
   const [query, setQuery] = useState('')
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
-  const isDndEnabled = filter === 'all' && query === '' && view === 'grid'
+  const isDndEnabled = filter === 'all' && query === '' && view !== 'list'
 
   const souls = useMemo<SoulCardData[]>(() => cardList.map(toSoulCardData), [cardList])
 
@@ -161,7 +104,7 @@ export default function SoulsListPage() {
       <div className="mx-auto max-w-[1300px]">
         <header className="mb-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-[36px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">Souls</h1>
+            <h1 className="font-serif text-[36px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">Souls</h1>
             <p className="mt-1 text-[14px] text-[var(--text-secondary)]">Your AI characters and personalities</p>
           </div>
 
@@ -219,41 +162,18 @@ export default function SoulsListPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-1">
-              <button
-                type="button"
-                onClick={() => setView('grid')}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                  view === 'grid'
-                    ? 'bg-[var(--sidebar-active)] text-[var(--accent-hover)]'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--surface-2)]'
-                }`}
-              >
-                <LayoutGrid size={14} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setView('list')}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                  view === 'list'
-                    ? 'bg-[var(--sidebar-active)] text-[var(--accent-hover)]'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--surface-2)]'
-                }`}
-              >
-                <Rows3 size={14} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setView('compact')}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                  view === 'compact'
-                    ? 'bg-[var(--sidebar-active)] text-[var(--accent-hover)]'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--surface-2)]'
-                }`}
-              >
-                <SquareDashedBottom size={14} />
-              </button>
-            </div>
+            <button
+              type="button"
+              title={view === 'list' ? 'Switch to grid view' : 'Switch to list view'}
+              onClick={() => setView(v => v === 'list' ? 'grid' : 'list')}
+              className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                view === 'list'
+                  ? 'bg-[var(--sidebar-active)] text-[var(--accent-hover)]'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--surface-2)]'
+              }`}
+            >
+              <Rows3 size={14} />
+            </button>
 
             <button
               type="button"
@@ -271,12 +191,32 @@ export default function SoulsListPage() {
         </div>
 
         {loading ? (
-          <div className="flex h-[320px] items-center justify-center rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[14px] text-[var(--text-secondary)]">
-            Loading souls...
-          </div>
+          view === 'list' ? (
+            <div className="rounded-2xl overflow-hidden border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-16 animate-pulse bg-[hsla(var(--bg-1),_1)]" />
+              ))}
+            </div>
+          ) : (
+            <div className="flex h-[320px] items-center justify-center rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[14px] text-[var(--text-secondary)]">
+              Loading souls...
+            </div>
+          )
         ) : filtered.length === 0 ? (
-          <div className="flex h-[320px] items-center justify-center rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[14px] text-[var(--text-secondary)]">
+          <div className="flex h-[320px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-[14px] text-[var(--text-secondary)]">
             No souls found.
+          </div>
+        ) : view === 'list' ? (
+          <div className="rounded-2xl overflow-hidden border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
+            {filtered.map(soul => (
+              <SoulListRow
+                key={soul.id}
+                data={soul}
+                isFavorite={favs.has(soul.id)}
+                onFavoriteToggle={() => toggle(soul.id)}
+                onOpen={() => router.push(`/souls/${soul.id}`)}
+              />
+            ))}
           </div>
         ) : isDndEnabled ? (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

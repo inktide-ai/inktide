@@ -18,7 +18,7 @@ export function SectionHeader({ title, tabs, withArrows = true }: SectionHeaderP
   return (
     <div className="mb-3 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
-        <h2 className="home-heading-font text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{title}</h2>
+        <h2 className="font-serif text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{title}</h2>
         {tabs && tabs.length > 0 && (
           <div className="flex items-center gap-1 rounded-xl bg-[var(--surface-1)] p-1">
             {tabs.map(tab => (

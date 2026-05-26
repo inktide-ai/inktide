@@ -39,6 +39,9 @@
     "discard": "Отменить",
     "save": "Сохранить"
   },
+  "billing": {
+    "subscriptionActivated": "Подписка активирована"
+  },
   "emptyState": {
     "loadingCharacters": "Загрузка персонажей...",
     "noCharacterSelected": "Персонаж не выбран",

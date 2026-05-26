@@ -61,9 +61,9 @@ export default function HeroInktide() {
             'max-md:text-[2rem]',
             'max-[480px]:text-[1.75rem]',
           )}>
-            Write your{' '}
+            {t('hero.titleStart')}{' '}
             <span className="relative inline-block whitespace-nowrap">
-              <span className="relative z-[1]">destiny</span>
+              <span className="relative z-[1]">{t('hero.titleHighlight')}</span>
               <img
                 src="/icons/destiny-underline.svg"
                 className="absolute left-[-4px] top-1/2 -translate-y-[52%] w-[calc(100%+8px)] h-auto z-0 pointer-events-none"
@@ -71,7 +71,7 @@ export default function HeroInktide() {
                 aria-hidden
               />
             </span>
-            {' '}in a couple of clicks
+            {' '}{t('hero.titleAfter')}
           </h1>
 
           <p className={cn(
@@ -94,12 +94,12 @@ export default function HeroInktide() {
               'max-[480px]:w-full max-[480px]:text-center',
             )}
           >
-            Sign up for free
+            {t('hero.ctaPrimary')}
           </button>
 
           <div className="mt-8">
             <p className="font-[family-name:var(--font-ui)] text-base font-medium text-[var(--support-color)] mb-[0.875rem]">
-              Download desktop app for
+              {t('hero.downloadLabel')}
             </p>
             <div className="flex items-center gap-2 max-lg:justify-center">
               {sorted.map(({ os, label, Icon }, i) => (

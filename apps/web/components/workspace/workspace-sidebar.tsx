@@ -98,7 +98,7 @@ function SidebarCollapsibleSection({
 export function WorkspaceSidebar() {
   const pathname = usePathname()
   const { userEmail, user } = useAuth()
-  const { plan, periodEnd, openCheckout, openPortal } = useBilling()
+  const { plan, periodEnd, openPortal } = useBilling()
   const { cardList, selected } = useCharactersContext()
   const [projects, setProjects] = useState<ProjectItem[]>([])
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
@@ -268,7 +268,7 @@ export function WorkspaceSidebar() {
         ) : (
           <button
             type="button"
-            onClick={() => void openCheckout()}
+            onClick={() => { window.location.href = '/pricing' }}
             className="flex w-full items-center gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-3 text-left transition-colors hover:bg-[var(--surface-2)]"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-soft)]">

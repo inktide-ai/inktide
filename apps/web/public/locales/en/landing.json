@@ -11,13 +11,19 @@
     "goToProfile": "Go to Profile",
     "navigation": "Navigation",
     "toggleMenu": "Toggle menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "itemPreview": "Preview",
+    "itemPricing": "Pricing",
+    "itemBlog": "Blog"
   },
   "hero": {
     "title": "Create your <accent>AI companion</accent> for streaming",
+    "titleStart": "Write your",
+    "titleHighlight": "destiny",
+    "titleAfter": "in a couple of clicks",
     "subtitle": "Customize prompts, algorithms and models — make your stream vibrant and interactive",
     "ctaPrimary": "Sign up for free",
-    "downloadLabel": "Download OBS plugin for",
+    "downloadLabel": "Download desktop app for",
     "createNew": "Create new",
     "sandbox": "Sandbox",
     "search": "Search",
@@ -138,5 +144,48 @@
   },
   "partners": {
     "heading": "Support for multiple LLM models"
+  },
+  "pricing": {
+    "badge": "Simple pricing. Big possibilities.",
+    "heading": "Plans for every",
+    "headingAccent": "creator",
+    "subtitle": "Start free, upgrade when you're ready.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "savePercent": "Save 33%",
+    "perMonth": "/mo",
+    "billedMonthly": "Billed monthly",
+    "billedYearlyStarter": "Billed yearly $144",
+    "billedYearlyPro": "Billed yearly $288",
+    "mostPopular": "Most popular",
+    "free": {
+      "name": "Free",
+      "tagline": "For curious minds",
+      "price": "$0",
+      "cta": "Get started free",
+      "features": ["1 Soul Card", "1 platform connector (Discord or Twitch)", "Standard LLM models", "Community support"]
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "For early builders",
+      "cta": "Start with Starter",
+      "features": ["3 Soul Cards", "Discord + Twitch connectors", "All TTS voices", "Memory & RAG (chat history)", "Priority support"]
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "For power users",
+      "cta": "Get Pro",
+      "features": ["Unlimited Soul Cards", "All platforms + future connectors", "Custom TTS API key", "Full RAG & unlimited memory", "API access", "Priority queue (less latency)"]
+    },
+    "trust": {
+      "secureTitle": "Secure & private",
+      "secureDesc": "Your data is encrypted\nand never shared.",
+      "noCardTitle": "No credit card",
+      "noCardDesc": "Get started for free.\nUpgrade anytime.",
+      "cancelTitle": "Cancel anytime",
+      "cancelDesc": "No commitments.\nNo hidden fees.",
+      "improvingTitle": "Always improving",
+      "improvingDesc": "We ship new features\nevery week."
+    }
   }
 }

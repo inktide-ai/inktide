@@ -2,7 +2,6 @@
 
 import { type ReactNode, useEffect, useState } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import LoadingScreen from '@/components/ui/loading-screen'
 import { AuthProvider } from '@/context/AuthContext'
 import { BillingProvider } from '@/context/BillingContext'
@@ -39,7 +38,6 @@ export function Providers({ children }: { children: ReactNode }) {
           </BillingProvider>
         </AuthProvider>
       ) : <LoadingScreen />}
-      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const PROTECTED = ['/edit/sandbox', '/edit/settings']
+const PROTECTED = ['/edit/sandbox', '/edit/settings', '/pricing', '/checkout']
 const AUTH_ONLY = ['/login', '/register', '/forgot-password']
 
 export function proxy(request: NextRequest) {
@@ -22,11 +22,11 @@ export function proxy(request: NextRequest) {
   }
 
   if (AUTH_ONLY.some(p => pathname.startsWith(p)) && isAuthenticated) {
-    return NextResponse.redirect(new URL('/edit/sandbox', request.url))
+    return NextResponse.redirect(new URL('/home', request.url))
   }
 
   if (pathname === '/' && isAuthenticated) {
-    return NextResponse.redirect(new URL('/edit/sandbox', request.url))
+    return NextResponse.redirect(new URL('/home', request.url))
   }
 
   return NextResponse.next()

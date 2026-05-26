@@ -41,6 +41,9 @@ export function apiResponseToCharacter(r: AiCardResponse): AiCharacter {
     visibility: VisibilitySchema.parse(r.visibility ?? 'private'),
     systemPrompt: r.system_prompt,
     llmCatalogId: r.llm_catalog_id,
+    createdAt: r.created_at,
+    category: r.category ?? null,
+    tags: r.tags ?? [],
 
     appearance: {
       avatarUrl: r.avatar_url ?? null,
@@ -135,6 +138,8 @@ export function characterToUpdateRequest(c: AiCharacter): UpdateAiCardRequest {
     avatar_url:    c.appearance.avatarUrl ?? undefined,
     is_active:     c.isActive,
     visibility:    c.visibility,
+    category:      c.category ?? null,
+    tags:          c.tags,
     llm_config: {
       provider_id:       c.llm.providerId,
       model_id:          c.llm.modelId,

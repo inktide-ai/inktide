@@ -61,7 +61,7 @@ export function KeycloakBootstrap({ children }: { children: ReactNode }) {
             localStorage.removeItem(KC_TOKEN_KEY)
             localStorage.removeItem(KC_REFRESH_KEY)
             clearAuthCookie()
-            keycloak.login({ redirectUri: window.location.href })
+            window.location.replace('/')
           })
         }
 
@@ -84,7 +84,7 @@ export function KeycloakBootstrap({ children }: { children: ReactNode }) {
       localStorage.removeItem(KC_TOKEN_KEY)
       localStorage.removeItem(KC_REFRESH_KEY)
       clearAuthCookie()
-      keycloak.login({ redirectUri: window.location.href })
+      window.location.replace('/')
     }
 
     configureApiAuth({
