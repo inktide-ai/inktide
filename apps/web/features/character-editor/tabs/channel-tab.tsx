@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import {
   getCard,
   type ChannelResponse,
-} from '../../../api/soul'
+} from '@/features/soul/api/index'
 import { ApiError } from '../../../api/client'
-import type { AiCharacter } from '@/lib/character'
+import type { AiCharacter } from '@/shared/lib/character'
 
 interface ChannelTabProps {
   character: AiCharacter

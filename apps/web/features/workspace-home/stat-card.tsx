@@ -1,5 +1,5 @@
-import { Card } from '@/components/ui/card'
-import { Sparkline } from '@/components/workspace/sparkline'
+import { Card } from '@/shared/ui/card'
+import { Sparkline } from '@/features/workspace-home/sparkline'
 
 interface StatCardProps {
   label: string

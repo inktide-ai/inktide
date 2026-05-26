@@ -9,12 +9,12 @@ import {
   ImageIcon, Layers, Monitor, Pause, Pencil, Play, Radio,
   type LucideIcon,
 } from 'lucide-react'
-import { queryKeys } from '@/lib/query/keys'
+import { queryKeys } from '@/shared/lib/query/keys'
 import { inferModelType } from '@/lib/utils/model-type'
 import { buildObsSceneUrl } from '@/lib/utils/obs-url'
 import { useProjectRuntimeContext } from '@/context/ProjectRuntimeContext'
-import { SoulBindingPicker } from '@/components/projects/soul-binding-picker'
-import type { ProjectActiveSoul } from '@/api/projects'
+import { SoulBindingPicker } from '@/features/projects/soul-binding-picker'
+import type { ProjectActiveSoul } from '@/features/projects/api/projects'
 
 function SectionCard({
   icon: Icon, title, href, children,

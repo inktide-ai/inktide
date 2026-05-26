@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useChatChannel } from '../../../hooks/useChatChannel'
-import type { LipSyncHandle } from '../../../hooks/useLipSync'
-import type { EmotionState } from '@/types/IVrmController'
+import type { LipSyncHandle } from '@/shared/hooks/useLipSync'
+import type { EmotionState } from '@/shared/types/IVrmController'
 
 interface SceneChatProps {
   cardId: string

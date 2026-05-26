@@ -8,7 +8,7 @@ namespace Inktide.API.Soul.Application.Interfaces;
 public interface IAiCardActivityService
 {
     Task<IReadOnlyList<AiCardActivityEntry>> GetRecentAsync(
-        string entityType, Guid entityId, int limit = 20, CancellationToken ct = default);
+        Guid userId, string entityType, Guid entityId, int limit = 20, CancellationToken ct = default);
 }
 
 /// <summary>A projected, read-only activity record for controller consumption.</summary>

@@ -3,10 +3,10 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
 import ProtectedRoute from '@/components/layout/protected-route'
-import { CharactersProvider } from '@/context/CharactersContext'
-import { WorkspaceSidebar } from '@/components/workspace/workspace-sidebar'
-import { AppTopBar } from '@/components/workspace/app-topbar'
-import { getProject } from '@/api/projects'
+import { CharactersProvider } from '@/entities/character/context/CharactersContext'
+import { WorkspaceSidebar } from '@/features/workspace-home/workspace-sidebar'
+import { AppTopBar } from '@/features/workspace-home/app-topbar'
+import { getProject } from '@/features/projects/api/projects'
 
 function SandboxLayoutContent({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams()

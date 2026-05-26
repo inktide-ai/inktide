@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Check, Loader2, Zap } from 'lucide-react'
-import { getProject, updateProject, type Project } from '@/api/projects'
+import { getProject, updateProject, type Project } from '@/features/projects/api/projects'
 
 const MAX_CHARS = 8000
 

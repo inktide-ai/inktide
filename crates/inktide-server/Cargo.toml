@@ -8,7 +8,3 @@ name = "inktide-server"
 path = "src/main.rs"
 
 [dependencies]
-inktide-lipsync = { path = "../inktide-lipsync" }
-inktide-animation = { path = "../inktide-animation" }
-inktide-audio = { path = "../inktide-audio" }
-inktide-rendering = { path = "../inktide-rendering" }

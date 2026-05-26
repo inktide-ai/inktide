@@ -3,8 +3,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { Check, ImageIcon, Box } from 'lucide-react'
-import { getProject, updateProject, type Project } from '@/api/projects'
-import { listCardModels, listCardScenes, type AiCardModelResponse, type AiCardSceneResponse } from '@/api/soul'
+import { getProject, updateProject, type Project } from '@/features/projects/api/projects'
+import { listCardModels, listCardScenes, type AiCardModelResponse, type AiCardSceneResponse } from '@/features/soul/api/index'
 
 function inferModelLabel(fileName: string): string {
   if (fileName.endsWith('.vrm')) return 'VRM'

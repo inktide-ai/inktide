@@ -1,8 +1,8 @@
 'use client'
 
-import { useProjectPreviewUrl } from '@/hooks/useProjectPreviewUrl'
+import { useProjectPreviewUrl } from '@/shared/hooks/useProjectPreviewUrl'
 import { ProjectListRow } from './project-list-row'
-import type { ProjectListItem } from '@/api/projects'
+import type { ProjectListItem } from '@/features/projects/api/projects'
 import type { ProjectStatus } from './project-grid-card'
 
 function updatedLabel(dateStr: string): string {

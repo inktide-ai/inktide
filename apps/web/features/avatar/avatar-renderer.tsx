@@ -1,10 +1,10 @@
 import { lazy, Suspense } from 'react'
 import { cn } from '@/lib/utils'
-import type { ModelType } from '@/lib/character'
-import type { MouthWeights } from '../../hooks/useLipSync'
+import type { ModelType } from '@/shared/lib/character'
+import type { MouthWeights } from '@/shared/hooks/useLipSync'
 import type { LookAtMode } from './renderers/vrm-renderer'
-import type { SceneRendererSettings } from '../../hooks/useSceneRendererSettings'
-import type { EmotionState } from '@/types/IVrmController'
+import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
+import type { EmotionState } from '@/shared/types/IVrmController'
 
 // Lazy-load heavy renderers — three.js is ~600KB, don't load until needed
 const VrmRenderer   = lazy(() => import('./renderers/vrm-renderer'))

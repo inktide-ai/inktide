@@ -1,1 +1,1 @@
-export { default } from '@/components/soul/emotion/emotion-page'
+export { default } from '@/features/soul/emotion/emotion-page'

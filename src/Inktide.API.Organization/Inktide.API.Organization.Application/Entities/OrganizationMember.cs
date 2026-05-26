@@ -9,7 +9,7 @@ public sealed class OrganizationMember
     public Guid OrganizationId { get; set; }
     public string UserId { get; set; } = string.Empty;
     public OrganizationRole Role { get; set; } = OrganizationRole.Member;
-    public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+    public DateTime JoinedAt { get; set; }
 
     public Organization Organization { get; set; } = null!;
 }

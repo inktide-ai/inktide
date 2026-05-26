@@ -6,8 +6,8 @@ namespace Inktide.API.TTS.Infrastructure.Telemetry;
 
 /// <summary>
 /// Structured-log implementation of <see cref="ITtsUsageRecorder"/>.
-/// Each event is emitted as an <c>Information</c> log entry with all billing-relevant fields.
-/// Replace or decorate with a database/queue-backed recorder for production billing.
+/// Each synthesis event is emitted as an <c>Information</c> log entry with all usage-relevant fields.
+/// Log-based usage tracking is the intended strategy for this deployment.
 /// </summary>
 public sealed class LogTtsUsageRecorder : ITtsUsageRecorder
 {

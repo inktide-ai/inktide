@@ -13,7 +13,7 @@ namespace Inktide.API.Synapse.Infrastructure.Scattering;
 /// Hard-cancelled at 800 ms to stay within latency budget.
 /// On any error or timeout, logs and continues silently — the pipeline must never block on user webhooks.
 /// </summary>
-public sealed class WebhookScatterShard : IPipelineStage
+internal sealed class WebhookScatterShard : IPipelineStage
 {
     private const int TimeoutMs = 800;
 
@@ -21,6 +21,9 @@ public sealed class WebhookScatterShard : IPipelineStage
     private readonly ILogger<WebhookScatterShard> _logger;
 
     public string ShardId => SynapseConstants.ShardIds.Webhook;
+
+    public bool ShouldRun(AiCardContext? cardCtx)
+        => SynapseConstants.PluginGate.IsEnabled(cardCtx?.Plugins, SynapseConstants.ShardIds.Webhook);
 
     public WebhookScatterShard(HttpClient http, ILogger<WebhookScatterShard> logger)
     {

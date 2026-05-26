@@ -1,16 +1,9 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Inktide.API.Soul.Domain.ValueObjects;
 
 public sealed class AppearanceSettings
 {
-
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
 
     [JsonPropertyName("banner_color_index")]
     public int? BannerColorIndex { get; set; }
@@ -21,11 +14,6 @@ public sealed class AppearanceSettings
     [JsonPropertyName("model_file_name")]
     public string? ModelFileName { get; set; }
 
-    public static AppearanceSettings Parse(string? json)
-    {
-        if (string.IsNullOrWhiteSpace(json)) return new AppearanceSettings();
-        try { return JsonSerializer.Deserialize<AppearanceSettings>(json, JsonOpts) ?? new AppearanceSettings(); }
-        catch { return new AppearanceSettings(); }
-    }
+    public static AppearanceSettings Parse(string? json) => ValueObjectJson.ParseOrDefault<AppearanceSettings>(json);
 
 }

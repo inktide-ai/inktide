@@ -9,17 +9,14 @@ public sealed class KokoroTtsClientSettings
 {
     public const string SectionName = "TtsProviders:Kokoro";
 
-
-    private Uri? _endpoint;
-
-
     /// <summary>
     /// Default v1 API root, e.g. <c>http://127.0.0.1:8880/v1/</c> (with or without trailing slash).
     /// </summary>
-    public Uri? Endpoint
-    {
-        get => _endpoint;
-        set => _endpoint = value;
-    }
+    public Uri? Endpoint { get; set; }
+
+    /// <summary>
+    /// HTTP client timeout for long-running synthesis requests. Default: 5 minutes.
+    /// </summary>
+    public TimeSpan Timeout { get; set; } = TimeSpan.FromMinutes(5);
 
 }

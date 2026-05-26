@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Inktide.API.TTS.Domain.Models;
+using Inktide.API.TTS.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.TTS.Infrastructure.Cartesia;
@@ -67,7 +68,7 @@ public sealed class CartesiaTtsClient
 
     private HttpClient CreateClient() => _httpClientFactory.CreateClient(HttpClientName);
 
-    private async Task<CartesiaResponseStream> SendAndReadStreamAsync(
+    private async Task<HttpResponseStream> SendAndReadStreamAsync(
         HttpRequestMessage request,
         CancellationToken ct)
     {
@@ -78,7 +79,7 @@ public sealed class CartesiaTtsClient
         await CartesiaErrorHandler.ThrowIfFailedAsync(response, ct).ConfigureAwait(false);
 
         var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-        return new CartesiaResponseStream(stream, response);
+        return new HttpResponseStream(stream, response);
     }
 
     /// <summary>
@@ -96,12 +97,12 @@ public sealed class CartesiaTtsClient
         {
             if (item.ValueKind != JsonValueKind.Object) continue;
 
-            var id = TryGetString(item, "id");
+            var id = item.GetStringOrNull("id");
             if (string.IsNullOrWhiteSpace(id)) continue;
 
-            var name     = TryGetString(item, "name");
-            var language = TryGetString(item, "language");
-            var desc     = TryGetString(item, "description");
+            var name     = item.GetStringOrNull("name");
+            var language = item.GetStringOrNull("language");
+            var desc     = item.GetStringOrNull("description");
 
             IReadOnlyDictionary<string, string>? labels = null;
             if (desc is not null)
@@ -111,13 +112,6 @@ public sealed class CartesiaTtsClient
         }
 
         return new SpeechVoiceCollection(result);
-    }
-
-    private static string? TryGetString(JsonElement el, string prop)
-    {
-        if (el.TryGetProperty(prop, out var v) && v.ValueKind == JsonValueKind.String)
-            return v.GetString();
-        return null;
     }
 
 }

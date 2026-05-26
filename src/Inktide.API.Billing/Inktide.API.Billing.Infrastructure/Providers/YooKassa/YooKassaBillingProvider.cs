@@ -14,7 +14,6 @@ public sealed class YooKassaBillingProvider : IBillingProvider
 {
     public string ProviderId => "yookassa";
 
-    private const string BaseUrl = "https://api.yookassa.ru/v3";
     private readonly YooKassaSettings _settings;
     private readonly BillingSettings _billing;
     private readonly HttpClient _http;
@@ -34,11 +33,15 @@ public sealed class YooKassaBillingProvider : IBillingProvider
 
     public async Task<string> CreateCheckoutUrlAsync(CreateCheckoutRequest request, CancellationToken ct = default)
     {
+        var isStarter = request.Plan == PlanType.Starter;
+        var amount      = isStarter ? _settings.StarterPriceAmount : _settings.ProPriceAmount;
+        var description = isStarter ? _settings.StarterDescription  : _settings.ProDescription;
+
         var body = new JsonObject
         {
             ["amount"] = new JsonObject
             {
-                ["value"]    = _settings.PriceAmount,
+                ["value"]    = amount,
                 ["currency"] = _settings.PriceCurrency,
             },
             ["capture"] = true,
@@ -49,8 +52,8 @@ public sealed class YooKassaBillingProvider : IBillingProvider
                 ["return_url"] = request.SuccessUrl,
             },
             ["save_payment_method"] = true,
-            ["description"] = _settings.Description,
-            ["metadata"] = new JsonObject { ["user_id"] = request.UserId },
+            ["description"] = description,
+            ["metadata"] = new JsonObject { ["user_id"] = request.UserId, ["plan"] = request.Plan.ToString().ToLowerInvariant() },
         };
 
         using var content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json");

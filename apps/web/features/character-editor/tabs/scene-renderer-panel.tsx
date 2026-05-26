@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
-import type { SceneRendererSettings } from '../../../hooks/useSceneRendererSettings'
-import { SCENE_RENDERER_DEFAULTS } from '../../../hooks/useSceneRendererSettings'
-import type { LookAtMode } from '../../avatar/avatar-renderer'
+import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
+import { SCENE_RENDERER_DEFAULTS } from '@/shared/hooks/useSceneRendererSettings'
+import type { LookAtMode } from '@/features/avatar/avatar-renderer'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

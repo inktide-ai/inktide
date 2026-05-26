@@ -7,18 +7,18 @@ using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Discord;
 
-internal sealed class DiscordMessageHandler
+internal sealed class DiscordMessageHandler : IDiscordMessageHandler
 {
     private readonly DiscordSettings _settings;
     private readonly IGuildSoulRegistry _registry;
-    private readonly DiscordMessageMapper _mapper;
+    private readonly IDiscordMessageMapper _mapper;
     private readonly IStreamMessageHandler _messageHandler;
     private readonly ILogger<DiscordMessageHandler> _logger;
 
     public DiscordMessageHandler(
         IOptions<DiscordSettings> settings,
         IGuildSoulRegistry registry,
-        DiscordMessageMapper mapper,
+        IDiscordMessageMapper mapper,
         IStreamMessageHandler messageHandler,
         ILogger<DiscordMessageHandler> logger)
     {

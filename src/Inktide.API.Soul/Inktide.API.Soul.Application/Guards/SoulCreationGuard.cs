@@ -1,25 +1,35 @@
+using Inktide.API.Core.Contracts;
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Queries;
+using Inktide.API.Soul.Domain.Repositories;
 
 namespace Inktide.API.Soul.Application.Guards;
 
 /// <summary>
 /// Pre-write validation guard for soul creation.
 /// Runs AFTER FluentValidation (shape checks) and BEFORE any DB writes.
-/// Validates business rules that require DB lookups: catalog existence, API key presence, key validity.
+/// Validates business rules that require DB lookups: plan quota, catalog existence, API key presence, key validity.
 /// </summary>
 public sealed class SoulCreationGuard
 {
     private readonly SoulCreationValidationQueryService _query;
+    private readonly IUserPlanResolver _planResolver;
+    private readonly IAiCardRepository _cardRepo;
 
-    public SoulCreationGuard(SoulCreationValidationQueryService query)
+    public SoulCreationGuard(
+        SoulCreationValidationQueryService query,
+        IUserPlanResolver planResolver,
+        IAiCardRepository cardRepo)
     {
-        _query = query ?? throw new ArgumentNullException(nameof(query));
+        _query       = query       ?? throw new ArgumentNullException(nameof(query));
+        _planResolver = planResolver ?? throw new ArgumentNullException(nameof(planResolver));
+        _cardRepo    = cardRepo    ?? throw new ArgumentNullException(nameof(cardRepo));
     }
 
     /// <summary>
     /// Validates that the request can proceed to creation.
-    /// Throws <see cref="SoulCreationException"/> with a specific error code on any failure.
+    /// Throws <see cref="PlanLimitExceededException"/> when the plan quota is reached.
+    /// Throws <see cref="SoulCreationException"/> with a specific error code on any other failure.
     /// </summary>
     public async Task EnsureCanCreateAsync(
         Guid userId,
@@ -28,6 +38,13 @@ public sealed class SoulCreationGuard
         Guid? ttsCatalogId,
         CancellationToken ct = default)
     {
+        // ── Plan quota ──────────────────────────────────────────────────────────
+
+        var limits = await _planResolver.GetLimitsAsync(userId.ToString(), ct).ConfigureAwait(false);
+        var count  = await _cardRepo.CountByUserIdAsync(userId, ct).ConfigureAwait(false);
+        if (count >= limits.MaxSoulCards)
+            throw new PlanLimitExceededException("soul_cards", limits.MaxSoulCards);
+
         var data = await _query.GetValidationDataAsync(userId, llmCatalogId, ttsCatalogId, ct)
                                .ConfigureAwait(false);
 

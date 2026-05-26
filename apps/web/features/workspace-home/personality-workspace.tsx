@@ -1,8 +1,8 @@
 'use client'
 
 import { motion, type Variants } from 'framer-motion'
-import SliderWithTicks from '@/components/profile/slider-with-ticks'
-import type { CharacterPersonality } from '@/lib/character'
+import SliderWithTicks from '@/shared/ui/slider-with-ticks'
+import type { CharacterPersonality } from '@/shared/lib/character'
 
 // ── Presets ───────────────────────────────────────────────────────────────────
 

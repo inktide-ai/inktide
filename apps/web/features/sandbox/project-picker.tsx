@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, Plus } from 'lucide-react'
-import { listProjects, type ProjectListItem } from '@/api/projects'
-import { Badge, type BadgeVariant } from '@/components/ui/badge'
+import { listProjects, type ProjectListItem } from '@/features/projects/api/projects'
+import { Badge, type BadgeVariant } from '@/shared/ui/badge'
 
 type Filter = 'all' | 'active' | 'paused' | 'archived'
 

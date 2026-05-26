@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/card'
+import { Card } from '@/shared/ui/card'
 
 interface ProPlanCardProps {
   renewalLabel: string

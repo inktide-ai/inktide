@@ -6,6 +6,7 @@ using Inktide.API.Graph.Application.Models;
 using Inktide.API.Synapse.Application.Configuration;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
+using Inktide.API.Synapse.Infrastructure.Constants;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -18,7 +19,7 @@ namespace Inktide.API.Synapse.Infrastructure.Emotion;
 /// SRP: only responsible for the HTTP call and response parsing.
 /// Never throws — returns <see cref="EmotionResult"/> with null emotion on any failure.
 /// </summary>
-public sealed class OllamaEmotionClassifier : IEmotionClassificationService, IEmotionClassifier
+internal sealed class OllamaEmotionClassifier : IEmotionClassificationService, IEmotionClassifier
 {
 
     private static readonly string[] ValidEmotions =
@@ -33,10 +34,6 @@ public sealed class OllamaEmotionClassifier : IEmotionClassificationService, IEm
         "Use null if the message requires no strong emotional reaction. " +
         "intensity is a float between 0.0 and 1.0.";
 
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNameCaseInsensitive = true,
-    };
 
     private readonly HttpClient _http;
     private readonly EmotionClassificationOptions _opts;
@@ -118,7 +115,7 @@ public sealed class OllamaEmotionClassifier : IEmotionClassificationService, IEm
                 .GetProperty("content")
                 .GetString() ?? "{}";
 
-            var parsed = JsonSerializer.Deserialize<EmotionPayload>(contentJson, JsonOpts);
+            var parsed = JsonSerializer.Deserialize<EmotionPayload>(contentJson, SynapseConstants.Json.ReadCaseInsensitive);
             if (parsed is null) return None;
 
             var emotion = parsed.Emotion?.ToLowerInvariant();

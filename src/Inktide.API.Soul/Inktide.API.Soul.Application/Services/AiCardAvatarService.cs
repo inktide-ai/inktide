@@ -41,14 +41,14 @@ public sealed class AiCardAvatarService : IAiCardAvatarService
         CancellationToken ct = default)
     {
         if (!_storage.IsEnabled)
-            return new AiCardAvatarUpdateResult(false, null, "Object storage is not configured.");
+            return AiCardAvatarUpdateResult.Fail(AiCardAvatarError.StorageUnavailable, "Object storage is not configured.");
 
         if (string.IsNullOrWhiteSpace(_s3.DefaultBucket))
-            return new AiCardAvatarUpdateResult(false, null, "S3 default bucket is not configured.");
+            return AiCardAvatarUpdateResult.Fail(AiCardAvatarError.StorageUnavailable, "S3 default bucket is not configured.");
 
         var card = await _cards.GetByIdAsync(userId, cardId, ct).ConfigureAwait(false);
         if (card is null)
-            return new AiCardAvatarUpdateResult(false, null, "AI card not found.");
+            return AiCardAvatarUpdateResult.Fail(AiCardAvatarError.CardNotFound, "AI card not found.");
 
         var safeName  = StorageFileHelper.SanitizeFileName(fileName, "avatar.bin");
         var objectKey = $"users/{userId:N}/cards/{cardId:N}/{IdGenerator.New():N}_{safeName}";
@@ -61,6 +61,6 @@ public sealed class AiCardAvatarService : IAiCardAvatarService
         var updated = await _cards.UpdateAsync(userId, card, ct).ConfigureAwait(false);
 
         _logger.LogInformation("AI card {CardId} avatar set to {Url}", cardId, publicUrl);
-        return new AiCardAvatarUpdateResult(true, updated, null);
+        return AiCardAvatarUpdateResult.Ok(updated);
     }
 }

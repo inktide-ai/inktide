@@ -1,6 +1,6 @@
-import type { IAudioPlayer } from '@/types/IAudioPlayer'
-import type { VisemeCue } from '@/types/IVisemeProvider'
-import type { LipSyncHandle } from '../../hooks/useLipSync'
+import type { IAudioPlayer } from '@/shared/types/IAudioPlayer'
+import type { VisemeCue } from '@/shared/types/IVisemeProvider'
+import type { LipSyncHandle } from '@/shared/hooks/useLipSync'
 
 /**
  * LSP: единственная реализация IAudioPlayer — заменяет MiniAudioPlayer (useChatChannel)

@@ -1,4 +1,4 @@
-import type { AiCharacter } from '@/lib/character'
+import type { AiCharacter } from '@/shared/lib/character'
 
 export function SoulVoiceCard({ character }: { character: AiCharacter }) {
   return (

@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Toggle } from '@/components/ui/toggle'
+import { Toggle } from '@/shared/ui/toggle'
 
 const STORAGE_KEY = 'inktide_user_notifications'
 

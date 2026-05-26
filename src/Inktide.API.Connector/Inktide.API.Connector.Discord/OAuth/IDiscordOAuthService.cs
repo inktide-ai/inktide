@@ -13,6 +13,4 @@ public interface IDiscordOAuthService
     Task<DiscordTokenResponse> ExchangeCodeAsync(string code, CancellationToken ct = default);
     Task<DiscordTokenResponse> RefreshAsync(string encryptedRefreshToken, CancellationToken ct = default);
     Task RevokeAsync(string encryptedAccessToken, CancellationToken ct = default);
-    string Protect(string plaintext);
-    string Unprotect(string ciphertext);
 }

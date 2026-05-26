@@ -1,9 +1,9 @@
 'use client'
 import { useSearchParams } from 'next/navigation'
-import AvatarRenderer from '../../components/avatar/avatar-renderer'
-import { useLipSync } from '../../hooks/useLipSync'
-import { useAudioStream } from '../../hooks/useAudioStream'
-import type { ModelType } from '@/lib/character'
+import AvatarRenderer from '@/features/avatar/avatar-renderer'
+import { useLipSync } from '@/shared/hooks/useLipSync'
+import { useAudioStream } from '@/shared/hooks/useAudioStream'
+import type { ModelType } from '@/shared/lib/character'
 import './obs-scene.css'
 
 // ── Config ────────────────────────────────────────────────────────────────────

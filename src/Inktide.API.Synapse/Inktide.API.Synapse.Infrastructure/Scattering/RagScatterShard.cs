@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Inktide.API.Synapse.Infrastructure.Scattering;
 
 /// <summary>Scatter shard: semantic memory retrieval via <see cref="IRagQueryPort"/>.</summary>
-public sealed class RagScatterShard : IPipelineStage
+internal sealed class RagScatterShard : IPipelineStage
 {
 
     private readonly IRagQueryPort _rag;
@@ -15,6 +15,8 @@ public sealed class RagScatterShard : IPipelineStage
 
     public string ShardId => SynapseConstants.ShardIds.Rag;
 
+    public bool ShouldRun(AiCardContext? cardCtx)
+        => SynapseConstants.PluginGate.IsEnabled(cardCtx?.Plugins, SynapseConstants.ShardIds.Rag);
 
     public RagScatterShard(IRagQueryPort rag, ILogger<RagScatterShard> logger)
     {

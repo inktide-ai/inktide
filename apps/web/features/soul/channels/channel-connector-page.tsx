@@ -7,14 +7,14 @@ import { motion } from 'framer-motion'
 import { Trans, useTranslation } from 'react-i18next'
 import { ExternalLink, HelpCircle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { getCard, type ChannelPlatform } from '@/api/soul'
-import { queryKeys } from '@/lib/query/keys'
+import { getCard, type ChannelPlatform } from '@/features/soul/api/index'
+import { queryKeys } from '@/shared/lib/query/keys'
 import {
   CHANNEL_STATIC,
   CHANNEL_VALID_IDS,
   CHANNEL_DETAILS,
   type ChannelStaticConfig,
-} from '@/data/channel-platforms'
+} from '@/shared/data/channel-platforms'
 import { resolveOAuthReturn, oauthPendingKey } from './resolve-oauth-return'
 import { DiscordChannelManager }  from './discord-channel-manager'
 import { TelegramChannelManager } from './telegram-channel-manager'

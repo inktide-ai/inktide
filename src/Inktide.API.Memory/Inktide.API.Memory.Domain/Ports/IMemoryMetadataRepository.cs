@@ -1,3 +1,5 @@
+using Inktide.API.Memory.Domain.Models;
+
 namespace Inktide.API.Memory.Domain.Ports;
 
 /// <summary>
@@ -5,23 +7,12 @@ namespace Inktide.API.Memory.Domain.Ports;
 /// </summary>
 public interface IMemoryMetadataRepository
 {
-    Task UpsertAsync(
-        Guid aiCardId,
-        string qdrantPointId,
-        string factText,
-        string category,
-        string sourceType,
-        double importance,
-        DateTime rememberedAt,
-        DateTime? expiresAt,
-        CancellationToken ct = default);
+    Task UpsertAsync(MemoryMetadata metadata, CancellationToken ct = default);
+
+    Task UpsertBatchAsync(IReadOnlyList<MemoryMetadata> records, CancellationToken ct = default);
 
     Task UpdateRecallAsync(
         Guid aiCardId,
         IReadOnlyList<Guid> qdrantPointIds,
         CancellationToken ct = default);
-
-    Task DeleteExpiredAsync(CancellationToken ct = default);
-
-    Task<int> CountTotalAsync(CancellationToken ct = default);
 }

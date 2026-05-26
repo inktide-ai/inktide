@@ -1,4 +1,4 @@
-import type { CharacterPersonality } from '@/lib/character'
+import type { CharacterPersonality } from '@/shared/lib/character'
 
 export type PresetKey = 'streamer' | 'mentor' | 'comedian' | 'philosopher' | 'tsundere' | 'supportive' | 'tactical'
 

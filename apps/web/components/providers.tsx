@@ -2,15 +2,15 @@
 
 import { type ReactNode, useEffect, useState } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import LoadingScreen from '@/components/ui/loading-screen'
+import LoadingScreen from '@/shared/ui/loading-screen'
 import { AuthProvider } from '@/context/AuthContext'
-import { BillingProvider } from '@/context/BillingContext'
+import { BillingProvider } from '@/features/billing/BillingContext'
 import { initI18n } from '@/i18n/i18n'
 import { keycloak } from '@/lib/keycloak'
 import { KeycloakBootstrap } from '@/lib/keycloak-bootstrap'
 import { UserAccentHydration } from '@/components/user-accent-hydration'
-import { queryClient } from '@/lib/query/client'
-import { tokenParser, localeSync, avatarService } from '@/services/index'
+import { queryClient } from '@/shared/lib/query/client'
+import { tokenParser, localeSync, avatarService } from '@/shared/services/index'
 
 export function Providers({ children }: { children: ReactNode }) {
   const [i18nReady, setI18nReady] = useState(false)

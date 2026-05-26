@@ -17,6 +17,7 @@ public sealed class OutboxEventConfiguration : IEntityTypeConfiguration<OutboxEv
         b.Property(e => e.CreatedAt).HasColumnName("created_at");
         b.Property(e => e.ProcessedAt).HasColumnName("processed_at");
         b.Property(e => e.Error).HasColumnName("error");
+        b.Property(e => e.RetryCount).HasColumnName("retry_count").HasDefaultValue(0);
 
         b.HasIndex(e => e.ProcessedAt)
             .HasDatabaseName("idx_outbox_unprocessed")

@@ -44,7 +44,7 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
         if (!TryResolveProvider(providerId, out var provider, out var notFoundId))
             return new GetVoicesResult.ProviderNotFound(notFoundId!);
 
-        if (!provider.Capabilities.SupportsVoiceListing)
+        if (provider is not IVoiceListingProvider voiceListing || !provider.Capabilities.SupportsVoiceListing)
             return new GetVoicesResult.NotSupported(provider.Id);
 
         var providerOptions = new ProviderOptions { ProviderId = provider.Id };
@@ -54,14 +54,17 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
         {
             var apiKey = _apiKeyResolver.Resolve(provider.Id);
             if (!string.IsNullOrWhiteSpace(apiKey))
+            {
                 providerOptions.ApiKey = apiKey;
+                providerOptions.ApiKeyIsTransient = _apiKeyResolver.IsHeaderKey(provider.Id);
+            }
         }
         catch (ApiKeyMissingException)
         {
             return new GetVoicesResult.ApiKeyRequired(provider.Id);
         }
 
-        var voices = await provider
+        var voices = await voiceListing
             .GetVoicesAsync(providerOptions, ct: ct)
             .ConfigureAwait(false);
 
@@ -104,6 +107,7 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
         if (!string.IsNullOrWhiteSpace(apiKey))
         {
             providerOptions.ApiKey = apiKey;
+            providerOptions.ApiKeyIsTransient = _apiKeyResolver.IsHeaderKey(provider.Id);
         }
 
         var validation = provider.Validate(providerOptions);
@@ -125,15 +129,13 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
             ? null
             : command.AudioFormat.Trim().ToLowerInvariant();
 
-        var speechRequest = new SpeechOptions
-        {
-            Text = command.Text.Trim(),
-            Voice = command.VoiceId.Trim(),
-            Model = string.IsNullOrWhiteSpace(command.ModelId) ? null : command.ModelId.Trim(),
-            Speed = command.Speed ?? 1f,
-            AudioFormat = audioFormat,
-            ProviderParams = command.ProviderParams,
-        };
+        var speechRequest = new SpeechOptions(
+            Text:           command.Text.Trim(),
+            Voice:          command.VoiceId.Trim(),
+            Model:          string.IsNullOrWhiteSpace(command.ModelId) ? null : command.ModelId.Trim(),
+            Speed:          command.Speed ?? 1f,
+            AudioFormat:    audioFormat,
+            ProviderParams: command.ProviderParams);
 
         try
         {
@@ -162,8 +164,8 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
         }
         catch (SpeechProviderException ex)
         {
-            return new SpeechResult.ValidationFailed(
-                [new(string.Empty, ex.Message)]);
+            _logger.LogWarning(ex, "TTS provider error for {ProviderId}: {Message}", provider.Id, ex.Message);
+            return new SpeechResult.UpstreamError(ex.Message);
         }
     }
 
@@ -187,17 +189,15 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
         }
 
         var defaultId = _ttsOptions.Value.DefaultProviderId;
-        try
-        {
-            provider = _speechProviderRegistry.GetRequired(defaultId);
-            return true;
-        }
-        catch (KeyNotFoundException)
+        if (!_speechProviderRegistry.TryGet(defaultId, out var defaultProvider))
         {
             provider = null!;
             notFoundId = defaultId;
             return false;
         }
+
+        provider = defaultProvider;
+        return true;
     }
 
     private static string ResolveContentType(string? audioFormat) => audioFormat switch

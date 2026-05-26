@@ -2,6 +2,7 @@ using Inktide.API.Domain.Enums;
 using Inktide.API.Domain.Models;
 using Inktide.API.TTS.Domain.Models;
 using Inktide.API.TTS.Domain.Speech;
+using Inktide.API.TTS.Infrastructure;
 using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,14 +14,11 @@ namespace Inktide.API.TTS.Infrastructure.AzureSpeech;
 /// Requires an API key supplied via <c>X-TTS-Api-Key</c> header or
 /// <c>TtsProviders:AzureSpeech:ApiKey</c> config.
 /// </summary>
-public sealed class AzureSpeechTtsProvider : ISpeechProvider
+public sealed class AzureSpeechTtsProvider : ISpeechProvider, IVoiceListingProvider
 {
 
     private const float MinSpeed = 0.5f;
     private const float MaxSpeed = 2.0f;
-
-    private static readonly SpeechModelCollection EmptyModels = new("list", []);
-
 
     private readonly AzureSpeechTtsClient _client;
     private readonly IOptions<AzureSpeechTtsClientSettings> _settings;
@@ -83,13 +81,6 @@ public sealed class AzureSpeechTtsProvider : ISpeechProvider
         return _client.GetVoicesAsync(options.ApiKey, endpoint, ct);
     }
 
-    public Task<SpeechModelCollection> GetModelsAsync(
-        ProviderOptions options,
-        CancellationToken ct = default)
-    {
-        return Task.FromResult(EmptyModels);
-    }
-
     public async Task<Stream> SynthesizeAsync(
         ProviderOptions providerOptions,
         SpeechOptions speechOptions,
@@ -102,12 +93,12 @@ public sealed class AzureSpeechTtsProvider : ISpeechProvider
             ?? throw new InvalidOperationException("Azure Speech API key is required.");
 
         // Region/endpoint: prefer runtime ProviderParams["baseUrl"], fall back to settings.
-        var baseUrl  = GetProviderParam(speechOptions.ProviderParams, "baseUrl");
+        var baseUrl  = ProviderParamReader.Get(speechOptions.ProviderParams, "baseUrl");
         var endpoint = ResolveEndpoint(baseUrl, _settings.Value.DefaultRegion);
 
         var speed  = Math.Clamp(speechOptions.Speed <= 0 ? 1.0f : speechOptions.Speed, MinSpeed, MaxSpeed);
-        var pitch  = GetProviderParamFloat(speechOptions.ProviderParams, "pitch",  0f);
-        var volume = GetProviderParamFloat(speechOptions.ProviderParams, "volume", 0f);
+        var pitch  = ProviderParamReader.GetNumeric<float>(speechOptions.ProviderParams, "pitch",  0f);
+        var volume = ProviderParamReader.GetNumeric<float>(speechOptions.ProviderParams, "volume", 0f);
 
         var rate = AzureSpeechSsmlBuilder.FormatRate(speed);
         var pitchStr  = AzureSpeechSsmlBuilder.FormatProsodyPercent(pitch);
@@ -120,7 +111,12 @@ public sealed class AzureSpeechTtsProvider : ISpeechProvider
             pitchStr,
             volumeStr);
 
-        var outputFormat = MapOutputFormat(speechOptions.AudioFormat);
+        var rawFormat    = MapOutputFormat(speechOptions.AudioFormat);
+        if (rawFormat is null)
+            _logger.LogWarning(
+                "AzureSpeech: unknown audio format '{Format}', falling back to mp3",
+                speechOptions.AudioFormat);
+        var outputFormat = rawFormat ?? "audio-24khz-48kbitrate-mono-mp3";
 
         return await _client
             .TextToSpeechStreamAsync(apiKey, endpoint, ssml, outputFormat, ct)
@@ -147,9 +143,8 @@ public sealed class AzureSpeechTtsProvider : ISpeechProvider
     private static string BuildEndpoint(string region)
         => $"https://{region}.tts.speech.microsoft.com";
 
-    private string MapOutputFormat(string? audioFormat)
-    {
-        var mapped = audioFormat?.ToLowerInvariant() switch
+    private static string? MapOutputFormat(string? audioFormat) =>
+        audioFormat?.ToLowerInvariant() switch
         {
             "mp3"  => "audio-24khz-48kbitrate-mono-mp3",
             "wav"  => "riff-24khz-16bit-mono-pcm",
@@ -159,38 +154,5 @@ public sealed class AzureSpeechTtsProvider : ISpeechProvider
             _      => null,
         };
 
-        if (mapped is null)
-        {
-            _logger.LogWarning(
-                "AzureSpeech: unknown audio format '{Format}', falling back to mp3",
-                audioFormat);
-            mapped = "audio-24khz-48kbitrate-mono-mp3";
-        }
-
-        return mapped;
-    }
-
-    private static string? GetProviderParam(
-        IReadOnlyDictionary<string, object>? providerParams,
-        string key)
-    {
-        if (providerParams is null) return null;
-        if (!providerParams.TryGetValue(key, out var val)) return null;
-        return val?.ToString();
-    }
-
-    private static float GetProviderParamFloat(
-        IReadOnlyDictionary<string, object>? providerParams,
-        string key,
-        float defaultValue)
-    {
-        var str = GetProviderParam(providerParams, key);
-        if (string.IsNullOrWhiteSpace(str)) return defaultValue;
-
-        return float.TryParse(str, System.Globalization.NumberStyles.Float,
-            System.Globalization.CultureInfo.InvariantCulture, out var f)
-            ? f
-            : defaultValue;
-    }
 
 }

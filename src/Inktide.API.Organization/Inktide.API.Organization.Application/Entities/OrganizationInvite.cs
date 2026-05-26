@@ -13,7 +13,7 @@ public sealed class OrganizationInvite
     public string InvitedBy { get; set; } = string.Empty;
     public InviteStatus Status { get; set; } = InviteStatus.Pending;
     public DateTime ExpiresAt { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
 
     public Organization Organization { get; set; } = null!;
 }

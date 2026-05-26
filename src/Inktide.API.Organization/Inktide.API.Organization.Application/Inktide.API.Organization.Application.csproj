@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
     <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
   </ItemGroup>
 

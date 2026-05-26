@@ -1,10 +1,10 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import type { AiCharacter } from '@/lib/character/types'
-import type { ICardRepository } from '@/types/ICardRepository'
-import { apiResponseToCharacter } from '@/lib/character/mappers'
-import { queryKeys } from '@/lib/query/keys'
+import type { AiCharacter } from '@/shared/lib/character/types'
+import type { ICardRepository } from '@/shared/types/ICardRepository'
+import { apiResponseToCharacter } from '@/shared/lib/character/mappers'
+import { queryKeys } from '@/shared/lib/query/keys'
 
 const SOUL_STORAGE_KEY = 'inktide_selected_soul'
 

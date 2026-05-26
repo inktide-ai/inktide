@@ -14,7 +14,7 @@ namespace Inktide.API.Synapse.Infrastructure.ChannelContext;
 /// Run preset overrides are applied after the base context is built and are NOT cached —
 /// allowing the active scene to change at runtime without requiring a cache flush.
 /// </summary>
-public sealed class ChannelContextResolutionService : IChannelContextResolutionService
+internal sealed class ChannelContextResolutionService : IChannelContextResolutionService
 {
 
     private readonly IAiCardChannelQueryService _cardQuery;

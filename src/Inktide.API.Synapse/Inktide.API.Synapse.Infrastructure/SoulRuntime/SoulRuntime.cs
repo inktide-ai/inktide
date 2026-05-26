@@ -11,7 +11,7 @@ namespace Inktide.API.Synapse.Infrastructure.SoulRuntime;
 /// Only nodes with <c>Type == "plugin"</c> are executed here. Core nodes (input, llm, tts, output)
 /// remain in their own workers. LLM and TTS stay on the Redis-stream path.
 /// </summary>
-public sealed class SoulRuntime : ISoulRuntime
+internal sealed class SoulRuntime : ISoulRuntime
 {
     private readonly IGraphPluginEnrichmentPort _graphPort;
     private readonly ILogger<SoulRuntime> _logger;
@@ -85,7 +85,10 @@ public sealed class SoulRuntime : ISoulRuntime
             && !string.IsNullOrWhiteSpace(emotion)
             && ctx.Get<EmotionResult>() is null)
         {
-            ctx.Set(new EmotionResult(emotion, 0.8f));
+            var intensity = outputs.TryGetValue("emotion_intensity", out var raw) && raw is float f
+                ? Math.Clamp(f, 0f, 1f)
+                : 0.8f;
+            ctx.Set(new EmotionResult(emotion, intensity));
         }
     }
 }

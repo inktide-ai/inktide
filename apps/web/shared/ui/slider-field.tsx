@@ -1,6 +1,6 @@
 'use client'
 import { cn } from '@/lib/utils'
-import SliderWithTicks from '@/components/profile/slider-with-ticks'
+import SliderWithTicks from '@/shared/ui/slider-with-ticks'
 
 interface SliderFieldProps {
   label: string

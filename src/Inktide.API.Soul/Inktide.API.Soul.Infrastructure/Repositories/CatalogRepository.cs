@@ -22,12 +22,12 @@ public sealed class CatalogRepository : ICatalogRepository
         var query = _db.LlmCatalog.AsNoTracking().Where(m => m.IsAvailable);
         if (tier is not null)
             query = query.Where(m => m.Tier == tier);
-        return await query.OrderBy(m => m.Provider).ThenBy(m => m.DisplayName).ToListAsync(ct);
+        return await query.OrderBy(m => m.Provider).ThenBy(m => m.DisplayName).ToListAsync(ct).ConfigureAwait(false);
     }
 
     public async Task<LlmCatalogEntry?> GetLlmByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _db.LlmCatalog.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id, ct);
+        return await _db.LlmCatalog.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id, ct).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<TtsCatalogEntry>> GetAvailableTtsVoicesAsync(string? tier = null, CancellationToken ct = default)
@@ -35,24 +35,24 @@ public sealed class CatalogRepository : ICatalogRepository
         var query = _db.TtsCatalog.AsNoTracking().Where(v => v.IsAvailable);
         if (tier is not null)
             query = query.Where(v => v.Tier == tier);
-        return await query.OrderBy(v => v.Provider).ThenBy(v => v.DisplayName).ToListAsync(ct);
+        return await query.OrderBy(v => v.Provider).ThenBy(v => v.DisplayName).ToListAsync(ct).ConfigureAwait(false);
     }
 
     public async Task<TtsCatalogEntry?> GetTtsByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _db.TtsCatalog.AsNoTracking().FirstOrDefaultAsync(v => v.Id == id, ct);
+        return await _db.TtsCatalog.AsNoTracking().FirstOrDefaultAsync(v => v.Id == id, ct).ConfigureAwait(false);
     }
 
     public async Task<LlmCatalogEntry?> FindLlmByModelIdAsync(string modelId, CancellationToken ct = default)
     {
         return await _db.LlmCatalog.AsNoTracking()
-            .FirstOrDefaultAsync(m => m.ModelId == modelId && m.IsAvailable, ct);
+            .FirstOrDefaultAsync(m => m.ModelId == modelId && m.IsAvailable, ct).ConfigureAwait(false);
     }
 
     public async Task<TtsCatalogEntry?> FindTtsByVoiceIdAsync(string voiceId, CancellationToken ct = default)
     {
         return await _db.TtsCatalog.AsNoTracking()
-            .FirstOrDefaultAsync(v => v.VoiceId == voiceId && v.IsAvailable, ct);
+            .FirstOrDefaultAsync(v => v.VoiceId == voiceId && v.IsAvailable, ct).ConfigureAwait(false);
     }
 
 }

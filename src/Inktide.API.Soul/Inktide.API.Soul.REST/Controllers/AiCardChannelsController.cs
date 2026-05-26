@@ -1,7 +1,7 @@
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Models;
-using Inktide.API.Soul.REST.Converters;
+using Inktide.API.Soul.REST.Mappers;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -48,8 +48,13 @@ public sealed class AiCardChannelsController : ApiController
         try
         {
             var created = await _channelLinks.CreateAsync(userId, cardId, cmd, ct);
-            var response = AiCardConverter.ToChannelResponse(created);
+            var response = ChannelResponseMapper.ToChannelResponse(created);
             return Created(string.Empty, response);
+        }
+        catch (PlanLimitExceededException ex)
+        {
+            return StatusCode(StatusCodes.Status402PaymentRequired,
+                ApiErrorResponse.From(ex.Message, "PLAN_LIMIT_EXCEEDED"));
         }
         catch (AiCardNotFoundException)
         {
@@ -84,7 +89,7 @@ public sealed class AiCardChannelsController : ApiController
                 linkId,
                 new PatchChannelLinkCommand(request.IsActive),
                 ct);
-            return Ok(AiCardConverter.ToChannelResponse(updated));
+            return Ok(ChannelResponseMapper.ToChannelResponse(updated));
         }
         catch (AiCardNotFoundException)
         {

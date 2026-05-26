@@ -3,10 +3,10 @@ using System.Text.Json;
 
 namespace Inktide.API.TTS.Domain.Models;
 
-public class SpeechModelCollection : ReadOnlyCollection<SpeechModel>
+public sealed class SpeechModelCollection : ReadOnlyCollection<SpeechModel>
 {
 
-    private string _object = "list";
+    private readonly string _object;
 
 
     internal SpeechModelCollection(
@@ -56,7 +56,7 @@ public class SpeechModelCollection : ReadOnlyCollection<SpeechModel>
         var list = new List<SpeechModel>();
         foreach (var el in array.EnumerateArray())
         {
-            var model = SpeechModel.FromResponse(el);
+            var model = ParseOne(el);
             if (model is not null)
             {
                 list.Add(model);
@@ -64,6 +64,66 @@ public class SpeechModelCollection : ReadOnlyCollection<SpeechModel>
         }
 
         return new SpeechModelCollection(objectType, list);
+    }
+
+    private static SpeechModel? ParseOne(JsonElement element)
+    {
+        if (element.ValueKind == JsonValueKind.Null)
+        {
+            return null;
+        }
+
+        string id = default!;
+        string model = default!;
+        DateTimeOffset created = default;
+        string ownedBy = default!;
+
+        foreach (var prop in element.EnumerateObject())
+        {
+            if (prop.NameEquals("id"u8))
+            {
+                id = prop.Value.GetString() ?? string.Empty;
+                continue;
+            }
+
+            if (prop.NameEquals("object"u8))
+            {
+                if (prop.Value.ValueKind == JsonValueKind.Null)
+                {
+                    continue;
+                }
+
+                model = prop.Value.GetString() ?? "model";
+                continue;
+            }
+
+            if (prop.NameEquals("created"u8))
+            {
+                if (prop.Value.ValueKind == JsonValueKind.Null)
+                {
+                    continue;
+                }
+
+                if (prop.Value.ValueKind == JsonValueKind.Number && prop.Value.TryGetInt64(out var unixSeconds))
+                {
+                    created = DateTimeOffset.FromUnixTimeSeconds(unixSeconds);
+                }
+
+                continue;
+            }
+
+            if (prop.NameEquals("owned_by"u8))
+            {
+                ownedBy = prop.Value.GetString() ?? string.Empty;
+                continue;
+            }
+        }
+
+        return new SpeechModel(
+            id ?? string.Empty,
+            string.IsNullOrEmpty(model) ? "model" : model,
+            created,
+            ownedBy ?? string.Empty);
     }
 
 }

@@ -1,6 +1,6 @@
 'use client'
-import { useCharactersContext } from '../../../context/CharactersContext'
-import BrainTab from '../../../components/profile/tabs/brain-tab'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import BrainTab from '@/features/brain/components/brain-tab'
 
 export default function BrainPage() {
   const { selected, updateCharacter } = useCharactersContext()

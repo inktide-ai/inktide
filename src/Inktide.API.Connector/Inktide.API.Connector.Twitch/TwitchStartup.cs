@@ -1,10 +1,13 @@
 using Inktide.API.Connector.Application.Contracts;
+using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Twitch.Gateway;
 using Inktide.API.Connector.Twitch.OAuth;
 using Inktide.API.Connector.Twitch.Settings;
 using Inktide.API.Core;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace Inktide.API.Connector.Twitch;
@@ -26,7 +29,8 @@ public sealed class TwitchStartup : IStartup
         services.AddSingleton<ITwitchChannelRegistry, TwitchChannelRegistry>();
 
         // ── IRC Connector ─────────────────────────────────────────────────────
-        services.AddSingleton<TwitchMessageHandler>();
+        services.AddSingleton<ITwitchMessageMapper, TwitchMessageMapper>();
+        services.AddSingleton<ITwitchMessageHandler, TwitchMessageHandler>();
         services.AddSingleton<TwitchConnector>();
         services.AddSingleton<IChatConnector>(sp => sp.GetRequiredService<TwitchConnector>());
         services.AddSingleton<ITwitchConnector>(sp => sp.GetRequiredService<TwitchConnector>());
@@ -35,7 +39,15 @@ public sealed class TwitchStartup : IStartup
         services.AddHostedService<TwitchChannelRegistryLoader>();
 
         // ── OAuth2 services ───────────────────────────────────────────────────
-        services.AddSingleton<TwitchOAuthStateService>();
+        services.AddOptions<OAuthStateSettings>()
+            .BindConfiguration("AuthSettings")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        services.TryAddSingleton<IOAuthStateService, OAuthStateService>();
+        services.AddKeyedSingleton<ITokenProtector>(TokenProtectorKeys.Twitch, (sp, _) =>
+            new DataProtectionTokenProtector(
+                sp.GetRequiredService<IDataProtectionProvider>(),
+                "Twitch.OAuth.Tokens"));
         services.AddHttpClient<ITwitchOAuthService, TwitchOAuthService>();
 
         // ── REST controller (in this assembly) ───────────────────────────────

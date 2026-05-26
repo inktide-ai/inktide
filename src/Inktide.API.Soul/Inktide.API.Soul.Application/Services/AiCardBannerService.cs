@@ -42,14 +42,14 @@ public sealed class AiCardBannerService : IAiCardBannerService
         CancellationToken ct = default)
     {
         if (!_storage.IsEnabled)
-            return new AiCardBannerUpdateResult(false, null, "Object storage is not configured.");
+            return AiCardBannerUpdateResult.Fail(AiCardBannerError.StorageUnavailable, "Object storage is not configured.");
 
         if (string.IsNullOrWhiteSpace(_s3.DefaultBucket))
-            return new AiCardBannerUpdateResult(false, null, "S3 default bucket is not configured.");
+            return AiCardBannerUpdateResult.Fail(AiCardBannerError.StorageUnavailable, "S3 default bucket is not configured.");
 
         var card = await _cards.GetByIdAsync(userId, cardId, ct).ConfigureAwait(false);
         if (card is null)
-            return new AiCardBannerUpdateResult(false, null, "AI card not found.");
+            return AiCardBannerUpdateResult.Fail(AiCardBannerError.CardNotFound, "AI card not found.");
 
         var safeName  = StorageFileHelper.SanitizeFileName(fileName, "banner.bin");
         var objectKey = $"users/{userId:N}/cards/{cardId:N}/banner_{IdGenerator.New():N}_{safeName}";
@@ -62,7 +62,7 @@ public sealed class AiCardBannerService : IAiCardBannerService
         var updated = await _cards.UpdateAsync(userId, card, ct).ConfigureAwait(false);
 
         _logger.LogInformation("AI card {CardId} banner set to {Url}", cardId, publicUrl);
-        return new AiCardBannerUpdateResult(true, updated, null);
+        return AiCardBannerUpdateResult.Ok(updated);
     }
 
     public async Task<AiCardBannerUpdateResult> RemoveBannerAsync(
@@ -72,13 +72,13 @@ public sealed class AiCardBannerService : IAiCardBannerService
     {
         var card = await _cards.GetByIdAsync(userId, cardId, ct).ConfigureAwait(false);
         if (card is null)
-            return new AiCardBannerUpdateResult(false, null, "AI card not found.");
+            return AiCardBannerUpdateResult.Fail(AiCardBannerError.CardNotFound, "AI card not found.");
 
         SetBannerImageUrl(card, null);
         var updated = await _cards.UpdateAsync(userId, card, ct).ConfigureAwait(false);
 
         _logger.LogInformation("AI card {CardId} banner removed", cardId);
-        return new AiCardBannerUpdateResult(true, updated, null);
+        return AiCardBannerUpdateResult.Ok(updated);
     }
 
     private static void SetBannerImageUrl(AiCard card, string? url)

@@ -1,6 +1,6 @@
 'use client'
-import { useCharactersContext } from '../../../context/CharactersContext'
-import ChannelTab from '../../../components/profile/tabs/channel-tab'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import ChannelTab from '@/features/character-editor/tabs/channel-tab'
 
 export default function ChannelsPage() {
   const { selected, updateCharacter } = useCharactersContext()

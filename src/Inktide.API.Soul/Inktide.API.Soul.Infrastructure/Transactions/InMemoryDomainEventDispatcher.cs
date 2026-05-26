@@ -15,11 +15,9 @@ internal sealed class InMemoryDomainEventDispatcher : IDomainEventDispatcher
         foreach (var evt in events)
         {
             var handlerType = typeof(IDomainEventHandler<>).MakeGenericType(evt.GetType());
-            var handlers = _serviceProvider.GetServices(handlerType);
-            foreach (var handler in handlers)
-            {
-                await ((dynamic)handler!).HandleAsync((dynamic)evt, ct).ConfigureAwait(false);
-            }
+            var method      = handlerType.GetMethod("HandleAsync")!;
+            foreach (var handler in _serviceProvider.GetServices(handlerType))
+                await ((Task)method.Invoke(handler, [evt, ct])!).ConfigureAwait(false);
         }
     }
 }

@@ -8,6 +8,4 @@ public interface ITwitchOAuthService
     Task RevokeAsync(string encryptedAccessToken, CancellationToken ct = default);
     /// <summary>Calls GET /helix/users and returns the broadcaster's login in lowercase.</summary>
     Task<string> GetBroadcasterLoginAsync(string plainAccessToken, CancellationToken ct = default);
-    string Protect(string plaintext);
-    string Unprotect(string ciphertext);
 }

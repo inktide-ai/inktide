@@ -32,7 +32,17 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var db = _redis.GetDatabase();
-        await EnsureConsumerGroupAsync(db, stoppingToken);
+        try
+        {
+            await EnsureConsumerGroupAsync(db, stoppingToken);
+        }
+        catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
+        {
+            // TODO: wire up an alert on this log message — in Kubernetes, LogCritical goes to stdout
+            // but without an explicit alert rule the consumer is silently inactive until pod restart.
+            _logger.LogCritical(ex, "UserAccountDeletedConsumer: failed to create consumer group — consumer will not process events");
+            return;
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {

@@ -1,30 +1,31 @@
 using Inktide.API.Connector.Application.Interfaces;
-using Inktide.API.Connector.Application.Models;
 using Microsoft.Extensions.Logging;
 using TwitchLib.Client.Events;
 
 namespace Inktide.API.Connector.Twitch.Gateway;
 
-internal sealed class TwitchMessageHandler
+internal sealed class TwitchMessageHandler : ITwitchMessageHandler
 {
     private readonly ITwitchChannelRegistry _registry;
     private readonly IStreamMessageHandler _messageHandler;
+    private readonly ITwitchMessageMapper _mapper;
     private readonly ILogger<TwitchMessageHandler> _logger;
 
     public TwitchMessageHandler(
         ITwitchChannelRegistry registry,
         IStreamMessageHandler messageHandler,
+        ITwitchMessageMapper mapper,
         ILogger<TwitchMessageHandler> logger)
     {
         _registry       = registry       ?? throw new ArgumentNullException(nameof(registry));
         _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
+        _mapper         = mapper         ?? throw new ArgumentNullException(nameof(mapper));
         _logger         = logger         ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task HandleAsync(OnMessageReceivedArgs args)
     {
-        var msg          = args.ChatMessage;
-        var channelLogin = msg.Channel.ToLowerInvariant();
+        var channelLogin = args.ChatMessage.Channel.ToLowerInvariant();
 
         var cardId = _registry.Resolve(channelLogin);
         if (cardId is null)
@@ -33,30 +34,7 @@ internal sealed class TwitchMessageHandler
             return;
         }
 
-        var badges = msg.Badges
-            .Select(b => b.Key)
-            .ToList();
-
-        var sender = new UserMetadata(
-            UserId:      msg.UserId,
-            UserName:    msg.Username,
-            Badges:      badges,
-            IsModerator:  msg.UserDetail.IsModerator,
-            IsSubscriber: msg.UserDetail.IsSubscriber,
-            IsVip:        msg.UserDetail.IsVip,
-            IsBroadcaster: msg.IsBroadcaster,
-            Color:       string.IsNullOrEmpty(msg.HexColor) ? null : msg.HexColor);
-
-        var chatMessage = new ChatMessage(
-            PlatformId:  TwitchConnector.PlatformIdValue,
-            ChannelId:   channelLogin,
-            ChannelName: channelLogin,
-            Sender:      sender,
-            Text:        msg.Message,
-            Timestamp:   DateTimeOffset.UtcNow)
-        {
-            CharacterId = cardId.Value,
-        };
+        var chatMessage = _mapper.Map(args, channelLogin, cardId.Value);
 
         try
         {

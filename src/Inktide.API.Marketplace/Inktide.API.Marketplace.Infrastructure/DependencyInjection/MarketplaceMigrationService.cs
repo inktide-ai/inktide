@@ -15,11 +15,11 @@ internal sealed class MarketplaceMigrationService(
         await using var scope = scopeFactory.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>();
 
-        var pending = await db.Database.GetPendingMigrationsAsync(cancellationToken);
-        if (!pending.Any())
+        var pending = (await db.Database.GetPendingMigrationsAsync(cancellationToken)).ToList();
+        if (pending.Count == 0)
             return;
 
-        logger.LogInformation("Applying {Count} pending Marketplace migration(s)...", pending.Count());
+        logger.LogInformation("Applying {Count} pending Marketplace migration(s)...", pending.Count);
         await db.Database.MigrateAsync(cancellationToken);
         logger.LogInformation("Marketplace migrations applied successfully");
     }

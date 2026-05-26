@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { MoreHorizontal } from 'lucide-react'
-import { Card } from '@/components/ui/card'
+import { Card } from '@/shared/ui/card'
 
 interface ProjectCardProps {
   title: string

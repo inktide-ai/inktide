@@ -6,12 +6,6 @@ namespace Inktide.API.Soul.Domain.ValueObjects;
 public sealed class ScreenAwarenessCardSettings
 {
 
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
-
     [JsonPropertyName("enabled")]
     public bool Enabled { get; set; } = false;
 
@@ -23,13 +17,8 @@ public sealed class ScreenAwarenessCardSettings
     [JsonPropertyName("phash_threshold")]
     public int PHashThreshold { get; set; } = 10;
 
-    public static ScreenAwarenessCardSettings Parse(string? json)
-    {
-        if (string.IsNullOrWhiteSpace(json)) return new ScreenAwarenessCardSettings();
-        try { return JsonSerializer.Deserialize<ScreenAwarenessCardSettings>(json, JsonOpts) ?? new ScreenAwarenessCardSettings(); }
-        catch { return new ScreenAwarenessCardSettings(); }
-    }
+    public static ScreenAwarenessCardSettings Parse(string? json) => ValueObjectJson.ParseOrDefault<ScreenAwarenessCardSettings>(json);
 
-    public string ToJson() => JsonSerializer.Serialize(this, JsonOpts);
+    public string ToJson() => JsonSerializer.Serialize(this, ValueObjectJson.Opts);
 
 }

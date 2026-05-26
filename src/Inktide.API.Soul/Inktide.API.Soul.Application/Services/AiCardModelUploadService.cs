@@ -181,7 +181,8 @@ public sealed class AiCardModelUploadService : IAiCardModelUploadService
             try { await _storage.DeleteObjectAsync(model.StorageKey, ct).ConfigureAwait(false); }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to delete object from storage key={Key}, proceeding with DB delete.", model.StorageKey);
+                _logger.LogError(ex, "DeleteAsync: storage deletion failed for key={Key} — aborting DB delete", model.StorageKey);
+                return DeleteModelResult.Fail(ModelUploadError.StorageDisabled, "File deletion from storage failed. Please retry.");
             }
         }
 

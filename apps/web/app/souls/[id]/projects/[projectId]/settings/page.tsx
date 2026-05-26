@@ -6,8 +6,8 @@ import { Check, Copy, Trash2 } from 'lucide-react'
 import {
   getProject, updateProject, deleteProject,
   type Project, type ProjectActiveSoul,
-} from '@/api/projects'
-import { SoulBindingPicker } from '@/components/projects/soul-binding-picker'
+} from '@/features/projects/api/projects'
+import { SoulBindingPicker } from '@/features/projects/soul-binding-picker'
 
 function SaveButton({ saving, disabled, onClick }: { saving: boolean; disabled?: boolean; onClick: () => void }) {
   return (

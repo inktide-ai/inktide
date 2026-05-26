@@ -13,4 +13,5 @@ public sealed class OutboxEvent
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
     public DateTime? ProcessedAt { get; set; }
     public string? Error { get; set; }
+    public int RetryCount { get; set; } = 0;
 }

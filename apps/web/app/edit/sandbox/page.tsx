@@ -1,5 +1,5 @@
-import ProjectPicker from '@/components/sandbox/project-picker'
-import SandboxRunner from '@/components/sandbox/sandbox-runner'
+import ProjectPicker from '@/features/sandbox/project-picker'
+import SandboxRunner from '@/features/sandbox/sandbox-runner'
 
 interface Props {
   searchParams: Promise<{ projectId?: string }>

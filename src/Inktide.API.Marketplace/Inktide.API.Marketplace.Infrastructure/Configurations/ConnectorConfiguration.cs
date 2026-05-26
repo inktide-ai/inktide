@@ -29,10 +29,8 @@ public sealed class ConnectorConfiguration : IEntityTypeConfiguration<Connector>
 
         b.HasIndex(e => e.Slug).IsUnique();
 
-        b.HasMany(e => e.Installations)
-         .WithOne(e => e.Connector!)
-         .HasForeignKey(e => e.ConnectorId)
-         .OnDelete(DeleteBehavior.Cascade);
+        // FK relationship is defined in ConnectorInstallationConfiguration (the owning side).
+        // Defining it here too would create a hidden ordering dependency — removed.
 
         b.HasData(
             Connector.Create(DiscordId,  "discord",  "Discord",  "Route guild messages to your AI character in real-time.", "Chat",   "/icons/connectors/discord.svg",  true,  1),

@@ -1,5 +1,5 @@
 import type { KeycloakTokenParsed } from 'keycloak-js'
-import type { UserInfo } from '../context/AuthContext'
+import type { UserInfo } from '@/context/AuthContext'
 
 /** SRP: единственная ответственность — извлечение данных пользователя из JWT-токена. */
 export interface IAuthTokenParser {

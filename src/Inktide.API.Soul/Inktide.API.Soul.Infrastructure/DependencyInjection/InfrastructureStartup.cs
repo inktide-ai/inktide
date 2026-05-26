@@ -1,5 +1,6 @@
 using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
+using Inktide.API.Soul.Infrastructure.Cache;
 using Inktide.API.Soul.Infrastructure.DbContext;
 using Inktide.API.Soul.Infrastructure.Services;
 using Inktide.API.Soul.Infrastructure.Messaging;
@@ -58,6 +59,7 @@ public sealed class InfrastructureStartup : IStartup
         services.AddHostedService<DatabaseMigrationService>();
         services.AddHostedService<OutboxProcessorHostedService>();
         services.AddHostedService<UserAccountDeletedConsumer>();
+        services.AddHostedService<SoulStatusGateSeedWorker>();
 
         services
             .AddHealthChecks()

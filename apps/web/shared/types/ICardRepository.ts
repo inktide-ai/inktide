@@ -4,7 +4,7 @@ import type {
   CreateAiCardRequest,
   LlmModelResponse,
   UpdateAiCardRequest,
-} from '../api/soul'
+} from '@/shared/types/soul-api'
 
 /** DIP: хуки/сервисы зависят от этого интерфейса, а не от конкретного soul.ts */
 export interface ICardRepository {

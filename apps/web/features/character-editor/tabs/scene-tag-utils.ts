@@ -1,4 +1,4 @@
-import type { CustomSceneTagDto } from '../../../api/soul'
+import type { CustomSceneTagDto } from '@/shared/types/soul-api'
 
 /** Built-in + custom labels for pickers (deduped, case-insensitive). */
 export function mergeSceneTagPickOptions(customTags: CustomSceneTagDto[] | string[]): string[] {

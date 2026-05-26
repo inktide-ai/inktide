@@ -1,7 +1,7 @@
 'use client'
 
 import { Add, CaretDownSmall, Notification, Search } from '@/components/icons'
-import { useSearch } from '@/hooks/useSearch'
+import { useSearch } from '@/shared/hooks/useSearch'
 import { SearchDropdown } from './search-dropdown'
 
 interface WorkspaceTopBarProps {

@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Inktide.API.TTS.Domain.Models;
 
-public class SpeechVoiceCollection : ReadOnlyCollection<SpeechVoice>
+public sealed class SpeechVoiceCollection : ReadOnlyCollection<SpeechVoice>
 {
 
     internal SpeechVoiceCollection(IList<SpeechVoice> items)

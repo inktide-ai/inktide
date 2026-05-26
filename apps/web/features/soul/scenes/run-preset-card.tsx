@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { MoreHorizontal, Zap, ZapOff } from 'lucide-react'
-import type { RunPreset } from '@/api/soul'
+import type { RunPreset } from '@/features/soul/api/index'
 
 interface RunPresetCardProps {
   preset: RunPreset

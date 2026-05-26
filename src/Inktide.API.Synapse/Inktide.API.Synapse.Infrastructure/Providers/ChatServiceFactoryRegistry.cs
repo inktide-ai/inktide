@@ -12,7 +12,7 @@ namespace Inktide.API.Synapse.Infrastructure.Providers;
 ///
 /// Lifetime: Singleton. The sorted list is built once at startup.
 /// </summary>
-public sealed class ChatServiceFactoryRegistry
+internal sealed class ChatServiceFactoryRegistry
 {
     private readonly IReadOnlyList<IChatServiceFactory> _sorted;
 

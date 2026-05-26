@@ -36,11 +36,12 @@ public sealed class TtsApiKeyResolver : IApiKeyResolver
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(providerId);
 
-        var provider = _speechProviderRegistry.GetRequired(providerId);
+        if (!_speechProviderRegistry.TryGet(providerId, out var provider))
+            throw new ApiKeyMissingException(
+                $"Speech provider '{providerId}' is not registered.");
+
         if (!provider.Capabilities.RequiresApiKey)
-        {
             return null;
-        }
 
         var httpContext = _httpContextAccessor.HttpContext;
         var apiKey = httpContext?.Request.Headers[TtsApiKeyHeader].FirstOrDefault();
@@ -57,6 +58,14 @@ public sealed class TtsApiKeyResolver : IApiKeyResolver
         }
 
         return apiKey;
+    }
+
+    /// <inheritdoc />
+    public bool IsHeaderKey(string providerId)
+    {
+        var httpContext = _httpContextAccessor.HttpContext;
+        var headerValue = httpContext?.Request.Headers[TtsApiKeyHeader].FirstOrDefault();
+        return !string.IsNullOrWhiteSpace(headerValue);
     }
 
 }

@@ -1,6 +1,7 @@
-using Inktide.API.Core.Generators;
 using System.Text.Json;
+using Inktide.API.Core.Generators;
 using Inktide.API.Core.Contracts;
+using Inktide.API.Graph.Domain;
 using Inktide.API.Graph.Domain.Contracts;
 using Inktide.API.Graph.Domain.Entities;
 using Inktide.API.Graph.Domain.Models;
@@ -27,53 +28,26 @@ public sealed class GraphDefinitionImporterService : IGraphDefinitionImporter
     }
 
     public async Task ImportAsync(Guid projectId, Guid userId, string graphPayloadJson, CancellationToken ct = default)
-
     {
-        var nodes = new List<GraphNodeRecord>();
-        var edges = new List<GraphEdgeRecord>();
+        var payload = JsonSerializer.Deserialize<GraphPayloadDto>(graphPayloadJson,
+            GraphJsonSerializerOptions.CamelCase)
+            ?? throw new ArgumentException("Invalid graph payload JSON", nameof(graphPayloadJson));
 
-        using var doc = JsonDocument.Parse(graphPayloadJson);
-        var root = doc.RootElement;
+        var nodes = (payload.Nodes ?? []).Select(n => new GraphNodeRecord(
+            n.Id ?? IdGenerator.New().ToString(),
+            n.Type ?? NodeTypes.Input,
+            n.ProviderId ?? "core",
+            n.Config ?? [],
+            n.Position is { } p ? new NodePosition(p.X, p.Y) : new NodePosition(0, 0)
+        )).ToList();
 
-        if (root.TryGetProperty("nodes", out var nodesEl) && nodesEl.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var item in nodesEl.EnumerateArray())
-            {
-                var id       = item.TryGetProperty("id", out var idEl)       ? idEl.GetString() ?? IdGenerator.New().ToString() : IdGenerator.New().ToString();
-                var type     = item.TryGetProperty("type", out var typeEl)   ? typeEl.GetString() ?? "input" : "input";
-                var provider = item.TryGetProperty("providerId", out var pvEl) ? pvEl.GetString() ?? "core" : "core";
-
-                var pos = new NodePosition(0, 0);
-                if (item.TryGetProperty("position", out var posEl) && posEl.ValueKind == JsonValueKind.Object)
-                {
-                    var x = posEl.TryGetProperty("x", out var xEl) ? xEl.GetDouble() : 0;
-                    var y = posEl.TryGetProperty("y", out var yEl) ? yEl.GetDouble() : 0;
-                    pos = new NodePosition(x, y);
-                }
-
-                var cfg = new Dictionary<string, object>();
-                if (item.TryGetProperty("config", out var cfgEl) && cfgEl.ValueKind == JsonValueKind.Object)
-                {
-                    foreach (var prop in cfgEl.EnumerateObject())
-                        cfg[prop.Name] = prop.Value.ToString();
-                }
-
-                nodes.Add(new GraphNodeRecord(id, type, provider, cfg, pos));
-            }
-        }
-
-        if (root.TryGetProperty("edges", out var edgesEl) && edgesEl.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var item in edgesEl.EnumerateArray())
-            {
-                edges.Add(new GraphEdgeRecord(
-                    item.TryGetProperty("id", out var idEl)             ? idEl.GetString()           ?? IdGenerator.New().ToString() : IdGenerator.New().ToString(),
-                    item.TryGetProperty("source", out var srcEl)        ? srcEl.GetString()           ?? string.Empty : string.Empty,
-                    item.TryGetProperty("sourceHandle", out var shEl)   ? shEl.GetString()            ?? string.Empty : string.Empty,
-                    item.TryGetProperty("target", out var tEl)          ? tEl.GetString()             ?? string.Empty : string.Empty,
-                    item.TryGetProperty("targetHandle", out var thEl)   ? thEl.GetString()            ?? string.Empty : string.Empty));
-            }
-        }
+        var edges = (payload.Edges ?? []).Select(e => new GraphEdgeRecord(
+            e.Id ?? IdGenerator.New().ToString(),
+            e.Source ?? string.Empty,
+            e.SourceHandle ?? string.Empty,
+            e.Target ?? string.Empty,
+            e.TargetHandle ?? string.Empty
+        )).ToList();
 
         var graph = GraphDefinition.Create(projectId, userId, nodes, edges);
         await _graphs.UpsertAsync(graph, ct).ConfigureAwait(false);
@@ -82,4 +56,11 @@ public sealed class GraphDefinitionImporterService : IGraphDefinitionImporter
             "GraphDefinitionImporterService: imported graph for project {ProjectId} ({NodeCount} nodes, {EdgeCount} edges)",
             projectId, nodes.Count, edges.Count);
     }
+
+    private sealed record GraphPayloadDto(List<NodeDto>? Nodes, List<EdgeDto>? Edges);
+    private sealed record NodeDto(string? Id, string? Type, string? ProviderId,
+        PositionDto? Position, Dictionary<string, object>? Config);
+    private sealed record PositionDto(double X, double Y);
+    private sealed record EdgeDto(string? Id, string? Source, string? SourceHandle,
+        string? Target, string? TargetHandle);
 }

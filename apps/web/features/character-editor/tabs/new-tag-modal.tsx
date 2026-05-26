@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { HexColorPicker } from 'react-colorful'
 import { cn } from '@/lib/utils'
-import { addCustomSceneTag } from '../../../api/soul'
+import { addCustomSceneTag } from '@/features/soul/api/index'
 
 const MAX_LEN = 128
 const TAG_COLOR_PRESETS = ['#818cf8', '#a78bfa', '#f472b6', '#4ade80', '#38bdf8', '#fb923c', '#f87171', '#facc15']

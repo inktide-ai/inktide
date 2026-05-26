@@ -1,6 +1,7 @@
 using Inktide.API.Core;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Inktide.API.Organization.REST.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,7 +15,7 @@ public sealed class RestApiStartup : IStartup
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
         services
-            .AddControllers()
+            .AddControllers(o => o.Filters.Add(new OrganizationExceptionFilter()))
             .AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();

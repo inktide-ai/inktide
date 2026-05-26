@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Synapse.Infrastructure.Adapters;
 
-public sealed class GraphPluginEnrichmentAdapter : IGraphPluginEnrichmentPort
+internal sealed class GraphPluginEnrichmentAdapter : IGraphPluginEnrichmentPort
 {
     private static readonly HashSet<string> EnrichmentTypes =
         new(StringComparer.OrdinalIgnoreCase) { "plugin", "context_builder" };

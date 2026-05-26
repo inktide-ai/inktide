@@ -16,12 +16,12 @@ public sealed class CatalogService : ICatalogService
     }
 
 
-    public async Task<IReadOnlyList<LlmCatalogEntry>> GetAvailableLlmModelsAsync(Guid userId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<LlmCatalogEntry>> GetAvailableLlmModelsAsync(CancellationToken ct = default)
     {
         return await _catalogRepo.GetAvailableLlmModelsAsync(ct: ct);
     }
 
-    public async Task<IReadOnlyList<TtsCatalogEntry>> GetAvailableTtsVoicesAsync(Guid userId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<TtsCatalogEntry>> GetAvailableTtsVoicesAsync(CancellationToken ct = default)
     {
         return await _catalogRepo.GetAvailableTtsVoicesAsync(ct: ct);
     }

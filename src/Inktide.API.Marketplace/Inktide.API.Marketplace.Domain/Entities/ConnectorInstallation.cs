@@ -1,4 +1,5 @@
 using Inktide.API.Core.Generators;
+
 namespace Inktide.API.Marketplace.Domain.Entities;
 
 public sealed class ConnectorInstallation
@@ -12,11 +13,15 @@ public sealed class ConnectorInstallation
 
     public Connector? Connector { get; private set; }
 
-    public static ConnectorInstallation Create(Guid soulId, Guid connectorId) => new()
+    public static ConnectorInstallation Create(
+        Guid soulId,
+        Guid connectorId,
+        TimeProvider? time = null,
+        Guid? id = null) => new()
     {
-        Id          = IdGenerator.New(),
+        Id          = id ?? IdGenerator.New(),
         SoulId      = soulId,
         ConnectorId = connectorId,
-        InstalledAt = DateTimeOffset.UtcNow,
+        InstalledAt = (time ?? TimeProvider.System).GetUtcNow(),
     };
 }

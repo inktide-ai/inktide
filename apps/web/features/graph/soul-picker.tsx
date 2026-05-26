@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCharactersContext } from '@/context/CharactersContext'
-import type { AiCardListItem } from '@/api/soul'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import type { AiCardListItem } from '@/shared/types/soul-api'
 
 type Filter = 'all' | 'active' | 'idle' | 'archived'
 

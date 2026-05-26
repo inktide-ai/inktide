@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { getCard } from '../api/soul'
+import { getCard } from '@/features/soul/api/index'
 
 /**
  * Returns the first active channel ID linked to the given card,

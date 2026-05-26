@@ -2,6 +2,7 @@ using System.Text.Json;
 using Inktide.API.Synapse.Application.Configuration;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
+using Inktide.API.Synapse.Infrastructure.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,13 +11,8 @@ using StackExchange.Redis;
 namespace Inktide.API.Synapse.Infrastructure.Aggregation;
 
 /// <summary>Fan-in: publishes aggregated context envelope to the LLM Redis stream.</summary>
-public sealed class SynapseAggregationService : ISynapseAggregationService
+internal sealed class SynapseAggregationService : ISynapseAggregationService
 {
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
 
     private readonly IConnectionMultiplexer _redis;
     private readonly IOptions<SynapseAggregationOptions> _options;
@@ -46,7 +42,7 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
             Screen:   context.Get<ScreenContext>(),
             Webhook:  context.Get<WebhookContext>());
 
-        var json = JsonSerializer.Serialize(envelope, JsonOptions);
+        var json = JsonSerializer.Serialize(envelope, SynapseConstants.Json.Write);
         var opt = _options.Value;
 
         var db = _redis.GetDatabase();
@@ -69,6 +65,11 @@ public sealed class SynapseAggregationService : ISynapseAggregationService
         var cardCtx = context.Get<AiCardContext>();
         if (cardCtx is null) return null;
 
+        // Intentionally excluded from envelope — pipeline-internal, not consumed by the LLM worker:
+        //   EmotionDynamics        → consumed by EmotionScatterShard / RedisEmotionalStateService
+        //   EmotionIntensityScale  → applied to EmotionalState.Intensity inside LlmStreamWorker
+        //   ProjectId / ActiveRunPreset* → diagnostics only, no downstream consumer
+        //   ScreenAwarenessEnabled → resolved events travel as ScreenContext shard output
         const int maxPreview = 2000;
         var preview = context.Message.Text is { Length: > maxPreview } t
             ? t[..maxPreview] + "…"

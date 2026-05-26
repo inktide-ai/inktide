@@ -19,6 +19,7 @@ public static class TtsOpenAiServiceCollectionExtensions
         services.Configure<OpenAiTtsSettings>(
             configuration.GetSection(OpenAiTtsSettings.SectionName));
 
+        services.AddSingleton<OpenAiTtsClient>();
         services.AddSingleton<OpenAiTtsProvider>();
 
         return services;

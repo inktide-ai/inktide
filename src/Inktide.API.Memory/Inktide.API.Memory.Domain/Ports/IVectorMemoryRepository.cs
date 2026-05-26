@@ -8,15 +8,9 @@ namespace Inktide.API.Memory.Domain.Ports;
 /// </summary>
 public interface IVectorMemoryRepository
 {
-    Task UpsertAsync(
-        Guid pointId,
-        Guid aiCardId,
-        string factText,
-        string category,
-        double importance,
-        DateTime rememberedAt,
-        ReadOnlyMemory<float> embedding,
-        CancellationToken ct = default);
+    Task UpsertAsync(VectorUpsertRequest request, CancellationToken ct = default);
+
+    Task UpsertBatchAsync(IReadOnlyList<VectorUpsertRequest> requests, CancellationToken ct = default);
 
     Task<IReadOnlyList<MemoryRecord>> SearchAsync(
         ReadOnlyMemory<float> vector,

@@ -12,7 +12,4 @@ internal sealed class EfConnectorRepository(MarketplaceDbContext db) : IConnecto
 
     public Task<Connector?> GetBySlugAsync(string slug, CancellationToken ct)
         => db.Connectors.FirstOrDefaultAsync(c => c.Slug == slug, ct);
-
-    public Task<Connector?> GetByIdAsync(Guid id, CancellationToken ct)
-        => db.Connectors.FirstOrDefaultAsync(c => c.Id == id, ct);
 }

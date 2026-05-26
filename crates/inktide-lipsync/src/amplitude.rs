@@ -31,12 +31,13 @@ impl Default for AmplitudeConfig {
 /// Use [`AmplitudeAnalyzer::with_defaults`] unless you need to tune thresholds.
 #[derive(Debug, Clone)]
 pub struct AmplitudeAnalyzer {
-    pub config: AmplitudeConfig,
+    config: AmplitudeConfig,
 }
 
 impl AmplitudeAnalyzer {
     pub fn new(config: AmplitudeConfig) -> Self { Self { config } }
     pub fn with_defaults() -> Self { Self::new(AmplitudeConfig::default()) }
+    pub fn config(&self) -> &AmplitudeConfig { &self.config }
 }
 
 impl LipSyncBackend for AmplitudeAnalyzer {
@@ -48,26 +49,33 @@ impl LipSyncBackend for AmplitudeAnalyzer {
         let spec = reader.spec();
 
         let sample_rate = spec.sample_rate as f64;
-        let frame_size = ((sample_rate * self.config.frame_ms / 1000.0) as usize).max(1);
+        let channels = spec.channels as usize;
+        // hound returns interleaved samples (L/R/L/R…), so chunk boundaries must
+        // span all channels. `mono_frame` is the per-channel frame count; `frame_size`
+        // is its interleaved equivalent used for hound chunking only.
+        let mono_frame = ((sample_rate * self.config.frame_ms / 1000.0) as usize).max(1);
+        let frame_size = mono_frame * channels;
         let samples = decode_samples(&mut reader, spec)?;
 
-        debug!(sample_rate, frame_size, total = samples.len(), "amplitude analysis");
+        debug!(sample_rate, channels, mono_frame, frame_size, total = samples.len(), "amplitude analysis");
 
         let mut cues: Vec<VisemeCue> = Vec::new();
         for (i, chunk) in samples.chunks(frame_size).enumerate() {
             let rms = (chunk.iter().map(|s| s * s).sum::<f32>() / chunk.len() as f32).sqrt();
             let viseme = self.rms_to_viseme(rms);
-            let start = Duration::from_secs_f64(i as f64 * frame_size as f64 / sample_rate);
+            // Timing uses mono_frame directly — no channel arithmetic needed here.
+            let start = Duration::from_secs_f64(i as f64 * mono_frame as f64 / sample_rate);
 
             if cues.last().is_none_or(|c: &VisemeCue| c.viseme != viseme) {
                 cues.push(VisemeCue { start, viseme });
             }
         }
 
-        Ok(VisemeTimeline {
-            duration: Duration::from_secs_f64(samples.len() as f64 / sample_rate),
+        Ok(VisemeTimeline::new(
             cues,
-        })
+            // Total interleaved samples ÷ (sample_rate × channels) = actual duration.
+            Duration::from_secs_f64(samples.len() as f64 / (sample_rate * channels as f64)),
+        ))
     }
 }
 

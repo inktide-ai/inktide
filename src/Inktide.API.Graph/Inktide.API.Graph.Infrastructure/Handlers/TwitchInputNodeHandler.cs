@@ -1,3 +1,4 @@
+using Inktide.API.Graph.Domain;
 using Inktide.API.Graph.Domain.Contracts;
 using Inktide.API.Graph.Domain.Models;
 
@@ -10,13 +11,13 @@ namespace Inktide.API.Graph.Infrastructure.Handlers;
 /// </summary>
 public sealed class TwitchInputNodeHandler : INodeHandler
 {
-    public string Type => "input";
+    public string Type => NodeTypes.Input;
     public string ProviderId => "twitch";
 
     public Task ExecuteAsync(NodeExecutionContext context, CancellationToken ct)
     {
-        var bitsOnly = context.GetConfig<bool?>("bits_only") ?? false;
-        var subsOnly = context.GetConfig<bool?>("subs_only") ?? false;
+        var bitsOnly = context.GetConfig<bool?>(ConfigKeys.BitsOnly) ?? false;
+        var subsOnly = context.GetConfig<bool?>(ConfigKeys.SubsOnly) ?? false;
 
         if (bitsOnly)
         {
@@ -30,9 +31,7 @@ public sealed class TwitchInputNodeHandler : INodeHandler
             if (!isSubscriber) return Task.CompletedTask;
         }
 
-        foreach (var kv in context.Inputs)
-            context.SetOutput(kv.Key, kv.Value);
-
+        context.PassThrough();
         return Task.CompletedTask;
     }
 }

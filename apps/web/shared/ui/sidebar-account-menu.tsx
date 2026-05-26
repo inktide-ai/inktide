@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Sun } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { Moon } from '@/components/icons'
-import { SidebarMenuItem } from '@/components/ui/sidebar-menu-item'
+import { SidebarMenuItem } from '@/shared/ui/sidebar-menu-item'
 
 function MenuIcon({ src }: { src: string }) {
   return (

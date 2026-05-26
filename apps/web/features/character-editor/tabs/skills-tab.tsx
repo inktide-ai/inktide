@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { AiCharacter } from '@/lib/character'
+import type { AiCharacter } from '@/shared/lib/character'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const SECTION_TITLE_SIZE = 12

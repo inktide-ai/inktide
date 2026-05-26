@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { getProject, type Project } from '@/api/projects'
+import { getProject, type Project } from '@/features/projects/api/projects'
 import SoulCharacterHubPage from '@/screens/profile/SoulCharacterHubPage'
 
 export default function SoulProjectCharacterPage() {

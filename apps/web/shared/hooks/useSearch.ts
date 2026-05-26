@@ -2,9 +2,9 @@
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { useCharactersContext } from '@/context/CharactersContext'
-import { listProjects } from '@/api/projects'
-import { queryKeys } from '@/lib/query/keys'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import { listProjects } from '@/features/projects/api/projects'
+import { queryKeys } from '@/shared/lib/query/keys'
 
 export interface SearchResult {
   type: 'soul' | 'project'

@@ -1,6 +1,6 @@
 import type { VRM } from '@pixiv/three-vrm'
 import { MathUtils } from 'three'
-import type { IVrmController, VrmAnimationContext, VrmControllerSetup } from '@/types/IVrmController'
+import type { IVrmController, VrmAnimationContext, VrmControllerSetup } from '@/shared/types/IVrmController'
 
 // Только face expressions. Mouth expressions (aa/ih/ou/ee/oh) и blink — чужая ответственность.
 const MANAGED_EXPRESSIONS = [

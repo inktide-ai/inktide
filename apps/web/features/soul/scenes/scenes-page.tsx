@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Plus } from 'lucide-react'
-import { useCharactersContext } from '@/context/CharactersContext'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import {
   listRunPresets,
   createRunPreset,
@@ -17,7 +17,7 @@ import {
   type CreateRunPresetRequest,
   type LlmModelResponse,
   type TtsVoiceResponse,
-} from '@/api/soul'
+} from '@/features/soul/api/index'
 import { RunPresetCard } from './run-preset-card'
 import { CreatePresetModal } from './create-preset-modal'
 

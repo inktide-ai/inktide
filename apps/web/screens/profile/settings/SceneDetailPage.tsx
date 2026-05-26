@@ -1,9 +1,9 @@
 'use client'
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useCharactersContext } from '../../../context/CharactersContext'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { useCardScene } from '../../../components/avatar/hooks/use-card-scene'
-import { SceneSettings } from '../../../components/profile/tabs/scene-settings'
+import { SceneSettings } from '@/features/character-editor/tabs/scene-settings'
 
 export default function SceneDetailPage() {
   const { sceneId } = useParams<{ sceneId: string }>()

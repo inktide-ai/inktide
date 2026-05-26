@@ -39,7 +39,8 @@ public sealed class ChatController : ControllerBase
     /// <summary>
     /// Lists available models for a provider. Fetches live from the provider API.
     /// Pass <c>base_url</c> for self-hosted providers like Ollama.
-    /// No auth required — credentials are passed via query params, not stored here.
+    /// Pass the API key via <c>X-Api-Key</c> request header — never in the URL.
+    /// No auth required — credentials are not stored here.
     /// </summary>
     [HttpGet("models")]
     [AllowAnonymous]
@@ -48,9 +49,9 @@ public sealed class ChatController : ControllerBase
     [ProducesResponseType(StatusCodes.Status501NotImplemented)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<IActionResult> GetModelsAsync(
-        [FromQuery(Name = "provider_id")] string? providerId,
-        [FromQuery(Name = "base_url")] string? baseUrl,
-        [FromQuery(Name = "api_key")] string? apiKey,
+        [FromQuery(Name = "provider_id")]  string? providerId,
+        [FromQuery(Name = "base_url")]     string? baseUrl,
+        [FromHeader(Name = "X-Api-Key")]   string? apiKey,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(providerId))

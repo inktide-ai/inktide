@@ -1,3 +1,8 @@
+// TODO FSD: NodeInspectorPanel.tsx (561 строк) — разбить на:
+// features/graph/nodes/inspector/llm-inspector.tsx
+// features/graph/nodes/inspector/tts-inspector.tsx
+// features/graph/nodes/inspector/generic-inspector.tsx
+// Сделать после стабилизации Фазы 3
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
@@ -7,7 +12,7 @@ import { cn } from '@/lib/utils'
 import type { Node as RFNode } from '@xyflow/react'
 import { NODE_DEFINITIONS, type PipelineNodeType } from '../nodes/node-definitions'
 import type { PipelineNodeData } from '../nodes/pipeline-node'
-import { LLM_PROVIDER_CATALOG, type LlmProviderCatalogEntry } from '@/data/llm-providers'
+import { LLM_PROVIDER_CATALOG, type LlmProviderCatalogEntry } from '@/shared/data/llm-providers'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 

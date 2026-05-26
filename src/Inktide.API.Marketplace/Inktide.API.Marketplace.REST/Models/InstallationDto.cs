@@ -14,7 +14,9 @@ public sealed record InstallationDto(
         i.Id,
         i.SoulId,
         i.ConnectorId,
-        i.Connector?.Slug  ?? string.Empty,
-        i.Connector?.Name  ?? string.Empty,
+        i.Connector?.Slug ?? throw new InvalidOperationException(
+            $"Installation {i.Id}: Connector navigation property not loaded."),
+        i.Connector?.Name ?? throw new InvalidOperationException(
+            $"Installation {i.Id}: Connector navigation property not loaded."),
         i.InstalledAt);
 }

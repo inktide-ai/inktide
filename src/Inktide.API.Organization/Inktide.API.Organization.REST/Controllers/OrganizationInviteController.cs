@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Inktide.API.Organization.Application.Enums;
-using Inktide.API.Organization.Application.Exceptions;
 using Inktide.API.Organization.Application.Interfaces;
 using Inktide.API.Organization.REST.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -26,20 +25,12 @@ public sealed class OrganizationInviteController : ControllerBase
     [ProducesResponseType(typeof(PendingInvitesResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> ListPending(CancellationToken ct)
     {
-        var userId = GetUserId();
-        try
+        var result = await _service.ListPendingAsync(GetUserId(), ct);
+        return Ok(new PendingInvitesResponse
         {
-            var result = await _service.ListPendingAsync(userId, ct);
-            return Ok(new PendingInvitesResponse
-            {
-                OrganizationId = result.OrganizationId,
-                Invites = result.Invites.Select(MapDto).ToList(),
-            });
-        }
-        catch (NotAnAdminException)
-        {
-            return Forbid();
-        }
+            OrganizationId = result.OrganizationId,
+            Invites = result.Invites.Select(MapDto).ToList(),
+        });
     }
 
     [HttpPost]
@@ -48,25 +39,14 @@ public sealed class OrganizationInviteController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> SendInvites([FromBody] SendInvitesRequest dto, CancellationToken ct)
     {
-        if (dto.Emails.Count == 0)
-            return BadRequest(new { error = "At least one email is required.", code = "VALIDATION_ERROR" });
-
-        var role = dto.Role.ToLower() == "admin" ? OrganizationRole.Admin : OrganizationRole.Member;
-        var userId = GetUserId();
-
-        try
+        // Role is validated by SendInvitesRequestValidator — TryParse is guaranteed to succeed here.
+        Enum.TryParse<OrganizationRole>(dto.Role, ignoreCase: true, out var role);
+        var result = await _service.SendInvitesAsync(GetUserId(), dto.Emails, role, ct);
+        return StatusCode(StatusCodes.Status201Created, new SendInvitesResponse
         {
-            var result = await _service.SendInvitesAsync(userId, dto.Emails, role, ct);
-            return StatusCode(StatusCodes.Status201Created, new SendInvitesResponse
-            {
-                OrganizationId = result.OrganizationId,
-                Invites = result.Invites.Select(MapDto).ToList(),
-            });
-        }
-        catch (NotAnAdminException)
-        {
-            return Forbid();
-        }
+            OrganizationId = result.OrganizationId,
+            Invites = result.Invites.Select(MapDto).ToList(),
+        });
     }
 
     [HttpPost("{inviteId:guid}/resend")]
@@ -75,20 +55,8 @@ public sealed class OrganizationInviteController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ResendInvite(Guid inviteId, CancellationToken ct)
     {
-        var userId = GetUserId();
-        try
-        {
-            await _service.ResendInviteAsync(userId, inviteId, ct);
-            return NoContent();
-        }
-        catch (InviteNotFoundException)
-        {
-            return NotFound();
-        }
-        catch (NotAnAdminException)
-        {
-            return Forbid();
-        }
+        await _service.ResendInviteAsync(GetUserId(), inviteId, ct);
+        return NoContent();
     }
 
     [HttpDelete("{inviteId:guid}")]
@@ -97,20 +65,8 @@ public sealed class OrganizationInviteController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CancelInvite(Guid inviteId, CancellationToken ct)
     {
-        var userId = GetUserId();
-        try
-        {
-            await _service.CancelInviteAsync(userId, inviteId, ct);
-            return NoContent();
-        }
-        catch (InviteNotFoundException)
-        {
-            return NotFound();
-        }
-        catch (NotAnAdminException)
-        {
-            return Forbid();
-        }
+        await _service.CancelInviteAsync(GetUserId(), inviteId, ct);
+        return NoContent();
     }
 
     [HttpPost("accept")]
@@ -118,11 +74,7 @@ public sealed class OrganizationInviteController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> AcceptInvite([FromBody] AcceptInviteRequest dto, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(dto.Token))
-            return BadRequest(new { error = "Token is required.", code = "VALIDATION_ERROR" });
-
-        var userId = GetUserId();
-        var result = await _service.AcceptInviteAsync(dto.Token, userId, ct);
+        var result = await _service.AcceptInviteAsync(dto.Token, GetUserId(), ct);
 
         if (result.Outcome == AcceptOutcome.TooManyInvalidAttempts)
             return StatusCode(StatusCodes.Status429TooManyRequests,
@@ -153,11 +105,11 @@ public sealed class OrganizationInviteController : ControllerBase
 
     private static string MapOutcome(AcceptOutcome outcome) => outcome switch
     {
-        AcceptOutcome.Success               => "success",
-        AcceptOutcome.AlreadyMember         => "already_member",
-        AcceptOutcome.Expired               => "expired",
-        AcceptOutcome.Invalid               => "invalid",
+        AcceptOutcome.Success                => "success",
+        AcceptOutcome.AlreadyMember          => "already_member",
+        AcceptOutcome.Expired                => "expired",
+        AcceptOutcome.Invalid                => "invalid",
         AcceptOutcome.TooManyInvalidAttempts => "too_many_invalid_attempts",
-        _                                   => "invalid",
+        _                                    => "invalid",
     };
 }

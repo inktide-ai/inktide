@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import PricingSection from '@/components/landing/pricing-section'
+import PricingSection from '@/features/landing/pricing-section'
 
 export default function PricingPage() {
   return (

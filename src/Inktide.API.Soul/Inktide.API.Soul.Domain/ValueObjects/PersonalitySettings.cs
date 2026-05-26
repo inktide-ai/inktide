@@ -6,12 +6,6 @@ namespace Inktide.API.Soul.Domain.ValueObjects;
 public sealed class PersonalitySettings
 {
 
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
-
     // ── Core Traits (0 = low, 1 = high) ──────────────────────────────────────
 
     [JsonPropertyName("warmth")]
@@ -61,13 +55,8 @@ public sealed class PersonalitySettings
     public string? PresetId { get; set; }
 
 
-    public static PersonalitySettings Parse(string? json)
-    {
-        if (string.IsNullOrWhiteSpace(json)) return new PersonalitySettings();
-        try { return JsonSerializer.Deserialize<PersonalitySettings>(json, JsonOpts) ?? new PersonalitySettings(); }
-        catch { return new PersonalitySettings(); }
-    }
+    public static PersonalitySettings Parse(string? json) => ValueObjectJson.ParseOrDefault<PersonalitySettings>(json);
 
-    public string ToJson() => JsonSerializer.Serialize(this, JsonOpts);
+    public string ToJson() => JsonSerializer.Serialize(this, ValueObjectJson.Opts);
 
 }

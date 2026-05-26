@@ -3,10 +3,10 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
-import { useCharactersContext } from '@/context/CharactersContext'
-import SceneFullscreen from '@/components/profile/tabs/scene-fullscreen'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import SceneFullscreen from '@/features/character-editor/tabs/scene-fullscreen'
 import { PROFILE_SETTINGS_BASE } from '@/lib/routes'
-import { useProjectRuntime } from '@/hooks/useProjectRuntime'
+import { useProjectRuntime } from '@/features/projects/hooks/useProjectRuntime'
 
 interface SandboxRunnerProps {
   projectId: string

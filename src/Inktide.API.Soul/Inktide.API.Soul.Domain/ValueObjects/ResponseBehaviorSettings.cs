@@ -1,16 +1,9 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Inktide.API.Soul.Domain.ValueObjects;
 
 public sealed class ResponseBehaviorSettings
 {
-
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
 
     [JsonPropertyName("chunking_mode")]
     public string ChunkingMode { get; set; } = "narration";
@@ -30,11 +23,6 @@ public sealed class ResponseBehaviorSettings
     [JsonPropertyName("key_phrases")]
     public string[]? KeyPhrases { get; set; }
 
-    public static ResponseBehaviorSettings Parse(string? json)
-    {
-        if (string.IsNullOrWhiteSpace(json)) return new ResponseBehaviorSettings();
-        try { return JsonSerializer.Deserialize<ResponseBehaviorSettings>(json, JsonOpts) ?? new ResponseBehaviorSettings(); }
-        catch { return new ResponseBehaviorSettings(); }
-    }
+    public static ResponseBehaviorSettings Parse(string? json) => ValueObjectJson.ParseOrDefault<ResponseBehaviorSettings>(json);
 
 }

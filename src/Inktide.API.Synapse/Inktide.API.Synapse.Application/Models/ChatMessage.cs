@@ -11,5 +11,8 @@ public sealed record ChatMessage(
     UserMetadata Sender,
     string Text,
     DateTimeOffset Timestamp,
-    StreamInfo? Stream = null);
+    StreamInfo? Stream = null)
+{
+    public Guid? CharacterId { get; init; }
+}
 

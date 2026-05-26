@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Inktide.API.Soul.Application.Constants;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Domain.Entities;
 using Inktide.API.Soul.Infrastructure.DbContext;
@@ -42,7 +43,7 @@ public sealed class ProjectImportService : IProjectImportService
 
             _db.OutboxEvents.Add(new OutboxEvent
             {
-                EventType = "GraphImport",
+                EventType = SoulEventTypes.GraphImport,
                 Payload   = payload,
             });
 

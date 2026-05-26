@@ -1168,7 +1168,8 @@
           "Inktide.API.Core": "1.0.0",
           "Microsoft.EntityFrameworkCore": "10.0.0",
           "Microsoft.EntityFrameworkCore.Relational": "10.0.0",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0"
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0",
+          "StackExchange.Redis": "2.8.24"
         },
         "runtime": {
           "Inktide.API.Billing.Infrastructure.dll": {
@@ -1421,7 +1422,8 @@
           "Microsoft.EntityFrameworkCore": "10.0.0",
           "Microsoft.Extensions.AI.OpenAI": "10.6.0",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0",
-          "Qdrant.Client": "1.18.1"
+          "Qdrant.Client": "1.18.1",
+          "StackExchange.Redis": "2.8.24"
         },
         "runtime": {
           "Inktide.API.Memory.Infrastructure.dll": {
@@ -1448,7 +1450,8 @@
           "MailKit": "4.9.0",
           "Microsoft.EntityFrameworkCore": "10.0.0",
           "Microsoft.EntityFrameworkCore.Relational": "10.0.0",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0"
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0",
+          "StackExchange.Redis": "2.8.24"
         },
         "runtime": {
           "Inktide.API.Organization.Infrastructure.dll": {
@@ -1716,7 +1719,6 @@
         "dependencies": {
           "AspNetCore.HealthChecks.NpgSql": "9.0.0",
           "Inktide.API.Core": "1.0.0",
-          "Inktide.API.Memory.Domain": "1.0.0",
           "Inktide.API.Soul.Application": "1.0.0",
           "Inktide.API.Soul.Domain": "1.0.0",
           "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "10.0.0",
@@ -1762,8 +1764,7 @@
       },
       "Inktide.API.Synapse.Application/1.0.0": {
         "dependencies": {
-          "Inktide.API.Core": "1.0.0",
-          "Inktide.API.Memory.Domain": "1.0.0"
+          "Inktide.API.Core": "1.0.0"
         },
         "runtime": {
           "Inktide.API.Synapse.Application.dll": {
@@ -1775,6 +1776,7 @@
       "Inktide.API.Synapse.Infrastructure/1.0.0": {
         "dependencies": {
           "Inktide.API.Core": "1.0.0",
+          "Inktide.API.Graph.Application": "1.0.0",
           "Inktide.API.Graph.Domain": "1.0.0",
           "Inktide.API.Memory.Domain": "1.0.0",
           "Inktide.API.Soul.Application": "1.0.0",
@@ -1792,7 +1794,6 @@
       "Inktide.API.Synapse.REST/1.0.0": {
         "dependencies": {
           "Inktide.API.Core": "1.0.0",
-          "Inktide.API.Soul.Application": "1.0.0",
           "Inktide.API.Synapse.Infrastructure": "1.0.0",
           "Microsoft.AspNetCore.Mvc.NewtonsoftJson": "10.0.3",
           "Serilog.AspNetCore": "8.0.3"

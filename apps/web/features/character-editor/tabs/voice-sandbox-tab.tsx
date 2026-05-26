@@ -1,11 +1,11 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import SliderWithTicks from '../slider-with-ticks'
+import SliderWithTicks from '@/shared/ui/slider-with-ticks'
 import { getTtsProviders, getTtsVoices, type SpeechProviderDescriptor, type SpeechVoice } from '../../../api/tts'
-import { LANG_LABELS, VOICE_GROUPS } from '@/data/kokoro-voices'
-import { useTtsSynth } from '../../../hooks/useTtsSynth'
-import type { AiCharacter } from '@/lib/character'
+import { LANG_LABELS, VOICE_GROUPS } from '@/shared/data/kokoro-voices'
+import { useTtsSynth } from '@/shared/hooks/useTtsSynth'
+import type { AiCharacter } from '@/shared/lib/character'
 
 function getFallbackVoices(_providerId: string): SpeechVoice[] { return [] }
 

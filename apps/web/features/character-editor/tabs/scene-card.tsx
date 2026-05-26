@@ -2,8 +2,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import type { AiCardSceneResponse } from '../../../api/soul'
-import { patchCardSceneTag } from '../../../api/soul'
+import type { AiCardSceneResponse } from '@/shared/types/soul-api'
+import { patchCardSceneTag } from '@/entities/soul/api'
 import { getEffectiveTagLabel, getSceneDisplayTitle, getTagDisplayStyleWithColor } from './scene-tag-utils'
 
 const pgCard = 'relative bg-[#13151A] border border-[#13151a] rounded-[0.875rem] overflow-hidden cursor-pointer flex flex-col min-h-[188px] transition-[border-color,transform,box-shadow,background,opacity] duration-[180ms] select-none outline-none opacity-0 animate-[cardIn_0.32s_cubic-bezier(0.2,0.9,0.2,1)_forwards] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(0,0,0,0.35)] focus-visible:shadow-[0_0_0_2px_rgba(237,62,62,0.5)]'

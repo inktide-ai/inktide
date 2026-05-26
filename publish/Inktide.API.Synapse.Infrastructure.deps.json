@@ -9,6 +9,7 @@
       "Inktide.API.Synapse.Infrastructure/1.0.0": {
         "dependencies": {
           "Inktide.API.Core": "1.0.0",
+          "Inktide.API.Graph.Application": "1.0.0",
           "Inktide.API.Graph.Domain": "1.0.0",
           "Inktide.API.Memory.Domain": "1.0.0",
           "Inktide.API.Soul.Application": "1.0.0",
@@ -528,6 +529,18 @@
           }
         }
       },
+      "Inktide.API.Graph.Application/1.0.0": {
+        "dependencies": {
+          "Inktide.API.Graph.Domain": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.6"
+        },
+        "runtime": {
+          "Inktide.API.Graph.Application.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "Inktide.API.Graph.Domain/1.0.0": {
         "dependencies": {
           "Inktide.API.Core": "1.0.0"
@@ -587,8 +600,7 @@
       },
       "Inktide.API.Synapse.Application/1.0.0": {
         "dependencies": {
-          "Inktide.API.Core": "1.0.0",
-          "Inktide.API.Memory.Domain": "1.0.0"
+          "Inktide.API.Core": "1.0.0"
         },
         "runtime": {
           "Inktide.API.Synapse.Application.dll": {
@@ -919,6 +931,11 @@
       "sha512": ""
     },
     "Inktide.API.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Inktide.API.Graph.Application/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

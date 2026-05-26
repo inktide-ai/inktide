@@ -1,7 +1,7 @@
 'use client'
 
 import { type ReactNode } from 'react'
-import { CharactersProvider } from '@/context/CharactersContext'
+import { CharactersProvider } from '@/entities/character/context/CharactersContext'
 import ProtectedRoute from '@/components/layout/protected-route'
 import ProfileShell from '@/components/layout/profile-shell'
 

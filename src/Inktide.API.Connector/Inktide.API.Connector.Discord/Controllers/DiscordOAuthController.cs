@@ -1,13 +1,16 @@
 using System.Net.Http;
-using System.Security.Claims;
+using Inktide.API.Connector.Application.Controllers;
+using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Discord.Gateway;
 using Inktide.API.Connector.Discord.OAuth;
 using Inktide.API.Connector.Discord.Settings;
+using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -16,20 +19,25 @@ namespace Inktide.API.Connector.Discord.Controllers;
 [ApiController]
 [Route("api/connectors/discord")]
 [Produces("application/json")]
-public sealed class DiscordOAuthController : ControllerBase
+public sealed class DiscordOAuthController : ConnectorControllerBase
 {
+    private const string DiscordCurrentUserUrl = "https://discord.com/api/v10/users/@me";
+
     private readonly IDiscordOAuthService _oauth;
-    private readonly DiscordOAuthStateService _state;
+    private readonly IOAuthStateService _state;
+    private readonly ITokenProtector _tokenProtector;
     private readonly IAiCardChannelConnectService _connect;
     private readonly IAiCardChannelLifecycleService _lifecycle;
     private readonly IGuildSoulRegistry _registry;
     private readonly ILogger<DiscordOAuthController> _log;
     private readonly IHttpClientFactory _http;
     private readonly string _frontendBaseUrl;
+    private readonly string _botUsername;
 
     public DiscordOAuthController(
         IDiscordOAuthService oauth,
-        DiscordOAuthStateService state,
+        IOAuthStateService state,
+        [FromKeyedServices(TokenProtectorKeys.Discord)] ITokenProtector tokenProtector,
         IAiCardChannelConnectService connect,
         IAiCardChannelLifecycleService lifecycle,
         IGuildSoulRegistry registry,
@@ -39,12 +47,14 @@ public sealed class DiscordOAuthController : ControllerBase
     {
         _oauth           = oauth;
         _state           = state;
+        _tokenProtector  = tokenProtector;
         _connect         = connect;
         _lifecycle       = lifecycle;
         _registry        = registry;
         _log             = log;
         _http            = http;
         _frontendBaseUrl = settings.Value.FrontendBaseUrl.TrimEnd('/');
+        _botUsername     = settings.Value.BotUsername;
     }
 
     /// <summary>Returns the Discord OAuth2 install URL for a soul card.</summary>
@@ -71,14 +81,9 @@ public sealed class DiscordOAuthController : ControllerBase
         [FromQuery] string state,
         CancellationToken ct)
     {
-        (Guid userId, Guid cardId) parsed;
-        try
+        if (!_state.TryVerify(state, out var ctx))
         {
-            parsed = _state.VerifyState(state);
-        }
-        catch (Exception ex)
-        {
-            _log.LogWarning(ex, "Discord OAuth callback: invalid state");
+            _log.LogWarning("Discord OAuth callback: invalid or expired state");
             return Redirect($"{_frontendBaseUrl}/souls?discord_error=invalid_state");
         }
 
@@ -91,29 +96,34 @@ public sealed class DiscordOAuthController : ControllerBase
 
             await _connect.UpsertAsync(
                 new OAuthChannelUpsertCommand(
-                    UserId:          parsed.userId,
-                    CardId:          parsed.cardId,
-                    Platform:        "discord",
+                    UserId:          ctx.UserId,
+                    CardId:          ctx.CardId,
+                    Platform:        DiscordConnector.PlatformIdValue,
                     ChannelId:       resolvedGuildId,
                     ChannelName:     guildName,
-                    BotUsername:     "Inktide",
-                    AccessTokenEnc:  _oauth.Protect(tokens.AccessToken),
-                    RefreshTokenEnc: _oauth.Protect(tokens.RefreshToken),
+                    BotUsername:     _botUsername,
+                    AccessTokenEnc:  _tokenProtector.Protect(tokens.AccessToken),
+                    RefreshTokenEnc: _tokenProtector.Protect(tokens.RefreshToken),
                     TokenExpiresAt:  DateTime.UtcNow.AddSeconds(tokens.ExpiresIn)),
                 ct);
 
-            _registry.Register(resolvedGuildId, parsed.cardId);
+            _registry.Register(resolvedGuildId, ctx.CardId);
 
             _log.LogInformation(
                 "Discord guild {GuildId} ({GuildName}) connected to card {CardId} by user {UserId}",
-                resolvedGuildId, guildName, parsed.cardId, parsed.userId);
+                resolvedGuildId, guildName, ctx.CardId, ctx.UserId);
 
-            return Redirect($"{_frontendBaseUrl}/souls/{parsed.cardId}/channels/discord?connected=true&guild={Uri.EscapeDataString(guildName)}");
+            return Redirect($"{_frontendBaseUrl}/souls/{ctx.CardId}/channels/discord?connected=true&guild={Uri.EscapeDataString(guildName)}");
+        }
+        catch (PlanLimitExceededException ex)
+        {
+            _log.LogInformation("Discord OAuth callback blocked by plan limit for card {CardId}: {Msg}", ctx.CardId, ex.Message);
+            return Redirect($"{_frontendBaseUrl}/souls/{ctx.CardId}/channels/discord?discord_error=plan_limit");
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "Discord OAuth callback failed for card {CardId}", parsed.cardId);
-            return Redirect($"{_frontendBaseUrl}/souls/{parsed.cardId}/channels/discord?discord_error=exchange_failed");
+            _log.LogError(ex, "Discord OAuth callback failed for card {CardId}", ctx.CardId);
+            return Redirect($"{_frontendBaseUrl}/souls/{ctx.CardId}/channels/discord?discord_error=exchange_failed");
         }
     }
 
@@ -137,7 +147,8 @@ public sealed class DiscordOAuthController : ControllerBase
         if (channel.ChannelId is not null)
             _registry.Unregister(channel.ChannelId);
 
-        await _lifecycle.DeactivateAsync(userId, channelId, ct);
+        if (!await _lifecycle.DeactivateAsync(userId, channelId, ct))
+            return NotFound();
         return NoContent();
     }
 
@@ -170,9 +181,10 @@ public sealed class DiscordOAuthController : ControllerBase
 
         var encryptedToken = string.IsNullOrWhiteSpace(req.BotToken)
             ? null
-            : _oauth.Protect(req.BotToken);
+            : _tokenProtector.Protect(req.BotToken);
 
-        await _lifecycle.SetCustomBotTokenAsync(userId, channelId, encryptedToken, ct);
+        if (!await _lifecycle.SetCustomBotTokenAsync(userId, channelId, encryptedToken, ct))
+            return NotFound();
         return NoContent();
     }
 
@@ -184,7 +196,7 @@ public sealed class DiscordOAuthController : ControllerBase
         [FromBody] ValidateTokenRequest req, CancellationToken ct)
     {
         using var client = _http.CreateClient("discord-validate");
-        using var httpReq = new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/v10/users/@me");
+        using var httpReq = new HttpRequestMessage(HttpMethod.Get, DiscordCurrentUserUrl);
         httpReq.Headers.Add("Authorization", $"Bot {req.BotToken}");
         try
         {
@@ -197,13 +209,6 @@ public sealed class DiscordOAuthController : ControllerBase
         {
             return Ok(new ValidateTokenResponse(false, ex.Message));
         }
-    }
-
-    private Guid GetUserId()
-    {
-        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException("User ID not found in token.");
-        return Guid.Parse(sub);
     }
 
     public sealed record InstallUrlResponse(string Url);

@@ -1,6 +1,6 @@
 'use client'
-import { useCharactersContext } from '../../../context/CharactersContext'
-import SceneTab from '../../../components/profile/tabs/scene-tab'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import SceneTab from '@/features/character-editor/tabs/scene-tab'
 
 export default function ScenePage() {
   const { selected, updateCharacter } = useCharactersContext()

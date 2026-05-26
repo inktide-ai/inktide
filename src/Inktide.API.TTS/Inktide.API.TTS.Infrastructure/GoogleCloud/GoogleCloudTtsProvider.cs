@@ -2,6 +2,7 @@ using Inktide.API.Domain.Enums;
 using Inktide.API.Domain.Models;
 using Inktide.API.TTS.Domain.Models;
 using Inktide.API.TTS.Domain.Speech;
+using Inktide.API.TTS.Infrastructure;
 using FluentValidation.Results;
 using Google.Cloud.TextToSpeech.V1;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,7 @@ namespace Inktide.API.TTS.Infrastructure.GoogleCloud;
 /// Requires an API key via <c>X-TTS-Api-Key</c> header or
 /// <c>TtsProviders:GoogleCloudTts:ApiKey</c> config.
 /// </summary>
-public sealed class GoogleCloudTtsProvider : ISpeechProvider
+public sealed class GoogleCloudTtsProvider : ISpeechProvider, IVoiceListingProvider
 {
 
     private const double MinSpeed  = 0.25;
@@ -23,9 +24,6 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider
     private const double MaxPitch  = 20.0;
     private const double MinVolume = -10.0;
     private const double MaxVolume = 10.0;
-
-    private static readonly SpeechModelCollection EmptyModels = new("list", []);
-
 
     private readonly GoogleCloudTtsClient _client;
     private readonly ILogger<GoogleCloudTtsProvider> _logger;
@@ -80,14 +78,7 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider
         if (string.IsNullOrWhiteSpace(options.ApiKey))
             return Task.FromResult(new SpeechVoiceCollection([]));
 
-        return _client.GetVoicesAsync(options.ApiKey, ct);
-    }
-
-    public Task<SpeechModelCollection> GetModelsAsync(
-        ProviderOptions options,
-        CancellationToken ct = default)
-    {
-        return Task.FromResult(EmptyModels);
+        return _client.GetVoicesAsync(options.ApiKey, cacheClient: !options.ApiKeyIsTransient, ct);
     }
 
     public async Task<Stream> SynthesizeAsync(
@@ -102,9 +93,17 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider
             ?? throw new InvalidOperationException("Google Cloud TTS API key is required.");
 
         var speed  = Math.Clamp(speechOptions.Speed <= 0 ? 1.0 : speechOptions.Speed, MinSpeed, MaxSpeed);
-        var pitch  = Math.Clamp(GetProviderParamDouble(speechOptions.ProviderParams, "pitch",  0.0), MinPitch,  MaxPitch);
-        var volume = Math.Clamp(GetProviderParamDouble(speechOptions.ProviderParams, "volume", 0.0), MinVolume, MaxVolume);
-        var locale = DeriveLocale(speechOptions.Voice);
+        var pitch  = Math.Clamp(ProviderParamReader.GetNumeric<double>(speechOptions.ProviderParams, "pitch",  0.0), MinPitch,  MaxPitch);
+        var volume = Math.Clamp(ProviderParamReader.GetNumeric<double>(speechOptions.ProviderParams, "volume", 0.0), MinVolume, MaxVolume);
+        var locale   = DeriveLocale(speechOptions.Voice);
+        var rawEncoding = MapAudioEncoding(speechOptions.AudioFormat);
+        if (rawEncoding is null)
+        {
+            _logger.LogWarning(
+                "GoogleCloudTTS: unknown audio format '{Format}', falling back to mp3",
+                speechOptions.AudioFormat);
+        }
+        var encoding = rawEncoding ?? AudioEncoding.Mp3;
 
         var request = new SynthesizeSpeechRequest
         {
@@ -116,39 +115,27 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider
             },
             AudioConfig = new AudioConfig
             {
-                AudioEncoding = MapAudioEncoding(speechOptions.AudioFormat),
+                AudioEncoding = encoding,
                 SpeakingRate  = speed,
                 Pitch         = pitch,
                 VolumeGainDb  = volume,
             },
         };
 
-        return await _client.SynthesizeAsync(apiKey, request, ct).ConfigureAwait(false);
+        return await _client.SynthesizeAsync(apiKey, request, cacheClient: !providerOptions.ApiKeyIsTransient, ct).ConfigureAwait(false);
     }
 
 
-    private AudioEncoding MapAudioEncoding(string? audioFormat)
-    {
-        var encoding = audioFormat?.ToLowerInvariant() switch
+    private static AudioEncoding? MapAudioEncoding(string? audioFormat) =>
+        audioFormat?.ToLowerInvariant() switch
         {
             "mp3"  => AudioEncoding.Mp3,
             "wav"  => AudioEncoding.Linear16,
             "ogg"  => AudioEncoding.OggOpus,
             "opus" => AudioEncoding.OggOpus,
             null   => AudioEncoding.Mp3,
-            _      => (AudioEncoding?)null,
+            _      => null,
         };
-
-        if (encoding is null)
-        {
-            _logger.LogWarning(
-                "GoogleCloudTTS: unknown audio format '{Format}', falling back to mp3",
-                audioFormat);
-            encoding = AudioEncoding.Mp3;
-        }
-
-        return encoding.Value;
-    }
 
     /// <summary>
     /// Derives a BCP-47 language code from a Google voice name.
@@ -162,27 +149,5 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider
         return parts.Length >= 2 ? $"{parts[0]}-{parts[1]}" : "en-US";
     }
 
-    private static string? GetProviderParam(
-        IReadOnlyDictionary<string, object>? providerParams,
-        string key)
-    {
-        if (providerParams is null) return null;
-        if (!providerParams.TryGetValue(key, out var val)) return null;
-        return val?.ToString();
-    }
-
-    private static double GetProviderParamDouble(
-        IReadOnlyDictionary<string, object>? providerParams,
-        string key,
-        double defaultValue)
-    {
-        var str = GetProviderParam(providerParams, key);
-        if (string.IsNullOrWhiteSpace(str)) return defaultValue;
-
-        return double.TryParse(str, System.Globalization.NumberStyles.Float,
-            System.Globalization.CultureInfo.InvariantCulture, out var d)
-            ? d
-            : defaultValue;
-    }
 
 }

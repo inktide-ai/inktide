@@ -40,6 +40,10 @@ public sealed class IngestionDlqPublisher : IIngestionDlqPublisher
                 maxLength: MaxStreamLength,
                 useApproximateMaxLength: true);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex,

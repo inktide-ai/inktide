@@ -49,7 +49,7 @@ impl BlendShapeWeights {
             out.set(k, va + (other.get(k) - va) * t);
         }
         for (k, vb) in other.iter() {
-            if self.get(k) == 0.0 {
+            if !self.0.contains_key(k) {
                 out.set(k, vb * t);
             }
         }
@@ -61,7 +61,7 @@ impl BlendShapeWeights {
 ///
 /// The TypeScript counterpart (`VISEME_WEIGHTS` in `useLipSync.ts`) is derived
 /// from this table — keep them in sync when adjusting weights.
-pub fn viseme_to_weights(viseme: Viseme) -> BlendShapeWeights {
+pub(crate) fn viseme_to_weights(viseme: Viseme) -> BlendShapeWeights {
     let mut w = BlendShapeWeights::new();
     match viseme {
         Viseme::X => {}

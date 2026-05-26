@@ -1,5 +1,5 @@
-import GraphBuilderPage from '@/components/graph/graph-builder-page'
-import SoulPicker from '@/components/graph/soul-picker'
+import GraphBuilderPage from '@/features/graph/graph-builder-page'
+import SoulPicker from '@/features/graph/soul-picker'
 
 interface Props {
   searchParams: Promise<{ characterId?: string; projectId?: string }>

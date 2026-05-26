@@ -2,6 +2,8 @@ using Inktide.API.Soul.Domain.Entities;
 using Inktide.API.Soul.Domain.Repositories;
 using Inktide.API.Soul.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Inktide.API.Soul.Infrastructure.Repositories;
 
@@ -21,6 +23,14 @@ public sealed class AiCardSceneRepository : IAiCardSceneRepository
     {
         _db.AiCardScenes.Add(scene);
         return Task.FromResult(scene);
+    }
+
+    public async Task<int> CountByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default)
+    {
+        return await _db.AiCardScenes
+            .AsNoTracking()
+            .CountAsync(s => s.UserId == userId && s.AiCardId == aiCardId, ct)
+            .ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<AiCardScene>> ListByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default)
@@ -118,17 +128,23 @@ public sealed class AiCardSceneRepository : IAiCardSceneRepository
         return rows.Select(r => (r.Id, r.SortKey)).ToList();
     }
 
-    public async Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default)
+    public async Task BulkUpdateSortKeysAsync(Guid userId, IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default)
     {
-        foreach (var (id, sortKey) in updates)
-        {
-            await _db.AiCardScenes
-                .Where(s => s.Id == id)
-                .ExecuteUpdateAsync(
-                    s => s.SetProperty(e => e.SortKey, sortKey),
-                    ct)
-                .ConfigureAwait(false);
-        }
+        if (updates.Count == 0) return;
+
+        var ids  = updates.Select(u => u.Id).ToArray();
+        var keys = updates.Select(u => u.SortKey).ToArray();
+
+        await _db.Database.ExecuteSqlRawAsync(
+            @"UPDATE soul.ai_card_scenes
+              SET sort_key = v.sort_key
+              FROM UNNEST(@ids, @keys) AS v(id uuid, sort_key text)
+              WHERE soul.ai_card_scenes.id = v.id
+                AND soul.ai_card_scenes.user_id = @user_id",
+            new NpgsqlParameter("ids",     NpgsqlDbType.Array | NpgsqlDbType.Uuid) { Value = ids },
+            new NpgsqlParameter("keys",    NpgsqlDbType.Array | NpgsqlDbType.Text) { Value = keys },
+            new NpgsqlParameter("user_id", NpgsqlDbType.Uuid)                      { Value = userId })
+            .ConfigureAwait(false);
     }
 
 }

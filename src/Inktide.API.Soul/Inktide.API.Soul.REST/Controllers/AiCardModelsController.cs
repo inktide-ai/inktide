@@ -1,4 +1,5 @@
 using Inktide.API.Soul.Application.Interfaces;
+using Inktide.API.Soul.REST.Mappers;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -37,7 +38,7 @@ public sealed class AiCardModelsController : ApiController
         if (list is null)
             return NotFound();
 
-        return Ok(list.Select(ToResponse).ToList());
+        return Ok(list.Select(AiCardModelResponseMapper.ToResponse).ToList());
     }
 
     /// <summary>Step 1: get presigned PUT URL and storage_key.</summary>
@@ -91,7 +92,10 @@ public sealed class AiCardModelsController : ApiController
         if (!result.Success)
             return MapError(result.ErrorKind, result.Error!);
 
-        return Ok(ToResponse(result.Model!));
+        if (result.Model is not { } model)
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                ApiErrorResponse.From("Upload result missing model.", ErrorCodes.InternalError));
+        return Ok(AiCardModelResponseMapper.ToResponse(model));
     }
 
     [HttpDelete("{modelId:guid}")]
@@ -128,33 +132,7 @@ public sealed class AiCardModelsController : ApiController
     }
 
 
-    private IActionResult MapError(ModelUploadError kind, string message) => kind switch
-    {
-        ModelUploadError.StorageDisabled =>
-            StatusCode(StatusCodes.Status503ServiceUnavailable,
-                ApiErrorResponse.From(message, ErrorCodes.ServiceUnavailable)),
-        ModelUploadError.CardNotFound or ModelUploadError.ModelNotFound =>
-            NotFound(ApiErrorResponse.From(message, ErrorCodes.NotFound)),
-        ModelUploadError.ObjectNotFoundInStorage or ModelUploadError.SizeMismatch =>
-            UnprocessableEntity(ApiErrorResponse.From(message, ErrorCodes.ValidationError)),
-        _ =>
-            BadRequest(ApiErrorResponse.From(message, ErrorCodes.ValidationError))
-    };
-
-    private static AiCardModelResponse ToResponse(AiCardModel dto)
-    {
-        return new AiCardModelResponse
-        {
-            Id = dto.Id,
-            AiCardId = dto.AiCardId,
-            StorageKey = dto.StorageKey,
-            PublicUrl = dto.PublicUrl,
-            OriginalFileName = dto.OriginalFileName,
-            ContentType = dto.ContentType,
-            SizeBytes = dto.SizeBytes,
-            CreatedAt = dto.CreatedAt,
-            IsActive = dto.IsActive,
-        };
-    }
+    private IActionResult MapError(ModelUploadError kind, string message) =>
+        MapUploadError(kind, message);
 
 }

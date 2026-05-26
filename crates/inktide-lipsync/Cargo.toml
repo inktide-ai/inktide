@@ -2,6 +2,8 @@
 name = "inktide-lipsync"
 version = "0.1.0"
 edition = "2021"
+# is_none_or stabilized in 1.82.0; bump when adopting newer APIs.
+rust-version = "1.82"
 
 [lib]
 name = "inktide_lipsync"

@@ -1,16 +1,9 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Inktide.API.Soul.Domain.ValueObjects;
 
 public sealed class LlmConfigSettings
 {
-
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
 
     [JsonPropertyName("temperature")]
     public float Temperature { get; set; } = 0.7f;
@@ -33,11 +26,6 @@ public sealed class LlmConfigSettings
     [JsonPropertyName("base_url")]
     public string? BaseUrl { get; set; }
 
-    public static LlmConfigSettings Parse(string? json)
-    {
-        if (string.IsNullOrWhiteSpace(json)) return new LlmConfigSettings();
-        try { return JsonSerializer.Deserialize<LlmConfigSettings>(json, JsonOpts) ?? new LlmConfigSettings(); }
-        catch { return new LlmConfigSettings(); }
-    }
+    public static LlmConfigSettings Parse(string? json) => ValueObjectJson.ParseOrDefault<LlmConfigSettings>(json);
 
 }

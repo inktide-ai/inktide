@@ -1,5 +1,5 @@
 using Inktide.API.Soul.Application.Interfaces;
-using Inktide.API.Soul.REST.Converters;
+using Inktide.API.Soul.REST.Mappers;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -27,18 +27,16 @@ public sealed class CatalogController : ApiController
     [ProducesResponseType(typeof(IReadOnlyList<LlmModelResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetLlmModels(CancellationToken ct)
     {
-        var userId = GetUserId();
-        var models = await _catalogService.GetAvailableLlmModelsAsync(userId, ct);
-        return Ok(models.Select(AiCardConverter.ToLlmResponse).ToList());
+        var models = await _catalogService.GetAvailableLlmModelsAsync(ct);
+        return Ok(models.Select(CatalogResponseMapper.ToLlmResponse).ToList());
     }
 
     [HttpGet("tts-voices")]
     [ProducesResponseType(typeof(IReadOnlyList<TtsVoiceResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTtsVoices(CancellationToken ct)
     {
-        var userId = GetUserId();
-        var voices = await _catalogService.GetAvailableTtsVoicesAsync(userId, ct);
-        return Ok(voices.Select(AiCardConverter.ToTtsResponse).ToList());
+        var voices = await _catalogService.GetAvailableTtsVoicesAsync(ct);
+        return Ok(voices.Select(CatalogResponseMapper.ToTtsResponse).ToList());
     }
 
 

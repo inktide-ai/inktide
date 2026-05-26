@@ -4,9 +4,9 @@ import { type ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { useCharactersContext } from '@/context/CharactersContext'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { PROFILE_SETTINGS_BASE } from '@/lib/routes'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/shared/ui/button'
 import { CaretLeftSmall } from '@/components/icons'
 
 const SEGMENT_TO_TAB: Record<string, string> = {

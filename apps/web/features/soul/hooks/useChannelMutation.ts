@@ -1,6 +1,6 @@
 'use client'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { queryKeys } from '@/lib/query/keys'
+import { queryKeys } from '@/shared/lib/query/keys'
 
 // Centralised mutation hook for channel operations.
 // Assumes fire-and-invalidate semantics — TResult defaults to void.

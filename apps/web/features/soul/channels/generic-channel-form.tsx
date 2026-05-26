@@ -8,10 +8,10 @@ import {
   deleteCardChannel,
   type ChannelResponse,
   type ChannelPlatform,
-} from '@/api/soul'
+} from '@/features/soul/api/index'
 import { ApiError } from '@/api/client'
-import { CHANNEL_STATIC } from '@/data/channel-platforms'
-import { useChannelMutation } from '@/hooks/soul/useChannelMutation'
+import { CHANNEL_STATIC } from '@/shared/data/channel-platforms'
+import { useChannelMutation } from '@/features/soul/hooks/useChannelMutation'
 
 type FormFields = { channelId: string; displayName: string; botUsername: string }
 const emptyForm = (): FormFields => ({ channelId: '', displayName: '', botUsername: '' })

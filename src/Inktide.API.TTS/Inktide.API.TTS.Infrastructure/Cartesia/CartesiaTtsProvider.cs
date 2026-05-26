@@ -13,7 +13,7 @@ namespace Inktide.API.TTS.Infrastructure.Cartesia;
 /// Requires an API key supplied via <c>X-TTS-Api-Key</c> header or
 /// <c>TtsProviders:Cartesia:ApiKey</c> config.
 /// </summary>
-public sealed class CartesiaTtsProvider : ISpeechProvider
+public sealed class CartesiaTtsProvider : ISpeechProvider, IVoiceListingProvider, IModelListingProvider
 {
 
     /// <summary>Cartesia speed range: -1.0 (slowest) to 1.0 (fastest), 0.0 = normal.</summary>
@@ -118,7 +118,12 @@ public sealed class CartesiaTtsProvider : ISpeechProvider
         var incomingSpeed  = Math.Clamp(speechOptions.Speed <= 0 ? 1.0f : speechOptions.Speed, IncomingMinSpeed, IncomingMaxSpeed);
         var cartesiaSpeed  = Math.Clamp(incomingSpeed - 1.0, CartesiaMinSpeed, CartesiaMaxSpeed);
 
-        var (container, encoding, sampleRate) = MapOutputFormat(speechOptions.AudioFormat);
+        var rawFormat = MapOutputFormat(speechOptions.AudioFormat);
+        if (rawFormat is null)
+            _logger.LogWarning(
+                "Cartesia: unknown audio format '{Format}', falling back to mp3",
+                speechOptions.AudioFormat);
+        var (container, encoding, sampleRate) = rawFormat ?? ("mp3", "mp3", 44100);
 
         var options = new CartesiaSpeechOptions
         {
@@ -147,27 +152,15 @@ public sealed class CartesiaTtsProvider : ISpeechProvider
     }
 
 
-    private (string container, string encoding, int sampleRate) MapOutputFormat(string? audioFormat)
-    {
-        var mapped = audioFormat?.ToLowerInvariant() switch
+    private static (string container, string encoding, int sampleRate)? MapOutputFormat(string? audioFormat) =>
+        audioFormat?.ToLowerInvariant() switch
         {
             "mp3"  => ("mp3", "mp3",      44100),
             "wav"  => ("wav", "pcm_f32le", 44100),
             "ogg"  => ("ogg", "opus",      48000),
             "opus" => ("ogg", "opus",      48000),
             null   => ("mp3", "mp3",       44100),
-            _      => ((string, string, int)?)null,
+            _      => null,
         };
-
-        if (mapped is null)
-        {
-            _logger.LogWarning(
-                "Cartesia: unknown audio format '{Format}', falling back to mp3",
-                audioFormat);
-            mapped = ("mp3", "mp3", 44100);
-        }
-
-        return mapped.Value;
-    }
 
 }

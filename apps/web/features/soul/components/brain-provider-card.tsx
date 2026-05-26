@@ -1,8 +1,8 @@
 'use client'
 
-import type { LlmProviderCatalogEntry } from '@/data/llm-providers'
+import type { LlmProviderCatalogEntry } from '@/shared/data/llm-providers'
 import { cn } from '@/lib/utils'
-import { CredentialStatusBadge, type CredentialStatus } from '@/components/soul/credential-status-badge'
+import { CredentialStatusBadge, type CredentialStatus } from '@/features/soul/components/credential-status-badge'
 
 export interface BrainProviderCardProps {
   provider: LlmProviderCatalogEntry

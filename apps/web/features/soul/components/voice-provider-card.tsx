@@ -1,8 +1,8 @@
 'use client'
 
-import type { VoiceProviderCatalogEntry } from '@/data/voice-providers'
+import type { VoiceProviderCatalogEntry } from '@/shared/data/voice-providers'
 import { cn } from '@/lib/utils'
-import { CredentialStatusBadge, type CredentialStatus } from '@/components/soul/credential-status-badge'
+import { CredentialStatusBadge, type CredentialStatus } from '@/features/soul/components/credential-status-badge'
 
 export interface VoiceProviderCardProps {
   provider: VoiceProviderCatalogEntry

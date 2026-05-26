@@ -8,8 +8,7 @@
     ".NETCoreApp,Version=v10.0": {
       "Inktide.API.Synapse.Application/1.0.0": {
         "dependencies": {
-          "Inktide.API.Core": "1.0.0",
-          "Inktide.API.Memory.Domain": "1.0.0"
+          "Inktide.API.Core": "1.0.0"
         },
         "runtime": {
           "Inktide.API.Synapse.Application.dll": {}
@@ -180,14 +179,6 @@
             "fileVersion": "1.0.0.0"
           }
         }
-      },
-      "Inktide.API.Memory.Domain/1.0.0": {
-        "runtime": {
-          "Inktide.API.Memory.Domain.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        }
       }
     }
   },
@@ -301,11 +292,6 @@
       "sha512": ""
     },
     "Inktide.API.Domain/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Inktide.API.Memory.Domain/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

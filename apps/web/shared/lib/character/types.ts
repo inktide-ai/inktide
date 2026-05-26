@@ -1,4 +1,4 @@
-import type { ChannelResponse } from '@/api/soul'
+import type { ChannelResponse } from '@/shared/types/soul-api'
 
 export type ModelType = 'live2d' | 'vrm' | 'glb' | 'none'
 

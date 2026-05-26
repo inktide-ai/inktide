@@ -1,3 +1,4 @@
+using Inktide.API.Realtime.Infrastructure.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -20,11 +21,11 @@ public sealed class AudioHub(ILogger<AudioHub> logger) : Hub
 {
     /// <summary>Subscribe to audio events for a given platform channel ID.</summary>
     public Task JoinChannel(string channelId)
-        => Groups.AddToGroupAsync(Context.ConnectionId, GroupKey(channelId));
+        => Groups.AddToGroupAsync(Context.ConnectionId, RealtimeConstants.Groups.ChannelKey(channelId));
 
     /// <summary>Unsubscribe from a channel's audio events.</summary>
     public Task LeaveChannel(string channelId)
-        => Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupKey(channelId));
+        => Groups.RemoveFromGroupAsync(Context.ConnectionId, RealtimeConstants.Groups.ChannelKey(channelId));
 
     public override async Task OnConnectedAsync()
     {
@@ -41,6 +42,4 @@ public sealed class AudioHub(ILogger<AudioHub> logger) : Hub
             logger.LogDebug("SignalR client disconnected: {ConnectionId}", Context.ConnectionId);
         await base.OnDisconnectedAsync(exception);
     }
-
-    internal static string GroupKey(string channelId) => $"ch:{channelId}";
 }

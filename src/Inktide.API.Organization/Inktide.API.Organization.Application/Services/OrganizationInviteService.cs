@@ -3,6 +3,8 @@ using Inktide.API.Organization.Application.Entities;
 using Inktide.API.Organization.Application.Enums;
 using Inktide.API.Organization.Application.Exceptions;
 using Inktide.API.Organization.Application.Interfaces;
+using Inktide.API.Organization.Application.Options;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Organization.Application.Services;
@@ -15,7 +17,8 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
     private readonly IOrganizationInviteEmailService _emailService;
     private readonly IInviteAttemptTracker _attemptTracker;
     private readonly ILogger<OrganizationInviteService> _logger;
-    private const int ExpiryDays = 7;
+    private readonly int _expiryDays;
+    private readonly TimeProvider _time;
 
     public OrganizationInviteService(
         IOrganizationRepository orgRepo,
@@ -23,7 +26,9 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         IOrganizationInviteRepository inviteRepo,
         IOrganizationInviteEmailService emailService,
         IInviteAttemptTracker attemptTracker,
-        ILogger<OrganizationInviteService> logger)
+        ILogger<OrganizationInviteService> logger,
+        OrganizationInviteOptions options,
+        TimeProvider time)
     {
         _orgRepo        = orgRepo;
         _memberRepo     = memberRepo;
@@ -31,6 +36,8 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         _emailService   = emailService;
         _attemptTracker = attemptTracker;
         _logger         = logger;
+        _expiryDays     = options.ExpiryDays;
+        _time           = time;
     }
 
     public async Task<SendInvitesResult> SendInvitesAsync(
@@ -40,9 +47,11 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         CancellationToken ct = default)
     {
         var org = await GetOrCreateOrgAsync(requestingUserId, ct);
-        await EnsureAdminAsync(requestingUserId, org, ct);
+        EnsureIsOwner(requestingUserId, org);
 
+        var utcNow = _time.GetUtcNow().UtcDateTime;
         var results = new List<InviteResult>();
+        var invitesToEmail = new List<(string email, OrganizationInvite invite)>();
 
         foreach (var raw in emails)
         {
@@ -52,12 +61,9 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
             var existing = await _inviteRepo.GetPendingByEmailAsync(org.Id, email, ct);
             if (existing is not null)
             {
-                existing.Token     = GenerateToken();
-                existing.ExpiresAt = DateTime.UtcNow.AddDays(ExpiryDays);
-                existing.Role      = role;
-                await _inviteRepo.SaveChangesAsync(ct);
-                await SendEmailSafe(email, org.Name, existing.Token, ct);
-                results.Add(MapToResult(existing));
+                RefreshInviteToken(existing, utcNow);
+                existing.Role = role;
+                invitesToEmail.Add((email, existing));
             }
             else
             {
@@ -69,13 +75,20 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
                     Token          = GenerateToken(),
                     InvitedBy      = requestingUserId,
                     Status         = InviteStatus.Pending,
-                    ExpiresAt      = DateTime.UtcNow.AddDays(ExpiryDays),
+                    ExpiresAt      = utcNow.AddDays(_expiryDays),
+                    CreatedAt      = utcNow,
                 };
                 await _inviteRepo.AddAsync(invite, ct);
-                await _inviteRepo.SaveChangesAsync(ct);
-                await SendEmailSafe(email, org.Name, invite.Token, ct);
-                results.Add(MapToResult(invite));
+                invitesToEmail.Add((email, invite));
             }
+        }
+
+        await _inviteRepo.SaveChangesAsync(ct);
+
+        foreach (var (email, invite) in invitesToEmail)
+        {
+            await SendEmailSafe(email, org.Name, invite.Token, ct);
+            results.Add(MapToResult(invite));
         }
 
         return new SendInvitesResult(org.Id, results);
@@ -83,26 +96,29 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
 
     public async Task ResendInviteAsync(string requestingUserId, Guid inviteId, CancellationToken ct = default)
     {
-        var pending = await _inviteRepo.GetPendingByOrganizationAsync(
-            await GetOrgIdForUser(requestingUserId, ct), ct);
+        var orgId = await GetOrgIdForUserAsync(requestingUserId, ct)
+            ?? throw new InviteNotFoundException();
+
+        var pending = await _inviteRepo.GetPendingByOrganizationAsync(orgId, ct);
 
         var target = pending.FirstOrDefault(i => i.Id == inviteId)
             ?? throw new InviteNotFoundException();
 
-        var org = await _orgRepo.GetByIdAsync(target.OrganizationId, ct)!
+        var org = await _orgRepo.GetByIdAsync(target.OrganizationId, ct)
             ?? throw new InviteNotFoundException();
 
-        await EnsureAdminAsync(requestingUserId, org, ct);
+        EnsureIsOwner(requestingUserId, org);
 
-        target.Token     = GenerateToken();
-        target.ExpiresAt = DateTime.UtcNow.AddDays(ExpiryDays);
+        RefreshInviteToken(target, _time.GetUtcNow().UtcDateTime);
         await _inviteRepo.SaveChangesAsync(ct);
         await SendEmailSafe(target.Email, org.Name, target.Token, ct);
     }
 
     public async Task CancelInviteAsync(string requestingUserId, Guid inviteId, CancellationToken ct = default)
     {
-        var orgId = await GetOrgIdForUser(requestingUserId, ct);
+        var orgId = await GetOrgIdForUserAsync(requestingUserId, ct)
+            ?? throw new InviteNotFoundException();
+
         var pending = await _inviteRepo.GetPendingByOrganizationAsync(orgId, ct);
         var target = pending.FirstOrDefault(i => i.Id == inviteId)
             ?? throw new InviteNotFoundException();
@@ -110,7 +126,7 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         var org = await _orgRepo.GetByIdAsync(target.OrganizationId, ct)
             ?? throw new InviteNotFoundException();
 
-        await EnsureAdminAsync(requestingUserId, org, ct);
+        EnsureIsOwner(requestingUserId, org);
 
         target.Status = InviteStatus.Expired;
         await _inviteRepo.SaveChangesAsync(ct);
@@ -121,6 +137,7 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         string acceptingUserId,
         CancellationToken ct = default)
     {
+        var utcNow = _time.GetUtcNow().UtcDateTime;
         var invite = await _inviteRepo.GetByTokenAsync(token, ct);
         if (invite is null)
         {
@@ -134,7 +151,7 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         if (invite.Status == InviteStatus.Accepted)
             return new AcceptInviteResult(AcceptOutcome.AlreadyMember, invite.OrganizationId);
 
-        if (invite.ExpiresAt < DateTime.UtcNow)
+        if (invite.ExpiresAt < utcNow)
         {
             invite.Status = InviteStatus.Expired;
             await _inviteRepo.SaveChangesAsync(ct);
@@ -158,6 +175,7 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
             OrganizationId = invite.OrganizationId,
             UserId         = acceptingUserId,
             Role           = invite.Role,
+            JoinedAt       = utcNow,
         }, ct);
         invite.Status = InviteStatus.Accepted;
         // Single SaveChanges — atomically commits the new member row and the invite status update
@@ -169,25 +187,18 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
 
     public async Task<PendingInvitesResult> ListPendingAsync(string requestingUserId, CancellationToken ct = default)
     {
-        var org = await _orgRepo.GetByOwnerIdAsync(requestingUserId, ct);
-        if (org is null)
-            return new PendingInvitesResult(Guid.Empty, []);
+        var org = await _orgRepo.GetByOwnerIdAsync(requestingUserId, ct)
+            ?? throw new InviteNotFoundException();
 
-        await EnsureAdminAsync(requestingUserId, org, ct);
+        EnsureIsOwner(requestingUserId, org);
 
         var invites = await _inviteRepo.GetPendingByOrganizationAsync(org.Id, ct);
         return new PendingInvitesResult(org.Id, invites.Select(MapToResult).ToList());
     }
 
-    private async Task EnsureAdminAsync(
-        string userId,
-        Entities.Organization org,
-        CancellationToken ct)
+    private static void EnsureIsOwner(string userId, Entities.Organization org)
     {
-        if (org.OwnerId == userId) return;
-        var member = await _memberRepo.GetByUserIdAsync(org.Id, userId, ct);
-        if (member?.Role != OrganizationRole.Admin)
-            throw new NotAnAdminException();
+        if (org.OwnerId != userId) throw new NotAnAdminException();
     }
 
     private async Task<Entities.Organization> GetOrCreateOrgAsync(string ownerId, CancellationToken ct)
@@ -195,10 +206,12 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         var org = await _orgRepo.GetByOwnerIdAsync(ownerId, ct);
         if (org is not null) return org;
 
+        var utcNow = _time.GetUtcNow().UtcDateTime;
         org = new Entities.Organization
         {
-            Name    = "Personal",
-            OwnerId = ownerId,
+            Name      = "Personal",
+            OwnerId   = ownerId,
+            CreatedAt = utcNow,
         };
 
         try
@@ -209,10 +222,11 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
                 OrganizationId = org.Id,
                 UserId         = ownerId,
                 Role           = OrganizationRole.Admin,
+                JoinedAt       = utcNow,
             }, ct);
             await _orgRepo.SaveChangesAsync(ct);
         }
-        catch (Exception)
+        catch (DbUpdateException)
         {
             // Concurrent creation — another request may have won the race; retry the fetch.
             org = await _orgRepo.GetByOwnerIdAsync(ownerId, ct);
@@ -222,11 +236,8 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         return org;
     }
 
-    private async Task<Guid> GetOrgIdForUser(string userId, CancellationToken ct)
-    {
-        var org = await _orgRepo.GetByOwnerIdAsync(userId, ct);
-        return org?.Id ?? Guid.Empty;
-    }
+    private async Task<Guid?> GetOrgIdForUserAsync(string userId, CancellationToken ct)
+        => (await _orgRepo.GetByOwnerIdAsync(userId, ct))?.Id;
 
     private async Task SendEmailSafe(string email, string orgName, string token, CancellationToken ct)
     {
@@ -238,6 +249,12 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         {
             _logger.LogError(ex, "Failed to send invite email to {Email}", email);
         }
+    }
+
+    private void RefreshInviteToken(OrganizationInvite invite, DateTime utcNow)
+    {
+        invite.Token     = GenerateToken();
+        invite.ExpiresAt = utcNow.AddDays(_expiryDays);
     }
 
     private static InviteResult MapToResult(OrganizationInvite i) =>

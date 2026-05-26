@@ -7,8 +7,9 @@ namespace Inktide.API.Synapse.Infrastructure.Llm;
 /// <summary>
 /// Builds a <see cref="ChatHistory"/> from a <see cref="SynapseAggregatedEnvelope"/>.
 /// Port of fast-api/ai-worker/llm-worker/app/prompt/builder.py.
+/// Sections are injected via DI — add a new <see cref="IPromptSection"/> registration to extend the prompt.
 /// </summary>
-public static class SynapsePromptBuilder
+internal sealed class SynapsePromptBuilder
 {
     private static readonly Dictionary<string, string> LanguageNames = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -17,17 +18,13 @@ public static class SynapsePromptBuilder
         ["zh"] = "Chinese",  ["uk"] = "Ukrainian",
     };
 
-    private static readonly IReadOnlyList<IPromptSection> Sections =
-    [
-        new RagContextSection(),
-        new PersonalitySection(),
-        new EmotionSection(),
-        new ScreenAwarenessSection(),
-        new WebhookContextSection(),
-    ];
+    private readonly IReadOnlyList<IPromptSection> _sections;
+
+    public SynapsePromptBuilder(IEnumerable<IPromptSection> sections)
+        => _sections = sections.ToList();
 
 
-    public static ChatHistory Build(SynapseAggregatedEnvelope envelope)
+    public ChatHistory Build(SynapseAggregatedEnvelope envelope)
     {
         var history = new ChatHistory();
         history.AddSystemMessage(BuildSystem(envelope));
@@ -47,15 +44,15 @@ public static class SynapsePromptBuilder
     }
 
 
-    private static string BuildSystem(SynapseAggregatedEnvelope envelope)
+    private string BuildSystem(SynapseAggregatedEnvelope envelope)
     {
         var ctx = envelope.Context;
         if (ctx is null)
             return "You are a helpful AI assistant.";
 
-        var parts = new List<string>(8) { BuildLanguageDirective(ctx.Language), ctx.SystemPrompt };
+        var parts = new List<string?>(8) { BuildLanguageDirective(ctx.Language), ctx.SystemPrompt };
 
-        foreach (var section in Sections)
+        foreach (var section in _sections)
         {
             var text = section.Build(envelope);
             if (text is not null) parts.Add(text);

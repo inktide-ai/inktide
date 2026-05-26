@@ -1,10 +1,10 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
-import { listCardModels, listCardScenes } from '@/api/soul'
-import { queryKeys } from '@/lib/query/keys'
+import { listCardModels, listCardScenes } from '@/features/soul/api/index'
+import { queryKeys } from '@/shared/lib/query/keys'
 import { inferModelType } from '@/lib/utils/model-type'
 import { buildObsSceneUrl } from '@/lib/utils/obs-url'
-import type { ProjectListItem } from '@/api/projects'
+import type { ProjectListItem } from '@/features/projects/api/projects'
 
 const STALE = 5 * 60_000
 

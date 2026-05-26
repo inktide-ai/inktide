@@ -5,6 +5,7 @@ using System.Text.Json;
 using Inktide.API.Synapse.Application.Configuration;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
+using Inktide.API.Synapse.Infrastructure.Constants;
 using Inktide.API.Synapse.Infrastructure.Emotion;
 using Inktide.API.Synapse.Infrastructure.Llm;
 using Inktide.API.Synapse.Infrastructure.Providers;
@@ -29,19 +30,8 @@ namespace Inktide.API.Synapse.Infrastructure.Messaging;
 /// Provider selection: the AiCard's <c>LlmProviderId</c> is used as the Semantic Kernel service ID.
 /// If that provider is not registered, the worker falls back to <see cref="LlmStreamSettings.FallbackProviderId"/>.
 /// </summary>
-public sealed class LlmStreamWorker : BackgroundService
+internal sealed class LlmStreamWorker : BackgroundService
 {
-
-    private static readonly JsonSerializerOptions JsonIn = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-    };
-
-    private static readonly JsonSerializerOptions JsonOut = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
 
     private readonly IConnectionMultiplexer _redis;
     private readonly IServiceScopeFactory _scopeFactory;
@@ -49,6 +39,7 @@ public sealed class LlmStreamWorker : BackgroundService
     private readonly IConversationHistoryRepository _history;
     private readonly Kernel _kernel;
     private readonly ChatServiceFactoryRegistry _factoryRegistry;
+    private readonly SynapsePromptBuilder _promptBuilder;
     private readonly LlmStreamSettings _settings;
     private readonly ILogger<LlmStreamWorker> _logger;
     private readonly string _consumerName;
@@ -67,6 +58,7 @@ public sealed class LlmStreamWorker : BackgroundService
         IConversationHistoryRepository history,
         Kernel kernel,
         ChatServiceFactoryRegistry factoryRegistry,
+        SynapsePromptBuilder promptBuilder,
         IOptions<LlmStreamSettings> settings,
         ILogger<LlmStreamWorker> logger)
     {
@@ -76,6 +68,7 @@ public sealed class LlmStreamWorker : BackgroundService
         _history          = history          ?? throw new ArgumentNullException(nameof(history));
         _kernel           = kernel           ?? throw new ArgumentNullException(nameof(kernel));
         _factoryRegistry  = factoryRegistry  ?? throw new ArgumentNullException(nameof(factoryRegistry));
+        _promptBuilder    = promptBuilder    ?? throw new ArgumentNullException(nameof(promptBuilder));
         _settings         = settings?.Value  ?? throw new ArgumentNullException(nameof(settings));
         _logger           = logger           ?? throw new ArgumentNullException(nameof(logger));
 
@@ -216,7 +209,7 @@ public sealed class LlmStreamWorker : BackgroundService
 
     private async Task ProcessEntryAsync(IDatabase db, StreamEntry entry, CancellationToken ct)
     {
-        var payloadJson = ReadField(entry, _settings.PayloadFieldName);
+        var payloadJson = entry.GetField(_settings.PayloadFieldName);
         if (payloadJson is null)
         {
             _logger.LogWarning("LlmStreamWorker: entry {Id} missing payload — discarding", entry.Id);
@@ -227,7 +220,7 @@ public sealed class LlmStreamWorker : BackgroundService
         SynapseAggregatedEnvelope? envelope;
         try
         {
-            envelope = JsonSerializer.Deserialize<SynapseAggregatedEnvelope>(payloadJson, JsonIn);
+            envelope = JsonSerializer.Deserialize<SynapseAggregatedEnvelope>(payloadJson, SynapseConstants.Json.Read);
         }
         catch (JsonException ex)
         {
@@ -251,10 +244,10 @@ public sealed class LlmStreamWorker : BackgroundService
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
         catch (Exception ex)
         {
-            // Do NOT ACK — XAUTOCLAIM will retry after AutoClaimMinIdleMs.
             _logger.LogError(ex,
-                "LlmStreamWorker: unhandled error. Correlation={Correlation} — will retry via XAUTOCLAIM",
+                "LlmStreamWorker: unhandled error. Correlation={Correlation}",
                 envelope.CorrelationId);
+            await HandleFailedEntryAsync(db, entry, ex);
         }
         finally
         {
@@ -302,7 +295,7 @@ public sealed class LlmStreamWorker : BackgroundService
                 fallbackId, userId, envelope.CorrelationId);
         }
 
-        var history = SynapsePromptBuilder.Build(envelope);
+        var history = _promptBuilder.Build(envelope);
 
 #pragma warning disable SKEXP0010 // OpenAIPromptExecutionSettings is experimental in some SK previews
         var execSettings = new OpenAIPromptExecutionSettings
@@ -478,7 +471,7 @@ public sealed class LlmStreamWorker : BackgroundService
             emotionIntensity,
             ttsSpeedModifier  = speechProfile.SpeedModifier,
             ttsEnergyModifier = speechProfile.EnergyModifier,
-        }, JsonOut);
+        }, SynapseConstants.Json.Write);
 
         await db.StreamAddAsync(
             _settings.StreamOut,
@@ -507,11 +500,45 @@ public sealed class LlmStreamWorker : BackgroundService
         => db.StreamAcknowledgeAsync(_settings.StreamIn, _settings.ConsumerGroup, id);
 
 
-    private static string? ReadField(StreamEntry entry, string field)
+    private async Task HandleFailedEntryAsync(IDatabase db, StreamEntry entry, Exception ex)
     {
-        foreach (var v in entry.Values)
-            if (v.Name.ToString() == field) return v.Value.ToString();
-        return null;
+        var pending = await db.StreamPendingMessagesAsync(
+            _settings.StreamIn, _settings.ConsumerGroup,
+            count: 1, consumerName: RedisValue.Null, minId: entry.Id, maxId: entry.Id);
+
+        var deliveries = pending.Length > 0 ? (int)pending[0].DeliveryCount : 1;
+        if (deliveries < _settings.MaxPoisonMessageDeliveries) return;
+
+        _logger.LogCritical(
+            "LlmStreamWorker: poison message after {Deliveries} deliveries — moving to DLQ and ACKing. Id={Id}",
+            deliveries, entry.Id);
+
+        if (!string.IsNullOrEmpty(_settings.DeadLetterStreamName))
+        {
+            try
+            {
+                await db.StreamAddAsync(
+                    _settings.DeadLetterStreamName,
+                    [
+                        new NameValueEntry("originalId",  entry.Id.ToString()),
+                        new NameValueEntry("failedAtUtc", DateTimeOffset.UtcNow.ToString("O")),
+                        new NameValueEntry("deliveries",  deliveries.ToString()),
+                        new NameValueEntry("error",       ex.Message),
+                        new NameValueEntry("payload",     entry.GetField(_settings.PayloadFieldName) ?? string.Empty),
+                    ],
+                    maxLength: 10_000,
+                    useApproximateMaxLength: true);
+            }
+            catch (Exception dlqEx)
+            {
+                _logger.LogCritical(dlqEx,
+                    "LlmStreamWorker: failed to write to DLQ — ACKing anyway to unblock pipeline. Id={Id}",
+                    entry.Id);
+            }
+        }
+
+        await AckAsync(db, entry.Id);
     }
+
 
 }

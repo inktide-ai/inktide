@@ -12,7 +12,7 @@ namespace Inktide.API.TTS.Infrastructure.ElevenLabs;
 /// Requires an API key supplied via <c>X-TTS-Api-Key</c> header or
 /// <c>TtsProviders:ElevenLabs:ApiKey</c> config.
 /// </summary>
-public sealed class ElevenLabsTtsProvider : ISpeechProvider
+public sealed class ElevenLabsTtsProvider : ISpeechProvider, IVoiceListingProvider, IModelListingProvider
 {
 
     private const string DefaultModelId    = "eleven_multilingual_v2";
@@ -100,7 +100,12 @@ public sealed class ElevenLabsTtsProvider : ISpeechProvider
             ? speechOptions.Model
             : DefaultModelId;
 
-        var outputFormat  = MapOutputFormat(speechOptions.AudioFormat);
+        var rawFormat    = MapOutputFormat(speechOptions.AudioFormat);
+        if (rawFormat is null)
+            _logger.LogWarning(
+                "ElevenLabs: unknown audio format '{Format}', falling back to mp3_44100_128",
+                speechOptions.AudioFormat);
+        var outputFormat = rawFormat ?? "mp3_44100_128";
         var voiceSettings = MapVoiceSettings(speechOptions);
 
         var options = new ElevenLabsSpeechOptions
@@ -116,9 +121,8 @@ public sealed class ElevenLabsTtsProvider : ISpeechProvider
     }
 
 
-    private string MapOutputFormat(string? audioFormat)
-    {
-        var mapped = audioFormat?.ToLowerInvariant() switch
+    private static string? MapOutputFormat(string? audioFormat) =>
+        audioFormat?.ToLowerInvariant() switch
         {
             "mp3"  => "mp3_44100_128",
             "pcm"  => "pcm_44100",
@@ -126,17 +130,6 @@ public sealed class ElevenLabsTtsProvider : ISpeechProvider
             null   => "mp3_44100_128",
             _      => null,
         };
-
-        if (mapped is null)
-        {
-            _logger.LogWarning(
-                "ElevenLabs: unknown audio format '{Format}', falling back to mp3_44100_128",
-                audioFormat);
-            mapped = "mp3_44100_128";
-        }
-
-        return mapped;
-    }
 
     private static ElevenLabsVoiceSettings MapVoiceSettings(SpeechOptions options)
     {

@@ -2,9 +2,9 @@
 
 import { type ReactNode } from 'react'
 import ProtectedRoute from '@/components/layout/protected-route'
-import { CharactersProvider } from '@/context/CharactersContext'
-import { WorkspaceSidebar } from '@/components/workspace/workspace-sidebar'
-import { AppTopBar } from '@/components/workspace/app-topbar'
+import { CharactersProvider } from '@/entities/character/context/CharactersContext'
+import { WorkspaceSidebar } from '@/features/workspace-home/workspace-sidebar'
+import { AppTopBar } from '@/features/workspace-home/app-topbar'
 
 export default function HomeLayout({ children }: { children: ReactNode }) {
   return (

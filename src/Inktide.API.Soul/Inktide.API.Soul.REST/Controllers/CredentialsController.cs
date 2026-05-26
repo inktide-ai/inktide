@@ -1,4 +1,5 @@
 using Inktide.API.Soul.Application.Interfaces;
+using Inktide.API.Soul.REST.Mappers;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -32,7 +33,7 @@ public sealed class CredentialsController : ApiController
     {
         var userId  = GetUserId();
         var results = await _service.GetAllAsync(userId, ct);
-        return Ok(results.Select(ToResponse).ToList());
+        return Ok(results.Select(CredentialResponseMapper.ToResponse).ToList());
     }
 
     [HttpPut("{providerId}")]
@@ -55,7 +56,7 @@ public sealed class CredentialsController : ApiController
             return StatusCode(StatusCodes.Status500InternalServerError,
                 ApiErrorResponse.From("Credential not found after upsert.", ErrorCodes.ServiceUnavailable));
 
-        return Ok(ToResponse(saved));
+        return Ok(CredentialResponseMapper.ToResponse(saved));
     }
 
     [HttpDelete("{providerId}")]
@@ -81,8 +82,5 @@ public sealed class CredentialsController : ApiController
         return Ok(new CredentialTestResponse(result.Success, result.Error, DateTime.UtcNow));
     }
 
-
-    private static CredentialResponse ToResponse(global::Inktide.API.Soul.Application.Models.UserProviderCredentialSummary s)
-        => new(s.ProviderId, s.HasKey, s.BaseUrl, s.Config, s.UpdatedAt, s.VerifiedAt, s.LastError);
 
 }

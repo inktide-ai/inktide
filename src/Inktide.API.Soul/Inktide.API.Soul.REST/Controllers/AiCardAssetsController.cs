@@ -48,12 +48,13 @@ public sealed class AiCardAssetsController : ApiController
             .ConfigureAwait(false);
 
         if (!result.Success)
-        {
-            if (string.Equals(result.Error, "AI card not found.", StringComparison.Ordinal))
-                return NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound));
-            return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                ApiErrorResponse.From(result.Error!, ErrorCodes.ServiceUnavailable));
-        }
+            return result.ErrorKind switch
+            {
+                AiCardAvatarError.CardNotFound      => NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound)),
+                AiCardAvatarError.StorageUnavailable => StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    ApiErrorResponse.From(result.Error!, ErrorCodes.ServiceUnavailable)),
+                _ => BadRequest(ApiErrorResponse.From(result.Error!, ErrorCodes.ValidationError))
+            };
 
         return Ok(AiCardResponseMapper.ToResponse(result.Card!));
     }
@@ -79,12 +80,13 @@ public sealed class AiCardAssetsController : ApiController
             .ConfigureAwait(false);
 
         if (!result.Success)
-        {
-            if (string.Equals(result.Error, "AI card not found.", StringComparison.Ordinal))
-                return NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound));
-            return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                ApiErrorResponse.From(result.Error!, ErrorCodes.ServiceUnavailable));
-        }
+            return result.ErrorKind switch
+            {
+                AiCardBannerError.CardNotFound       => NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound)),
+                AiCardBannerError.StorageUnavailable  => StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    ApiErrorResponse.From(result.Error!, ErrorCodes.ServiceUnavailable)),
+                _ => BadRequest(ApiErrorResponse.From(result.Error!, ErrorCodes.ValidationError))
+            };
 
         return Ok(AiCardResponseMapper.ToResponse(result.Card!));
     }
@@ -98,7 +100,12 @@ public sealed class AiCardAssetsController : ApiController
         var result = await _cardBanner.RemoveBannerAsync(userId, cardId, ct).ConfigureAwait(false);
 
         if (!result.Success)
-            return NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound));
+            return result.ErrorKind switch
+            {
+                AiCardBannerError.CardNotFound => NotFound(ApiErrorResponse.From(result.Error!, ErrorCodes.NotFound)),
+                _ => StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    ApiErrorResponse.From(result.Error!, ErrorCodes.ServiceUnavailable))
+            };
 
         return Ok(AiCardResponseMapper.ToResponse(result.Card!));
     }

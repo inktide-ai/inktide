@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Inktide.API.Core.Contracts;
 using Inktide.API.Core.Transactions;
+using Inktide.API.Soul.Application.Constants;
 using Inktide.API.Soul.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,7 +67,7 @@ public sealed class OutboxProcessorHostedService : BackgroundService
         var importer = scope.ServiceProvider.GetService<IGraphDefinitionImporter>();
 
         var pending = await db.OutboxEvents
-            .Where(e => e.ProcessedAt == null)
+            .Where(e => e.ProcessedAt == null && e.RetryCount < 5)
             .OrderBy(e => e.CreatedAt)
             .Take(10)
             .ToListAsync(ct)
@@ -83,11 +84,13 @@ public sealed class OutboxProcessorHostedService : BackgroundService
             }
             catch (Exception ex)
             {
+                evt.RetryCount++;
                 _logger.LogWarning(ex,
-                    "OutboxProcessorHostedService: failed to deliver event {EventId} ({EventType})",
-                    evt.Id, evt.EventType);
+                    "OutboxProcessorHostedService: failed to deliver event {EventId} ({EventType}), retry {Retry}/5",
+                    evt.Id, evt.EventType, evt.RetryCount);
                 evt.Error = ex.Message;
-                evt.ProcessedAt = DateTime.UtcNow;
+                // Do NOT set ProcessedAt — leave null so the event is retried next poll.
+                // After 5 failures it falls out of the where-filter as a dead letter for manual inspection.
             }
         }
 
@@ -100,7 +103,7 @@ public sealed class OutboxProcessorHostedService : BackgroundService
         CancellationToken ct)
     {
         // GraphImport events are handled in-process for backward compatibility.
-        if (evt.EventType == "GraphImport")
+        if (evt.EventType == SoulEventTypes.GraphImport)
         {
             if (importer is null)
             {

@@ -2,6 +2,7 @@ using Inktide.API.Core.DependencyInjection;
 using Inktide.API.TTS.Infrastructure.Kokoro;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Inktide.API.TTS.Infrastructure.DependencyInjection;
 
@@ -21,9 +22,10 @@ public static class TtsKokoroServiceCollectionExtensions
         services.Configure<KokoroTtsClientSettings>(
             configuration.GetSection(KokoroTtsClientSettings.SectionName));
 
-        services.AddHttpClient(KokoroTtsClient.HttpClientName, client =>
+        services.AddHttpClient(KokoroTtsClient.HttpClientName, (sp, client) =>
             {
-                client.Timeout = TimeSpan.FromMinutes(5);
+                var settings = sp.GetRequiredService<IOptions<KokoroTtsClientSettings>>().Value;
+                client.Timeout = settings.Timeout;
             })
             .AddInktideHttpResilience();
 

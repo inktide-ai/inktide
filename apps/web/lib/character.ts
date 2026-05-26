@@ -10,12 +10,12 @@ export type {
   CharacterMemory,
   CharacterAutoPilot,
   CharacterPersonality,
-} from './character/types'
+} from '@/shared/lib/character/types'
 
-export { DEFAULTS, createDefaultCharacter } from './character/defaults'
+export { DEFAULTS, createDefaultCharacter } from '@/shared/lib/character/defaults'
 
 export {
   apiResponseToCharacter,
   characterToUpdateRequest,
   characterToCreateRequest,
-} from './character/mappers'
+} from '@/shared/lib/character/mappers'

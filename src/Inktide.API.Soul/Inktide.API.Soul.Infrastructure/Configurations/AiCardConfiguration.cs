@@ -142,6 +142,15 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
         b.Property(e => e.UpdatedAt)
             .HasColumnName("updated_at");
 
+        b.Property(e => e.Category)
+            .HasColumnName("category");
+
+        b.Property(e => e.Tags)
+            .HasColumnName("tags")
+            .HasColumnType("jsonb")
+            .IsRequired()
+            .HasDefaultValueSql("'[]'");
+
         b.Property(e => e.SortKey)
             .HasColumnName("sort_key")
             .IsRequired()

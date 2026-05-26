@@ -1,6 +1,6 @@
 'use client'
 
-import type { CharacterLlm } from '@/lib/character/types'
+import type { CharacterLlm } from '@/shared/lib/character/types'
 
 interface SliderDef {
   key: keyof CharacterLlm

@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useRef, useState } from 'react'
-import type { AiCharacter } from '@/lib/character/types'
+import type { AiCharacter } from '@/shared/lib/character/types'
 
 /**
  * ISP: единственная ответственность — dirty-tracking и snapshot.

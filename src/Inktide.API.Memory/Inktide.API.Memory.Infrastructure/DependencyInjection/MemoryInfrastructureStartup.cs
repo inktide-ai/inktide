@@ -106,6 +106,7 @@ public sealed class MemoryInfrastructureStartup : IStartup
         services.AddSingleton<IIngestionDlqPublisher, IngestionDlqPublisher>();
         services.AddSingleton<IMemoryIngestionService, MemoryIngestionService>();
         services.AddScoped<IMemoryQueryService, MemoryQueryService>();
+        services.AddScoped<IMemoryIngestionPipeline, MemoryIngestionPipeline>();
         services.AddHostedService<MemoryIngestionWorker>();
         services.AddMemoryCache();
     }

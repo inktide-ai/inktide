@@ -68,6 +68,11 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
         if (card is null)
             return BeginSceneUploadResult.Fail(SceneUploadError.CardNotFound, "AI card not found.");
 
+        var existingCount = await _scenes.CountByCardAsync(userId, cardId, ct).ConfigureAwait(false);
+        if (existingCount >= SoulConstants.Upload.MaxScenesPerCard)
+            return BeginSceneUploadResult.Fail(SceneUploadError.Validation,
+                $"Scene limit reached ({SoulConstants.Upload.MaxScenesPerCard} per card).");
+
         var safeName  = StorageFileHelper.SanitizeFileName(fileName, Constraints.FallbackFileName);
         var objectKey = $"users/{userId:N}/cards/{cardId:N}/scenes/{IdGenerator.New():N}_{safeName}";
         var ctNorm    = StorageFileHelper.InferContentType(contentType, fileName, "image/jpeg");
@@ -90,7 +95,7 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
         if (string.IsNullOrWhiteSpace(storageKey))
             return CompleteSceneUploadResult.Fail(SceneUploadError.Validation, "storage_key is required.");
 
-        var tagError = TryNormalizeTag(tag, out var normalizedTag);
+        var tagError = SceneTagValidation.TryNormalizeTag(tag, out var normalizedTag);
         if (tagError is not null)
             return CompleteSceneUploadResult.Fail(SceneUploadError.Validation, tagError);
 
@@ -168,7 +173,8 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
             try { await _storage.DeleteObjectAsync(scene.StorageKey, ct).ConfigureAwait(false); }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to delete scene object key={Key}, proceeding with DB delete.", scene.StorageKey);
+                _logger.LogError(ex, "DeleteAsync: storage deletion failed for key={Key} — aborting DB delete", scene.StorageKey);
+                return DeleteSceneResult.Fail(SceneUploadError.StorageDisabled, "File deletion from storage failed. Please retry.");
             }
         }
 
@@ -198,7 +204,7 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
 
         string newKey = FractionalIndexer.GenerateKeyBetween(prevKey, nextKey);
 
-        await _scenes.BulkUpdateSortKeysAsync([(sceneId, newKey)], _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
+        await _scenes.BulkUpdateSortKeysAsync(userId, [(sceneId, newKey)], _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
 
         return ToDto(scene) with { SortKey = newKey };
     }
@@ -206,14 +212,4 @@ public sealed class AiCardSceneUploadService : IAiCardSceneService
     private static AiCardScene ToDto(AiCardSceneEntity s) =>
         new(s.Id, s.AiCardId, s.StorageKey, s.PublicUrl, s.OriginalFileName,
             s.ContentType, s.SizeBytes, s.CreatedAt, s.Tag, s.DisplayName, s.Description, s.SortKey);
-
-    private static string? TryNormalizeTag(string? tag, out string? normalized)
-    {
-        normalized = null;
-        if (tag is null || string.IsNullOrWhiteSpace(tag)) return null;
-        var t = tag.Trim();
-        if (t.Length > 128) return "tag must be at most 128 characters.";
-        normalized = t;
-        return null;
-    }
 }

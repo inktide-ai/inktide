@@ -1,5 +1,5 @@
 import type { VRM } from '@pixiv/three-vrm'
-import type { IVrmController, VrmAnimationContext, VrmControllerSetup } from '@/types/IVrmController'
+import type { IVrmController, VrmAnimationContext, VrmControllerSetup } from '@/shared/types/IVrmController'
 
 const BLINK_DURATION = 0.2
 const BLINK_MIN = 1.5

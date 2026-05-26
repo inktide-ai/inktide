@@ -1,4 +1,4 @@
-import type { IVisemeProvider } from '@/types/IVisemeProvider'
+import type { IVisemeProvider } from '@/shared/types/IVisemeProvider'
 import { RhubarbVisemeProvider } from './RhubarbVisemeProvider'
 import { FormantVisemeProvider } from './FormantVisemeProvider'
 

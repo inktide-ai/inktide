@@ -80,6 +80,18 @@ public sealed class SynapseIngestStreamSettings
         set => _autoClaimLoopDelaySeconds = value;
     }
 
+    /// <summary>
+    /// After this many XAUTOCLAIM deliveries without ACK the entry is moved to
+    /// <see cref="DeadLetterStreamName"/> and acknowledged to stop infinite retry.
+    /// </summary>
+    public int MaxPoisonMessageDeliveries { get; set; } = 5;
+
+    /// <summary>
+    /// Redis stream where poison messages land after exceeding <see cref="MaxPoisonMessageDeliveries"/>.
+    /// Set to empty string to disable DLQ (messages will be ACKed and lost after max deliveries).
+    /// </summary>
+    public string DeadLetterStreamName { get; set; } = "synapse.ingest.dlq";
+
 
     public static string ResolveConsumerInstanceId()
     {

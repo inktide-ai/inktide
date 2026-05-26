@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { getBannerGradient } from '@/components/profile/banner-presets'
+import { getBannerGradient } from '@/shared/ui/banner-presets'
 
 interface SidebarProjectItemProps {
   name: string

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Inktide.API.Domain.Enums;
 using Inktide.API.Domain.Models;
 using Inktide.API.TTS.Domain.Models;
@@ -9,10 +10,12 @@ using Microsoft.Extensions.Logging;
 namespace Inktide.API.TTS.Infrastructure.Decorators;
 
 /// <summary>
-/// Caches <see cref="GetModelsAsync"/> and <see cref="GetVoicesAsync"/> results per provider.
-/// Synthesis is never cached — it is a stateful streaming operation.
+/// Caches <see cref="IModelListingProvider.GetModelsAsync"/> and <see cref="IVoiceListingProvider.GetVoicesAsync"/>
+/// results per provider. Synthesis is never cached — it is a stateful streaming operation.
+/// Wraps any <see cref="ISpeechProvider"/>; listing methods are no-ops when the inner
+/// provider does not declare the corresponding capability.
 /// </summary>
-public sealed class CachingSpeechProviderDecorator : ISpeechProvider
+public sealed class CachingSpeechProviderDecorator : ISpeechProvider, IVoiceListingProvider, IModelListingProvider
 {
 
     private static readonly TimeSpan DefaultTtl = TimeSpan.FromMinutes(15);
@@ -49,6 +52,18 @@ public sealed class CachingSpeechProviderDecorator : ISpeechProvider
         ProviderOptions options,
         CancellationToken ct = default)
     {
+        if (!_inner.Capabilities.SupportsModelListing)
+            return new SpeechModelCollection("list", []);
+
+        // Invariant: all registered providers that declare SupportsModelListing = true
+        // implement IModelListingProvider. Enforced at registration time by SpeechProviderRegistry.
+        Debug.Assert(_inner is IModelListingProvider,
+            $"{_inner.Id} declares SupportsModelListing but does not implement IModelListingProvider");
+        var ml = (IModelListingProvider)_inner;
+
+        if (options.ApiKeyIsTransient)
+            return await ml.GetModelsAsync(options, ct).ConfigureAwait(false);
+
         var key = $"tts:models:{_inner.Id}";
 
         if (_cache.TryGetValue(key, out SpeechModelCollection? cached) && cached is not null)
@@ -57,7 +72,7 @@ public sealed class CachingSpeechProviderDecorator : ISpeechProvider
             return cached;
         }
 
-        var models = await _inner.GetModelsAsync(options, ct).ConfigureAwait(false);
+        var models = await ml.GetModelsAsync(options, ct).ConfigureAwait(false);
         _cache.Set(key, models, DefaultTtl);
         return models;
     }
@@ -67,6 +82,18 @@ public sealed class CachingSpeechProviderDecorator : ISpeechProvider
         string? modelId = null,
         CancellationToken ct = default)
     {
+        if (!_inner.Capabilities.SupportsVoiceListing)
+            return new SpeechVoiceCollection([]);
+
+        // Invariant: all registered providers that declare SupportsVoiceListing = true
+        // implement IVoiceListingProvider. Enforced at registration time by SpeechProviderRegistry.
+        Debug.Assert(_inner is IVoiceListingProvider,
+            $"{_inner.Id} declares SupportsVoiceListing but does not implement IVoiceListingProvider");
+        var vl = (IVoiceListingProvider)_inner;
+
+        if (options.ApiKeyIsTransient)
+            return await vl.GetVoicesAsync(options, modelId, ct).ConfigureAwait(false);
+
         var key = $"tts:voices:{_inner.Id}:{modelId}";
 
         if (_cache.TryGetValue(key, out SpeechVoiceCollection? cached) && cached is not null)
@@ -75,7 +102,7 @@ public sealed class CachingSpeechProviderDecorator : ISpeechProvider
             return cached;
         }
 
-        var voices = await _inner.GetVoicesAsync(options, modelId, ct).ConfigureAwait(false);
+        var voices = await vl.GetVoicesAsync(options, modelId, ct).ConfigureAwait(false);
         _cache.Set(key, voices, DefaultTtl);
         return voices;
     }

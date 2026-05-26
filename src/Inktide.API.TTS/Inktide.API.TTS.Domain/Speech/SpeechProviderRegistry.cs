@@ -64,20 +64,7 @@ public sealed class SpeechProviderRegistry : ISpeechProviderRegistry
         => _byId.TryGetValue(providerId, out provider);
 
 
-    private static SpeechProviderDescriptor BuildDescriptor(ISpeechProvider provider)
-    {
-        var caps = provider.Capabilities;
-        return new SpeechProviderDescriptor
-        {
-            Id = provider.Id,
-            DisplayName = provider.Name,
-            Capabilities = new SpeechProviderCapabilities
-            {
-                RequiresApiKey = caps.RequiresApiKey,
-                SupportsVoiceListing = caps.SupportsVoiceListing,
-                SupportsStreaming = caps.SupportsStreaming,
-            },
-        };
-    }
+    private static SpeechProviderDescriptor BuildDescriptor(ISpeechProvider provider) =>
+        new(provider.Id, provider.Name, provider.Capabilities);
 
 }

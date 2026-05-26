@@ -13,11 +13,11 @@ public sealed class UserSubscription
     public string? ProviderSubId { get; set; }
     public string? ProviderCustomerId { get; set; }
     public DateTime? CurrentPeriodEnd { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
-    public bool IsProActive() =>
+    public bool IsProActive(DateTime utcNow) =>
         Plan == PlanType.Pro &&
         (Status == SubStatus.Active || Status == SubStatus.Trialing) &&
-        (CurrentPeriodEnd == null || CurrentPeriodEnd > DateTime.UtcNow);
+        (CurrentPeriodEnd == null || CurrentPeriodEnd > utcNow);
 }

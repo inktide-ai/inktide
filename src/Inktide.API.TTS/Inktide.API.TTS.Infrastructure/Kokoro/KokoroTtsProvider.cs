@@ -10,7 +10,7 @@ namespace Inktide.API.TTS.Infrastructure.Kokoro;
 /// <summary>
 /// Kokoro TTS (OpenAI-compatible HTTP API) as <see cref="ISpeechProvider"/>.
 /// </summary>
-public sealed class KokoroTtsProvider : ISpeechProvider
+public sealed class KokoroTtsProvider : ISpeechProvider, IVoiceListingProvider, IModelListingProvider
 {
     
 

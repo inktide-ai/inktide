@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Inktide.API.Core.Constants;
 using Inktide.API.Core.Events;
+using Inktide.API.Organization.Application.Enums;
 using Inktide.API.Organization.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,12 +13,15 @@ namespace Inktide.API.Organization.Infrastructure.Messaging;
 
 public sealed class UserAccountDeletedConsumer : BackgroundService
 {
-    private const string ConsumerGroup = "org-user-cleanup";
-    private const string ConsumerName  = "org-consumer-1";
+    private const string ConsumerGroup    = "org-user-cleanup";
+    private const string ConsumerName     = "org-consumer-1";
+    private const int    PelRecoveryInterval = 50;
 
     private readonly IConnectionMultiplexer _redis;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<UserAccountDeletedConsumer> _logger;
+
+    private int _pollCount;
 
     public UserAccountDeletedConsumer(
         IConnectionMultiplexer redis,
@@ -51,6 +55,9 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
 
                 if (entries.Length == 0)
                     await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+
+                if (++_pollCount % PelRecoveryInterval == 0)
+                    await RecoverPendingEntriesAsync(db, stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
             catch (Exception ex)
@@ -58,6 +65,27 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
                 _logger.LogWarning(ex, "UserAccountDeletedConsumer (org): read error, retrying in 5s");
                 await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
             }
+        }
+    }
+
+    private async Task RecoverPendingEntriesAsync(IDatabase db, CancellationToken ct)
+    {
+        try
+        {
+            var result = await db.StreamAutoClaimAsync(
+                StreamNames.IntegrationEvents,
+                ConsumerGroup,
+                ConsumerName,
+                60_000,      // minIdleTimeInMs — claim messages idle > 60 s
+                "0-0",       // startAt — scan from beginning of PEL
+                10);
+
+            foreach (var entry in result.ClaimedEntries)
+                await ProcessEntryAsync(db, entry, ct);
+        }
+        catch (RedisException ex)
+        {
+            _logger.LogWarning(ex, "UserAccountDeletedConsumer (org): PEL recovery failed");
         }
     }
 
@@ -121,7 +149,7 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
         }
 
         // Transient errors — do NOT ACK; message stays in PEL for retry.
-        // TODO: add XAUTOCLAIM recovery loop for messages stuck in PEL after consumer crash.
+        // PEL recovery runs every PelRecoveryInterval polls via RecoverPendingEntriesAsync.
         await PurgeOrgDataAsync(evt.UserId, ct);
         await db.StreamAcknowledgeAsync(StreamNames.IntegrationEvents, ConsumerGroup, entry.Id);
         _logger.LogInformation(
@@ -138,27 +166,49 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
 
         await using var tx = await db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
 
-        // Find orgs where this user is the only member.
-        // If sole member → delete the org (cascade removes the membership and invites via FK).
-        // If other members exist → remove only this user's membership.
-        // TODO (Phase 2): if user is the only Admin but others exist, org is left without admin.
-        //   Options: promote another member, block account deletion, or transfer ownership first.
         var memberOrgIds = await db.OrganizationMembers
             .Where(m => m.UserId == userIdStr)
             .Select(m => m.OrganizationId)
             .ToListAsync(ct)
             .ConfigureAwait(false);
 
-        var orgsToDelete = new List<Guid>();
-        foreach (var orgId in memberOrgIds)
-        {
-            var memberCount = await db.OrganizationMembers
-                .CountAsync(m => m.OrganizationId == orgId, ct)
-                .ConfigureAwait(false);
+        // Guard: skip orgs where this user is the sole admin but other members exist.
+        // Single query — avoids N×3 round trips from per-org CountAsync calls.
+        var orgStats = await db.OrganizationMembers
+            .Where(m => memberOrgIds.Contains(m.OrganizationId))
+            .GroupBy(m => m.OrganizationId)
+            .Select(g => new
+            {
+                OrgId       = g.Key,
+                AdminCount  = g.Count(m => m.Role == OrganizationRole.Admin),
+                TotalCount  = g.Count(),
+                UserIsAdmin = g.Any(m => m.UserId == userIdStr && m.Role == OrganizationRole.Admin),
+            })
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
 
-            if (memberCount == 1)
-                orgsToDelete.Add(orgId);
+        var blockedOrgIds = orgStats
+            .Where(s => s.UserIsAdmin && s.AdminCount == 1 && s.TotalCount > 1)
+            .Select(s => s.OrgId)
+            .ToList();
+
+        if (blockedOrgIds.Count > 0)
+        {
+            _logger.LogWarning(
+                "UserAccountDeletedConsumer (org): user {UserId} is sole admin of {Count} org(s) with other members — " +
+                "skipping those orgs, manual admin transfer required. OrgIds: {OrgIds}",
+                userId, blockedOrgIds.Count, string.Join(", ", blockedOrgIds));
+            // memberOrgIds is List<Guid> (from .ToListAsync above) — reassignment is valid
+            memberOrgIds = memberOrgIds.Except(blockedOrgIds).ToList();
         }
+
+        // Find orgs where this user is now the only remaining member.
+        // If sole member → delete the org (cascade removes the membership and invites via FK).
+        // If other members exist → remove only this user's membership.
+        var orgsToDelete = orgStats
+            .Where(s => !blockedOrgIds.Contains(s.OrgId) && s.TotalCount == 1)
+            .Select(s => s.OrgId)
+            .ToList();
 
         var orgsDeleted = 0;
         if (orgsToDelete.Count > 0)
@@ -172,7 +222,7 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
 
         // Remove remaining memberships (orgs with other members).
         var membershipsDeleted = await db.OrganizationMembers
-            .Where(m => m.UserId == userIdStr)
+            .Where(m => m.UserId == userIdStr && memberOrgIds.Contains(m.OrganizationId))
             .ExecuteDeleteAsync(ct)
             .ConfigureAwait(false);
 

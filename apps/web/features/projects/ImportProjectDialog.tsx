@@ -2,12 +2,12 @@
 
 import { useCallback, useRef, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
-import { useCharactersContext } from '@/context/CharactersContext'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import {
   parseInktFile,
   finalizeImport,
   type InktParseResponse,
-} from '@/api/projects'
+} from '@/features/projects/api/projects'
 
 type Phase = 'idle' | 'parsing' | 'preview' | 'finalizing' | 'done'
 

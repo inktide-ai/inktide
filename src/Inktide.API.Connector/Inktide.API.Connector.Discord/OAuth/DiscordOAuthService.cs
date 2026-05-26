@@ -1,8 +1,9 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Discord.Settings;
-using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Discord.OAuth;
@@ -15,17 +16,17 @@ public sealed class DiscordOAuthService : IDiscordOAuthService
     private const int Permissions = 84992; // VIEW_CHANNEL + SEND_MESSAGES + READ_MESSAGE_HISTORY + EMBED_LINKS
 
     private readonly DiscordSettings _settings;
-    private readonly IDataProtector _protector;
+    private readonly ITokenProtector _tokenProtector;
     private readonly HttpClient _http;
 
     public DiscordOAuthService(
         IOptions<DiscordSettings> settings,
-        IDataProtectionProvider dp,
+        [FromKeyedServices(TokenProtectorKeys.Discord)] ITokenProtector tokenProtector,
         HttpClient http)
     {
-        _settings = settings.Value;
-        _protector = dp.CreateProtector("Discord.OAuth.Tokens");
-        _http = http;
+        _settings       = settings.Value;
+        _tokenProtector = tokenProtector;
+        _http           = http;
     }
 
     public string BuildInstallUrl(string state) =>
@@ -53,7 +54,7 @@ public sealed class DiscordOAuthService : IDiscordOAuthService
 
     public async Task<DiscordTokenResponse> RefreshAsync(string encryptedRefreshToken, CancellationToken ct = default)
     {
-        var refreshToken = Unprotect(encryptedRefreshToken);
+        var refreshToken = _tokenProtector.Unprotect(encryptedRefreshToken);
         var form = new Dictionary<string, string>
         {
             ["client_id"]     = _settings.ClientId,
@@ -66,7 +67,7 @@ public sealed class DiscordOAuthService : IDiscordOAuthService
 
     public async Task RevokeAsync(string encryptedAccessToken, CancellationToken ct = default)
     {
-        var token = Unprotect(encryptedAccessToken);
+        var token = _tokenProtector.Unprotect(encryptedAccessToken);
         var form = new Dictionary<string, string>
         {
             ["client_id"]     = _settings.ClientId,
@@ -77,11 +78,11 @@ public sealed class DiscordOAuthService : IDiscordOAuthService
         {
             Content = new FormUrlEncodedContent(form),
         };
-        await _http.SendAsync(req, ct);
+        var res = await _http.SendAsync(req, ct);
+        if (!res.IsSuccessStatusCode)
+            throw new InvalidOperationException(
+                $"Discord token revoke returned {(int)res.StatusCode}");
     }
-
-    public string Protect(string plaintext) => _protector.Protect(plaintext);
-    public string Unprotect(string ciphertext) => _protector.Unprotect(ciphertext);
 
     private async Task<DiscordTokenResponse> PostTokenAsync(
         Dictionary<string, string> form,

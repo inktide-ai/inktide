@@ -1,5 +1,5 @@
-import i18n from '../../i18n/i18n'
-import type { ILocaleSync } from '@/types/ILocaleSync'
+import i18n from '@/i18n/i18n'
+import type { ILocaleSync } from '@/shared/types/ILocaleSync'
 
 const SUPPORTED = new Set(['en', 'ru'])
 

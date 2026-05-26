@@ -17,8 +17,8 @@ public sealed class MemoryMetadataConfiguration : IEntityTypeConfiguration<Memor
         b.Property(e => e.CharacterId).HasColumnName("ai_card_id").IsRequired();
         b.Property(e => e.QdrantPointId).HasColumnName("qdrant_point_id").IsRequired();
         b.Property(e => e.FactText).HasColumnName("fact_text").IsRequired();
-        b.Property(e => e.Category).HasColumnName("category").IsRequired().HasDefaultValue("general");
-        b.Property(e => e.SourceType).HasColumnName("source_type").IsRequired().HasDefaultValue("chat");
+        b.Property(e => e.Category).HasColumnName("category").IsRequired().HasDefaultValue(MemoryCategoryType.General);
+        b.Property(e => e.SourceType).HasColumnName("source_type").IsRequired().HasDefaultValue(MemorySourceType.Chat);
         b.Property(e => e.Importance).HasColumnName("importance").HasDefaultValue(0.5);
         b.Property(e => e.RememberedAt).HasColumnName("remembered_at");
         b.Property(e => e.LastRecalledAt).HasColumnName("last_recalled_at");

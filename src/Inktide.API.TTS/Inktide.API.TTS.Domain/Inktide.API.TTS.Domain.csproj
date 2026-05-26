@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Inktide.API.TTS.Infrastructure" />
+    <InternalsVisibleTo Include="Inktide.API.TTS.Tests" />
   </ItemGroup>
 
 </Project>

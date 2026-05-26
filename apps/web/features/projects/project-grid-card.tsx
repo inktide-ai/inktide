@@ -1,8 +1,8 @@
 'use client'
 
 import { Gamepad2, MessageCircle, Radio, ExternalLink, Download, Tv2 } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Badge, type BadgeVariant } from '@/components/ui/badge'
+import { Card } from '@/shared/ui/card'
+import { Badge, type BadgeVariant } from '@/shared/ui/badge'
 
 export type ProjectStatus = 'active' | 'paused' | 'archived'
 export type ProjectPlatform = 'discord' | 'twitch' | 'telegram' | 'obs'

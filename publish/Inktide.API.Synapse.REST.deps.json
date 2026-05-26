@@ -9,7 +9,6 @@
       "Inktide.API.Synapse.REST/1.0.0": {
         "dependencies": {
           "Inktide.API.Core": "1.0.0",
-          "Inktide.API.Soul.Application": "1.0.0",
           "Inktide.API.Synapse.Infrastructure": "1.0.0",
           "Microsoft.AspNetCore.Mvc.NewtonsoftJson": "10.0.3",
           "Serilog.AspNetCore": "8.0.3"
@@ -535,6 +534,17 @@
           }
         }
       },
+      "Inktide.API.Graph.Application/1.0.0": {
+        "dependencies": {
+          "Inktide.API.Graph.Domain": "1.0.0"
+        },
+        "runtime": {
+          "Inktide.API.Graph.Application.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "Inktide.API.Graph.Domain/1.0.0": {
         "dependencies": {
           "Inktide.API.Core": "1.0.0"
@@ -591,8 +601,7 @@
       },
       "Inktide.API.Synapse.Application/1.0.0": {
         "dependencies": {
-          "Inktide.API.Core": "1.0.0",
-          "Inktide.API.Memory.Domain": "1.0.0"
+          "Inktide.API.Core": "1.0.0"
         },
         "runtime": {
           "Inktide.API.Synapse.Application.dll": {
@@ -604,6 +613,7 @@
       "Inktide.API.Synapse.Infrastructure/1.0.0": {
         "dependencies": {
           "Inktide.API.Core": "1.0.0",
+          "Inktide.API.Graph.Application": "1.0.0",
           "Inktide.API.Graph.Domain": "1.0.0",
           "Inktide.API.Memory.Domain": "1.0.0",
           "Inktide.API.Soul.Application": "1.0.0",
@@ -954,6 +964,11 @@
       "sha512": ""
     },
     "Inktide.API.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Inktide.API.Graph.Application/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

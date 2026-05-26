@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { useEffect } from 'react'
-import LoadingScreen from '@/components/ui/loading-screen'
+import LoadingScreen from '@/shared/ui/loading-screen'
 
 export default function ForgotPasswordPage() {
   const router = useRouter()

@@ -3,7 +3,7 @@
 import { type ReactNode } from 'react'
 import { redirect } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
-import LoadingScreen from '@/components/ui/loading-screen'
+import LoadingScreen from '@/shared/ui/loading-screen'
 
 interface ProtectedRouteProps {
   children: ReactNode

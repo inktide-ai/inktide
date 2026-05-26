@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import { Bot, Folder } from 'lucide-react'
-import type { SearchResult } from '@/hooks/useSearch'
+import type { SearchResult } from '@/shared/hooks/useSearch'
 
 interface SearchDropdownProps {
   results: SearchResult[]

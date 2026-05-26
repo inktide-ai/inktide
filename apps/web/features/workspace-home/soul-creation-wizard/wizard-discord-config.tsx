@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { validateDiscordToken } from '@/api/soul'
-import { CredentialStatusBadge, type CredentialStatus } from '@/components/soul/credential-status-badge'
+import { validateDiscordToken } from '@/entities/soul/api'
+import { CredentialStatusBadge, type CredentialStatus } from '@/features/soul/components/credential-status-badge'
 
 const iconCls = 'w-5 h-5'
 

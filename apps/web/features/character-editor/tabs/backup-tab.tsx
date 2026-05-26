@@ -1,6 +1,6 @@
 'use client'
 import { useTranslation } from 'react-i18next'
-import type { AiCharacter } from '@/lib/character'
+import type { AiCharacter } from '@/shared/lib/character'
 
 interface BackupTabProps {
   character: AiCharacter

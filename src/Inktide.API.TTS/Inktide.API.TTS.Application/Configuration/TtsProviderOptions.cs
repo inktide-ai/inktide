@@ -7,27 +7,14 @@ public sealed class TtsProviderOptions
 {
     public const string SectionName = "TtsProviders";
 
-
-    private string _defaultProviderId = "kokoro";
-    private Dictionary<string, bool>? _featureFlags;
-
-
     /// <summary>
     /// Provider id when the caller does not specify one (must exist in the speech provider registry).
     /// </summary>
-    public string DefaultProviderId
-    {
-        get => _defaultProviderId;
-        set => _defaultProviderId = value;
-    }
+    public string DefaultProviderId { get; set; } = "kokoro";
 
     /// <summary>
     /// Optional feature switches for routing / experiments.
     /// </summary>
-    public Dictionary<string, bool>? FeatureFlags
-    {
-        get => _featureFlags;
-        set => _featureFlags = value;
-    }
+    public Dictionary<string, bool>? FeatureFlags { get; set; }
 
 }

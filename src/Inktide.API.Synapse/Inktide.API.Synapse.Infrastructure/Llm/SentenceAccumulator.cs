@@ -16,7 +16,7 @@ namespace Inktide.API.Synapse.Infrastructure.Llm;
 /// Preserves semantic coherence for short conversational replies where latency matters
 /// less than delivering the full thought at once.
 /// </remarks>
-public static class SentenceAccumulator
+internal static class SentenceAccumulator
 {
 
     private const int MinSentenceLength = 10;

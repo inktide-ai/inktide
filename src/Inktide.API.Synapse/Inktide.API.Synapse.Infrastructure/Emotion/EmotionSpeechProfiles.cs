@@ -7,7 +7,7 @@ namespace Inktide.API.Synapse.Infrastructure.Emotion;
 /// Intensity and personality responsiveness scale the effect — low intensity or low responsiveness
 /// means minimal deviation from 1.0 even for highly emotional states.
 /// </summary>
-public static class EmotionSpeechProfiles
+internal static class EmotionSpeechProfiles
 {
 
     private sealed record EmotionDeltas(float SpeedDelta, float EnergyDelta);

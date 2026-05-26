@@ -1,5 +1,5 @@
 using Inktide.API.Soul.Application.Interfaces;
-using Inktide.API.Soul.Domain.Entities;
+using Inktide.API.Soul.REST.Mappers;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -38,7 +38,7 @@ public sealed class AiCardRunPresetsController : ApiController
         var list = await _presets.ListAsync(userId, cardId, ct).ConfigureAwait(false);
         if (list is null) return NotFound();
 
-        return Ok(list.Select(ToResponse).ToList());
+        return Ok(list.Select(RunPresetResponseMapper.ToResponse).ToList());
     }
 
     [HttpPost]
@@ -61,7 +61,7 @@ public sealed class AiCardRunPresetsController : ApiController
 
         if (preset is null) return NotFound();
 
-        return CreatedAtAction(nameof(List), new { cardId }, ToResponse(preset));
+        return CreatedAtAction(nameof(List), new { cardId }, RunPresetResponseMapper.ToResponse(preset));
     }
 
     [HttpPut("{presetId:guid}")]
@@ -83,7 +83,7 @@ public sealed class AiCardRunPresetsController : ApiController
             ct).ConfigureAwait(false);
 
         if (preset is null) return NotFound();
-        return Ok(ToResponse(preset));
+        return Ok(RunPresetResponseMapper.ToResponse(preset));
     }
 
     [HttpDelete("{presetId:guid}")]
@@ -107,7 +107,7 @@ public sealed class AiCardRunPresetsController : ApiController
 
         var preset = await _presets.ActivateAsync(userId, cardId, presetId, ct).ConfigureAwait(false);
         if (preset is null) return NotFound();
-        return Ok(ToResponse(preset));
+        return Ok(RunPresetResponseMapper.ToResponse(preset));
     }
 
     /// <summary>Deactivates the currently active preset, reverting the card to its base defaults.</summary>
@@ -132,25 +132,8 @@ public sealed class AiCardRunPresetsController : ApiController
         if (!TryGetUserId(out var userId)) return Unauthorized();
 
         var preset = await _presets.ReorderAsync(userId, cardId, presetId, body.PreviousId, body.NextId, ct).ConfigureAwait(false);
-        return preset is null ? NotFound() : Ok(ToResponse(preset));
+        return preset is null ? NotFound() : Ok(RunPresetResponseMapper.ToResponse(preset));
     }
 
-
-    private static RunPresetResponse ToResponse(AiCardRunPreset p) => new()
-    {
-        Id                    = p.Id,
-        AiCardId              = p.AiCardId,
-        Name                  = p.Name,
-        Description           = p.Description,
-        Icon                  = p.Icon,
-        IsActive              = p.IsActive,
-        SortKey               = p.SortKey,
-        OverrideLlmModelId    = p.OverrideLlmModelId,
-        OverrideTemperature   = p.OverrideTemperature,
-        OverrideEmotionPresetId = p.OverrideEmotionPresetId,
-        OverrideVoiceProfileId  = p.OverrideVoiceProfileId,
-        CreatedAt             = p.CreatedAt,
-        UpdatedAt             = p.UpdatedAt,
-    };
 
 }

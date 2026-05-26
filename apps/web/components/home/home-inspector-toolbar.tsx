@@ -1,9 +1,9 @@
 'use client'
 import type { ReactNode } from 'react'
-import type { HubTabId } from '@/hooks/useHubLayout'
+import type { HubTabId } from '@/shared/hooks/useHubLayout'
 import {
   IconUser, IconPaint, IconSkills, IconScene, IconObs,
-} from '@/components/profile/tab-icons'
+} from '@/features/character-editor/tab-icons'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const BG     = '#0A0B0F'

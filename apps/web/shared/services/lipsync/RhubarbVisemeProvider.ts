@@ -1,4 +1,4 @@
-import type { IVisemeProvider, MouthWeights, RhubarbViseme, VisemeContext, VisemeCue } from '@/types/IVisemeProvider'
+import type { IVisemeProvider, MouthWeights, RhubarbViseme, VisemeContext, VisemeCue } from '@/shared/types/IVisemeProvider'
 
 // ── Rhubarb → VRM blend-shape weights ────────────────────────────────────────
 //

@@ -12,7 +12,8 @@ namespace Inktide.API.Billing.Infrastructure.Messaging;
 public sealed class UserAccountDeletedConsumer : BackgroundService
 {
     private const string ConsumerGroup = "billing-user-cleanup";
-    private const string ConsumerName  = "billing-consumer-1";
+    private static readonly string ConsumerName =
+        $"billing-consumer-{Environment.MachineName}-{Environment.ProcessId}";
 
     private readonly IConnectionMultiplexer _redis;
     private readonly IServiceScopeFactory _scopeFactory;
@@ -32,6 +33,8 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
     {
         var db = _redis.GetDatabase();
         await EnsureConsumerGroupAsync(db, stoppingToken);
+        // Recover messages orphaned in the PEL by a previous consumer crash.
+        await ClaimStalePendingAsync(db, stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -49,7 +52,11 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
                     await ProcessEntryAsync(db, entry, stoppingToken);
 
                 if (entries.Length == 0)
+                {
+                    // Also check the PEL periodically in case a sibling consumer crashes mid-flight.
+                    await ClaimStalePendingAsync(db, stoppingToken);
                     await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+                }
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
             catch (Exception ex)
@@ -119,13 +126,47 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
             return;
         }
 
-        // Transient errors — do NOT ACK; message stays in PEL for retry.
-        // TODO: add XAUTOCLAIM recovery loop for messages stuck in PEL after consumer crash.
+        // Transient errors — do NOT ACK; message stays in PEL for retry (ClaimStalePendingAsync re-claims it).
         await PurgeBillingDataAsync(evt.UserId, ct);
         await db.StreamAcknowledgeAsync(StreamNames.IntegrationEvents, ConsumerGroup, entry.Id);
         _logger.LogInformation(
             "UserAccountDeletedConsumer (billing): processed {MessageId} for user {UserId}",
             entry.Id, evt.UserId);
+    }
+
+    /// <summary>
+    /// Claims messages that have been pending (unacknowledged) in the PEL for more than 1 minute
+    /// — i.e. delivered to a consumer that crashed before ACKing — and reprocesses them.
+    /// </summary>
+    private async Task ClaimStalePendingAsync(IDatabase db, CancellationToken ct)
+    {
+        try
+        {
+            const long minIdleMs = 60_000; // 1 minute
+            var cursor = "0-0";
+            StreamAutoClaimResult result;
+            do
+            {
+                result = await db.StreamAutoClaimAsync(
+                    StreamNames.IntegrationEvents,
+                    ConsumerGroup,
+                    ConsumerName,
+                    minIdleMs,
+                    cursor,
+                    count: 10);
+
+                foreach (var entry in result.ClaimedEntries)
+                    await ProcessEntryAsync(db, entry, ct);
+
+                cursor = result.NextStartId;
+            }
+            while (cursor != "0-0" && !ct.IsCancellationRequested);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "UserAccountDeletedConsumer (billing): stale PEL claim pass failed");
+        }
     }
 
     private async Task PurgeBillingDataAsync(Guid userId, CancellationToken ct)

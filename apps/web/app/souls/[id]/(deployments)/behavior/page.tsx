@@ -1,7 +1,7 @@
 'use client'
 
-import BehaviorTab from '@/components/profile/tabs/behavior-tab'
-import { useCharactersContext } from '@/context/CharactersContext'
+import BehaviorTab from '@/features/character-editor/tabs/behavior-tab'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 
 export default function SoulBehaviorPage() {
   const { selected, updateCharacter } = useCharactersContext()

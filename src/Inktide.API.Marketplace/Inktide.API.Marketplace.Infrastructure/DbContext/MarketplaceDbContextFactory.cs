@@ -1,3 +1,4 @@
+using Inktide.API.Marketplace.Infrastructure.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -14,13 +15,7 @@ public sealed class MarketplaceDbContextFactory : IDesignTimeDbContextFactory<Ma
             .AddEnvironmentVariables()
             .Build();
 
-        var pg = config.GetSection("PostgresSettings");
-        var connStr = config.GetConnectionString("Postgres")
-            ?? $"Host={pg["Host"] ?? "localhost"};"
-             + $"Port={pg["Port"] ?? "5432"};"
-             + $"Database={pg["Database"] ?? "inktide"};"
-             + $"Username={pg["Username"] ?? "postgres"};"
-             + $"Password={pg["Password"] ?? ""}";
+        var connStr = PostgresConnectionStringResolver.Resolve(config, throwIfPasswordMissing: false);
 
         var opts = new DbContextOptionsBuilder<MarketplaceDbContext>()
             .UseNpgsql(connStr)
@@ -31,6 +26,9 @@ public sealed class MarketplaceDbContextFactory : IDesignTimeDbContextFactory<Ma
 
     private static string FindAppSettingsDir()
     {
+        var envPath = Environment.GetEnvironmentVariable("EF_MIGRATION_SETTINGS_PATH");
+        if (!string.IsNullOrEmpty(envPath) && Directory.Exists(envPath)) return envPath;
+
         var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
         while (dir is not null)
         {

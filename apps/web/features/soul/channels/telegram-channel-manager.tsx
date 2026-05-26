@@ -6,9 +6,9 @@ import {
   createTelegramChannel,
   revokeTelegramChannel,
   type ChannelResponse,
-} from '@/api/soul'
+} from '@/features/soul/api/index'
 import { ApiError } from '@/api/client'
-import { useChannelMutation } from '@/hooks/soul/useChannelMutation'
+import { useChannelMutation } from '@/features/soul/hooks/useChannelMutation'
 
 interface Props {
   soulId: string

@@ -1,10 +1,10 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import type { AiCharacter } from '@/lib/character/types'
-import type { AiCardListItem, LlmModelResponse } from '../../api/soul'
-import type { ICardRepository } from '@/types/ICardRepository'
-import { apiResponseToCharacter, characterToUpdateRequest, characterToCreateRequest } from '@/lib/character/mappers'
+import type { AiCharacter } from '@/shared/lib/character/types'
+import type { AiCardListItem, LlmModelResponse } from '@/shared/types/soul-api'
+import type { ICardRepository } from '@/shared/types/ICardRepository'
+import { apiResponseToCharacter, characterToUpdateRequest, characterToCreateRequest } from '@/shared/lib/character/mappers'
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 

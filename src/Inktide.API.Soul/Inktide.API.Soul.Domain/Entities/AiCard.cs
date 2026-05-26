@@ -38,6 +38,8 @@ public sealed class AiCard
     private string _sortKey = "a0";
     private LlmCatalogEntry? _llmCatalog;
     private TtsCatalogEntry? _ttsCatalog;
+    private string? _category;
+    private string _tags = "[]";
     private ICollection<AiCardChannel> _channels = [];
     private ICollection<AiCardTool> _tools = [];
 
@@ -217,6 +219,19 @@ public sealed class AiCard
     {
         if (string.IsNullOrEmpty(key)) throw new ArgumentException("sort key required", nameof(key));
         _sortKey = key;
+    }
+
+    public string? Category
+    {
+        get => _category;
+        set => _category = value;
+    }
+
+    /// <summary>JSON-serialized string array of user-defined tags.</summary>
+    public string Tags
+    {
+        get => _tags;
+        set => _tags = value;
     }
 
     public LlmCatalogEntry? LlmCatalog

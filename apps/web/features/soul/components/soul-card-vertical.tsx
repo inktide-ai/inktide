@@ -1,7 +1,7 @@
 'use client'
 
 import { Star } from 'lucide-react'
-import { Card } from '@/components/ui/card'
+import { Card } from '@/shared/ui/card'
 import type { SoulCardData, SoulStatus } from './soul-card'
 
 // ── Status config ─────────────────────────────────────────────────────────────

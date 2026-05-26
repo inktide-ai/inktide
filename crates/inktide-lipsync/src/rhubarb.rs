@@ -1,4 +1,4 @@
-use std::io::Write as _;
+use std::io::{Read as _, Write as _};
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::time::Duration;
@@ -25,10 +25,17 @@ struct RhubarbMetadata { duration: f64 }
 #[derive(Deserialize)]
 struct RhubarbCue { start: f64, value: String }
 
+/// Default Rhubarb subprocess timeout, aligned with the Inktide ≤4 s end-to-end
+/// latency budget. Rhubarb normally finishes in 100–500 ms; this allows an 8–40×
+/// margin before the process is killed. Used by [`RhubarbAnalyzer::from_path`] and
+/// [`LipSyncAnalyzer::rhubarb`].
+pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(4);
+
 #[derive(Debug, Clone)]
 pub struct RhubarbConfig {
     pub executable: PathBuf,
-    /// `None` waits indefinitely. Recommended: `Some(Duration::from_secs(30))`.
+    /// `None` waits indefinitely. Set to match your pipeline latency budget.
+    /// See [`DEFAULT_TIMEOUT`] for the recommended value.
     pub timeout: Option<Duration>,
 }
 
@@ -43,7 +50,10 @@ impl RhubarbAnalyzer {
 
     pub fn from_path() -> Option<Self> {
         which::which("rhubarb").ok().map(|exe| {
-            Self::new(RhubarbConfig { executable: exe, timeout: None })
+            Self::new(RhubarbConfig {
+                executable: exe,
+                timeout: Some(DEFAULT_TIMEOUT),
+            })
         })
     }
 }
@@ -75,34 +85,37 @@ impl RhubarbAnalyzer {
         // can fill the OS pipe buffer while we're blocked in wait(), deadlocking both sides.
         let stdout_t = child.stdout.take().map(|out| {
             std::thread::spawn(move || {
+                let mut out = out;
                 let mut buf = Vec::new();
-                let _ = std::io::Read::read_to_end(&mut { out }, &mut buf);
+                let _ = out.read_to_end(&mut buf);
                 buf
             })
         });
         let stderr_t = child.stderr.take().map(|err| {
             std::thread::spawn(move || {
+                let mut err = err;
                 let mut buf = String::new();
-                let _ = std::io::Read::read_to_string(&mut { err }, &mut buf);
+                let _ = err.read_to_string(&mut buf);
                 buf
             })
         });
 
         let status = match self.config.timeout {
-            None => Some(child.wait().map_err(LipSyncError::Io)?),
+            None => child.wait().map_err(LipSyncError::Io)?,
             Some(t) => {
-                let s = child.wait_timeout(t).map_err(LipSyncError::Io)?;
-                if s.is_none() { let _ = child.kill(); }
-                s
+                let Some(status) = child.wait_timeout(t).map_err(LipSyncError::Io)? else {
+                    let _ = child.kill();
+                    // join draining threads before returning so we don't leak them
+                    let _ = stdout_t.and_then(|h| h.join().ok());
+                    let _ = stderr_t.and_then(|h| h.join().ok());
+                    return Err(LipSyncError::Timeout(t));
+                };
+                status
             }
         };
 
         let stdout = stdout_t.and_then(|h| h.join().ok()).unwrap_or_default();
         let stderr = stderr_t.and_then(|h| h.join().ok()).unwrap_or_default();
-
-        let Some(status) = status else {
-            return Err(LipSyncError::Timeout(self.config.timeout.unwrap_or(Duration::ZERO)));
-        };
 
         if !status.success() {
             return Err(LipSyncError::RhubarbFailed(stderr));
@@ -119,18 +132,25 @@ fn write_temp_wav(wav_bytes: &[u8]) -> Result<NamedTempFile, LipSyncError> {
     Ok(tmp)
 }
 
+fn checked_secs(secs: f64, context: &str) -> Result<Duration, LipSyncError> {
+    if secs < 0.0 || !secs.is_finite() {
+        return Err(LipSyncError::RhubarbFailed(format!("invalid {context}: {secs}")));
+    }
+    Ok(Duration::from_secs_f64(secs))
+}
+
 fn parse_output(stdout: &[u8]) -> Result<VisemeTimeline, LipSyncError> {
     let parsed: RhubarbOutput = serde_json::from_slice(stdout).map_err(LipSyncError::Json)?;
 
     let cues = parsed.mouth_cues.iter()
         .map(|c| Ok(VisemeCue {
-            start: Duration::from_secs_f64(c.start),
+            start: checked_secs(c.start, "cue timestamp")?,
             viseme: Viseme::try_from(c.value.as_str())?,
         }))
         .collect::<Result<Vec<_>, LipSyncError>>()?;
 
-    Ok(VisemeTimeline {
-        duration: Duration::from_secs_f64(parsed.metadata.duration),
+    Ok(VisemeTimeline::new(
         cues,
-    })
+        checked_secs(parsed.metadata.duration, "duration")?,
+    ))
 }

@@ -1,7 +1,7 @@
 import { apiFetch, jsonOrThrow } from './client'
 import type { Node as RFNode, Edge } from '@xyflow/react'
-import type { PipelineNodeData } from '@/components/graph/nodes/pipeline-node'
-import type { PipelineNodeType, NodeDefinition } from '@/components/graph/nodes/node-definitions'
+import type { PipelineNodeData } from '@/features/graph/nodes/pipeline-node'
+import type { PipelineNodeType, NodeDefinition } from '@/features/graph/nodes/node-definitions'
 
 // ── Backend DTOs ──────────────────────────────────────────────────────────────
 

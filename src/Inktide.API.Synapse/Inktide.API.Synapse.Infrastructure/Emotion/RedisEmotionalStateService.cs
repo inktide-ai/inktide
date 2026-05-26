@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
+using Inktide.API.Synapse.Infrastructure.Constants;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -11,15 +12,17 @@ namespace Inktide.API.Synapse.Infrastructure.Emotion;
 /// State expires automatically when the character goes dormant, resetting emotion to baseline
 /// on the next conversation without any explicit cleanup.
 /// </summary>
-public sealed class RedisEmotionalStateService : IEmotionalStateService
+internal sealed class RedisEmotionalStateService : IEmotionalStateService
 {
 
     private static readonly TimeSpan StateTtl = TimeSpan.FromMinutes(20);
 
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
+    private const float DecayFactor         = 0.8f;  // intensity decay per tick when no new emotion
+    private const float MemoryBiasThreshold = 0.5f;  // memory > this = keep previous emotion label
+    private const float OverrideThreshold   = 0.6f;  // new signal must exceed this fraction to switch label
+    private const float SteadyMomentumMax   = 0.08f; // momentum below this = "steady" trajectory
+    private const float RapidShiftMomentum  = 0.4f;  // momentum above this = "shifting rapidly"
+
 
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<RedisEmotionalStateService> _logger;
@@ -42,7 +45,7 @@ public sealed class RedisEmotionalStateService : IEmotionalStateService
             var raw = await db.StringGetAsync(StateKey(characterId));
             if (raw.IsNullOrEmpty) return null;
 
-            return JsonSerializer.Deserialize<EmotionalState>((string)raw!, JsonOpts);
+            return JsonSerializer.Deserialize<EmotionalState>((string)raw!, SynapseConstants.Json.Write);
         }
         catch (Exception ex)
         {
@@ -64,7 +67,7 @@ public sealed class RedisEmotionalStateService : IEmotionalStateService
         try
         {
             var db  = _redis.GetDatabase();
-            var raw = JsonSerializer.Serialize(updated, JsonOpts);
+            var raw = JsonSerializer.Serialize(updated, SynapseConstants.Json.Write);
             await db.StringSetAsync(StateKey(characterId), raw, StateTtl);
         }
         catch (Exception ex)
@@ -108,8 +111,8 @@ public sealed class RedisEmotionalStateService : IEmotionalStateService
         if (string.IsNullOrEmpty(newEmotion))
         {
             // No new emotion — decay toward neutral based on memory
-            blendedEmotion    = memory > 0.5f ? previousEmotion : null;
-            blendedIntensity  = previousIntensity * memory * 0.8f;
+            blendedEmotion    = memory > MemoryBiasThreshold ? previousEmotion : null;
+            blendedIntensity  = previousIntensity * memory * DecayFactor;
         }
         else
         {
@@ -119,7 +122,7 @@ public sealed class RedisEmotionalStateService : IEmotionalStateService
             blendedIntensity = Math.Clamp(blendedIntensity, 0f, 1f);
 
             // If new emotion is strong enough to override, switch; otherwise blend labels
-            blendedEmotion = newRawIntensity * responsiveness > previousIntensity * memory * 0.6f
+            blendedEmotion = newRawIntensity * responsiveness > previousIntensity * memory * OverrideThreshold
                 ? newEmotion
                 : (previousEmotion ?? newEmotion);
         }
@@ -140,12 +143,12 @@ public sealed class RedisEmotionalStateService : IEmotionalStateService
 
     private static string? ComputeTrajectory(string? from, string? to, float momentum)
     {
-        if (momentum < 0.08f)
+        if (momentum < SteadyMomentumMax)
         {
             return to is null ? null : $"steady {to}";
         }
 
-        if (momentum > 0.4f) return "shifting rapidly";
+        if (momentum > RapidShiftMomentum) return "shifting rapidly";
 
         var fv = GetValence(from);
         var tv = GetValence(to);

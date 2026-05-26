@@ -7,10 +7,10 @@ import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm'
 import type { VRM } from '@pixiv/three-vrm'
 import { VRMAnimationLoaderPlugin } from '@pixiv/three-vrm-animation'
 
-import type { MouthWeights } from '@/types/IVisemeProvider'
-import type { EmotionState, VrmAnimationContext } from '@/types/IVrmController'
-import type { SceneRendererSettings } from '../../../hooks/useSceneRendererSettings'
-import { createVrmControllers } from '../../../services/animation/registry'
+import type { MouthWeights } from '@/shared/types/IVisemeProvider'
+import type { EmotionState, VrmAnimationContext } from '@/shared/types/IVrmController'
+import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
+import { createVrmControllers } from '@/shared/services/animation/registry'
 
 export type LookAtMode = 'idle' | 'camera' | 'mouse' | 'disabled'
 

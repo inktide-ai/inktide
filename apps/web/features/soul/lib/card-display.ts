@@ -1,6 +1,6 @@
-import type { SoulCardData, SoulPlatform, SoulStatus } from '@/components/hub/soul-card'
-import type { AiCardListItem } from '@/api/soul'
-import { splitPersonalityForSoulCard } from '@/lib/soul-card-personality'
+import type { SoulCardData, SoulPlatform, SoulStatus } from '@/features/soul/components/soul-card'
+import type { AiCardListItem } from '@/features/soul/api/index'
+import { splitPersonalityForSoulCard } from '@/features/soul/lib/soul-card-personality'
 
 const ACCENT_PALETTE = ['#8b5cf6', '#22d3ee', '#f43f5e', '#ec4899', '#f97316', '#60a5fa', '#a78bfa'] as const
 

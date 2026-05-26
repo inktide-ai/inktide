@@ -7,7 +7,7 @@ namespace Inktide.API.Synapse.Infrastructure.Llm;
 /// directive block that is injected into the LLM system prompt.
 /// Returns null when the personality is entirely default — no noise for unconfigured cards.
 /// </summary>
-public static class PersonalityDirectiveBuilder
+internal static class PersonalityDirectiveBuilder
 {
 
     public static string? Build(SynapsePersonalitySnapshot p)

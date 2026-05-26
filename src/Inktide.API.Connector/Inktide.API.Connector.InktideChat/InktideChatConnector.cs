@@ -1,7 +1,6 @@
 using System.Threading.Channels;
 using Inktide.API.Connector.Application.Contracts;
 using Inktide.API.Connector.Application.Interfaces;
-using Inktide.API.Connector.Application.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Connector.InktideChat;
@@ -16,7 +15,10 @@ namespace Inktide.API.Connector.InktideChat;
 /// </summary>
 public sealed class InktideChatConnector : IChatConnector, IInktideChatInbox, IAsyncDisposable
 {
-    public const string PlatformIdValue = "inktide-chat";
+    public const string PlatformIdValue   = "inktide-chat";
+    // Distinct from PlatformIdValue: channel label visible in downstream routing/logs.
+    // Same value today, but independently modifiable without touching the platform ID.
+    internal const string DefaultChannelName = "inktide-chat";
 
     public string PlatformId => PlatformIdValue;
 
@@ -25,13 +27,14 @@ public sealed class InktideChatConnector : IChatConnector, IInktideChatInbox, IA
     public bool IsConnected => _worker is { IsCompleted: false };
 
     private readonly IStreamMessageHandler _handler;
+    private readonly IInktideChatMessageMapper _mapper;
     private readonly ILogger<InktideChatConnector> _logger;
     private readonly Channel<InboundMessage> _queue;
 
     private CancellationTokenSource? _cts;
     private Task? _worker;
 
-    private readonly record struct InboundMessage(
+    public readonly record struct InboundMessage(
         string ChannelId,
         string UserId,
         string UserName,
@@ -40,10 +43,12 @@ public sealed class InktideChatConnector : IChatConnector, IInktideChatInbox, IA
 
     public InktideChatConnector(
         IStreamMessageHandler handler,
+        IInktideChatMessageMapper mapper,
         ILogger<InktideChatConnector> logger)
     {
         _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _mapper  = mapper  ?? throw new ArgumentNullException(nameof(mapper));
+        _logger  = logger  ?? throw new ArgumentNullException(nameof(logger));
 
         // DropWrite: TryWrite returns false when the buffer is full, giving callers an accurate
         // backpressure signal. DropNewest/DropOldest silently evict items inside the channel and
@@ -124,21 +129,7 @@ public sealed class InktideChatConnector : IChatConnector, IInktideChatInbox, IA
             {
                 try
                 {
-                    var chatMessage = new ChatMessage(
-                        PlatformId:  PlatformIdValue,
-                        ChannelId:   msg.ChannelId,
-                        ChannelName: "inktide-chat",
-                        Sender: new UserMetadata(
-                            UserId:        msg.UserId,
-                            UserName:      msg.UserName,
-                            Badges:        [],
-                            IsModerator:   false,
-                            IsSubscriber:  false,
-                            IsVip:         false,
-                            IsBroadcaster: false),
-                        Text:      msg.Text,
-                        Timestamp: msg.Timestamp);
-
+                    var chatMessage = _mapper.Map(msg);
                     await _handler.HandleAsync(chatMessage);
                 }
                 catch (Exception ex)

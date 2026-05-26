@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useCharactersContext } from '@/context/CharactersContext'
-import ChannelTab from '@/components/profile/tabs/channel-tab'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import ChannelTab from '@/features/character-editor/tabs/channel-tab'
 import { cn } from '@/lib/utils'
 
 const FILTERS = ['All', 'Streaming', 'Chat', 'Social'] as const

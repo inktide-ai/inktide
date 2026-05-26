@@ -4,7 +4,7 @@ import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
-import { Toggle } from '@/components/ui/toggle'
+import { Toggle } from '@/shared/ui/toggle'
 import {
   ACCENT_COLORS,
   ACCENT_NAMES,

@@ -1,4 +1,5 @@
 using Inktide.API.Core;
+using Inktide.API.Marketplace.REST.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;

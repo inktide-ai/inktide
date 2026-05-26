@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
-import LoadingScreen from '@/components/ui/loading-screen'
+import LoadingScreen from '@/shared/ui/loading-screen'
 
 export default function RegisterPage() {
   const router = useRouter()

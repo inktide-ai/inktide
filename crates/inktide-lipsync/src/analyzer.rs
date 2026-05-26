@@ -5,7 +5,7 @@ use tracing::{info, warn};
 use crate::amplitude::{AmplitudeAnalyzer, AmplitudeConfig};
 use crate::backend::LipSyncBackend;
 use crate::error::LipSyncError;
-use crate::rhubarb::{RhubarbAnalyzer, RhubarbConfig};
+use crate::rhubarb::{RhubarbAnalyzer, RhubarbConfig, DEFAULT_TIMEOUT};
 use crate::viseme::VisemeTimeline;
 
 /// Entry point for lip-sync analysis. Wraps any [`LipSyncBackend`].
@@ -40,12 +40,13 @@ impl LipSyncAnalyzer {
         }
     }
 
-    /// Force Rhubarb at a specific path with no timeout.
-    /// For timeout control pass a [`RhubarbConfig`] to [`from_backend`] directly.
+    /// Force Rhubarb at a specific path. Applies [`DEFAULT_TIMEOUT`] as the
+    /// subprocess ceiling. For a different value pass a [`RhubarbConfig`] to
+    /// [`from_backend`] directly.
     pub fn rhubarb(path: impl Into<PathBuf>) -> Self {
         Self::from_backend(RhubarbAnalyzer::new(RhubarbConfig {
             executable: path.into(),
-            timeout: None,
+            timeout: Some(DEFAULT_TIMEOUT),
         }))
     }
 

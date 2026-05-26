@@ -13,7 +13,7 @@ namespace Inktide.API.TTS.Infrastructure.FishAudio;
 /// Requires an API key supplied via <c>X-TTS-Api-Key</c> header or
 /// <c>TtsProviders:FishAudio:ApiKey</c> config.
 /// </summary>
-public sealed class FishAudioTtsProvider : ISpeechProvider
+public sealed class FishAudioTtsProvider : ISpeechProvider, IVoiceListingProvider, IModelListingProvider
 {
 
     private const double MinSpeed = 0.5;
@@ -109,7 +109,12 @@ public sealed class FishAudioTtsProvider : ISpeechProvider
             ? speechOptions.Model
             : _settings.Value.DefaultModel;
 
-        var fishOptions = MapSpeechOptions(speechOptions);
+        var rawFormat = MapOutputFormat(speechOptions.AudioFormat);
+        if (rawFormat is null)
+            _logger.LogWarning(
+                "FishAudio: unknown audio format '{Format}', falling back to mp3",
+                speechOptions.AudioFormat);
+        var fishOptions = MapSpeechOptions(speechOptions, rawFormat ?? "mp3");
 
         return await _client
             .TextToSpeechStreamAsync(speechOptions.Voice, apiKey, model, fishOptions, ct)
@@ -117,14 +122,14 @@ public sealed class FishAudioTtsProvider : ISpeechProvider
     }
 
 
-    private FishAudioSpeechOptions MapSpeechOptions(SpeechOptions options)
+    private static FishAudioSpeechOptions MapSpeechOptions(SpeechOptions options, string format)
     {
         var p = FishAudioParams.From(options.ProviderParams);
 
         return new FishAudioSpeechOptions
         {
             Text      = options.Text,
-            Format    = MapOutputFormat(options.AudioFormat),
+            Format    = format,
             Speed     = (float)Math.Clamp(options.Speed <= 0 ? 1.0 : options.Speed, MinSpeed, MaxSpeed),
             Latency   = p.GetLatency(),
             Normalize = p.GetNormalize(),
@@ -132,9 +137,8 @@ public sealed class FishAudioTtsProvider : ISpeechProvider
         };
     }
 
-    private string MapOutputFormat(string? audioFormat)
-    {
-        var mapped = audioFormat?.ToLowerInvariant() switch
+    private static string? MapOutputFormat(string? audioFormat) =>
+        audioFormat?.ToLowerInvariant() switch
         {
             "mp3"  => "mp3",
             "opus" => "opus",
@@ -143,16 +147,5 @@ public sealed class FishAudioTtsProvider : ISpeechProvider
             null   => "mp3",
             _      => null,
         };
-
-        if (mapped is null)
-        {
-            _logger.LogWarning(
-                "FishAudio: unknown audio format '{Format}', falling back to mp3",
-                audioFormat);
-            mapped = "mp3";
-        }
-
-        return mapped;
-    }
 
 }

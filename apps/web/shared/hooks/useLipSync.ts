@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef } from 'react'
-import type { MouthWeights, RhubarbViseme, VisemeCue } from '@/types/IVisemeProvider'
+import type { MouthWeights, RhubarbViseme, VisemeCue } from '@/shared/types/IVisemeProvider'
 import { visemeProviderRegistry } from '../services/lipsync/registry'
 
 // Re-export из ports/ для backward compat (useChatChannel, useAudioStream импортируют отсюда)

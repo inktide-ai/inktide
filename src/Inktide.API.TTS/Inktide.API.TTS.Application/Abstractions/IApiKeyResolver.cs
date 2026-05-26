@@ -16,4 +16,10 @@ public interface IApiKeyResolver
     /// <param name="providerId">Registered <see cref="ISpeechProvider"/> id.</param>
     string? Resolve(string providerId);
 
+    /// <summary>
+    /// Returns <see langword="true"/> when the last resolved key for <paramref name="providerId"/>
+    /// came from a per-request header (BYOK). Infrastructure clients must not cache such clients.
+    /// </summary>
+    bool IsHeaderKey(string providerId);
+
 }

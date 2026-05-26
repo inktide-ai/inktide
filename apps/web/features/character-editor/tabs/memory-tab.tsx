@@ -1,7 +1,7 @@
 'use client'
 import { useTranslation } from 'react-i18next'
-import SliderWithTicks from '../slider-with-ticks'
-import type { AiCharacter } from '@/lib/character'
+import SliderWithTicks from '@/shared/ui/slider-with-ticks'
+import type { AiCharacter } from '@/shared/lib/character'
 
 const section = 'flex flex-col gap-3 border-t border-(--border) pt-4 mt-6 [&:first-child]:border-t-0 [&:first-child]:pt-0 [&:first-child]:mt-0'
 const sliderHeader = 'flex justify-between items-start gap-4 mb-3'

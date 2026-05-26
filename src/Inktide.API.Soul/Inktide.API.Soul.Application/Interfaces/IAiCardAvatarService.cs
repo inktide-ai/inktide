@@ -13,4 +13,17 @@ public interface IAiCardAvatarService
         CancellationToken ct = default);
 }
 
-public sealed record AiCardAvatarUpdateResult(bool Success, AiCard? Card, string? Error);
+public enum AiCardAvatarError { None, CardNotFound, StorageUnavailable }
+
+public sealed record AiCardAvatarUpdateResult(
+    bool Success,
+    AiCardAvatarError ErrorKind,
+    AiCard? Card,
+    string? Error)
+{
+    public static AiCardAvatarUpdateResult Ok(AiCard card) =>
+        new(true, AiCardAvatarError.None, card, null);
+
+    public static AiCardAvatarUpdateResult Fail(AiCardAvatarError kind, string msg) =>
+        new(false, kind, null, msg);
+}

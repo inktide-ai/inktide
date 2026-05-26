@@ -11,7 +11,7 @@ import {
 } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import { apiFetch, jsonOrThrow } from '@/api/client'
-import { useBilling } from '@/context/BillingContext'
+import { useBilling } from '@/features/billing/BillingContext'
 import { PLANS, type PlanKey } from '@/lib/plans'
 
 const rawKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''

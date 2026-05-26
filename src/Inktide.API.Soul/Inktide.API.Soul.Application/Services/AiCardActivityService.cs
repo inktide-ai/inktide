@@ -19,9 +19,9 @@ public sealed class AiCardActivityService : IAiCardActivityService
     }
 
     public async Task<IReadOnlyList<AiCardActivityEntry>> GetRecentAsync(
-        string entityType, Guid entityId, int limit = 20, CancellationToken ct = default)
+        Guid userId, string entityType, Guid entityId, int limit = 20, CancellationToken ct = default)
     {
-        var logs = await _auditLog.GetByEntityAsync(entityType, entityId, limit, ct).ConfigureAwait(false);
+        var logs = await _auditLog.GetByEntityAsync(userId, entityType, entityId, limit, ct).ConfigureAwait(false);
         return logs.Select(l => new AiCardActivityEntry(l.Id, l.Action, l.CreatedAt)).ToList();
     }
 }

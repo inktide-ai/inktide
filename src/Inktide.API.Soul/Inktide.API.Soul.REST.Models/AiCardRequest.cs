@@ -108,10 +108,22 @@ public sealed class UpdateAiCardRequest
 
     [JsonProperty("visibility")]
     public string? Visibility { get; set; }
+
+    [JsonProperty("category")]
+    public string? Category { get; set; }
+
+    [JsonProperty("tags")]
+    public IReadOnlyList<string>? Tags { get; set; }
 }
 
 public sealed class ReorderCardRequest
 {
     [JsonProperty("previous_id")] public Guid? PreviousId { get; set; }
     [JsonProperty("next_id")]     public Guid? NextId     { get; set; }
+}
+
+public sealed class ChangeCardStatusRequest
+{
+    /// <summary>"start" | "pause" | "stop"</summary>
+    [JsonProperty("action")] public string Action { get; set; } = string.Empty;
 }

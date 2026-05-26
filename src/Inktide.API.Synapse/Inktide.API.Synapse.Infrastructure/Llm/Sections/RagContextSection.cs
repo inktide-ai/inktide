@@ -1,3 +1,4 @@
+using Inktide.API.Core.Contracts;
 using Inktide.API.Synapse.Application.Models;
 using Inktide.API.Synapse.Infrastructure.Constants;
 
@@ -8,8 +9,7 @@ internal sealed class RagContextSection : IPromptSection
     public string? Build(SynapseAggregatedEnvelope envelope)
     {
         var plugins = envelope.Context?.Plugins;
-        var ragEnabled = plugins?.FirstOrDefault(p => p.PluginId == SynapseConstants.ShardIds.Rag)?.IsEnabled ?? true;
-        if (!ragEnabled) return null;
+        if (!SynapseConstants.PluginGate.IsEnabled(plugins, SynapseConstants.ShardIds.Rag)) return null;
 
         var memories = envelope.Rag?.Memories;
         if (memories is not { Count: > 0 }) return null;

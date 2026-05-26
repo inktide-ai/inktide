@@ -1,4 +1,4 @@
-import type { IVisemeProvider, MouthWeights, VisemeContext } from '@/types/IVisemeProvider'
+import type { IVisemeProvider, MouthWeights, VisemeContext } from '@/shared/types/IVisemeProvider'
 
 // ── Formant bands (Hz) ────────────────────────────────────────────────────────
 const FUND_LO = 80;    const FUND_HI = 300

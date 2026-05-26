@@ -9,107 +9,40 @@ namespace Inktide.API.TTS.Infrastructure.Kokoro;
 /// </summary>
 public sealed class KokoroSpeechOptions
 {
-    
-    private string _input = string.Empty;
-
-    private KokoroSpeechVoice _voice = KokoroSpeechVoice.AfAlloy;
-    
-    private string _model = "kokoro";
-    
-    private string _responseFormat = "mp3";
-
-    private string? _downloadFormat = "mp3";
-
-    private double _speed = 1.0;
-
-    private bool _stream = true;
-
-    private bool _returnDownloadLink = false;
-
-    private string? _langCode;
-
-    private double? _volumeMultiplier = 1.0;
-
-    private KokoroNormalizationOptions? _normalizationOptions;
-
 
     [JsonPropertyName("input")]
-    public string Input
-    {
-        get => _input;
-        set => _input = value;
-    }
+    public string Input { get; set; } = string.Empty;
 
     [JsonPropertyName("voice")]
     [JsonConverter(typeof(KokoroSpeechVoiceJsonConverter))]
-    public KokoroSpeechVoice Voice
-    {
-        get => _voice;
-        set => _voice = value;
-    }
-    
+    public KokoroSpeechVoice Voice { get; set; } = KokoroSpeechVoice.AfAlloy;
+
     [JsonPropertyName("model")]
-    public string Model
-    {
-        get => _model;
-        set => _model = value;
-    }
+    public string Model { get; set; } = "kokoro";
 
     [JsonPropertyName("response_format")]
-    public string ResponseFormat
-    {
-        get => _responseFormat;
-        set => _responseFormat = value;
-    }
+    public string ResponseFormat { get; set; } = "mp3";
 
     [JsonPropertyName("download_format")]
-    public string? DownloadFormat
-    {
-        get => _downloadFormat;
-        set => _downloadFormat = value;
-    }
+    public string? DownloadFormat { get; set; } = "mp3";
 
     [JsonPropertyName("speed")]
-    public double Speed
-    {
-        get => _speed;
-        set => _speed = value;
-    }
+    public double Speed { get; set; } = 1.0;
 
     [JsonPropertyName("stream")]
-    public bool Stream
-    {
-        get => _stream;
-        set => _stream = value;
-    }
+    public bool Stream { get; set; } = true;
 
     [JsonPropertyName("return_download_link")]
-    public bool ReturnDownloadLink
-    {
-        get => _returnDownloadLink;
-        set => _returnDownloadLink = value;
-    }
+    public bool ReturnDownloadLink { get; set; } = false;
 
     [JsonPropertyName("lang_code")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? LangCode
-    {
-        get => _langCode;
-        set => _langCode = value;
-    }
+    public string? LangCode { get; set; }
 
     [JsonPropertyName("volume_multiplier")]
-    public double? VolumeMultiplier
-    {
-        get => _volumeMultiplier;
-        set => _volumeMultiplier = value;
-    }
+    public double? VolumeMultiplier { get; set; } = 1.0;
 
     [JsonPropertyName("normalization_options")]
-    public KokoroNormalizationOptions? NormalizationOptions
-    {
-        get => _normalizationOptions;
-        set => _normalizationOptions = value;
-    }
+    public KokoroNormalizationOptions? NormalizationOptions { get; set; }
 
 }

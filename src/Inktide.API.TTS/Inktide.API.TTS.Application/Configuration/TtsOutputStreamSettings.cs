@@ -10,11 +10,11 @@ public sealed class TtsOutputStreamSettings
 
     /// <summary>Redis stream key where audio payloads are published.
     /// Default matches <c>Inktide.API.Core.Constants.StreamNames.TtsReady</c>.</summary>
-    public string StreamName { get; set; } = "synapse.tts.ready";
+    public string StreamName { get; init; } = "synapse.tts.ready";
 
     /// <summary>Approximate MAXLEN (~N) to keep memory bounded.</summary>
-    public long ApproximateMaxLength { get; set; } = 5_000;
+    public int ApproximateMaxLength { get; init; } = 5_000;
 
     /// <summary>Stream entry field name holding the JSON payload.</summary>
-    public string PayloadFieldName { get; set; } = "payload";
+    public string PayloadFieldName { get; init; } = "payload";
 }

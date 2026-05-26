@@ -8,5 +8,7 @@ public interface ISubscriptionRepository
     Task<UserSubscription?> GetByProviderSubIdAsync(string providerSubId, CancellationToken ct = default);
     Task UpsertAsync(UserSubscription subscription, CancellationToken ct = default);
     Task DeleteByUserIdAsync(string userId, CancellationToken ct = default);
-    Task<bool> TryExpireAsync(string userId, CancellationToken ct = default);
+
+    /// <summary>Bulk-expires all Active/Trialing subscriptions whose period has ended.</summary>
+    Task<int> ExpireAllOverdueAsync(CancellationToken ct = default);
 }

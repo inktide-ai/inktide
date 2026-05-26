@@ -1,4 +1,5 @@
 using Inktide.API.Soul.Application.Interfaces;
+using Inktide.API.Soul.REST.Mappers;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -36,7 +37,7 @@ public sealed class AiCardScenesController : ApiController
         var list = await _scenes.ListAsync(userId, cardId, ct).ConfigureAwait(false);
         if (list is null) return NotFound();
 
-        return Ok(list.Select(ToResponse).ToList());
+        return Ok(list.Select(AiCardSceneResponseMapper.ToResponse).ToList());
     }
 
     /// <summary>Step 1: get presigned PUT URL and storage_key.</summary>
@@ -81,7 +82,10 @@ public sealed class AiCardScenesController : ApiController
             .ConfigureAwait(false);
 
         if (!result.Success) return MapSceneError(result.ErrorKind, result.Error!);
-        return Ok(ToResponse(result.Scene!));
+        if (result.Scene is not { } completedScene)
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                ApiErrorResponse.From("Upload result missing scene.", ErrorCodes.InternalError));
+        return Ok(AiCardSceneResponseMapper.ToResponse(completedScene));
     }
 
     [HttpGet("custom-tags")]
@@ -125,7 +129,10 @@ public sealed class AiCardScenesController : ApiController
         var result = await _tags.PatchSceneTagAsync(userId, cardId, sceneId, body.Tag, ct).ConfigureAwait(false);
         if (!result.Success) return MapSceneError(result.ErrorKind, result.Error!);
 
-        return Ok(ToResponse(result.Scene!));
+        if (result.Scene is not { } patchedScene)
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                ApiErrorResponse.From("Operation result missing scene.", ErrorCodes.InternalError));
+        return Ok(AiCardSceneResponseMapper.ToResponse(patchedScene));
     }
 
     [HttpPut("{sceneId:guid}/metadata")]
@@ -143,7 +150,10 @@ public sealed class AiCardScenesController : ApiController
             .ConfigureAwait(false);
 
         if (!result.Success) return MapSceneError(result.ErrorKind, result.Error!);
-        return Ok(ToResponse(result.Scene!));
+        if (result.Scene is not { } patchedScene)
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                ApiErrorResponse.From("Operation result missing scene.", ErrorCodes.InternalError));
+        return Ok(AiCardSceneResponseMapper.ToResponse(patchedScene));
     }
 
     [HttpDelete("{sceneId:guid}")]
@@ -174,36 +184,11 @@ public sealed class AiCardScenesController : ApiController
         var scene = await _scenes.ReorderAsync(userId, cardId, sceneId, body.PreviousId, body.NextId, ct).ConfigureAwait(false);
         if (scene is null) return NotFound(ApiErrorResponse.From("Scene not found.", ErrorCodes.NotFound));
 
-        return Ok(ToResponse(scene));
+        return Ok(AiCardSceneResponseMapper.ToResponse(scene));
     }
 
 
-    private IActionResult MapSceneError(SceneUploadError kind, string message) => kind switch
-    {
-        SceneUploadError.StorageDisabled =>
-            StatusCode(StatusCodes.Status503ServiceUnavailable,
-                ApiErrorResponse.From(message, ErrorCodes.ServiceUnavailable)),
-        SceneUploadError.CardNotFound or SceneUploadError.SceneNotFound =>
-            NotFound(ApiErrorResponse.From(message, ErrorCodes.NotFound)),
-        SceneUploadError.ObjectNotFoundInStorage or SceneUploadError.SizeMismatch =>
-            UnprocessableEntity(ApiErrorResponse.From(message, ErrorCodes.ValidationError)),
-        _ =>
-            BadRequest(ApiErrorResponse.From(message, ErrorCodes.ValidationError)),
-    };
+    private IActionResult MapSceneError(SceneUploadError kind, string message) =>
+        MapUploadError(kind, message);
 
-    private static AiCardSceneResponse ToResponse(AiCardScene dto) => new()
-    {
-        Id               = dto.Id,
-        AiCardId         = dto.AiCardId,
-        StorageKey       = dto.StorageKey,
-        PublicUrl        = dto.PublicUrl,
-        OriginalFileName = dto.OriginalFileName,
-        ContentType      = dto.ContentType,
-        SizeBytes        = dto.SizeBytes,
-        CreatedAt        = dto.CreatedAt,
-        Tag              = dto.Tag,
-        DisplayName      = dto.DisplayName,
-        Description      = dto.Description,
-        SortKey          = dto.SortKey,
-    };
 }

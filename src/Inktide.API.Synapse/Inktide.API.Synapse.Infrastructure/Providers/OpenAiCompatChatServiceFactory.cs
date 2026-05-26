@@ -12,7 +12,7 @@ namespace Inktide.API.Synapse.Infrastructure.Providers;
 ///
 /// Priority = 0 (lowest) so provider-specific factories registered with higher Priority always win.
 /// </summary>
-public sealed class OpenAiCompatChatServiceFactory : IChatServiceFactory
+internal sealed class OpenAiCompatChatServiceFactory : IChatServiceFactory
 {
     public int Priority => 0;
 

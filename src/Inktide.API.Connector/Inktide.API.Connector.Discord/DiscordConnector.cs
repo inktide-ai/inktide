@@ -1,4 +1,5 @@
 using Inktide.API.Connector.Application.Contracts;
+using Inktide.API.Connector.Discord.Gateway;
 using Inktide.API.Connector.Discord.Settings;
 using Discord;
 using Discord.WebSocket;
@@ -17,7 +18,8 @@ internal sealed class DiscordConnector : IChatConnector, IAsyncDisposable
     private readonly ILogger<DiscordConnector> _logger;
     private readonly DiscordSocketClient _client;
     private readonly DiscordSettings _settings;
-    private readonly DiscordMessageHandler _messageHandler;
+    private readonly IDiscordMessageHandler _messageHandler;
+    private readonly IGuildSoulRegistry _registry;
 
     private CancellationTokenSource? _cts;
     private TaskCompletionSource _readyTcs = new();
@@ -25,11 +27,13 @@ internal sealed class DiscordConnector : IChatConnector, IAsyncDisposable
     public DiscordConnector(
         ILogger<DiscordConnector> logger,
         IOptions<DiscordSettings> settings,
-        DiscordMessageHandler messageHandler)
+        IDiscordMessageHandler messageHandler,
+        IGuildSoulRegistry registry)
     {
         _logger         = logger ?? throw new ArgumentNullException(nameof(logger));
         _settings       = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
         _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
+        _registry       = registry ?? throw new ArgumentNullException(nameof(registry));
 
         _client = new DiscordSocketClient(new DiscordSocketConfig
         {
@@ -84,6 +88,20 @@ internal sealed class DiscordConnector : IChatConnector, IAsyncDisposable
         await _client.LogoutAsync();
     }
 
+    public Task JoinChannelAsync(string channelId, Guid cardId, CancellationToken ct = default)
+    {
+        _registry.Register(channelId, cardId);
+        _logger.LogInformation("DiscordConnector: soul {CardId} registered for guild {GuildId}", cardId, channelId);
+        return Task.CompletedTask;
+    }
+
+    public Task LeaveChannelAsync(string channelId, Guid cardId, CancellationToken ct = default)
+    {
+        _registry.Unregister(channelId);
+        _logger.LogInformation("DiscordConnector: soul {CardId} unregistered from guild {GuildId}", cardId, channelId);
+        return Task.CompletedTask;
+    }
+
     public async ValueTask DisposeAsync()
     {
         _client.Log -= OnLog;
@@ -125,15 +143,16 @@ internal sealed class DiscordConnector : IChatConnector, IAsyncDisposable
     {
         if (log.Exception is TaskCanceledException or OperationCanceledException)
         {
-            _logger.LogDebug("{Message} (shutdown)", log.Message);
+            _logger.LogDebug("{Source} {Message} (shutdown)", log.Source, log.Message);
             return Task.CompletedTask;
         }
 
         var level = DiscordLogLevelMapper.ToLogLevel(log.Severity);
-        var msg = log.Exception is not null
-            ? $"{log.Message}. {log.Exception.GetType().Name}: {log.Exception.Message}"
-            : log.Message;
-        _logger.Log(level, msg);
+        if (log.Exception is not null)
+            _logger.Log(level, log.Exception, "[Discord] {Source} {Message}", log.Source, log.Message);
+        else
+            _logger.Log(level, "[Discord] {Source} {Message}", log.Source, log.Message);
+
         return Task.CompletedTask;
     }
 }

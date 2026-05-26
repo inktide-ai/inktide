@@ -23,6 +23,7 @@ public sealed class AiCardService : IAiCardService
     private readonly ITransactionManager _txManager;
     private readonly IDomainEventCollector _events;
     private readonly SoulCreationGuard _creationGuard;
+    private readonly IAiCardStatusGateCache _gateCache;
     private readonly TimeProvider _time;
     private readonly ILogger<AiCardService> _logger;
 
@@ -33,6 +34,7 @@ public sealed class AiCardService : IAiCardService
         ITransactionManager txManager,
         IDomainEventCollector events,
         SoulCreationGuard creationGuard,
+        IAiCardStatusGateCache gateCache,
         TimeProvider time,
         ILogger<AiCardService> logger)
     {
@@ -42,6 +44,7 @@ public sealed class AiCardService : IAiCardService
         _txManager     = txManager     ?? throw new ArgumentNullException(nameof(txManager));
         _events        = events        ?? throw new ArgumentNullException(nameof(events));
         _creationGuard = creationGuard ?? throw new ArgumentNullException(nameof(creationGuard));
+        _gateCache     = gateCache     ?? throw new ArgumentNullException(nameof(gateCache));
         _time          = time          ?? throw new ArgumentNullException(nameof(time));
         _logger        = logger        ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -160,9 +163,34 @@ public sealed class AiCardService : IAiCardService
 
         string newKey = FractionalIndexer.GenerateKeyBetween(prevKey, nextKey);
 
-        await _cardRepo.BulkUpdateSortKeysAsync([(cardId, newKey)], _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
+        await _cardRepo.BulkUpdateSortKeysAsync(userId, [(cardId, newKey)], _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
 
         card.SortKey = newKey;
+        return card;
+    }
+
+    public async Task<AiCard?> ChangeStatusAsync(Guid userId, Guid cardId, bool isActive, AiCardStatus status, CancellationToken ct = default)
+    {
+        var card = await _cardRepo.GetByIdAsync(cardId, ct).ConfigureAwait(false);
+        if (card is null || card.UserId != userId) return null;
+
+        card.IsActive  = isActive;
+        card.Status    = status;
+        card.UpdatedAt = _time.GetUtcNow().UtcDateTime;
+
+        await _cardRepo.UpdateAsync(card, ct).ConfigureAwait(false);
+
+        if (isActive && status == AiCardStatus.Active)
+            await _gateCache.UnblockAsync(cardId, ct).ConfigureAwait(false);
+        else
+            await _gateCache.BlockAsync(cardId, ct).ConfigureAwait(false);
+
+        _events.Add(new AiCardStatusChangedIntegrationEvent(
+            IdGenerator.New(), _time.GetUtcNow().UtcDateTime, cardId, isActive, status.ToString()));
+
+        await _txManager.SaveChangesAsync(ct).ConfigureAwait(false);
+
+        _logger.LogInformation("Soul {CardId} status changed: IsActive={IsActive}, Status={Status}", cardId, isActive, status);
         return card;
     }
 

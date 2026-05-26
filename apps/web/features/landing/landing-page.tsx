@@ -1,8 +1,8 @@
-import Navigation from '@/components/landing/navigation';
-import HeroInktide from '@/components/landing/hero-inktide';
-import PartnerLogos from '@/components/landing/partner-logos';
-import PricingSection from '@/components/landing/pricing-section';
-import Footer from '@/components/landing/footer';
+import Navigation from '@/features/landing/navigation';
+import HeroInktide from '@/features/landing/hero-inktide';
+import PartnerLogos from '@/features/landing/partner-logos';
+import PricingSection from '@/features/landing/pricing-section';
+import Footer from '@/features/landing/footer';
 
 export default function LandingPage() {
   return (

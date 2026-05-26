@@ -11,11 +11,11 @@ import { cn } from '@/lib/utils'
 import {
   IconUser, IconSkills, IconBrain, IconMicrophone, IconPaint,
   IconIntegration, IconScene, IconMemory, IconObs,
-} from '../../components/profile/tab-icons'
+} from '@/features/character-editor/tab-icons'
 import { Grid } from '@/components/icons'
-import { useCharactersContext } from '../../context/CharactersContext'
-import { getBannerAccent } from '../../components/profile/banner-presets'
-import { type HubTabId, type CardLayout, useHubLayout } from '../../hooks/useHubLayout'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import { getBannerAccent } from '@/shared/ui/banner-presets'
+import { type HubTabId, type CardLayout, useHubLayout } from '@/shared/hooks/useHubLayout'
 import { profileSettingsPath } from '@/lib/routes'
 import SettingsInspectorPanel from '../../components/settings/SettingsInspectorPanel'
 

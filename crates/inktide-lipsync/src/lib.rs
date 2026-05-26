@@ -4,9 +4,12 @@
 //! use inktide_lipsync::LipSyncAnalyzer;
 //! use std::time::Duration;
 //!
-//! let wav = std::fs::read("speech.wav").unwrap();
-//! let timeline = LipSyncAnalyzer::auto().analyze(&wav).unwrap();
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! let wav = std::fs::read("speech.wav")?;
+//! let timeline = LipSyncAnalyzer::auto().analyze(&wav)?;
 //! let (current, next, progress) = timeline.blend_state(Duration::from_millis(120));
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! `auto()` picks Rhubarb when it's in `$PATH`, otherwise falls back to amplitude.

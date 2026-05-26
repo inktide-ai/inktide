@@ -1,42 +1,52 @@
-using System.Security.Claims;
+using Inktide.API.Connector.Application.Controllers;
+using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Telegram.Services;
+using Inktide.API.Connector.Telegram.Settings;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Telegram.Controllers;
 
 [ApiController]
 [Route("api/connectors/telegram")]
 [Produces("application/json")]
-public sealed class TelegramController : ControllerBase
+public sealed class TelegramController : ConnectorControllerBase
 {
+    // TODO: replace with TelegramConnector.PlatformIdValue once the connector class exists
+    private const string PlatformId = "telegram";
+
     private readonly ITelegramBotApiClient _telegram;
     private readonly IAiCardChannelConnectService _connect;
     private readonly IAiCardChannelLifecycleService _lifecycle;
-    private readonly IDataProtector _protector;
+    private readonly ITokenProtector _tokenProtector;
     private readonly ILogger<TelegramController> _log;
+    private readonly string _botUsername;
 
     public TelegramController(
         ITelegramBotApiClient telegram,
         IAiCardChannelConnectService connect,
         IAiCardChannelLifecycleService lifecycle,
-        IDataProtectionProvider dp,
-        ILogger<TelegramController> log)
+        [FromKeyedServices(TokenProtectorKeys.Telegram)] ITokenProtector tokenProtector,
+        ILogger<TelegramController> log,
+        IOptions<TelegramSettings> settings)
     {
-        _telegram  = telegram;
-        _connect   = connect;
-        _lifecycle = lifecycle;
-        _protector = dp.CreateProtector("Telegram.BotTokens");
-        _log       = log;
+        _telegram       = telegram;
+        _connect        = connect;
+        _lifecycle      = lifecycle;
+        _tokenProtector = tokenProtector;
+        _log            = log;
+        _botUsername    = settings.Value.BotUsername;
     }
 
     /// <summary>Validates a Telegram bot token by calling /getMe.</summary>
     [HttpPost("validate-token")]
+    [Authorize]
     [ProducesResponseType(typeof(ValidateTokenResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> ValidateToken(
         [FromBody] ValidateTokenRequest req, CancellationToken ct)
@@ -74,16 +84,16 @@ public sealed class TelegramController : ControllerBase
             return BadRequest("Chat name is required.");
 
         var userId         = GetUserId();
-        var encryptedToken = _protector.Protect(req.BotToken.Trim());
+        var encryptedToken = _tokenProtector.Protect(req.BotToken.Trim());
 
         var channelId = await _connect.UpsertAsync(
             new OAuthChannelUpsertCommand(
                 UserId:       userId,
                 CardId:       req.CardId,
-                Platform:     "telegram",
+                Platform:     PlatformId,
                 ChannelId:    req.ChatId.Trim(),
                 ChannelName:  req.ChatName.Trim(),
-                BotUsername:  "TelegramBot",
+                BotUsername:  _botUsername,
                 AccessTokenEnc: encryptedToken),
             ct);
 
@@ -98,18 +108,13 @@ public sealed class TelegramController : ControllerBase
     [HttpPost("revoke/{channelId:guid}")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Revoke(Guid channelId, CancellationToken ct)
     {
         var userId = GetUserId();
-        await _lifecycle.DeactivateAsync(userId, channelId, ct);
+        if (!await _lifecycle.DeactivateAsync(userId, channelId, ct))
+            return NotFound();
         return NoContent();
-    }
-
-    private Guid GetUserId()
-    {
-        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException("User ID not found in token.");
-        return Guid.Parse(sub);
     }
 
     public sealed record ValidateTokenRequest(string BotToken);

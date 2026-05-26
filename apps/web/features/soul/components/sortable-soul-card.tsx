@@ -2,8 +2,8 @@
 
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { SoulCardVertical } from '@/components/hub/soul-card-vertical'
-import type { SoulCardData } from '@/components/hub/soul-card'
+import { SoulCardVertical } from '@/features/soul/components/soul-card-vertical'
+import type { SoulCardData } from '@/features/soul/components/soul-card'
 
 interface SortableSoulCardProps {
   soul: SoulCardData

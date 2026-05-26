@@ -2,10 +2,10 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { getStorageStatus, patchAvatar, uploadProfileFile } from '../../api/me'
-import type { AiCardListItem } from '../../api/soul'
+import type { AiCardListItem } from '@/shared/types/soul-api'
 import { MAX_NICKNAME_LEN } from '../../utils/profileStorage'
-import { getBannerAccent, getBannerGradient } from './banner-presets'
-import type { AiCharacter } from '@/lib/character'
+import { getBannerAccent, getBannerGradient } from '@/shared/ui/banner-presets'
+import type { AiCharacter } from '@/shared/lib/character'
 function getInitialLetter(userName: string | undefined): string {
   const u = userName?.trim() ?? ''
   if (!u) return '?'

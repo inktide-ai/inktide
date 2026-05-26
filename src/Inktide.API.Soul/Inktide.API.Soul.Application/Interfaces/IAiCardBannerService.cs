@@ -18,4 +18,17 @@ public interface IAiCardBannerService
         CancellationToken ct = default);
 }
 
-public sealed record AiCardBannerUpdateResult(bool Success, AiCard? Card, string? Error);
+public enum AiCardBannerError { None, CardNotFound, StorageUnavailable }
+
+public sealed record AiCardBannerUpdateResult(
+    bool Success,
+    AiCardBannerError ErrorKind,
+    AiCard? Card,
+    string? Error)
+{
+    public static AiCardBannerUpdateResult Ok(AiCard card) =>
+        new(true, AiCardBannerError.None, card, null);
+
+    public static AiCardBannerUpdateResult Fail(AiCardBannerError kind, string msg) =>
+        new(false, kind, null, msg);
+}

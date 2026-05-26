@@ -35,5 +35,12 @@ public sealed class ProviderOptions
         get => _extra;
         set => _extra = value;
     }
-    
+
+    /// <summary>
+    /// True when the API key was supplied per-request (e.g. X-TTS-Api-Key header, BYOK).
+    /// Infrastructure clients should NOT cache a client keyed on this key — use a transient client instead.
+    /// False (default) when the key comes from static configuration; caching is safe.
+    /// </summary>
+    public bool ApiKeyIsTransient { get; set; }
+
 }

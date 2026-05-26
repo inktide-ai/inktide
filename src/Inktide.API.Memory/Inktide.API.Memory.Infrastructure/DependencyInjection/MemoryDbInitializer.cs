@@ -21,6 +21,9 @@ internal sealed class MemoryDbInitializer(
         var db = scope.ServiceProvider.GetRequiredService<MemoryDbContext>();
 
         await db.Database.ExecuteSqlRawAsync("CREATE SCHEMA IF NOT EXISTS soul", cancellationToken);
+        // TODO: Replace with db.Database.MigrateAsync() once EF migrations are set up for
+        // MemoryDbContext. EnsureCreatedAsync is a no-op on existing databases and will not
+        // apply future schema changes.
         await db.Database.EnsureCreatedAsync(cancellationToken);
 
         logger.LogInformation("MemoryDbContext initialized (soul.memory_metadata ready)");

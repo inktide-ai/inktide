@@ -44,6 +44,10 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("avatar_url");
 
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
                     b.Property<string>("CoverUrl")
                         .HasColumnType("text")
                         .HasColumnName("cover_url");
@@ -138,6 +142,13 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("system_prompt");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("tags")
+                        .HasDefaultValueSql("'[]'");
 
                     b.Property<Guid?>("TtsCatalogId")
                         .HasColumnType("uuid")
@@ -335,6 +346,12 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_active");
+
                     b.Property<string>("OriginalFileName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -358,11 +375,6 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_active");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AiCardId")
@@ -372,11 +384,11 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("idx_ai_card_models_storage_key");
 
-                    b.HasIndex("UserId", "AiCardId")
-                        .HasDatabaseName("idx_ai_card_models_user_card");
-
                     b.HasIndex("AiCardId", "IsActive")
                         .HasDatabaseName("idx_ai_card_models_active");
+
+                    b.HasIndex("UserId", "AiCardId")
+                        .HasDatabaseName("idx_ai_card_models_user_card");
 
                     b.ToTable("ai_card_models", "soul");
                 });
@@ -672,12 +684,6 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("is_available");
 
-                    b.Property<bool>("RequiresApiKey")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("requires_api_key");
-
                     b.Property<string>("ModelId")
                         .IsRequired()
                         .HasColumnType("text")
@@ -687,6 +693,12 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("provider");
+
+                    b.Property<bool>("RequiresApiKey")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("requires_api_key");
 
                     b.Property<string>("Tier")
                         .IsRequired()
@@ -733,6 +745,12 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("processed_at");
 
+                    b.Property<int>("RetryCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("retry_count");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProcessedAt")
@@ -768,12 +786,6 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("is_available");
 
-                    b.Property<bool>("RequiresApiKey")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("requires_api_key");
-
                     b.Property<string>("Language")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -785,6 +797,12 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("provider");
+
+                    b.Property<bool>("RequiresApiKey")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("requires_api_key");
 
                     b.Property<string>("SampleUrl")
                         .HasColumnType("text")

@@ -1,8 +1,9 @@
+using Inktide.API.Graph.Domain;
 using Inktide.API.Graph.Domain.Contracts;
 using Inktide.API.Graph.Domain.Models;
-using Inktide.API.Memory.Domain.Models;
+using Inktide.API.Graph.Infrastructure.Models;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
+using Inktide.API.Memory.Domain.Models;
 
 namespace Inktide.API.Graph.Infrastructure.Handlers;
 
@@ -28,28 +29,25 @@ namespace Inktide.API.Graph.Infrastructure.Handlers;
 /// </summary>
 public sealed class ContextBuilderNodeHandler : INodeHandler
 {
-    public string Type => "context_builder";
+    public string Type => NodeTypes.ContextBuilder;
     public string ProviderId => "core";
 
     public Task ExecuteAsync(NodeExecutionContext context, CancellationToken ct)
     {
-        var logger = context.Services.GetService<ILogger<ContextBuilderNodeHandler>>();
+        var logger = context.Services.GetLogger<ContextBuilderNodeHandler>();
 
         var baseContext = context.GetInput<string>("context") ?? string.Empty;
 
-        // Append memories block if Memory node is connected and returned results.
         var memories = context.GetInput<IReadOnlyList<MemoryRecord>>("memories");
         if (memories is { Count: > 0 })
         {
-            var block = string.Join("\n", memories.Select(m => $"- {m.FactText}"));
-            baseContext = $"{baseContext}\n\nRelevant context from memory:\n{block}";
-            logger?.LogDebug("ContextBuilder: appended {Count} memory entries", memories.Count);
+            baseContext = MemoryBlockFormatter.Append(baseContext, memories);
+            logger.LogDebug("ContextBuilder: appended {Count} memory entries", memories.Count);
         }
 
-        // Emotion label — pass through for SoulRuntime to store in MessageProcessingContext.
         var emotion = context.GetInput<string>("emotion");
         if (!string.IsNullOrWhiteSpace(emotion))
-            logger?.LogDebug("ContextBuilder: emotion signal = '{Emotion}'", emotion);
+            logger.LogDebug("ContextBuilder: emotion signal = '{Emotion}'", emotion);
 
         context.SetOutput("out", baseContext);
 

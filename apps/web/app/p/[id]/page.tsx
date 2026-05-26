@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getPublicCard, type PublicAiCardResponse } from '@/api/soul'
-import { Skeleton } from '@/components/ui/skeleton'
+import { getPublicCard, type PublicAiCardResponse } from '@/features/soul/api/index'
+import { Skeleton } from '@/shared/ui/skeleton'
 
 // ── Platform badges ───────────────────────────────────────────────────────────
 

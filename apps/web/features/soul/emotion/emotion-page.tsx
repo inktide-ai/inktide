@@ -1,15 +1,15 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { useCharactersContext } from '@/context/CharactersContext'
-import type { CharacterPersonality } from '@/lib/character'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import type { CharacterPersonality } from '@/shared/lib/character'
 import {
   PERSONALITY_PRESETS,
   PERSONALITY_PRESET_META,
   ALL_PRESET_KEYS,
   type PresetKey,
   type PresetMeta,
-} from '@/data/personality-presets'
+} from '@/shared/data/personality-presets'
 
 function moodDescription(p: CharacterPersonality): string {
   const base: Record<string, string> = {

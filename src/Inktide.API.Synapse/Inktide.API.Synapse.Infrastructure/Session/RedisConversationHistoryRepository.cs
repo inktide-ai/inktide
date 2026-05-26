@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
+using Inktide.API.Synapse.Infrastructure.Constants;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -11,13 +12,8 @@ namespace Inktide.API.Synapse.Infrastructure.Session;
 /// Each channel keeps a capped list of JSON-serialised <see cref="ConversationTurn"/> entries.
 /// Key format: <c>inktide:session:{channelId}</c>, TTL: 24 h.
 /// </summary>
-public sealed class RedisConversationHistoryRepository : IConversationHistoryRepository
+internal sealed class RedisConversationHistoryRepository : IConversationHistoryRepository
 {
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-    };
 
     private const int TtlSeconds = 86_400; // 24 h
 
@@ -44,7 +40,7 @@ public sealed class RedisConversationHistoryRepository : IConversationHistoryRep
             var result = new List<ConversationTurn>(entries.Length);
             foreach (var entry in entries)
             {
-                var turn = JsonSerializer.Deserialize<ConversationTurn>(entry.ToString(), JsonOpts);
+                var turn = JsonSerializer.Deserialize<ConversationTurn>(entry.ToString(), SynapseConstants.Json.Read);
                 if (turn is not null)
                     result.Add(turn);
             }
@@ -70,7 +66,7 @@ public sealed class RedisConversationHistoryRepository : IConversationHistoryRep
             var db    = _redis.GetDatabase();
             var key   = BuildKey(channelId);
             var json  = JsonSerializer.Serialize(
-                new ConversationTurn(userMessage, assistantReply), JsonOpts);
+                new ConversationTurn(userMessage, assistantReply), SynapseConstants.Json.Read);
 
             var batch = db.CreateBatch();
             var pushTask  = batch.ListRightPushAsync(key, json);

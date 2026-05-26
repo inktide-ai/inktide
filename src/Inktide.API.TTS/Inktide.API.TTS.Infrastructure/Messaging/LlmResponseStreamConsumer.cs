@@ -1,9 +1,9 @@
 using Inktide.API.Core.Generators;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Inktide.API.TTS.Application.Abstractions;
 using Inktide.API.TTS.Application.Configuration;
 using Inktide.API.TTS.Application.Synthesis;
-using Inktide.API.TTS.Infrastructure.LipSync;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -55,9 +55,8 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
 
     private readonly IConnectionMultiplexer _redis;
     private readonly ITtsSynthesisService _tts;
-    private readonly IRhubarbService _rhubarb;
+    private readonly ITtsAudioPublisher _publisher;
     private readonly LlmResponseStreamSettings _inSettings;
-    private readonly TtsOutputStreamSettings _outSettings;
     private readonly ILogger<LlmResponseStreamConsumer> _logger;
     private readonly string _consumerName;
 
@@ -65,17 +64,15 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
     public LlmResponseStreamConsumer(
         IConnectionMultiplexer redis,
         ITtsSynthesisService tts,
-        IRhubarbService rhubarb,
+        ITtsAudioPublisher publisher,
         IOptions<LlmResponseStreamSettings> inSettings,
-        IOptions<TtsOutputStreamSettings> outSettings,
         ILogger<LlmResponseStreamConsumer> logger)
     {
-        _redis       = redis    ?? throw new ArgumentNullException(nameof(redis));
-        _tts         = tts     ?? throw new ArgumentNullException(nameof(tts));
-        _rhubarb     = rhubarb ?? throw new ArgumentNullException(nameof(rhubarb));
-        _inSettings  = inSettings?.Value  ?? throw new ArgumentNullException(nameof(inSettings));
-        _outSettings = outSettings?.Value ?? throw new ArgumentNullException(nameof(outSettings));
-        _logger      = logger ?? throw new ArgumentNullException(nameof(logger));
+        _redis      = redis      ?? throw new ArgumentNullException(nameof(redis));
+        _tts        = tts        ?? throw new ArgumentNullException(nameof(tts));
+        _publisher  = publisher  ?? throw new ArgumentNullException(nameof(publisher));
+        _inSettings = inSettings?.Value ?? throw new ArgumentNullException(nameof(inSettings));
+        _logger     = logger     ?? throw new ArgumentNullException(nameof(logger));
 
         _consumerName = $"{_inSettings.ConsumerNamePrefix}-{ResolveInstanceId()}";
     }
@@ -111,6 +108,8 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         {
             try
             {
+                // SE.Redis does not support CancellationToken on StreamCreateConsumerGroupAsync.
+                // Configure syncTimeout/connectTimeout on ConnectionMultiplexer to bound hang time.
                 await db.StreamCreateConsumerGroupAsync(
                     _inSettings.StreamName,
                     _inSettings.ConsumerGroup,
@@ -274,7 +273,7 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
             : (float?)null;
 
         var command = new SynthesizeCommand(
-            ProviderId:  response.TtsProviderId,   // null → uses TtsProviders:DefaultProviderId
+            ProviderId:  response.TtsProviderId,
             Text:        response.Text,
             VoiceId:     voiceId,
             ModelId:     response.TtsModelId,
@@ -287,7 +286,21 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         switch (result)
         {
             case SpeechResult.Ok ok:
-                await PublishAudioAsync(db, response, ok, ct);
+                using (var ms = new MemoryStream(capacity: 512 * 1024))
+                {
+                    await ok.Audio.CopyToAsync(ms, ct);
+                    await _publisher.PublishAsync(new TtsAudioPayload(
+                        CorrelationId:   response.CorrelationId,
+                        ChannelId:       response.ChannelId,
+                        PlatformId:      response.PlatformId,
+                        SequenceNumber:  response.SequenceNumber,
+                        IsLast:          response.IsLast,
+                        WavBytes:        ms.ToArray(),
+                        ContentType:     ok.ContentType,
+                        LlmModel:        response.Model,
+                        EmotionId:       response.EmotionId,
+                        EmotionIntensity: response.EmotionIntensity), ct);
+                }
                 break;
 
             case SpeechResult.UpstreamError err:
@@ -304,52 +317,10 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         }
     }
 
-    private async Task PublishAudioAsync(
-        IDatabase db,
-        LlmResponse response,
-        SpeechResult.Ok ok,
-        CancellationToken ct)
-    {
-        // Pre-size avoids repeated doubling for typical TTS clip sizes (~256 KB–1 MB).
-        using var ms = new MemoryStream(capacity: 512 * 1024);
-        await ok.Audio.CopyToAsync(ms, ct);
-        var wavBytes    = ms.ToArray();
-        var audioBase64 = Convert.ToBase64String(wavBytes);
-
-        // Run Rhubarb in parallel with Redis publish prep. Null when unavailable — the
-        // frontend falls back to real-time formant analysis transparently.
-        var visemeTimeline = await _rhubarb.AnalyzeAsync(wavBytes, ct);
-
-        // Downstream shape — Realtime/Publisher Worker deserializes this from synapse.tts.ready.
-        // sequenceNumber and isLast allow the consumer to reorder chunks and detect completion.
-        var payload = JsonSerializer.Serialize(new
-        {
-            correlationId  = response.CorrelationId,
-            channelId      = response.ChannelId,
-            platformId     = response.PlatformId,
-            sequenceNumber = response.SequenceNumber,
-            isLast         = response.IsLast,
-            audioBase64,
-            contentType    = ok.ContentType,
-            llmModel         = response.Model,
-            visemeTimeline,   // VisemeCue[]? — null → frontend uses formant fallback
-            emotionId        = response.EmotionId,
-            emotionIntensity = response.EmotionIntensity,
-        });
-
-        await db.StreamAddAsync(
-            _outSettings.StreamName,
-            [new NameValueEntry(_outSettings.PayloadFieldName, payload)],
-            maxLength: (int)_outSettings.ApproximateMaxLength,
-            useApproximateMaxLength: true);
-
-        _logger.LogInformation(
-            "TTS audio published. Channel={Channel} Correlation={Correlation} Seq={Seq} IsLast={IsLast} Bytes={Bytes}",
-            response.ChannelId, response.CorrelationId, response.SequenceNumber, response.IsLast, ms.Length);
-    }
-
 
     private Task AckAsync(IDatabase db, RedisValue entryId)
+        // SE.Redis does not support CancellationToken on StreamAcknowledgeAsync.
+        // Configure syncTimeout/connectTimeout on ConnectionMultiplexer to bound hang time.
         => db.StreamAcknowledgeAsync(_inSettings.StreamName, _inSettings.ConsumerGroup, entryId);
 
     private static string? ReadField(StreamEntry entry, string field)

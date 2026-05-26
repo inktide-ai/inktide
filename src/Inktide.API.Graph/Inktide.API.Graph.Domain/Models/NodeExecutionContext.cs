@@ -11,10 +11,10 @@ public sealed class NodeExecutionContext
     public NodeExecutionContext(
         IReadOnlyDictionary<string, object> inputs,
         IReadOnlyDictionary<string, object> config,
-        IServiceProvider services)
+        IHandlerServices services)
     {
-        Inputs = inputs;
-        Config = config;
+        Inputs   = inputs;
+        Config   = config;
         Services = services;
     }
 
@@ -22,9 +22,15 @@ public sealed class NodeExecutionContext
 
     public IReadOnlyDictionary<string, object> Config { get; }
 
-    public IServiceProvider Services { get; }
+    public IHandlerServices Services { get; }
 
     public void SetOutput(string portName, object value) => _outputs[portName] = value;
+
+    public void PassThrough()
+    {
+        foreach (var kv in Inputs)
+            _outputs[kv.Key] = kv.Value;
+    }
 
     public IReadOnlyDictionary<string, object> GetOutputs() => _outputs;
 

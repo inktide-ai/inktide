@@ -8,21 +8,21 @@ import { Bell, ChevronDown, List, Search, Upload } from 'lucide-react'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { StatCard } from '@/components/workspace/stat-card'
-import { ProjectGridCardConnected } from '@/components/projects/project-grid-card-connected'
-import { ProjectListRowConnected } from '@/components/projects/project-list-row-connected'
-import { type ProjectStatus } from '@/components/projects/project-grid-card'
-import { ProjectCreationWizard } from '@/components/workspace/project-creation-wizard'
+import { StatCard } from '@/features/workspace-home/stat-card'
+import { ProjectGridCardConnected } from '@/features/projects/project-grid-card-connected'
+import { ProjectListRowConnected } from '@/features/projects/project-list-row-connected'
+import { type ProjectStatus } from '@/features/projects/project-grid-card'
+import { ProjectCreationWizard } from '@/features/workspace-home/project-creation-wizard'
 import {
   listProjects,
   exportProject,
   reorderProject,
   type ProjectListItem,
-} from '@/api/projects'
-import { queryKeys } from '@/lib/query/keys'
+} from '@/features/projects/api/projects'
+import { queryKeys } from '@/shared/lib/query/keys'
 import { buildSpark } from '@/lib/spark'
-import { useCharactersContext } from '@/context/CharactersContext'
-import ImportProjectDialog from '@/components/projects/ImportProjectDialog'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import ImportProjectDialog from '@/features/projects/ImportProjectDialog'
 
 type FilterTab = 'all' | ProjectStatus
 

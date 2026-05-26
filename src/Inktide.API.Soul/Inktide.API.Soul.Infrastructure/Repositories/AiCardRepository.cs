@@ -2,6 +2,8 @@ using Inktide.API.Soul.Domain.Entities;
 using Inktide.API.Soul.Domain.Repositories;
 using Inktide.API.Soul.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Inktide.API.Soul.Infrastructure.Repositories;
 
@@ -118,19 +120,24 @@ public sealed class AiCardRepository : IAiCardRepository
         return rows.Select(r => (r.Id, r.SortKey)).ToList();
     }
 
-    public async Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default)
+    public async Task BulkUpdateSortKeysAsync(Guid userId, IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default)
     {
-        foreach (var (id, sortKey) in updates)
-        {
-            await _db.AiCards
-                .Where(c => c.Id == id)
-                .ExecuteUpdateAsync(
-                    s => s
-                        .SetProperty(e => e.SortKey, sortKey)
-                        .SetProperty(e => e.UpdatedAt, updatedAt),
-                    ct)
-                .ConfigureAwait(false);
-        }
+        if (updates.Count == 0) return;
+
+        var ids  = updates.Select(u => u.Id).ToArray();
+        var keys = updates.Select(u => u.SortKey).ToArray();
+
+        await _db.Database.ExecuteSqlRawAsync(
+            @"UPDATE soul.ai_cards
+              SET sort_key = v.sort_key, updated_at = @updated_at
+              FROM UNNEST(@ids, @keys) AS v(id uuid, sort_key text)
+              WHERE soul.ai_cards.id = v.id
+                AND soul.ai_cards.user_id = @user_id",
+            new NpgsqlParameter("ids",        NpgsqlDbType.Array | NpgsqlDbType.Uuid) { Value = ids },
+            new NpgsqlParameter("keys",       NpgsqlDbType.Array | NpgsqlDbType.Text) { Value = keys },
+            new NpgsqlParameter("updated_at", NpgsqlDbType.Timestamp)                 { Value = updatedAt },
+            new NpgsqlParameter("user_id",    NpgsqlDbType.Uuid)                      { Value = userId })
+            .ConfigureAwait(false);
     }
 
 }

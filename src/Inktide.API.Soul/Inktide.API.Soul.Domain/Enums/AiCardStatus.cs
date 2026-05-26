@@ -4,5 +4,6 @@ public enum AiCardStatus
 {
     Active,
     Paused,
+    Stopped,
     Archived,
 }

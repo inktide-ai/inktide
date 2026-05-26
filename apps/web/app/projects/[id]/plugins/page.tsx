@@ -5,7 +5,7 @@ import { Brain, Link, Puzzle, User, Webhook } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PluginCard } from '@/components/plugins/plugin-card'
 import { getProjectPlugins, upsertProjectPlugin, type ProjectPlugin } from '@/api/plugins'
-import { queryKeys } from '@/lib/query/keys'
+import { queryKeys } from '@/shared/lib/query/keys'
 import { useState } from 'react'
 
 const btnSecondary =

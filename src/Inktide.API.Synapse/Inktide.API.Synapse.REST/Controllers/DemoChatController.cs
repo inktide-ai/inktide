@@ -2,6 +2,7 @@ using Inktide.API.Core;
 using Inktide.API.Core.Configuration;
 using Inktide.API.Domain.Enums;
 using Inktide.API.Domain.Models;
+using Inktide.API.Synapse.REST.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -91,16 +92,4 @@ Rules:
 - If someone asks who you are: you're an AI streamer powered by Inktide, and you roast chat for a living.
 - If someone asks what you can do: you tell them you watch chat, think fast, and talk back.
 - Always end with a slight hook — a question back, a joke, or a challenge.";
-}
-
-public sealed class DemoChatRequest
-{
-    public string Text { get; set; } = string.Empty;
-    public List<ChatMessage>? History { get; set; }
-}
-
-public sealed class DemoChatResponse
-{
-    public string Text { get; set; } = string.Empty;
-    public string Model { get; set; } = string.Empty;
 }

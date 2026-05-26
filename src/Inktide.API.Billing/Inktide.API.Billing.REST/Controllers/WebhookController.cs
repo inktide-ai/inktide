@@ -1,5 +1,4 @@
 using Inktide.API.Billing.Application.Interfaces;
-using Inktide.API.Billing.Infrastructure.Settings;
 using Inktide.API.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +10,7 @@ namespace Inktide.API.Billing.REST.Controllers;
 /// <summary>
 /// Routes incoming webhooks to the appropriate provider processor.
 /// All webhook endpoints are unauthenticated — signature validation is the security mechanism.
+/// Each processor resolves its own signing secret from its injected settings.
 /// </summary>
 [ApiController]
 [Route("api/billing/webhook")]
@@ -18,17 +18,14 @@ namespace Inktide.API.Billing.REST.Controllers;
 public sealed class WebhookController : ControllerBase
 {
     private readonly IEnumerable<IWebhookProcessor> _processors;
-    private readonly LemonSqueezySettings _lsSettings;
     private readonly ILogger<WebhookController> _logger;
 
     public WebhookController(
         IEnumerable<IWebhookProcessor> processors,
-        LemonSqueezySettings lsSettings,
         ILogger<WebhookController> logger)
     {
         _processors = processors;
-        _lsSettings = lsSettings;
-        _logger = logger;
+        _logger     = logger;
     }
 
     [HttpPost("{provider}")]
@@ -51,9 +48,12 @@ public sealed class WebhookController : ControllerBase
             return BadRequest(ApiErrorResponse.From($"Unknown provider: {provider}", "UNKNOWN_PROVIDER"));
         }
 
-        var clientIp = HttpContext.Connection.RemoteIpAddress;
-        var secret = GetSigningSecret(provider);
-        if (!processor.ValidateSignature(Request.Headers, rawBody, secret, clientIp))
+        var headers = Request.Headers.ToDictionary(
+            h => h.Key,
+            h => (IReadOnlyList<string>)h.Value.ToArray(),
+            StringComparer.OrdinalIgnoreCase);
+        var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+        if (!processor.ValidateSignature(headers, rawBody, clientIp))
         {
             _logger.LogWarning("Webhook signature validation failed for provider: {Provider}", provider);
             return Unauthorized();
@@ -81,11 +81,4 @@ public sealed class WebhookController : ControllerBase
 
         return Ok();
     }
-
-    private string GetSigningSecret(string provider) => provider.ToLowerInvariant() switch
-    {
-        "lemon_squeezy" => _lsSettings.WebhookSigningSecret,
-        "yookassa"      => string.Empty,   // no HMAC — verified via re-fetch in processor
-        _ => string.Empty,
-    };
 }

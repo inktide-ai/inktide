@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Link2, Unlink, X } from 'lucide-react'
-import { getCards, type AiCardListItem } from '@/api/soul'
-import { bindSoul, unbindSoul } from '@/api/projects'
-import type { ProjectActiveSoul } from '@/api/projects'
-import { queryKeys } from '@/lib/query/keys'
+import type { AiCardListItem } from '@/shared/types/soul-api'
+import { getCards } from '@/entities/soul/api'
+import { bindSoul, unbindSoul } from '@/features/projects/api/projects'
+import type { ProjectActiveSoul } from '@/features/projects/api/projects'
+import { queryKeys } from '@/shared/lib/query/keys'
 
 interface SoulBindingPickerProps {
   projectId: string

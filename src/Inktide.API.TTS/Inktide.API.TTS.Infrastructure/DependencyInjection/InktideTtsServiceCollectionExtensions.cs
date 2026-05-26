@@ -9,6 +9,7 @@ using Inktide.API.TTS.Infrastructure.FishAudio;
 using Inktide.API.TTS.Infrastructure.GoogleCloud;
 using Inktide.API.TTS.Infrastructure.Kokoro;
 using Inktide.API.TTS.Infrastructure.OpenAi;
+using Inktide.API.TTS.Infrastructure.Messaging;
 using Inktide.API.TTS.Infrastructure.Telemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,15 +39,22 @@ public static class InktideTtsServiceCollectionExtensions
         services.AddInktideTtsCartesiaClients(configuration);
 
         services.AddSingleton<SpeechProviderDecoratorApplicator>();
-        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<KokoroTtsProvider>()));
-        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<ElevenLabsTtsProvider>()));
-        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<FishAudioTtsProvider>()));
-        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<OpenAiTtsProvider>()));
-        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<OpenAiCompatibleTtsProvider>()));
-        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<AzureSpeechTtsProvider>()));
-        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<GoogleCloudTtsProvider>()));
-        services.AddSingleton<ISpeechProvider>(sp => sp.GetRequiredService<SpeechProviderDecoratorApplicator>().Apply(sp.GetRequiredService<CartesiaTtsProvider>()));
 
+        static void Register<T>(IServiceCollection s) where T : class, ISpeechProvider =>
+            s.AddSingleton<ISpeechProvider>(sp =>
+                sp.GetRequiredService<SpeechProviderDecoratorApplicator>()
+                  .Apply(sp.GetRequiredService<T>()));
+
+        Register<KokoroTtsProvider>(services);
+        Register<ElevenLabsTtsProvider>(services);
+        Register<FishAudioTtsProvider>(services);
+        Register<OpenAiTtsProvider>(services);
+        Register<OpenAiCompatibleTtsProvider>(services);
+        Register<AzureSpeechTtsProvider>(services);
+        Register<GoogleCloudTtsProvider>(services);
+        Register<CartesiaTtsProvider>(services);
+
+        services.AddSingleton<ITtsAudioPublisher, RedisTtsAudioPublisher>();
         services.AddInktideSpeechProviders(configuration);
 
         return services;

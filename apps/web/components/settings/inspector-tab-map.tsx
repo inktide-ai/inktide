@@ -1,10 +1,10 @@
 'use client'
 import type { ComponentType } from 'react'
-import type { HubTabId } from '@/hooks/useHubLayout'
+import type { HubTabId } from '@/shared/hooks/useHubLayout'
 import {
   IconUser, IconBrain, IconMicrophone, IconPaint,
   IconIntegration, IconScene, IconMemory, IconObs,
-} from '@/components/profile/tab-icons'
+} from '@/features/character-editor/tab-icons'
 
 import IdentityPage     from '@/screens/profile/settings/IdentityPage'
 import BrainPage        from '@/screens/profile/settings/BrainPage'

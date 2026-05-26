@@ -4,7 +4,7 @@
  * VrmRenderer.tsx не трогать.
  */
 
-import type { IVrmController } from '@/types/IVrmController'
+import type { IVrmController } from '@/shared/types/IVrmController'
 import { BlinkController } from './controllers/BlinkController'
 import { GazeController } from './controllers/gazeController/GazeController'
 import { AnimationStateMachineController } from './controllers/stateMachine'

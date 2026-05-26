@@ -2,8 +2,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import type { HubTabId } from '@/hooks/useHubLayout'
-import { useCharactersContext } from '@/context/CharactersContext'
+import type { HubTabId } from '@/shared/hooks/useHubLayout'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { INSPECTOR_TAB_MAP } from './inspector-tab-map'
 
 // Code </> icon from icon assets (fill → currentColor for theming)

@@ -1,12 +1,15 @@
-using System.Security.Claims;
+using Inktide.API.Connector.Application.Controllers;
+using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Twitch.Gateway;
 using Inktide.API.Connector.Twitch.OAuth;
 using Inktide.API.Connector.Twitch.Settings;
+using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,10 +18,11 @@ namespace Inktide.API.Connector.Twitch.Controllers;
 [ApiController]
 [Route("api/connectors/twitch")]
 [Produces("application/json")]
-public sealed class TwitchOAuthController : ControllerBase
+public sealed class TwitchOAuthController : ConnectorControllerBase
 {
     private readonly ITwitchOAuthService _oauth;
-    private readonly TwitchOAuthStateService _state;
+    private readonly IOAuthStateService _state;
+    private readonly ITokenProtector _tokenProtector;
     private readonly IAiCardChannelConnectService _connect;
     private readonly IAiCardChannelLifecycleService _lifecycle;
     private readonly ITwitchChannelRegistry _registry;
@@ -29,7 +33,8 @@ public sealed class TwitchOAuthController : ControllerBase
 
     public TwitchOAuthController(
         ITwitchOAuthService oauth,
-        TwitchOAuthStateService state,
+        IOAuthStateService state,
+        [FromKeyedServices(TokenProtectorKeys.Twitch)] ITokenProtector tokenProtector,
         IAiCardChannelConnectService connect,
         IAiCardChannelLifecycleService lifecycle,
         ITwitchChannelRegistry registry,
@@ -37,13 +42,14 @@ public sealed class TwitchOAuthController : ControllerBase
         ILogger<TwitchOAuthController> log,
         IOptions<TwitchSettings> settings)
     {
-        _oauth           = oauth      ?? throw new ArgumentNullException(nameof(oauth));
-        _state           = state      ?? throw new ArgumentNullException(nameof(state));
-        _connect         = connect    ?? throw new ArgumentNullException(nameof(connect));
-        _lifecycle       = lifecycle  ?? throw new ArgumentNullException(nameof(lifecycle));
-        _registry        = registry   ?? throw new ArgumentNullException(nameof(registry));
-        _connector       = connector  ?? throw new ArgumentNullException(nameof(connector));
-        _log             = log        ?? throw new ArgumentNullException(nameof(log));
+        _oauth           = oauth           ?? throw new ArgumentNullException(nameof(oauth));
+        _state           = state           ?? throw new ArgumentNullException(nameof(state));
+        _tokenProtector  = tokenProtector  ?? throw new ArgumentNullException(nameof(tokenProtector));
+        _connect         = connect         ?? throw new ArgumentNullException(nameof(connect));
+        _lifecycle       = lifecycle       ?? throw new ArgumentNullException(nameof(lifecycle));
+        _registry        = registry        ?? throw new ArgumentNullException(nameof(registry));
+        _connector       = connector       ?? throw new ArgumentNullException(nameof(connector));
+        _log             = log             ?? throw new ArgumentNullException(nameof(log));
         _frontendBaseUrl = settings.Value.FrontendBaseUrl.TrimEnd('/');
         _botUsername     = settings.Value.BotUsername;
     }
@@ -83,8 +89,8 @@ public sealed class TwitchOAuthController : ControllerBase
             var tokens = await _oauth.ExchangeCodeAsync(code, ct).ConfigureAwait(false);
 
             // Encrypt before storing — never persist raw tokens
-            var accessTokenEnc  = _oauth.Protect(tokens.AccessToken);
-            var refreshTokenEnc = _oauth.Protect(tokens.RefreshToken);
+            var accessTokenEnc  = _tokenProtector.Protect(tokens.AccessToken);
+            var refreshTokenEnc = _tokenProtector.Protect(tokens.RefreshToken);
 
             // Resolve broadcaster login from Helix API using the plain access token
             var channelLogin = await _oauth.GetBroadcasterLoginAsync(tokens.AccessToken, ct).ConfigureAwait(false);
@@ -94,7 +100,7 @@ public sealed class TwitchOAuthController : ControllerBase
                 new OAuthChannelUpsertCommand(
                     UserId:          ctx.UserId,
                     CardId:          ctx.CardId,
-                    Platform:        "twitch",
+                    Platform:        TwitchConnector.PlatformIdValue,
                     ChannelId:       channelLogin,
                     ChannelName:     channelLogin,
                     BotUsername:     _botUsername,
@@ -112,6 +118,11 @@ public sealed class TwitchOAuthController : ControllerBase
                 channelLogin, ctx.CardId, ctx.UserId);
 
             return Redirect($"{_frontendBaseUrl}/souls/{ctx.CardId}/channels/twitch?connected=true");
+        }
+        catch (PlanLimitExceededException ex)
+        {
+            _log.LogInformation("Twitch OAuth callback blocked by plan limit for card {CardId}: {Msg}", ctx.CardId, ex.Message);
+            return Redirect($"{_frontendBaseUrl}/souls/{ctx.CardId}/channels/twitch?twitch_error=plan_limit");
         }
         catch (Exception ex)
         {
@@ -138,7 +149,8 @@ public sealed class TwitchOAuthController : ControllerBase
             _registry.Unregister(channel.ChannelId);
         }
 
-        await _lifecycle.DeactivateAsync(userId, channelId, ct).ConfigureAwait(false);
+        if (!await _lifecycle.DeactivateAsync(userId, channelId, ct).ConfigureAwait(false))
+            return NotFound();
 
         // Best-effort token revocation — failure is logged but does not block the response
         if (channel.OAuthTokenEnc is not null)
@@ -169,12 +181,5 @@ public sealed class TwitchOAuthController : ControllerBase
         return Ok(new InstallUrlResponse(url));
     }
 
-    private Guid GetUserId()
-    {
-        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException("User ID not found in token.");
-        return Guid.Parse(sub);
-    }
+    public sealed record InstallUrlResponse(string Url);
 }
-
-public sealed record InstallUrlResponse(string Url);

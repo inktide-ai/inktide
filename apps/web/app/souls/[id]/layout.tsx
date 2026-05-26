@@ -4,9 +4,9 @@ import { useEffect, type ReactNode } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/layout/protected-route'
-import { CharactersProvider, useCharactersContext } from '@/context/CharactersContext'
-import { WorkspaceSidebar } from '@/components/workspace/workspace-sidebar'
-import { AppTopBar } from '@/components/workspace/app-topbar'
+import { CharactersProvider, useCharactersContext } from '@/entities/character/context/CharactersContext'
+import { WorkspaceSidebar } from '@/features/workspace-home/workspace-sidebar'
+import { AppTopBar } from '@/features/workspace-home/app-topbar'
 
 const NAV_ITEMS = [
   { label: 'Overview', href: ''          },

@@ -2,7 +2,6 @@ namespace Inktide.API.Memory.Application.Configuration;
 
 public sealed class MemoryOptions
 {
-
     /// <summary>Ingestion worker flushes when batch reaches this size.</summary>
     public int IngestionBatchSize { get; set; } = 5;
 
@@ -20,5 +19,4 @@ public sealed class MemoryOptions
 
     /// <summary>Base URL of the Scribe Python worker (fact extraction only — embeddings are handled by Ollama via SK).</summary>
     public string ScribeBaseUrl { get; set; } = "http://localhost:8001";
-    
 }

@@ -1,5 +1,5 @@
-import { ApiError } from '../../api/client'
-import type { IStorageUploader } from '@/types/IStorageUploader'
+import { ApiError } from '@/api/client'
+import type { IStorageUploader } from '@/shared/types/IStorageUploader'
 
 const ALLOWED_CONTENT_TYPES = new Set([
   'image/jpeg',

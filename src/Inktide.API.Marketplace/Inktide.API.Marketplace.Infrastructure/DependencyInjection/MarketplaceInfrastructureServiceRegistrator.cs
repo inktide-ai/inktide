@@ -17,5 +17,6 @@ public sealed class MarketplaceInfrastructureServiceRegistrator : IServiceRegist
         registrator.Register<IConnectorInstallationRepository, EfConnectorInstallationRepository>(Reuse.Scoped);
         registrator.Register<IMarketplaceService,              MarketplaceService>(Reuse.Scoped);
         registrator.Register<ISoulOwnershipChecker,            SoulOwnershipChecker>(Reuse.Scoped);
+        registrator.Register<ICurrentUserTokenProvider,        HttpContextTokenProvider>(Reuse.Scoped);
     }
 }

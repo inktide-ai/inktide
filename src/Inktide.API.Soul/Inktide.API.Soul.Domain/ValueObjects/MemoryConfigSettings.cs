@@ -1,16 +1,9 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Inktide.API.Soul.Domain.ValueObjects;
 
 public sealed class MemoryConfigSettings
 {
-
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
 
     [JsonPropertyName("enabled")]
     public bool Enabled { get; set; } = true;
@@ -24,11 +17,6 @@ public sealed class MemoryConfigSettings
     [JsonPropertyName("importance_threshold")]
     public float ImportanceThreshold { get; set; } = 0.5f;
 
-    public static MemoryConfigSettings Parse(string? json)
-    {
-        if (string.IsNullOrWhiteSpace(json)) return new MemoryConfigSettings();
-        try { return JsonSerializer.Deserialize<MemoryConfigSettings>(json, JsonOpts) ?? new MemoryConfigSettings(); }
-        catch { return new MemoryConfigSettings(); }
-    }
+    public static MemoryConfigSettings Parse(string? json) => ValueObjectJson.ParseOrDefault<MemoryConfigSettings>(json);
 
 }

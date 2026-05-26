@@ -21,9 +21,9 @@ mod lipsync_controller;
 mod viseme_mapper;
 mod vrm_viseme;
 
-pub use lipsync_controller::{ease_in_out, ControllerConfig, LipSyncController};
+pub use lipsync_controller::{ControllerConfig, LipSyncController};
 pub use viseme_mapper::{VisemeMapper, VrmVisemeMapper};
-pub use vrm_viseme::{shape, viseme_to_weights, BlendShapeWeights};
+pub use vrm_viseme::{shape, BlendShapeWeights};
 
 #[allow(deprecated)]
 pub use vrm_viseme::lerp_weights;

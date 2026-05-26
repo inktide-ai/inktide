@@ -1,6 +1,6 @@
 'use client'
-import { useCharactersContext } from '../../../context/CharactersContext'
-import ObsTab from '../../../components/profile/tabs/obs-tab'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import ObsTab from '@/features/character-editor/tabs/obs-tab'
 
 export default function ObsPage() {
   const { selected } = useCharactersContext()

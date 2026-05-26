@@ -2,13 +2,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { CardModelUploader } from '../../../services/upload/CardModelUploader'
-import { executePresignedUpload } from '../../../services/upload/PresignedUploadService'
-import AvatarRenderer from '../../avatar/avatar-renderer'
-import { useCardModel } from '../../avatar/hooks/use-card-model'
-import { listCardModels, activateCardModel, type AiCardModelResponse } from '../../../api/soul'
-import { useSceneRendererSettings } from '@/hooks/useSceneRendererSettings'
-import type { AiCharacter, ModelType } from '@/lib/character'
+import { CardModelUploader } from '@/entities/soul/services/upload/CardModelUploader'
+import { executePresignedUpload } from '@/shared/services/upload/PresignedUploadService'
+import AvatarRenderer from '@/features/avatar/avatar-renderer'
+import { useCardModel } from '@/features/avatar/hooks/use-card-model'
+import { listCardModels, activateCardModel, type AiCardModelResponse } from '@/features/soul/api/index'
+import { useSceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
+import type { AiCharacter, ModelType } from '@/shared/lib/character'
 
 const MODEL_TYPES: { value: ModelType; label: string; ext: string }[] = [
   { value: 'vrm',    label: 'VRM',       ext: '.vrm' },

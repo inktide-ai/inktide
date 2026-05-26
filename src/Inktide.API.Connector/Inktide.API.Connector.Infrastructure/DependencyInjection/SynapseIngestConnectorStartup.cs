@@ -36,6 +36,7 @@ public sealed class SynapseIngestConnectorStartup : IStartup
         services.AddSingleton<IStreamMessageHandler, SynapseIngestMessageHandler>();
         services.AddHostedService<RedisStreamPublisherWorker>();
         services.AddHostedService<ChatConnectorHostedService>();
+        services.AddHostedService<SoulStatusChangedConsumer>();
 
         services.AddControllers();
 

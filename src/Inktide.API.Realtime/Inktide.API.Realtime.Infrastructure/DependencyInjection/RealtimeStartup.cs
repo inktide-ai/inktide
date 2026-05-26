@@ -1,5 +1,6 @@
 using Inktide.API.Core;
 using Inktide.API.Realtime.Infrastructure.Configuration;
+using Inktide.API.Realtime.Infrastructure.Constants;
 using Inktide.API.Realtime.Infrastructure.Hubs;
 using Inktide.API.Realtime.Infrastructure.Messaging;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,15 +18,19 @@ public sealed class RealtimeStartup : IStartup
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
         services.AddOptions<RealtimeStreamSettings>()
-            .BindConfiguration(RealtimeStreamSettings.SectionName);
+            .BindConfiguration(RealtimeStreamSettings.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         services.AddOptions<RealtimeTextStreamSettings>()
-            .BindConfiguration(RealtimeTextStreamSettings.SectionName);
+            .BindConfiguration(RealtimeTextStreamSettings.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-        // 5 MB max message size — audio WAV payloads can be ~200 KB base64-encoded.
+        // audio WAV payloads can be ~200 KB base64-encoded
         services.AddSignalR(options =>
         {
-            options.MaximumReceiveMessageSize = 5 * 1024 * 1024;
+            options.MaximumReceiveMessageSize = RealtimeConstants.MaxSignalRMessageBytes;
         });
 
         services.AddHostedService<BrowserAudioPublisher>();

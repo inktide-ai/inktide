@@ -1,7 +1,7 @@
 'use client'
 
 import { Download, ExternalLink, Gamepad2, MessageCircle, Radio, Tv2 } from 'lucide-react'
-import { Badge, type BadgeVariant } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/shared/ui/badge'
 import type { ProjectStatus } from './project-grid-card'
 
 const STATUS_TO_BADGE: Record<ProjectStatus, BadgeVariant> = {

@@ -1,3 +1,4 @@
+using Inktide.API.Graph.Domain;
 using Inktide.API.Graph.Domain.Contracts;
 using Inktide.API.Graph.Domain.Models;
 
@@ -10,12 +11,12 @@ namespace Inktide.API.Graph.Infrastructure.Handlers;
 /// </summary>
 public sealed class TelegramInputNodeHandler : INodeHandler
 {
-    public string Type => "input";
+    public string Type => NodeTypes.Input;
     public string ProviderId => "telegram";
 
     public Task ExecuteAsync(NodeExecutionContext context, CancellationToken ct)
     {
-        var commandsOnly = context.GetConfig<bool?>("commands_only") ?? false;
+        var commandsOnly = context.GetConfig<bool?>(ConfigKeys.CommandsOnly) ?? false;
 
         if (commandsOnly)
         {
@@ -23,9 +24,7 @@ public sealed class TelegramInputNodeHandler : INodeHandler
             if (!text.StartsWith('/')) return Task.CompletedTask;
         }
 
-        foreach (var kv in context.Inputs)
-            context.SetOutput(kv.Key, kv.Value);
-
+        context.PassThrough();
         return Task.CompletedTask;
     }
 }

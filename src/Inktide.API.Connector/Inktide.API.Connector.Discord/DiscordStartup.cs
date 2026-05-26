@@ -1,11 +1,14 @@
 using Inktide.API.Connector.Application.Contracts;
+using Inktide.API.Connector.Application.Health;
+using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Discord.Gateway;
-using Inktide.API.Connector.Discord.Health;
 using Inktide.API.Connector.Discord.OAuth;
 using Inktide.API.Connector.Discord.Settings;
 using Inktide.API.Core;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
@@ -29,12 +32,20 @@ public sealed class DiscordStartup : IStartup
         services.AddHostedService<GuildRegistryLoader>();
 
         // ── Connector ─────────────────────────────────────────────────────────
-        services.AddSingleton<DiscordMessageMapper>();
-        services.AddSingleton<DiscordMessageHandler>();
+        services.AddSingleton<IDiscordMessageMapper, DiscordMessageMapper>();
+        services.AddSingleton<IDiscordMessageHandler, DiscordMessageHandler>();
         services.AddSingleton<IChatConnector, DiscordConnector>();
 
         // ── OAuth2 services ───────────────────────────────────────────────────
-        services.AddSingleton<DiscordOAuthStateService>();
+        services.AddOptions<OAuthStateSettings>()
+            .BindConfiguration("AuthSettings")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        services.TryAddSingleton<IOAuthStateService, OAuthStateService>();
+        services.AddKeyedSingleton<ITokenProtector>(TokenProtectorKeys.Discord, (sp, _) =>
+            new DataProtectionTokenProtector(
+                sp.GetRequiredService<IDataProtectionProvider>(),
+                "Discord.OAuth.Tokens"));
         services.AddHttpClient<IDiscordOAuthService, DiscordOAuthService>();
         services.AddHttpClient("discord-validate")
             .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(5));
@@ -46,9 +57,14 @@ public sealed class DiscordStartup : IStartup
 
         // ── Health check ──────────────────────────────────────────────────────
         services.AddHealthChecks()
-            .AddCheck<DiscordHealthCheck>(
+            .Add(new HealthCheckRegistration(
                 "discord",
-                failureStatus: HealthStatus.Degraded,
-                tags: ["streaming", "discord"]);
+                sp => new ConnectorHealthCheck(
+                    sp.GetRequiredService<IEnumerable<IChatConnector>>(),
+                    DiscordConnector.PlatformIdValue,
+                    "Discord Gateway WebSocket connected",
+                    "Discord Gateway WebSocket disconnected"),
+                HealthStatus.Degraded,
+                ["streaming", "discord"]));
     }
 }

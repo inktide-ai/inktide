@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Inktide.API.TTS.Domain.Models;
+using Inktide.API.TTS.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.TTS.Infrastructure.ElevenLabs;
@@ -85,12 +86,7 @@ public sealed class ElevenLabsTtsClient
 
     private HttpClient CreateClient() => _httpClientFactory.CreateClient(HttpClientName);
 
-    /// <summary>
-    /// Sends the request and returns an <see cref="ElevenLabsResponseStream"/> that owns
-    /// the <see cref="HttpResponseMessage"/> lifetime. The response is disposed when the
-    /// stream is disposed, returning the connection to the pool.
-    /// </summary>
-    private async Task<ElevenLabsResponseStream> SendAndReadStreamAsync(
+    private async Task<HttpResponseStream> SendAndReadStreamAsync(
         HttpRequestMessage request,
         CancellationToken ct)
     {
@@ -101,7 +97,7 @@ public sealed class ElevenLabsTtsClient
         await ElevenLabsErrorHandler.ThrowIfFailedAsync(response, ct).ConfigureAwait(false);
 
         var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-        return new ElevenLabsResponseStream(stream, response);
+        return new HttpResponseStream(stream, response);
     }
 
     /// <summary>
@@ -122,24 +118,11 @@ public sealed class ElevenLabsTtsClient
         {
             if (voice.ValueKind != JsonValueKind.Object) continue;
 
-            if (!voice.TryGetProperty("voice_id", out var idEl) ||
-                idEl.ValueKind != JsonValueKind.String)
-            {
-                continue;
-            }
-
-            var id = idEl.GetString();
+            var id = voice.GetStringOrNull("voice_id");
             if (string.IsNullOrWhiteSpace(id)) continue;
 
-            var name = voice.TryGetProperty("name", out var nameEl) &&
-                       nameEl.ValueKind == JsonValueKind.String
-                ? nameEl.GetString()
-                : null;
-
-            var category = voice.TryGetProperty("category", out var catEl) &&
-                           catEl.ValueKind == JsonValueKind.String
-                ? catEl.GetString()
-                : null;
+            var name     = voice.GetStringOrNull("name");
+            var category = voice.GetStringOrNull("category");
 
             IReadOnlyDictionary<string, string>? labels = null;
             if (voice.TryGetProperty("labels", out var labelsEl) &&
@@ -183,13 +166,7 @@ public sealed class ElevenLabsTtsClient
                 continue;
             }
 
-            if (!el.TryGetProperty("model_id", out var idEl) ||
-                idEl.ValueKind != JsonValueKind.String)
-            {
-                continue;
-            }
-
-            var id = idEl.GetString();
+            var id = el.GetStringOrNull("model_id");
             if (string.IsNullOrWhiteSpace(id)) continue;
 
             models.Add(new SpeechModel(id, "model", DateTimeOffset.UnixEpoch, "elevenlabs"));

@@ -10,7 +10,7 @@ namespace Inktide.API.Synapse.Infrastructure.Scattering;
 /// Runs in parallel with RAG and Context shards.
 /// Falls back to an empty history on any error — never aborts the pipeline.
 /// </summary>
-public sealed class SessionScatterShard : IPipelineStage
+internal sealed class SessionScatterShard : IPipelineStage
 {
     private const int DefaultMaxTurns = 20;
 
@@ -18,6 +18,9 @@ public sealed class SessionScatterShard : IPipelineStage
     private readonly ILogger<SessionScatterShard> _logger;
 
     public string ShardId => SynapseConstants.ShardIds.Session;
+
+    public bool ShouldRun(AiCardContext? cardCtx)
+        => SynapseConstants.PluginGate.IsEnabled(cardCtx?.Plugins, SynapseConstants.ShardIds.Session);
 
     public SessionScatterShard(
         IConversationHistoryRepository history,

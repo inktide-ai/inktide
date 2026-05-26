@@ -12,5 +12,12 @@ public interface IChatConnector
     Task ConnectAsync(CancellationToken cancellationToken = default);
 
     Task DisconnectAsync(CancellationToken cancellationToken = default);
-    
+
+    /// <summary>Joins a channel at runtime and registers the soul routing for it.</summary>
+    Task JoinChannelAsync(string channelId, Guid cardId, CancellationToken ct = default)
+        => Task.CompletedTask;
+
+    /// <summary>Leaves a channel at runtime and removes its soul routing entry.</summary>
+    Task LeaveChannelAsync(string channelId, Guid cardId, CancellationToken ct = default)
+        => Task.CompletedTask;
 }

@@ -1,3 +1,4 @@
+using Inktide.API.Graph.Domain;
 using Inktide.API.Graph.Domain.Contracts;
 using Inktide.API.Graph.Domain.Models;
 
@@ -10,14 +11,12 @@ namespace Inktide.API.Graph.Infrastructure.Handlers;
 /// </summary>
 public sealed class InputNodeHandler : INodeHandler
 {
-    public string Type => "input";
+    public string Type => NodeTypes.Input;
     public string ProviderId => "core";
 
     public Task ExecuteAsync(NodeExecutionContext context, CancellationToken ct)
     {
-        foreach (var kv in context.Inputs)
-            context.SetOutput(kv.Key, kv.Value);
-
+        context.PassThrough();
         return Task.CompletedTask;
     }
 }

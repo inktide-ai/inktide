@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Inktide.API.Core;
 using Inktide.API.Connector.Application.Contracts;
+using Inktide.API.Connector.Application.Controllers;
 using Inktide.API.Connector.InktideChat.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -12,7 +13,7 @@ namespace Inktide.API.Connector.InktideChat;
 [ApiController]
 [Route("api/connector/chat")]
 [Authorize]
-public sealed class InktideChatSendController : ControllerBase
+public sealed class InktideChatSendController : ConnectorControllerBase
 {
     private readonly IInktideChatInbox _inbox;
     private readonly ILogger<InktideChatSendController> _logger;
@@ -36,9 +37,7 @@ public sealed class InktideChatSendController : ControllerBase
     [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public IActionResult Send([FromBody] InktideChatSendRequest request)
     {
-        var userId = User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null)
-            return Unauthorized();
+        var userId = GetUserId().ToString();
 
         if (!InktideChatChannelId.BelongsToUser(request.ChannelId, userId))
             return BadRequest(ApiErrorResponse.From("channelId must be in the format '{cardId}:{userId}' where userId matches the authenticated user.", "VALIDATION_ERROR"));

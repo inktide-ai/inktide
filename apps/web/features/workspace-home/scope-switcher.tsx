@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { listProjects, type ProjectListItem } from '@/api/projects'
+import { listProjects, type ProjectListItem } from '@/features/projects/api/projects'
 import { cn } from '@/lib/utils'
-import { useOptionalCharactersContext } from '@/context/CharactersContext'
+import { useOptionalCharactersContext } from '@/entities/character/context/CharactersContext'
 
 const panelClass = cn(
   'z-[3000] w-[280px] overflow-hidden rounded-md border border-[var(--border-default)]',

@@ -84,7 +84,7 @@ public sealed class AiCardSceneTagService : IAiCardSceneTagService
     public async Task<PatchSceneTagResult> PatchSceneTagAsync(
         Guid userId, Guid cardId, Guid sceneId, string? tag, CancellationToken ct = default)
     {
-        var tagError = TryNormalizeTag(tag, out var normalizedTag);
+        var tagError = SceneTagValidation.TryNormalizeTag(tag, out var normalizedTag);
         if (tagError is not null)
             return PatchSceneTagResult.Fail(SceneUploadError.Validation, tagError);
 
@@ -111,15 +111,15 @@ public sealed class AiCardSceneTagService : IAiCardSceneTagService
         string? displayName, string? description, string? tag,
         CancellationToken ct = default)
     {
-        var dnErr = TryNormalizeMaxLength(displayName, 200, "display_name", out var normalizedDisplay);
+        var dnErr = SceneTagValidation.TryNormalizeMaxLength(displayName, 200, "display_name", out var normalizedDisplay);
         if (dnErr is not null)
             return PatchSceneTagResult.Fail(SceneUploadError.Validation, dnErr);
 
-        var descErr = TryNormalizeMaxLength(description, 2000, "description", out var normalizedDescription);
+        var descErr = SceneTagValidation.TryNormalizeMaxLength(description, 2000, "description", out var normalizedDescription);
         if (descErr is not null)
             return PatchSceneTagResult.Fail(SceneUploadError.Validation, descErr);
 
-        var tagError = TryNormalizeTag(tag, out var normalizedTag);
+        var tagError = SceneTagValidation.TryNormalizeTag(tag, out var normalizedTag);
         if (tagError is not null)
             return PatchSceneTagResult.Fail(SceneUploadError.Validation, tagError);
 
@@ -148,26 +148,4 @@ public sealed class AiCardSceneTagService : IAiCardSceneTagService
         new(s.Id, s.AiCardId, s.StorageKey, s.PublicUrl, s.OriginalFileName,
             s.ContentType, s.SizeBytes, s.CreatedAt, s.Tag, s.DisplayName, s.Description, s.SortKey);
 
-    /// <summary>Validates a scene tag (max 128 chars, nullable = clear). Returns null on success.</summary>
-    private static string? TryNormalizeTag(string? tag, out string? normalized)
-    {
-        normalized = null;
-        if (tag is null || string.IsNullOrWhiteSpace(tag)) return null;
-        var t = tag.Trim();
-        if (t.Length > 128) return "tag must be at most 128 characters.";
-        normalized = t;
-        return null;
-    }
-
-    /// <summary>Validates an optional string field with a maximum character limit. Returns null on success.</summary>
-    private static string? TryNormalizeMaxLength(string? value, int maxLength, string fieldName, out string? normalized)
-    {
-        normalized = null;
-        if (value is null || string.IsNullOrWhiteSpace(value)) return null;
-        var v = value.Trim();
-        if (v.Length == 0) return null;
-        if (v.Length > maxLength) return $"{fieldName} must be at most {maxLength} characters.";
-        normalized = v;
-        return null;
-    }
 }

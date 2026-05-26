@@ -1,1 +1,1 @@
-export { default } from '@/components/soul/voice/voice-provider-settings'
+export { default } from '@/features/soul/voice/voice-provider-settings'

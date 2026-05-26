@@ -1,5 +1,6 @@
 using Inktide.API.Core.Contracts;
 using Inktide.API.Soul.Domain.Entities;
+using Inktide.API.Soul.Domain.Enums;
 
 namespace Inktide.API.Soul.Application.Interfaces;
 
@@ -38,4 +39,7 @@ public interface IAiCardService
     /// AiCard entity is built entirely inside Soul — callers never construct domain entities.
     /// </summary>
     Task<Guid> CreateFromImportAsync(Guid userId, ImportSoulCommand command, CancellationToken ct = default);
+
+    /// <summary>Changes the run status (start / pause / stop) of a soul card. Returns null when not found or not owned by userId.</summary>
+    Task<AiCard?> ChangeStatusAsync(Guid userId, Guid cardId, bool isActive, AiCardStatus status, CancellationToken ct = default);
 }

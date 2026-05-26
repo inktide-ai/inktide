@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Upload } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { type AiCardSceneResponse } from '../../../api/soul'
-import { CardSceneUploader } from '../../../services/upload/CardSceneUploader'
-import { executePresignedUpload } from '../../../services/upload/PresignedUploadService'
+import type { AiCardSceneResponse } from '@/shared/types/soul-api'
+import { CardSceneUploader } from '@/entities/soul/services/upload/CardSceneUploader'
+import { executePresignedUpload } from '@/shared/services/upload/PresignedUploadService'
 
 const MAX_MB = 50
 const ALLOWED_TYPES = 'image/jpeg,image/png,image/webp'

@@ -1,8 +1,8 @@
 'use client'
 import { createContext, useContext, type ReactNode } from 'react'
 import { useCharacters, type SaveStatus } from '../hooks/useCharacters'
-import type { AiCharacter } from '@/lib/character'
-import type { AiCardListItem, LlmModelResponse } from '../api/soul'
+import type { AiCharacter } from '@/shared/lib/character'
+import type { AiCardListItem, LlmModelResponse } from '@/shared/types/soul-api'
 
 export interface CharactersContextValue {
   cardList: AiCardListItem[]

@@ -2,14 +2,14 @@
 import { useRef, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import type { AiCharacter } from '@/lib/character'
+import type { AiCharacter } from '@/shared/lib/character'
 import { IconUser, IconSkills, IconPaint, IconScene, IconMemory, IconBrain, IconMicrophone } from './tab-icons'
 import { Add, ArrowLeft, Edit } from '@/components/icons'
 import SkillsTab from './tabs/skills-tab'
 import ModelTab from './tabs/model-tab'
 import SceneTab from './tabs/scene-tab'
 import MemoryTab from './tabs/memory-tab'
-import BrainTab from './tabs/brain-tab'
+import BrainTab from '@/features/brain/components/brain-tab'
 import VoiceTab from './tabs/voice-tab'
 
 const PencilIcon = () => <Edit />

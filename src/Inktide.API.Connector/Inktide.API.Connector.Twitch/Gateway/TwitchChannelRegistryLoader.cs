@@ -24,7 +24,7 @@ internal sealed class TwitchChannelRegistryLoader(
         await using var scope = scopeFactory.CreateAsyncScope();
         var repo = scope.ServiceProvider.GetRequiredService<IAiCardChannelRepository>();
 
-        var channels = await repo.GetActiveByPlatformAsync("twitch", cancellationToken)
+        var channels = await repo.GetActiveByPlatformAsync(TwitchConnector.PlatformIdValue, cancellationToken)
             .ConfigureAwait(false);
 
         var logins = channels

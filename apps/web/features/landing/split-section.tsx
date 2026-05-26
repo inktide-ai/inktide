@@ -1,8 +1,8 @@
 'use client'
 
-import { useRevealOnScroll } from '@/hooks/useRevealOnScroll'
+import { useRevealOnScroll } from '@/shared/hooks/useRevealOnScroll'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/shared/ui/button'
 
 interface SplitSectionProps {
   heading: React.ReactNode

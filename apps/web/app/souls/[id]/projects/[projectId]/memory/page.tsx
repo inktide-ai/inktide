@@ -1,4 +1,4 @@
-import { DinoGame } from '@/components/ui/dino-game'
+import { DinoGame } from '@/shared/ui/dino-game'
 
 export default function SoulProjectMemoryPage() {
   return (

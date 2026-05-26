@@ -1,4 +1,5 @@
 using System.Text;
+using Inktide.API.Core.Contracts;
 using Inktide.API.Synapse.Application.Models;
 using Inktide.API.Synapse.Infrastructure.Constants;
 
@@ -12,8 +13,7 @@ internal sealed class PersonalitySection : IPromptSection
         if (ctx is null) return null;
 
         var plugins = ctx.Plugins;
-        var soulEnabled = plugins?.FirstOrDefault(p => p.PluginId == SynapseConstants.ShardIds.Soul)?.IsEnabled ?? true;
-        if (!soulEnabled) return null;
+        if (!SynapseConstants.PluginGate.IsEnabled(plugins, SynapseConstants.ShardIds.Soul)) return null;
 
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(ctx.Personality))

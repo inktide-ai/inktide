@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import type { VRM } from '@pixiv/three-vrm'
-import type { IVrmController, VrmAnimationContext, VrmControllerSetup } from '@/types/IVrmController'
+import type { IVrmController, VrmAnimationContext, VrmControllerSetup } from '@/shared/types/IVrmController'
 
 // ── Saccade probability table (реалистичные движения глаз) ───────────────────
 

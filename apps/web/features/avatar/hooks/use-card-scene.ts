@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { listCardScenes, type AiCardSceneResponse } from '../../../api/soul'
+import type { AiCardSceneResponse } from '@/shared/types/soul-api'
+import { listCardScenes } from '@/entities/soul/api'
 
 interface SceneState {
   scenes: AiCardSceneResponse[]

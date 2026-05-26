@@ -35,8 +35,9 @@ public sealed class ScribeFactExtractionClient : IFactExtractionClient
         using var response = await _client.PostAsJsonAsync("/api/v1/extract-facts", body, ct);
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<FactExtractionResponse>(ct);
-        return result!.Facts
+        var result = await response.Content.ReadFromJsonAsync<FactExtractionResponse>(ct)
+            ?? throw new InvalidOperationException("Scribe returned null response body");
+        return result.Facts
             .Select(f => new ExtractedFact(f.Text, f.Type, f.Entities, f.Importance))
             .ToList();
     }

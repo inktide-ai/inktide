@@ -10,6 +10,8 @@ public sealed class MemoryServiceRegistrator : IServiceRegistrator
 {
     public void Register(IRegistrator registrator, IConfiguration configuration)
     {
-        registrator.Register<IMemoryMetadataRepository, MemoryMetadataRepository>(Reuse.Scoped);
+        registrator.Register<MemoryMetadataRepository>(Reuse.Scoped);
+        registrator.RegisterMapping<IMemoryMetadataRepository, MemoryMetadataRepository>();
+        registrator.RegisterMapping<IMemoryMaintenanceRepository, MemoryMetadataRepository>();
     }
 }

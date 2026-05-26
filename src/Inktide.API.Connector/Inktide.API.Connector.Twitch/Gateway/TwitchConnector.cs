@@ -19,17 +19,20 @@ internal sealed class TwitchConnector : IChatConnector, ITwitchConnector, IAsync
     public bool   IsConnected => _client.IsConnected;
 
     private readonly TwitchClient _client;
-    private readonly TwitchMessageHandler _messageHandler;
+    private readonly ITwitchMessageHandler _messageHandler;
+    private readonly ITwitchChannelRegistry _registry;
     private readonly ILogger<TwitchConnector> _logger;
-    private CancellationTokenSource _cts = new();
+    private CancellationTokenSource? _cts;
 
     public TwitchConnector(
         IOptions<TwitchSettings> settings,
-        TwitchMessageHandler messageHandler,
+        ITwitchMessageHandler messageHandler,
+        ITwitchChannelRegistry registry,
         ILoggerFactory loggerFactory,
         ILogger<TwitchConnector> logger)
     {
         _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
+        _registry       = registry       ?? throw new ArgumentNullException(nameof(registry));
         _logger         = logger         ?? throw new ArgumentNullException(nameof(logger));
 
         var s = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
@@ -70,13 +73,27 @@ internal sealed class TwitchConnector : IChatConnector, ITwitchConnector, IAsync
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _logger.LogInformation("TwitchConnector: connecting...");
-        await _client.ConnectAsync().ConfigureAwait(false);
+
+        // TwitchLib's ConnectAsync accepts no CancellationToken — guard with an explicit timeout
+        // so startup can't block indefinitely. If TwitchLib eventually connects after the deadline,
+        // OnConnected() fires normally and IsConnected becomes true.
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        linkedCts.CancelAfter(TimeSpan.FromSeconds(30));
+
+        try
+        {
+            await _client.ConnectAsync().WaitAsync(linkedCts.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning("TwitchConnector: IRC connect did not complete within 30s, continuing anyway");
+        }
     }
 
     public async Task DisconnectAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("TwitchConnector: disconnecting");
-        _cts.Cancel();
+        _cts?.Cancel();
         await _client.DisconnectAsync().ConfigureAwait(false);
     }
 
@@ -92,6 +109,20 @@ internal sealed class TwitchConnector : IChatConnector, ITwitchConnector, IAsync
         _logger.LogInformation("TwitchConnector: left channel #{Channel}", channelLogin);
     }
 
+    public Task JoinChannelAsync(string channelId, Guid cardId, CancellationToken ct = default)
+    {
+        _registry.Register(channelId, cardId);
+        JoinChannel(channelId);
+        return Task.CompletedTask;
+    }
+
+    public Task LeaveChannelAsync(string channelId, Guid cardId, CancellationToken ct = default)
+    {
+        _registry.Unregister(channelId);
+        LeaveChannel(channelId);
+        return Task.CompletedTask;
+    }
+
     private void OnConnected()
     {
         _logger.LogInformation("TwitchConnector: connected (twitch.irc.connected=1)");
@@ -105,8 +136,8 @@ internal sealed class TwitchConnector : IChatConnector, ITwitchConnector, IAsync
 
     public async ValueTask DisposeAsync()
     {
-        _cts.Cancel();
-        _cts.Dispose();
+        _cts?.Cancel();
+        _cts?.Dispose();
         await _client.DisconnectAsync().ConfigureAwait(false);
     }
 }

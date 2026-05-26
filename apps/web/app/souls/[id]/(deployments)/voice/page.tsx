@@ -2,12 +2,12 @@
 
 import { useMemo, useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { VoiceProviderCard } from '@/components/soul/voice-provider-card'
-import { VOICE_PROVIDER_CATALOG } from '@/data/voice-providers'
-import { useCharactersContext } from '@/context/CharactersContext'
+import { VoiceProviderCard } from '@/features/soul/components/voice-provider-card'
+import { VOICE_PROVIDER_CATALOG } from '@/shared/data/voice-providers'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { cn } from '@/lib/utils'
-import { getCredentials, type CredentialResponse } from '@/api/soul'
-import { statusFromCredential } from '@/components/soul/credential-status-badge'
+import { getCredentials, type CredentialResponse } from '@/features/soul/api/index'
+import { statusFromCredential } from '@/features/soul/components/credential-status-badge'
 import { FeaturedIntegrations } from '@/components/featured-integrations'
 
 // ── Toolbar icons ─────────────────────────────────────────────────────────────

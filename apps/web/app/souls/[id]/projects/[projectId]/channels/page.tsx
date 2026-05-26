@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Layers } from 'lucide-react'
-import ChannelTab from '@/components/profile/tabs/channel-tab'
-import { getProject, type Project } from '@/api/projects'
-import { getCard } from '@/api/soul'
-import { apiResponseToCharacter } from '@/lib/character/mappers'
-import type { AiCharacter } from '@/lib/character'
+import ChannelTab from '@/features/character-editor/tabs/channel-tab'
+import { getProject, type Project } from '@/features/projects/api/projects'
+import { getCard } from '@/features/soul/api/index'
+import { apiResponseToCharacter } from '@/shared/lib/character/mappers'
+import type { AiCharacter } from '@/shared/lib/character'
 
 /* ── icons ─────────────────────────────────────────────────────────── */
 

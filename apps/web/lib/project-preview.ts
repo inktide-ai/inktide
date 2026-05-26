@@ -1,4 +1,4 @@
-import type { AiCardModelResponse, AiCardSceneResponse } from '@/api/soul'
+import type { AiCardModelResponse, AiCardSceneResponse } from '@/features/soul/api/index'
 import { inferModelType } from '@/lib/utils/model-type'
 import { buildObsSceneUrl } from '@/lib/utils/obs-url'
 

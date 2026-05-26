@@ -13,10 +13,14 @@ namespace Inktide.API.TTS.Infrastructure.OpenAi;
 /// </summary>
 public sealed class OpenAiCompatibleTtsProvider : ISpeechProvider
 {
+    private readonly OpenAiTtsClient _client;
     private readonly IOptions<OpenAiCompatibleTtsSettings> _settings;
 
-    public OpenAiCompatibleTtsProvider(IOptions<OpenAiCompatibleTtsSettings> settings)
+    public OpenAiCompatibleTtsProvider(
+        OpenAiTtsClient client,
+        IOptions<OpenAiCompatibleTtsSettings> settings)
     {
+        _client   = client   ?? throw new ArgumentNullException(nameof(client));
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
     }
 
@@ -54,21 +58,6 @@ public sealed class OpenAiCompatibleTtsProvider : ISpeechProvider
         return result;
     }
 
-    public Task<SpeechVoiceCollection> GetVoicesAsync(
-        ProviderOptions options,
-        string? modelId = null,
-        CancellationToken ct = default)
-    {
-        return Task.FromResult(new SpeechVoiceCollection([]));
-    }
-
-    public Task<SpeechModelCollection> GetModelsAsync(
-        ProviderOptions options,
-        CancellationToken ct = default)
-    {
-        return Task.FromResult(new SpeechModelCollection("list", []));
-    }
-
     public async Task<Stream> SynthesizeAsync(
         ProviderOptions providerOptions,
         SpeechOptions speechOptions,
@@ -88,8 +77,8 @@ public sealed class OpenAiCompatibleTtsProvider : ISpeechProvider
             ? speechOptions.Model
             : _settings.Value.DefaultModelId;
 
-        return await OpenAiTtsProvider.GenerateSpeechAsync(
-            endpoint, apiKey, modelId, speechOptions, ct)
+        return await _client
+            .SynthesizeAsync(endpoint, apiKey, modelId, speechOptions, cacheClient: !providerOptions.ApiKeyIsTransient, ct)
             .ConfigureAwait(false);
     }
 }

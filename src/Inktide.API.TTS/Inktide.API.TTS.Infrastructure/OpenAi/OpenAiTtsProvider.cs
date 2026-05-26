@@ -4,8 +4,6 @@ using Inktide.API.TTS.Domain.Models;
 using Inktide.API.TTS.Domain.Speech;
 using FluentValidation.Results;
 using Microsoft.Extensions.Options;
-using OpenAI.Audio;
-using System.ClientModel;
 
 namespace Inktide.API.TTS.Infrastructure.OpenAi;
 
@@ -14,7 +12,7 @@ namespace Inktide.API.TTS.Infrastructure.OpenAi;
 /// Requires an API key supplied via <c>X-TTS-Api-Key</c> header or
 /// <c>TtsProviders:OpenAi:ApiKey</c> config.
 /// </summary>
-public sealed class OpenAiTtsProvider : ISpeechProvider
+public sealed class OpenAiTtsProvider : ISpeechProvider, IVoiceListingProvider, IModelListingProvider
 {
     private static readonly Uri OpenAiEndpoint = new("https://api.openai.com/v1");
 
@@ -25,10 +23,12 @@ public sealed class OpenAiTtsProvider : ISpeechProvider
         new("gpt-4o-mini-tts",  "gpt-4o-mini-tts",  DateTimeOffset.UnixEpoch, "openai"),
     ]);
 
+    private readonly OpenAiTtsClient _client;
     private readonly IOptions<OpenAiTtsSettings> _settings;
 
-    public OpenAiTtsProvider(IOptions<OpenAiTtsSettings> settings)
+    public OpenAiTtsProvider(OpenAiTtsClient client, IOptions<OpenAiTtsSettings> settings)
     {
+        _client   = client   ?? throw new ArgumentNullException(nameof(client));
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
     }
 
@@ -40,9 +40,10 @@ public sealed class OpenAiTtsProvider : ISpeechProvider
 
     public SpeechProviderCapabilities Capabilities { get; } = new()
     {
-        RequiresApiKey = true,
+        RequiresApiKey       = true,
         SupportsVoiceListing = true,
-        SupportsStreaming = false,
+        SupportsStreaming     = false,
+        SupportsModelListing  = true,
     };
 
     public ValidationResult Validate(ProviderOptions options)
@@ -90,50 +91,8 @@ public sealed class OpenAiTtsProvider : ISpeechProvider
             ? speechOptions.Model
             : _settings.Value.DefaultModelId;
 
-        return await GenerateSpeechAsync(
-            OpenAiEndpoint, apiKey, modelId, speechOptions, ct)
+        return await _client
+            .SynthesizeAsync(OpenAiEndpoint, apiKey, modelId, speechOptions, cacheClient: !providerOptions.ApiKeyIsTransient, ct)
             .ConfigureAwait(false);
     }
-
-    internal static async Task<Stream> GenerateSpeechAsync(
-        Uri endpoint,
-        string apiKey,
-        string modelId,
-        SpeechOptions speechOptions,
-        CancellationToken ct)
-    {
-        var client = new AudioClient(
-            model: modelId,
-            credential: new ApiKeyCredential(apiKey),
-            options: new OpenAI.OpenAIClientOptions { Endpoint = endpoint });
-
-        var options = new SpeechGenerationOptions
-        {
-            SpeedRatio = (float)Math.Clamp(
-                speechOptions.Speed <= 0 ? 1.0 : speechOptions.Speed, 0.25, 4.0),
-            ResponseFormat = MapFormat(speechOptions.AudioFormat),
-        };
-
-        var result = await client
-            .GenerateSpeechAsync(
-                speechOptions.Text,
-                new GeneratedSpeechVoice(speechOptions.Voice),
-                options,
-                ct)
-            .ConfigureAwait(false);
-
-        return result.Value.ToStream();
-    }
-
-    private static GeneratedSpeechFormat MapFormat(string? audioFormat)
-        => audioFormat?.ToLowerInvariant() switch
-        {
-            "mp3"  => GeneratedSpeechFormat.Mp3,
-            "opus" => GeneratedSpeechFormat.Opus,
-            "aac"  => GeneratedSpeechFormat.Aac,
-            "flac" => GeneratedSpeechFormat.Flac,
-            "pcm"  => GeneratedSpeechFormat.Pcm,
-            "wav"  => GeneratedSpeechFormat.Wav,
-            _      => GeneratedSpeechFormat.Mp3,
-        };
 }

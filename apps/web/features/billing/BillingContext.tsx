@@ -8,8 +8,8 @@ import {
 } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { getSubscription, createCheckout, createPortal, type SubscriptionDto } from '@/api/billing'
-import { queryKeys } from '@/lib/query/keys'
-import { useAuth } from './AuthContext'
+import { queryKeys } from '@/shared/lib/query/keys'
+import { useAuth } from '@/context/AuthContext'
 
 interface BillingContextValue {
   plan: 'free' | 'starter' | 'pro'

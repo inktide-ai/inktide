@@ -1,4 +1,4 @@
-import { apiFetch, emptyOrThrow, jsonOrThrow } from './client'
+import { apiFetch, emptyOrThrow, jsonOrThrow } from '@/api/client'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

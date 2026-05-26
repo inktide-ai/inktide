@@ -11,4 +11,5 @@ public sealed record CreateCheckoutRequest(
     string UserId,
     string UserEmail,
     string SuccessUrl,
-    string CancelUrl);
+    string CancelUrl,
+    PlanType Plan);

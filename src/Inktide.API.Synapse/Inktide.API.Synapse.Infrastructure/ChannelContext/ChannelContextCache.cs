@@ -4,7 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Inktide.API.Synapse.Infrastructure.ChannelContext;
 
-public sealed class ChannelContextCache(IMemoryCache cache)
+internal sealed class ChannelContextCache(IMemoryCache cache)
 {
     internal async Task<AiCardContext?> GetOrSetAsync(
         string channelId,

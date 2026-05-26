@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { ChevronDown, X } from 'lucide-react'
-import { createProject } from '@/api/projects'
-import type { AiCardListItem } from '@/api/soul'
+import { createProject } from '@/features/projects/api/projects'
+import type { AiCardListItem } from '@/entities/soul/api'
 import { TetrisAssemble } from './tetris-assemble'
 
 interface ProjectCreationWizardProps {

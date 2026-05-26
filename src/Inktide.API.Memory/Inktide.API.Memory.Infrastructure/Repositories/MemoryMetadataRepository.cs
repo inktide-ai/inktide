@@ -1,4 +1,3 @@
-using Inktide.API.Core.Generators;
 using Inktide.API.Memory.Domain.Models;
 using Inktide.API.Memory.Domain.Ports;
 using Inktide.API.Memory.Infrastructure.DbContext;
@@ -6,43 +5,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Inktide.API.Memory.Infrastructure.Repositories;
 
-public sealed class MemoryMetadataRepository : IMemoryMetadataRepository
+public sealed class MemoryMetadataRepository : IMemoryMetadataRepository, IMemoryMaintenanceRepository
 {
     private readonly MemoryDbContext _db;
 
     public MemoryMetadataRepository(MemoryDbContext db) => _db = db;
 
-    public async Task UpsertAsync(
-        Guid aiCardId,
-        string qdrantPointId,
-        string factText,
-        string category,
-        string sourceType,
-        double importance,
-        DateTime rememberedAt,
-        DateTime? expiresAt,
-        CancellationToken ct = default)
+    public Task UpsertAsync(MemoryMetadata m, CancellationToken ct = default) =>
+        _db.Database.ExecuteSqlAsync(
+            $"""
+             INSERT INTO soul.memory_metadata
+                 (id, ai_card_id, qdrant_point_id, fact_text, category, source_type,
+                  importance, remembered_at, expires_at)
+             VALUES
+                 ({m.Id}, {m.CharacterId}, {m.QdrantPointId}, {m.FactText},
+                  {m.Category}, {m.SourceType}, {m.Importance}, {m.RememberedAt}, {m.ExpiresAt})
+             ON CONFLICT (ai_card_id, qdrant_point_id) DO NOTHING
+             """,
+            ct);
+
+    public async Task UpsertBatchAsync(IReadOnlyList<MemoryMetadata> records, CancellationToken ct = default)
     {
-        var exists = await _db.MemoryMetadata
-            .AnyAsync(m => m.CharacterId == aiCardId && m.QdrantPointId == qdrantPointId, ct);
-
-        if (!exists)
-        {
-            _db.MemoryMetadata.Add(new MemoryMetadata
-            {
-                Id            = IdGenerator.New(),
-                CharacterId      = aiCardId,
-                QdrantPointId = qdrantPointId,
-                FactText      = factText,
-                Category      = category,
-                SourceType    = sourceType,
-                Importance    = importance,
-                RememberedAt  = rememberedAt,
-                ExpiresAt     = expiresAt,
-            });
-
-            await _db.SaveChangesAsync(ct);
-        }
+        if (records.Count == 0) return;
+        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+        foreach (var r in records)
+            await UpsertAsync(r, ct);
+        await tx.CommitAsync(ct);
     }
 
     public async Task UpdateRecallAsync(

@@ -3,7 +3,7 @@ using Inktide.API.Synapse.Application.Interfaces;
 
 namespace Inktide.API.Synapse.Infrastructure.Adapters;
 
-public sealed class SynapseStatsAdapter : ISynapseStatsPort
+internal sealed class SynapseStatsAdapter : ISynapseStatsPort
 {
     private readonly IDashboardStatsService _stats;
 

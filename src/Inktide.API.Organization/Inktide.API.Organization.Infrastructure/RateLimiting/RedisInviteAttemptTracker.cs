@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Inktide.API.Organization.Application.Interfaces;
+using Inktide.API.Organization.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -8,9 +9,6 @@ namespace Inktide.API.Organization.Infrastructure.RateLimiting;
 
 public sealed class RedisInviteAttemptTracker : IInviteAttemptTracker
 {
-    private const int MaxAttempts = 10;
-    private const int TtlSeconds = 3600; // 1h — sufficient for anti-abuse, does not lock out permanently
-
     // Token is SHA256-hashed before persistence to avoid storing raw invite secrets in Redis.
     // actorId must be canonical internal user identifier — not external identity claim (sub, email).
     // Using external claims risks split counters across identity provider migrations.
@@ -24,12 +22,17 @@ public sealed class RedisInviteAttemptTracker : IInviteAttemptTracker
         """;
 
     private readonly IConnectionMultiplexer _redis;
+    private readonly OrganizationSettings _settings;
     private readonly ILogger<RedisInviteAttemptTracker> _logger;
 
-    public RedisInviteAttemptTracker(IConnectionMultiplexer redis, ILogger<RedisInviteAttemptTracker> logger)
+    public RedisInviteAttemptTracker(
+        IConnectionMultiplexer redis,
+        OrganizationSettings settings,
+        ILogger<RedisInviteAttemptTracker> logger)
     {
-        _redis = redis;
-        _logger = logger;
+        _redis    = redis;
+        _settings = settings;
+        _logger   = logger;
     }
 
     public async Task<bool> TryRecordAttemptAsync(string token, string actorId, CancellationToken ct = default)
@@ -43,9 +46,9 @@ public sealed class RedisInviteAttemptTracker : IInviteAttemptTracker
             var count = (long)await db.ScriptEvaluateAsync(
                 LuaScript,
                 keys: [key],
-                values: [(RedisValue)TtlSeconds]).ConfigureAwait(false);
+                values: [(RedisValue)_settings.InviteAttemptTtlSeconds]).ConfigureAwait(false);
 
-            return count <= MaxAttempts;
+            return count <= _settings.InviteMaxAttempts;
         }
         catch (RedisException ex)
         {

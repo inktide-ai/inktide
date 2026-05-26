@@ -6,10 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Synapse.Infrastructure.Startup;
 
-// TODO(H13): formalize required vs optional shard contract on IPipelineStage
-//   Core cognition (RAG, Session) → absent = context-free responses → crash on startup
-//   Decorative enrichment (Emotion, Screen) → absent = graceful degrade → null fallback
-//   Future: bool IsRequired { get; } on IPipelineStage; validator becomes data-driven.
+// Required shards: RAG only. Session is optional — absent = responses without conversation history
+// (degraded but not broken). Emotion and Screen are always decorative.
+// Future: bool IsRequired { get; } on IPipelineStage makes this data-driven.
 internal sealed class ScatterShardValidator(
     IServiceScopeFactory scopeFactory,
     ILogger<ScatterShardValidator> logger) : IHostedService

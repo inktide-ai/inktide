@@ -1,6 +1,6 @@
 'use client'
-import { useCharactersContext } from '../../../context/CharactersContext'
-import SkillsTab from '../../../components/profile/tabs/skills-tab'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import SkillsTab from '@/features/character-editor/tabs/skills-tab'
 
 export default function SkillsPage() {
   const { selected, updateCharacter } = useCharactersContext()

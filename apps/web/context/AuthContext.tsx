@@ -10,12 +10,12 @@ import {
 } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Keycloak from 'keycloak-js'
-import type { IAuthTokenParser } from '@/types/IAuthTokenParser'
-import type { ILocaleSync } from '@/types/ILocaleSync'
-import type { IAvatarService } from '@/types/IAvatarService'
+import type { IAuthTokenParser } from '@/shared/types/IAuthTokenParser'
+import type { ILocaleSync } from '@/shared/types/ILocaleSync'
+import type { IAvatarService } from '@/shared/types/IAvatarService'
 import { writeStoredNickname } from '../utils/profileStorage'
 import { HOME_ROUTE } from '@/lib/routes'
-import { queryKeys } from '@/lib/query/keys'
+import { queryKeys } from '@/shared/lib/query/keys'
 
 // ── Domain types ──────────────────────────────────────────────────────────────
 

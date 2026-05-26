@@ -1,6 +1,6 @@
 'use client'
 import { useTranslation } from 'react-i18next'
-import { SliderField } from '@/components/ui/slider-field'
+import { SliderField } from '@/shared/ui/slider-field'
 import { infoContent, formGroup, labelCls, labelHint, inputCls } from './panel-styles'
 import type { PanelProps } from './types'
 

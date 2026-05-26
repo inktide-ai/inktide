@@ -3,6 +3,7 @@ using Inktide.API.Core.Contracts;
 using Inktide.API.Core.Transactions;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Domain.Repositories;
+using Inktide.API.Soul.Infrastructure.Cache;
 using Inktide.API.Soul.Infrastructure.Messaging;
 using Inktide.API.Soul.Infrastructure.Queries;
 using Inktide.API.Soul.Infrastructure.Repositories;
@@ -45,6 +46,9 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
 
         // Integration event publisher — singleton, stateless Redis client
         registrator.Register<IIntegrationEventPublisher, RedisStreamsIntegrationEventPublisher>(Reuse.Singleton);
+
+        // Synapse gate cache — singleton, Redis key per soul card
+        registrator.Register<IAiCardStatusGateCache, SoulStatusGateRedisCache>(Reuse.Singleton);
     }
 
 }

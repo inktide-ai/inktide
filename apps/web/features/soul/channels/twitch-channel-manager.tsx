@@ -7,9 +7,9 @@ import {
   revokeTwitchChannel,
   patchCardChannel,
   type ChannelResponse,
-} from '@/api/soul'
+} from '@/features/soul/api/index'
 import { ApiError } from '@/api/client'
-import { useChannelMutation } from '@/hooks/soul/useChannelMutation'
+import { useChannelMutation } from '@/features/soul/hooks/useChannelMutation'
 import { saveOAuthPending } from './resolve-oauth-return'
 
 function IconTwitchMono() {

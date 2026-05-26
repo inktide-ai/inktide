@@ -42,6 +42,11 @@ mod duration_ms {
 
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Duration, D::Error> {
         let ms = <f64 as serde::Deserialize>::deserialize(d)?;
+        if ms < 0.0 || !ms.is_finite() {
+            return Err(serde::de::Error::custom(
+                format!("duration must be a non-negative finite number of ms, got {ms}")
+            ));
+        }
         Ok(Duration::from_secs_f64(ms / 1_000.0))
     }
 }
@@ -54,15 +59,51 @@ pub struct VisemeCue {
     pub viseme: Viseme,
 }
 
-/// Complete lip-sync timeline for one audio chunk.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct VisemeTimeline {
-    pub cues: Vec<VisemeCue>,
+/// Private helper — plain deserialization target without any invariant.
+/// [`VisemeTimeline`] is deserialized via `From<VisemeTimelineRaw>` so that
+/// `new()` (and its sort `assert!`) always runs.
+#[derive(Deserialize)]
+struct VisemeTimelineRaw {
+    cues: Vec<VisemeCue>,
     #[serde(rename = "durationMs", with = "duration_ms")]
-    pub duration: Duration,
+    duration: Duration,
+}
+
+impl From<VisemeTimelineRaw> for VisemeTimeline {
+    fn from(raw: VisemeTimelineRaw) -> Self {
+        Self::new(raw.cues, raw.duration)
+    }
+}
+
+/// Complete lip-sync timeline for one audio chunk.
+///
+/// Cues must be sorted by `start` time — [`VisemeTimeline::new`] asserts this in
+/// debug builds. Providing unsorted cues silently breaks [`blend_state`](Self::blend_state)
+/// because it relies on `partition_point`.
+///
+/// Deserialization always goes through [`new`](Self::new) (via `VisemeTimelineRaw`),
+/// so the sort invariant is checked on every construction path.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(from = "VisemeTimelineRaw")]
+pub struct VisemeTimeline {
+    cues: Vec<VisemeCue>,
+    #[serde(rename = "durationMs", with = "duration_ms")]
+    duration: Duration,
 }
 
 impl VisemeTimeline {
+    /// Canonical constructor. Panics if `cues` are not sorted by `start`.
+    pub fn new(cues: Vec<VisemeCue>, duration: Duration) -> Self {
+        assert!(
+            cues.windows(2).all(|w| w[0].start <= w[1].start),
+            "VisemeTimeline cues must be sorted by start time"
+        );
+        Self { cues, duration }
+    }
+
+    pub fn cues(&self) -> &[VisemeCue] { &self.cues }
+    pub fn duration(&self) -> Duration { self.duration }
+
     /// Returns `(current, next, progress)` at `time`, where `progress` ∈ [0, 1]
     /// is how far through the current cue we are. Used by the renderer to blend.
     pub fn blend_state(&self, time: Duration) -> (Viseme, Viseme, f32) {
@@ -97,14 +138,14 @@ mod tests {
     use super::*;
 
     fn timeline() -> VisemeTimeline {
-        VisemeTimeline {
-            cues: vec![
+        VisemeTimeline::new(
+            vec![
                 VisemeCue { start: Duration::ZERO, viseme: Viseme::X },
                 VisemeCue { start: Duration::from_millis(100), viseme: Viseme::E },
                 VisemeCue { start: Duration::from_millis(300), viseme: Viseme::X },
             ],
-            duration: Duration::from_millis(500),
-        }
+            Duration::from_millis(500),
+        )
     }
 
     #[test]
@@ -146,5 +187,32 @@ mod tests {
         let cue = VisemeCue { start: Duration::from_millis(120), viseme: Viseme::E };
         let json = serde_json::to_string(&cue).unwrap();
         assert!(json.contains("startMs") && json.contains("120"));
+    }
+
+    #[test]
+    fn deserialize_rejects_negative_duration() {
+        let result = serde_json::from_str::<VisemeTimeline>(
+            r#"{"durationMs": -100.0, "cues": []}"#
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn deserialize_rejects_negative_cue_start() {
+        let result = serde_json::from_str::<VisemeCue>(
+            r#"{"startMs": -50.0, "viseme": "X"}"#
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn timeline_roundtrip_sorted_cues() {
+        // Deserialization must go through new() and produce a valid, usable timeline.
+        let original = timeline();
+        let json = serde_json::to_string(&original).unwrap();
+        let restored: VisemeTimeline = serde_json::from_str(&json).unwrap();
+        // blend_state must work on the restored timeline — regression for Deserialize bypass.
+        let (cur, _, _) = restored.blend_state(Duration::from_millis(200));
+        assert_eq!(cur, Viseme::E);
     }
 }

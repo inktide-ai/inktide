@@ -1,6 +1,5 @@
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
-using Inktide.API.Synapse.Infrastructure.Constants;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Synapse.Infrastructure.Aggregation;
@@ -13,7 +12,7 @@ namespace Inktide.API.Synapse.Infrastructure.Aggregation;
 ///      or the soul has no saved graph.
 ///   3. Aggregate and publish to the LLM Redis stream.
 /// </summary>
-public sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
+internal sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
 {
     private readonly IChannelContextResolutionService _channelContext;
     private readonly IEnumerable<IPipelineStage> _shards;
@@ -88,14 +87,9 @@ public sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
         // This preserves backwards-compatibility for souls without a saved graph.
         if (!graphEnriched)
         {
-            // Respect per-project plugin config. Missing entry = default OFF (opt-in per plugin).
-            var plugins = cardCtx?.Plugins;
-            bool IsPluginEnabled(string id) =>
-                plugins?.FirstOrDefault(p => p.PluginId == id)?.IsEnabled ?? false;
-
             var orderedShards = _shards
                 .OrderBy(s => s.ShardId, StringComparer.Ordinal)
-                .Where(s => s.ShardId != SynapseConstants.ShardIds.Rag || IsPluginEnabled(SynapseConstants.ShardIds.Rag))
+                .Where(s => s.ShouldRun(cardCtx))
                 .ToArray();
 
             var shardIds = string.Join(',', orderedShards.Select(s => s.ShardId));

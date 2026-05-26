@@ -2,6 +2,7 @@ using System.Net;
 using Inktide.API.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
@@ -9,7 +10,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace Inktide.API.Billing.REST;
 
-public sealed class BillingRestApiStartup : IStartup, IMiddlewareConfigurator
+public sealed class BillingRestApiStartup : IStartup, IMiddlewareConfigurator, IEndpointConfigurator
 {
     // Policy name constant — registered in Inktide.API/Deployment/TtsRateLimiterStartup.cs
     // (AddRateLimiter requires Microsoft.NET.Sdk.Web which is unavailable in REST class-library projects)
@@ -47,5 +48,10 @@ public sealed class BillingRestApiStartup : IStartup, IMiddlewareConfigurator
     public void Configure(IApplicationBuilder app)
     {
         app.UseForwardedHeaders();
+    }
+
+    public void Map(IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapControllers();
     }
 }

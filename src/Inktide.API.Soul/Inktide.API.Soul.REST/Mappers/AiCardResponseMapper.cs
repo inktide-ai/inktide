@@ -41,6 +41,8 @@ public static class AiCardResponseMapper
             Visibility       = EnumToString(card.Visibility),
             Channels         = card.Channels?.Select(ChannelResponseMapper.ToChannelResponse).ToList(),
             Tools            = card.Tools?.Select(ToolResponseMapper.ToToolResponse).ToList(),
+            Category         = card.Category,
+            Tags             = DeserializeOrEmpty(card.Tags),
             IsActive         = card.IsActive,
             CreatedAt        = card.CreatedAt,
             UpdatedAt        = card.UpdatedAt,
@@ -87,6 +89,9 @@ public static class AiCardResponseMapper
         BaselineMood          = p.BaselineMood,
         PresetId              = p.PresetId,
     };
+
+    private static IReadOnlyList<string> DeserializeOrEmpty(string? json) =>
+        string.IsNullOrEmpty(json) ? [] : JsonConvert.DeserializeObject<List<string>>(json) ?? [];
 
     private static T? Deserialize<T>(string? json) where T : class =>
         string.IsNullOrEmpty(json) ? null : JsonConvert.DeserializeObject<T>(json);

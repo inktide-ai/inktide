@@ -1,3 +1,4 @@
+using Inktide.API.Core.Contracts;
 using Inktide.API.Core.Generators;
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
@@ -15,19 +16,22 @@ public sealed class AiCardChannelLinkService :
 {
     private readonly IAiCardRepository _cardRepo;
     private readonly IAiCardChannelRepository _channelRepo;
+    private readonly IUserPlanResolver _planResolver;
     private readonly TimeProvider _time;
     private readonly ILogger<AiCardChannelLinkService> _logger;
 
     public AiCardChannelLinkService(
         IAiCardRepository cardRepo,
         IAiCardChannelRepository channelRepo,
+        IUserPlanResolver planResolver,
         TimeProvider time,
         ILogger<AiCardChannelLinkService> logger)
     {
-        _cardRepo = cardRepo ?? throw new ArgumentNullException(nameof(cardRepo));
-        _channelRepo = channelRepo ?? throw new ArgumentNullException(nameof(channelRepo));
-        _time = time ?? throw new ArgumentNullException(nameof(time));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _cardRepo     = cardRepo     ?? throw new ArgumentNullException(nameof(cardRepo));
+        _channelRepo  = channelRepo  ?? throw new ArgumentNullException(nameof(channelRepo));
+        _planResolver = planResolver ?? throw new ArgumentNullException(nameof(planResolver));
+        _time         = time         ?? throw new ArgumentNullException(nameof(time));
+        _logger       = logger       ?? throw new ArgumentNullException(nameof(logger));
     }
 
     // ── IAiCardChannelCrudService ────────────────────────────────────────────
@@ -40,9 +44,7 @@ public sealed class AiCardChannelLinkService :
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var card = await _cardRepo.GetByIdAsync(cardId, ct);
-        if (card is null || card.UserId != userId)
-            throw new AiCardNotFoundException(cardId);
+        await RequireCardOwnershipAsync(userId, cardId, ct);
 
         var platform = command.Platform.Trim().ToLowerInvariant();
         var channelName = command.ChannelName.Trim();
@@ -50,6 +52,12 @@ public sealed class AiCardChannelLinkService :
         var channelId = string.IsNullOrWhiteSpace(command.ChannelId) ? null : command.ChannelId.Trim();
 
         var existing = await _channelRepo.GetByCardIdAsync(cardId, ct);
+
+        // ── Plan quota ──────────────────────────────────────────────────────────
+        var limits = await _planResolver.GetLimitsAsync(userId.ToString(), ct).ConfigureAwait(false);
+        if (existing.Count >= limits.MaxChannelsPerCard)
+            throw new PlanLimitExceededException("channels_per_card", limits.MaxChannelsPerCard);
+
         if (existing.Any(
                 c => string.Equals(c.Platform, platform, StringComparison.OrdinalIgnoreCase)
                      && string.Equals(c.ChannelName, channelName, StringComparison.Ordinal)))
@@ -93,9 +101,7 @@ public sealed class AiCardChannelLinkService :
 
     public async Task DeleteAsync(Guid userId, Guid cardId, Guid linkId, CancellationToken ct = default)
     {
-        var card = await _cardRepo.GetByIdAsync(cardId, ct);
-        if (card is null || card.UserId != userId)
-            throw new AiCardNotFoundException(cardId);
+        await RequireCardOwnershipAsync(userId, cardId, ct);
 
         var link = await _channelRepo.GetByIdForUpdateAsync(linkId, ct);
         if (link is null || link.AiCardId != cardId)
@@ -115,9 +121,7 @@ public sealed class AiCardChannelLinkService :
         PatchChannelLinkCommand command,
         CancellationToken ct = default)
     {
-        var card = await _cardRepo.GetByIdAsync(cardId, ct);
-        if (card is null || card.UserId != userId)
-            throw new AiCardNotFoundException(cardId);
+        await RequireCardOwnershipAsync(userId, cardId, ct);
 
         var link = await _channelRepo.GetByIdForUpdateAsync(linkId, ct);
         if (link is null || link.AiCardId != cardId)
@@ -133,49 +137,48 @@ public sealed class AiCardChannelLinkService :
 
     public async Task<AiCardChannel?> GetByIdAsync(Guid userId, Guid channelId, CancellationToken ct = default)
     {
-        var channel = await _channelRepo.GetByIdForUpdateAsync(channelId, ct);
-        if (channel is null) return null;
-
-        var card = await _cardRepo.GetByIdAsync(channel.AiCardId, ct);
-        if (card is null || card.UserId != userId) return null;
-
-        return channel;
+        var owned = await TryGetOwnedChannelAsync(userId, channelId, ct);
+        return owned?.channel;
     }
 
-    public async Task DeactivateAsync(Guid userId, Guid channelId, CancellationToken ct = default)
+    public async Task<bool> DeactivateAsync(Guid userId, Guid channelId, CancellationToken ct = default)
     {
-        var channel = await _channelRepo.GetByIdForUpdateAsync(channelId, ct);
-        if (channel is null) return;
+        var owned = await TryGetOwnedChannelAsync(userId, channelId, ct);
+        if (owned is null)
+        {
+            _logger.LogWarning("DeactivateAsync: channel {ChannelId} not found or not owned by user {UserId}", channelId, userId);
+            return false;
+        }
 
-        var card = await _cardRepo.GetByIdAsync(channel.AiCardId, ct);
-        if (card is null || card.UserId != userId) return;
-
+        var channel = owned.Value.channel;
         channel.IsActive = false;
         channel.OAuthTokenEnc = null;
         channel.RefreshTokenEnc = null;
         channel.TokenExpiresAt = null;
         await _channelRepo.UpdateAsync(channel, ct);
+        return true;
     }
 
-    public async Task SetCustomBotTokenAsync(Guid userId, Guid channelId, string? encryptedToken, CancellationToken ct = default)
+    public async Task<bool> SetCustomBotTokenAsync(Guid userId, Guid channelId, string? encryptedToken, CancellationToken ct = default)
     {
-        var channel = await _channelRepo.GetByIdForUpdateAsync(channelId, ct);
-        if (channel is null) return;
+        var owned = await TryGetOwnedChannelAsync(userId, channelId, ct);
+        if (owned is null)
+        {
+            _logger.LogWarning("SetCustomBotTokenAsync: channel {ChannelId} not found or not owned by user {UserId}", channelId, userId);
+            return false;
+        }
 
-        var card = await _cardRepo.GetByIdAsync(channel.AiCardId, ct);
-        if (card is null || card.UserId != userId) return;
-
+        var channel = owned.Value.channel;
         channel.CustomBotTokenEnc = encryptedToken;
         await _channelRepo.UpdateAsync(channel, ct);
+        return true;
     }
 
     // ── IAiCardChannelConnectService ─────────────────────────────────────────
 
     public async Task<Guid> UpsertAsync(OAuthChannelUpsertCommand cmd, CancellationToken ct = default)
     {
-        var card = await _cardRepo.GetByIdAsync(cmd.CardId, ct);
-        if (card is null || card.UserId != cmd.UserId)
-            throw new AiCardNotFoundException(cmd.CardId);
+        await RequireCardOwnershipAsync(cmd.UserId, cmd.CardId, ct);
 
         var existing = await _channelRepo.GetByCardIdAsync(cmd.CardId, ct);
         var channel = existing.FirstOrDefault(c =>
@@ -185,6 +188,11 @@ public sealed class AiCardChannelLinkService :
 
         if (channel is null)
         {
+            // ── Plan quota — only checked on new channel creation, not token refresh ──
+            var limits = await _planResolver.GetLimitsAsync(cmd.UserId.ToString(), ct).ConfigureAwait(false);
+            if (existing.Count >= limits.MaxChannelsPerCard)
+                throw new PlanLimitExceededException("channels_per_card", limits.MaxChannelsPerCard);
+
             channel = new AiCardChannel
             {
                 Id              = IdGenerator.New(),
@@ -218,6 +226,23 @@ public sealed class AiCardChannelLinkService :
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
+
+    /// <summary>Throws AiCardNotFoundException when card is missing or owned by a different user.</summary>
+    private async Task<AiCard> RequireCardOwnershipAsync(Guid userId, Guid cardId, CancellationToken ct)
+    {
+        var card = await _cardRepo.GetByIdAsync(cardId, ct);
+        if (card is null || card.UserId != userId)
+            throw new AiCardNotFoundException(cardId);
+        return card;
+    }
+
+    /// <summary>Returns null when channel is missing or its card is owned by a different user.</summary>
+    private async Task<(AiCardChannel channel, AiCard card)?> TryGetOwnedChannelAsync(Guid userId, Guid channelId, CancellationToken ct)
+    {
+        var channel = await _channelRepo.GetByIdWithCardAsync(channelId, ct);
+        if (channel is null || channel.AiCard is null || channel.AiCard.UserId != userId) return null;
+        return (channel, channel.AiCard);
+    }
 
     private static ChannelLink ToDto(AiCardChannel c) =>
         new(

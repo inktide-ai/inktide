@@ -1,9 +1,9 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCardScene } from '../../avatar/hooks/use-card-scene'
+import { useCardScene } from '@/features/avatar/hooks/use-card-scene'
 import { SceneGrid } from './scene-grid'
-import type { AiCharacter } from '@/lib/character'
+import type { AiCharacter } from '@/shared/lib/character'
 
 interface SceneTabProps {
   character: AiCharacter

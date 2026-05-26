@@ -6,5 +6,4 @@ public interface IConnectorRepository
 {
     Task<IReadOnlyList<Connector>> GetAllAsync(CancellationToken ct);
     Task<Connector?> GetBySlugAsync(string slug, CancellationToken ct);
-    Task<Connector?> GetByIdAsync(Guid id, CancellationToken ct);
 }

@@ -6,7 +6,7 @@ namespace Inktide.API.Connector.Discord;
 /// <summary>
 /// Maps Discord <see cref="SocketMessage"/> to the unified <see cref="ChatMessage"/> model.
 /// </summary>
-public sealed class DiscordMessageMapper
+public sealed class DiscordMessageMapper : IDiscordMessageMapper
 {
     public ChatMessage Map(SocketUserMessage message, string channelName, string guildId)
     {

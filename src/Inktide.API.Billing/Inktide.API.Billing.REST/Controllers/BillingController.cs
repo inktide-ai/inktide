@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using Inktide.API.Billing.Application.Interfaces;
+using Inktide.API.Billing.Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Billing.REST.Controllers;
 
@@ -13,10 +15,17 @@ namespace Inktide.API.Billing.REST.Controllers;
 public sealed class BillingController : ControllerBase
 {
     private readonly ISubscriptionService _subscriptions;
+    private readonly IStripeService _stripe;
+    private readonly ILogger<BillingController> _logger;
 
-    public BillingController(ISubscriptionService subscriptions)
+    public BillingController(
+        ISubscriptionService subscriptions,
+        IStripeService stripe,
+        ILogger<BillingController> logger)
     {
         _subscriptions = subscriptions ?? throw new ArgumentNullException(nameof(subscriptions));
+        _stripe        = stripe        ?? throw new ArgumentNullException(nameof(stripe));
+        _logger        = logger        ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>Returns the current user's subscription plan and status.</summary>
@@ -46,7 +55,8 @@ public sealed class BillingController : ControllerBase
         var email  = User.FindFirstValue("email") ?? User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
         if (userId is null) return Unauthorized();
 
-        var url = await _subscriptions.CreateCheckoutUrlAsync(userId, email, body?.ReturnUrl ?? string.Empty, ct)
+        var plan = Enum.TryParse<PlanType>(body?.Plan, ignoreCase: true, out var p) ? p : PlanType.Pro;
+        var url = await _subscriptions.CreateCheckoutUrlAsync(userId, email, body?.ReturnUrl ?? string.Empty, plan, ct)
             .ConfigureAwait(false);
 
         return Ok(new CheckoutResponse { CheckoutUrl = url });
@@ -78,8 +88,38 @@ public sealed class BillingController : ControllerBase
         public DateTime? PeriodEnd { get; init; }
     }
 
-    public sealed class CheckoutRequest  { public string? ReturnUrl { get; init; } }
-    public sealed class CheckoutResponse { public string CheckoutUrl { get; init; } = string.Empty; }
-    public sealed class PortalRequest    { public string? ReturnUrl { get; init; } }
-    public sealed class PortalResponse   { public string PortalUrl  { get; init; } = string.Empty; }
+    /// <summary>Creates a Stripe PaymentIntent and returns the client_secret for card payments.</summary>
+    [HttpPost("stripe/payment-intent")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateStripePaymentIntent(
+        [FromBody] StripePaymentIntentRequest req,
+        CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var email  = User.FindFirstValue("email") ?? User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+        if (userId is null) return Unauthorized();
+
+        try
+        {
+            var clientSecret = await _stripe.CreatePaymentIntentAsync(
+                userId, email,
+                req.Plan ?? "starter",
+                req.Period ?? "monthly",
+                ct).ConfigureAwait(false);
+
+            return Ok(new { clientSecret });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Stripe CreatePaymentIntent failed for user {UserId}", userId);
+            return StatusCode(StatusCodes.Status502BadGateway);
+        }
+    }
+
+    public sealed class CheckoutRequest             { public string? ReturnUrl { get; init; } public string? Plan { get; init; } }
+    public sealed class CheckoutResponse            { public string CheckoutUrl { get; init; } = string.Empty; }
+    public sealed class PortalRequest               { public string? ReturnUrl { get; init; } }
+    public sealed class PortalResponse              { public string PortalUrl  { get; init; } = string.Empty; }
+    public sealed record StripePaymentIntentRequest(string? Plan, string? Period);
 }

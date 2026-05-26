@@ -1,9 +1,9 @@
 'use client'
 import { useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import type { AiCardListItem } from '../../api/soul'
-import type { ICardRepository } from '@/types/ICardRepository'
-import { queryKeys } from '@/lib/query/keys'
+import type { AiCardListItem } from '@/shared/types/soul-api'
+import type { ICardRepository } from '@/shared/types/ICardRepository'
+import { queryKeys } from '@/shared/lib/query/keys'
 
 export function useCharacterList(repo: ICardRepository) {
   const queryClient = useQueryClient()

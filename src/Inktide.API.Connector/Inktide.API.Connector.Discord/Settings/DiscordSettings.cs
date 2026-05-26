@@ -58,6 +58,12 @@ public sealed class DiscordSettings
     public string FrontendBaseUrl { get; set; } = "http://localhost:3000";
 
     /// <summary>
+    /// Display name stored as BotUsername in the channel record.
+    /// Defaults to "Inktide" — override in config to match your bot's actual display name.
+    /// </summary>
+    public string BotUsername { get; init; } = "Inktide";
+
+    /// <summary>
     /// Guild (server) IDs to listen to. Empty = listen to all guilds the bot is in.
     /// </summary>
     public List<ulong> GuildIds

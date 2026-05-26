@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { listCardModels, type AiCardModelResponse } from '../../../api/soul'
+import type { AiCardModelResponse } from '@/shared/types/soul-api'
+import { listCardModels } from '@/entities/soul/api'
 
 interface ModelState {
   model: AiCardModelResponse | null

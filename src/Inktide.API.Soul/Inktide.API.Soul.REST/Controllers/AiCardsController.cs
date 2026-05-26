@@ -1,5 +1,6 @@
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
+using Inktide.API.Soul.Domain.Enums;
 using Inktide.API.Soul.REST.Mappers;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -66,6 +67,11 @@ public sealed class AiCardsController : ApiController
             var created = await _cardService.CreateAsync(userId, entity, request.LlmConfig?.ProviderId, ct);
             return CreatedAtAction(nameof(GetById), new { cardId = created.Id }, AiCardResponseMapper.ToResponse(created));
         }
+        catch (PlanLimitExceededException ex)
+        {
+            return StatusCode(StatusCodes.Status402PaymentRequired,
+                ApiErrorResponse.From(ex.Message, "PLAN_LIMIT_EXCEEDED"));
+        }
         catch (SoulCreationException ex)
         {
             return BadRequest(ApiErrorResponse.FromGuard(ex.ErrorCode, ex.Message, ex.Field));
@@ -129,7 +135,7 @@ public sealed class AiCardsController : ApiController
         if (card is null)
             return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
 
-        var entries = await _activity.GetRecentAsync("ai_card", cardId, limit: 20, ct);
+        var entries = await _activity.GetRecentAsync(userId, "ai_card", cardId, limit: 20, ct);
         var items   = entries.Select(e => new AiCardActivityItem
         {
             Id        = e.Id,
@@ -154,6 +160,36 @@ public sealed class AiCardsController : ApiController
             return NotFound(ApiErrorResponse.From("Project not found.", ErrorCodes.NotFound));
 
         return File(result.Content, result.ContentType, result.FileName);
+    }
+
+    /// <summary>Change the run status of a soul card: start, pause, or stop.</summary>
+    [HttpPatch("{cardId:guid}/status")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ChangeStatus(
+        Guid cardId, [FromBody] ChangeCardStatusRequest? request, CancellationToken ct = default)
+    {
+        if (request is null || string.IsNullOrWhiteSpace(request.Action))
+            return BadRequest(ApiErrorResponse.From("action is required.", ErrorCodes.ValidationError));
+
+        var (isActive, status) = request.Action.ToLowerInvariant() switch
+        {
+            "start" => (true,  AiCardStatus.Active),
+            "pause" => (true,  AiCardStatus.Paused),
+            "stop"  => (false, AiCardStatus.Stopped),
+            _       => ((bool?)null, (AiCardStatus?)null)
+        };
+
+        if (isActive is null || status is null)
+            return BadRequest(ApiErrorResponse.From("action must be 'start', 'pause', or 'stop'.", ErrorCodes.ValidationError));
+
+        var userId = GetUserId();
+        var card   = await _cardService.ChangeStatusAsync(userId, cardId, isActive.Value, status.Value, ct);
+        if (card is null)
+            return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
+
+        return NoContent();
     }
 
     /// <summary>Move a soul to a new position. previousId=null → beginning; nextId=null → end.</summary>

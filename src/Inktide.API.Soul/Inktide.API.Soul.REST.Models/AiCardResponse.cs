@@ -79,6 +79,12 @@ public sealed class AiCardResponse
     [JsonProperty("is_active")]
     public bool IsActive { get; set; }
 
+    [JsonProperty("category")]
+    public string? Category { get; set; }
+
+    [JsonProperty("tags")]
+    public IReadOnlyList<string> Tags { get; set; } = [];
+
     [JsonProperty("created_at")]
     public DateTime CreatedAt { get; set; }
 

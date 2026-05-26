@@ -1,9 +1,9 @@
 'use client'
 import { useTranslation } from 'react-i18next'
-import { SliderField } from '@/components/ui/slider-field'
-import { ApiKeyCallout } from '@/components/ui/api-key-callout'
-import { useVoiceProvider } from '@/hooks/useVoiceProvider'
-import { FISHAUDIO_MODELS } from '@/data/voice-models'
+import { SliderField } from '@/shared/ui/slider-field'
+import { ApiKeyCallout } from '@/shared/ui/api-key-callout'
+import { useVoiceProvider } from '@/features/soul/hooks/useVoiceProvider'
+import { FISHAUDIO_MODELS } from '@/shared/data/voice-models'
 import { infoContent, formGroup, labelCls, labelHint, inputCls, voiceSelectWrap, voiceSelect } from './panel-styles'
 import type { PanelProps } from './types'
 

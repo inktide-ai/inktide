@@ -1,8 +1,9 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Twitch.Settings;
-using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Twitch.OAuth;
@@ -14,18 +15,18 @@ public sealed class TwitchOAuthService : ITwitchOAuthService
     private const string UsersUrl  = "https://api.twitch.tv/helix/users";
     private const string Scopes    = "chat:read chat:edit";
 
-    private readonly TwitchSettings _settings;
-    private readonly IDataProtector _protector;
-    private readonly HttpClient     _http;
+    private readonly TwitchSettings  _settings;
+    private readonly ITokenProtector _tokenProtector;
+    private readonly HttpClient      _http;
 
     public TwitchOAuthService(
         IOptions<TwitchSettings> settings,
-        IDataProtectionProvider dp,
+        [FromKeyedServices(TokenProtectorKeys.Twitch)] ITokenProtector tokenProtector,
         HttpClient http)
     {
-        _settings  = settings.Value;
-        _protector = dp.CreateProtector("Twitch.OAuth.Tokens");
-        _http      = http;
+        _settings       = settings.Value;
+        _tokenProtector = tokenProtector;
+        _http           = http;
     }
 
     public string BuildInstallUrl(string state) =>
@@ -51,7 +52,7 @@ public sealed class TwitchOAuthService : ITwitchOAuthService
 
     public async Task<TwitchTokenResponse> RefreshAsync(string encryptedRefreshToken, CancellationToken ct = default)
     {
-        var refreshToken = Unprotect(encryptedRefreshToken);
+        var refreshToken = _tokenProtector.Unprotect(encryptedRefreshToken);
         var form = new Dictionary<string, string>
         {
             ["client_id"]     = _settings.ClientId,
@@ -64,7 +65,7 @@ public sealed class TwitchOAuthService : ITwitchOAuthService
 
     public async Task RevokeAsync(string encryptedAccessToken, CancellationToken ct = default)
     {
-        var token = Unprotect(encryptedAccessToken);
+        var token = _tokenProtector.Unprotect(encryptedAccessToken);
         var form = new Dictionary<string, string>
         {
             ["client_id"] = _settings.ClientId,
@@ -74,7 +75,10 @@ public sealed class TwitchOAuthService : ITwitchOAuthService
         {
             Content = new FormUrlEncodedContent(form),
         };
-        await _http.SendAsync(req, ct).ConfigureAwait(false);
+        var res = await _http.SendAsync(req, ct).ConfigureAwait(false);
+        if (!res.IsSuccessStatusCode)
+            throw new InvalidOperationException(
+                $"Twitch token revoke returned {(int)res.StatusCode}");
     }
 
     public async Task<string> GetBroadcasterLoginAsync(string plainAccessToken, CancellationToken ct = default)
@@ -97,9 +101,6 @@ public sealed class TwitchOAuthService : ITwitchOAuthService
 
         return login.ToLowerInvariant();
     }
-
-    public string Protect(string plaintext)   => _protector.Protect(plaintext);
-    public string Unprotect(string ciphertext) => _protector.Unprotect(ciphertext);
 
     private async Task<TwitchTokenResponse> PostTokenAsync(Dictionary<string, string> form, CancellationToken ct)
     {

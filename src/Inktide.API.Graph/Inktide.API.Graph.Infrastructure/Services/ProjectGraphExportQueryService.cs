@@ -6,11 +6,6 @@ namespace Inktide.API.Graph.Infrastructure.Services;
 
 internal sealed class ProjectGraphExportQueryService : IProjectGraphExportQuery
 {
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
     private readonly IGraphRepository _graphRepo;
 
     public ProjectGraphExportQueryService(IGraphRepository graphRepo)
@@ -25,7 +20,7 @@ internal sealed class ProjectGraphExportQueryService : IProjectGraphExportQuery
 
         var brainJson = JsonSerializer.Serialize(
             new { nodes = graph.Nodes, edges = graph.Edges },
-            JsonOpts);
+            GraphJsonSerializerOptions.CamelCase);
 
         return new GraphExportSnapshot(brainJson);
     }

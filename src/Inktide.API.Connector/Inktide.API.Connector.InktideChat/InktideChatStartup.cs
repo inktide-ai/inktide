@@ -1,5 +1,5 @@
 using Inktide.API.Connector.Application.Contracts;
-using Inktide.API.Connector.InktideChat.Health;
+using Inktide.API.Connector.Application.Health;
 using Inktide.API.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -15,14 +15,20 @@ public sealed class InktideChatStartup : IStartup
 {
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
+        services.AddSingleton<IInktideChatMessageMapper, InktideChatMessageMapper>();
         services.AddSingleton<InktideChatConnector>();
         services.AddSingleton<IChatConnector>(sp => sp.GetRequiredService<InktideChatConnector>());
         services.AddSingleton<IInktideChatInbox>(sp => sp.GetRequiredService<InktideChatConnector>());
 
         services.AddHealthChecks()
-            .AddCheck<InktideChatHealthCheck>(
+            .Add(new HealthCheckRegistration(
                 "inktide-chat",
-                failureStatus: HealthStatus.Degraded,
-                tags: ["streaming", "inktide-chat"]);
+                sp => new ConnectorHealthCheck(
+                    sp.GetRequiredService<IEnumerable<IChatConnector>>(),
+                    InktideChatConnector.PlatformIdValue,
+                    "InktideChat inbox is accepting messages",
+                    "InktideChat connector is not running"),
+                HealthStatus.Degraded,
+                ["streaming", "inktide-chat"]));
     }
 }

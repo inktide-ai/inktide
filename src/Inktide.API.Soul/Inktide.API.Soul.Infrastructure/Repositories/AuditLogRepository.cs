@@ -40,11 +40,11 @@ public sealed class AuditLogRepository : IAuditLogRepository
         return Task.CompletedTask;
     }
 
-    public async Task<IReadOnlyList<AuditLog>> GetByEntityAsync(string entityType, Guid entityId, int limit = 50, CancellationToken ct = default)
+    public async Task<IReadOnlyList<AuditLog>> GetByEntityAsync(Guid userId, string entityType, Guid entityId, int limit = 50, CancellationToken ct = default)
     {
         return await _db.AuditLogs
             .AsNoTracking()
-            .Where(a => a.EntityType == entityType && a.EntityId == entityId)
+            .Where(a => a.UserId == userId && a.EntityType == entityType && a.EntityId == entityId)
             .OrderByDescending(a => a.CreatedAt)
             .Take(limit)
             .ToListAsync(ct);

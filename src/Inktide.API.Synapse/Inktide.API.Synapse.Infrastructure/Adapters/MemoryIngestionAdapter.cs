@@ -5,7 +5,7 @@ using Inktide.API.Synapse.Application.Models;
 
 namespace Inktide.API.Synapse.Infrastructure.Adapters;
 
-public sealed class MemoryIngestionAdapter : IMemoryIngestionPort
+internal sealed class MemoryIngestionAdapter : IMemoryIngestionPort
 {
     private readonly IMemoryIngestionService _ingestion;
 

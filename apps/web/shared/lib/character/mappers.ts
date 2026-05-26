@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { AiCardResponse, CreateAiCardRequest, UpdateAiCardRequest } from '@/api/soul'
+import type { AiCardResponse, CreateAiCardRequest, UpdateAiCardRequest } from '@/shared/types/soul-api'
 import type { AiCharacter } from './types'
 import {
   LlmConfigSchema,

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronRight } from 'lucide-react'
-import type { AiCharacter } from '@/lib/character'
+import type { AiCharacter } from '@/shared/lib/character'
 
 function TwitchIcon() {
   return (

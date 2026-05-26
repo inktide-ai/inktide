@@ -6,12 +6,12 @@ import { useParams, usePathname } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { Cpu, FlaskConical, Layers, LayoutDashboard, MemoryStick, Monitor, Puzzle, Radio, Settings, type LucideProps } from 'lucide-react'
 import ProtectedRoute from '@/components/layout/protected-route'
-import { CharactersProvider } from '@/context/CharactersContext'
+import { CharactersProvider } from '@/entities/character/context/CharactersContext'
 import { ProjectRuntimeProvider } from '@/context/ProjectRuntimeContext'
-import { WorkspaceSidebar } from '@/components/workspace/workspace-sidebar'
-import { AppTopBar } from '@/components/workspace/app-topbar'
-import { getProject } from '@/api/projects'
-import { queryKeys } from '@/lib/query/keys'
+import { WorkspaceSidebar } from '@/features/workspace-home/workspace-sidebar'
+import { AppTopBar } from '@/features/workspace-home/app-topbar'
+import { getProject } from '@/features/projects/api/projects'
+import { queryKeys } from '@/shared/lib/query/keys'
 
 const NAV_ITEMS: { label: string; href: string; icon: React.ComponentType<LucideProps>; buildHref?: (id: string) => string }[] = [
   { label: 'Overview',  href: '',          icon: LayoutDashboard },

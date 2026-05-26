@@ -1,5 +1,4 @@
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 using Inktide.API.Core;
 using Inktide.API.Domain.Enums;
 using Inktide.API.Domain.Models;
@@ -11,7 +10,7 @@ namespace Inktide.API.Synapse.Infrastructure.Providers;
 /// Chat provider backed by a local Ollama server.
 /// Only <see cref="ListModelsAsync"/> is implemented here — inference goes through the Synapse pipeline.
 /// </summary>
-public sealed class OllamaChatProvider : IChatProvider
+internal sealed class OllamaChatProvider : IChatProvider
 {
 
     private readonly HttpClient _http;
@@ -64,14 +63,11 @@ public sealed class OllamaChatProvider : IChatProvider
         CancellationToken cancellationToken = default)
         => throw new NotSupportedException("Ollama inference runs through the Synapse pipeline, not direct provider calls.");
 
-    public async IAsyncEnumerable<ChatChunk> StreamAsync(
+    public IAsyncEnumerable<ChatChunk> StreamAsync(
         ProviderOptions options,
         ChatRequest request,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        throw new NotSupportedException("Ollama inference runs through the Synapse pipeline, not direct provider calls.");
-        yield break;
-    }
+        CancellationToken cancellationToken = default)
+        => throw new NotSupportedException("Ollama inference runs through the Synapse pipeline, not direct provider calls.");
 
 
     private sealed class OllamaTagsResponse

@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@/shared/ui/skeleton'
 
 function CardShell({ className, children }: { className?: string; children: React.ReactNode }) {
   return (

@@ -2,12 +2,12 @@
 
 import { useMemo, useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { BrainProviderCard } from '@/components/soul/brain-provider-card'
-import { LLM_PROVIDER_CATALOG } from '@/data/llm-providers'
-import { useCharactersContext } from '@/context/CharactersContext'
+import { BrainProviderCard } from '@/features/soul/components/brain-provider-card'
+import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-providers'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { cn } from '@/lib/utils'
-import { getCredentials, type CredentialResponse } from '@/api/soul'
-import { statusFromCredential } from '@/components/soul/credential-status-badge'
+import { getCredentials, type CredentialResponse } from '@/features/soul/api/index'
+import { statusFromCredential } from '@/features/soul/components/credential-status-badge'
 import { FeaturedIntegrations } from '@/components/featured-integrations'
 
 // ── Toolbar icons ─────────────────────────────────────────────────────────────

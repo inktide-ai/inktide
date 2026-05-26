@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
-import type { RunPreset, CreateRunPresetRequest, LlmModelResponse, TtsVoiceResponse } from '@/api/soul'
+import type { RunPreset, CreateRunPresetRequest, LlmModelResponse, TtsVoiceResponse } from '@/features/soul/api/index'
 
 const EMOTION_PRESETS = [
   { id: 'friendly',   label: 'Friendly' },

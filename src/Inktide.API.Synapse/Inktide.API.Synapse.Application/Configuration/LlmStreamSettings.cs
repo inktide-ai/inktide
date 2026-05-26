@@ -40,4 +40,10 @@ public sealed class LlmStreamSettings
     /// proportionally higher LLM API spend and memory.
     /// </summary>
     public int MaxConcurrentRequests { get; set; } = 1;
+
+    /// <summary>After this many XAUTOCLAIM deliveries without ACK, move to DLQ and ACK.</summary>
+    public int MaxPoisonMessageDeliveries { get; set; } = 5;
+
+    /// <summary>Redis stream for poison messages. Empty = disable DLQ (ACK and lose after max retries).</summary>
+    public string DeadLetterStreamName { get; set; } = "synapse.llm.ready.dlq";
 }

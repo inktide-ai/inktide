@@ -10,12 +10,15 @@ namespace Inktide.API.Synapse.Infrastructure.Scattering;
 /// Only runs when <see cref="AiCardContext.ScreenAwarenessEnabled"/> is true.
 /// Falls back to an empty context on any error — never aborts the pipeline.
 /// </summary>
-public sealed class ScreenContextScatterShard : IPipelineStage
+internal sealed class ScreenContextScatterShard : IPipelineStage
 {
     private readonly IScreenContextRepository _repo;
     private readonly ILogger<ScreenContextScatterShard> _logger;
 
     public string ShardId => SynapseConstants.ShardIds.Screen;
+
+    public bool ShouldRun(AiCardContext? cardCtx)
+        => SynapseConstants.PluginGate.IsEnabled(cardCtx?.Plugins, SynapseConstants.ShardIds.Screen);
 
     public ScreenContextScatterShard(
         IScreenContextRepository repo,

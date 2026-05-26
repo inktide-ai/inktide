@@ -1,4 +1,4 @@
-import GraphBuilderPage from '@/components/graph/graph-builder-page'
+import GraphBuilderPage from '@/features/graph/graph-builder-page'
 
 interface Props {
   params: Promise<{ id: string }>

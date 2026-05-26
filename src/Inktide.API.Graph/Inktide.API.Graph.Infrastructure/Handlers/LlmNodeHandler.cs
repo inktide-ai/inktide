@@ -1,6 +1,6 @@
+using Inktide.API.Graph.Domain;
 using Inktide.API.Graph.Domain.Contracts;
 using Inktide.API.Graph.Domain.Models;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -13,36 +13,35 @@ namespace Inktide.API.Graph.Infrastructure.Handlers;
 /// </summary>
 public sealed class LlmNodeHandler : INodeHandler
 {
-    public string Type => "llm";
+    public string Type => NodeTypes.Llm;
     public string ProviderId => "core";
 
     public async Task ExecuteAsync(NodeExecutionContext context, CancellationToken ct)
     {
-        var logger = context.Services.GetService<ILogger<LlmNodeHandler>>();
-        var providerId = context.GetConfig<string>("provider_id") ?? "ollama";
+        var logger     = context.Services.GetLogger<LlmNodeHandler>();
+        var providerId = context.GetConfig<string>(ConfigKeys.ProviderId) ?? "ollama";
 
         IChatCompletionService? chatService = null;
         try
         {
-            chatService = context.Services.GetKeyedService<IChatCompletionService>(providerId)
-                ?? context.Services.GetService<IChatCompletionService>();
+            chatService = context.Services.GetOptional<IChatCompletionService>();
         }
         catch (Exception ex)
         {
-            logger?.LogWarning(ex, "LlmNode: could not resolve IChatCompletionService for provider '{Provider}'", providerId);
+            logger.LogWarning(ex, "LlmNode: could not resolve IChatCompletionService for provider '{Provider}'", providerId);
         }
 
         if (chatService is null)
         {
-            logger?.LogWarning("LlmNode: no chat completion service available, skipping");
+            logger.LogWarning("LlmNode: no chat completion service available, skipping");
             context.SetOutput("response", string.Empty);
             return;
         }
 
-        var userMessage = context.GetInput<string>("context") ?? string.Empty;
-        var systemPrompt = context.GetConfig<string>("system_prompt_override") ?? string.Empty;
-        var temperature = context.GetConfig<double?>("temperature") ?? 0.7;
-        var maxTokens = context.GetConfig<int?>("max_tokens") ?? 512;
+        var userMessage  = context.GetInput<string>("context") ?? string.Empty;
+        var systemPrompt = context.GetConfig<string>(ConfigKeys.SystemPrompt) ?? string.Empty;
+        var temperature  = context.GetConfig<double?>(ConfigKeys.Temperature) ?? 0.7;
+        var maxTokens    = context.GetConfig<int?>(ConfigKeys.MaxTokens) ?? 512;
 
         var history = new ChatHistory();
         if (!string.IsNullOrEmpty(systemPrompt))
@@ -53,8 +52,8 @@ public sealed class LlmNodeHandler : INodeHandler
         {
             ExtensionData = new Dictionary<string, object>
             {
-                ["temperature"] = temperature,
-                ["max_tokens"] = maxTokens,
+                [ConfigKeys.Temperature] = temperature,
+                [ConfigKeys.MaxTokens]   = maxTokens,
             },
         };
 

@@ -1,8 +1,6 @@
-using System.Net;
 using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Infrastructure.Providers.YooKassa;
 using Inktide.API.Billing.Infrastructure.Settings;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using StackExchange.Redis;
@@ -18,11 +16,11 @@ public sealed class YooKassaWebhookValidationTests
         var redis    = Substitute.For<IConnectionMultiplexer>();
         var subs     = Substitute.For<ISubscriptionRepository>();
         var logger   = NullLogger<YooKassaWebhookProcessor>.Instance;
-        return new YooKassaWebhookProcessor(new HttpClient(), settings, subs, redis, logger);
+        return new YooKassaWebhookProcessor(new HttpClient(), settings, subs, redis, TimeProvider.System, logger);
     }
 
     private static bool Validate(YooKassaWebhookProcessor p, string ip) =>
-        p.ValidateSignature(new HeaderDictionary(), [], string.Empty, IPAddress.Parse(ip));
+        p.ValidateSignature(new Dictionary<string, IReadOnlyList<string>>(), [], ip);
 
     // ── Default CIDR behaviour (WebhookAllowedIps = []) ──────────────────────
 
@@ -59,7 +57,7 @@ public sealed class YooKassaWebhookValidationTests
     public void NullClientIp_Rejected()
     {
         var p = CreateProcessor([]);
-        var result = p.ValidateSignature(new HeaderDictionary(), [], string.Empty, null);
+        var result = p.ValidateSignature(new Dictionary<string, IReadOnlyList<string>>(), [], null);
         Assert.False(result);
     }
 

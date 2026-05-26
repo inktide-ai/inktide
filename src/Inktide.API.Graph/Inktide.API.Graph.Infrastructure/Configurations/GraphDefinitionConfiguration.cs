@@ -8,11 +8,6 @@ namespace Inktide.API.Graph.Infrastructure.Configurations;
 
 public sealed class GraphDefinitionConfiguration : IEntityTypeConfiguration<GraphDefinition>
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
     public void Configure(EntityTypeBuilder<GraphDefinition> b)
     {
         b.ToTable("graph_definitions", "graph");
@@ -33,16 +28,16 @@ public sealed class GraphDefinitionConfiguration : IEntityTypeConfiguration<Grap
             .HasColumnName("nodes")
             .HasColumnType("jsonb")
             .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonOptions),
-                v => JsonSerializer.Deserialize<List<GraphNodeRecord>>(v, JsonOptions)!)
+                v => JsonSerializer.Serialize(v, GraphJsonSerializerOptions.CamelCase),
+                v => JsonSerializer.Deserialize<List<GraphNodeRecord>>(v, GraphJsonSerializerOptions.CamelCase)!)
             .IsRequired();
 
         b.Property(e => e.Edges)
             .HasColumnName("edges")
             .HasColumnType("jsonb")
             .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonOptions),
-                v => JsonSerializer.Deserialize<List<GraphEdgeRecord>>(v, JsonOptions)!)
+                v => JsonSerializer.Serialize(v, GraphJsonSerializerOptions.CamelCase),
+                v => JsonSerializer.Deserialize<List<GraphEdgeRecord>>(v, GraphJsonSerializerOptions.CamelCase)!)
             .IsRequired();
 
         b.Property(e => e.UpdatedAt)

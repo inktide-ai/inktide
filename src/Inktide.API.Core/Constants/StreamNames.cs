@@ -26,4 +26,7 @@ public static class StreamNames
 
     /// <summary>Event type published when a user account is deleted. Subscribed by Soul and other contexts.</summary>
     public const string EventTypeUserAccountDeleted = "user.account.deleted";
+
+    /// <summary>Event type published when a soul card's run status changes (start / pause / stop).</summary>
+    public const string EventTypeSoulStatusChanged = "soul.status.changed";
 }

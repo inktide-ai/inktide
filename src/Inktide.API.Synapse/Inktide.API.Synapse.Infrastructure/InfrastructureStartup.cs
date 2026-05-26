@@ -11,6 +11,8 @@ using Inktide.API.Synapse.Infrastructure.ChannelContext;
 using Inktide.API.Synapse.Infrastructure.Emotion;
 using Inktide.API.Synapse.Infrastructure.Messaging;
 using Inktide.API.Synapse.Infrastructure.Providers;
+using Inktide.API.Synapse.Infrastructure.Llm;
+using Inktide.API.Synapse.Infrastructure.Llm.Sections;
 using Inktide.API.Synapse.Infrastructure.Scattering;
 using Inktide.API.Synapse.Infrastructure.Session;
 using Inktide.API.Synapse.Infrastructure.Startup;
@@ -171,6 +173,16 @@ public sealed class InfrastructureStartup : IStartup
         services.AddSingleton<ChatServiceFactoryRegistry>();
 
         services.AddHostedService<ScatterShardValidator>();
+
+        // ---------------------------------------------------------------
+        // Prompt builder — sections registered in order; new section = new AddSingleton line.
+        // ---------------------------------------------------------------
+        services.AddSingleton<IPromptSection, RagContextSection>();
+        services.AddSingleton<IPromptSection, PersonalitySection>();
+        services.AddSingleton<IPromptSection, EmotionSection>();
+        services.AddSingleton<IPromptSection, ScreenAwarenessSection>();
+        services.AddSingleton<IPromptSection, WebhookContextSection>();
+        services.AddSingleton<SynapsePromptBuilder>();
 
         // ---------------------------------------------------------------
         // LLM stream worker (replaces Python llm-worker)

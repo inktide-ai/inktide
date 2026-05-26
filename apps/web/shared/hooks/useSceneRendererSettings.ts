@@ -1,6 +1,6 @@
 'use client'
 import { useState, useCallback, useEffect } from 'react'
-import type { LookAtMode } from '../components/avatar/avatar-renderer'
+import type { LookAtMode } from '@/features/avatar/avatar-renderer'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

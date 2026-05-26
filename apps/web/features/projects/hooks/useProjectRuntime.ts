@@ -8,7 +8,7 @@ import {
   unbindSoul as apiUnbind,
   type Project,
   type UpdateProjectRequest,
-} from '@/api/projects'
+} from '@/features/projects/api/projects'
 
 function buildUpdate(project: Project | null, overrides: Partial<UpdateProjectRequest>): UpdateProjectRequest {
   return {
@@ -21,8 +21,9 @@ function buildUpdate(project: Project | null, overrides: Partial<UpdateProjectRe
     ...overrides,
   }
 }
-import { getCard, listCardModels, listCardScenes, type AiCardResponse, type AiCardModelResponse, type AiCardSceneResponse, type ChannelResponse } from '@/api/soul'
-import { queryKeys } from '@/lib/query/keys'
+import type { AiCardResponse, AiCardModelResponse, AiCardSceneResponse, ChannelResponse } from '@/shared/types/soul-api'
+import { getCard, listCardModels, listCardScenes } from '@/entities/soul/api'
+import { queryKeys } from '@/shared/lib/query/keys'
 import { buildProjectPreviewUrl } from '@/lib/project-preview'
 
 export interface ProjectRuntime {

@@ -2,9 +2,10 @@
 import { useCallback, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { uploadCardAvatar, type ChannelResponse } from '../../api/soul'
-import type { AiCharacter } from '@/lib/character'
-import { getBannerAccent, getBannerStyle } from './banner-presets'
+import type { ChannelResponse } from '@/shared/types/soul-api'
+import { uploadCardAvatar } from '@/entities/soul/api'
+import type { AiCharacter } from '@/shared/lib/character'
+import { getBannerAccent, getBannerStyle } from '@/shared/ui/banner-presets'
 import { cn } from '@/lib/utils'
 
 interface IdentityCardProps {

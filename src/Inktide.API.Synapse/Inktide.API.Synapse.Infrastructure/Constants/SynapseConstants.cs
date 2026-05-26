@@ -1,3 +1,6 @@
+using System.Text.Json;
+using Inktide.API.Core.Contracts;
+
 namespace Inktide.API.Synapse.Infrastructure.Constants;
 
 internal static class SynapseConstants
@@ -37,5 +40,35 @@ internal static class SynapseConstants
     internal static class Messaging
     {
         internal static readonly TimeSpan MessageStalenessThreshold = TimeSpan.FromSeconds(10);
+    }
+
+    internal static class Json
+    {
+        internal static readonly JsonSerializerOptions Read = new()
+        {
+            PropertyNamingPolicy        = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true,
+        };
+
+        internal static readonly JsonSerializerOptions Write = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
+        internal static readonly JsonSerializerOptions ReadCaseInsensitive = new()
+        {
+            PropertyNameCaseInsensitive = true,
+        };
+    }
+
+    /// <summary>
+    /// Centralises plugin enable/disable resolution so every call site uses the same semantics:
+    /// null plugins (= no project linked) → all features ON (backwards compatible).
+    /// </summary>
+    internal static class PluginGate
+    {
+        internal static bool IsEnabled(IReadOnlyList<ProjectPluginDto>? plugins, string pluginId)
+            => plugins is null
+            || (plugins.FirstOrDefault(p => p.PluginId == pluginId)?.IsEnabled ?? true);
     }
 }

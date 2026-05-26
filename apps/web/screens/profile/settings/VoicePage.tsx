@@ -1,6 +1,6 @@
 'use client'
-import { useCharactersContext } from '../../../context/CharactersContext'
-import VoiceTab from '../../../components/profile/tabs/voice-tab'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import VoiceTab from '@/features/character-editor/tabs/voice-tab'
 
 export default function VoicePage() {
   const { selected, updateCharacter } = useCharactersContext()

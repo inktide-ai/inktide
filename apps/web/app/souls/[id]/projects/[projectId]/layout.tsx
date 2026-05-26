@@ -7,7 +7,7 @@ import {
   Cpu, FlaskConical, Layers, LayoutDashboard,
   MemoryStick, Monitor, Radio, Settings, Zap, type LucideProps,
 } from 'lucide-react'
-import { AppTopBar } from '@/components/workspace/app-topbar'
+import { AppTopBar } from '@/features/workspace-home/app-topbar'
 import { ProjectRuntimeProvider, useProjectRuntimeContext } from '@/context/ProjectRuntimeContext'
 
 const NAV_ITEMS: { label: string; href: string; icon: React.ComponentType<LucideProps>; buildHref?: (pid: string) => string }[] = [

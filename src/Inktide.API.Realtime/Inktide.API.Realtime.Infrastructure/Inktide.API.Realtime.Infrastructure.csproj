@@ -22,4 +22,8 @@
     <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Inktide.API.Realtime.Tests" />
+  </ItemGroup>
+
 </Project>

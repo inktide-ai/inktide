@@ -18,10 +18,10 @@ public sealed class SubscriptionService : ISubscriptionService
         BillingSettings billing,
         ILogger<SubscriptionService> logger)
     {
-        _subscriptions = subscriptions;
-        _provider      = provider;
-        _billing       = billing;
-        _logger        = logger;
+        _subscriptions = subscriptions ?? throw new ArgumentNullException(nameof(subscriptions));
+        _provider      = provider      ?? throw new ArgumentNullException(nameof(provider));
+        _billing       = billing       ?? throw new ArgumentNullException(nameof(billing));
+        _logger        = logger        ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<SubscriptionDto> GetSubscriptionAsync(string userId, CancellationToken ct = default)
@@ -31,13 +31,6 @@ public sealed class SubscriptionService : ISubscriptionService
         if (sub is null)
             return new SubscriptionDto(userId, PlanType.Free, SubStatus.Active, null, null);
 
-        if (sub.IsProActive() && sub.CurrentPeriodEnd.HasValue && sub.CurrentPeriodEnd < DateTime.UtcNow)
-        {
-            await _subscriptions.TryExpireAsync(userId, ct).ConfigureAwait(false);
-            sub = await _subscriptions.GetByUserIdAsync(userId, ct).ConfigureAwait(false)
-                  ?? new UserSubscription { UserId = userId, Status = SubStatus.Expired, Plan = PlanType.Free };
-        }
-
         return new SubscriptionDto(userId, sub.Plan, sub.Status, sub.Provider, sub.CurrentPeriodEnd);
     }
 
@@ -45,13 +38,15 @@ public sealed class SubscriptionService : ISubscriptionService
         string userId,
         string userEmail,
         string returnUrl,
+        PlanType plan,
         CancellationToken ct = default)
     {
         var request = new CreateCheckoutRequest(
             UserId:     userId,
             UserEmail:  userEmail,
             SuccessUrl: string.IsNullOrWhiteSpace(returnUrl) ? _billing.SuccessUrl : returnUrl,
-            CancelUrl:  _billing.CancelUrl);
+            CancelUrl:  _billing.CancelUrl,
+            Plan:       plan);
 
         return await _provider.CreateCheckoutUrlAsync(request, ct).ConfigureAwait(false);
     }

@@ -1,5 +1,5 @@
-import { getMe } from '../../api/me'
-import type { IAvatarService } from '@/types/IAvatarService'
+import { getMe } from '@/api/me'
+import type { IAvatarService } from '@/shared/types/IAvatarService'
 
 /** SRP: единственная ответственность — получить URL аватара из /api/me. */
 export class MeAvatarService implements IAvatarService {

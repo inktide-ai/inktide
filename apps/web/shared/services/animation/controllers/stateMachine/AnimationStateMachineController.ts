@@ -3,7 +3,7 @@ import { createVRMAnimationClip, VRMLookAtQuaternionProxy } from '@pixiv/three-v
 import type { VRM } from '@pixiv/three-vrm'
 import type { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-import type { IVrmController, VrmAnimationContext, VrmControllerSetup } from '@/types/IVrmController'
+import type { IVrmController, VrmAnimationContext, VrmControllerSetup } from '@/shared/types/IVrmController'
 import { ClipRegistry } from './clipRegistry'
 import * as blend from './blendEngine'
 import { createAnimationActor, type AnimationActor } from './machine'

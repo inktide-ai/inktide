@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Inktide.API.Domain.Enums;
 using Inktide.API.Domain.Models;
 using Inktide.API.TTS.Domain.Models;
@@ -9,8 +10,10 @@ namespace Inktide.API.TTS.Infrastructure.Decorators;
 
 /// <summary>
 /// Cross-cutting logging around a concrete speech (TTS) provider.
+/// Wraps any <see cref="ISpeechProvider"/>; listing methods are no-ops when the inner
+/// provider does not declare the corresponding capability.
 /// </summary>
-public sealed class LoggingSpeechProviderDecorator : ISpeechProvider
+public sealed class LoggingSpeechProviderDecorator : ISpeechProvider, IVoiceListingProvider, IModelListingProvider
 {
 
     private readonly ISpeechProvider _inner;
@@ -46,7 +49,13 @@ public sealed class LoggingSpeechProviderDecorator : ISpeechProvider
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("GetModelsAsync {ProviderId}", Id);
-        return _inner.GetModelsAsync(options, cancellationToken);
+        if (!_inner.Capabilities.SupportsModelListing)
+            return Task.FromResult(new SpeechModelCollection("list", []));
+        // Invariant: all registered providers that declare SupportsModelListing = true
+        // implement IModelListingProvider. Enforced at registration time by SpeechProviderRegistry.
+        Debug.Assert(_inner is IModelListingProvider,
+            $"{_inner.Id} declares SupportsModelListing but does not implement IModelListingProvider");
+        return ((IModelListingProvider)_inner).GetModelsAsync(options, cancellationToken);
     }
 
     public Task<SpeechVoiceCollection> GetVoicesAsync(
@@ -55,7 +64,13 @@ public sealed class LoggingSpeechProviderDecorator : ISpeechProvider
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("GetVoicesAsync {ProviderId} model {ModelId}", Id, modelId);
-        return _inner.GetVoicesAsync(options, modelId, cancellationToken);
+        if (!_inner.Capabilities.SupportsVoiceListing)
+            return Task.FromResult(new SpeechVoiceCollection([]));
+        // Invariant: all registered providers that declare SupportsVoiceListing = true
+        // implement IVoiceListingProvider. Enforced at registration time by SpeechProviderRegistry.
+        Debug.Assert(_inner is IVoiceListingProvider,
+            $"{_inner.Id} declares SupportsVoiceListing but does not implement IVoiceListingProvider");
+        return ((IVoiceListingProvider)_inner).GetVoicesAsync(options, modelId, cancellationToken);
     }
 
     public async Task<Stream> SynthesizeAsync(

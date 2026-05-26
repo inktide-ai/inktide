@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { apiFetch, ApiError } from '../api/client'
+import { apiFetch, ApiError } from '@/api/client'
 
 export type SynthState = 'idle' | 'loading' | 'playing' | 'streaming' | 'error'
 

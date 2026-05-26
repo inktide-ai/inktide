@@ -1,6 +1,6 @@
 'use client'
 import { createContext, useContext, type ReactNode } from 'react'
-import { useProjectRuntime, type ProjectRuntime } from '@/hooks/useProjectRuntime'
+import { useProjectRuntime, type ProjectRuntime } from '@/features/projects/hooks/useProjectRuntime'
 
 const ProjectRuntimeContext = createContext<ProjectRuntime | null>(null)
 

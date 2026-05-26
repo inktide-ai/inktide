@@ -1,4 +1,5 @@
 using Inktide.API.Synapse.Application.Interfaces;
+using Inktide.API.Synapse.REST.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,10 +30,4 @@ public sealed class StatsController : ControllerBase
             MonthlyApiCalls = result.MonthlyApiCalls,
         });
     }
-}
-
-public sealed class DashboardStats
-{
-    public int TotalMemories { get; set; }
-    public int MonthlyApiCalls { get; set; }
 }

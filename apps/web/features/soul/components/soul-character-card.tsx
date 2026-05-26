@@ -2,9 +2,9 @@
 
 import { useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react'
 import { MoreHorizontal, Share2, X } from 'lucide-react'
-import type { AiCharacter } from '@/lib/character'
-import { uploadCardAvatar } from '@/api/soul'
-import { useCharactersContext } from '@/context/CharactersContext'
+import type { AiCharacter } from '@/shared/lib/character'
+import { uploadCardAvatar } from '@/features/soul/api/index'
+import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 
 const SOUL_CATEGORIES = [
   'Assistant', 'Character', 'Streamer', 'Companion',

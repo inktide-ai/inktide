@@ -2,8 +2,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { SliderField } from '@/components/ui/slider-field'
-import { LANG_LABELS, VOICE_GROUPS } from '@/data/kokoro-voices'
+import { SliderField } from '@/shared/ui/slider-field'
+import { LANG_LABELS, VOICE_GROUPS } from '@/shared/data/kokoro-voices'
 import { infoContent, formGroup, labelCls, labelHint, inputCls, voiceSelectWrap, voiceSelect, advancedToggle, advancedPanel } from './panel-styles'
 import type { PanelProps } from './types'
 

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Inktide.API.TTS.Domain.Models;
+using Inktide.API.TTS.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.TTS.Infrastructure.FishAudio;
@@ -72,7 +73,7 @@ public sealed class FishAudioTtsClient
 
     private HttpClient CreateClient() => _httpClientFactory.CreateClient(HttpClientName);
 
-    private async Task<FishAudioResponseStream> SendAndReadStreamAsync(
+    private async Task<HttpResponseStream> SendAndReadStreamAsync(
         HttpRequestMessage request,
         CancellationToken ct)
     {
@@ -83,7 +84,7 @@ public sealed class FishAudioTtsClient
         await FishAudioErrorHandler.ThrowIfFailedAsync(response, ct).ConfigureAwait(false);
 
         var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-        return new FishAudioResponseStream(stream, response);
+        return new HttpResponseStream(stream, response);
     }
 
     /// <summary>
@@ -110,13 +111,13 @@ public sealed class FishAudioTtsClient
             if (item.ValueKind != JsonValueKind.Object) continue;
 
             // Voice ID may be "_id" or "id" depending on the endpoint version
-            var id = TryGetString(item, "_id") ?? TryGetString(item, "id");
+            var id = item.GetStringOrNull("_id") ?? item.GetStringOrNull("id");
             if (string.IsNullOrWhiteSpace(id)) continue;
 
-            var name = TryGetString(item, "title");
+            var name = item.GetStringOrNull("title");
 
             // language comes as a string like "en-US" or "zh"
-            string? category = TryGetString(item, "language");
+            string? category = item.GetStringOrNull("language");
 
             IReadOnlyDictionary<string, string>? labels = null;
             if (item.TryGetProperty("tags", out var tagsEl) && tagsEl.ValueKind == JsonValueKind.Array)
@@ -138,13 +139,6 @@ public sealed class FishAudioTtsClient
         }
 
         return new SpeechVoiceCollection(result);
-    }
-
-    private static string? TryGetString(JsonElement el, string propertyName)
-    {
-        if (el.TryGetProperty(propertyName, out var prop) && prop.ValueKind == JsonValueKind.String)
-            return prop.GetString();
-        return null;
     }
 
 }

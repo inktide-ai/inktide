@@ -6,6 +6,8 @@ public interface IAiCardSceneRepository
 {
     Task<AiCardScene> AddAsync(AiCardScene scene, CancellationToken ct = default);
 
+    Task<int> CountByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default);
+
     Task<IReadOnlyList<AiCardScene>> ListByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default);
 
     Task<AiCardScene?> GetByIdAsync(Guid userId, Guid aiCardId, Guid sceneId, CancellationToken ct = default);
@@ -33,6 +35,6 @@ public interface IAiCardSceneRepository
     /// <summary>Returns all (id, sort_key) pairs for the card ordered by sort_key ASC.</summary>
     Task<IReadOnlyList<(Guid Id, string SortKey)>> GetSortKeysAsync(Guid aiCardId, CancellationToken ct = default);
 
-    /// <summary>Updates sort_key for each entry in the list. Callers requiring multi-item atomicity must wrap in ITransactionManager.</summary>
-    Task BulkUpdateSortKeysAsync(IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default);
+    /// <summary>Updates sort_key for each entry in the list. Only rows owned by <paramref name="userId"/> are updated.</summary>
+    Task BulkUpdateSortKeysAsync(Guid userId, IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default);
 }

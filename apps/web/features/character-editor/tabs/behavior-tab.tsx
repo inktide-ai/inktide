@@ -1,8 +1,8 @@
 'use client'
 import { useTranslation } from 'react-i18next'
 import CustomSelect from '../custom-select'
-import SliderWithTicks from '../slider-with-ticks'
-import type { AiCharacter, CharacterPersonality } from '@/lib/character'
+import SliderWithTicks from '@/shared/ui/slider-with-ticks'
+import type { AiCharacter, CharacterPersonality } from '@/shared/lib/character'
 
 const LANGUAGE_OPTIONS = [
   { value: 'en', label: 'English' },

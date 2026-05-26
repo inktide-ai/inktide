@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import Link from 'next/link'
-import { useBilling } from '@/context/BillingContext'
+import { useBilling } from '@/features/billing/BillingContext'
 
 export default function BillingSuccessPage() {
   const { refresh } = useBilling()

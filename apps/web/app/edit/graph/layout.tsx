@@ -2,8 +2,8 @@
 
 import { type ReactNode } from 'react'
 import ProtectedRoute from '@/components/layout/protected-route'
-import { CharactersProvider } from '@/context/CharactersContext'
-import { WorkspaceSidebar } from '@/components/workspace/workspace-sidebar'
+import { CharactersProvider } from '@/entities/character/context/CharactersContext'
+import { WorkspaceSidebar } from '@/features/workspace-home/workspace-sidebar'
 
 export default function GraphLayout({ children }: { children: ReactNode }) {
   return (

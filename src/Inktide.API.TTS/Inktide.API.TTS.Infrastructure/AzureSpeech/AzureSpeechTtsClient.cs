@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Inktide.API.TTS.Domain.Models;
+using Inktide.API.TTS.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.TTS.Infrastructure.AzureSpeech;
@@ -26,7 +27,7 @@ public sealed class AzureSpeechTtsClient
         IOptions<AzureSpeechTtsClientSettings> options)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-        _settings          = options.Value;
+        _settings          = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
 
 
@@ -55,22 +56,7 @@ public sealed class AzureSpeechTtsClient
         request.Headers.TryAddWithoutValidation("User-Agent", "inktide");
         request.Content = new StringContent(ssml, Encoding.UTF8, "application/ssml+xml");
 
-        var client   = CreateClient();
-        var response = await client
-            .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct)
-            .ConfigureAwait(false);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var body = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-            throw new HttpRequestException(
-                $"Azure Speech synthesis failed ({(int)response.StatusCode}): {body}",
-                null,
-                response.StatusCode);
-        }
-
-        var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-        return new AzureSpeechResponseStream(stream, response);
+        return await SendAndReadStreamAsync(request, ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -91,21 +77,7 @@ public sealed class AzureSpeechTtsClient
         request.Headers.TryAddWithoutValidation(SubscriptionKeyHeader, apiKey);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        var client   = CreateClient();
-        var response = await client
-            .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct)
-            .ConfigureAwait(false);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var body = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-            throw new HttpRequestException(
-                $"Azure Speech voice listing failed ({(int)response.StatusCode}): {body}",
-                null,
-                response.StatusCode);
-        }
-
-        await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+        await using var stream = await SendAndReadStreamAsync(request, ct).ConfigureAwait(false);
         using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
 
         return ParseVoices(doc.RootElement);
@@ -113,6 +85,31 @@ public sealed class AzureSpeechTtsClient
 
 
     private HttpClient CreateClient() => _httpClientFactory.CreateClient(HttpClientName);
+
+    private async Task<HttpResponseStream> SendAndReadStreamAsync(
+        HttpRequestMessage request,
+        CancellationToken ct)
+    {
+        var client   = CreateClient();
+        var response = await client
+            .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct)
+            .ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            using (response)
+            {
+                var body = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+                throw new HttpRequestException(
+                    $"Azure Speech request failed ({(int)response.StatusCode}): {body}",
+                    null,
+                    response.StatusCode);
+            }
+        }
+
+        var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+        return new HttpResponseStream(stream, response);
+    }
 
     /// <summary>
     /// Azure voices/list returns a JSON array:
@@ -129,13 +126,13 @@ public sealed class AzureSpeechTtsClient
         {
             if (item.ValueKind != JsonValueKind.Object) continue;
 
-            var id = TryGetString(item, "ShortName");
+            var id = item.GetStringOrNull("ShortName");
             if (string.IsNullOrWhiteSpace(id)) continue;
 
-            var name     = TryGetString(item, "LocalName") ?? TryGetString(item, "DisplayName");
-            var locale   = TryGetString(item, "Locale");
-            var gender   = TryGetString(item, "Gender");
-            var type     = TryGetString(item, "VoiceType");
+            var name     = item.GetStringOrNull("LocalName") ?? item.GetStringOrNull("DisplayName");
+            var locale   = item.GetStringOrNull("Locale");
+            var gender   = item.GetStringOrNull("Gender");
+            var type     = item.GetStringOrNull("VoiceType");
 
             IReadOnlyDictionary<string, string>? labels = null;
             if (gender is not null || type is not null)
@@ -150,13 +147,6 @@ public sealed class AzureSpeechTtsClient
         }
 
         return new SpeechVoiceCollection(result);
-    }
-
-    private static string? TryGetString(JsonElement el, string propertyName)
-    {
-        if (el.TryGetProperty(propertyName, out var prop) && prop.ValueKind == JsonValueKind.String)
-            return prop.GetString();
-        return null;
     }
 
 }

@@ -12,11 +12,6 @@ namespace Inktide.API.Synapse.Infrastructure.Messaging;
 
 internal sealed class ChatMessageProcessor : IChatMessageProcessor
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly SynapseIngestStreamSettings _settings;
     private readonly ILogger<ChatMessageProcessor> _logger;
@@ -33,7 +28,7 @@ internal sealed class ChatMessageProcessor : IChatMessageProcessor
 
     public async Task ProcessAsync(IDatabase db, StreamEntry entry, CancellationToken ct)
     {
-        var payloadJson = TryGetPayload(entry);
+        var payloadJson = entry.GetField(_settings.PayloadFieldName);
         if (payloadJson is null)
         {
             _logger.LogWarning(
@@ -42,12 +37,30 @@ internal sealed class ChatMessageProcessor : IChatMessageProcessor
             return;
         }
 
-        var message = JsonSerializer.Deserialize<ChatMessage>(payloadJson, JsonOptions);
+        var message = JsonSerializer.Deserialize<ChatMessage>(payloadJson, SynapseConstants.Json.Read);
         if (message is null)
         {
             _logger.LogWarning("Poison message, cannot deserialize. Id={Id}", entry.Id);
             await db.StreamAcknowledgeAsync(_settings.StreamName, _settings.ConsumerGroup, entry.Id);
             return;
+        }
+
+        if (message.CharacterId.HasValue)
+        {
+            var isBlocked = await db.KeyExistsAsync($"soul:{message.CharacterId.Value}:blocked");
+            if (isBlocked)
+            {
+                _logger.LogDebug("Soul {CardId} is paused/stopped — discarding message from {Channel}",
+                    message.CharacterId.Value, message.ChannelName);
+                await db.StreamAcknowledgeAsync(_settings.StreamName, _settings.ConsumerGroup, entry.Id);
+                return;
+            }
+        }
+        else
+        {
+            _logger.LogWarning(
+                "Message from channel {Channel} has no CharacterId — gate check skipped. Platform={Platform}",
+                message.ChannelName, message.PlatformId);
         }
 
         if (DateTimeOffset.UtcNow - message.Timestamp > SynapseConstants.Messaging.MessageStalenessThreshold)
@@ -80,18 +93,50 @@ internal sealed class ChatMessageProcessor : IChatMessageProcessor
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "Error while processing stream entry. Id={Id}", entry.Id);
+            _logger.LogError(ex, "Error while processing stream entry. Id={Id}", entry.Id);
+            await HandleFailedEntryAsync(db, entry, ex, ct);
         }
     }
 
-    private string? TryGetPayload(StreamEntry entry)
+    private async Task HandleFailedEntryAsync(
+        IDatabase db, StreamEntry entry, Exception ex, CancellationToken ct)
     {
-        foreach (var v in entry.Values)
+        // Check how many times XAUTOCLAIM has already delivered this entry.
+        var pending = await db.StreamPendingMessagesAsync(
+            _settings.StreamName, _settings.ConsumerGroup,
+            count: 1, consumerName: RedisValue.Null, minId: entry.Id, maxId: entry.Id);
+
+        var deliveries = pending.Length > 0 ? (int)pending[0].DeliveryCount : 1;
+        if (deliveries < _settings.MaxPoisonMessageDeliveries) return;
+
+        _logger.LogCritical(
+            "Poison message detected after {Deliveries} deliveries — moving to DLQ and ACKing. Id={Id}",
+            deliveries, entry.Id);
+
+        if (!string.IsNullOrEmpty(_settings.DeadLetterStreamName))
         {
-            if (v.Name.ToString() == _settings.PayloadFieldName)
-                return v.Value.ToString();
+            try
+            {
+                await db.StreamAddAsync(
+                    _settings.DeadLetterStreamName,
+                    [
+                        new NameValueEntry("originalId",  entry.Id.ToString()),
+                        new NameValueEntry("failedAtUtc", DateTimeOffset.UtcNow.ToString("O")),
+                        new NameValueEntry("deliveries",  deliveries.ToString()),
+                        new NameValueEntry("error",       ex.Message),
+                        new NameValueEntry("payload",     entry.GetField(_settings.PayloadFieldName) ?? string.Empty),
+                    ],
+                    maxLength: 10_000,
+                    useApproximateMaxLength: true);
+            }
+            catch (Exception dlqEx)
+            {
+                _logger.LogCritical(dlqEx,
+                    "Failed to write poison message to DLQ — ACKing anyway to unblock pipeline. Id={Id}",
+                    entry.Id);
+            }
         }
 
-        return null;
+        await db.StreamAcknowledgeAsync(_settings.StreamName, _settings.ConsumerGroup, entry.Id);
     }
 }

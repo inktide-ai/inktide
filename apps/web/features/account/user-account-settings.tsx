@@ -2,7 +2,7 @@
 import { createContext, useContext, useState } from 'react'
 import * as Tabs from '@radix-ui/react-tabs'
 import { cn } from '@/lib/utils'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea } from '@/shared/ui/scroll-area'
 import { useAuth } from '@/context/AuthContext'
 import ProfilePanel from './panels/profile-panel'
 import SecurityPanel from './panels/security-panel'

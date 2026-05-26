@@ -10,8 +10,8 @@ public sealed class MemoryMetadata
     public Guid CharacterId { get; set; }
     public string QdrantPointId { get; set; } = string.Empty;
     public string FactText { get; set; } = string.Empty;
-    public string Category { get; set; } = "general";
-    public string SourceType { get; set; } = "chat";
+    public string Category { get; set; } = MemoryCategoryType.General;
+    public string SourceType { get; set; } = MemorySourceType.Chat;
     public double Importance { get; set; } = 0.5;
     public DateTime RememberedAt { get; set; }
     public DateTime? LastRecalledAt { get; set; }

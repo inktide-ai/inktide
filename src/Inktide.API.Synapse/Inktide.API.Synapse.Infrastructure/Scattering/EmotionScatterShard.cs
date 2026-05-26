@@ -16,7 +16,7 @@ namespace Inktide.API.Synapse.Infrastructure.Scattering;
 /// SRP: classification + state update only.
 /// OCP: registered via <see cref="IPipelineStage"/> — removing this feature = delete file + DI.
 /// </summary>
-public sealed class EmotionScatterShard : IPipelineStage
+internal sealed class EmotionScatterShard : IPipelineStage
 {
 
     private readonly IEmotionClassificationService _classifier;
@@ -26,6 +26,8 @@ public sealed class EmotionScatterShard : IPipelineStage
 
     public string ShardId => SynapseConstants.ShardIds.Emotion;
 
+    public bool ShouldRun(AiCardContext? cardCtx)
+        => SynapseConstants.PluginGate.IsEnabled(cardCtx?.Plugins, SynapseConstants.ShardIds.Emotion);
 
     public EmotionScatterShard(
         IEmotionClassificationService classifier,
