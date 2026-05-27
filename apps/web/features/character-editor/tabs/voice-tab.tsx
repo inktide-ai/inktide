@@ -73,7 +73,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
     return (
       <div className="flex flex-col gap-6 max-w-[840px] mx-auto w-full">
         <div className="flex items-center gap-3 mb-7 pb-4 border-b border-white/[0.06]">
-          <button type="button" className="flex items-center justify-center w-7 h-7 bg-white/[0.04] border border-[#2d2f33] rounded-[6px] text-white/45 cursor-pointer transition-all duration-[120ms] ease shrink-0 hover:border-[#42454d] hover:text-white/85 hover:bg-white/[0.07]" onClick={() => router.push('/settings/voice')} aria-label={t('back')}>
+          <button type="button" className="flex items-center justify-center w-7 h-7 bg-white/[0.04] border border-[var(--panel-input-border)] rounded-[6px] text-white/45 cursor-pointer transition-all duration-[120ms] ease shrink-0 hover:border-[var(--panel-input-border-hover)] hover:text-white/85 hover:bg-white/[0.07]" onClick={() => router.push('/settings/voice')} aria-label={t('back')}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7L9 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
           {provider && (
@@ -135,7 +135,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
             <div
               key={provider.id}
               className={cn(
-                'relative bg-[#1e1f22] border border-[#2d2f33] border-l-2 border-l-transparent rounded-[8px] p-4 cursor-pointer transition-[background,border-color] duration-[120ms] ease flex flex-col min-h-[114px] overflow-hidden select-none outline-none hover:bg-[#26282e] hover:border-[#42454d] focus-visible:shadow-[0_0_0_2px_rgba(53,116,240,0.4)]',
+                'relative bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] border-l-2 border-l-transparent rounded-[8px] p-4 cursor-pointer transition-[background,border-color] duration-[120ms] ease flex flex-col min-h-[114px] overflow-hidden select-none outline-none hover:bg-[var(--panel-input-bg-hover)] hover:border-[var(--panel-input-border-hover)] focus-visible:shadow-[0_0_0_2px_rgba(53,116,240,0.4)]',
                 isActive && !isWarning && 'border-[#2a5040] border-l-[#22c55e] bg-[#162820] hover:bg-[#1a3025] hover:border-[#2a5040]',
                 isWarning && 'border-[rgba(245,158,11,0.35)] border-l-[rgba(245,158,11,0.75)] bg-[rgba(245,158,11,0.03)] hover:bg-[rgba(245,158,11,0.06)]',
               )}
@@ -169,7 +169,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
           )
         })}
 
-        <div className="relative bg-[#1e1f22] border border-[#2d2f33] border-l-2 border-l-transparent rounded-[8px] p-4 cursor-pointer transition-[background,border-color] duration-[120ms] ease flex flex-col min-h-[114px] overflow-hidden select-none outline-none hover:bg-[#26282e] hover:border-[#42454d]" role="button" tabIndex={0} onClick={() => router.push('sandbox')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.push('sandbox') }}>
+        <div className="relative bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] border-l-2 border-l-transparent rounded-[8px] p-4 cursor-pointer transition-[background,border-color] duration-[120ms] ease flex flex-col min-h-[114px] overflow-hidden select-none outline-none hover:bg-[var(--panel-input-bg-hover)] hover:border-[var(--panel-input-border-hover)]" role="button" tabIndex={0} onClick={() => router.push('sandbox')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.push('sandbox') }}>
           <div className="w-9 h-9 flex items-center justify-center mb-[0.625rem] shrink-0 bg-white/[0.05] border border-white/[0.08] rounded-[8px]">
             <span className="text-[1.5rem] leading-none">🎙</span>
           </div>

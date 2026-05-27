@@ -252,6 +252,11 @@
   --input-bg-dark:      var(--ds-gray-alpha-100);
   --input-border:       var(--border-subtle);
   --input-border-focus: var(--border-default);
+  /* Panel inputs (brain / voice settings panels — darker opaque style) */
+  --panel-input-bg:           #1e1f22;
+  --panel-input-bg-hover:     #26282e;
+  --panel-input-border:       #2d2f33;
+  --panel-input-border-hover: #42454d;
   /* Inspector panel (graph) */
   --inspector-bg:       var(--ds-gray-100);
   --inspector-section-separator: var(--ds-gray-alpha-100);

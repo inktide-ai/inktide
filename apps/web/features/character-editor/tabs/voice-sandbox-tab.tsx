@@ -22,10 +22,10 @@ const infoContent = 'py-2'
 const formGroup = 'mb-7'
 const labelCls = 'block text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2'
 const labelHint = 'text-[0.75rem] text-(--text-muted) mt-0.5 leading-[1.4]'
-const inputCls = 'w-full py-[0.625rem] px-[0.875rem] bg-[#1e1f22] border border-[#2d2f33] rounded-[6px] text-(--text-primary) font-[var(--font-ui)] text-[0.8125rem] outline-none transition-[border-color,background] duration-[120ms] ease focus:border-white/20 focus:bg-[#26282e] placeholder:text-[rgba(139,144,154,0.45)] mt-2'
+const inputCls = 'w-full py-[0.625rem] px-[0.875rem] bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] rounded-[6px] text-(--text-primary) font-[var(--font-ui)] text-[0.8125rem] outline-none transition-[border-color,background] duration-[120ms] ease focus:border-white/20 focus:bg-[var(--panel-input-bg-hover)] placeholder:text-[rgba(139,144,154,0.45)] mt-2'
 const textareaCls = `${inputCls} min-h-[120px] resize-y leading-relaxed mt-2`
 const voiceSelectWrap = 'relative flex items-center mt-2'
-const voiceSelect = 'w-full appearance-none bg-[#1e1f22] border border-[#2d2f33] rounded-[6px] py-[0.625rem] pr-11 pl-[0.875rem] text-(--text-primary) font-[var(--font-ui)] text-[0.875rem] cursor-pointer outline-none transition-[background,border-color] duration-[120ms] ease hover:bg-[#26282e] hover:border-[#42454d] focus:bg-[#26282e] focus:border-white/20 [&_option]:bg-[#1e1f22]'
+const voiceSelect = 'w-full appearance-none bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] rounded-[6px] py-[0.625rem] pr-11 pl-[0.875rem] text-(--text-primary) font-[var(--font-ui)] text-[0.875rem] cursor-pointer outline-none transition-[background,border-color] duration-[120ms] ease hover:bg-[var(--panel-input-bg-hover)] hover:border-[var(--panel-input-border-hover)] focus:bg-[var(--panel-input-bg-hover)] focus:border-white/20 [&_option]:bg-[var(--panel-input-bg)]'
 const voiceSelectChevron = 'absolute right-4 text-white/30 pointer-events-none shrink-0'
 const sliderHeader = 'flex justify-between items-start gap-4 mb-3'
 const sliderValue = 'text-[0.6875rem] font-semibold font-mono text-(--accent-red-bright) bg-[linear-gradient(135deg,rgba(237,62,62,0.15),rgba(237,62,62,0.08))] py-0.5 px-[0.375rem] rounded-[0.25rem] border border-[rgba(237,62,62,0.2)] shrink-0'
@@ -81,7 +81,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
     <div className="flex flex-col gap-6 max-w-[840px] mx-auto w-full">
       {/* Header */}
       <div className="flex items-center gap-3 mb-7 pb-4 border-b border-white/[0.06]">
-        <button type="button" className="flex items-center justify-center w-7 h-7 bg-white/[0.04] border border-[#2d2f33] rounded-[6px] text-white/45 cursor-pointer transition-all duration-[120ms] ease shrink-0 hover:border-[#42454d] hover:text-white/85 hover:bg-white/[0.07]" onClick={onBack} aria-label="Back">
+        <button type="button" className="flex items-center justify-center w-7 h-7 bg-white/[0.04] border border-[var(--panel-input-border)] rounded-[6px] text-white/45 cursor-pointer transition-all duration-[120ms] ease shrink-0 hover:border-[var(--panel-input-border-hover)] hover:text-white/85 hover:bg-white/[0.07]" onClick={onBack} aria-label="Back">
           ←
         </button>
         <span className="text-[1rem] font-semibold text-(--text-primary) tracking-[-0.01em]">{t('sandbox.title')}</span>

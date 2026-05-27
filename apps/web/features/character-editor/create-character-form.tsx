@@ -25,7 +25,7 @@ interface CreateCharacterFormProps {
   defaultValues: Omit<AiCharacter, 'id'>
 }
 
-const inputCls = 'w-full py-[0.625rem] px-[0.875rem] bg-[#1e1f22] border border-[#2d2f33] rounded-[6px] text-(--text-primary) font-[var(--font-ui)] text-[0.8125rem] outline-none transition-[border-color,background] duration-[120ms] ease focus:border-white/20 focus:bg-[#26282e] placeholder:text-[rgba(139,144,154,0.45)]'
+const inputCls = 'w-full py-[0.625rem] px-[0.875rem] bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] rounded-[6px] text-(--text-primary) font-[var(--font-ui)] text-[0.8125rem] outline-none transition-[border-color,background] duration-[120ms] ease focus:border-white/20 focus:bg-[var(--panel-input-bg-hover)] placeholder:text-[rgba(139,144,154,0.45)]'
 const textareaCls = `${inputCls} min-h-[120px] resize-y leading-relaxed`
 const labelCls = 'block text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2'
 
