@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { getProject, type Project } from '@/features/projects/api/projects'
-import SoulCharacterHubPage from '@/screens/profile/SoulCharacterHubPage'
+import SoulCharacterHubPage from '@/features/character-editor/character-hub-page'
 
 export default function ProjectDeployPage() {
   const { id } = useParams<{ id: string }>()

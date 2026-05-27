@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import ObsScenePage from '@/screens/obs/ObsScenePage'
+import ObsScenePage from '@/features/obs/obs-scene-page'
 
 export default function Page() {
   return (

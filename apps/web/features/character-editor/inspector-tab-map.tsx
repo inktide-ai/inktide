@@ -6,15 +6,15 @@ import {
   IconIntegration, IconScene, IconMemory, IconObs,
 } from '@/features/character-editor/tab-icons'
 
-import IdentityPage     from '@/screens/profile/settings/IdentityPage'
-import BrainPage        from '@/screens/profile/settings/BrainPage'
-import VoicePage        from '@/screens/profile/settings/VoicePage'
-import MemoryPage       from '@/screens/profile/settings/MemoryPage'
-import SkillsPage       from '@/screens/profile/settings/SkillsPage'
-import ModelPage        from '@/screens/profile/settings/ModelPage'
-import ScenePage        from '@/screens/profile/settings/ScenePage'
-import ChannelsPage from '@/screens/profile/settings/ChannelsPage'
-import ObsPage          from '@/screens/profile/settings/ObsPage'
+import IdentityPage     from '@/features/character-editor/settings/identity-page'
+import BrainPage        from '@/features/character-editor/settings/brain-page'
+import VoicePage        from '@/features/character-editor/settings/voice-page'
+import MemoryPage       from '@/features/character-editor/settings/memory-page'
+import SkillsPage       from '@/features/character-editor/settings/skills-page'
+import ModelPage        from '@/features/character-editor/settings/model-page'
+import ScenePage        from '@/features/character-editor/settings/scene-page'
+import ChannelsPage from '@/features/character-editor/settings/channels-page'
+import ObsPage          from '@/features/character-editor/settings/obs-page'
 
 export interface InspectorTabDef {
   labelKey: string
