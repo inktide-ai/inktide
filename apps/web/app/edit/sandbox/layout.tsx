@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
-import ProtectedRoute from '@/components/layout/protected-route'
+import ProtectedRoute from '@/features/account/protected-route'
 import { CharactersProvider } from '@/entities/character/context/CharactersContext'
 import { WorkspaceSidebar } from '@/features/workspace-home/workspace-sidebar'
 import { AppTopBar } from '@/features/workspace-home/app-topbar'

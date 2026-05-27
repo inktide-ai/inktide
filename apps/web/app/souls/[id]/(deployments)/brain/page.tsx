@@ -8,7 +8,7 @@ import { useCharactersContext } from '@/entities/character/context/CharactersCon
 import { cn } from '@/lib/utils'
 import { getCredentials, type CredentialResponse } from '@/features/soul/api/index'
 import { statusFromCredential } from '@/features/soul/components/credential-status-badge'
-import { FeaturedIntegrations } from '@/components/featured-integrations'
+import { FeaturedIntegrations } from '@/features/character-editor/featured-integrations'
 
 // ── Toolbar icons ─────────────────────────────────────────────────────────────
 

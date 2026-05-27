@@ -17,7 +17,7 @@ import { useCharactersContext } from '@/entities/character/context/CharactersCon
 import { getBannerAccent } from '@/shared/ui/banner-presets'
 import { type HubTabId, type CardLayout, useHubLayout } from '@/shared/hooks/useHubLayout'
 import { profileSettingsPath } from '@/lib/routes'
-import SettingsInspectorPanel from '../../components/settings/SettingsInspectorPanel'
+import SettingsInspectorPanel from '@/features/character-editor/settings-inspector-panel'
 
 const HUB_LINKS: { to: string; tabId: HubTabId; icon: ReactNode }[] = [
   { to: profileSettingsPath('identity'),     tabId: 'profile',    icon: <IconUser /> },

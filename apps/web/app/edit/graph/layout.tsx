@@ -1,7 +1,7 @@
 'use client'
 
 import { type ReactNode } from 'react'
-import ProtectedRoute from '@/components/layout/protected-route'
+import ProtectedRoute from '@/features/account/protected-route'
 import { CharactersProvider } from '@/entities/character/context/CharactersContext'
 import { WorkspaceSidebar } from '@/features/workspace-home/workspace-sidebar'
 

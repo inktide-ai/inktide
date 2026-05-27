@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import { Brain, Link, Puzzle, User, Webhook } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { PluginCard } from '@/components/plugins/plugin-card'
+import { PluginCard } from '@/features/plugins/plugin-card'
 import { getProjectPlugins, upsertProjectPlugin, type ProjectPlugin } from '@/api/plugins'
 import { queryKeys } from '@/shared/lib/query/keys'
 import { useState } from 'react'

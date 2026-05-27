@@ -2,8 +2,8 @@
 
 import { type ReactNode } from 'react'
 import { CharactersProvider } from '@/entities/character/context/CharactersContext'
-import ProtectedRoute from '@/components/layout/protected-route'
-import ProfileShell from '@/components/layout/profile-shell'
+import ProtectedRoute from '@/features/account/protected-route'
+import ProfileShell from '@/features/account/profile-shell'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
