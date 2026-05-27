@@ -159,7 +159,7 @@ export function PresetSceneCard({ preset, animationDelay = 0 }: PresetSceneCardP
         <div className="text-[0.6875rem] text-(--text-muted) leading-[1.45] mt-[0.1875rem] line-clamp-2">{preset.description}</div>
         <div className="flex items-center justify-between mt-auto pt-[0.625rem]">
           <div className="w-[14px] h-[14px] rounded-full border-[1.5px] border-white/[0.16] shrink-0" />
-          <span className="text-[9.5px] font-semibold tracking-[0.05em] uppercase text-[rgba(251,191,36,0.65)] bg-[rgba(251,191,36,0.06)] border border-[rgba(251,191,36,0.16)] rounded-[4px] py-[2px] px-[7px] shrink-0" style={{ fontSize: '0.625rem' }}>Скоро</span>
+          <span className="text-[0.625rem] font-semibold tracking-[0.05em] uppercase text-[rgba(251,191,36,0.65)] bg-[rgba(251,191,36,0.06)] border border-[rgba(251,191,36,0.16)] rounded-[4px] py-[2px] px-[7px] shrink-0">Скоро</span>
         </div>
       </div>
     </div>

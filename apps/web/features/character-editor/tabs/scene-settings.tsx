@@ -197,7 +197,7 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
         <span className="text-[9.5px] font-semibold tracking-[0.05em] uppercase text-[rgba(251,191,36,0.65)] bg-[rgba(251,191,36,0.06)] border border-[rgba(251,191,36,0.16)] rounded-[4px] py-[2px] px-[7px] shrink-0">{t('settings.comingSoonBadge')}</span>
       </div>
 
-      <input ref={fileInputRef} type="file" accept={ALLOWED_TYPES} style={{ display: 'none' }} onChange={scene ? handleReplace : handleUploadNew} />
+      <input ref={fileInputRef} type="file" accept={ALLOWED_TYPES} className="hidden" onChange={scene ? handleReplace : handleUploadNew} />
     </div>
   )
 }
