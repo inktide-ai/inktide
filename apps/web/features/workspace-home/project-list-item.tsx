@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Projects as ProjectsIcon } from '@/components/icons'
+import { Projects as ProjectsIcon } from '@/shared/ui/icons'
 
 interface ProjectListItemProps {
   title: string

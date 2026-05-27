@@ -12,7 +12,7 @@ import {
   IconUser, IconBrain, IconMicrophone, IconPaint, IconScene,
   IconEmotion,
 } from '@/features/character-editor/tab-icons'
-import { Grid } from '@/components/icons'
+import { Grid } from '@/shared/ui/icons'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { getBannerAccent } from '@/shared/ui/banner-presets'
 import { type HubTabId, type CardLayout, useSoulHubLayout } from '@/shared/hooks/useHubLayout'

@@ -1,6 +1,6 @@
 'use client'
 
-import { CaretLeftSmall, CaretRightSmall } from '@/components/icons'
+import { CaretLeftSmall, CaretRightSmall } from '@/shared/ui/icons'
 
 interface SectionTab {
   id: string

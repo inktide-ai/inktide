@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, Atom, CaretRightSmall, Microphone } from '@/components/icons'
+import { ArrowLeft, Atom, CaretRightSmall, Microphone } from '@/shared/ui/icons'
 import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-providers'
 import { VOICE_PROVIDER_CATALOG } from '@/shared/data/voice-providers'
 import { cn } from '@/lib/utils'

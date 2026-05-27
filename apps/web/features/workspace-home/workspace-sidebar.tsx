@@ -10,7 +10,7 @@ import { listProjects, type ProjectListItem as ProjectItem } from '@/entities/pr
 import { ProPlanCard } from '@/features/workspace-home/pro-plan-card'
 // fsd:cross-feature-ok — sidebar composes account settings modal
 import AccountSettingsModal from '@/features/account/account-settings-modal'
-import InviteMembersModal from '@/components/organization/invite-members-modal'
+import InviteMembersModal from '@/features/organization/invite-members-modal'
 import type { PageId } from '@/features/account/user-account-settings'
 import { SidebarAccountMenu } from '@/shared/ui/sidebar-account-menu'
 import { SidebarItem } from '@/features/workspace-home/sidebar-item'
@@ -24,7 +24,7 @@ import {
   Home,
   Grid as ProjectsIcon,
   Team,
-} from '@/components/icons'
+} from '@/shared/ui/icons'
 
 
 function SidebarCollapsibleSection({

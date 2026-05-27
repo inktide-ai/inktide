@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { Atom } from '@/components/icons'
+import { Atom } from '@/shared/ui/icons'
 
 export interface WizardFinishPanelProps {
   llmName: string | null

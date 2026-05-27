@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { Connector } from '@/components/icons'
+import { Connector } from '@/shared/ui/icons'
 import { ChIconDiscord, DISCORD_PLATFORM, WizardDiscordConfig } from './wizard-discord-config'
 
 export interface WizardChannelsPanelProps {

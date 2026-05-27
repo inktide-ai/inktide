@@ -1,6 +1,6 @@
 'use client'
 import { cn } from '@/lib/utils'
-import { CaretRightSmall } from '@/components/icons'
+import { CaretRightSmall } from '@/shared/ui/icons'
 import type { SoulTemplate } from '@/shared/data/soul-templates'
 
 export function TemplateSectionLabel({ children }: { children: React.ReactNode }) {

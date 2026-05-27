@@ -16,7 +16,7 @@ import {
   Tool,
   Trash,
   User,
-} from '@/components/icons'
+} from '@/shared/ui/icons'
 import { Smile, SlidersHorizontal } from 'lucide-react'
 
 const DEFAULT_SIZE = 18

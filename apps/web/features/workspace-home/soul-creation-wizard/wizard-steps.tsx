@@ -1,5 +1,5 @@
 'use client'
-import { Atom, Connector, Microphone, User } from '@/components/icons'
+import { Atom, Connector, Microphone, User } from '@/shared/ui/icons'
 
 export interface WizardStep {
   id: string

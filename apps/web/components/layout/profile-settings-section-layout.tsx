@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { PROFILE_SETTINGS_BASE } from '@/lib/routes'
 import { Button } from '@/shared/ui/button'
-import { CaretLeftSmall } from '@/components/icons'
+import { CaretLeftSmall } from '@/shared/ui/icons'
 
 const SEGMENT_TO_TAB: Record<string, string> = {
   identity: 'profile',

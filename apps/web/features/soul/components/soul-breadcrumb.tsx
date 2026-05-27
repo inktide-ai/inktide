@@ -2,7 +2,7 @@
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Tooltip from '@radix-ui/react-tooltip'
-import { Play, Share, Star, Upload } from '@/components/icons'
+import { Play, Share, Star, Upload } from '@/shared/ui/icons'
 import { cn } from '@/lib/utils'
 
 const tooltipClass = cn(
