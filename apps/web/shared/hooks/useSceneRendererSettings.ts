@@ -52,6 +52,7 @@ function storageKey(cardId: string) {
 }
 
 function loadFromStorage(cardId: string): SceneRendererSettings {
+  if (typeof window === 'undefined') return SCENE_RENDERER_DEFAULTS
   try {
     const raw = localStorage.getItem(storageKey(cardId))
     if (!raw) return SCENE_RENDERER_DEFAULTS
@@ -81,7 +82,9 @@ export function useSceneRendererSettings(cardId: string) {
     (patch: Partial<SceneRendererSettings>) => {
       setSettingsState((prev) => {
         const next = { ...prev, ...patch }
-        localStorage.setItem(storageKey(cardId), JSON.stringify(next))
+        if (typeof window !== 'undefined') {
+          try { localStorage.setItem(storageKey(cardId), JSON.stringify(next)) } catch { /* quota */ }
+        }
         return next
       })
     },
@@ -89,7 +92,9 @@ export function useSceneRendererSettings(cardId: string) {
   )
 
   const resetSettings = useCallback(() => {
-    localStorage.removeItem(storageKey(cardId))
+    if (typeof window !== 'undefined') {
+      try { localStorage.removeItem(storageKey(cardId)) } catch { /* ignore */ }
+    }
     setSettingsState(SCENE_RENDERER_DEFAULTS)
   }, [cardId])
 

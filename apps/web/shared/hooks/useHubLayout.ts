@@ -55,6 +55,7 @@ export function useSoulHubLayout(soulId: string) {
   const key = `inktide_soul_hub_layout_${soulId}`
 
   const [layout, setLayout] = useState<CardLayout[]>(() => {
+    if (typeof window === 'undefined') return SOUL_DEFAULT_LAYOUT
     try {
       const raw = localStorage.getItem(key)
       if (raw) {
@@ -94,6 +95,7 @@ export function useHubLayout(characterId: string) {
   const key = `inktide_hub_layout_${characterId}`
 
   const [layout, setLayout] = useState<CardLayout[]>(() => {
+    if (typeof window === 'undefined') return DEFAULT_LAYOUT
     try {
       const raw = localStorage.getItem(key)
       if (raw) {

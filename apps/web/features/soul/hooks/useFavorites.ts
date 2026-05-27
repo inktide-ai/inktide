@@ -5,6 +5,7 @@ const KEY = 'v1_inktide_favorites'
 
 export function useFavorites() {
   const [favs, setFavs] = useState<Set<string>>(() => {
+    if (typeof window === 'undefined') return new Set()
     try { return new Set(JSON.parse(localStorage.getItem(KEY) ?? '[]') as string[]) }
     catch { return new Set() }
   })

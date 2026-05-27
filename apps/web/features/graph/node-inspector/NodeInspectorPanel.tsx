@@ -6,6 +6,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useDebounce } from '@/shared/hooks/useDebounce'
 import { createPortal } from 'react-dom'
 import { X, Eye, EyeOff, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -381,18 +382,16 @@ export default function NodeInspectorPanel({ node, onClose, onNameChange, onNode
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [node.id])
 
-  // Propagate LLM config changes back to node data.
-  // Debounced 800ms: prevents partial API keys and rapid field edits from firing a graph save
-  // on every keystroke. onNodeDataChange and node.id are excluded from deps intentionally —
-  // they do not change mid-edit and including them would reset the timer on unrelated renders.
+  // Propagate LLM config changes back to node data, debounced 800ms.
+  // Prevents partial API keys and rapid field edits from firing a graph save on every keystroke.
+  const debouncedLlmCfg = useDebounce(llmCfg, 800)
   useEffect(() => {
     if (nodeData.pipelineType !== 'llm') return
-    const timer = setTimeout(() => {
-      onNodeDataChange?.(node.id, llmCfg as unknown as Record<string, unknown>)
-    }, 800)
-    return () => clearTimeout(timer)
+    onNodeDataChange?.(node.id, debouncedLlmCfg as unknown as Record<string, unknown>)
+  // node.id and onNodeDataChange intentionally excluded: stable values that must not reset
+  // the debounce; node selection change is handled by the re-init effect above.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [llmCfg])
+  }, [debouncedLlmCfg, nodeData.pipelineType])
 
   const set = useCallback(<K extends keyof LlmCfg>(key: K, val: LlmCfg[K]) => {
     setLlmCfg(c => ({ ...c, [key]: val }))
