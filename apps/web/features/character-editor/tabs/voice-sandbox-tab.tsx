@@ -1,13 +1,11 @@
 'use client'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SliderWithTicks from '@/shared/ui/slider-with-ticks'
-import { getTtsProviders, getTtsVoices, type SpeechProviderDescriptor, type SpeechVoice } from '../../../api/tts'
 import { LANG_LABELS, VOICE_GROUPS } from '@/shared/data/kokoro-voices'
 import { useTtsSynth } from '@/shared/hooks/useTtsSynth'
 import type { AiCharacter } from '@/shared/lib/character'
-
-function getFallbackVoices(_providerId: string): SpeechVoice[] { return [] }
+import { useVoiceSandbox } from '../hooks/useVoiceSandbox'
 
 interface VoiceSandboxTabProps {
   character: AiCharacter
@@ -44,58 +42,29 @@ const ChevronSVG = () => (
 const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
   const { t } = useTranslation('voice')
 
-  const [providers, setProviders] = useState<SpeechProviderDescriptor[]>([])
-  const [providersLoading, setProvidersLoading] = useState(true)
-  const [selectedProviderId, setSelectedProviderId] = useState(character.tts.providerId ?? '')
-  const [voices, setVoices] = useState<SpeechVoice[]>([])
-  const [voicesLoading, setVoicesLoading] = useState(false)
+  const {
+    providers, providersLoading,
+    selectedProviderId, setSelectedProviderId,
+    voices, voicesLoading,
+    provider, needsApiKey, canListVoices, canStream,
+  } = useVoiceSandbox(character.tts.providerId ?? '')
+
+  // Simple form fields — no external data dependency, stay in component
   const [voiceId, setVoiceId] = useState(character.tts.voiceId ?? '')
-  const [apiKey, setApiKey] = useState('')
-  const [text, setText] = useState(() => t('text.defaultSample'))
+  const [apiKey, setApiKey]   = useState('')
+  const [text, setText]       = useState(() => t('text.defaultSample'))
   const [ssmlMode, setSsmlMode] = useState(false)
-  const [speed, setSpeed] = useState(character.tts.speed ?? 1.0)
-  const [format, setFormat] = useState<AudioFormat>('mp3')
+  const [speed, setSpeed]     = useState(character.tts.speed ?? 1.0)
+  const [format, setFormat]   = useState<AudioFormat>('mp3')
 
   const { state, audioUrl, error: synthError, chunks, synthesize, streamChunked, reset } = useTtsSynth()
-
-  useEffect(() => {
-    let cancelled = false
-    setProvidersLoading(true)
-    getTtsProviders()
-      .then((list) => {
-        if (cancelled) return
-        setProviders(list)
-        if (list.length > 0 && !list.find((p) => p.id === selectedProviderId)) setSelectedProviderId(list[0].id)
-      })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setProvidersLoading(false) })
-    return () => { cancelled = true }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const provider = providers.find((p) => p.id === selectedProviderId)
-  const needsApiKey = provider?.capabilities.requiresApiKey ?? false
-  const canListVoices = provider?.capabilities.supportsVoiceListing ?? false
-
-  useEffect(() => {
-    if (!selectedProviderId) return
-    if (!canListVoices) { setVoices([]); return }
-    let cancelled = false
-    setVoicesLoading(true)
-    setVoices([])
-    getTtsVoices(selectedProviderId, needsApiKey ? apiKey : undefined)
-      .then((list) => { if (cancelled) return; setVoices(list.length > 0 ? list : getFallbackVoices(selectedProviderId)) })
-      .catch(() => { if (!cancelled) setVoices(getFallbackVoices(selectedProviderId)) })
-      .finally(() => { if (!cancelled) setVoicesLoading(false) })
-    return () => { cancelled = true }
-  }, [selectedProviderId, providers]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleProviderChange = useCallback((id: string) => {
     setSelectedProviderId(id)
     setVoiceId('')
     reset()
-  }, [reset])
+  }, [setSelectedProviderId, reset])
 
-  const canStream = provider?.capabilities.supportsStreaming ?? false
   const validationErrors: string[] = []
   if (!text.trim()) validationErrors.push(t('validation.textEmpty'))
   if (!voiceId.trim()) validationErrors.push(t('validation.voiceRequired'))
