@@ -46,7 +46,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
     providers, providersLoading,
     selectedProviderId, setSelectedProviderId,
     voices, voicesLoading,
-    provider, needsApiKey, canListVoices, canStream,
+    needsApiKey, canListVoices, canStream,
   } = useVoiceSandbox(character.tts.providerId ?? '')
 
   // Simple form fields — no external data dependency, stay in component
