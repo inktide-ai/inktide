@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AiCharacter } from '@/shared/lib/character'
-import { getChatModels, type ChatModelInfo } from '@/api/chat'
-import { getCredentials, upsertCredential } from '@/entities/soul/api'
 import { PROVIDER_DEFS } from '@/lib/providers'
 import { pingOllama } from '@/lib/provider-validation'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import { useOllamaCredentials } from '../hooks/useOllamaCredentials'
+import { useOllamaModels } from '../hooks/useOllamaModels'
 import {
   infoContent, formGroup, label, labelHint, inputCls,
   validationOk, validationFailed, btnContinueAnyway,
@@ -31,11 +31,11 @@ export function OllamaPanel({ character, onUpdate }: PanelProps) {
   const def = PROVIDER_DEFS.find((p) => p.id === 'ollama')!
   const patch = (p: Partial<typeof llm>) => onUpdate({ llm: { ...llm, ...p } })
 
-  const [cred, setCred]               = useState<Awaited<ReturnType<typeof getCredentials>>[number] | null>(null)
-  const [credLoading, setCredLoading] = useState(true)
-  const [baseUrl, setBaseUrl]         = useState('')
-  const [extraConfig, setExtraConfig] = useState<Record<string, unknown>>({})
-  const [kvPairs, setKvPairs]         = useState<Record<string, [string, string][]>>({})
+  const creds = useOllamaCredentials(def, registerSavePlugin, unregisterSavePlugin)
+  const { cred, credLoading, baseUrl, setBaseUrl, extraConfig, setExtraConfig, kvPairs, setKvPairs } = creds
+
+  const effectiveBaseUrl = baseUrl || def.defaultBaseUrl || 'http://localhost:11434'
+  const { models, modelsLoading, modelsError } = useOllamaModels(effectiveBaseUrl, credLoading)
 
   const [autoState, setAutoState]     = useState<AutoState>('idle')
   const [autoError, setAutoError]     = useState<string | null>(null)
@@ -43,89 +43,6 @@ export function OllamaPanel({ character, onUpdate }: PanelProps) {
   const [manualError, setManualError] = useState<string | null>(null)
   const [bypassed, setBypassed]       = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const [models, setModels]               = useState<ChatModelInfo[]>([])
-  const [modelsLoading, setModelsLoading] = useState(false)
-  const [modelsError, setModelsError]     = useState(false)
-
-  const baseUrlRef   = useRef(baseUrl)
-  const extraRef     = useRef(extraConfig)
-  const kvRef        = useRef(kvPairs)
-  baseUrlRef.current = baseUrl
-  extraRef.current   = extraConfig
-  kvRef.current      = kvPairs
-
-  useEffect(() => {
-    const key = 'ollama-credential'
-    registerSavePlugin(key, async () => {
-      const configObj: Record<string, unknown> = { ...extraRef.current }
-      def.extraFields?.forEach((f) => {
-        if (f.type === 'kv-pairs') {
-          const pairs = kvRef.current[f.key] ?? []
-          if (pairs.length > 0)
-            configObj[f.key] = Object.fromEntries(pairs.filter(([k]) => k.trim()))
-        }
-      })
-      await upsertCredential(
-        'ollama', null,
-        baseUrlRef.current.trim() || null,
-        Object.keys(configObj).length ? configObj : null,
-      )
-      const list = await getCredentials()
-      setCred(list.find((c) => c.providerId === 'ollama') ?? null)
-    })
-    return () => unregisterSavePlugin(key)
-  }, [registerSavePlugin, unregisterSavePlugin, def])
-
-  useEffect(() => {
-    getCredentials()
-      .then((list) => {
-        const found = list.find((c) => c.providerId === 'ollama') ?? null
-        setCred(found)
-        setBaseUrl(found?.baseUrl ?? def.defaultBaseUrl ?? '')
-        if (found?.config) {
-          try {
-            const parsed = JSON.parse(found.config) as Record<string, unknown>
-            const newExtra: Record<string, unknown> = {}
-            const newKv: Record<string, [string, string][]> = {}
-            def.extraFields?.forEach((f) => {
-              if (f.type === 'kv-pairs') {
-                const val = parsed[f.key]
-                if (val && typeof val === 'object' && !Array.isArray(val))
-                  newKv[f.key] = Object.entries(val as Record<string, string>)
-              } else if (parsed[f.key] !== undefined) {
-                newExtra[f.key] = parsed[f.key]
-              }
-            })
-            setExtraConfig(newExtra)
-            setKvPairs(newKv)
-          } catch {}
-        } else {
-          const defaults: Record<string, unknown> = {}
-          def.extraFields?.forEach((f) => {
-            if (f.type !== 'kv-pairs' && f.default !== undefined) defaults[f.key] = f.default
-          })
-          setExtraConfig(defaults)
-        }
-      })
-      .catch(() => {})
-      .finally(() => setCredLoading(false))
-  }, [def])
-
-  const effectiveBaseUrl = baseUrl || def.defaultBaseUrl || 'http://localhost:11434'
-  useEffect(() => {
-    if (credLoading) return
-    let cancelled = false
-    setModelsError(false)
-    const timer = setTimeout(() => {
-      setModelsLoading(true)
-      getChatModels('ollama', effectiveBaseUrl)
-        .then((list) => { if (!cancelled) { setModels(list); setModelsError(false) } })
-        .catch(() => { if (!cancelled) { setModels([]); setModelsError(true) } })
-        .finally(() => { if (!cancelled) setModelsLoading(false) })
-    }, 500)
-    return () => { cancelled = true; clearTimeout(timer) }
-  }, [effectiveBaseUrl, credLoading])
 
   const triggerAutoValidation = (url: string) => {
     setBypassed(false); setManualState('idle'); setManualError(null)
