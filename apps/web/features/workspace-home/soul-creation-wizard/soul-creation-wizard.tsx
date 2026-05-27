@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, Atom, CaretRightSmall, Microphone } from '@/shared/ui/icons'
 import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-providers'
@@ -8,7 +8,6 @@ import { VOICE_PROVIDER_CATALOG } from '@/shared/data/voice-providers'
 import { cn } from '@/lib/utils'
 import { TetrisBackground } from '../tetris-background'
 import { PersonalityWorkspace } from '../personality-workspace'
-import type { CharacterPersonality } from '@/shared/lib/character'
 import { createDefaultCharacter } from '@/shared/lib/character/defaults'
 import type { AiCharacter } from '@/shared/lib/character/types'
 import { SOUL_TEMPLATES, type SoulTemplate } from '@/shared/data/soul-templates'
@@ -18,37 +17,7 @@ import { WizardProviderPanel } from './wizard-provider-panel'
 import { WizardChannelsPanel } from './wizard-channels-panel'
 import { WizardFinishPanel } from './wizard-finish-panel'
 import { TemplateSectionLabel, TemplateListItem } from './wizard-template-picker'
-
-type Screen = 'templates' | 'steps' | 'llm' | 'tts' | 'channels' | 'finish'
-
-type StepSelection = { id: string; name: string; config?: Record<string, string> }
-
-const WIZARD_TTL_MS = 24 * 60 * 60 * 1000
-
-const WIZARD_KEYS = [
-  'v1_inktide_wizard_selections',
-  'v1_inktide_wizard_channels',
-  'v1_inktide_wizard_personality',
-  'v1_inktide_wizard_template',
-] as const
-
-function loadWithTTL<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key)
-    if (!raw) return fallback
-    const { value, ts } = JSON.parse(raw) as { value: T; ts: number }
-    if (Date.now() - ts > WIZARD_TTL_MS) { localStorage.removeItem(key); return fallback }
-    return value
-  } catch { return fallback }
-}
-
-function saveWithTTL(key: string, value: unknown) {
-  try { localStorage.setItem(key, JSON.stringify({ value, ts: Date.now() })) } catch { /* ignore */ }
-}
-
-function clearWizardDraft() {
-  WIZARD_KEYS.forEach(k => localStorage.removeItem(k))
-}
+import { useWizardState } from './useWizardState'
 
 const screenVariants = {
   enter: (d: number) => ({ opacity: 0, x: d * 24 }),
@@ -66,14 +35,6 @@ const panelMotionProps = {
   transition: panelTransition,
 }
 
-const DEFAULT_PERSONALITY: CharacterPersonality = {
-  warmth: 0.7, playfulness: 0.5, assertiveness: 0.5, empathy: 0.7,
-  formality: 0.3, sarcasm: 0.2, emotionVolatility: 0.5,
-  emotionResponsiveness: 0.7, emotionMemory: 0.5,
-  stressBehavior: 'deflect', baselineMood: 'neutral', presetId: null,
-}
-
-
 export interface SoulCreationWizardProps {
   onBack: () => void
   onFinish?: (character: Omit<AiCharacter, 'id'>, discordBotToken?: string) => Promise<string | null>
@@ -83,27 +44,8 @@ export interface SoulCreationWizardProps {
 }
 
 export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTtsSelect }: SoulCreationWizardProps) {
-  const [screen, setScreen] = useState<Screen>('templates')
-  const [direction, setDirection] = useState<1 | -1>(1)
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
-  const [stepSelections, setStepSelections] = useState<Record<string, StepSelection>>(
-    () => loadWithTTL<Record<string, StepSelection>>('v1_inktide_wizard_selections', {}),
-  )
-  const [personalityOpen, setPersonalityOpen] = useState(false)
-  const [personalityConfig, setPersonalityConfig] = useState<CharacterPersonality>(
-    () => loadWithTTL<CharacterPersonality>('v1_inktide_wizard_personality', DEFAULT_PERSONALITY),
-  )
-  const [personalityConfigured, setPersonalityConfigured] = useState(
-    () => localStorage.getItem('v1_inktide_wizard_personality') !== null,
-  )
-  const [channelsSelected, setChannelsSelected] = useState<string[]>(
-    () => loadWithTTL<string[]>('v1_inktide_wizard_channels', []),
-  )
-
-  const navigate = (to: Screen, dir: 1 | -1) => {
-    setDirection(dir)
-    setScreen(to)
-  }
+  const wizard = useWizardState()
+  const { state, navigate, selectTemplate, selectProvider, setPersonality, openPersonality, closePersonality, confirmChannels, clearDraft } = wizard
 
   const llmItems = useMemo<WizardProviderItem[]>(() =>
     LLM_PROVIDER_CATALOG.map(p => ({ id: p.id, name: p.name, subtitle: p.model, iconSrc: p.iconSrc, darkIcon: p.darkIcon })),
@@ -114,30 +56,9 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
     [],
   )
 
-  const handleSelectTemplate = (tmpl: SoulTemplate | null) => {
-    if (tmpl) {
-      setSelectedTemplate(tmpl.id)
-      saveWithTTL('v1_inktide_wizard_template', { id: tmpl.id, personality: tmpl.personality })
-    } else {
-      setSelectedTemplate(null)
-      localStorage.removeItem('v1_inktide_wizard_template')
-    }
-    navigate('steps', 1)
-  }
-
-  const handlePersonalityChange = (p: CharacterPersonality) => {
-    setPersonalityConfig(p)
-    saveWithTTL('v1_inktide_wizard_personality', p)
-  }
-
-  const handlePersonalityClose = () => {
-    setPersonalityOpen(false)
-    setPersonalityConfigured(true)
-  }
-
   const buildCharacter = (name: string): Omit<AiCharacter, 'id'> => {
     const base = createDefaultCharacter()
-    const template = SOUL_TEMPLATES.find(t => t.id === selectedTemplate)
+    const template = SOUL_TEMPLATES.find(t => t.id === state.selectedTemplate)
     return {
       ...base,
       name,
@@ -145,40 +66,39 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
       systemPrompt: template?.personality ?? base.systemPrompt,
       llm: {
         ...base.llm,
-        providerId: stepSelections.llm?.id ?? null,
-        baseUrl:    stepSelections.llm?.config?.baseUrl ?? null,
+        providerId: state.stepSelections.llm?.id ?? null,
+        baseUrl:    state.stepSelections.llm?.config?.baseUrl ?? null,
       },
       tts: {
         ...base.tts,
-        providerId: stepSelections.tts?.id ?? null,
-        apiKey:     stepSelections.tts?.config?.apiKey ?? null,
+        providerId: state.stepSelections.tts?.id ?? null,
+        apiKey:     state.stepSelections.tts?.config?.apiKey ?? null,
       },
-      personalityConfig,
+      personalityConfig: state.personalityConfig,
     }
   }
 
+  const handleProviderSelect = (stepId: string, id: string, name: string, config?: Record<string, string>) => {
+    selectProvider(stepId, id, name, config)
+    if (stepId === 'llm') onLlmSelect?.(id, config)
+    if (stepId === 'tts') onTtsSelect?.(id, config)
+  }
+
   const handleStepClick = (stepId: string) => {
-    if (stepId === 'llm' || stepId === 'tts') { navigate(stepId as Screen, 1); return }
+    if (stepId === 'llm' || stepId === 'tts') { navigate(stepId as 'llm' | 'tts', 1); return }
     if (stepId === 'channels') { navigate('channels', 1); return }
-    if (stepId === 'personality') { setPersonalityOpen(true); return }
+    if (stepId === 'personality') { openPersonality(); return }
     if (stepId === 'finish') { navigate('finish', 1); return }
     onStep?.(stepId)
   }
 
-  const handleProviderSelect = (stepId: string, id: string, name: string, config?: Record<string, string>) => {
-    const updated = { ...stepSelections, [stepId]: { id, name, config } }
-    setStepSelections(updated)
-    saveWithTTL('v1_inktide_wizard_selections', updated)
-    if (stepId === 'llm') onLlmSelect?.(id, config)
-    if (stepId === 'tts') onTtsSelect?.(id, config)
-    navigate('steps', -1)
-  }
-
   const handleBack = () => {
-    if (personalityOpen) { setPersonalityOpen(false); return }
-    if (screen === 'finish' || screen === 'llm' || screen === 'tts' || screen === 'channels') navigate('steps', -1)
-    else if (screen === 'steps') navigate('templates', -1)
-    else { clearWizardDraft(); onBack() }
+    if (state.personalityOpen) { closePersonality(); return }
+    if (state.screen === 'finish' || state.screen === 'llm' || state.screen === 'tts' || state.screen === 'channels')
+      navigate('steps', -1)
+    else if (state.screen === 'steps')
+      navigate('templates', -1)
+    else { clearDraft(); onBack() }
   }
 
   return (
@@ -195,12 +115,12 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
       </button>
 
       <div className="relative z-10 flex h-full w-full items-center justify-center px-6 py-10">
-        <AnimatePresence mode="wait" initial={false} custom={direction}>
+        <AnimatePresence mode="wait" initial={false} custom={state.direction}>
 
-          {screen === 'templates' && (
+          {state.screen === 'templates' && (
             <motion.div
               key="templates"
-              custom={direction}
+              custom={state.direction}
               {...panelMotionProps}
               className="flex w-full max-w-[480px] flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)]/90 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55)] backdrop-blur-md"
               style={{ maxHeight: 'min(580px, calc(100vh - 80px))' }}
@@ -240,7 +160,7 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
                 <TemplateSectionLabel>My Own</TemplateSectionLabel>
                 <button
                   type="button"
-                  onClick={() => handleSelectTemplate(null)}
+                  onClick={() => selectTemplate(null)}
                   className={cn(
                     'group flex w-full items-center gap-3 rounded-xl border border-dashed border-[var(--border-subtle)]',
                     'px-3 py-2.5 text-left outline-none',
@@ -282,7 +202,7 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
                         <TemplateListItem
                           key={tmpl.id}
                           template={tmpl}
-                          onSelect={() => handleSelectTemplate(tmpl)}
+                          onSelect={() => selectTemplate(tmpl)}
                         />
                       ))}
                     </div>
@@ -292,21 +212,21 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
             </motion.div>
           )}
 
-          {screen === 'steps' && (
+          {state.screen === 'steps' && (
             <motion.div
               key="steps"
               layout
-              custom={direction}
+              custom={state.direction}
               {...panelMotionProps}
               className={cn(
                 'rounded-2xl border bg-[var(--surface-1)]/90 backdrop-blur-md transition-shadow duration-300',
-                personalityOpen
+                state.personalityOpen
                   ? 'w-full max-w-[680px] border-[color-mix(in_srgb,var(--accent-base)_30%,var(--border-subtle))] shadow-[0_24px_80px_-16px_color-mix(in_srgb,var(--accent-base)_25%,transparent)]'
                   : 'w-full max-w-[560px] border-[var(--border-subtle)] shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55)]',
               )}
             >
               <AnimatePresence mode="wait" initial={false}>
-                {personalityOpen ? (
+                {state.personalityOpen ? (
                   <motion.div
                     key="personality-workspace"
                     initial={{ opacity: 0, y: 8 }}
@@ -316,9 +236,9 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
                     className="max-h-[calc(100vh-100px)] overflow-y-auto no-scrollbar p-6"
                   >
                     <PersonalityWorkspace
-                      personality={personalityConfig}
-                      onChange={handlePersonalityChange}
-                      onClose={handlePersonalityClose}
+                      personality={state.personalityConfig}
+                      onChange={setPersonality}
+                      onClose={closePersonality}
                     />
                   </motion.div>
                 ) : (
@@ -343,10 +263,10 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
                       <h2 className="home-heading-font text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
                         Configure your soul
                       </h2>
-                      {selectedTemplate && (
+                      {state.selectedTemplate && (
                         <p className="home-ui-font mt-1 text-[14px] text-[var(--text-secondary)]">
                           Based on <span className="font-semibold text-[var(--text-primary)]">
-                            {SOUL_TEMPLATES.find(t => t.id === selectedTemplate)?.name}
+                            {SOUL_TEMPLATES.find(t => t.id === state.selectedTemplate)?.name}
                           </span> template
                         </p>
                       )}
@@ -354,15 +274,15 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
 
                     <ul className="flex flex-col gap-1.5">
                       {STEPS.map((step, idx) => {
-                        const selection = stepSelections[step.id]
-                        const isPersonalityDone = step.id === 'personality' && personalityConfigured
-                        const isChannelsDone = step.id === 'channels' && channelsSelected.length > 0
+                        const selection = state.stepSelections[step.id]
+                        const isPersonalityDone = step.id === 'personality' && state.personalityConfigured
+                        const isChannelsDone = step.id === 'channels' && state.channelsSelected.length > 0
                         const showCheck = selection != null || isPersonalityDone || isChannelsDone
-                        const subtitle = step.id === 'channels' && channelsSelected.length > 0
+                        const subtitle = step.id === 'channels' && state.channelsSelected.length > 0
                           ? 'Discord'
-                          : step.id === 'personality' && personalityConfigured
-                            ? (personalityConfig.presetId
-                                ? personalityConfig.presetId.charAt(0).toUpperCase() + personalityConfig.presetId.slice(1)
+                          : step.id === 'personality' && state.personalityConfigured
+                            ? (state.personalityConfig.presetId
+                                ? state.personalityConfig.presetId.charAt(0).toUpperCase() + state.personalityConfig.presetId.slice(1)
                                 : 'Custom')
                             : (selection?.name ?? step.subtitle)
                         return (
@@ -417,65 +337,61 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
             </motion.div>
           )}
 
-          {screen === 'llm' && (
-            <motion.div key="llm" custom={direction} {...panelMotionProps} className="flex w-full justify-center">
+          {state.screen === 'llm' && (
+            <motion.div key="llm" custom={state.direction} {...panelMotionProps} className="flex w-full justify-center">
               <WizardProviderPanel
                 title="Select LLM"
                 subtitle="Choose the language model that will power your soul."
                 icon={<Atom size={20} />}
                 panelType="llm"
                 items={llmItems}
-                selectedId={stepSelections.llm?.id ?? null}
-                initialConfig={stepSelections.llm?.config}
+                selectedId={state.stepSelections.llm?.id ?? null}
+                initialConfig={state.stepSelections.llm?.config}
                 onSelect={(id, name, config) => handleProviderSelect('llm', id, name, config)}
               />
             </motion.div>
           )}
 
-          {screen === 'tts' && (
-            <motion.div key="tts" custom={direction} {...panelMotionProps} className="flex w-full justify-center">
+          {state.screen === 'tts' && (
+            <motion.div key="tts" custom={state.direction} {...panelMotionProps} className="flex w-full justify-center">
               <WizardProviderPanel
                 title="Select Voice"
                 subtitle="Choose the text-to-speech engine for your soul's voice."
                 icon={<Microphone size={20} />}
                 panelType="tts"
                 items={ttsItems}
-                selectedId={stepSelections.tts?.id ?? null}
-                initialConfig={stepSelections.tts?.config}
+                selectedId={state.stepSelections.tts?.id ?? null}
+                initialConfig={state.stepSelections.tts?.config}
                 onSelect={(id, name, config) => handleProviderSelect('tts', id, name, config)}
               />
             </motion.div>
           )}
 
-          {screen === 'channels' && (
-            <motion.div key="channels" custom={direction} {...panelMotionProps} className="flex w-full justify-center">
+          {state.screen === 'channels' && (
+            <motion.div key="channels" custom={state.direction} {...panelMotionProps} className="flex w-full justify-center">
               <WizardChannelsPanel
-                initialBotToken={stepSelections.channels?.config?.botToken}
+                initialBotToken={state.stepSelections.channels?.config?.botToken}
                 onConfirm={(config) => {
-                  setChannelsSelected(['discord'])
-                  saveWithTTL('v1_inktide_wizard_channels', ['discord'])
-                  if (config?.botToken) {
-                    const updated = { ...stepSelections, channels: { id: 'discord', name: 'Discord', config: { botToken: config.botToken } } }
-                    setStepSelections(updated)
-                    saveWithTTL('v1_inktide_wizard_selections', updated)
-                  }
-                  navigate('steps', -1)
+                  const selections = config?.botToken
+                    ? { ...state.stepSelections, channels: { id: 'discord', name: 'Discord', config: { botToken: config.botToken } } }
+                    : state.stepSelections // same reference — no spurious persist
+                  confirmChannels(['discord'], selections)
                 }}
               />
             </motion.div>
           )}
 
-          {screen === 'finish' && (
-            <motion.div key="finish" custom={direction} {...panelMotionProps} className="flex w-full justify-center">
+          {state.screen === 'finish' && (
+            <motion.div key="finish" custom={state.direction} {...panelMotionProps} className="flex w-full justify-center">
               <WizardFinishPanel
-                llmName={stepSelections.llm?.name ?? null}
-                ttsName={stepSelections.tts?.name ?? null}
-                hasDiscord={channelsSelected.length > 0}
+                llmName={state.stepSelections.llm?.name ?? null}
+                ttsName={state.stepSelections.tts?.name ?? null}
+                hasDiscord={state.channelsSelected.length > 0}
                 onConfirm={async (name) => {
                   const char = buildCharacter(name)
-                  const botToken = stepSelections.channels?.config?.botToken as string | undefined
+                  const botToken = state.stepSelections.channels?.config?.botToken as string | undefined
                   await onFinish?.(char, botToken)
-                  clearWizardDraft()
+                  clearDraft()
                 }}
               />
             </motion.div>
