@@ -140,6 +140,7 @@
   --nav-item-hover-color: var(--ds-gray-1000);
   --nav-item-active-bg: color-mix(in srgb, var(--accent-base) 18%, transparent);
   --nav-item-active-color: oklch(1 0 0);
+  --nav-item-active-indicator: #6D62C4;
   --nav-login-border: var(--ds-gray-alpha-300);
   --nav-login-color: var(--ds-gray-1000);
   --nav-login-hover-bg: var(--ds-gray-alpha-100);
@@ -236,10 +237,49 @@
   --stat-accent-warn: #F4C35A;
   --stat-accent-info: #7B8BFF;
 
+  /* Platform brand colors — static, theme-invariant */
+  --platform-discord:  #5865F2;
+  --platform-twitch:   #9146FF;
+  --platform-telegram: #0088CC;
+  --platform-kick:     #3FB800;
+  --platform-vk:       #0077FF;
+
+  --avatar-fallback-gradient: linear-gradient(135deg, #e05252, #8B5CF6);
+
+  /* Semantic UI colors */
+  --color-online:       #22c55e; /* active / online status dot */
+  --color-star:         var(--accent-yellow); /* star ratings, gold (#EAB308) */
+  --color-brand-accent: #7B61FF; /* brand purple (pricing, badges) */
+  --color-brand-orange: #FF6A2B; /* brand orange (pricing icons, CTA) */
+  /* Brand gradients */
+  --brand-gradient-violet: linear-gradient(135deg, #7B61FF, #5046CC);
+  --brand-gradient-orange: linear-gradient(135deg, #FF6A2B, #E84E00);
+  --brand-gradient-hero:   linear-gradient(to bottom right, #f43f5e, #8b5cf6);
+  --brand-gradient-violet-glass: linear-gradient(140deg, rgba(123,97,255,0.56), rgba(74,61,200,0.38), rgba(123,97,255,0.44));
+  --accent-voice: #f0abfc;        /* fuchsia accent for voice/TTS visualizations */
+  --color-error-strong: #ED3E3E; /* vivid red for error badges */
+  --color-error-mid:    #f87171; /* medium red for inline errors, field states */
+  --color-blue-primary: #3B82F6; /* primary action blue */
+  --color-card-dark:    #13151A; /* dark card bg (scene/character cards) */
+
   /* Domain: graph & mood */
   --graph-node-bg: var(--ds-background-100);
   --graph-node-active-bg: color-mix(in srgb, var(--accent-base) 12%, transparent);
   --graph-node-active-border: color-mix(in srgb, var(--accent-base) 48%, transparent);
+  /* Graph canvas, structural, and status tokens */
+  --graph-canvas-bg: #0F1117;
+  --graph-node-surface: #252524;
+  --graph-node-border: #3E3E3B;
+  --graph-node-border-focus: #6b6b67;
+  --graph-node-text: #c8c8c4;
+  --graph-node-text-muted: #7a7a76;
+  --graph-toolbar-icon: #6B7280;
+  --graph-toolbar-text: #E6EAF2;
+  --graph-edge-stroke: rgba(255, 255, 255, 0.14);
+  --graph-status-saved:  #4B5563;
+  --graph-status-saving: var(--node-llm);
+  --graph-status-dirty:  #F59E0B;
+  --graph-status-error:  #EF4444;
   --mood-gradient-from: color-mix(in srgb, var(--accent-base) 36%, var(--bg-0));
   --mood-gradient-via: color-mix(in srgb, var(--accent-base) 12%, var(--bg-0));
 
@@ -261,6 +301,15 @@
   --inspector-bg:       var(--ds-gray-100);
   --inspector-section-separator: var(--ds-gray-alpha-100);
   --inspector-row-label: var(--ds-gray-600);
+
+  /* ── Checkout page ─────────────────────── */
+  --checkout-page-bg:    #0A0A0A;
+  --checkout-surface:    #1a1a1a;
+  --checkout-border:     #2a2a2a;
+  --checkout-stripe-bg:  #141414;
+  --checkout-stripe-text:    #f9fafb;
+  --checkout-stripe-danger:  #ef4444;
+  --checkout-stripe-primary: var(--accent-primary);
 
   /* ── Pricing section ───────────────────── */
   --pricing-card-bg:             #0D0D11;
@@ -420,6 +469,7 @@
   --nav-item-hover-color: var(--ds-gray-1000);
   --nav-item-active-bg: var(--ds-gray-alpha-200);
   --nav-item-active-color: var(--ds-gray-1000);
+  --nav-item-active-indicator: #5a52b8;
   --nav-login-border: var(--ds-gray-alpha-300);
   --nav-login-color: var(--ds-gray-1000);
   --nav-login-hover-bg: var(--ds-gray-alpha-100);
@@ -589,6 +639,14 @@
   --animate-marquee: marquee 25s linear infinite;
   --animate-settings-page-in: settingsPageIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-menu-in: menuIn 0.18s cubic-bezier(0.2, 0.9, 0.2, 1);
+
+  --text-2xs: 0.625rem;
+  --text-caption: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-body: 0.875rem;
+  --text-body-md: 0.9375rem;
+  --text-body-lg: 1rem;
 }
 
 @utility no-scrollbar {
@@ -1089,4 +1147,226 @@ code {
   border: 2px solid #0E131C;
   box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
   cursor: pointer;
+}
+
+/* ── Account Settings Modal ─────────────────────────────────────────────────── */
+@keyframes accountModalBackdropIn {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+@keyframes accountModalIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98) }
+  to   { opacity: 1; transform: translateY(0)   scale(1)    }
+}
+
+/* ── Account Settings Modal ──────────────────────────────────────────────────── */
+/* Design tokens — override in theme if needed */
+:root {
+  --sm-sidebar-width:        240px;
+  --sm-sidebar-bg:           var(--c-bacSec);
+  --sm-content-bg:           var(--bg-primary);
+  --sm-tab-height:           28px;
+  --sm-tab-radius:           6px;
+  --sm-tab-active-bg:        var(--sidebar-active);
+  --sm-tab-hover-bg:         var(--sidebar-hover);
+  --sm-tab-active-text:      var(--text-primary);
+  --sm-tab-inactive-text:    var(--text-secondary);
+  --sm-group-label-size:     12px;
+  --sm-group-label-color:    var(--text-tertiary);
+  --sm-section-border:       var(--settings-card-border);
+  --sm-setting-label-size:   14px;
+  --sm-setting-desc-size:    13px;
+  --sm-setting-desc-color:   var(--text-secondary);
+  --sm-content-max-width:    800px;
+  --sm-content-padding:      clamp(18px, 5vw, 60px);
+}
+
+/* Sidebar */
+.sm-sidebar {
+  width: var(--sm-sidebar-width);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--sm-sidebar-bg);
+  border-right: 1px solid var(--border-divider);
+  padding: 8px;
+}
+
+/* Group label — "Account", "Workspace" */
+.sm-group-label {
+  padding-inline: 8px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--sm-group-label-size);
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--sm-group-label-color);
+}
+
+/* Tab item */
+.sm-tab {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: var(--sm-tab-height);
+  gap: 8px;
+  padding-inline: 6px;
+  padding-block: 4px;
+  border-radius: var(--sm-tab-radius);
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 120ms, color 120ms;
+  outline: none;
+  color: var(--sm-tab-inactive-text);
+}
+.sm-tab:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.sm-tab[data-state=active] {
+  background: var(--sm-tab-active-bg);
+  color: var(--sm-tab-active-text);
+}
+.sm-tab[data-state=inactive]:hover {
+  background: var(--sm-tab-hover-bg);
+  color: var(--sm-tab-active-text);
+}
+
+/* Tab icon slot */
+.sm-tab-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sm-tab-icon svg { width: 18px; height: 18px; }
+
+/* Right panel */
+.sm-panel {
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--sm-content-bg);
+}
+
+/* Scrollable content area */
+.sm-scroller {
+  flex: 1 1 0%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-inline: var(--sm-content-padding);
+  padding-block: 36px;
+  overflow-y: auto;
+}
+
+/* Content column (max-width container) */
+.sm-content {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  width: 100%;
+  max-width: var(--sm-content-max-width);
+}
+
+/* Page title block */
+.sm-page-title {
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-heading);
+}
+.sm-page-subtitle {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+/* Section header within panel */
+.sm-section-header {
+  border-bottom: 1px solid var(--sm-section-border);
+  margin-bottom: 16px;
+  margin-top: 0;
+  padding-bottom: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-heading);
+}
+
+/* Setting row */
+/* spacing comes from parent .sm-settings-group gap, not padding on rows */
+.sm-setting-row {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  position: relative;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+/* flex-col gap-6 container for settings within a section — matches Notion */
+.sm-settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+/* 48px separator between sections — matches Notion */
+.sm-section-sep {
+  display: flex;
+  height: 48px;
+  align-items: center;
+}
+.sm-section-sep::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--sm-section-border);
+}
+.sm-setting-label-col {
+  flex: 3 1 0%;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sm-setting-label {
+  font-size: var(--sm-setting-label-size);
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.sm-setting-desc {
+  font-size: var(--sm-setting-desc-size);
+  line-height: 18px;
+  font-weight: 400;
+  color: var(--sm-setting-desc-color);
+  text-wrap: pretty;
+}
+.sm-setting-action-col {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
 }
