@@ -1,6 +1,6 @@
 'use client'
 
-import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group'
+import { ToggleGroup, ToggleGroupItem } from '@/shared/ui/toggle-group'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
@@ -12,7 +12,7 @@ import {
   loadAppearancePrefs,
   saveAppearancePrefs,
   type AppearancePrefs,
-} from '@/lib/user-appearance'
+} from '@/shared/lib/user-appearance'
 
 const DEFAULT_PREFS = DEFAULT_APPEARANCE_PREFS
 
@@ -80,7 +80,7 @@ export default function AppearancePanel() {
       <div className="mt-[36px]" />
       <SectionHeader>Theme</SectionHeader>
 
-      <ToggleGroupPrimitive.Root
+      <ToggleGroup
         type="single"
         value={prefs.theme}
         onValueChange={(next: string | undefined) => {
@@ -92,7 +92,7 @@ export default function AppearancePanel() {
         aria-label="Theme"
       >
         {THEMES.map(t => (
-          <ToggleGroupPrimitive.Item
+          <ToggleGroupItem
             key={t.id}
             value={t.id}
             aria-label={t.label}
@@ -115,7 +115,7 @@ export default function AppearancePanel() {
             </div>
             <span
               className={cn(
-                'text-[14px] font-medium',
+                'text-body font-medium',
                 'group-data-[state=on]:text-[var(--text-heading)]',
                 'group-data-[state=off]:text-[var(--text-secondary)]',
               )}
@@ -125,9 +125,9 @@ export default function AppearancePanel() {
             <span className="absolute right-2 top-2 hidden h-4 w-4 items-center justify-center rounded-full bg-[var(--accent-primary)] text-white group-data-[state=on]:flex">
               <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </span>
-          </ToggleGroupPrimitive.Item>
+          </ToggleGroupItem>
         ))}
-      </ToggleGroupPrimitive.Root>
+      </ToggleGroup>
 
       {/* ── Accent Color ──────────────────────────────────────────────────── */}
       <div className="mt-[48px]" />
@@ -166,7 +166,7 @@ export default function AppearancePanel() {
       <div className="mt-[48px]" />
       <SectionHeader>Font size</SectionHeader>
 
-      <ToggleGroupPrimitive.Root
+      <ToggleGroup
         type="single"
         value={prefs.fontSize}
         onValueChange={(next: string | undefined) => {
@@ -178,7 +178,7 @@ export default function AppearancePanel() {
         aria-label="Font size"
       >
         {FONT_SIZES.map(f => (
-          <ToggleGroupPrimitive.Item
+          <ToggleGroupItem
             key={f.id}
             value={f.id}
             aria-label={f.label}
@@ -202,16 +202,16 @@ export default function AppearancePanel() {
             </span>
             <span
               className={cn(
-                'text-[14px]',
+                'text-body',
                 'group-data-[state=on]:text-[var(--text-heading)]',
                 'group-data-[state=off]:text-[var(--text-tertiary)]',
               )}
             >
               {f.label}
             </span>
-          </ToggleGroupPrimitive.Item>
+          </ToggleGroupItem>
         ))}
-      </ToggleGroupPrimitive.Root>
+      </ToggleGroup>
 
       {/* ── Display ───────────────────────────────────────────────────────── */}
       <div className="mt-[48px]" />
@@ -255,8 +255,8 @@ function SecurityRow({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 py-[11px]">
       <div className="flex min-w-[200px] flex-1 flex-col gap-1">
-        <div className="text-[14px] font-medium leading-[20px] text-[var(--text-primary)]">{label}</div>
-        <div className="text-[14px] font-normal leading-[18px] text-pretty text-[var(--text-secondary)]">
+        <div className="text-body font-medium leading-[20px] text-[var(--text-primary)]">{label}</div>
+        <div className="text-body font-normal leading-[18px] text-pretty text-[var(--text-secondary)]">
           {typeof value === 'string' ? <span className="break-words">{value}</span> : value}
         </div>
       </div>

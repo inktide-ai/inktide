@@ -9,7 +9,7 @@ import { ProjectGridCardConnected } from '@/features/projects'
 import { type ProjectStatus } from '@/features/projects'
 import { ProjectCreationWizard } from '@/features/workspace-home'
 import { listProjects, importProjectFile, type ProjectListItem } from '@/features/projects'
-import { buildSpark } from '@/lib/spark'
+import { buildSpark } from '@/shared/lib/spark'
 import { exportProject } from '@/features/soul'
 import { useCharactersContext } from '@/entities/character'
 

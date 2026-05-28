@@ -15,7 +15,7 @@ import { default as ImportProjectDialog } from './ImportProjectDialog'
 import { listProjects, exportProject, reorderProject, type ProjectListItem } from './api'
 import type { ProjectStatus } from './project-grid-card'
 import { queryKeys } from '@/shared/lib/query/keys'
-import { buildSpark } from '@/lib/spark'
+import { buildSpark } from '@/shared/lib/spark'
 import { useCharactersContext } from '@/entities/character'
 
 type FilterTab = 'all' | ProjectStatus

@@ -24,7 +24,7 @@ function buildUpdate(project: Project | null, overrides: Partial<UpdateProjectRe
 import type { AiCardResponse, AiCardModelResponse, AiCardSceneResponse, ChannelResponse } from '@/shared/types/soul-api'
 import { getCard, listCardModels, listCardScenes } from '@/entities/soul/api'
 import { queryKeys } from '@/shared/lib/query/keys'
-import { buildProjectPreviewUrl } from '@/lib/project-preview'
+import { buildProjectPreviewUrl } from '@/features/projects/lib/project-preview'
 
 export interface ProjectRuntime {
   project: Project | null

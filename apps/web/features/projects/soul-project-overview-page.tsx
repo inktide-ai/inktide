@@ -7,8 +7,8 @@ import {
   Box, Check, ChevronRight, Copy, Cpu, FlaskConical,
   ImageIcon, Layers, Monitor, Pause, Pencil, Play, Radio,
 } from 'lucide-react'
-import { inferModelType } from '@/lib/utils/model-type'
-import { buildObsSceneUrl } from '@/lib/utils/obs-url'
+import { inferModelType } from '@/shared/lib/utils/model-type'
+import { buildObsSceneUrl } from '@/shared/lib/utils/obs-url'
 import { useProjectRuntimeContext } from './ProjectRuntimeContext'
 import {
   SectionCard, NoSoulPlaceholder, ProjectMetaRow, ProjectStatusBadge,

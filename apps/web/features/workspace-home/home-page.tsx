@@ -14,8 +14,8 @@ import { fetchDashboardStats } from '@/api/stats'
 import { queryKeys } from '@/shared/lib/query/keys'
 import { SectionHeader, SoulCreationWizard, ProjectCardConnected, ProjectCreationWizard, StatCard, TemplateCard, WorkspaceTopBar } from '@/features/workspace-home'
 import { listProjects } from '@/features/projects'
-import { buildSpark } from '@/lib/spark'
-import { formatApiCalls, editedLabel } from '@/lib/format-utils'
+import { buildSpark } from '@/shared/lib/spark'
+import { formatApiCalls, editedLabel } from '@/shared/lib/format-utils'
 import { HOME_TEMPLATES } from '@/shared/data/home-templates'
 
 const TEMPLATE_ICONS: Record<string, React.ReactNode> = {

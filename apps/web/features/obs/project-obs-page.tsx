@@ -8,7 +8,7 @@ import { getCard, type ChannelResponse } from '@/features/soul'
 import { apiResponseToCharacter } from '@/shared/lib/character/mappers'
 import { useCardModel, useCardScene } from '@/entities/soul'
 import type { AiCharacter } from '@/shared/lib/character'
-import { buildObsSceneUrl } from '@/lib/utils/obs-url'
+import { buildObsSceneUrl } from '@/shared/lib/utils/obs-url'
 import { cn } from '@/lib/utils'
 
 // ── Accordion row ──────────────────────────────────────────────────────────────

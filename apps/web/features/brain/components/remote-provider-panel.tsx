@@ -6,7 +6,7 @@ import type { AiCharacter } from '@/shared/lib/character'
 import type { LlmModelResponse } from '@/shared/types/soul-api'
 import { getCatalogLlmModels, getCredentials, upsertCredential } from '@/entities/soul/api'
 import { PROVIDER_DEFS } from '@/shared/data/providers'
-import { pingRemote } from '@/lib/provider-validation'
+import { pingRemote } from '@/features/brain/lib/provider-validation'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import {
   infoContent, formGroup, label, labelHint, inputCls,

@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Check } from 'lucide-react'
-import { fadeUp } from '@/lib/motion'
+import { fadeUp } from '@/shared/lib/motion'
 
 export interface PlanCardConfig {
   id: string
@@ -84,7 +84,7 @@ export default function PlanCard(cfg: PlanCardConfig) {
         <button
           type="button"
           onClick={cta.onClick}
-          className="w-full rounded-xl py-[11px] text-[14px] font-semibold transition-all duration-[250ms] hover:bg-[var(--pricing-btn-hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
+          className="w-full rounded-xl py-[11px] text-body font-semibold transition-all duration-[250ms] hover:bg-[var(--pricing-btn-hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
           style={{ border: '1px solid var(--pricing-btn-border)', color: 'var(--pricing-btn-color)', background: 'transparent' }}
         >
           {cta.label}
@@ -93,7 +93,7 @@ export default function PlanCard(cfg: PlanCardConfig) {
         <button
           type="button"
           onClick={cta.onClick}
-          className="w-full rounded-xl py-[11px] text-[14px] font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
+          className="w-full rounded-xl py-[11px] text-body font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
           style={cta.solidStyle}
         >
           {cta.label}
@@ -106,13 +106,13 @@ export default function PlanCard(cfg: PlanCardConfig) {
     return (
       <motion.div
         className="relative flex flex-col rounded-2xl p-px overflow-visible"
-        style={{ background: 'linear-gradient(140deg, #7B61FF90, #4A3DC860, #7B61FF70)' }}
+        style={{ background: 'var(--brand-gradient-violet-glass)' }}
         initial="hidden" whileInView="visible" viewport={{ once: true }} custom={animationIndex} variants={fadeUp}
         whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
       >
         {popularLabel && (
           <div className="absolute -top-[14px] left-1/2 -translate-x-1/2 z-20">
-            <span className="rounded-full bg-[#7B61FF] px-3.5 py-[5px] text-[11.5px] font-semibold text-white shadow-[0_4px_16px_#7B61FF40] whitespace-nowrap">
+            <span className="rounded-full bg-[var(--color-brand-accent)] px-3.5 py-[5px] text-[11.5px] font-semibold text-white shadow-[0_4px_16px_#7B61FF40] whitespace-nowrap">
               {popularLabel}
             </span>
           </div>

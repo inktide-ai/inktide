@@ -4,27 +4,26 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import type { AiCardSceneResponse } from '@/shared/types/soul-api'
 import type { AiCharacter } from '@/shared/lib/character'
-import { inferModelType } from '@/lib/utils/model-type'
-// fsd:cross-feature-ok — renderer composition in soul editor
-import AvatarRenderer from '@/features/avatar/avatar-renderer'
-import { useCardModel } from '@/features/avatar/hooks/use-card-model'
+import { inferModelType } from '@/shared/lib/utils/model-type'
+import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok — editor embeds avatar preview
+import { useCardModel } from '@/entities/soul/hooks'
 import { useSceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import { getSceneDisplayTitle } from './scene-tag-utils'
 import SceneRendererPanel from './scene-renderer-panel'
 import { useSceneSettings, TAG_AUTO_VALUE, MAX_DISPLAY, MAX_DESC, ALLOWED_TYPES } from '../hooks/useSceneSettings'
 
 // Shared style strings
-const backBtn = 'inline-flex items-center gap-[0.4rem] py-[0.4rem] px-[0.625rem] mb-6 -ml-[0.625rem] bg-transparent border border-transparent rounded-lg text-(--text-muted) font-[inherit] text-[0.8125rem] font-medium cursor-pointer transition-[color,background,border-color] duration-150 self-start hover:text-(--text-primary) hover:bg-white/[0.05] hover:border-white/[0.07]'
+const backBtn = 'inline-flex items-center gap-[0.4rem] py-[0.4rem] px-[0.625rem] mb-6 -ml-[0.625rem] bg-transparent border border-transparent rounded-lg text-(--text-muted) font-[inherit] text-sm font-medium cursor-pointer transition-[color,background,border-color] duration-150 self-start hover:text-(--text-primary) hover:bg-white/[0.05] hover:border-white/[0.07]'
 const btnGhost = 'text-[11.5px] font-medium text-(--text-muted) bg-transparent border border-white/[0.07] rounded-[6px] py-[5px] px-[11px] cursor-pointer font-[inherit] transition-[color,background,border-color] duration-150 hover:text-(--text-primary) hover:border-white/12 hover:bg-white/[0.05] disabled:opacity-50 disabled:cursor-not-allowed'
-const btnDanger = 'text-[11.5px] font-medium text-[rgba(248,113,113,0.65)] bg-transparent border border-[rgba(248,113,113,0.14)] rounded-[6px] py-[5px] px-[11px] cursor-pointer font-[inherit] transition-[color,background,border-color] duration-150 hover:text-[#f87171] hover:border-[rgba(248,113,113,0.3)] hover:bg-[rgba(248,113,113,0.07)] disabled:opacity-50 disabled:cursor-not-allowed'
+const btnDanger = 'text-[11.5px] font-medium text-[var(--color-error-mid)]/65 bg-transparent border border-[var(--color-error-mid)]/14 rounded-[6px] py-[5px] px-[11px] cursor-pointer font-[inherit] transition-[color,background,border-color] duration-150 hover:text-[var(--color-error-mid)] hover:border-[var(--color-error-mid)]/30 hover:bg-[var(--color-error-mid)]/7 disabled:opacity-50 disabled:cursor-not-allowed'
 const sectionHdr = 'flex items-center gap-[10px] mb-3'
-const sectionLbl = 'text-[10px] font-semibold tracking-[0.09em] uppercase text-(--text-muted) whitespace-nowrap'
+const sectionLbl = 'text-2xs font-semibold tracking-[0.09em] uppercase text-(--text-muted) whitespace-nowrap'
 const sectionLine = 'flex-1 h-px bg-white/[0.07]'
-const modalFieldLabel = 'text-[14px] font-medium tracking-[0.07em] uppercase text-white/35 mb-2 flex items-center gap-[6px]'
-const modalTextInput = 'w-full bg-white/[0.05] border border-[0.5px] border-white/12 rounded-[10px] p-[11px_14px] text-[14px] text-(--text-primary) outline-none font-[inherit] transition-[border-color] duration-150 placeholder:text-white/25 focus:border-white/30'
-const modalCharCount = 'text-[14px] text-white/25 text-right mt-1'
-const modalDescInput = 'w-full bg-white/[0.05] border border-[0.5px] border-white/12 rounded-[10px] p-[11px_14px] text-[14px] text-(--text-primary) outline-none font-[inherit] resize-none h-[72px] transition-[border-color] duration-150 leading-relaxed placeholder:text-white/25 focus:border-white/30'
-const settingsSelect = 'w-full max-w-[320px] py-[10px] px-3 rounded-[10px] border border-white/[0.12] bg-black/35 text-white/[0.92] text-[0.8125rem] font-[inherit] cursor-pointer outline-none focus:border-white/28'
+const modalFieldLabel = 'text-body font-medium tracking-[0.07em] uppercase text-white/35 mb-2 flex items-center gap-[6px]'
+const modalTextInput = 'w-full bg-white/[0.05] border border-[0.5px] border-white/12 rounded-[10px] p-[11px_14px] text-body text-(--text-primary) outline-none font-[inherit] transition-[border-color] duration-150 placeholder:text-white/25 focus:border-white/30'
+const modalCharCount = 'text-body text-white/25 text-right mt-1'
+const modalDescInput = 'w-full bg-white/[0.05] border border-[0.5px] border-white/12 rounded-[10px] p-[11px_14px] text-body text-(--text-primary) outline-none font-[inherit] resize-none h-[72px] transition-[border-color] duration-150 leading-relaxed placeholder:text-white/25 focus:border-white/30'
+const settingsSelect = 'w-full max-w-[320px] py-[10px] px-3 rounded-[10px] border border-white/[0.12] bg-black/35 text-white/[0.92] text-sm font-[inherit] cursor-pointer outline-none focus:border-white/28'
 const uploadPlaceholder = 'flex items-center justify-center flex-col gap-2 p-[22px] bg-white/[0.015] border border-dashed border-white/[0.07] rounded-[10px] cursor-pointer transition-[border-color,background] duration-150 hover:border-white/12 hover:bg-white/[0.025]'
 const toolbarBtnBase = 'absolute w-9 h-9 rounded-[10px] bg-[rgba(18,18,22,0.72)] border border-white/10 backdrop-blur-[10px] flex items-center justify-center cursor-pointer text-white/60 transition-[background,transform,color,border-color] duration-150 z-10 p-0'
 
@@ -101,7 +100,7 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
           </div>
         )}
         {cardId && modelError && (
-          <div className="absolute inset-0 z-[4] flex items-center justify-center p-4 text-center text-[0.78rem] text-[#e05c5c] bg-black/35 pointer-events-none">{t('settings.modelPreviewError')}</div>
+          <div className="absolute inset-0 z-[4] flex items-center justify-center p-4 text-center text-[0.78rem] text-[var(--color-error-mid)] bg-black/35 pointer-events-none">{t('settings.modelPreviewError')}</div>
         )}
 
         {/* Renderer toggle btn */}
@@ -129,7 +128,7 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
             <div className="w-full h-full block bg-cover bg-center" style={scene.public_url ? { backgroundImage: `url(${scene.public_url})` } : { background: 'linear-gradient(135deg,#1a0a2e 0%,#0d1117 50%,#091420 100%)' }} />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[14px] font-semibold text-(--text-secondary) tracking-[-0.01em] mb-[3px]">{t('settings.bgTitle')}</div>
+            <div className="text-body font-semibold text-(--text-secondary) tracking-[-0.01em] mb-[3px]">{t('settings.bgTitle')}</div>
             <div className="text-[10.5px] text-(--text-muted) whitespace-nowrap overflow-hidden text-ellipsis">{sizeLabel}</div>
           </div>
           <div className="flex gap-[6px] shrink-0">
@@ -142,12 +141,12 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
           <div className="text-(--text-muted) flex">
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><rect x="3" y="3" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" /><path d="M11 7v8M7 11h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
           </div>
-          <div className="text-[14px] font-medium text-(--text-muted)">{uploading ? t('settings.uploading') : t('settings.noImage')}</div>
+          <div className="text-body font-medium text-(--text-muted)">{uploading ? t('settings.uploading') : t('settings.noImage')}</div>
           <div className="text-[10.5px] text-white/20">{t('settings.noImageHint')}</div>
         </div>
       )}
 
-      {error && <div className="mt-3 text-[0.75rem] text-[#e05c5c]">{error}</div>}
+      {error && <div className="mt-3 text-xs text-[var(--color-error-mid)]">{error}</div>}
 
       {scene && cardId && (
         <>
@@ -174,9 +173,9 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
               <textarea className={modalDescInput} value={metaDescription} onChange={e => setMetaDescription(e.target.value.slice(0, MAX_DESC))} maxLength={MAX_DESC} placeholder={t('settings.metaDescPlaceholder')} rows={4} />
               <div className={modalCharCount}>{metaDescription.length}/{MAX_DESC}</div>
             </div>
-            {metaError && <div className="mt-3 text-[0.75rem] text-[#e05c5c]">{metaError}</div>}
+            {metaError && <div className="mt-3 text-xs text-[var(--color-error-mid)]">{metaError}</div>}
             <div className="flex flex-wrap gap-2 mt-1">
-              <button type="button" className="flex-[2] p-[11px] rounded-[10px] bg-[#7c3aed] border-none text-white text-[14px] font-medium cursor-pointer font-[inherit] transition-[background] duration-[120ms] hover:enabled:bg-[#6d28d9] disabled:bg-[rgba(124,58,237,0.3)] disabled:text-white/30 disabled:cursor-not-allowed" onClick={() => void handleSaveMeta()} disabled={metaSaving}>
+              <button type="button" className="flex-[2] p-[11px] rounded-[10px] bg-[#7c3aed] border-none text-white text-body font-medium cursor-pointer font-[inherit] transition-[background] duration-[120ms] hover:enabled:bg-[#6d28d9] disabled:bg-[rgba(124,58,237,0.3)] disabled:text-white/30 disabled:cursor-not-allowed" onClick={() => void handleSaveMeta()} disabled={metaSaving}>
                 {metaSaving ? t('settings.savingMeta') : t('settings.saveMeta')}
               </button>
             </div>
@@ -193,7 +192,7 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
         <div className="w-7 h-7 rounded-[6px] bg-white/[0.03] border border-white/[0.05] flex items-center justify-center shrink-0">
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5" stroke="rgba(255,255,255,0.2)" strokeWidth="1.2" /><path d="M6.5 3.5v3l1.8 1.4" stroke="rgba(255,255,255,0.2)" strokeWidth="1.2" strokeLinecap="round" /></svg>
         </div>
-        <span className="text-[14px] font-medium text-(--text-muted) flex-1">{t('settings.comingSoon')}</span>
+        <span className="text-body font-medium text-(--text-muted) flex-1">{t('settings.comingSoon')}</span>
         <span className="text-[9.5px] font-semibold tracking-[0.05em] uppercase text-[rgba(251,191,36,0.65)] bg-[rgba(251,191,36,0.06)] border border-[rgba(251,191,36,0.16)] rounded-[4px] py-[2px] px-[7px] shrink-0">{t('settings.comingSoonBadge')}</span>
       </div>
 

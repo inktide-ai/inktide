@@ -2,8 +2,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { listCardModels, listCardScenes } from '@/entities/soul/api'
 import { queryKeys } from '@/shared/lib/query/keys'
-import { inferModelType } from '@/lib/utils/model-type'
-import { buildObsSceneUrl } from '@/lib/utils/obs-url'
+import { inferModelType } from '@/shared/lib/utils/model-type'
+import { buildObsSceneUrl } from '@/shared/lib/utils/obs-url'
 import type { ProjectListItem } from '@/entities/project/api'
 
 const STALE = 5 * 60_000

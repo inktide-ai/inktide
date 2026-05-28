@@ -15,7 +15,7 @@ import type { Appearance } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import { apiFetch, jsonOrThrow } from '@/api/client'
 import { useBilling } from '@/entities/billing'
-import { PLANS, type PlanKey } from '@/lib/plans'
+import { PLANS, type PlanKey } from '@/shared/data/plans'
 
 const rawKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''
 const stripePromise = rawKey && !rawKey.includes('REPLACE') ? loadStripe(rawKey) : null

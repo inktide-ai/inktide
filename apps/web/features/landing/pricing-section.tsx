@@ -3,11 +3,12 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
+import { HOME_ROUTE, PRICING_ROUTE, checkoutPath } from '@/lib/routes'
 import { motion } from 'framer-motion'
 import { Shield, RefreshCw, Sparkles, Crown, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { fadeUp } from '@/lib/motion'
-import { useAuth } from '@/context/AuthContext'
+import { fadeUp } from '@/shared/lib/motion'
+import { useAuth } from '@/shared/services/auth'
 import { useBilling } from '@/entities/billing/context/BillingContext'
 import PlanCard, { type PlanCardConfig } from './plan-card'
 
@@ -18,10 +19,10 @@ interface PricingSectionProps {
 }
 
 const trustItems = [
-  { icon: Shield,    titleKey: 'pricing.trust.secureTitle',    descKey: 'pricing.trust.secureDesc',    bgVar: 'var(--pricing-icon-purple-bg)', borderVar: 'var(--pricing-icon-purple-border)', iconColor: 'text-[#7B61FF]' },
-  { icon: Zap,       titleKey: 'pricing.trust.noCardTitle',    descKey: 'pricing.trust.noCardDesc',    bgVar: 'var(--pricing-icon-orange-bg)', borderVar: 'var(--pricing-icon-orange-border)', iconColor: 'text-[#FF8C2B]' },
-  { icon: RefreshCw, titleKey: 'pricing.trust.cancelTitle',    descKey: 'pricing.trust.cancelDesc',    bgVar: 'var(--pricing-icon-purple-bg)', borderVar: 'var(--pricing-icon-purple-border)', iconColor: 'text-[#7B61FF]' },
-  { icon: Sparkles,  titleKey: 'pricing.trust.improvingTitle', descKey: 'pricing.trust.improvingDesc', bgVar: 'var(--pricing-icon-orange-bg)', borderVar: 'var(--pricing-icon-orange-border)', iconColor: 'text-[#FF6B2B]' },
+  { icon: Shield,    titleKey: 'pricing.trust.secureTitle',    descKey: 'pricing.trust.secureDesc',    bgVar: 'var(--pricing-icon-purple-bg)', borderVar: 'var(--pricing-icon-purple-border)', iconColor: 'text-[var(--color-brand-accent)]' },
+  { icon: Zap,       titleKey: 'pricing.trust.noCardTitle',    descKey: 'pricing.trust.noCardDesc',    bgVar: 'var(--pricing-icon-orange-bg)', borderVar: 'var(--pricing-icon-orange-border)', iconColor: 'text-[var(--color-brand-orange)]' },
+  { icon: RefreshCw, titleKey: 'pricing.trust.cancelTitle',    descKey: 'pricing.trust.cancelDesc',    bgVar: 'var(--pricing-icon-purple-bg)', borderVar: 'var(--pricing-icon-purple-border)', iconColor: 'text-[var(--color-brand-accent)]' },
+  { icon: Sparkles,  titleKey: 'pricing.trust.improvingTitle', descKey: 'pricing.trust.improvingDesc', bgVar: 'var(--pricing-icon-orange-bg)', borderVar: 'var(--pricing-icon-orange-border)', iconColor: 'text-[var(--color-brand-orange)]' },
 ]
 
 export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: PricingSectionProps) {
@@ -34,19 +35,19 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
   const period = yearly ? '&period=yearly' : ''
 
   const handleUpgradeFree = () => {
-    if (isLoggedIn) router.push('/pricing')
+    if (isLoggedIn) router.push(PRICING_ROUTE)
     else registerWithKeycloak()
   }
 
   const handleUpgradeStarter = () => {
     if (!isLoggedIn) { registerWithKeycloak(); return }
-    router.push(`/checkout?plan=starter${period}`)
+    router.push(checkoutPath('starter', period))
   }
 
   const handleUpgradePro = () => {
     if (!isLoggedIn) { registerWithKeycloak(); return }
-    if (plan === 'pro') { router.push('/home'); return }
-    router.push(`/checkout?plan=pro${period}`)
+    if (plan === 'pro') { router.push(HOME_ROUTE); return }
+    router.push(checkoutPath('pro', period))
   }
 
   const configs = useMemo<Record<PlanKey, PlanCardConfig>>(() => ({
@@ -83,7 +84,7 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
         label: t('pricing.starter.cta'),
         onClick: handleUpgradeStarter,
         variant: 'solid',
-        solidStyle: { background: 'linear-gradient(135deg, #FF6A2B, #E84E00)', boxShadow: '0 4px 20px #FF6A2B30' },
+        solidStyle: { background: 'var(--brand-gradient-orange)', boxShadow: '0 4px 20px #FF6A2B30' },
       },
     },
     pro: {
@@ -102,7 +103,7 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
         label: t('pricing.pro.cta'),
         onClick: handleUpgradePro,
         variant: 'solid',
-        solidStyle: { background: 'linear-gradient(135deg, #6B5CE7, #5046CC)', boxShadow: '0 4px 20px #7B61FF35' },
+        solidStyle: { background: 'var(--brand-gradient-violet)', boxShadow: '0 4px 20px #7B61FF35' },
       },
       highlighted: true,
       popularLabel: t('pricing.mostPopular'),
@@ -152,7 +153,7 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
             <span className="relative inline-block">
               <span
                 className="absolute inset-x-[-6px] inset-y-[-2px] rounded-xl z-0"
-                style={{ background: 'linear-gradient(135deg, #5B4FCC, #7B61FF)', transform: 'rotate(-1.2deg)' }}
+                style={{ background: 'var(--brand-gradient-violet)', transform: 'rotate(-1.2deg)' }}
               />
               <span className="relative z-10 px-1 text-white">{t('pricing.headingAccent')}</span>
               <img
@@ -228,7 +229,7 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
               }}
             >
               {t('pricing.yearly')}
-              <span className="rounded-full bg-[#7B61FF]/25 border border-[#7B61FF]/35 px-2 py-[2px] text-[11px] font-semibold text-[#A896FF]">
+              <span className="rounded-full bg-[var(--color-brand-accent)]/25 border border-[var(--color-brand-accent)]/35 px-2 py-[2px] text-[11px] font-semibold text-[#A896FF]">
                 {t('pricing.savePercent')}
               </span>
             </button>
@@ -263,7 +264,7 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
                   {t(titleKey)}
                 </p>
                 <p
-                  className="text-[12px] mt-1 whitespace-pre-line leading-snug transition-[color] duration-[250ms]"
+                  className="text-xs mt-1 whitespace-pre-line leading-snug transition-[color] duration-[250ms]"
                   style={{ color: 'var(--pricing-trust-desc)' }}
                 >
                   {t(descKey)}
