@@ -42,6 +42,19 @@
   "billing": {
     "subscriptionActivated": "Subscription activated"
   },
+  "preferences": {
+    "title": "Preferences",
+    "appearance": {
+      "title": "Appearance"
+    },
+    "languageAndTime": {
+      "title": "Language & time",
+      "language": {
+        "label": "Language",
+        "description": "Choose the language you want to use"
+      }
+    }
+  },
   "emptyState": {
     "loadingCharacters": "Loading characters...",
     "noCharacterSelected": "No character selected",

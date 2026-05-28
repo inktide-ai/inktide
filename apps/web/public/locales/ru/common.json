@@ -42,6 +42,19 @@
   "billing": {
     "subscriptionActivated": "Подписка активирована"
   },
+  "preferences": {
+    "title": "Настройки",
+    "appearance": {
+      "title": "Внешний вид"
+    },
+    "languageAndTime": {
+      "title": "Язык и время",
+      "language": {
+        "label": "Язык",
+        "description": "Выберите язык интерфейса"
+      }
+    }
+  },
   "emptyState": {
     "loadingCharacters": "Загрузка персонажей...",
     "noCharacterSelected": "Персонаж не выбран",
