@@ -1,4 +1,7 @@
 export { default as ProjectsListPage } from './projects-list-page'
+export { ProjectOverviewPage } from './project-overview-page'
+export { default as SoulProjectOverviewPage } from './soul-project-overview-page'
+export { default as ProjectSettingsPage } from './project-settings-page'
 export { ProjectGridCardConnected } from './project-grid-card-connected'
 export { ProjectListRowConnected } from './project-list-row-connected'
 export { SoulBindingPicker } from './soul-binding-picker'

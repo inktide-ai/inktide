@@ -1,0 +1,434 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import {
+  Box, Check, ChevronRight, Copy, Cpu, FlaskConical,
+  ImageIcon, Layers, Monitor, Pause, Pencil, Play, Radio,
+} from 'lucide-react'
+import { inferModelType } from '@/lib/utils/model-type'
+import { buildObsSceneUrl } from '@/lib/utils/obs-url'
+import { useProjectRuntimeContext } from './ProjectRuntimeContext'
+import {
+  SectionCard, NoSoulPlaceholder, ProjectMetaRow, ProjectStatusBadge,
+} from './ui/project-overview-primitives'
+
+export default function SoulProjectOverviewPage() {
+  const { id: soulId, projectId } = useParams<{ id: string; projectId: string }>()
+  const router = useRouter()
+  const base = `/souls/${soulId}/projects/${projectId}`
+
+  const {
+    project,
+    soul,
+    activeModel,
+    activeScene,
+    activeChannels,
+    previewUrl,
+    loading,
+    updateProjectMeta,
+    toggleStatus,
+  } = useProjectRuntimeContext()
+
+  // ── Edit form state ───────────────────────────────────────────────────────
+  const [editing, setEditing]         = useState(false)
+  const [name, setName]               = useState('')
+  const [description, setDescription] = useState('')
+  const [saving, setSaving]           = useState(false)
+  const [toggling, setToggling]       = useState(false)
+  const [copied, setCopied]           = useState(false)
+
+  useEffect(() => {
+    if (project && !editing) {
+      setName(project.name)
+      setDescription(project.description ?? '')
+    }
+  }, [project, editing])
+
+  // ── Mutations ─────────────────────────────────────────────────────────────
+  async function handleSave() {
+    if (!project || saving) return
+    setSaving(true)
+    try {
+      await updateProjectMeta({ name, description: description || null })
+      setEditing(false)
+    } catch (err) {
+      console.error('Update failed:', err)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleTogglePause() {
+    if (!project || toggling) return
+    setToggling(true)
+    try {
+      await toggleStatus()
+    } catch (err) {
+      console.error('Status toggle failed:', err)
+    } finally {
+      setToggling(false)
+    }
+  }
+
+  // ── Derived values ────────────────────────────────────────────────────────
+  const obsUrl = useMemo(() => {
+    if (!activeModel || !activeChannels.length || typeof window === 'undefined') return null
+    return buildObsSceneUrl(window.location.origin, {
+      channelId: activeChannels[0].channel_id!,
+      modelUrl:  activeModel.public_url,
+      modelType: inferModelType(activeModel.original_file_name),
+      sceneUrl:  activeScene?.public_url,
+    })
+  }, [activeModel, activeChannels, activeScene])
+
+  function copyObsUrl() {
+    if (!obsUrl) return
+    navigator.clipboard.writeText(obsUrl).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--border-subtle)] border-t-[var(--accent-primary)]" />
+      </div>
+    )
+  }
+
+  if (!project) {
+    return (
+      <div className="flex h-full items-center justify-center text-body text-[var(--text-tertiary)]">
+        Project not found
+      </div>
+    )
+  }
+
+  return (
+    <div className="mx-auto max-w-[1000px] px-6 py-8">
+
+      {/* ── Header ── */}
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div className="flex-1">
+          {editing ? (
+            <div className="space-y-2">
+              <input
+                autoFocus
+                value={name}
+                onChange={e => setName(e.target.value)}
+                className="w-full rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 py-2 text-[22px] font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)]"
+              />
+              <textarea
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Description (optional)"
+                rows={2}
+                className="w-full resize-none rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 py-2 text-body text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)] placeholder:text-[var(--text-tertiary)]"
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={saving || !name.trim()}
+                  onClick={handleSave}
+                  className="h-8 rounded-lg bg-[var(--accent-primary)] px-4 text-body font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-50"
+                >
+                  {saving ? 'Saving…' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEditing(false); setName(project.name); setDescription(project.description ?? '') }}
+                  className="h-8 rounded-lg border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-4 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{project.name}</h1>
+                <ProjectStatusBadge status={project.status} />
+              </div>
+              {project.description && (
+                <p className="mt-1 text-body text-[var(--text-secondary)]">{project.description}</p>
+              )}
+            </>
+          )}
+        </div>
+
+        {!editing && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="flex h-9 items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+            >
+              <Pencil size={13} /> Edit
+            </button>
+            <button
+              type="button"
+              disabled={toggling || project.status === 'archived'}
+              onClick={handleTogglePause}
+              className="flex h-9 items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-2)] disabled:opacity-40"
+            >
+              {project.status === 'paused'
+                ? <><Play size={13} /> Resume</>
+                : <><Pause size={13} /> Pause</>
+              }
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(`${base}/character`)}
+              className="flex h-9 items-center gap-1.5 rounded-xl bg-[var(--accent-primary)] px-4 text-body font-medium text-white hover:bg-[var(--accent-hover)]"
+            >
+              <Cpu size={13} /> Open Character
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ── Sandbox — full-width scene preview ── */}
+      <section className="mb-6 overflow-hidden rounded-xl border border-[var(--border-card)]">
+        <div
+          className="relative w-full overflow-hidden"
+          style={{ aspectRatio: '16/9' }}
+        >
+          {previewUrl ? (
+            <iframe
+              src={previewUrl}
+              title="Scene preview"
+              className="h-full w-full border-0 pointer-events-none"
+            />
+          ) : activeScene?.public_url ? (
+            <img
+              src={activeScene.public_url}
+              alt="Scene background"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-[var(--surface-2)] to-[var(--bg-deeper,var(--bg-0))]">
+              <div className="flex flex-col items-center gap-2 text-[var(--text-tertiary)]">
+                <ImageIcon size={36} strokeWidth={1.25} />
+                <span className="text-body">No scene configured</span>
+              </div>
+            </div>
+          )}
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+
+          {activeModel && (
+            <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-3 py-1 backdrop-blur-sm">
+              <Box size={12} className="text-white/60" />
+              <span className="text-body font-medium text-white/90">
+                {inferModelType(activeModel.original_file_name).toUpperCase()} · {activeModel.original_file_name}
+              </span>
+            </div>
+          )}
+
+          <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-3 px-5 py-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <FlaskConical size={14} className="text-white/70" />
+                <span className="text-body font-semibold text-white">Sandbox</span>
+              </div>
+              <p className="mt-0.5 text-body text-white/60">
+                Test your soul&apos;s responses in real-time before going live
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push(`${base}/sandbox`)}
+              className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-4 text-body font-medium text-white backdrop-blur-sm hover:bg-white/20"
+            >
+              <FlaskConical size={13} /> Open Sandbox
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 2-col grid: Character + Scene ── */}
+      <div className="mb-6 grid gap-6 md:grid-cols-2">
+
+        <SectionCard icon={Cpu} title="Character" href={`${base}/character`}>
+          {!soul ? <NoSoulPlaceholder /> : (
+            <div className="-my-2.5">
+              <ProjectMetaRow label="Soul" value={soul.name} />
+              {soul.llm_model && (
+                <ProjectMetaRow
+                  label="Model"
+                  value={`${soul.llm_model.provider} · ${soul.llm_model.display_name}`}
+                />
+              )}
+              {soul.personality && (
+                <ProjectMetaRow
+                  label="Personality"
+                  value={<span className="line-clamp-2">{soul.personality}</span>}
+                />
+              )}
+              {soul.system_prompt && (
+                <ProjectMetaRow
+                  label="System prompt"
+                  value={
+                    <span className="line-clamp-2 text-[var(--text-secondary)]">
+                      {soul.system_prompt}
+                    </span>
+                  }
+                />
+              )}
+            </div>
+          )}
+        </SectionCard>
+
+        <SectionCard icon={Layers} title="Scene" href={`${base}/scene`}>
+          {!soul ? <NoSoulPlaceholder /> : (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 rounded-lg border border-[var(--border-subtle)] px-3 py-2.5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--surface-2)]">
+                  <Box size={15} className="text-[var(--text-secondary)]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-body font-medium text-[var(--text-primary)]">
+                    {activeModel?.original_file_name ?? 'No model selected'}
+                  </p>
+                  <p className="text-xs text-[var(--text-tertiary)]">3D Model</p>
+                </div>
+                {activeModel && (
+                  <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs text-emerald-400">
+                    Active
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3 rounded-lg border border-[var(--border-subtle)] px-3 py-2.5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--surface-2)]">
+                  {activeScene?.public_url
+                    ? <img src={activeScene.public_url} alt="" className="h-full w-full object-cover" />
+                    : <ImageIcon size={15} className="text-[var(--text-secondary)]" />
+                  }
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-body font-medium text-[var(--text-primary)]">
+                    {activeScene?.display_name ?? activeScene?.original_file_name ?? 'No background selected'}
+                  </p>
+                  <p className="text-xs text-[var(--text-tertiary)]">Background</p>
+                </div>
+                {activeScene && (
+                  <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs text-emerald-400">
+                    Active
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </SectionCard>
+      </div>
+
+      {/* ── 2-col grid: Channels + Soul ── */}
+      <div className="mb-6 grid gap-6 md:grid-cols-2">
+
+        <SectionCard icon={Radio} title="Channels" href={`${base}/channels`}>
+          {!soul ? <NoSoulPlaceholder /> : activeChannels.length === 0 ? (
+            <p className="text-body text-[var(--text-tertiary)]">No active channels yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {activeChannels.slice(0, 4).map(ch => (
+                <div key={ch.id} className="flex items-center gap-2.5 rounded-lg border border-[var(--border-subtle)] px-3 py-2">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                  <span className="text-body font-medium capitalize text-[var(--text-primary)]">{ch.platform}</span>
+                  <span className="truncate text-body text-[var(--text-secondary)]">· {ch.channel_name}</span>
+                </div>
+              ))}
+              {activeChannels.length > 4 && (
+                <p className="text-xs text-[var(--text-tertiary)]">+{activeChannels.length - 4} more</p>
+              )}
+            </div>
+          )}
+        </SectionCard>
+
+        <SectionCard icon={Cpu} title="Soul" href={`/souls/${soulId}`}>
+          {!project.active_soul ? (
+            <p className="text-body text-[var(--text-secondary)]">
+              Connect a soul from Settings.
+            </p>
+          ) : (
+            <div className="flex items-center gap-3">
+              {project.active_soul.avatar_url ? (
+                <img src={project.active_soul.avatar_url} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+              ) : (
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface-2)] text-body font-medium text-[var(--text-secondary)]">
+                  {project.active_soul.name[0].toUpperCase()}
+                </div>
+              )}
+              <span className="text-body font-medium text-[var(--text-primary)]">{project.active_soul.name}</span>
+            </div>
+          )}
+        </SectionCard>
+      </div>
+
+      {/* ── OBS (full width) ── */}
+      <section className="overflow-hidden rounded-xl border border-[var(--border-card)]">
+        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-3.5">
+          <div className="flex items-center gap-2 text-body font-medium text-[var(--text-primary)]">
+            <Monitor size={14} className="text-[var(--text-tertiary)]" />
+            OBS
+          </div>
+          <Link
+            href={`${base}/obs`}
+            className="flex items-center gap-0.5 text-body text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+          >
+            View <ChevronRight size={12} />
+          </Link>
+        </div>
+        <div className="bg-[var(--bg-0)] px-5 py-4">
+          {!soul ? <NoSoulPlaceholder /> : (
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${
+                  obsUrl
+                    ? 'bg-emerald-400 shadow-[0_0_6px_rgba(74,222,128,0.5)]'
+                    : 'bg-[var(--text-tertiary)]/40'
+                }`} />
+                <div>
+                  <p className="text-body font-medium text-[var(--text-primary)]">
+                    {obsUrl ? 'Browser Source Ready' : 'Not configured'}
+                  </p>
+                  <p className="text-body text-[var(--text-secondary)]">
+                    {obsUrl
+                      ? 'OBS browser source URL is ready to use'
+                      : 'Requires an active model and channel'
+                    }
+                  </p>
+                </div>
+              </div>
+              {obsUrl ? (
+                <div className="flex shrink-0 items-center gap-2">
+                  <code className="max-w-[300px] truncate rounded-lg border border-[var(--border-subtle)] bg-black/30 px-3 py-1.5 font-mono text-xs text-cyan-300/90">
+                    {obsUrl}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={copyObsUrl}
+                    className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 text-body font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
+                  >
+                    {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                    {copied ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href={`${base}/obs`}
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+                >
+                  Configure <ChevronRight size={12} />
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
+    </div>
+  )
+}
