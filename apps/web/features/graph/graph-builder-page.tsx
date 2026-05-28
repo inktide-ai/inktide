@@ -30,8 +30,7 @@ import {
 } from './lib/graph-defaults'
 import { migrateLegacyNodes } from './lib/migrate-legacy-nodes'
 import { Toolbar, AddNodePanel } from './components/graph-toolbar'
-
-const LS_KEY = (id: string) => `inktide_graph_${id}`
+import { STORAGE_KEYS } from '@/shared/lib/storage-keys'
 
 let nodeCounter = initialNodes.length + 1
 
@@ -75,7 +74,7 @@ export default function GraphBuilderPage({ projectId }: GraphBuilderPageProps) {
       saveRef.current.dirtyState = 'clean'
       setLastSavedAt(new Date())
       setSaveStatus('saved')
-      localStorage.setItem(LS_KEY(characterId), JSON.stringify({
+      localStorage.setItem(STORAGE_KEYS.graph(characterId), JSON.stringify({
         nodes: nodesRef.current,
         edges: edgesRef.current,
         savedAt: Date.now(),
@@ -115,7 +114,7 @@ export default function GraphBuilderPage({ projectId }: GraphBuilderPageProps) {
     let localTimestamp = 0
     let localLoaded = false
     try {
-      const raw = localStorage.getItem(LS_KEY(characterId))
+      const raw = localStorage.getItem(STORAGE_KEYS.graph(characterId))
       if (raw) {
         const { nodes: ln, edges: le, savedAt } = JSON.parse(raw) as { nodes: RFNode[]; edges: Edge[]; savedAt: number }
         const { nodes: mn, edges: me } = migrateLegacyNodes(ln, le)
@@ -239,7 +238,7 @@ export default function GraphBuilderPage({ projectId }: GraphBuilderPageProps) {
   const panOnDrag = tool === 'pan' ? [0, 1, 2] : [1, 2]
 
   return (
-    <div style={{ display: 'flex', width: '100%', height: '100vh', overflow: 'hidden' }}>
+    <div className="flex w-full h-screen overflow-hidden">
       {/* ── Graph area ───────────────────────────────────────────────────── */}
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: 'var(--bg-0)' }}>
         {/* Dot grid */}

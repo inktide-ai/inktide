@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useReducer } from 'react'
 import type { CharacterPersonality } from '@/shared/lib/character'
 import type { SoulTemplate } from '@/shared/data/soul-templates'
+import { STORAGE_KEYS } from '@/shared/lib/storage-keys'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -11,13 +12,6 @@ export type StepSelection = { id: string; name: string; config?: Record<string, 
 // ── TTL-based persistence ──────────────────────────────────────────────────
 
 const WIZARD_TTL_MS = 24 * 60 * 60 * 1000
-
-export const WIZARD_KEYS = [
-  'v1_inktide_wizard_selections',
-  'v1_inktide_wizard_channels',
-  'v1_inktide_wizard_personality',
-  'v1_inktide_wizard_template',
-] as const
 
 function loadWithTTL<T>(key: string, fallback: T): T {
   // SSR guard: window is unavailable during server-side rendering
@@ -117,12 +111,12 @@ function initState(): WizardState {
     screen:            'templates',
     direction:         1,
     selectedTemplate:  null,
-    stepSelections:    loadWithTTL<Record<string, StepSelection>>('v1_inktide_wizard_selections', {}),
+    stepSelections:    loadWithTTL<Record<string, StepSelection>>(STORAGE_KEYS.wizard.selections, {}),
     personalityOpen:   false,
-    personalityConfig: loadWithTTL<CharacterPersonality>('v1_inktide_wizard_personality', DEFAULT_PERSONALITY),
+    personalityConfig: loadWithTTL<CharacterPersonality>(STORAGE_KEYS.wizard.personality, DEFAULT_PERSONALITY),
     // SSR guard: localStorage.getItem is unavailable on the server
-    personalityConfigured: typeof window !== 'undefined' && localStorage.getItem('v1_inktide_wizard_personality') !== null,
-    channelsSelected:  loadWithTTL<string[]>('v1_inktide_wizard_channels', []),
+    personalityConfigured: typeof window !== 'undefined' && localStorage.getItem(STORAGE_KEYS.wizard.personality) !== null,
+    channelsSelected:  loadWithTTL<string[]>(STORAGE_KEYS.wizard.channels, []),
   }
 }
 
@@ -146,9 +140,9 @@ export function useWizardState(): UseWizardStateResult {
   // Persist each data field only when its reference actually changes.
   // Reducer cases that don't touch a field return state.field unchanged,
   // so these effects are silent on unrelated transitions.
-  useEffect(() => { saveWithTTL('v1_inktide_wizard_selections', state.stepSelections) },  [state.stepSelections])
-  useEffect(() => { saveWithTTL('v1_inktide_wizard_personality', state.personalityConfig) }, [state.personalityConfig])
-  useEffect(() => { saveWithTTL('v1_inktide_wizard_channels', state.channelsSelected) },    [state.channelsSelected])
+  useEffect(() => { saveWithTTL(STORAGE_KEYS.wizard.selections,  state.stepSelections) },  [state.stepSelections])
+  useEffect(() => { saveWithTTL(STORAGE_KEYS.wizard.personality, state.personalityConfig) }, [state.personalityConfig])
+  useEffect(() => { saveWithTTL(STORAGE_KEYS.wizard.channels,    state.channelsSelected) },  [state.channelsSelected])
 
   const navigate = useCallback((to: Screen, dir: 1 | -1) =>
     dispatch({ type: 'NAVIGATE', to, dir }), [])
@@ -159,9 +153,9 @@ export function useWizardState(): UseWizardStateResult {
     dispatch({ type: 'SELECT_TEMPLATE', id: tmpl?.id ?? null })
     if (typeof window !== 'undefined') {
       if (tmpl) {
-        saveWithTTL('v1_inktide_wizard_template', { id: tmpl.id, personality: tmpl.personality })
+        saveWithTTL(STORAGE_KEYS.wizard.template, { id: tmpl.id, personality: tmpl.personality })
       } else {
-        localStorage.removeItem('v1_inktide_wizard_template')
+        localStorage.removeItem(STORAGE_KEYS.wizard.template)
       }
     }
   }, [])
@@ -179,7 +173,7 @@ export function useWizardState(): UseWizardStateResult {
     dispatch({ type: 'CONFIRM_CHANNELS', channels, selections }), [])
 
   const clearDraft = useCallback(() => {
-    if (typeof window !== 'undefined') WIZARD_KEYS.forEach(k => localStorage.removeItem(k))
+    if (typeof window !== 'undefined') Object.values(STORAGE_KEYS.wizard).forEach(k => localStorage.removeItem(k))
   }, [])
 
   return { state, navigate, selectTemplate, selectProvider, setPersonality, openPersonality, closePersonality, confirmChannels, clearDraft }

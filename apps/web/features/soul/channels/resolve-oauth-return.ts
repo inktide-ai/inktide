@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from '@/shared/lib/storage-keys'
+
 const OAUTH_TTL_MS = 10 * 60 * 1000 // 10 minutes
 
 export interface OAuthPendingState {
@@ -7,8 +9,7 @@ export interface OAuthPendingState {
 }
 
 // Unique key per connector+soul prevents cross-connector collision and simplifies cleanup.
-export const oauthPendingKey = (connectorId: string, soulId: string) =>
-  `v1_inktide_oauth_pending:${connectorId}:${soulId}`
+export const oauthPendingKey = STORAGE_KEYS.oauth.pending
 
 export function saveOAuthPending(state: OAuthPendingState): void {
   sessionStorage.setItem(
