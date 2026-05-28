@@ -1,15 +1,10 @@
 'use client'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { CardModelUploader } from '@/entities/soul/services/upload/CardModelUploader'
-import { executePresignedUpload } from '@/shared/services/upload/PresignedUploadService'
 import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok — editor embeds avatar preview
-import { useCardModel } from '@/entities/soul/hooks'
-import { listCardModels, activateCardModel, type AiCardModelResponse } from '@/features/soul/api/index' // fsd:cross-feature-ok — editor manages soul card models
 import { useSceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import type { AiCharacter, ModelType } from '@/shared/lib/character'
 import { ANIMATION_PRESETS, type AnimationPreset } from '../lib'
+import { useModelTab } from './useModelTab'
 
 const MODEL_TYPES: { value: ModelType; label: string; ext: string }[] = [
   { value: 'vrm',    label: 'VRM',       ext: '.vrm' },
@@ -43,61 +38,12 @@ interface ModelTabProps {
 }
 
 export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps) {
-  const { t } = useTranslation('model')
-  const fileRef = useRef<HTMLInputElement>(null)
-
-  const [uploadBusy, setUploadBusy]       = useState(false)
-  const [uploadHint, setUploadHint]       = useState<string | null>(null)
-  const [refreshKey, setRefreshKey]       = useState(0)
-  const [allModels, setAllModels]         = useState<AiCardModelResponse[]>([])
-  const [activatingId, setActivatingId]   = useState<string | null>(null)
-  const [search, setSearch]               = useState('')
-  const [animation, setAnimation]         = useState<AnimationPreset>(ANIMATION_PRESETS[0])
-
-  const { model } = useCardModel(cardId, refreshKey)
+  const tab = useModelTab(character, onUpdate, cardId)
   const { settings, setSettings, resetSettings } = useSceneRendererSettings(cardId ?? '')
 
-  const loadAll = useCallback(async () => {
-    if (!cardId) return
-    try {
-      const list = await listCardModels(cardId)
-      setAllModels(list)
-    } catch { /* silent */ }
-  }, [cardId])
-
-  useEffect(() => { void loadAll() }, [loadAll, refreshKey])
-
-  const handleFile = async (file: File) => {
-    onUpdate({ appearance: { ...character.appearance, modelFileName: file.name } })
-    setUploadHint(null)
-    if (!cardId) { setUploadHint(t('upload.saveFirst')); return }
-    setUploadBusy(true)
-    try {
-      await executePresignedUpload(new CardModelUploader(cardId), file)
-      setUploadHint(t('upload.success'))
-      setRefreshKey(k => k + 1)
-    } catch (err) {
-      setUploadHint(err instanceof Error ? err.message : 'Upload failed')
-    } finally {
-      setUploadBusy(false)
-    }
-  }
-
-  const activeModel   = allModels.find(m => m.is_active) ?? allModels[0] ?? model
-
-  const handleActivate = async (m: AiCardModelResponse) => {
-    if (!cardId || m.is_active || activatingId) return
-    setActivatingId(m.id)
-    try {
-      await activateCardModel(cardId, m.id)
-      await loadAll()
-    } catch { /* silent — UI stays unchanged */ }
-    finally { setActivatingId(null) }
-  }
-  const modelTypeMeta = MODEL_TYPES.find(m => m.value === character.appearance.modelType)!
-  const filteredModels = search
-    ? allModels.filter(m => m.original_file_name.toLowerCase().includes(search.toLowerCase()))
-    : allModels
+  const modelTypeMeta  = MODEL_TYPES.find(m => m.value === character.appearance.modelType)!
+  const { fileRef, uploadBusy, uploadHint, filteredModels, activeModel, activatingId,
+          search, setSearch, animation, setAnimation, handleFile, handleActivate } = tab
 
   return (
     <div className="flex flex-col gap-8 w-full">

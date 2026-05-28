@@ -41,7 +41,7 @@ const DEFAULT_PERSONALITY: CharacterPersonality = {
 
 // ── Reducer ────────────────────────────────────────────────────────────────
 
-type WizardState = {
+export type WizardState = {
   screen:               Screen
   direction:            1 | -1
   selectedTemplate:     string | null
