@@ -1,4 +1,4 @@
-import { apiFetch, jsonOrThrow } from './client'
+import { apiFetch, jsonOrThrow } from '@/api/client'
 
 export async function requestEmailChange(newEmail: string): Promise<void> {
   const res = await apiFetch('/api/me/email/request', {

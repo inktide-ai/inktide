@@ -1,4 +1,4 @@
-import { apiFetch, emptyOrThrow, jsonOrThrow } from './client'
+import { apiFetch, emptyOrThrow, jsonOrThrow } from '@/api/client'
 
 export type OrgRole = 'member' | 'admin'
 export type InviteStatus = 'pending' | 'accepted' | 'expired'

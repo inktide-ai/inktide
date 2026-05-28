@@ -1,4 +1,4 @@
-import { apiFetch, jsonOrThrow } from './client'
+import { apiFetch, jsonOrThrow } from '@/api/client'
 
 export interface ProjectPlugin {
   plugin_id: string
