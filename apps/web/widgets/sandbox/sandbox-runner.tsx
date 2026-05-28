@@ -4,11 +4,9 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
-// fsd:cross-feature-ok — sandbox reuses scene-fullscreen from character-editor
-import SceneFullscreen from '@/features/character-editor/tabs/scene-fullscreen'
+import { SceneFullscreen } from '@/widgets/scene-fullscreen'
 import { PROFILE_SETTINGS_BASE } from '@/lib/routes'
-// fsd:cross-feature-ok — sandbox depends on project runtime hook
-import { useProjectRuntime } from '@/features/projects/hooks/useProjectRuntime'
+import { useProjectRuntime } from '@/features/projects' // fsd:cross-feature-ok — sandbox is always a sub-view of a project runtime
 
 interface SandboxRunnerProps {
   projectId: string

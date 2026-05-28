@@ -1,4 +1,4 @@
-import SandboxRunner from '@/features/sandbox/sandbox-runner'
+import SandboxRunner from '@/widgets/sandbox/sandbox-runner'
 
 interface Props {
   params: Promise<{ id: string; projectId: string }>
