@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CredentialResponse } from '@/shared/types/soul-api'
 import { getCredentials, upsertCredential } from '@/entities/soul/api'
-import type { ProviderDefinition } from '@/lib/providers'
+import type { ProviderDefinition } from '@/shared/data/providers'
 
 export interface UseOllamaCredentialsResult {
   cred:           CredentialResponse | null

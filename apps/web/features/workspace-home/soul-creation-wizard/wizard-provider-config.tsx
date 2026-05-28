@@ -1,22 +1,21 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { PROVIDER_DEFS } from '@/lib/providers'
+import { PROVIDER_DEFS } from '@/shared/data/providers'
 import { VOICE_PROVIDER_CATALOG } from '@/shared/data/voice-providers'
 import { upsertCredential, testCredential } from '@/entities/soul/api'
-// fsd:cross-feature-ok — wizard uses soul credential badge during soul setup
-import { CredentialStatusBadge, type CredentialStatus } from '@/features/soul/components/credential-status-badge'
+import { CredentialStatusBadge, type CredentialStatus } from '@/shared/ui/credential-status-badge'
 import { DynamicField } from './dynamic-field'
 import type { WizardProviderItem } from './wizard-provider-card'
 
 const inputCls = cn(
   'h-9 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)]/60 px-3',
-  'home-ui-font text-[14px] text-[var(--text-primary)] outline-none',
+  'home-ui-font text-body text-[var(--text-primary)] outline-none',
   'placeholder:text-[var(--text-tertiary)] transition-colors',
   'focus:border-[var(--accent-base)]/50 focus:bg-[var(--surface-2)]',
 )
 
-const labelCls = 'home-ui-font mb-1.5 block text-[12px] font-semibold uppercase tracking-widest text-[var(--text-tertiary)]'
+const labelCls = 'home-ui-font mb-1.5 block text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)]'
 
 export interface WizardProviderConfigProps {
   panelType: 'llm' | 'tts'
@@ -91,14 +90,14 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
             />
           </div>
           <div className="min-w-0">
-            <p className="home-ui-font truncate text-[14px] font-semibold text-[var(--text-primary)]">{item.name}</p>
+            <p className="home-ui-font truncate text-body font-semibold text-[var(--text-primary)]">{item.name}</p>
             {item.subtitle && (
               <p className="home-ui-font truncate text-[11.5px] text-[var(--text-tertiary)]">{item.subtitle}</p>
             )}
           </div>
         </div>
         {description && (
-          <p className="home-ui-font mt-2.5 text-[14px] leading-relaxed text-[var(--text-secondary)]">
+          <p className="home-ui-font mt-2.5 text-body leading-relaxed text-[var(--text-secondary)]">
             {description}
           </p>
         )}
@@ -107,10 +106,10 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
       <div className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar">
         {!hasFields && panelType === 'tts' && (
           <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)]/40 px-4 py-3">
-            <p className="home-ui-font text-[14px] leading-relaxed text-[var(--text-secondary)]">
+            <p className="home-ui-font text-body leading-relaxed text-[var(--text-secondary)]">
               No API key required. {item.name} runs locally on your machine.
             </p>
-            <p className="home-ui-font mt-1 text-[12px] text-[var(--text-tertiary)]">
+            <p className="home-ui-font mt-1 text-xs text-[var(--text-tertiary)]">
               Full voice configuration is available in soul settings.
             </p>
           </div>
@@ -162,7 +161,7 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
           <div key={field.key} className="mb-4">
             <span className={labelCls}>{field.label}</span>
             {field.hint && (
-              <p className="home-ui-font mb-1.5 text-[12px] text-[var(--text-tertiary)]">{field.hint}</p>
+              <p className="home-ui-font mb-1.5 text-xs text-[var(--text-tertiary)]">{field.hint}</p>
             )}
             <DynamicField
               field={field}
@@ -173,7 +172,7 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
         ))}
 
         {panelType === 'tts' && hasFields && (
-          <p className="home-ui-font mt-1 text-[12px] text-[var(--text-tertiary)]">
+          <p className="home-ui-font mt-1 text-xs text-[var(--text-tertiary)]">
             Voice selection and advanced settings are available after creating your soul.
           </p>
         )}
@@ -184,7 +183,7 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
           type="button"
           onClick={handleClick}
           disabled={isTesting}
-          className="home-ui-font flex h-9 w-full items-center justify-center rounded-xl text-[14px] font-semibold text-white transition-colors hover:opacity-90 active:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="home-ui-font flex h-9 w-full items-center justify-center rounded-xl text-body font-semibold text-white transition-colors hover:opacity-90 active:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ background: 'var(--accent-base)' }}
         >
           {buttonLabel}

@@ -1,10 +1,10 @@
 'use client'
 import { cn } from '@/lib/utils'
-import type { ProviderFieldDef } from '@/lib/providers'
+import type { ProviderFieldDef } from '@/shared/data/providers'
 
 const inputCls = cn(
   'h-9 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)]/60 px-3',
-  'home-ui-font text-[14px] text-[var(--text-primary)] outline-none',
+  'home-ui-font text-body text-[var(--text-primary)] outline-none',
   'placeholder:text-[var(--text-tertiary)] transition-colors',
   'focus:border-[var(--accent-base)]/50 focus:bg-[var(--surface-2)]',
 )
@@ -60,7 +60,7 @@ export function DynamicField({
               onChange={e => update(i, e.target.value, pair.v)}
               className={cn(inputCls, 'flex-1')}
             />
-            <span className="text-[12px] text-[var(--text-tertiary)]">=</span>
+            <span className="text-xs text-[var(--text-tertiary)]">=</span>
             <input
               type="text" placeholder="value" value={pair.v}
               onChange={e => update(i, pair.k, e.target.value)}
@@ -73,7 +73,7 @@ export function DynamicField({
             </button>
           </div>
         ))}
-        <button type="button" onClick={addRow} className="home-ui-font flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[14px] text-[var(--text-tertiary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-secondary)] transition-colors">
+        <button type="button" onClick={addRow} className="home-ui-font flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-body text-[var(--text-tertiary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-secondary)] transition-colors">
           <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3">
             <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>

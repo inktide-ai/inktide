@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AiCharacter } from '@/shared/lib/character'
-import { PROVIDER_DEFS } from '@/lib/providers'
+import { PROVIDER_DEFS } from '@/shared/data/providers'
 import { pingOllama } from '@/lib/provider-validation'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { useOllamaCredentials } from '../hooks/useOllamaCredentials'
@@ -73,8 +73,8 @@ export function OllamaPanel({ character, onUpdate }: PanelProps) {
       <div className={formGroup}>
         <label className={label}>{t('providers:detail.status')}</label>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
-          <span className={cred ? 'w-2 h-2 rounded-full bg-[#22c55e] shrink-0' : 'w-2 h-2 rounded-full bg-[rgba(148,163,184,0.35)] shrink-0'} />
-          <span className="text-[0.6875rem] font-medium text-(--text-muted) font-[var(--font-ui)]">
+          <span className={cred ? 'w-2 h-2 rounded-full bg-[var(--color-online)] shrink-0' : 'w-2 h-2 rounded-full bg-[rgba(148,163,184,0.35)] shrink-0'} />
+          <span className="text-caption font-medium text-(--text-muted) font-[var(--font-ui)]">
             {cred ? t('providers:status.connected') : t('providers:status.notConnected')}
           </span>
         </div>
@@ -89,7 +89,7 @@ export function OllamaPanel({ character, onUpdate }: PanelProps) {
       {autoState === 'ok' && <div className={validationOk}>✓ {t('providers:validation.autoOk')}</div>}
       {autoState === 'failed' && !bypassed && (
         <div className={validationFailed}>
-          <div className="font-semibold text-[#ef4444]">{autoError}</div>
+          <div className="font-semibold text-[var(--color-error-strong)]">{autoError}</div>
         </div>
       )}
 
@@ -101,8 +101,8 @@ export function OllamaPanel({ character, onUpdate }: PanelProps) {
       {manualState === 'ok' && <div className={validationOk}>✓ {t('providers:validation.ok')}</div>}
       {manualState === 'failed' && !bypassed && (
         <div className={validationFailed}>
-          <div className="font-semibold text-[#ef4444]">{t('providers:validation.failed')}</div>
-          {manualError && <pre className="font-[inherit] text-[0.75rem] text-(--text-muted) whitespace-pre-wrap break-words m-0 p-0">{manualError}</pre>}
+          <div className="font-semibold text-[var(--color-error-strong)]">{t('providers:validation.failed')}</div>
+          {manualError && <pre className="font-[inherit] text-xs text-(--text-muted) whitespace-pre-wrap break-words m-0 p-0">{manualError}</pre>}
           <button type="button" className={btnContinueAnyway} onClick={() => setBypassed(true)}>
             {t('providers:validation.continueAnyway')}
           </button>

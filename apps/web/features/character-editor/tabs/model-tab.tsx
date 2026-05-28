@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { CardModelUploader } from '@/entities/soul/services/upload/CardModelUploader'
 import { executePresignedUpload } from '@/shared/services/upload/PresignedUploadService'
-// fsd:cross-feature-ok — renderer composition in soul editor
-import AvatarRenderer from '@/features/avatar/avatar-renderer'
-import { useCardModel } from '@/features/avatar/hooks/use-card-model'
-import { listCardModels, activateCardModel, type AiCardModelResponse } from '@/features/soul/api/index'
+import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok — editor embeds avatar preview
+import { useCardModel } from '@/entities/soul/hooks'
+import { listCardModels, activateCardModel, type AiCardModelResponse } from '@/features/soul/api/index' // fsd:cross-feature-ok — editor manages soul card models
 import { useSceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import type { AiCharacter, ModelType } from '@/shared/lib/character'
+import { ANIMATION_PRESETS, type AnimationPreset } from '../lib'
 
 const MODEL_TYPES: { value: ModelType; label: string; ext: string }[] = [
   { value: 'vrm',    label: 'VRM',       ext: '.vrm' },
@@ -25,7 +25,6 @@ const ACCEPT_MAP: Record<ModelType, string> = {
   none: '',
 }
 
-const ANIMATIONS = ['Idle', 'Talk', 'Dance', 'Wave']
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -53,7 +52,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
   const [allModels, setAllModels]         = useState<AiCardModelResponse[]>([])
   const [activatingId, setActivatingId]   = useState<string | null>(null)
   const [search, setSearch]               = useState('')
-  const [animation, setAnimation]         = useState('Idle')
+  const [animation, setAnimation]         = useState<AnimationPreset>(ANIMATION_PRESETS[0])
 
   const { model } = useCardModel(cardId, refreshKey)
   const { settings, setSettings, resetSettings } = useSceneRendererSettings(cardId ?? '')
@@ -123,9 +122,9 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
         )}>
           {/* Card header */}
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-subtle)]">
-            <span className="text-[0.8125rem] font-semibold text-[var(--text-secondary)]">Current Model</span>
+            <span className="text-sm font-semibold text-[var(--text-secondary)]">Current Model</span>
             {activeModel && (
-              <span className="flex items-center gap-1.5 rounded-full bg-green-500/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-green-500">
+              <span className="flex items-center gap-1.5 rounded-full bg-green-500/10 px-2.5 py-1 text-caption font-semibold text-green-500">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
                 Active
               </span>
@@ -145,10 +144,10 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
           {/* Meta + actions */}
           <div className="px-5 py-4 flex items-start justify-between gap-4">
             <div>
-              <p className="text-[0.9375rem] font-semibold text-[var(--text-primary)] leading-snug mb-2">
+              <p className="text-body-md font-semibold text-[var(--text-primary)] leading-snug mb-2">
                 {activeModel?.original_file_name ?? character.name}
               </p>
-              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[0.8125rem]">
+              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
                 <dt className="text-[var(--text-tertiary)]">Type</dt>
                 <dd className="text-[var(--text-primary)] m-0">{modelTypeMeta.label}</dd>
                 <dt className="text-[var(--text-tertiary)]">Format</dt>
@@ -169,7 +168,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
                 onChange={e => onUpdate({ appearance: { ...character.appearance, modelType: e.target.value as ModelType, modelFileName: null } })}
                 className={cn(
                   'h-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)]',
-                  'px-2 text-[0.8125rem] text-[var(--text-primary)] outline-none cursor-pointer',
+                  'px-2 text-sm text-[var(--text-primary)] outline-none cursor-pointer',
                   'hover:border-[var(--border-default)] transition-colors',
                 )}
               >
@@ -184,7 +183,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
                 onClick={() => fileRef.current?.click()}
                 className={cn(
                   'h-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3',
-                  'text-[0.8125rem] font-medium text-[var(--text-primary)]',
+                  'text-sm font-medium text-[var(--text-primary)]',
                   'hover:bg-[var(--surface-3)] hover:border-[var(--border-default)] transition-colors',
                   'disabled:opacity-40 disabled:cursor-not-allowed',
                 )}
@@ -195,35 +194,35 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
           </div>
 
           {uploadHint && (
-            <p className="px-5 pb-3 text-[0.75rem] text-[var(--text-tertiary)]">{uploadHint}</p>
+            <p className="px-5 pb-3 text-xs text-[var(--text-tertiary)]">{uploadHint}</p>
           )}
         </div>
 
         {/* Right: Model Settings card */}
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-5 flex flex-col gap-5">
-          <p className="text-[0.9375rem] font-semibold text-[var(--text-primary)]">Model Settings</p>
+          <p className="text-body-md font-semibold text-[var(--text-primary)]">Model Settings</p>
 
           {/* Default Animation */}
           <div className="flex flex-col gap-2">
-            <label className="text-[0.8125rem] font-medium text-[var(--text-secondary)]">Default Animation</label>
+            <label className="text-sm font-medium text-[var(--text-secondary)]">Default Animation</label>
             <select
               value={animation}
-              onChange={e => setAnimation(e.target.value)}
+              onChange={e => setAnimation(e.target.value as AnimationPreset)}
               className={cn(
                 'h-9 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)]',
-                'px-3 text-[0.8125rem] text-[var(--text-primary)] outline-none cursor-pointer',
+                'px-3 text-sm text-[var(--text-primary)] outline-none cursor-pointer',
                 'hover:border-[var(--border-default)] transition-colors w-full',
               )}
             >
-              {ANIMATIONS.map(a => <option key={a} value={a}>{a}</option>)}
+              {ANIMATION_PRESETS.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
           </div>
 
           {/* Scaling */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <label className="text-[0.8125rem] font-medium text-[var(--text-secondary)]">Scaling</label>
-              <span className="text-[0.8125rem] text-[var(--text-primary)] tabular-nums">
+              <label className="text-sm font-medium text-[var(--text-secondary)]">Scaling</label>
+              <span className="text-sm text-[var(--text-primary)] tabular-nums">
                 {settings.renderScale.toFixed(2)}
               </span>
             </div>
@@ -238,14 +237,14 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
 
           {/* Rotation */}
           <div className="flex flex-col gap-2">
-            <label className="text-[0.8125rem] font-medium text-[var(--text-secondary)]">Rotation</label>
+            <label className="text-sm font-medium text-[var(--text-secondary)]">Rotation</label>
             <div className="flex gap-1.5">
               {(['X', 'Y', 'Z'] as const).map(axis => (
                 <button
                   key={axis}
                   type="button"
                   className={cn(
-                    'flex-1 h-8 rounded-lg border text-[0.8125rem] font-medium transition-colors',
+                    'flex-1 h-8 rounded-lg border text-sm font-medium transition-colors',
                     axis === 'Y'
                       ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]'
                       : 'border-[var(--border-subtle)] bg-[var(--surface-2)] text-[var(--text-tertiary)]',
@@ -266,11 +265,11 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
 
           {/* Position Offset */}
           <div className="flex flex-col gap-2">
-            <label className="text-[0.8125rem] font-medium text-[var(--text-secondary)]">Position Offset</label>
+            <label className="text-sm font-medium text-[var(--text-secondary)]">Position Offset</label>
             <div className="grid grid-cols-3 gap-1.5">
               {(['posX', 'posY', 'posZ'] as const).map((key, i) => (
                 <div key={key} className="flex flex-col gap-1">
-                  <span className="text-[0.6875rem] text-[var(--text-tertiary)] text-center">
+                  <span className="text-caption text-[var(--text-tertiary)] text-center">
                     {['X', 'Y', 'Z'][i]}
                   </span>
                   <input
@@ -280,7 +279,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
                     onChange={e => setSettings({ [key]: parseFloat(e.target.value) || 0 })}
                     className={cn(
                       'w-full h-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)]',
-                      'px-2 text-[0.8125rem] text-[var(--text-primary)] text-center tabular-nums outline-none',
+                      'px-2 text-sm text-[var(--text-primary)] text-center tabular-nums outline-none',
                       'hover:border-[var(--border-default)] focus:border-[var(--accent-primary)] transition-colors',
                     )}
                   />
@@ -296,7 +295,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
             className={cn(
               'flex items-center justify-center gap-1.5 h-8 rounded-lg w-full',
               'border border-[var(--border-subtle)] bg-transparent',
-              'text-[0.8125rem] font-medium text-[var(--text-secondary)]',
+              'text-sm font-medium text-[var(--text-secondary)]',
               'hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-colors',
             )}
           >
@@ -310,7 +309,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="text-[1rem] font-semibold text-[var(--text-primary)]">Available Models</h2>
-            <p className="text-[0.8125rem] text-[var(--text-secondary)] mt-0.5">
+            <p className="text-sm text-[var(--text-secondary)] mt-0.5">
               Select another model from your library or upload a new one.
             </p>
           </div>
@@ -322,7 +321,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
               onChange={e => setSearch(e.target.value)}
               className={cn(
                 'h-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)]',
-                'px-3 text-[0.8125rem] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]',
+                'px-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]',
                 'outline-none focus:border-[var(--accent-primary)] transition-colors w-44',
               )}
             />
@@ -332,7 +331,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
               onClick={() => fileRef.current?.click()}
               className={cn(
                 'flex items-center gap-1.5 h-8 rounded-lg px-3',
-                'bg-[var(--accent-primary)] text-white text-[0.8125rem] font-medium',
+                'bg-[var(--accent-primary)] text-white text-sm font-medium',
                 'hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed',
               )}
             >
@@ -363,7 +362,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
             >
               {/* Active badge */}
               {m.is_active && (
-                <div className="absolute top-2 left-2 z-10 flex items-center gap-1 rounded-full bg-[var(--accent-primary)] px-2 py-0.5 text-[0.6875rem] font-semibold text-white">
+                <div className="absolute top-2 left-2 z-10 flex items-center gap-1 rounded-full bg-[var(--accent-primary)] px-2 py-0.5 text-caption font-semibold text-white">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
@@ -382,10 +381,10 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
 
               {/* Info */}
               <div className="px-3 py-2.5">
-                <p className="text-[0.8125rem] font-semibold text-[var(--text-primary)] truncate leading-snug">
+                <p className="text-sm font-semibold text-[var(--text-primary)] truncate leading-snug">
                   {m.original_file_name.replace(/\.[^.]+$/, '')}
                 </p>
-                <p className="text-[0.75rem] text-[var(--text-tertiary)] mt-0.5">
+                <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
                   {modelTypeMeta.label} · {formatBytes(m.size_bytes)}
                 </p>
               </div>
@@ -409,8 +408,8 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
             </svg>
             <div className="text-center">
-              <p className="text-[0.8125rem] font-medium">Upload New Model</p>
-              <p className="text-[0.75rem] mt-0.5">VRM or GLB</p>
+              <p className="text-sm font-medium">Upload New Model</p>
+              <p className="text-xs mt-0.5">VRM or GLB</p>
             </div>
           </button>
         </div>
