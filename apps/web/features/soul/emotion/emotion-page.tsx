@@ -8,124 +8,9 @@ import {
   PERSONALITY_PRESET_META,
   ALL_PRESET_KEYS,
   type PresetKey,
-  type PresetMeta,
 } from '@/shared/data/personality-presets'
-
-function moodDescription(p: CharacterPersonality): string {
-  const base: Record<string, string> = {
-    neutral:     'Composed and balanced',
-    happy:       'Warm and cheerful',
-    chill:       'Relaxed and easygoing',
-    melancholic: 'Introspective and quiet',
-    hyped:       'High-energy and expressive',
-  }
-  let desc = base[p.baselineMood] ?? 'Balanced'
-  if (p.sarcasm > 0.65)            desc += ', sharp-tongued'
-  else if (p.empathy > 0.85)       desc += ', deeply empathetic'
-  else if (p.assertiveness > 0.75) desc += ', assertive by nature'
-  else if (p.warmth < 0.3)         desc += ', emotionally reserved'
-  return desc
-}
-
-function stressLabel(s: string): string {
-  return (
-    { humor: 'Deflects with humor', deflect: 'Redirects tension', withdraw: 'Becomes quieter', confront: 'Addresses conflict directly' }[s]
-    ?? 'Adapts to context'
-  )
-}
-
-function MetricBar({ label, value, positive = false }: { label: string; value: number; positive?: boolean }) {
-  const pct = Math.round(Math.max(0, Math.min(1, value)) * 100)
-  return (
-    <div className="flex items-center gap-3 py-[3px]">
-      <span className="text-[14px] text-[var(--text-tertiary)] w-[116px] shrink-0 leading-none">{label}</span>
-      <div className="flex-1 h-[2px] rounded-full bg-[rgba(255,255,255,0.07)]">
-        <div
-          className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${pct}%`, background: positive ? 'var(--success-text)' : 'var(--accent-primary)' }}
-        />
-      </div>
-      <span className="text-[12px] font-mono tabular-nums text-[var(--text-tertiary)] w-7 text-right">{pct}%</span>
-    </div>
-  )
-}
-
-function TraitSlider({
-  label, hint, lowLabel, highLabel, value, onChange,
-}: {
-  label: string; hint?: string; lowLabel?: string; highLabel?: string; value: number; onChange: (v: number) => void
-}) {
-  const pct = Math.round(Math.max(0, Math.min(1, value)) * 100)
-  return (
-    <div className="py-0.5">
-      <div className="flex items-baseline justify-between mb-1.5">
-        <span className="text-[14px] font-medium text-[var(--text-primary)]">{label}</span>
-        <span className="text-[12px] font-mono tabular-nums text-[var(--text-tertiary)]">{pct}%</span>
-      </div>
-      {hint && <p className="text-[12px] text-[var(--text-tertiary)] mb-2 leading-[1.4]">{hint}</p>}
-      <input
-        type="range"
-        min={0}
-        max={1}
-        step={0.01}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className={cn(
-          'w-full cursor-pointer appearance-none rounded-full outline-none',
-          '[&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3',
-          '[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full',
-          '[&::-webkit-slider-thumb]:bg-white',
-          '[&::-webkit-slider-thumb]:shadow-[0_1px_3px_rgba(0,0,0,0.45)]',
-          '[&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:duration-100',
-          '[&::-webkit-slider-thumb]:hover:scale-[1.2]',
-          '[&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:w-3',
-          '[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white',
-          '[&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-[0_1px_3px_rgba(0,0,0,0.45)]',
-        )}
-        style={{
-          height: '3px',
-          background: `linear-gradient(to right, var(--accent-primary) ${pct}%, rgba(255,255,255,0.09) ${pct}%)`,
-        }}
-      />
-      {(lowLabel || highLabel) && (
-        <div className="flex justify-between mt-1">
-          <span className="text-[10px] text-[var(--text-tertiary)]">{lowLabel}</span>
-          <span className="text-[10px] text-[var(--text-tertiary)]">{highLabel}</span>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function ProfileCard({ meta, isActive, onClick }: { id: string; meta: PresetMeta; isActive: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'text-left p-3 rounded-xl border transition-all duration-150 w-full',
-        isActive
-          ? 'border-[var(--accent-primary)]'
-          : 'border-[var(--border-subtle)] bg-[var(--surface-1)] hover:border-[var(--border-default)] hover:bg-[var(--surface-2)]',
-      )}
-      style={isActive ? { background: 'color-mix(in srgb, var(--accent-primary) 9%, transparent)' } : undefined}
-    >
-      <p className={cn('text-[14px] font-semibold leading-snug mb-0.5', isActive ? 'text-[var(--accent-violet-text)]' : 'text-[var(--text-primary)]')}>
-        {meta.label}
-      </p>
-      <p className="text-[12px] text-[var(--text-tertiary)] mb-2.5">{meta.tagline}</p>
-      <div className="flex gap-1 items-center">
-        {meta.dots.map((d, i) => (
-          <div
-            key={i}
-            className="h-[3px] rounded-full flex-1 transition-opacity duration-300"
-            style={{ opacity: 0.15 + d * 0.85, background: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)' }}
-          />
-        ))}
-      </div>
-    </button>
-  )
-}
+import { MetricBar, TraitSlider, ProfileCard } from './components'
+import { moodDescription, stressLabel } from './lib/personality-display'
 
 function SectionCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
@@ -149,16 +34,16 @@ function EmotionalStateSection({ p, onChange }: { p: CharacterPersonality; onCha
     <SectionCard className="h-full flex flex-col">
       <div className="flex items-center gap-2 mb-4">
         <span className="h-[7px] w-[7px] rounded-full animate-pulse" style={{ background: 'var(--accent-primary)', opacity: 0.7 }} />
-        <span className="text-[12px] font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.07em]">Emotional Baseline</span>
+        <span className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.07em]">Emotional Baseline</span>
       </div>
 
       <p className="text-[20px] font-semibold text-[var(--text-heading)] leading-tight mb-1">{moodDescription(p)}</p>
-      <p className="text-[14px] text-[var(--text-tertiary)] mb-5 leading-relaxed">
+      <p className="text-body text-[var(--text-tertiary)] mb-5 leading-relaxed">
         {stressLabel(p.stressBehavior)}&ensp;·&ensp;Active state when conversation is idle
       </p>
 
       <div className="mb-5">
-        <p className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.07em] mb-2">Default Mood</p>
+        <p className="text-2xs font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.07em] mb-2">Default Mood</p>
         <div className="flex flex-wrap gap-1.5">
           {BASELINE_MOODS.map((m) => {
             const active = p.baselineMood === m.value
@@ -168,7 +53,7 @@ function EmotionalStateSection({ p, onChange }: { p: CharacterPersonality; onCha
                 type="button"
                 onClick={() => onChange({ baselineMood: m.value })}
                 className={cn(
-                  'px-2.5 py-[5px] rounded-lg text-[14px] font-medium border transition-all duration-100',
+                  'px-2.5 py-[5px] rounded-lg text-body font-medium border transition-all duration-100',
                   active
                     ? 'border-[var(--accent-primary)] text-[var(--accent-violet-text)]'
                     : 'border-[var(--border-subtle)] bg-transparent text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:border-[var(--border-default)]',
@@ -197,8 +82,8 @@ function EmotionalProfilesSection({ p, onApply }: { p: CharacterPersonality; onA
   return (
     <SectionCard className="h-full flex flex-col">
       <div className="mb-4">
-        <h2 className="text-[14px] font-semibold text-[var(--text-heading)] mb-0.5">Emotional Profiles</h2>
-        <p className="text-[12px] text-[var(--text-tertiary)]">One-tap personality presets</p>
+        <h2 className="text-body font-semibold text-[var(--text-heading)] mb-0.5">Emotional Profiles</h2>
+        <p className="text-xs text-[var(--text-tertiary)]">One-tap personality presets</p>
       </div>
       <div className="grid grid-cols-2 gap-2 flex-1">
         {ALL_PRESET_KEYS.map((id) => (
@@ -211,7 +96,7 @@ function EmotionalProfilesSection({ p, onApply }: { p: CharacterPersonality; onA
           />
         ))}
       </div>
-      <p className="text-[10px] text-[var(--text-tertiary)] mt-3 leading-relaxed">
+      <p className="text-2xs text-[var(--text-tertiary)] mt-3 leading-relaxed">
         Dots represent warmth · energy · empathy. Custom is selected automatically when you edit traits.
       </p>
     </SectionCard>
@@ -233,8 +118,8 @@ function PersonalityTraitsSection({ p, onChange }: { p: CharacterPersonality; on
   return (
     <SectionCard>
       <div className="mb-5">
-        <h2 className="text-[14px] font-semibold text-[var(--text-heading)] mb-0.5">Personality Traits</h2>
-        <p className="text-[12px] text-[var(--text-tertiary)]">Core character dimensions that persist across all conversations.</p>
+        <h2 className="text-body font-semibold text-[var(--text-heading)] mb-0.5">Personality Traits</h2>
+        <p className="text-xs text-[var(--text-tertiary)]">Core character dimensions that persist across all conversations.</p>
       </div>
       <div className="grid grid-cols-2 gap-x-8 gap-y-5">
         {TRAITS.map((t) => (
@@ -271,8 +156,8 @@ function SpeechBehaviorSection({ p, onChange }: { p: CharacterPersonality; onCha
   return (
     <SectionCard>
       <div className="mb-5">
-        <h2 className="text-[14px] font-semibold text-[var(--text-heading)] mb-0.5">Speech Expression</h2>
-        <p className="text-[12px] text-[var(--text-tertiary)]">How emotion shapes vocal delivery and TTS parameters.</p>
+        <h2 className="text-body font-semibold text-[var(--text-heading)] mb-0.5">Speech Expression</h2>
+        <p className="text-xs text-[var(--text-tertiary)]">How emotion shapes vocal delivery and TTS parameters.</p>
       </div>
       <div className="space-y-4 mb-5">
         <TraitSlider
@@ -293,8 +178,8 @@ function SpeechBehaviorSection({ p, onChange }: { p: CharacterPersonality; onCha
         />
       </div>
       <div className="mb-5">
-        <p className="text-[14px] font-medium text-[var(--text-primary)] mb-1">Stress Expression</p>
-        <p className="text-[12px] text-[var(--text-tertiary)] mb-2.5">How the AI responds under pressure or repeated stimuli</p>
+        <p className="text-body font-medium text-[var(--text-primary)] mb-1">Stress Expression</p>
+        <p className="text-xs text-[var(--text-tertiary)] mb-2.5">How the AI responds under pressure or repeated stimuli</p>
         <div className="grid grid-cols-2 gap-1.5">
           {STRESS_OPTIONS.map((opt) => {
             const active = p.stressBehavior === opt.value
@@ -304,35 +189,35 @@ function SpeechBehaviorSection({ p, onChange }: { p: CharacterPersonality; onCha
                 type="button"
                 onClick={() => onChange({ stressBehavior: opt.value })}
                 className={cn(
-                  'text-left px-3 py-2 rounded-lg border text-[14px] transition-all duration-100',
+                  'text-left px-3 py-2 rounded-lg border text-body transition-all duration-100',
                   active
                     ? 'border-[var(--accent-primary)]'
                     : 'border-[var(--border-subtle)] bg-[var(--surface-1)] hover:border-[var(--border-default)]',
                 )}
                 style={active ? { background: 'color-mix(in srgb, var(--accent-primary) 10%, transparent)' } : undefined}
               >
-                <span className={cn('block text-[14px] font-semibold', active ? 'text-[var(--accent-violet-text)]' : 'text-[var(--text-primary)]')}>
+                <span className={cn('block text-body font-semibold', active ? 'text-[var(--accent-violet-text)]' : 'text-[var(--text-primary)]')}>
                   {opt.label}
                 </span>
-                <span className="text-[10px] text-[var(--text-tertiary)]">{opt.desc}</span>
+                <span className="text-2xs text-[var(--text-tertiary)]">{opt.desc}</span>
               </button>
             )
           })}
         </div>
       </div>
       <div>
-        <p className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.07em] mb-2">Provider Support</p>
+        <p className="text-2xs font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.07em] mb-2">Provider Support</p>
         <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] overflow-hidden">
           <div className="grid grid-cols-4 px-3 py-2 border-b border-[var(--border-subtle)]">
             {['Provider', 'Speed', 'Energy', 'Pitch'].map((h) => (
-              <span key={h} className="text-[10px] font-medium text-[var(--text-tertiary)] text-center first:text-left">{h}</span>
+              <span key={h} className="text-2xs font-medium text-[var(--text-tertiary)] text-center first:text-left">{h}</span>
             ))}
           </div>
           {TTS_PROVIDERS.map((prov) => (
             <div key={prov.name} className="grid grid-cols-4 px-3 py-[7px] border-b border-[var(--border-subtle)] last:border-0">
-              <span className="text-[14px] text-[var(--text-secondary)]">{prov.name}</span>
+              <span className="text-body text-[var(--text-secondary)]">{prov.name}</span>
               {[prov.speed, prov.energy, prov.pitch].map((ok, i) => (
-                <span key={i} className={cn('text-center text-[14px]', ok ? 'text-[var(--success-text)]' : 'text-[var(--text-tertiary)] opacity-25')}>
+                <span key={i} className={cn('text-center text-body', ok ? 'text-[var(--success-text)]' : 'text-[var(--text-tertiary)] opacity-25')}>
                   {ok ? '✓' : '–'}
                 </span>
               ))}
@@ -353,8 +238,8 @@ function EmotionalMemorySection({ p, onChange }: { p: CharacterPersonality; onCh
   return (
     <SectionCard>
       <div className="mb-5">
-        <h2 className="text-[14px] font-semibold text-[var(--text-heading)] mb-0.5">Emotional Continuity</h2>
-        <p className="text-[12px] text-[var(--text-tertiary)]">How emotional states evolve and persist across conversation turns.</p>
+        <h2 className="text-body font-semibold text-[var(--text-heading)] mb-0.5">Emotional Continuity</h2>
+        <p className="text-xs text-[var(--text-tertiary)]">How emotional states evolve and persist across conversation turns.</p>
       </div>
       <div className="space-y-4 mb-6">
         <TraitSlider
@@ -381,10 +266,10 @@ function EmotionalMemorySection({ p, onChange }: { p: CharacterPersonality; onCh
             className={cn('flex items-center justify-between px-4 py-3 bg-[var(--surface-1)]', i < memoryRows.length - 1 && 'border-b border-[var(--border-subtle)]')}
           >
             <div>
-              <p className="text-[14px] font-medium text-[var(--text-primary)]">{row.label}</p>
-              <p className="text-[12px] text-[var(--text-tertiary)]">{row.desc}</p>
+              <p className="text-body font-medium text-[var(--text-primary)]">{row.label}</p>
+              <p className="text-xs text-[var(--text-tertiary)]">{row.desc}</p>
             </div>
-            <span className={cn('text-[12px] font-semibold px-2 py-0.5 rounded-md text-[var(--text-secondary)] bg-[var(--surface-2)] shrink-0 ml-3', row.badgeStyle)}>
+            <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-md text-[var(--text-secondary)] bg-[var(--surface-2)] shrink-0 ml-3', row.badgeStyle)}>
               {row.badge}
             </span>
           </div>
@@ -411,7 +296,7 @@ export default function EmotionPage() {
       <header className="mb-9">
         <div className="flex items-center gap-2">
           <h1 className="text-[1.625rem] font-semibold leading-8 text-[var(--text-heading)]">Emotion</h1>
-          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[12px] font-semibold text-blue-500 capitalize">
+          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-500 capitalize">
             Beta
           </span>
         </div>
