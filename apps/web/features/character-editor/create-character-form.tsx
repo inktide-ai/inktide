@@ -24,9 +24,9 @@ interface CreateCharacterFormProps {
   defaultValues: Omit<AiCharacter, 'id'>
 }
 
-const inputCls = 'w-full py-[0.625rem] px-[0.875rem] bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] rounded-[6px] text-(--text-primary) font-[var(--font-ui)] text-[0.8125rem] outline-none transition-[border-color,background] duration-[120ms] ease focus:border-white/20 focus:bg-[var(--panel-input-bg-hover)] placeholder:text-[rgba(139,144,154,0.45)]'
+const inputCls = 'w-full py-[0.625rem] px-[0.875rem] bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] rounded-[6px] text-(--text-primary) font-[var(--font-ui)] text-sm outline-none transition-[border-color,background] duration-[120ms] ease focus:border-white/20 focus:bg-[var(--panel-input-bg-hover)] placeholder:text-[rgba(139,144,154,0.45)]'
 const textareaCls = `${inputCls} min-h-[120px] resize-y leading-relaxed`
-const labelCls = 'block text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2'
+const labelCls = 'block text-body font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2'
 
 const CreateCharacterForm = ({ onSave, onCancel, defaultValues }: CreateCharacterFormProps) => {
   const { t } = useTranslation('profile')
@@ -79,7 +79,7 @@ const CreateCharacterForm = ({ onSave, onCancel, defaultValues }: CreateCharacte
                 key={tab.id}
                 type="button"
                 className={cn(
-                  'flex items-center gap-2 px-[0.875rem] py-2 bg-transparent border border-transparent rounded-lg font-[var(--font-ui)] text-[0.8125rem] font-medium cursor-pointer transition-all duration-200 ease',
+                  'flex items-center gap-2 px-[0.875rem] py-2 bg-transparent border border-transparent rounded-lg font-[var(--font-ui)] text-sm font-medium cursor-pointer transition-all duration-200 ease',
                   activeTab === tab.id
                     ? 'text-[#a78bfa] bg-[rgba(139,92,246,0.15)]'
                     : 'text-(--text-muted) hover:text-(--text-primary) hover:bg-white/[0.04]',
@@ -96,7 +96,7 @@ const CreateCharacterForm = ({ onSave, onCancel, defaultValues }: CreateCharacte
         </div>
         <button
           type="button"
-          className="flex items-center gap-2 px-5 py-2 bg-(--accent-red) text-white border-none rounded-lg font-[var(--font-ui)] text-[0.8125rem] font-semibold cursor-pointer transition-[background] duration-200 ease mr-4 shrink-0 hover:bg-(--accent-red-bright) [&>svg]:w-4 [&>svg]:h-4"
+          className="flex items-center gap-2 px-5 py-2 bg-(--accent-red) text-white border-none rounded-lg font-[var(--font-ui)] text-sm font-semibold cursor-pointer transition-[background] duration-200 ease mr-4 shrink-0 hover:bg-(--accent-red-bright) [&>svg]:w-4 [&>svg]:h-4"
           onClick={handleSave}
         >
           <PlusIcon />
@@ -168,25 +168,25 @@ const CreateIdentitySection = ({ draft, greeting, onUpdate, setGreeting, avatarR
           <div className="mb-7">
             <label className={labelCls} htmlFor="create-name">{t('create.field.name')}</label>
             <input id="create-name" className={inputCls} placeholder={t('create.field.namePlaceholder')} value={draft.name} onChange={(e) => onUpdate({ name: e.target.value.slice(0, 20) })} maxLength={20} />
-            <div className="flex justify-end mt-1 text-[0.75rem] text-(--text-muted)">{draft.name.length}/20</div>
+            <div className="flex justify-end mt-1 text-xs text-(--text-muted)">{draft.name.length}/20</div>
           </div>
 
           <div className="mb-7">
             <label className={labelCls} htmlFor="create-slug">{t('create.field.slug')}</label>
             <input id="create-slug" className={inputCls} placeholder={t('create.field.slugPlaceholder')} value={draft.slug} onChange={(e) => onUpdate({ slug: e.target.value.slice(0, 50) })} maxLength={50} />
-            <div className="flex justify-end mt-1 text-[0.75rem] text-(--text-muted)">{draft.slug.length}/50</div>
+            <div className="flex justify-end mt-1 text-xs text-(--text-muted)">{draft.slug.length}/50</div>
           </div>
 
           <div className="mb-7">
             <label className={labelCls} htmlFor="create-personality">{t('create.field.description')}</label>
             <textarea id="create-personality" className={textareaCls} placeholder={t('create.field.descriptionPlaceholder')} value={draft.personality} onChange={(e) => onUpdate({ personality: e.target.value.slice(0, 500) })} maxLength={500} />
-            <div className="flex justify-end mt-1 text-[0.75rem] text-(--text-muted)">{draft.personality.length}/500</div>
+            <div className="flex justify-end mt-1 text-xs text-(--text-muted)">{draft.personality.length}/500</div>
           </div>
 
           <div className="mb-7">
             <label className={labelCls} htmlFor="create-greeting">{t('create.field.greeting')}</label>
             <textarea id="create-greeting" className={textareaCls} placeholder={t('create.field.greetingPlaceholder')} value={greeting} onChange={(e) => setGreeting(e.target.value.slice(0, 500))} maxLength={500} />
-            <div className="flex justify-end mt-1 text-[0.75rem] text-(--text-muted)">{greeting.length}/500</div>
+            <div className="flex justify-end mt-1 text-xs text-(--text-muted)">{greeting.length}/500</div>
           </div>
 
           <div className="mb-7">
