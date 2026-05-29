@@ -9,10 +9,12 @@ public sealed class ProfileDbContext : Microsoft.EntityFrameworkCore.DbContext
     public ProfileDbContext(DbContextOptions<ProfileDbContext> options) : base(options) { }
 
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<UserPreferences> UserPreferences => Set<UserPreferences>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new UserProfileConfiguration());
+        modelBuilder.ApplyConfiguration(new UserPreferencesConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 }

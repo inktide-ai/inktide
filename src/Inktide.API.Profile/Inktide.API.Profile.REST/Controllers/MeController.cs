@@ -1,9 +1,11 @@
 using System.Security.Claims;
 using Inktide.API.Core;
+using Inktide.API.Profile.Application.Entities;
 using Inktide.API.Profile.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace Inktide.API.Profile.REST.Controllers;
 
@@ -19,12 +21,14 @@ public sealed class MeController : ControllerBase
 
     private readonly IUserAccountDeletionService _accountDeletion;
     private readonly IUserAvatarService _avatar;
+    private readonly IUserPreferencesService _preferences;
 
 
-    public MeController(IUserAccountDeletionService accountDeletion, IUserAvatarService avatar)
+    public MeController(IUserAccountDeletionService accountDeletion, IUserAvatarService avatar, IUserPreferencesService preferences)
     {
         _accountDeletion = accountDeletion ?? throw new ArgumentNullException(nameof(accountDeletion));
         _avatar = avatar ?? throw new ArgumentNullException(nameof(avatar));
+        _preferences = preferences ?? throw new ArgumentNullException(nameof(preferences));
     }
 
 
@@ -129,6 +133,158 @@ public sealed class MeController : ControllerBase
         public bool IdentityRemovedFromKeycloak { get; init; }
         public bool KeycloakAdminSkipped { get; init; }
         public string? Warning { get; init; }
+    }
+
+    // ── Preferences ──────────────────────────────────────────────────────────────
+
+    [HttpGet("preferences")]
+    [ProducesResponseType(typeof(GlobalPreferencesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetGlobalPreferences(CancellationToken ct)
+    {
+        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (sub is null) return Unauthorized();
+
+        var result = await _preferences.GetGlobalAsync(sub, ct).ConfigureAwait(false);
+        return Ok(ToGlobalResponse(result));
+    }
+
+    [HttpPatch("preferences")]
+    [ProducesResponseType(typeof(GlobalPreferencesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> PatchGlobalPreferences([FromBody] PatchGlobalPreferencesRequest body, CancellationToken ct)
+    {
+        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (sub is null) return Unauthorized();
+
+        var appearance = body.Appearance is null ? null : new AppearancePrefs(
+            body.Appearance.Theme ?? AppearancePrefs.Default.Theme,
+            body.Appearance.AccentColor ?? AppearancePrefs.Default.AccentColor,
+            body.Appearance.FontSize ?? AppearancePrefs.Default.FontSize,
+            body.Appearance.Compact ?? AppearancePrefs.Default.Compact,
+            body.Appearance.ReduceMotion ?? AppearancePrefs.Default.ReduceMotion);
+
+        var notifications = body.Notifications is null ? null : new NotifPrefs(
+            body.Notifications.Enabled ?? NotifPrefs.Default.Enabled,
+            body.Notifications.EmailMentions ?? NotifPrefs.Default.EmailMentions,
+            body.Notifications.EmailMessages ?? NotifPrefs.Default.EmailMessages,
+            body.Notifications.EmailProjectUpdates ?? NotifPrefs.Default.EmailProjectUpdates,
+            body.Notifications.EmailSystem ?? NotifPrefs.Default.EmailSystem,
+            body.Notifications.PushMentions ?? NotifPrefs.Default.PushMentions,
+            body.Notifications.PushMessages ?? NotifPrefs.Default.PushMessages,
+            body.Notifications.PushReminders ?? NotifPrefs.Default.PushReminders);
+
+        var result = await _preferences.PatchGlobalAsync(sub, appearance, body.Language, notifications, body.Favorites, ct).ConfigureAwait(false);
+        return Ok(ToGlobalResponse(result));
+    }
+
+    [HttpGet("preferences/workspace/{characterId}")]
+    [ProducesResponseType(typeof(WorkspacePreferencesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetWorkspacePreferences(string characterId, CancellationToken ct)
+    {
+        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (sub is null) return Unauthorized();
+
+        var result = await _preferences.GetWorkspaceAsync(sub, characterId, ct).ConfigureAwait(false);
+        return Ok(ToWorkspaceResponse(result));
+    }
+
+    [HttpPatch("preferences/workspace/{characterId}")]
+    [ProducesResponseType(typeof(WorkspacePreferencesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> PatchWorkspacePreferences(string characterId, [FromBody] PatchWorkspacePreferencesRequest body, CancellationToken ct)
+    {
+        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (sub is null) return Unauthorized();
+
+        var hubLayout = body.HubLayout?.ToString(Newtonsoft.Json.Formatting.None);
+        var sceneSettings = body.SceneSettings?.ToString(Newtonsoft.Json.Formatting.None);
+
+        var result = await _preferences.PatchWorkspaceAsync(sub, characterId, hubLayout, sceneSettings, ct).ConfigureAwait(false);
+        return Ok(ToWorkspaceResponse(result));
+    }
+
+    private static GlobalPreferencesResponse ToGlobalResponse(UserPreferencesGlobal g) => new()
+    {
+        Appearance = new AppearancePrefDto
+        {
+            Theme = g.Appearance.Theme,
+            AccentColor = g.Appearance.AccentColor,
+            FontSize = g.Appearance.FontSize,
+            Compact = g.Appearance.Compact,
+            ReduceMotion = g.Appearance.ReduceMotion,
+        },
+        Language = g.Language,
+        Notifications = new NotifPrefDto
+        {
+            Enabled = g.Notifications.Enabled,
+            EmailMentions = g.Notifications.EmailMentions,
+            EmailMessages = g.Notifications.EmailMessages,
+            EmailProjectUpdates = g.Notifications.EmailProjectUpdates,
+            EmailSystem = g.Notifications.EmailSystem,
+            PushMentions = g.Notifications.PushMentions,
+            PushMessages = g.Notifications.PushMessages,
+            PushReminders = g.Notifications.PushReminders,
+        },
+        Favorites = g.Favorites,
+    };
+
+    private static WorkspacePreferencesResponse ToWorkspaceResponse(UserPreferencesWorkspace w) => new()
+    {
+        HubLayout = w.HubLayout is null ? null : JToken.Parse(w.HubLayout),
+        SceneSettings = w.SceneSettings is null ? null : JToken.Parse(w.SceneSettings),
+    };
+
+    // ── DTOs ─────────────────────────────────────────────────────────────────────
+
+    public sealed class GlobalPreferencesResponse
+    {
+        public AppearancePrefDto Appearance { get; init; } = new();
+        public string Language { get; init; } = "en";
+        public NotifPrefDto Notifications { get; init; } = new();
+        public string[] Favorites { get; init; } = [];
+    }
+
+    public sealed class WorkspacePreferencesResponse
+    {
+        public JToken? HubLayout { get; init; }
+        public JToken? SceneSettings { get; init; }
+    }
+
+    public sealed class PatchGlobalPreferencesRequest
+    {
+        public AppearancePrefDto? Appearance { get; init; }
+        public string? Language { get; init; }
+        public NotifPrefDto? Notifications { get; init; }
+        public string[]? Favorites { get; init; }
+    }
+
+    public sealed class PatchWorkspacePreferencesRequest
+    {
+        public JToken? HubLayout { get; init; }
+        public JToken? SceneSettings { get; init; }
+    }
+
+    public sealed class AppearancePrefDto
+    {
+        public string? Theme { get; init; }
+        public string? AccentColor { get; init; }
+        public string? FontSize { get; init; }
+        public bool? Compact { get; init; }
+        public bool? ReduceMotion { get; init; }
+    }
+
+    public sealed class NotifPrefDto
+    {
+        public bool? Enabled { get; init; }
+        public bool? EmailMentions { get; init; }
+        public bool? EmailMessages { get; init; }
+        public bool? EmailProjectUpdates { get; init; }
+        public bool? EmailSystem { get; init; }
+        public bool? PushMentions { get; init; }
+        public bool? PushMessages { get; init; }
+        public bool? PushReminders { get; init; }
     }
 
 }

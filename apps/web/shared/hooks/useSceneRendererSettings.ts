@@ -1,6 +1,7 @@
 'use client'
-import { useState, useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import type { LookAtMode } from '@/shared/types/IVrmController'
+import { useWorkspacePreferences, useDebouncedWorkspacePatch } from './useWorkspacePreferences'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -45,58 +46,32 @@ export const SCENE_RENDERER_DEFAULTS: SceneRendererSettings = {
   ambientColor: '#ffffff',
 }
 
-// ── Storage ───────────────────────────────────────────────────────────────────
-
-function storageKey(cardId: string) {
-  return `v1_inktide_scene_settings_${cardId}`
-}
-
-function loadFromStorage(cardId: string): SceneRendererSettings {
-  if (typeof window === 'undefined') return SCENE_RENDERER_DEFAULTS
-  try {
-    const raw = localStorage.getItem(storageKey(cardId))
-    if (!raw) return SCENE_RENDERER_DEFAULTS
-    const parsed: unknown = JSON.parse(raw)
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      return SCENE_RENDERER_DEFAULTS
-    }
-    return { ...SCENE_RENDERER_DEFAULTS, ...(parsed as Partial<SceneRendererSettings>) }
-  } catch {
-    return SCENE_RENDERER_DEFAULTS
-  }
-}
-
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useSceneRendererSettings(cardId: string) {
-  const [settings, setSettingsState] = useState<SceneRendererSettings>(
-    () => loadFromStorage(cardId),
-  )
+  const { data } = useWorkspacePreferences(cardId)
+  const dispatch = useDebouncedWorkspacePatch(cardId, 200)
 
-  // Reload when the active card changes
-  useEffect(() => {
-    setSettingsState(loadFromStorage(cardId))
-  }, [cardId])
+  const settings: SceneRendererSettings = (() => {
+    try {
+      const raw = data?.sceneSettings
+      if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+        return { ...SCENE_RENDERER_DEFAULTS, ...(raw as Partial<SceneRendererSettings>) }
+      }
+    } catch { /* ignore */ }
+    return SCENE_RENDERER_DEFAULTS
+  })()
 
   const setSettings = useCallback(
     (patch: Partial<SceneRendererSettings>) => {
-      setSettingsState((prev) => {
-        const next = { ...prev, ...patch }
-        if (typeof window !== 'undefined') {
-          try { localStorage.setItem(storageKey(cardId), JSON.stringify(next)) } catch { /* quota */ }
-        }
-        return next
-      })
+      dispatch({ sceneSettings: { ...settings, ...patch } })
     },
-    [cardId],
+    [dispatch, settings],
   )
 
   const resetSettings = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      try { localStorage.removeItem(storageKey(cardId)) } catch { /* ignore */ }
-    }
-    setSettingsState(SCENE_RENDERER_DEFAULTS)
-  }, [cardId])
+    dispatch({ sceneSettings: SCENE_RENDERER_DEFAULTS })
+  }, [dispatch])
 
   return { settings, setSettings, resetSettings }
 }

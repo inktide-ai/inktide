@@ -1,5 +1,6 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
+import { useWorkspacePreferences, useDebouncedWorkspacePatch } from './useWorkspacePreferences'
 
 export type HubTabId =
   | 'profile' | 'skills' | 'avatars' | 'scene' | 'memory'
@@ -51,34 +52,6 @@ function isValidSoulLayout(parsed: unknown): parsed is CardLayout[] {
   )
 }
 
-export function useSoulHubLayout(soulId: string) {
-  const key = `inktide_soul_hub_layout_${soulId}`
-
-  const [layout, setLayout] = useState<CardLayout[]>(() => {
-    if (typeof window === 'undefined') return SOUL_DEFAULT_LAYOUT
-    try {
-      const raw = localStorage.getItem(key)
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        if (isValidSoulLayout(parsed)) return parsed
-      }
-    } catch { /* ignore */ }
-    return SOUL_DEFAULT_LAYOUT
-  })
-
-  const updateLayout = useCallback((newLayout: CardLayout[]) => {
-    setLayout(newLayout)
-    try { localStorage.setItem(key, JSON.stringify(newLayout)) } catch { /* quota */ }
-  }, [key])
-
-  const resetLayout = useCallback(() => {
-    setLayout(SOUL_DEFAULT_LAYOUT)
-    try { localStorage.removeItem(key) } catch { /* quota */ }
-  }, [key])
-
-  return { layout, updateLayout, resetLayout }
-}
-
 function isValidLayout(parsed: unknown): parsed is CardLayout[] {
   if (!Array.isArray(parsed) || parsed.length !== DEFAULT_LAYOUT.length) return false
   return parsed.every(
@@ -91,30 +64,53 @@ function isValidLayout(parsed: unknown): parsed is CardLayout[] {
   )
 }
 
-export function useHubLayout(characterId: string) {
-  const key = `inktide_hub_layout_${characterId}`
+// ── Soul hub layout (on souls/[id] pages) ────────────────────────────────────
+// Soul hub uses the workspace preferences keyed by soulId.
 
-  const [layout, setLayout] = useState<CardLayout[]>(() => {
-    if (typeof window === 'undefined') return DEFAULT_LAYOUT
+export function useSoulHubLayout(soulId: string) {
+  const { data } = useWorkspacePreferences(soulId)
+  const dispatch = useDebouncedWorkspacePatch(soulId, 500)
+
+  const layout: CardLayout[] = (() => {
     try {
-      const raw = localStorage.getItem(key)
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        if (isValidLayout(parsed)) return parsed
-      }
+      const raw = data?.hubLayout
+      if (raw && isValidSoulLayout(raw)) return raw as CardLayout[]
     } catch { /* ignore */ }
-    return DEFAULT_LAYOUT
-  })
+    return SOUL_DEFAULT_LAYOUT
+  })()
 
   const updateLayout = useCallback((newLayout: CardLayout[]) => {
-    setLayout(newLayout)
-    try { localStorage.setItem(key, JSON.stringify(newLayout)) } catch { /* quota */ }
-  }, [key])
+    dispatch({ hubLayout: newLayout })
+  }, [dispatch])
 
   const resetLayout = useCallback(() => {
-    setLayout(DEFAULT_LAYOUT)
-    try { localStorage.removeItem(key) } catch { /* quota */ }
-  }, [key])
+    dispatch({ hubLayout: SOUL_DEFAULT_LAYOUT })
+  }, [dispatch])
+
+  return { layout, updateLayout, resetLayout }
+}
+
+// ── Character settings hub layout ────────────────────────────────────────────
+
+export function useHubLayout(characterId: string) {
+  const { data } = useWorkspacePreferences(characterId)
+  const dispatch = useDebouncedWorkspacePatch(characterId, 500)
+
+  const layout: CardLayout[] = (() => {
+    try {
+      const raw = data?.hubLayout
+      if (raw && isValidLayout(raw)) return raw as CardLayout[]
+    } catch { /* ignore */ }
+    return DEFAULT_LAYOUT
+  })()
+
+  const updateLayout = useCallback((newLayout: CardLayout[]) => {
+    dispatch({ hubLayout: newLayout })
+  }, [dispatch])
+
+  const resetLayout = useCallback(() => {
+    dispatch({ hubLayout: DEFAULT_LAYOUT })
+  }, [dispatch])
 
   return { layout, updateLayout, resetLayout }
 }

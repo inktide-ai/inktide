@@ -25,6 +25,10 @@ export const queryKeys = {
     profile: ['me'] as const,
     avatar: (userId: string) => ['me', 'avatar', userId] as const,
     storage: ['me', 'storage'] as const,
+    preferences: {
+      global: ['me', 'preferences', 'global'] as const,
+      workspace: (characterId: string) => ['me', 'preferences', 'workspace', characterId] as const,
+    },
   },
   marketplace: {
     connectors: ['marketplace', 'connectors'] as const,

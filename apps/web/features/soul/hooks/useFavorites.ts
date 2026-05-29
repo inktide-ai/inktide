@@ -1,29 +1,17 @@
 'use client'
-import { useState } from 'react'
-
-const KEY = 'v1_inktide_favorites'
+import { useGlobalPreferences, usePatchGlobalPreferences } from '@/shared/hooks/useGlobalPreferences'
 
 export function useFavorites() {
-  const [favs, setFavs] = useState<Set<string>>(() => {
-    if (typeof window === 'undefined') return new Set()
-    try { return new Set(JSON.parse(localStorage.getItem(KEY) ?? '[]') as string[]) }
-    catch { return new Set() }
-  })
+  const { data } = useGlobalPreferences()
+  const { mutate } = usePatchGlobalPreferences()
 
-  const toggle = (id: string) => setFavs(prev => {
-    const next = new Set(prev)
+  const favs = new Set<string>(data?.favorites ?? [])
+
+  const toggle = (id: string) => {
+    const next = new Set(favs)
     next.has(id) ? next.delete(id) : next.add(id)
-    try {
-      localStorage.setItem(KEY, JSON.stringify([...next]))
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'QuotaExceededError') {
-        console.warn('[useFavorites] localStorage quota exceeded — favorites not persisted')
-      } else {
-        throw err
-      }
-    }
-    return next
-  })
+    mutate({ favorites: [...next] })
+  }
 
   return { favs, toggle }
 }

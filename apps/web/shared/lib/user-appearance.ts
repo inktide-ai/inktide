@@ -1,8 +1,11 @@
 /**
- * Client preferences for Appearance (account settings). Persisted to localStorage.
+ * Client preferences for Appearance (account settings).
+ * Source of truth: server (GET /api/me/preferences).
+ * localStorage is used only as a warm read-through cache for zero-flicker paint.
  * Accent hex is synced to `--inktide-accent-base` on `<html>`; see globals.css derivatives.
  */
 
+// Key kept for backward compat — useGlobalPreferences migration reads it once then removes it.
 export const USER_APPEARANCE_STORAGE_KEY = 'inktide_user_appearance' as const
 
 export interface AppearancePrefs {
@@ -70,13 +73,6 @@ export function loadAppearancePrefs(): AppearancePrefs {
   catch {
     return DEFAULT_APPEARANCE_PREFS
   }
-}
-
-/** Persist full prefs and update accent CSS immediately. */
-export function saveAppearancePrefs(p: AppearancePrefs): void {
-  if (typeof localStorage === 'undefined') return
-  localStorage.setItem(USER_APPEARANCE_STORAGE_KEY, JSON.stringify(p))
-  applyUserAccent(p.accentColor)
 }
 
 /** Re-read storage and refresh accent tokens (startup + cross-tab sync). */

@@ -24,6 +24,8 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
         registrator.Register<IKeycloakAdminClient, KeycloakAdminClient>(Reuse.Singleton);
         registrator.Register<IUserAccountDeletionService, UserAccountDeletionService>(Reuse.Scoped);
         registrator.Register<IUserProfileRepository, UserProfileRepository>(Reuse.Scoped);
+        registrator.Register<IUserPreferencesRepository, UserPreferencesRepository>(Reuse.Scoped);
+        registrator.Register<IUserPreferencesService, UserPreferencesService>(Reuse.Scoped);
         registrator.Register<IUserAvatarService, UserAvatarService>(Reuse.Scoped);
         registrator.Register<IImageProcessingService, ImageProcessingService>(Reuse.Singleton);
 
