@@ -25,10 +25,10 @@ const PRESETS: Record<PresetId, Omit<CharacterPersonality, 'presetId'>> = {
 
 const sectionCls = 'flex flex-col gap-3 border-t border-(--border) pt-4 mt-6 [&:first-child]:border-t-0 [&:first-child]:pt-0 [&:first-child]:mt-0'
 const sectionTitle = 'text-[1.125rem] font-bold text-(--text-primary) tracking-[-0.02em] mb-2'
-const labelHint = 'text-[0.75rem] text-(--text-muted) mt-0.5 leading-[1.4]'
+const labelHint = 'text-xs text-(--text-muted) mt-0.5 leading-[1.4]'
 const sliderHeader = 'flex justify-between items-start gap-4 mb-3'
-const sliderValue = 'text-[0.6875rem] font-semibold font-mono text-(--accent-red-bright) bg-[linear-gradient(135deg,rgba(237,62,62,0.15),rgba(237,62,62,0.08))] py-0.5 px-[0.375rem] rounded-[0.25rem] border border-[rgba(237,62,62,0.2)] shrink-0'
-const labelInBlock = 'block text-[0.9375rem] font-bold text-(--text-primary) mb-1'
+const sliderValue = 'text-caption font-semibold font-mono text-(--accent-red-bright) bg-[linear-gradient(135deg,rgba(237,62,62,0.15),rgba(237,62,62,0.08))] py-0.5 px-[0.375rem] rounded-[0.25rem] border border-[rgba(237,62,62,0.2)] shrink-0'
+const labelInBlock = 'block text-body-md font-bold text-(--text-primary) mb-1'
 const toggleRow = 'flex items-center justify-between py-2 mb-12 last:mb-0'
 const inactive = 'opacity-45 pointer-events-none transition-opacity duration-200 ease'
 
@@ -37,10 +37,10 @@ interface BehaviorTabProps {
   onUpdate: (patch: Partial<AiCharacter>) => void
 }
 
-const presetPill = 'px-3 py-1.5 rounded-[0.375rem] text-[0.8125rem] font-semibold font-[var(--font-ui)] border transition-all duration-150 cursor-pointer'
+const presetPill = 'px-3 py-1.5 rounded-[0.375rem] text-sm font-semibold font-[var(--font-ui)] border transition-all duration-150 cursor-pointer'
 const presetPillActive = 'bg-[linear-gradient(135deg,rgba(139,92,246,0.25),rgba(109,40,217,0.15))] border-[rgba(139,92,246,0.6)] text-(--accent-purple-bright) shadow-[0_0_0_1px_rgba(139,92,246,0.15)]'
 const presetPillInactive = 'bg-transparent border-(--border) text-(--text-muted) hover:border-[rgba(139,92,246,0.35)] hover:text-(--text-primary)'
-const traitHintRow = 'flex justify-between text-[0.6875rem] text-(--text-muted) mt-1 px-0.5'
+const traitHintRow = 'flex justify-between text-caption text-(--text-muted) mt-1 px-0.5'
 
 function PersonalitySection({ personality, onUpdate, t }: {
   personality: CharacterPersonality
@@ -62,7 +62,7 @@ function PersonalitySection({ personality, onUpdate, t }: {
 
       {/* Preset Pills */}
       <div className="mb-6">
-        <div className="text-[0.75rem] font-semibold text-(--text-muted) uppercase tracking-[0.06em] mb-2">{t('personality.presetsLabel')}</div>
+        <div className="text-xs font-semibold text-(--text-muted) uppercase tracking-[0.06em] mb-2">{t('personality.presetsLabel')}</div>
         <div className="flex flex-wrap gap-2">
           {allPresets.map((id) => (
             <button
@@ -79,7 +79,7 @@ function PersonalitySection({ personality, onUpdate, t }: {
 
       {/* Core Traits */}
       <div className="mb-5">
-        <div className="text-[0.75rem] font-semibold text-(--text-muted) uppercase tracking-[0.06em] mb-4">{t('personality.traitsTitle')}</div>
+        <div className="text-xs font-semibold text-(--text-muted) uppercase tracking-[0.06em] mb-4">{t('personality.traitsTitle')}</div>
         {(
           [
             ['warmth',        'warmth'],
@@ -115,7 +115,7 @@ function PersonalitySection({ personality, onUpdate, t }: {
 
       {/* Emotional Dynamics */}
       <div className="mb-5">
-        <div className="text-[0.75rem] font-semibold text-(--text-muted) uppercase tracking-[0.06em] mb-4">{t('personality.dynamicsTitle')}</div>
+        <div className="text-xs font-semibold text-(--text-muted) uppercase tracking-[0.06em] mb-4">{t('personality.dynamicsTitle')}</div>
         {(
           [
             ['emotionVolatility',     'volatility'],
@@ -149,7 +149,7 @@ function PersonalitySection({ personality, onUpdate, t }: {
       {/* Stress Behavior + Baseline Mood */}
       <div className="flex flex-col gap-5">
         <div>
-          <label className="block text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary) mb-1">{t('personality.stressBehavior.label')}</label>
+          <label className="block text-body font-semibold font-[var(--font-ui)] text-(--text-primary) mb-1">{t('personality.stressBehavior.label')}</label>
           <div className={labelHint + ' mb-2'}>{t('personality.stressBehavior.hint')}</div>
           <CustomSelect
             value={personality.stressBehavior}
@@ -158,7 +158,7 @@ function PersonalitySection({ personality, onUpdate, t }: {
           />
         </div>
         <div className="mb-3">
-          <label className="block text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary) mb-1">{t('personality.baselineMood.label')}</label>
+          <label className="block text-body font-semibold font-[var(--font-ui)] text-(--text-primary) mb-1">{t('personality.baselineMood.label')}</label>
           <div className={labelHint + ' mb-2'}>{t('personality.baselineMood.hint')}</div>
           <CustomSelect
             value={personality.baselineMood}
@@ -193,7 +193,7 @@ function ToggleRow({ label, hint, checked, onChange }: { label: string; hint: st
   return (
     <div className={toggleRow}>
       <div>
-        <div className="text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary)">{label}</div>
+        <div className="text-body font-semibold font-[var(--font-ui)] text-(--text-primary)">{label}</div>
         <div className={labelHint}>{hint}</div>
       </div>
       <label className="toggle-control">
@@ -230,7 +230,7 @@ const BehaviorTab = ({ character, onUpdate }: BehaviorTabProps) => {
           <SliderGroup label={t('response.maxLength.label')} hint={t('response.maxLength.hint')} value={character.behavior.maxResponseLength} display={`${character.behavior.maxResponseLength} chars`} min={50} max={2000} step={50} format={(v) => String(v)} tickCount={5} onChange={(v) => onUpdate({ behavior: { ...character.behavior, maxResponseLength: v } })} />
           <SliderGroup label={t('response.emotionScale.label')} hint={t('response.emotionScale.hint')} value={character.behavior.emotionIntensityScale} display={`${character.behavior.emotionIntensityScale.toFixed(2)}×`} min={0} max={2} step={0.05} format={(v) => v.toFixed(1)} tickCount={5} onChange={(v) => onUpdate({ behavior: { ...character.behavior, emotionIntensityScale: v } })} />
           <div className="mb-7">
-            <label className="block text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2">{t('response.language.label')}</label>
+            <label className="block text-body font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2">{t('response.language.label')}</label>
             <div className={labelHint}>{t('response.language.hint')}</div>
             <CustomSelect value={character.behavior.language} options={LANGUAGE_OPTIONS} onChange={(v) => onUpdate({ behavior: { ...character.behavior, language: v } })} />
           </div>
@@ -273,7 +273,7 @@ const BehaviorTab = ({ character, onUpdate }: BehaviorTabProps) => {
             <SliderGroup label={t('autoPilot.idleTimeout.label')} hint={t('autoPilot.idleTimeout.hint')} value={character.autoPilot.idleTimeoutSeconds} display={`${character.autoPilot.idleTimeoutSeconds}s`} min={30} max={600} step={10} format={(v) => `${v}s`} tickCount={6} disabled={!character.autoPilot.enabled} onChange={(v) => onUpdate({ autoPilot: { ...character.autoPilot, idleTimeoutSeconds: v } })} />
             <SliderGroup label={t('autoPilot.minInterval.label')} hint={t('autoPilot.minInterval.hint')} value={character.autoPilot.minIntervalSeconds} display={`${character.autoPilot.minIntervalSeconds}s`} min={10} max={300} step={10} format={(v) => `${v}s`} tickCount={6} disabled={!character.autoPilot.enabled} onChange={(v) => onUpdate({ autoPilot: { ...character.autoPilot, minIntervalSeconds: v } })} />
             <div className="mb-7">
-              <label className="block text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2">{t('autoPilot.mood.label')}</label>
+              <label className="block text-body font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2">{t('autoPilot.mood.label')}</label>
               <div className={labelHint}>{t('autoPilot.mood.hint')}</div>
               <CustomSelect value={character.autoPilot.mood} options={moodOptions} onChange={(v) => onUpdate({ autoPilot: { ...character.autoPilot, mood: v } })} disabled={!character.autoPilot.enabled} />
             </div>

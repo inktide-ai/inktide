@@ -1,6 +1,7 @@
 'use client'
 
 import { Star } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Card } from '@/shared/ui/card'
 import type { SoulCardData, SoulStatus } from './soul-card'
 
@@ -11,13 +12,6 @@ const STATUS_DOT: Record<SoulStatus, string> = {
   active:  '#22c55e',
   idle:    '#9ca3af',
   offline: '#9ca3af',
-}
-
-const STATUS_LABEL: Record<SoulStatus, string> = {
-  online:  'Online',
-  active:  'Active',
-  idle:    'Idle',
-  offline: 'Offline',
 }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -40,6 +34,15 @@ interface SoulCardVerticalProps {
 }
 
 export function SoulCardVertical({ data, isFavorite, onFavoriteToggle, onOpen }: SoulCardVerticalProps) {
+  const { t } = useTranslation('common')
+
+  const STATUS_LABEL: Record<SoulStatus, string> = {
+    online:  t('soulCard.online'),
+    active:  t('soulCard.active'),
+    idle:    t('soulCard.idle'),
+    offline: t('soulCard.offline'),
+  }
+
   return (
     <Card
       className="w-full cursor-pointer overflow-hidden transition-shadow hover:shadow-md"
@@ -61,7 +64,7 @@ export function SoulCardVertical({ data, isFavorite, onFavoriteToggle, onOpen }:
             className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
             style={{ backgroundColor: STATUS_DOT[data.status] }}
           />
-          <span className="home-ui-font text-[12px] font-medium text-white">
+          <span className="home-ui-font text-xs font-medium text-white">
             {STATUS_LABEL[data.status]}
           </span>
         </div>
@@ -71,7 +74,7 @@ export function SoulCardVertical({ data, isFavorite, onFavoriteToggle, onOpen }:
           type="button"
           onClick={e => { e.stopPropagation(); onFavoriteToggle() }}
           className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-colors hover:bg-black/60"
-          title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          title={isFavorite ? t('soulCard.removeFavorite') : t('soulCard.addFavorite')}
         >
           <Star
             size={13}
@@ -84,17 +87,17 @@ export function SoulCardVertical({ data, isFavorite, onFavoriteToggle, onOpen }:
       {/* Content */}
       <div className="flex items-start justify-between px-3 py-2.5">
         <div className="min-w-0">
-          <p className="home-heading-font truncate text-[14px] font-semibold text-[var(--text-primary)]">
+          <p className="home-heading-font truncate text-body font-semibold text-[var(--text-primary)]">
             {data.name}
           </p>
-          <p className="home-ui-font mt-0.5 truncate text-[12px] text-[var(--text-secondary)]">
+          <p className="home-ui-font mt-0.5 truncate text-xs text-[var(--text-secondary)]">
             {data.subtitle}
           </p>
         </div>
         <button
           type="button"
           className="ml-2 flex-shrink-0 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-          title="More options"
+          title={t('soulCard.moreOptions')}
         >
           <IcDots />
         </button>

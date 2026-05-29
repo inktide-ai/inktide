@@ -44,7 +44,7 @@ const CustomSelect = ({
       <button
         type="button"
         className={cn(
-          'w-full flex items-center justify-between gap-2 px-[0.875rem] py-[0.625rem] bg-transparent border border-(--border) rounded-lg text-(--text-primary) font-[var(--font-ui)] text-[0.8125rem] cursor-pointer transition-[border-color,background] duration-200 ease outline-none text-left',
+          'w-full flex items-center justify-between gap-2 px-[0.875rem] py-[0.625rem] bg-transparent border border-(--border) rounded-lg text-(--text-primary) font-[var(--font-ui)] text-sm cursor-pointer transition-[border-color,background] duration-200 ease outline-none text-left',
           'hover:enabled:border-white/35',
           open && 'border-white/35',
           disabled && 'opacity-50 cursor-not-allowed',
@@ -71,7 +71,7 @@ const CustomSelect = ({
               key={opt.value}
               type="button"
               className={cn(
-                'w-full px-[0.875rem] py-[0.625rem] bg-none border-none text-(--text-primary) font-[var(--font-ui)] text-[0.8125rem] text-left cursor-pointer transition-[background] duration-150 ease',
+                'w-full px-[0.875rem] py-[0.625rem] bg-none border-none text-(--text-primary) font-[var(--font-ui)] text-sm text-left cursor-pointer transition-[background] duration-150 ease',
                 'hover:bg-white/[0.06]',
                 opt.value === value
                   ? 'bg-[rgba(237,62,62,0.12)] text-(--accent-red-bright) hover:bg-[rgba(237,62,62,0.18)]'

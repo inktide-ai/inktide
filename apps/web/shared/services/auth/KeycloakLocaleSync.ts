@@ -1,14 +1,12 @@
-import i18n from '@/i18n/i18n'
 import type { ILocaleSync } from '@/shared/types/ILocaleSync'
 
-const SUPPORTED = new Set(['en', 'ru'])
-
-/** SRP: единственная ответственность — синхронизировать язык i18n из locale-клейма токена. */
+/**
+ * Language is managed via the user's global preferences (LanguageSync component).
+ * The Keycloak token locale is intentionally not applied — it reflects the browser's
+ * UI language at registration time and would override the user's explicit language choice.
+ */
 export class KeycloakLocaleSync implements ILocaleSync {
-  sync(locale: string | undefined): void {
-    const lang = locale?.split('-')[0] // 'ru-RU' → 'ru'
-    if (lang && SUPPORTED.has(lang)) {
-      void i18n.changeLanguage(lang)
-    }
+  sync(_locale: string | undefined): void {
+    // no-op
   }
 }

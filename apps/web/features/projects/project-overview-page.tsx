@@ -8,6 +8,7 @@ import {
   Box, Check, ChevronRight, Copy, Cpu, FlaskConical,
   ImageIcon, Layers, Monitor, Pause, Pencil, Play, Radio,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { queryKeys } from '@/shared/lib/query/keys'
 import { SOULS_ROUTE } from '@/lib/routes'
 import { inferModelType } from '@/shared/lib/utils/model-type'
@@ -24,6 +25,7 @@ export function ProjectOverviewPage() {
   const router = useRouter()
   const qc = useQueryClient()
   const base = `/projects/${id}`
+  const { t } = useTranslation('common')
 
   const {
     project,
@@ -113,7 +115,7 @@ export function ProjectOverviewPage() {
   if (!project) {
     return (
       <div className="flex h-full items-center justify-center text-body text-[var(--text-tertiary)]">
-        Project not found
+        {t('projectDetail.projectNotFound')}
       </div>
     )
   }
@@ -135,7 +137,7 @@ export function ProjectOverviewPage() {
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="Description (optional)"
+                placeholder={t('projectDetail.descriptionPlaceholder')}
                 rows={2}
                 className="w-full resize-none rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 py-2 text-body text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)] placeholder:text-[var(--text-tertiary)]"
               />
@@ -146,14 +148,14 @@ export function ProjectOverviewPage() {
                   onClick={handleSave}
                   className="h-8 rounded-lg bg-[var(--accent-primary)] px-4 text-body font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-50"
                 >
-                  {saving ? 'Saving…' : 'Save'}
+                  {saving ? t('projectDetail.saving') : t('projectDetail.save')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setEditing(false); setName(project.name); setDescription(project.description ?? '') }}
                   className="h-8 rounded-lg border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-4 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
                 >
-                  Cancel
+                  {t('projectDetail.cancel')}
                 </button>
               </div>
             </div>
@@ -177,7 +179,7 @@ export function ProjectOverviewPage() {
               onClick={() => setEditing(true)}
               className="flex h-9 items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
             >
-              <Pencil size={13} /> Edit
+              <Pencil size={13} /> {t('projectDetail.edit')}
             </button>
             <button
               type="button"
@@ -186,8 +188,8 @@ export function ProjectOverviewPage() {
               className="flex h-9 items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-2)] disabled:opacity-40"
             >
               {project.status === 'paused'
-                ? <><Play size={13} /> Resume</>
-                : <><Pause size={13} /> Pause</>
+                ? <><Play size={13} /> {t('projectDetail.resume')}</>
+                : <><Pause size={13} /> {t('projectDetail.pause')}</>
               }
             </button>
             <button
@@ -195,7 +197,7 @@ export function ProjectOverviewPage() {
               onClick={() => router.push(`${base}/character`)}
               className="flex h-9 items-center gap-1.5 rounded-xl bg-[var(--accent-primary)] px-4 text-body font-medium text-white hover:bg-[var(--accent-hover)]"
             >
-              <Cpu size={13} /> Open Character
+              <Cpu size={13} /> {t('projectDetail.openCharacter')}
             </button>
           </div>
         )}
@@ -223,7 +225,7 @@ export function ProjectOverviewPage() {
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-[var(--surface-2)] to-[var(--bg-deeper,var(--bg-0))]">
               <div className="flex flex-col items-center gap-2 text-[var(--text-tertiary)]">
                 <ImageIcon size={36} strokeWidth={1.25} />
-                <span className="text-body">No scene configured</span>
+                <span className="text-body">{t('projectDetail.noSceneConfigured')}</span>
               </div>
             </div>
           )}
@@ -243,10 +245,10 @@ export function ProjectOverviewPage() {
             <div>
               <div className="flex items-center gap-2">
                 <FlaskConical size={14} className="text-white/70" />
-                <span className="text-body font-semibold text-white">Sandbox</span>
+                <span className="text-body font-semibold text-white">{t('projectDetail.sandbox')}</span>
               </div>
               <p className="mt-0.5 text-body text-white/60">
-                Test your soul&apos;s responses in real-time before going live
+                {t('projectDetail.sandboxDesc')}
               </p>
             </div>
             <button
@@ -254,7 +256,7 @@ export function ProjectOverviewPage() {
               onClick={() => router.push(`${base}/sandbox`)}
               className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-4 text-body font-medium text-white backdrop-blur-sm hover:bg-white/20"
             >
-              <FlaskConical size={13} /> Open Sandbox
+              <FlaskConical size={13} /> {t('projectDetail.openSandbox')}
             </button>
           </div>
         </div>
@@ -263,25 +265,25 @@ export function ProjectOverviewPage() {
       {/* ── 2-col grid: Character + Scene ── */}
       <div className="mb-6 grid gap-6 md:grid-cols-2">
 
-        <SectionCard icon={Cpu} title="Character" href={`${base}/character`}>
+        <SectionCard icon={Cpu} title={t('projectDetail.character')} href={`${base}/character`}>
           {!soul ? <NoSoulPlaceholder /> : (
             <div className="-my-2.5">
-              <ProjectMetaRow label="Soul" value={soul.name} />
+              <ProjectMetaRow label={t('projectDetail.soul')} value={soul.name} />
               {soul.llm_model && (
                 <ProjectMetaRow
-                  label="Model"
+                  label={t('projectDetail.model')}
                   value={`${soul.llm_model.provider} · ${soul.llm_model.display_name}`}
                 />
               )}
               {soul.personality && (
                 <ProjectMetaRow
-                  label="Personality"
+                  label={t('projectDetail.personality')}
                   value={<span className="line-clamp-2">{soul.personality}</span>}
                 />
               )}
               {soul.system_prompt && (
                 <ProjectMetaRow
-                  label="System prompt"
+                  label={t('projectDetail.systemPrompt')}
                   value={
                     <span className="line-clamp-2 text-[var(--text-secondary)]">
                       {soul.system_prompt}
@@ -293,7 +295,7 @@ export function ProjectOverviewPage() {
           )}
         </SectionCard>
 
-        <SectionCard icon={Layers} title="Scene" href={`${base}/scene`}>
+        <SectionCard icon={Layers} title={t('projectDetail.scene')} href={`${base}/scene`}>
           {!soul ? <NoSoulPlaceholder /> : (
             <div className="space-y-3">
               <div className="flex items-center gap-3 rounded-lg border border-[var(--border-subtle)] px-3 py-2.5">
@@ -302,13 +304,13 @@ export function ProjectOverviewPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-body font-medium text-[var(--text-primary)]">
-                    {activeModel?.original_file_name ?? 'No model selected'}
+                    {activeModel?.original_file_name ?? t('projectDetail.noModelSelected')}
                   </p>
-                  <p className="text-xs text-[var(--text-tertiary)]">3D Model</p>
+                  <p className="text-xs text-[var(--text-tertiary)]">{t('projectDetail.model3d')}</p>
                 </div>
                 {activeModel && (
                   <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs text-emerald-400">
-                    Active
+                    {t('projectDetail.active')}
                   </span>
                 )}
               </div>
@@ -321,13 +323,13 @@ export function ProjectOverviewPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-body font-medium text-[var(--text-primary)]">
-                    {activeScene?.display_name ?? activeScene?.original_file_name ?? 'No background selected'}
+                    {activeScene?.display_name ?? activeScene?.original_file_name ?? t('projectDetail.noBackgroundSelected')}
                   </p>
-                  <p className="text-xs text-[var(--text-tertiary)]">Background</p>
+                  <p className="text-xs text-[var(--text-tertiary)]">{t('projectDetail.background')}</p>
                 </div>
                 {activeScene && (
                   <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs text-emerald-400">
-                    Active
+                    {t('projectDetail.active')}
                   </span>
                 )}
               </div>
@@ -339,9 +341,9 @@ export function ProjectOverviewPage() {
       {/* ── 2-col grid: Channels + Soul ── */}
       <div className="mb-6 grid gap-6 md:grid-cols-2">
 
-        <SectionCard icon={Radio} title="Channels" href={`${base}/channels`}>
+        <SectionCard icon={Radio} title={t('projectDetail.channels')} href={`${base}/channels`}>
           {!soul ? <NoSoulPlaceholder /> : activeChannels.length === 0 ? (
-            <p className="text-body text-[var(--text-tertiary)]">No active channels yet.</p>
+            <p className="text-body text-[var(--text-tertiary)]">{t('projectDetail.noActiveChannels')}</p>
           ) : (
             <div className="space-y-2">
               {activeChannels.slice(0, 4).map(ch => (
@@ -352,19 +354,19 @@ export function ProjectOverviewPage() {
                 </div>
               ))}
               {activeChannels.length > 4 && (
-                <p className="text-xs text-[var(--text-tertiary)]">+{activeChannels.length - 4} more</p>
+                <p className="text-xs text-[var(--text-tertiary)]">{t('projectDetail.moreChannels', { count: activeChannels.length - 4 })}</p>
               )}
             </div>
           )}
         </SectionCard>
 
-        <SectionCard icon={Cpu} title="Soul" href="/souls">
+        <SectionCard icon={Cpu} title={t('projectDetail.soul')} href="/souls">
           {!project.active_soul ? (
             <div className="space-y-4">
               <div>
-                <p className="text-body font-medium text-[var(--text-primary)]">Select Soul</p>
+                <p className="text-body font-medium text-[var(--text-primary)]">{t('projectDetail.selectSoul')}</p>
                 <p className="mt-1 text-body text-[var(--text-secondary)]">
-                  Connect a personality, memory and behavior layer to this project.
+                  {t('projectDetail.selectSoulDesc')}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -374,13 +376,13 @@ export function ProjectOverviewPage() {
                   onClick={() => setSoulPickerOpen(true)}
                   className="h-8 rounded-lg border border-[var(--border-subtle)] bg-transparent px-3 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-1)]"
                 >
-                  Select
+                  {t('projectDetail.select')}
                 </button>
                 <Link
                   href={SOULS_ROUTE}
                   className="flex h-8 items-center rounded-lg bg-white px-3 text-body font-medium text-black hover:bg-[#f2f2f2]"
                 >
-                  Browse Souls
+                  {t('projectDetail.browseSouls')}
                 </Link>
               </div>
             </div>
@@ -399,7 +401,7 @@ export function ProjectOverviewPage() {
                 onClick={() => setSoulPickerOpen(true)}
                 className="ml-auto h-8 rounded-lg border border-[var(--border-subtle)] bg-transparent px-3 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-1)]"
               >
-                Change
+                {t('projectDetail.change')}
               </button>
             </div>
           )}
@@ -411,13 +413,13 @@ export function ProjectOverviewPage() {
         <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-3.5">
           <div className="flex items-center gap-2 text-body font-medium text-[var(--text-primary)]">
             <Monitor size={14} className="text-[var(--text-tertiary)]" />
-            OBS
+            {t('projectDetail.obs')}
           </div>
           <Link
             href={`${base}/obs`}
             className="flex items-center gap-0.5 text-body text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
           >
-            View <ChevronRight size={12} />
+            {t('projectDetail.view')} <ChevronRight size={12} />
           </Link>
         </div>
         <div className="bg-[var(--bg-0)] px-5 py-4">
@@ -431,12 +433,12 @@ export function ProjectOverviewPage() {
                 }`} />
                 <div>
                   <p className="text-body font-medium text-[var(--text-primary)]">
-                    {obsUrl ? 'Browser Source Ready' : 'Not configured'}
+                    {obsUrl ? t('projectDetail.obsReady') : t('projectDetail.obsNotConfigured')}
                   </p>
                   <p className="text-body text-[var(--text-secondary)]">
                     {obsUrl
-                      ? 'OBS browser source URL is ready to use'
-                      : 'Requires an active model and channel'
+                      ? t('projectDetail.obsReadyDesc')
+                      : t('projectDetail.obsNotConfiguredDesc')
                     }
                   </p>
                 </div>
@@ -452,7 +454,7 @@ export function ProjectOverviewPage() {
                     className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 text-body font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
                   >
                     {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
-                    {copied ? 'Copied' : 'Copy'}
+                    {copied ? t('projectDetail.copied') : t('projectDetail.copy')}
                   </button>
                 </div>
               ) : (
@@ -460,7 +462,7 @@ export function ProjectOverviewPage() {
                   href={`${base}/obs`}
                   className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
                 >
-                  Configure <ChevronRight size={12} />
+                  {t('projectDetail.obsConfigure')} <ChevronRight size={12} />
                 </Link>
               )}
             </div>

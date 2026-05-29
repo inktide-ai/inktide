@@ -1,4 +1,4 @@
-import ModelPage from '@/features/character-editor/settings/model-page'
+import { ModelPage } from '@/features/character-editor'
 
 export default function Page() {
   return <ModelPage />

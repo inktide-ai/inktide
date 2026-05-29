@@ -67,7 +67,7 @@ export const DEFAULT_WIDTH = 280
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="relative px-4 py-3 border-b border-[var(--inspector-section-separator)]">
-      <h2 className="mb-2 h-6 flex items-center text-[14px] font-medium tracking-[-0.01em] text-[var(--text-secondary)]">
+      <h2 className="mb-2 h-6 flex items-center text-body font-medium tracking-[-0.01em] text-[var(--text-secondary)]">
         {title}
       </h2>
       {children}
@@ -76,10 +76,10 @@ export function Section({ title, children }: { title: string; children: React.Re
 }
 
 export const cellBase = 'flex items-center gap-1.5 h-7 px-2 rounded min-w-0 overflow-hidden'
-export const cellLabel = 'text-[10px] text-[var(--text-tertiary)] shrink-0'
+export const cellLabel = 'text-2xs text-[var(--text-tertiary)] shrink-0'
 export const cellInput = cn(
   'flex-1 min-w-0 bg-transparent border-none outline-none',
-  'text-[12px] text-right font-[Inter,var(--font-ui),sans-serif]',
+  'text-xs text-right font-[Inter,var(--font-ui),sans-serif]',
 )
 
 export function TextCell({ label, value, onChange, readOnly, accent, dark, placeholder }: {
@@ -93,7 +93,7 @@ export function TextCell({ label, value, onChange, readOnly, accent, dark, place
     )}>
       <span className={cellLabel}>{label}</span>
       {accent ? (
-        <span className="flex-1 min-w-0 text-[12px] text-right truncate" style={{ color: accent }}>
+        <span className="flex-1 min-w-0 text-xs text-right truncate" style={{ color: accent }}>
           {value}
         </span>
       ) : (
@@ -145,7 +145,7 @@ export function TextAreaCell({ label, value, onChange, placeholder, rows = 3 }: 
       <textarea
         className={cn(
           'inspector-textarea',
-          'w-full rounded px-2 py-1.5 text-[12px] leading-relaxed outline-none',
+          'w-full rounded px-2 py-1.5 text-xs leading-relaxed outline-none',
           'bg-[var(--input-bg)] border border-[var(--border-subtle)]',
           'text-[var(--text-primary)] font-[Inter,var(--font-ui),sans-serif]',
         )}

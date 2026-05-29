@@ -1,22 +1,10 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
 import { useProjectPreviewUrl } from '@/features/projects/hooks/useProjectPreviewUrl'
 import { ProjectListRow } from './project-list-row'
 import type { ProjectListItem } from '@/features/projects/api/projects'
 import type { ProjectStatus } from './project-grid-card'
-
-function updatedLabel(dateStr: string): string {
-  try {
-    const diff = Date.now() - new Date(dateStr).getTime()
-    const mins = Math.floor(diff / 60_000)
-    if (mins < 60) return `Updated ${mins}m ago`
-    const hrs = Math.floor(mins / 60)
-    if (hrs < 24) return `Updated ${hrs}h ago`
-    const days = Math.floor(hrs / 24)
-    if (days < 7) return `Updated ${days}d ago`
-    return `Updated ${Math.floor(days / 7)}w ago`
-  } catch { return 'Updated recently' }
-}
 
 interface ProjectListRowConnectedProps {
   project: ProjectListItem
@@ -26,7 +14,22 @@ interface ProjectListRowConnectedProps {
 }
 
 export function ProjectListRowConnected({ project, coverUrlFallback, onOpen, onExport }: ProjectListRowConnectedProps) {
+  const { t } = useTranslation('common')
   const previewUrl = useProjectPreviewUrl(project)
+
+  function updatedLabel(dateStr: string): string {
+    try {
+      const diff = Date.now() - new Date(dateStr).getTime()
+      const mins = Math.floor(diff / 60_000)
+      if (mins < 60) return t('home.updatedM', { n: mins })
+      const hrs = Math.floor(mins / 60)
+      if (hrs < 24) return t('home.updatedH', { n: hrs })
+      const days = Math.floor(hrs / 24)
+      if (days < 7) return t('home.updatedD', { n: days })
+      return t('home.updatedW', { n: Math.floor(days / 7) })
+    } catch { return '' }
+  }
+
   return (
     <ProjectListRow
       characterId={project.id}

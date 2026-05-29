@@ -1,4 +1,5 @@
 'use client'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Atom, CaretRightSmall } from '@/shared/ui/icons'
 import { SOUL_TEMPLATES, type SoulTemplate } from '@/shared/data/soul-templates'
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function WizardTemplatesScreen({ direction, onSelect }: Props) {
+  const { t } = useTranslation('common')
   return (
     <motion.div
       key="templates"
@@ -41,10 +43,10 @@ export function WizardTemplatesScreen({ direction, onSelect }: Props) {
           <Atom size={20} />
         </div>
         <h2 className="home-heading-font text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
-          Create a new soul
+          {t('wizard.createSoul')}
         </h2>
         <p className="home-ui-font mt-1 text-body text-[var(--text-secondary)]">
-          Pick a personality template or start from scratch.
+          {t('wizard.pickTemplate')}
         </p>
       </div>
 
@@ -62,7 +64,7 @@ export function WizardTemplatesScreen({ direction, onSelect }: Props) {
           }
         }}
       >
-        <TemplateSectionLabel>My Own</TemplateSectionLabel>
+        <TemplateSectionLabel>{t('wizard.myOwn')}</TemplateSectionLabel>
         <button
           type="button"
           onClick={() => onSelect(null)}
@@ -81,10 +83,10 @@ export function WizardTemplatesScreen({ direction, onSelect }: Props) {
           </span>
           <span className="min-w-0 flex-1">
             <span className="home-ui-font block truncate text-[13.5px] font-semibold text-[var(--text-primary)]">
-              Custom Soul
+              {t('wizard.customSoul')}
             </span>
             <span className="home-ui-font block truncate text-body text-[var(--text-secondary)]">
-              Start with a blank configuration
+              {t('wizard.customSoulDesc')}
             </span>
           </span>
           <CaretRightSmall

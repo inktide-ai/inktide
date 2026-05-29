@@ -47,8 +47,8 @@ const getDescriptor = (field: string, value: number): string => {
 
 // ── Style constants ────────────────────────────────────────────────────────────
 
-const sectionLabel = 'text-[0.6875rem] font-semibold uppercase tracking-[0.07em] text-[var(--text-tertiary)] mb-3 block'
-const chipBase = 'px-3 py-1.5 rounded-lg text-[0.8125rem] font-semibold border transition-all duration-150 cursor-pointer select-none'
+const sectionLabel = 'text-caption font-semibold uppercase tracking-[0.07em] text-[var(--text-tertiary)] mb-3 block'
+const chipBase = 'px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all duration-150 cursor-pointer select-none'
 const chipActive = 'bg-[color-mix(in_srgb,var(--accent-base)_20%,transparent)] border-[color-mix(in_srgb,var(--accent-base)_60%,transparent)] text-[var(--accent-base)]'
 const chipInactive = 'bg-transparent border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-default)] hover:text-[var(--text-primary)]'
 
@@ -69,8 +69,8 @@ function TraitSlider({
     <div className="mb-5">
       <div className="flex items-start justify-between mb-2 gap-3">
         <div className="min-w-0 flex-1">
-          <div className="text-[0.9375rem] font-semibold text-[var(--text-primary)] mb-0.5">{label}</div>
-          <div className="text-[0.75rem] text-[var(--text-tertiary)] leading-snug">
+          <div className="text-body-md font-semibold text-[var(--text-primary)] mb-0.5">{label}</div>
+          <div className="text-xs text-[var(--text-tertiary)] leading-snug">
             {getDescriptor(field, value)}
           </div>
         </div>
@@ -101,7 +101,7 @@ function BipolarSlider({
 }) {
   return (
     <div className="mb-5">
-      <div className="flex justify-between items-center mb-1 text-[0.8125rem] font-medium">
+      <div className="flex justify-between items-center mb-1 text-sm font-medium">
         <span className={value < 0.5 ? 'text-[var(--accent-base)]' : 'text-[var(--text-tertiary)]'}>{lowLabel}</span>
         <span className={value >= 0.5 ? 'text-[var(--accent-base)]' : 'text-[var(--text-tertiary)]'}>{highLabel}</span>
       </div>
@@ -112,7 +112,7 @@ function BipolarSlider({
         formatValue={(v) => v.toFixed(1)}
         tickCount={5}
       />
-      <div className="text-center text-[0.6875rem] text-[var(--text-tertiary)] mt-1">
+      <div className="text-center text-caption text-[var(--text-tertiary)] mt-1">
         {getDescriptor(field, value)}
       </div>
     </div>
@@ -208,7 +208,7 @@ export function PersonalityWorkspace({ personality, onChange, onClose }: Persona
           <h2 className="home-heading-font text-[20px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
             Personality & Emotions
           </h2>
-          <p className="text-[0.8125rem] text-[var(--text-tertiary)] mt-0.5">
+          <p className="text-sm text-[var(--text-tertiary)] mt-0.5">
             Shape the character, communication style and emotional behavior.
           </p>
         </div>
@@ -266,7 +266,7 @@ export function PersonalityWorkspace({ personality, onChange, onClose }: Persona
       <Section index={3}>
         <span className={sectionLabel}>Emotional State</span>
         <div className="mb-4">
-          <div className="text-[0.8125rem] font-medium text-[var(--text-secondary)] mb-2">Default mood</div>
+          <div className="text-sm font-medium text-[var(--text-secondary)] mb-2">Default mood</div>
           <ChipRow
             options={MOOD_OPTIONS}
             value={personality.baselineMood as typeof MOOD_OPTIONS[number]['id']}
@@ -281,7 +281,7 @@ export function PersonalityWorkspace({ personality, onChange, onClose }: Persona
       <Section index={4}>
         <span className={sectionLabel}>Response Behavior</span>
         <div className="mb-4">
-          <div className="text-[0.8125rem] font-medium text-[var(--text-secondary)] mb-2">Under pressure</div>
+          <div className="text-sm font-medium text-[var(--text-secondary)] mb-2">Under pressure</div>
           <ChipRow
             options={STRESS_OPTIONS}
             value={personality.stressBehavior as typeof STRESS_OPTIONS[number]['id']}

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import * as Tabs from '@radix-ui/react-tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { cn } from '@/lib/utils'
 
 interface SoulDeploymentsSubTabBarProps {
@@ -20,13 +20,13 @@ const SUB_TABS = [
 
 const activeCls = cn(
   'inline-flex items-center rounded-md border px-3 py-1',
-  'text-[14px] font-semibold whitespace-nowrap transition-colors outline-none',
+  'text-body font-semibold whitespace-nowrap transition-colors outline-none',
   'border-[var(--border-default)] bg-[var(--surface-1)] text-[var(--text-primary)]',
 )
 
 const inactiveCls = cn(
   'inline-flex items-center rounded-md px-3 py-1',
-  'text-[14px] font-medium whitespace-nowrap transition-colors outline-none',
+  'text-body font-medium whitespace-nowrap transition-colors outline-none',
   'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
 )
 
@@ -47,8 +47,8 @@ export function SoulDeploymentsSubTabBar({ soulId }: SoulDeploymentsSubTabBarPro
   const tabValue = subTabValueFromPath(pathname, soulId)
 
   return (
-    <Tabs.Root value={tabValue} className="w-full">
-      <Tabs.List
+    <Tabs value={tabValue} className="w-full">
+      <TabsList
         className={cn(
           'flex items-center gap-0.5 overflow-x-auto',
           'border-b border-[var(--border-divider)] bg-[var(--surface-0)]',
@@ -60,7 +60,7 @@ export function SoulDeploymentsSubTabBar({ soulId }: SoulDeploymentsSubTabBarPro
         {SUB_TABS.map((tab) => {
           const isActive = tabValue === tab.key
           return (
-            <Tabs.Trigger key={tab.key} value={tab.key} asChild>
+            <TabsTrigger key={tab.key} value={tab.key} asChild>
               <Link
                 href={tab.href(soulId)}
                 scroll={false}
@@ -68,10 +68,10 @@ export function SoulDeploymentsSubTabBar({ soulId }: SoulDeploymentsSubTabBarPro
               >
                 {tab.label}
               </Link>
-            </Tabs.Trigger>
+            </TabsTrigger>
           )
         })}
-      </Tabs.List>
-    </Tabs.Root>
+      </TabsList>
+    </Tabs>
   )
 }

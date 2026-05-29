@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import * as Dialog from '@radix-ui/react-dialog'
-import { requestEmailChange, verifyEmailChange } from '@/api/email-change'
+import { Dialog, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from '@/shared/ui/dialog'
+import { requestEmailChange, verifyEmailChange } from '@/features/account/api/email-change'
 
 interface Props {
   open: boolean
@@ -71,17 +71,16 @@ export default function ChangeEmailModal({ open, onClose, currentEmail, onSaved 
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={(next) => { if (!next) onClose() }}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[2100]" style={{ background: 'rgba(0,0,0,0.45)' }} />
-        <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-[2100] w-[400px] max-w-[94vw] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[14px] p-6 outline-none"
-          style={{ background: 'var(--menu-panel-bg)', boxShadow: 'var(--menu-panel-shadow)' }}
+    <Dialog open={open} onOpenChange={(next) => { if (!next) onClose() }}>
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 z-[2100] bg-black/45" />
+        <DialogContent
+          className="fixed left-1/2 top-1/2 z-[2100] w-[400px] max-w-[94vw] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[14px] p-6 outline-none bg-[var(--menu-panel-bg)] shadow-[var(--menu-panel-shadow)]"
           onInteractOutside={() => onClose()}
         >
-          <Dialog.Title className="sr-only">
+          <DialogTitle className="sr-only">
             {step === 'email' ? 'Change email address' : 'Verify email address'}
-          </Dialog.Title>
+          </DialogTitle>
 
           {/* Icon + title */}
           <div className="mb-4 flex flex-col items-center gap-2 text-center">
@@ -101,7 +100,7 @@ export default function ChangeEmailModal({ open, onClose, currentEmail, onSaved 
             <div className="text-[15px] font-semibold text-[var(--text-heading)]">
               {step === 'email' ? 'Change email address' : 'Verify email address'}
             </div>
-            <div className="text-[14px] text-[var(--text-tertiary)]">
+            <div className="text-body text-[var(--text-tertiary)]">
               {step === 'email'
                 ? "We'll send a verification code to your new email."
                 : <><span className="text-[var(--text-primary)]">{pendingEmail}</span> — check your inbox and enter the code below.</>}
@@ -109,7 +108,7 @@ export default function ChangeEmailModal({ open, onClose, currentEmail, onSaved 
           </div>
 
           {error && (
-            <div className="mb-3 rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-[14px] text-[var(--danger-text)]">
+            <div className="mb-3 rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-body text-[var(--danger-text)]">
               {error}
             </div>
           )}
@@ -117,7 +116,7 @@ export default function ChangeEmailModal({ open, onClose, currentEmail, onSaved 
           {step === 'email' ? (
             <>
               <div className="mb-5">
-                <label className="mb-[5px] block text-[14px] text-[var(--text-tertiary)]">Email address</label>
+                <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">Email address</label>
                 <input
                   ref={emailRef}
                   type="email"
@@ -125,14 +124,14 @@ export default function ChangeEmailModal({ open, onClose, currentEmail, onSaved 
                   onChange={(e) => setEmailDraft(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && void handleSendCode()}
                   placeholder="example@company.com"
-                  className="w-full rounded-[8px] border border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] px-[11px] py-[9px] text-[14px] text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-disabled)] focus:border-[var(--accent-primary)]"
+                  className="w-full rounded-[8px] border border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] px-[11px] py-[9px] text-body text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-disabled)] focus:border-[var(--accent-primary)]"
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <button type="button" onClick={onClose} disabled={busy} className="rounded-[7px] border border-[var(--border-default)] bg-transparent px-4 py-[7px] text-[14px] text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] disabled:opacity-40">
+                <button type="button" onClick={onClose} disabled={busy} className="rounded-[7px] border border-[var(--border-default)] bg-transparent px-4 py-[7px] text-body text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] disabled:opacity-40">
                   Cancel
                 </button>
-                <button type="button" onClick={() => void handleSendCode()} disabled={busy} className="rounded-[7px] bg-[var(--accent-primary)] px-4 py-[7px] text-[14px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40">
+                <button type="button" onClick={() => void handleSendCode()} disabled={busy} className="rounded-[7px] bg-[var(--accent-primary)] px-4 py-[7px] text-body font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40">
                   {busy ? 'Sending…' : 'Send code →'}
                 </button>
               </div>
@@ -140,7 +139,7 @@ export default function ChangeEmailModal({ open, onClose, currentEmail, onSaved 
           ) : (
             <>
               <div className="mb-5">
-                <label className="mb-[5px] block text-[14px] text-[var(--text-tertiary)]">Verification code</label>
+                <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">Verification code</label>
                 <input
                   ref={codeRef}
                   type="text"
@@ -150,21 +149,21 @@ export default function ChangeEmailModal({ open, onClose, currentEmail, onSaved 
                   placeholder="e.g. sDqu7U"
                   autoComplete="one-time-code"
                   maxLength={6}
-                  className="w-full rounded-[8px] border border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] px-[11px] py-[9px] font-mono text-[14px] tracking-[0.15em] text-[var(--text-primary)] outline-none transition-colors placeholder:font-sans placeholder:tracking-normal placeholder:text-[var(--text-disabled)] focus:border-[var(--accent-primary)]"
+                  className="w-full rounded-[8px] border border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] px-[11px] py-[9px] font-mono text-body tracking-[0.15em] text-[var(--text-primary)] outline-none transition-colors placeholder:font-sans placeholder:tracking-normal placeholder:text-[var(--text-disabled)] focus:border-[var(--accent-primary)]"
                 />
               </div>
               <div className="flex justify-between gap-2">
-                <button type="button" onClick={() => { setStep('email'); setCode(''); setError(null) }} disabled={busy} className="rounded-[7px] border border-[var(--border-default)] bg-transparent px-4 py-[7px] text-[14px] text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] disabled:opacity-40">
+                <button type="button" onClick={() => { setStep('email'); setCode(''); setError(null) }} disabled={busy} className="rounded-[7px] border border-[var(--border-default)] bg-transparent px-4 py-[7px] text-body text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] disabled:opacity-40">
                   ← Back
                 </button>
-                <button type="button" onClick={() => void handleVerify()} disabled={busy} className="rounded-[7px] bg-[var(--accent-primary)] px-4 py-[7px] text-[14px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40">
+                <button type="button" onClick={() => void handleVerify()} disabled={busy} className="rounded-[7px] bg-[var(--accent-primary)] px-4 py-[7px] text-body font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40">
                   {busy ? 'Verifying…' : 'Verify email'}
                 </button>
               </div>
             </>
           )}
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
   )
 }

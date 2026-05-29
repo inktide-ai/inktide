@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { type WizardProviderItem, WizardProviderCard } from './wizard-provider-card'
@@ -19,6 +20,7 @@ export interface WizardProviderPanelProps {
 export function WizardProviderPanel({
   title, subtitle, icon, panelType, items, selectedId, initialConfig, onSelect,
 }: WizardProviderPanelProps) {
+  const { t } = useTranslation('common')
   const [search, setSearch] = useState('')
   const [pendingId, setPendingId] = useState<string | null>(selectedId)
   const [pendingConfig, setPendingConfig] = useState<Record<string, string>>(
@@ -102,7 +104,7 @@ export function WizardProviderPanel({
               <h2 className="home-heading-font text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
                 {title}
               </h2>
-              <p className="home-ui-font mt-1 text-[14px] text-[var(--text-secondary)]">
+              <p className="home-ui-font mt-1 text-body text-[var(--text-secondary)]">
                 {subtitle}
               </p>
             </div>
@@ -116,12 +118,12 @@ export function WizardProviderPanel({
               <input
                 ref={searchRef}
                 type="search"
-                placeholder="Search providers…"
+                placeholder={t('wizard.searchProviders')}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className={cn(
                   'h-9 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)]/60 pl-9 pr-3',
-                  'home-ui-font text-[14px] text-[var(--text-primary)] outline-none',
+                  'home-ui-font text-body text-[var(--text-primary)] outline-none',
                   'placeholder:text-[var(--text-tertiary)] transition-colors',
                   'focus:border-[var(--accent-base)]/50 focus:bg-[var(--surface-2)]',
                 )}
@@ -147,15 +149,15 @@ export function WizardProviderPanel({
                 <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-[var(--text-tertiary)]">
                   <path d="M10 2C14.4183 2 18 5.58172 18 10C18 11.939 17.3088 13.7158 16.1611 15.1006L21.7803 20.7197C22.073 21.0126 22.0731 21.4874 21.7803 21.7803C21.4874 22.0731 21.0126 22.073 20.7197 21.7803L15.1006 16.1611C13.7158 17.3088 11.939 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2ZM10 3.5C6.41015 3.5 3.5 6.41015 3.5 10C3.5 13.5899 6.41015 16.5 10 16.5C13.5899 16.5 16.5 13.5899 16.5 10C16.5 6.41015 13.5899 3.5 10 3.5Z" fill="currentColor" />
                 </svg>
-                <p className="home-ui-font text-[14px] text-[var(--text-tertiary)]">
-                  No providers match your search.
+                <p className="home-ui-font text-body text-[var(--text-tertiary)]">
+                  {t('wizard.noProvidersMatch')}
                 </p>
                 <button
                   type="button"
                   onClick={() => setSearch('')}
-                  className="home-ui-font text-[14px] text-[var(--accent-base)] hover:opacity-80 transition-opacity"
+                  className="home-ui-font text-body text-[var(--accent-base)] hover:opacity-80 transition-opacity"
                 >
-                  Clear search
+                  {t('wizard.clearSearch')}
                 </button>
               </div>
             )}
@@ -221,7 +223,7 @@ export function WizardProviderPanel({
             >
               <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-[var(--border-default)]" />
               <div className="flex items-center justify-between px-5 py-3">
-                <span className="home-ui-font text-[14px] font-semibold text-[var(--text-primary)]">Configure {activeItem.name}</span>
+                <span className="home-ui-font text-body font-semibold text-[var(--text-primary)]">{t('wizard.configureProvider', { name: activeItem.name })}</span>
                 <button type="button" onClick={() => setPendingId(null)} className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-secondary)] transition-colors">
                   <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
                     <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

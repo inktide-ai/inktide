@@ -1,0 +1,6 @@
+export { default as AppearancePanel } from './appearance-panel'
+export { default as ConnectionsPanel } from './connections-panel'
+export { default as NotificationsPanel } from './notifications-panel'
+export { default as ProfilePanel } from './profile-panel'
+export { default as SecurityPanel } from './security-panel'
+export { default as SessionsPanel } from './sessions-panel'

@@ -77,7 +77,7 @@ function ProviderPicker({ value, onChange }: { value: string; onChange: (v: stri
       >
         <div className="flex items-center gap-1.5 flex-1 px-2 min-w-0">
           <ProviderIcon id={value} size={16} />
-          <span className="text-[12px] text-[var(--text-primary)] truncate">
+          <span className="text-xs text-[var(--text-primary)] truncate">
             {currentEntry?.name ?? value}
           </span>
         </div>
@@ -108,7 +108,7 @@ function ProviderPicker({ value, onChange }: { value: string; onChange: (v: stri
           )}
           style={{ top: pos.top, right: pos.right }}
         >
-          <p className="mx-0.5 mb-2 text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wide">
+          <p className="mx-0.5 mb-2 text-2xs font-medium text-[var(--text-tertiary)] uppercase tracking-wide">
             Model provider
           </p>
           <div className="grid grid-cols-5 gap-0.5 max-h-[280px] overflow-y-auto [scrollbar-width:thin]">

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { REGISTER_ROUTE } from '@/lib/routes';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MESSAGE_LIMIT = 5;
@@ -122,13 +123,13 @@ export default function DemoChatWidget() {
             onClick={() => setOpen(true)}
             className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl border border-white/[0.08] bg-[rgba(15,15,20,0.92)] px-4 py-3 text-sm font-medium text-white shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl transition-all duration-200 hover:border-white/[0.15] hover:bg-[rgba(20,20,28,0.94)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)] cursor-pointer"
           >
-            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-rose-500 to-violet-600">
+            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[image:var(--brand-gradient-hero)]">
               <img src={AKANE_AVATAR} alt="Akane" className="h-full w-full object-cover" />
               <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-[#0f0f14] bg-emerald-400" />
             </div>
             <span className="text-white/90">Chat with Akane</span>
             {remaining <= 2 && remaining > 0 && (
-              <span className="rounded-full bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-bold text-rose-400">
+              <span className="rounded-full bg-rose-500/15 px-1.5 py-0.5 text-2xs font-bold text-rose-400">
                 {remaining} left
               </span>
             )}
@@ -149,18 +150,18 @@ export default function DemoChatWidget() {
             {/* Header */}
             <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-4 py-3">
               <div className="flex items-center gap-2.5">
-                <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-rose-500 to-violet-600">
+                <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[image:var(--brand-gradient-hero)]">
                   <img src={AKANE_AVATAR} alt="" className="h-full w-full object-cover" />
                   <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-[#0a0a10] bg-emerald-400" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold leading-tight text-white/90">Akane</p>
-                  <p className="text-[12px] leading-tight text-emerald-400/80">Online — AI Demo</p>
+                  <p className="text-xs leading-tight text-emerald-400/80">Online — AI Demo</p>
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
                 {remaining > 0 && (
-                  <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-medium text-white/35">
+                  <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-2xs font-medium text-white/35">
                     {remaining}/{MESSAGE_LIMIT} free
                   </span>
                 )}
@@ -186,12 +187,12 @@ export default function DemoChatWidget() {
                 {messages.map((msg) => (
                   <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'items-end gap-2'}`}>
                     {msg.role === 'assistant' && msg.id !== 'error' && (
-                      <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-rose-500 to-violet-600">
+                      <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[image:var(--brand-gradient-hero)]">
                         <img src={AKANE_AVATAR} alt="" className="h-full w-full object-cover opacity-90" />
                       </div>
                     )}
                     <div
-                      className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-[14px] leading-[1.55] ${
+                      className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-body leading-[1.55] ${
                         msg.role === 'user'
                           ? 'rounded-br-md bg-[rgba(157,122,245,0.18)] text-[rgba(220,210,255,0.88)]'
                           : 'rounded-bl-md bg-white/[0.05] text-[rgba(200,200,215,0.85)]'
@@ -216,7 +217,7 @@ export default function DemoChatWidget() {
 
                 {loading && (
                   <div className="flex items-end gap-2">
-                    <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-rose-500 to-violet-600">
+                    <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[image:var(--brand-gradient-hero)]">
                       <img src={AKANE_AVATAR} alt="" className="h-full w-full object-cover opacity-90" />
                     </div>
                     <div className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-white/[0.05] px-3.5 py-3">
@@ -233,7 +234,7 @@ export default function DemoChatWidget() {
 
                 {error && (
                   <div className="flex justify-center">
-                    <span className="rounded-full bg-rose-500/10 px-3 py-1 text-[12px] text-rose-400/80">{error}</span>
+                    <span className="rounded-full bg-rose-500/10 px-3 py-1 text-xs text-rose-400/80">{error}</span>
                   </div>
                 )}
               </div>
@@ -244,7 +245,7 @@ export default function DemoChatWidget() {
               <div className="flex items-center gap-2 rounded-xl border border-white/[0.07] bg-[rgba(15,15,20,0.8)] px-3">
                 <input
                   ref={inputRef}
-                  className="flex-1 bg-transparent py-2.5 text-[14px] text-white/85 outline-none placeholder:text-white/20"
+                  className="flex-1 bg-transparent py-2.5 text-body text-white/85 outline-none placeholder:text-white/20"
                   placeholder={gateShown ? 'Sign up to continue...' : 'Type a message...'}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -277,7 +278,7 @@ export default function DemoChatWidget() {
                   transition={{ duration: 0.35 }}
                   className="absolute inset-0 flex flex-col items-center justify-center gap-5 rounded-2xl bg-[rgba(10,10,16,0.92)] px-8 text-center backdrop-blur-md"
                 >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500/20 to-violet-500/20 ring-1 ring-white/[0.06]">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl ring-1 ring-white/[0.06]" style={{ background: 'linear-gradient(to bottom right, rgba(244,63,94,0.2), rgba(139,92,246,0.2))' }}>
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#gateGrad)" strokeWidth="1.5" strokeLinecap="round">
                       <defs>
                         <linearGradient id="gateGrad" x1="0" y1="0" x2="24" y2="24">
@@ -290,17 +291,18 @@ export default function DemoChatWidget() {
                   </div>
                   <div>
                     <p className="text-lg font-bold text-white/90">Create your own AI</p>
-                    <p className="mt-1.5 text-[14px] leading-relaxed text-white/40">
+                    <p className="mt-1.5 text-body leading-relaxed text-white/40">
                       Build a custom AI streamer with its own personality, voice, and 3D avatar. It reads your chat and talks back — no scripts, no delays.
                     </p>
                   </div>
                   <button
-                    onClick={() => router.push('/register')}
-                    className="rounded-xl bg-gradient-to-r from-rose-500 to-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] transition-all hover:from-rose-400 hover:to-violet-500 hover:shadow-[0_6px_24px_rgba(139,92,246,0.4)]"
+                    onClick={() => router.push(REGISTER_ROUTE)}
+                    className="rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] transition-all hover:opacity-90 hover:shadow-[0_6px_24px_rgba(139,92,246,0.4)]"
+                    style={{ background: 'var(--brand-gradient-hero)' }}
                   >
                     Sign up free
                   </button>
-                  <p className="text-[12px] text-white/20">No credit card · 2 min setup</p>
+                  <p className="text-xs text-white/20">No credit card · 2 min setup</p>
                 </motion.div>
               )}
             </AnimatePresence>

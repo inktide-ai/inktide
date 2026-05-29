@@ -95,7 +95,7 @@ export default function SettingsHubPage() {
     return (
       <div className="text-center py-16 px-8 text-(--text-muted)">
         <div className="inline-block w-6 h-6 border-2 border-(--border) border-t-(--accent-red) rounded-full animate-spin mb-4" />
-        <div className="text-[0.875rem]">{t('common:emptyState.loadingCharacters')}</div>
+        <div className="text-body">{t('common:emptyState.loadingCharacters')}</div>
       </div>
     )
   }
@@ -105,7 +105,7 @@ export default function SettingsHubPage() {
       <div className="text-center py-16 px-8 text-(--text-muted)">
         <div className="text-[3rem] mb-4 opacity-40">⚠</div>
         <div className="text-[1.125rem] font-bold text-(--text-primary) mb-2">{t('common:emptyState.failedToLoad')}</div>
-        <p className="text-[0.8125rem] max-w-[360px] mx-auto leading-relaxed">{loadError}</p>
+        <p className="text-sm max-w-[360px] mx-auto leading-relaxed">{loadError}</p>
       </div>
     )
   }
@@ -115,7 +115,7 @@ export default function SettingsHubPage() {
       <div className="text-center py-16 px-8 text-(--text-muted)">
         <div className="text-[3rem] mb-4 opacity-40">🤖</div>
         <div className="text-[1.125rem] font-bold text-(--text-primary) mb-2">{t('common:emptyState.selectCharacter')}</div>
-        <p className="text-[0.8125rem] max-w-[360px] mx-auto leading-relaxed">{t('common:emptyState.selectCharacterDesc')}</p>
+        <p className="text-sm max-w-[360px] mx-auto leading-relaxed">{t('common:emptyState.selectCharacterDesc')}</p>
       </div>
     )
   }
@@ -130,8 +130,8 @@ export default function SettingsHubPage() {
     }),
     selected.tts.providerId ? { label: capitalize(selected.tts.providerId), style: tagStyle('tts') } : null,
     selected.llm.modelId ? { label: selected.llm.modelId, style: tagStyle('llm') } : null,
-    selected.memory.enabled ? { label: 'Memory', style: tagStyle('memory') } : null,
-    selected.autoPilot.enabled ? { label: 'AutoPilot', style: tagStyle('autopilot') } : null,
+    selected.memory.enabled ? { label: t('profile:badge.memory'), style: tagStyle('memory') } : null,
+    selected.autoPilot.enabled ? { label: t('profile:badge.autoPilot'), style: tagStyle('autopilot') } : null,
   ].filter(Boolean) as TagItem[]
 
   function handleLayoutChange(newLayout: Layout) {
@@ -165,16 +165,16 @@ export default function SettingsHubPage() {
           <div className="flex items-start gap-2.5">
             <div className="flex flex-col gap-0.5">
               <span className="text-[1rem] font-bold text-(--text-primary) leading-[1.2]">{selected.name}</span>
-              <span className="text-[0.8125rem] text-(--text-muted)">/{selected.slug}</span>
+              <span className="text-sm text-(--text-muted)">/{selected.slug}</span>
             </div>
           </div>
           {selected.personality && (
-            <p className="text-[0.8125rem] text-(--text-muted) leading-relaxed m-0 whitespace-nowrap overflow-hidden text-ellipsis">{selected.personality}</p>
+            <p className="text-sm text-(--text-muted) leading-relaxed m-0 whitespace-nowrap overflow-hidden text-ellipsis">{selected.personality}</p>
           )}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-[0.3125rem]">
               {tags.map(tag => (
-                <span key={tag.label} className="py-[0.1875rem] px-2 bg-white/[0.055] border border-white/[0.07] rounded-full text-[0.6875rem] font-medium text-(--text-muted) whitespace-nowrap" style={tag.style}>
+                <span key={tag.label} className="py-[0.1875rem] px-2 bg-white/[0.055] border border-white/[0.07] rounded-full text-caption font-medium text-(--text-muted) whitespace-nowrap" style={tag.style}>
                   {tag.label}
                 </span>
               ))}
@@ -185,12 +185,12 @@ export default function SettingsHubPage() {
         <div className="shrink-0 ml-auto flex items-center gap-0 pl-6">
           <div className="flex flex-col items-center text-center px-4">
             <span className="text-[1.75rem] font-bold text-(--text-primary) leading-none block">{HUB_LINKS.length}</span>
-            <span className="text-[0.6875rem] text-(--text-muted) mt-[0.2rem]">settings</span>
+            <span className="text-caption text-(--text-muted) mt-[0.2rem]">{t('common:hub.settings')}</span>
           </div>
           <div className="w-px h-8 bg-white/[0.07] shrink-0" />
           <div className="flex flex-col items-center text-center px-4">
             <span className="text-[1.75rem] font-bold text-(--text-primary) leading-none block">{selected.channels.length}</span>
-            <span className="text-[0.6875rem] text-(--text-muted) mt-[0.2rem]">channels</span>
+            <span className="text-caption text-(--text-muted) mt-[0.2rem]">{t('common:hub.channels')}</span>
           </div>
         </div>
       </div>
@@ -229,10 +229,10 @@ export default function SettingsHubPage() {
                     {link.icon}
                   </div>
                   <div className="tab-card-body relative z-[2] min-w-0">
-                    <div className="tab-card-label text-[0.9375rem] font-semibold text-white/88 tracking-[-0.01em] mb-[0.3rem]">
+                    <div className="tab-card-label text-body-md font-semibold text-white/88 tracking-[-0.01em] mb-[0.3rem]">
                       {t(`profile:tabs.${item.i}.label` as const)}
                     </div>
-                    <div className="tab-card-desc text-[0.8125rem] text-white/36 leading-[1.45] pr-6">
+                    <div className="tab-card-desc text-sm text-white/36 leading-[1.45] pr-6">
                       {t(`profile:tabs.${item.i}.desc` as const)}
                     </div>
                   </div>
@@ -240,7 +240,7 @@ export default function SettingsHubPage() {
                 {isEditMode && (
                   <>
                     <button
-                      className="absolute top-2 right-2 w-[26px] h-[26px] rounded-[6px] bg-black/35 border border-white/12 text-white/50 cursor-pointer flex items-center justify-center z-[20] transition-[background,color,border-color] duration-150 backdrop-blur-[6px] hover:bg-[rgba(99,102,241,0.2)] hover:border-[rgba(99,102,241,0.4)] hover:text-[#a5b4fc]"
+                      className="absolute top-2 right-2 w-[26px] h-[26px] rounded-[6px] bg-black/35 border border-white/12 text-white/50 cursor-pointer flex items-center justify-center z-[20] transition-[background,color,border-color] duration-150 backdrop-blur-[6px] hover:bg-[rgba(99,102,241,0.2)] hover:border-[rgba(99,102,241,0.4)] hover:text-indigo-300"
                       onClick={e => { e.stopPropagation(); setActiveMenu(prev => prev === item.i ? null : item.i) }}
                     >
                       <GridIcon />
@@ -254,8 +254,8 @@ export default function SettingsHubPage() {
                           <button
                             key={label}
                             className={cn(
-                              'flex flex-col items-center gap-[5px] py-2 px-[10px] rounded-[8px] bg-transparent border border-white/[0.07] text-white/45 cursor-pointer text-[10px] font-semibold tracking-[0.03em] transition-all duration-[120ms] whitespace-nowrap hover:bg-white/[0.06] hover:border-white/[0.15] hover:text-white/85',
-                              item.w === w && item.h === h && 'bg-[rgba(99,102,241,0.15)] border-[rgba(99,102,241,0.45)] text-[#a5b4fc]',
+                              'flex flex-col items-center gap-[5px] py-2 px-[10px] rounded-[8px] bg-transparent border border-white/[0.07] text-white/45 cursor-pointer text-2xs font-semibold tracking-[0.03em] transition-all duration-[120ms] whitespace-nowrap hover:bg-white/[0.06] hover:border-white/[0.15] hover:text-white/85',
+                              item.w === w && item.h === h && 'bg-[rgba(99,102,241,0.15)] border-[rgba(99,102,241,0.45)] text-indigo-300',
                             )}
                             onClick={() => handleSizeChange(item.i, w, h)}
                           >
@@ -277,20 +277,20 @@ export default function SettingsHubPage() {
       <div className="flex justify-end items-center gap-[0.625rem] max-w-[1100px] mx-auto w-full pt-6 pb-8">
         {isEditMode && (
           <button
-            className="inline-flex items-center py-2 px-4 bg-[rgba(15,15,20,0.7)] border border-white/[0.07] rounded-full text-white/35 font-[var(--font-ui)] text-[0.8125rem] cursor-pointer transition-all duration-150 backdrop-blur-[8px] hover:border-[rgba(244,63,94,0.35)] hover:text-[rgba(244,63,94,0.75)] hover:bg-[rgba(244,63,94,0.05)]"
+            className="inline-flex items-center py-2 px-4 bg-[rgba(15,15,20,0.7)] border border-white/[0.07] rounded-full text-white/35 font-[var(--font-ui)] text-sm cursor-pointer transition-all duration-150 backdrop-blur-[8px] hover:border-[rgba(244,63,94,0.35)] hover:text-[rgba(244,63,94,0.75)] hover:bg-[rgba(244,63,94,0.05)]"
             onClick={() => resetLayout()}
           >
-            Reset to default
+            {t('common:hub.resetToDefault')}
           </button>
         )}
         <button
           className={cn(
-            'inline-flex items-center gap-1.5 py-2 px-[1.125rem] bg-[rgba(15,15,20,0.85)] border border-white/10 rounded-full text-white/65 font-[var(--font-ui)] text-[0.8125rem] font-medium cursor-pointer transition-all duration-150 ease backdrop-blur-[12px] shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:bg-[rgba(30,30,40,0.9)] hover:border-white/[0.18] hover:text-white/90',
-            isEditMode && 'bg-[rgba(99,102,241,0.15)] border-[rgba(99,102,241,0.4)] text-[#a5b4fc] hover:bg-[rgba(99,102,241,0.25)] hover:border-[rgba(99,102,241,0.55)]',
+            'inline-flex items-center gap-1.5 py-2 px-[1.125rem] bg-[rgba(15,15,20,0.85)] border border-white/10 rounded-full text-white/65 font-[var(--font-ui)] text-sm font-medium cursor-pointer transition-all duration-150 ease backdrop-blur-[12px] shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:bg-[rgba(30,30,40,0.9)] hover:border-white/[0.18] hover:text-white/90',
+            isEditMode && 'bg-[rgba(99,102,241,0.15)] border-[rgba(99,102,241,0.4)] text-indigo-300 hover:bg-[rgba(99,102,241,0.25)] hover:border-[rgba(99,102,241,0.55)]',
           )}
           onClick={() => setIsEditMode(prev => !prev)}
         >
-          {isEditMode ? 'Done' : 'Edit layout'}
+          {isEditMode ? t('common:hub.done') : t('common:hub.editLayout')}
         </button>
       </div>
 

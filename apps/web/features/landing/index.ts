@@ -1,0 +1,6 @@
+export { default as LandingPage } from './landing-page'
+export { default as PricingSection } from './pricing-section'
+export { default as Navigation } from './navigation'
+export { default as HeroInktide } from './hero-inktide'
+export { default as PartnerLogos } from './partner-logos'
+export { default as Footer } from './footer'

@@ -11,7 +11,7 @@ export function FormField({ label, hint, children, className }: FormFieldProps) 
   return (
     <div className={cn('mb-7', className)}>
       <label className="block cursor-text">
-        <span className="block text-[0.875rem] font-semibold text-[var(--text-primary)] mb-2 font-[var(--font-ui)]">
+        <span className="block text-body font-semibold text-[var(--text-primary)] mb-2 font-[var(--font-ui)]">
           {label}
         </span>
         {hint && (

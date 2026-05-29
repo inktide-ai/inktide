@@ -1,7 +1,7 @@
 import type { KeycloakTokenParsed } from 'keycloak-js'
 import type { IAuthTokenParser } from '@/shared/types/IAuthTokenParser'
-import type { UserInfo } from '@/context/AuthContext'
-import { readStoredNickname } from '@/utils/profileStorage'
+import type { UserInfo } from './AuthContext'
+import { readStoredNickname } from '@/shared/lib/profileStorage'
 
 const IGNORED_ROLES = new Set(['offline_access', 'uma_authorization'])
 

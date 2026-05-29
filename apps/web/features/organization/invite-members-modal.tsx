@@ -1,8 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import * as Dialog from '@radix-ui/react-dialog'
-import * as Select from '@radix-ui/react-select'
+import { Dialog, DialogPortal, DialogOverlay, DialogContent, DialogTitle, DialogClose } from '@/shared/ui/dialog'
+import { Select, SelectTrigger, SelectValue, SelectIcon, SelectPortal, SelectContent, SelectViewport, SelectItem, SelectItemText } from '@/shared/ui/select'
 import {
   cancelInvite,
   listPendingInvites,
@@ -10,7 +10,7 @@ import {
   sendInvites,
   type InviteDto,
   type OrgRole,
-} from '@/api/organization'
+} from '@/features/organization/api/organization'
 import { ApiError } from '@/api/client'
 
 interface Props {
@@ -94,50 +94,33 @@ export default function InviteMembersModal({ open, onClose }: Props) {
   )
 
   return (
-    <Dialog.Root
+    <Dialog
       open={open}
       onOpenChange={next => {
         if (!next) onClose()
       }}
     >
-      <Dialog.Portal>
-        <Dialog.Overlay
-          className="fixed inset-0 z-[2000]"
-          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+      <DialogPortal>
+        <DialogOverlay
+          className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-[4px]"
         />
-        <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-[2001] -translate-x-1/2 -translate-y-1/2 flex flex-col rounded-[14px] overflow-hidden outline-none"
-          style={{
-            width: 'min(540px, 95vw)',
-            maxHeight: '85vh',
-            background: 'var(--menu-panel-bg)',
-            boxShadow: 'var(--menu-panel-shadow)',
-          }}
+        <DialogContent
+          className="fixed left-1/2 top-1/2 z-[2001] -translate-x-1/2 -translate-y-1/2 flex flex-col w-[min(540px,95vw)] max-h-[85vh] rounded-[14px] overflow-hidden outline-none bg-[var(--menu-panel-bg)] shadow-[var(--menu-panel-shadow)]"
         >
-          <Dialog.Title className="sr-only">Invite team members</Dialog.Title>
+          <DialogTitle className="sr-only">Invite team members</DialogTitle>
 
           {/* Header */}
-          <div
-            className="flex items-start justify-between px-6 pt-5 pb-4"
-            style={{ borderBottom: '1px solid var(--border-subtle)' }}
-          >
+          <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-[var(--border-subtle)]">
             <div>
-              <h2 className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
                 Invite Members
               </h2>
-              <p className="mt-0.5 text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+              <p className="mt-0.5 text-body text-[var(--text-secondary)]">
                 Send email invitations to collaborate in your workspace.
               </p>
             </div>
-            <Dialog.Close
-              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors"
-              style={{ color: 'var(--text-tertiary)' }}
-              onMouseEnter={e =>
-                ((e.target as HTMLElement).style.background = 'var(--surface-2)')
-              }
-              onMouseLeave={e =>
-                ((e.target as HTMLElement).style.background = 'transparent')
-              }
+            <DialogClose
+              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors text-[var(--text-tertiary)] hover:bg-[var(--surface-2)]"
             >
               <svg
                 width="14"
@@ -151,18 +134,12 @@ export default function InviteMembersModal({ open, onClose }: Props) {
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
-            </Dialog.Close>
+            </DialogClose>
           </div>
 
           {/* Input area */}
-          <div
-            className="px-6 py-4"
-            style={{ borderBottom: '1px solid var(--border-subtle)' }}
-          >
-            <label
-              className="block text-[14px] font-medium mb-1.5"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+          <div className="px-6 py-4 border-b border-[var(--border-subtle)]">
+            <label className="block text-body font-medium mb-1.5 text-[var(--text-secondary)]">
               Email addresses
             </label>
             <textarea
@@ -176,26 +153,15 @@ export default function InviteMembersModal({ open, onClose }: Props) {
               onKeyDown={handleKeyDown}
               placeholder="alice@example.com, bob@example.com"
               rows={3}
-              className="w-full rounded-lg px-3 py-2.5 text-[14px] resize-none outline-none"
-              style={{
-                background: 'var(--surface-1)',
-                border: '1px solid var(--border-default)',
-                color: 'var(--text-primary)',
-              }}
+              className="w-full rounded-lg px-3 py-2.5 text-body resize-none outline-none bg-[var(--surface-1)] border border-[var(--border-default)] text-[var(--text-primary)]"
             />
             <div className="mt-3 flex items-center gap-2">
-              <Select.Root value={role} onValueChange={v => setRole(v as OrgRole)}>
-                <Select.Trigger
-                  className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-[14px] outline-none cursor-pointer"
-                  style={{
-                    border: '1px solid var(--border-subtle)',
-                    background: 'var(--surface-1)',
-                    color: 'var(--text-primary)',
-                    minWidth: '110px',
-                  }}
+              <Select value={role} onValueChange={v => setRole(v as OrgRole)}>
+                <SelectTrigger
+                  className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-body outline-none cursor-pointer border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-primary)] min-w-[110px]"
                 >
-                  <Select.Value />
-                  <Select.Icon>
+                  <SelectValue />
+                  <SelectIcon>
                     <svg
                       width="12"
                       height="12"
@@ -207,60 +173,46 @@ export default function InviteMembersModal({ open, onClose }: Props) {
                     >
                       <polyline points="6 9 12 15 18 9" />
                     </svg>
-                  </Select.Icon>
-                </Select.Trigger>
-                <Select.Portal>
-                  <Select.Content
-                    className="z-[3000] rounded-lg p-1"
-                    style={{
-                      background: 'var(--menu-panel-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      boxShadow: 'var(--menu-panel-shadow)',
-                    }}
+                  </SelectIcon>
+                </SelectTrigger>
+                <SelectPortal>
+                  <SelectContent
+                    className="z-[3000] rounded-lg p-1 bg-[var(--menu-panel-bg)] border border-[var(--border-subtle)] shadow-[var(--menu-panel-shadow)]"
                   >
-                    <Select.Viewport>
+                    <SelectViewport>
                       {(['member', 'admin'] as OrgRole[]).map(r => (
-                        <Select.Item
+                        <SelectItem
                           key={r}
                           value={r}
-                          className="flex items-center px-3 py-1.5 text-[14px] rounded-md cursor-pointer outline-none select-none"
-                          style={{ color: 'var(--text-primary)' }}
-                          onMouseEnter={e =>
-                            ((e.currentTarget as HTMLElement).style.background =
-                              'var(--surface-2)')
-                          }
-                          onMouseLeave={e =>
-                            ((e.currentTarget as HTMLElement).style.background = 'transparent')
-                          }
+                          className="flex items-center px-3 py-1.5 text-body rounded-md cursor-pointer outline-none select-none text-[var(--text-primary)] data-[highlighted]:bg-[var(--surface-2)]"
                         >
-                          <Select.ItemText>
+                          <SelectItemText>
                             {r.charAt(0).toUpperCase() + r.slice(1)}
-                          </Select.ItemText>
-                        </Select.Item>
+                          </SelectItemText>
+                        </SelectItem>
                       ))}
-                    </Select.Viewport>
-                  </Select.Content>
-                </Select.Portal>
-              </Select.Root>
+                    </SelectViewport>
+                  </SelectContent>
+                </SelectPortal>
+              </Select>
 
               <button
                 type="button"
                 onClick={handleSend}
                 disabled={sending || !emailInput.trim()}
-                className="ml-auto h-9 px-4 rounded-lg text-[14px] font-medium text-white transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ background: 'var(--accent-primary)' }}
+                className="ml-auto h-9 px-4 rounded-lg text-body font-medium text-white transition-opacity disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--accent-primary)]"
               >
                 {sending ? 'Sending…' : 'Send Invites'}
               </button>
             </div>
 
             {error && (
-              <p className="mt-2 text-[14px]" style={{ color: '#f87171' }}>
+              <p className="mt-2 text-body text-[var(--color-error-mid)]">
                 {error}
               </p>
             )}
             {successMsg && (
-              <p className="mt-2 text-[14px]" style={{ color: '#4ade80' }}>
+              <p className="mt-2 text-body text-[var(--color-online)]">
                 {successMsg}
               </p>
             )}
@@ -268,15 +220,15 @@ export default function InviteMembersModal({ open, onClose }: Props) {
 
           {/* Pending invites list */}
           <div className="flex-1 overflow-y-auto px-6 py-4">
-            <p className="text-[14px] font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-body font-medium mb-3 text-[var(--text-secondary)]">
               Pending Invites ({loading ? '…' : pendingInvites.length})
             </p>
             {loading ? (
-              <p className="text-[14px]" style={{ color: 'var(--text-tertiary)' }}>
+              <p className="text-body text-[var(--text-tertiary)]">
                 Loading…
               </p>
             ) : pendingInvites.length === 0 ? (
-              <p className="text-[14px]" style={{ color: 'var(--text-tertiary)' }}>
+              <p className="text-body text-[var(--text-tertiary)]">
                 No pending invitations.
               </p>
             ) : (
@@ -292,9 +244,9 @@ export default function InviteMembersModal({ open, onClose }: Props) {
               </ul>
             )}
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
   )
 }
 
@@ -312,18 +264,12 @@ function PendingInviteRow({
   const isExpired = expiresDate < new Date()
 
   return (
-    <li
-      className="flex items-center gap-3 rounded-xl px-3 py-2.5"
-      style={{ background: 'var(--surface-1)' }}
-    >
+    <li className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-[var(--surface-1)]">
       <div className="min-w-0 flex-1">
-        <p
-          className="truncate text-[14px] font-medium"
-          style={{ color: 'var(--text-primary)' }}
-        >
+        <p className="truncate text-body font-medium text-[var(--text-primary)]">
           {invite.email}
         </p>
-        <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-xs mt-0.5 text-[var(--text-secondary)]">
           {invite.role.charAt(0).toUpperCase() + invite.role.slice(1)}
           {' · '}
           {isExpired ? 'Expired' : `Expires ${expiresDate.toLocaleDateString()}`}
@@ -337,8 +283,7 @@ function PendingInviteRow({
           await onResend(invite.id)
           setBusy(false)
         }}
-        className="shrink-0 text-[14px] disabled:opacity-50 hover:underline"
-        style={{ color: 'var(--accent-primary)' }}
+        className="shrink-0 text-body disabled:opacity-50 hover:underline text-[var(--accent-primary)]"
       >
         Resend
       </button>
@@ -350,12 +295,7 @@ function PendingInviteRow({
           await onCancel(invite.id)
           setBusy(false)
         }}
-        className="shrink-0 text-[14px] disabled:opacity-50 transition-colors"
-        style={{ color: 'var(--text-tertiary)' }}
-        onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#f87171')}
-        onMouseLeave={e =>
-          ((e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)')
-        }
+        className="shrink-0 text-body disabled:opacity-50 transition-colors text-[var(--text-tertiary)] hover:text-[var(--color-error-mid)]"
       >
         Cancel
       </button>

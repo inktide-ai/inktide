@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Check, Copy, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   getProject, updateProject, deleteProject,
   type Project, type ProjectActiveSoul,
@@ -10,10 +11,11 @@ import {
 import { SoulBindingPicker } from '@/features/projects'
 
 function SaveButton({ saving, disabled, onClick }: { saving: boolean; disabled?: boolean; onClick: () => void }) {
+  const { t } = useTranslation('common')
   return (
     <button type="button" disabled={saving || disabled} onClick={onClick}
       className="h-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 text-body font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-2)]/80 disabled:opacity-40">
-      {saving ? 'Saving…' : 'Save'}
+      {saving ? t('projectDetail.saving') : t('projectDetail.save')}
     </button>
   )
 }
@@ -47,6 +49,7 @@ function SettingsCard({ id, title, description, children, footerLeft, footerRigh
 export default function SoulProjectSettingsPage() {
   const { id: soulId, projectId } = useParams<{ id: string; projectId: string }>()
   const router = useRouter()
+  const { t } = useTranslation('common')
 
   const [project, setProject]           = useState<Project | null>(null)
   const [loading, setLoading]           = useState(true)
@@ -110,16 +113,16 @@ export default function SoulProjectSettingsPage() {
     catch (err) { console.error(err); setDeleting(false) }
   }
 
-  if (loading) return <div className="p-8 text-body text-[var(--text-secondary)]">Loading…</div>
-  if (!project) return <div className="p-8 text-body text-[var(--text-secondary)]">Project not found</div>
+  if (loading) return <div className="p-8 text-body text-[var(--text-secondary)]">{t('projectDetail.loading')}</div>
+  if (!project) return <div className="p-8 text-body text-[var(--text-secondary)]">{t('projectDetail.projectNotFound')}</div>
 
   return (
     <div className="mx-auto max-w-[1100px] px-6 py-8">
       <div className="flex gap-12">
         <div className="flex-1 space-y-4" id="general">
 
-          <SettingsCard title="Project Name" description="Used to identify your project on the Dashboard and in URLs."
-            footerLeft="Learn more about project names"
+          <SettingsCard title={t('projectDetail.projectName')} description={t('projectDetail.projectNameDesc')}
+            footerLeft={t('projectDetail.learnMoreProjectNames')}
             footerRight={<SaveButton saving={savingName} disabled={!name.trim()} onClick={saveName} />}>
             <div className="flex overflow-hidden rounded-lg border border-[var(--border-subtle)] focus-within:border-[var(--accent-primary)] transition-colors">
               <span className="shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2 text-body text-[var(--text-tertiary)]">inktide.ai/p/</span>
@@ -128,54 +131,54 @@ export default function SoulProjectSettingsPage() {
             </div>
           </SettingsCard>
 
-          <SettingsCard title="Project ID" description="Used when interacting with the Inktide API." footerLeft="Used when calling the API">
+          <SettingsCard title={t('projectDetail.projectId')} description={t('projectDetail.projectIdDesc')} footerLeft={t('projectDetail.projectIdFooter')}>
             <div className="flex items-center gap-2">
               <div className="flex-1 overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2">
                 <span className="font-mono text-body text-[var(--text-secondary)]">{project.id}</span>
               </div>
-              <button type="button" onClick={copyId} title="Copy ID"
+              <button type="button" onClick={copyId} title={t('projectDetail.copyId')}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]">
                 {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
               </button>
             </div>
           </SettingsCard>
 
-          <SettingsCard title="Description" description="A short description of what this project does."
+          <SettingsCard title={t('projectDetail.description')} description={t('projectDetail.descriptionDesc')}
             footerLeft={<span className="ml-auto text-right">{description.length}/300</span>}
             footerRight={<SaveButton saving={savingDesc} onClick={saveDescription} />}>
             <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} maxLength={300}
-              placeholder="What is this project for?"
+              placeholder={t('projectDetail.descriptionPlaceholderLong')}
               className="w-full resize-none rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2.5 text-body text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-primary)]" />
           </SettingsCard>
 
-          <SettingsCard title="Linked Soul" description="The AI soul that powers this project." footerLeft="Changes are saved immediately">
+          <SettingsCard title={t('projectDetail.linkedSoul')} description={t('projectDetail.linkedSoulDesc')} footerLeft={t('projectDetail.linkedSoulFooter')}>
             <SoulBindingPicker projectId={projectId} activeSoul={activeSoul} onChanged={setActiveSoul} />
           </SettingsCard>
 
-          <SettingsCard title="Status" description="Control the operational state of this project."
-            footerLeft="Pausing a project stops all active pipelines"
+          <SettingsCard title={t('projectDetail.status')} description={t('projectDetail.statusDesc')}
+            footerLeft={t('projectDetail.statusFooter')}
             footerRight={<SaveButton saving={savingStatus} onClick={saveStatus} />}>
             <select value={status} onChange={e => setStatus(e.target.value as 'active' | 'paused' | 'archived')}
               className="w-48 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2 text-body text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)]">
-              <option value="active">Active</option>
-              <option value="paused">Paused</option>
-              <option value="archived">Archived</option>
+              <option value="active">{t('projectDetail.statusActive')}</option>
+              <option value="paused">{t('projectDetail.statusPaused')}</option>
+              <option value="archived">{t('projectDetail.statusArchived')}</option>
             </select>
           </SettingsCard>
 
-          <SettingsCard id="danger" title="Delete Project"
-            description="Permanently delete this project and all associated data. This action cannot be undone."
+          <SettingsCard id="danger" title={t('projectDetail.deleteProject')}
+            description={t('projectDetail.deleteProjectDesc')}
             danger
-            footerLeft="This will delete all pipelines, settings, and history"
+            footerLeft={t('projectDetail.deleteFooter')}
             footerRight={
               <button type="button" disabled={deleting} onClick={handleDelete}
                 className="flex h-8 items-center gap-1.5 rounded-lg border border-red-800/50 px-3 text-body text-red-400 transition-colors hover:bg-red-950/40 disabled:opacity-40">
                 <Trash2 size={12} />
-                {deleting ? 'Deleting…' : 'Delete Project'}
+                {deleting ? t('projectDetail.deleting') : t('projectDetail.deleteProject')}
               </button>
             }>
             <p className="text-body text-[var(--text-tertiary)]">
-              Once you delete a project, there is no going back. All pipelines, channels, and configuration will be permanently removed.
+              {t('projectDetail.deleteBody')}
             </p>
           </SettingsCard>
 

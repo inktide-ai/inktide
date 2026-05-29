@@ -1,6 +1,7 @@
 'use client'
 
 import { Download, ExternalLink, Gamepad2, MessageCircle, Radio, Tv2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Badge, type BadgeVariant } from '@/shared/ui/badge'
 import type { ProjectStatus } from './project-grid-card'
 
@@ -10,17 +11,11 @@ const STATUS_TO_BADGE: Record<ProjectStatus, BadgeVariant> = {
   archived: 'archived',
 }
 
-const STATUS_LABELS: Record<ProjectStatus, string> = {
-  active:   'Active',
-  paused:   'Paused',
-  archived: 'Archived',
-}
-
 function PlatformIcon({ platform }: { platform: string }) {
-  if (platform === 'discord')  return <Gamepad2     size={12} className="text-[#60A5FA]" />
-  if (platform === 'twitch')   return <MessageCircle size={12} className="text-[#A78BFA]" />
-  if (platform === 'telegram') return <Tv2          size={12} className="text-[#38BDF8]" />
-  return <Radio size={12} className="text-[#9CA3AF]" />
+  if (platform === 'discord')  return <Gamepad2     size={12} className="text-blue-400" />
+  if (platform === 'twitch')   return <MessageCircle size={12} className="text-violet-400" />
+  if (platform === 'telegram') return <Tv2          size={12} className="text-sky-300" />
+  return <Radio size={12} className="text-gray-400" />
 }
 
 interface ActiveSoul {
@@ -56,6 +51,12 @@ export function ProjectListRow({
   onOpen,
   onExport,
 }: ProjectListRowProps) {
+  const { t } = useTranslation('common')
+  const STATUS_LABELS: Record<ProjectStatus, string> = {
+    active:   t('projectDetail.statusActive'),
+    paused:   t('projectDetail.statusPaused'),
+    archived: t('projectDetail.statusArchived'),
+  }
   const safeStatus: ProjectStatus = ['active', 'paused', 'archived'].includes(status) ? status : 'active'
   const thumbSrc = coverUrl ?? activeSoul?.avatar_url ?? null
 
@@ -97,9 +98,9 @@ export function ProjectListRow({
 
       {/* Title + description */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[14px] font-semibold leading-tight text-[var(--text-primary)]">{title}</p>
-        <p className="truncate text-[12px] leading-tight text-[var(--text-secondary)]">
-          {description || 'No description'}
+        <p className="truncate text-body font-semibold leading-tight text-[var(--text-primary)]">{title}</p>
+        <p className="truncate text-xs leading-tight text-[var(--text-secondary)]">
+          {description || t('projectDetail.noDescription')}
         </p>
       </div>
 
@@ -113,7 +114,7 @@ export function ProjectListRow({
               {activeSoul.name.charAt(0).toUpperCase()}
             </div>
           )}
-          <span className="text-[12px] text-[var(--text-secondary)]">{activeSoul.name}</span>
+          <span className="text-xs text-[var(--text-secondary)]">{activeSoul.name}</span>
         </div>
       )}
 
@@ -130,7 +131,7 @@ export function ProjectListRow({
       )}
 
       {/* Updated */}
-      <span className="w-[90px] shrink-0 text-right text-[12px] text-[var(--text-tertiary)]">
+      <span className="w-[90px] shrink-0 text-right text-xs text-[var(--text-tertiary)]">
         {updatedLabel}
       </span>
 

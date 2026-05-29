@@ -6,16 +6,16 @@ import type { AiCardSceneResponse } from '@/shared/types/soul-api'
 import { patchCardSceneTag } from '@/entities/soul/api'
 import { getEffectiveTagLabel, getSceneDisplayTitle, getTagDisplayStyleWithColor } from './scene-tag-utils'
 
-const pgCard = 'relative bg-[#13151A] border border-[#13151a] rounded-[0.875rem] overflow-hidden cursor-pointer flex flex-col min-h-[188px] transition-[border-color,transform,box-shadow,background,opacity] duration-[180ms] select-none outline-none opacity-0 animate-[cardIn_0.32s_cubic-bezier(0.2,0.9,0.2,1)_forwards] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(0,0,0,0.35)] focus-visible:shadow-[0_0_0_2px_rgba(237,62,62,0.5)]'
+const pgCard = 'relative bg-(--bg-card) border border-(--bg-card) rounded-[0.875rem] overflow-hidden cursor-pointer flex flex-col min-h-[188px] transition-[border-color,transform,box-shadow,background,opacity] duration-[180ms] select-none outline-none opacity-0 animate-[cardIn_0.32s_cubic-bezier(0.2,0.9,0.2,1)_forwards] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(0,0,0,0.35)] focus-visible:shadow-[0_0_0_2px_rgba(237,62,62,0.5)]'
 const pgThumb = 'relative h-[124px] overflow-hidden shrink-0 before:content-[\'\'] before:absolute before:inset-0 before:z-[1] before:pointer-events-none'
 const pgBody = 'flex flex-col flex-1 p-[0.625rem_0.875rem_0.75rem]'
 const pgMeta = 'flex items-center gap-2 mb-1'
-const pgName = 'text-[0.875rem] font-semibold text-(--text-primary) leading-[1.25] whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0'
-const pgTag = 'text-[0.6875rem] font-semibold tracking-[0.03em] uppercase py-[2px] px-[6px] rounded-[4px] shrink-0 whitespace-nowrap'
-const pgDesc = 'text-[0.6875rem] text-(--text-muted) leading-[1.45] mt-[0.1875rem] line-clamp-2'
+const pgName = 'text-body font-semibold text-(--text-primary) leading-[1.25] whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0'
+const pgTag = 'text-caption font-semibold tracking-[0.03em] uppercase py-[2px] px-[6px] rounded-[4px] shrink-0 whitespace-nowrap'
+const pgDesc = 'text-caption text-(--text-muted) leading-[1.45] mt-[0.1875rem] line-clamp-2'
 const pgFooter = 'flex items-center justify-between mt-auto pt-[0.625rem]'
 const pgRadioBase = 'w-[14px] h-[14px] rounded-full border-[1.5px] border-white/[0.16] shrink-0 transition-[border-color,background,box-shadow] duration-150'
-const pgConfigureCls = 'inline-flex items-center gap-[3px] text-[0.6875rem] font-medium text-(--text-muted) bg-transparent border-none p-0 cursor-pointer font-[inherit] transition-[color] duration-150 leading-none no-underline'
+const pgConfigureCls = 'inline-flex items-center gap-[3px] text-caption font-medium text-(--text-muted) bg-transparent border-none p-0 cursor-pointer font-[inherit] transition-[color] duration-150 leading-none no-underline'
 const tagMenuCls = 'absolute top-[calc(100%+4px)] left-0 z-[30] min-w-[168px] max-w-[min(240px,70vw)] max-h-[220px] overflow-y-auto p-1 rounded-[10px] bg-(--bg-card) border border-white/12 shadow-[0_10px_28px_rgba(0,0,0,0.45)]'
 const tagMenuItemCls = 'block w-full text-left py-2 px-[10px] m-0 border-none rounded-[6px] bg-transparent text-white/[0.88] text-[0.72rem] font-medium font-[inherit] cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis hover:bg-white/[0.08]'
 
@@ -97,7 +97,7 @@ export function SceneCard({ scene, cardId, tagOptions, tagColorMap, isActive, on
           <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${scene.public_url})` }} />
         ) : (
           <>
-            <div style={{ position: 'absolute', inset: 0, background: '#07050f' }} />
+            <div className="absolute inset-0 bg-(--bg-card)" />
             <div className="absolute rounded-full blur-[32px] pointer-events-none" style={{ width: 110, height: 110, top: -25, left: '5%', background: 'rgba(139,92,246,.28)' }} />
             <div className="absolute rounded-full blur-[32px] pointer-events-none" style={{ width: 80, height: 80, bottom: -15, right: '5%', background: 'rgba(34,211,238,.18)' }} />
             <div className="absolute rounded-full blur-[32px] pointer-events-none" style={{ width: 60, height: 60, top: 5, right: '22%', background: 'rgba(236,72,153,.13)' }} />
@@ -108,7 +108,7 @@ export function SceneCard({ scene, cardId, tagOptions, tagColorMap, isActive, on
           <div className="w-[26px] h-[62px] rounded-[13px_13px_0_0] border border-white/[0.08] border-b-0 relative" style={{ background: 'linear-gradient(180deg, rgba(139,92,246,.12), rgba(139,92,246,.03))' }} />
         </div>
         <button
-          className="absolute top-2 right-2 z-10 w-7 h-7 rounded-[8px] bg-[rgba(10,4,4,0.65)] border border-[rgba(248,113,113,0.18)] backdrop-blur-[6px] flex items-center justify-center text-[rgba(248,113,113,0.65)] cursor-pointer opacity-0 transition-[opacity,background,color,transform,border-color] duration-150 p-0 [.group:hover_&]:opacity-100 hover:bg-[rgba(248,113,113,0.18)] hover:text-[#f87171] hover:border-[rgba(248,113,113,0.35)] hover:scale-[1.08] active:scale-[0.94] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="absolute top-2 right-2 z-10 w-7 h-7 rounded-[8px] bg-[rgba(10,4,4,0.65)] border border-[rgba(248,113,113,0.18)] backdrop-blur-[6px] flex items-center justify-center text-[rgba(248,113,113,0.65)] cursor-pointer opacity-0 transition-[opacity,background,color,transform,border-color] duration-150 p-0 [.group:hover_&]:opacity-100 hover:bg-[rgba(248,113,113,0.18)] hover:text-[var(--color-error-mid)] hover:border-[rgba(248,113,113,0.35)] hover:scale-[1.08] active:scale-[0.94] disabled:opacity-40 disabled:cursor-not-allowed"
           title={t('card.delete')} aria-label={t('card.delete')}
           onClick={(e) => { e.stopPropagation(); setConfirming(true) }}
           disabled={deleting}
@@ -143,10 +143,10 @@ export function SceneCard({ scene, cardId, tagOptions, tagColorMap, isActive, on
             )}
           </div>
         </div>
-        {tagError && <div className="text-[0.65rem] text-[#f87171] mt-1 leading-[1.35]">{tagError}</div>}
+        {tagError && <div className="text-[0.65rem] text-[var(--color-error-mid)] mt-1 leading-[1.35]">{tagError}</div>}
         {sceneDescription ? <div className={pgDesc}>{sceneDescription}</div> : null}
         <div className={pgFooter}>
-          <div className={cn(pgRadioBase, isActive && 'border-[#22c55e] bg-[#22c55e] shadow-[0_0_0_3px_rgba(34,197,94,0.18)]')} />
+          <div className={cn(pgRadioBase, isActive && 'border-[var(--color-online)] bg-[var(--color-online)] shadow-[0_0_0_3px_rgba(34,197,94,0.18)]')} />
           <button className={pgConfigureCls} onClick={(e) => { e.stopPropagation(); onConfigure() }} tabIndex={-1}>
             {t('card.configure')}
             <span className="opacity-0 -translate-x-[3px] transition-[opacity,transform] duration-150 flex items-center" style={{ opacity: hovered ? 1 : undefined, transform: hovered ? 'translateX(0)' : undefined }}>
@@ -160,11 +160,11 @@ export function SceneCard({ scene, cardId, tagOptions, tagColorMap, isActive, on
 
       {confirming && (
         <div className="absolute inset-0 z-[20] bg-[rgba(6,4,12,0.9)] backdrop-blur-[3px] flex flex-col items-center justify-center gap-[6px] p-[14px_12px_12px] rounded-[inherit] animate-[cardOverlayIn_0.14s_ease]" onClick={(e) => { e.stopPropagation(); setConfirming(false) }}>
-          <div className="text-[0.875rem] font-bold text-(--text-primary) tracking-[-0.01em] text-center leading-[1.2]">{displayTitle}</div>
-          <div className="text-[0.6875rem] text-(--text-muted) leading-[1.45] text-center px-1">{t('card.deleteConfirm')}<br />{t('card.deleteDesc')}.</div>
+          <div className="text-body font-bold text-(--text-primary) tracking-[-0.01em] text-center leading-[1.2]">{displayTitle}</div>
+          <div className="text-caption text-(--text-muted) leading-[1.45] text-center px-1">{t('card.deleteConfirm')}<br />{t('card.deleteDesc')}.</div>
           <div className="flex gap-[7px] w-full mt-[6px]">
-            <button className="flex-1 py-2 px-1 text-[0.75rem] font-semibold text-(--text-secondary) bg-transparent border border-white/[0.14] rounded-[9px] cursor-pointer font-[inherit] transition-[background,color,border-color] duration-150 hover:bg-white/[0.09] hover:border-white/22 hover:text-(--text-primary)" onClick={(e) => { e.stopPropagation(); setConfirming(false) }}>{t('card.cancel')}</button>
-            <button className="flex-1 py-2 px-1 text-[0.75rem] font-semibold text-(--text-secondary) bg-transparent border border-white/[0.14] rounded-[9px] cursor-pointer font-[inherit] transition-[background,color,border-color] duration-150 hover:bg-white/[0.09] hover:border-white/22 hover:text-(--text-primary)" onClick={(e) => { e.stopPropagation(); setConfirming(false); onDelete() }} disabled={deleting}>{deleting ? '…' : t('card.delete')}</button>
+            <button className="flex-1 py-2 px-1 text-xs font-semibold text-(--text-secondary) bg-transparent border border-white/[0.14] rounded-[9px] cursor-pointer font-[inherit] transition-[background,color,border-color] duration-150 hover:bg-white/[0.09] hover:border-white/22 hover:text-(--text-primary)" onClick={(e) => { e.stopPropagation(); setConfirming(false) }}>{t('card.cancel')}</button>
+            <button className="flex-1 py-2 px-1 text-xs font-semibold text-(--text-secondary) bg-transparent border border-white/[0.14] rounded-[9px] cursor-pointer font-[inherit] transition-[background,color,border-color] duration-150 hover:bg-white/[0.09] hover:border-white/22 hover:text-(--text-primary)" onClick={(e) => { e.stopPropagation(); setConfirming(false); onDelete() }} disabled={deleting}>{deleting ? '…' : t('card.delete')}</button>
           </div>
         </div>
       )}

@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { useParams } from 'next/navigation'
+import { useState } from 'react'
 import { Check, ImageIcon, Box } from 'lucide-react'
-import { getProject, updateProject, type Project } from '@/features/projects'
-import { listCardModels, listCardScenes, type AiCardModelResponse, type AiCardSceneResponse } from '@/features/soul'
+import { useTranslation } from 'react-i18next'
+import { useProjectRuntimeContext } from './ProjectRuntimeContext'
 
 function inferModelLabel(fileName: string): string {
   if (fileName.endsWith('.vrm')) return 'VRM'
@@ -13,64 +12,33 @@ function inferModelLabel(fileName: string): string {
 }
 
 export default function ProjectScenePage() {
-  const { id } = useParams<{ id: string }>()
+  const { project, models, scenes, loading, setActiveModel, setActiveScene } = useProjectRuntimeContext()
+  const [saving, setSaving] = useState(false)
+  const { t } = useTranslation('common')
 
-  const [project, setProject]   = useState<Project | null>(null)
-  const [models, setModels]     = useState<AiCardModelResponse[]>([])
-  const [scenes, setScenes]     = useState<AiCardSceneResponse[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [saving, setSaving]     = useState(false)
-
-  useEffect(() => {
-    getProject(id)
-      .then(async p => {
-        setProject(p)
-        if (p.active_soul_id) {
-          const [m, s] = await Promise.all([
-            listCardModels(p.active_soul_id),
-            listCardScenes(p.active_soul_id),
-          ])
-          setModels(m)
-          setScenes(s)
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [id])
-
-  const selectModel = useCallback(async (modelId: string | null) => {
-    if (!project || saving) return
+  const selectModel = async (modelId: string | null) => {
+    if (saving) return
     setSaving(true)
     try {
-      const updated = await updateProject(id, {
-        name: project.name,
-        active_model_id: modelId,
-        active_scene_id: project.active_scene_id,
-      })
-      setProject(updated)
+      await setActiveModel(modelId)
     } catch (err) {
       console.error('Failed to update model:', err)
     } finally {
       setSaving(false)
     }
-  }, [project, saving, id])
+  }
 
-  const selectScene = useCallback(async (sceneId: string | null) => {
-    if (!project || saving) return
+  const selectScene = async (sceneId: string | null) => {
+    if (saving) return
     setSaving(true)
     try {
-      const updated = await updateProject(id, {
-        name: project.name,
-        active_model_id: project.active_model_id,
-        active_scene_id: sceneId,
-      })
-      setProject(updated)
+      await setActiveScene(sceneId)
     } catch (err) {
       console.error('Failed to update scene:', err)
     } finally {
       setSaving(false)
     }
-  }, [project, saving, id])
+  }
 
   if (loading) {
     return (
@@ -83,7 +51,7 @@ export default function ProjectScenePage() {
   if (!project?.active_soul_id) {
     return (
       <div className="flex h-full items-center justify-center text-body text-[var(--text-tertiary)]">
-        Bind a soul to this project first — go to Overview and use the Soul picker.
+        {t('projectDetail.bindSoulFirst')}
       </div>
     )
   }
@@ -91,9 +59,9 @@ export default function ProjectScenePage() {
   return (
     <div className="mx-auto max-w-[860px] px-6 py-8">
       <header className="mb-7">
-        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">Scene</h1>
+        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{t('projectDetail.scene')}</h1>
         <p className="mt-1 text-body text-[var(--text-secondary)]">
-          Choose which 3D model and background scene to render for this project.
+          {t('projectDetail.sceneSubtitle')}
         </p>
       </header>
 
@@ -101,15 +69,15 @@ export default function ProjectScenePage() {
       <section className="mb-8">
         <div className="mb-3 flex items-center gap-2">
           <Box size={15} className="text-[var(--text-secondary)]" />
-          <h2 className="text-body font-semibold text-[var(--text-primary)]">3D Model</h2>
+          <h2 className="text-body font-semibold text-[var(--text-primary)]">{t('projectDetail.model3d')}</h2>
           {project.active_model_id && (
-            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">Active</span>
+            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">{t('projectDetail.active')}</span>
           )}
         </div>
 
         {models.length === 0 ? (
           <div className="flex h-[120px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-body text-[var(--text-tertiary)]">
-            No models uploaded yet — go to Soul → Avatars to upload one.
+            {t('projectDetail.noModelsUploaded')}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">
@@ -154,15 +122,15 @@ export default function ProjectScenePage() {
       <section>
         <div className="mb-3 flex items-center gap-2">
           <ImageIcon size={15} className="text-[var(--text-secondary)]" />
-          <h2 className="text-body font-semibold text-[var(--text-primary)]">Background</h2>
+          <h2 className="text-body font-semibold text-[var(--text-primary)]">{t('projectDetail.background')}</h2>
           {project.active_scene_id && (
-            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">Active</span>
+            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">{t('projectDetail.active')}</span>
           )}
         </div>
 
         {scenes.length === 0 ? (
           <div className="flex h-[120px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-body text-[var(--text-tertiary)]">
-            No scenes uploaded yet — go to Soul → Scenes to upload one.
+            {t('projectDetail.noScenesUploaded')}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">

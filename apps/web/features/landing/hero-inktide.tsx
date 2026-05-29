@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
+import { REGISTER_ROUTE } from '@/lib/routes'
 import { cn } from '@/lib/utils'
 
 const WindowsIcon = () => (
@@ -85,7 +86,7 @@ export default function HeroInktide() {
 
           <button
             type="button"
-            onClick={() => router.push('/register')}
+            onClick={() => router.push(REGISTER_ROUTE)}
             className={cn(
               'inline-block py-[0.875rem] px-[1.875rem] bg-[var(--hero-cta-bg)] border-none rounded-lg',
               'text-white font-[family-name:var(--font-ui)] text-base font-semibold cursor-pointer mb-8',

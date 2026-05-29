@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
+import { SANDBOX_ROUTE, profileSettingsPath } from '@/lib/routes'
 import type { AiCharacter } from '@/shared/lib/character'
 import VoiceSandboxTab from './voice-sandbox-tab'
 import { KokoroPanel } from './voice/panels/kokoro-panel'
@@ -65,7 +66,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
   ], [t])
 
   if (providerId === 'sandbox') {
-    return <VoiceSandboxTab character={character} onBack={() => router.push('/settings/voice')} />
+    return <VoiceSandboxTab character={character} onBack={() => router.push(profileSettingsPath('voice'))} />
   }
 
   if (providerId) {
@@ -73,7 +74,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
     return (
       <div className="flex flex-col gap-6 max-w-[840px] mx-auto w-full">
         <div className="flex items-center gap-3 mb-7 pb-4 border-b border-white/[0.06]">
-          <button type="button" className="flex items-center justify-center w-7 h-7 bg-white/[0.04] border border-[var(--panel-input-border)] rounded-[6px] text-white/45 cursor-pointer transition-all duration-[120ms] ease shrink-0 hover:border-[var(--panel-input-border-hover)] hover:text-white/85 hover:bg-white/[0.07]" onClick={() => router.push('/settings/voice')} aria-label={t('back')}>
+          <button type="button" className="flex items-center justify-center w-7 h-7 bg-white/[0.04] border border-[var(--panel-input-border)] rounded-[6px] text-white/45 cursor-pointer transition-all duration-[120ms] ease shrink-0 hover:border-[var(--panel-input-border-hover)] hover:text-white/85 hover:bg-white/[0.07]" onClick={() => router.push(profileSettingsPath('voice'))} aria-label={t('back')}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7L9 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
           {provider && (
@@ -83,7 +84,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
           )}
           <div>
             <div className="text-[1rem] font-semibold text-(--text-primary) tracking-[-0.01em]">{provider?.name ?? providerId}</div>
-            <div className="text-[0.6875rem] text-white/38 mt-[0.1rem]">{t('settings')}</div>
+            <div className="text-caption text-white/38 mt-[0.1rem]">{t('settings')}</div>
           </div>
         </div>
         <div className={sectionCls} style={{ borderTop: 'none', paddingTop: 0, marginTop: 0 }}>
@@ -101,15 +102,15 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
     <div className="flex flex-col gap-6 max-w-[840px] mx-auto w-full">
       <div className="mb-[0.875rem] pb-[0.875rem] border-b border-white/[0.06]">
         <div className="text-[0.625rem] font-bold text-white/38 tracking-[0.09em] uppercase mb-[0.3rem]">{t('grid.title')}</div>
-        <div className="text-[0.8125rem] text-white/50 leading-[1.55]">{t('grid.desc')}</div>
+        <div className="text-sm text-white/50 leading-[1.55]">{t('grid.desc')}</div>
       </div>
 
       <div className="relative flex items-center">
-        <svg className="absolute left-4 text-[0.9375rem] text-white/20 pointer-events-none leading-none" width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <svg className="absolute left-4 text-body-md text-white/20 pointer-events-none leading-none" width="15" height="15" viewBox="0 0 15 15" fill="none">
           <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.4"/>
           <path d="M10.5 10.5L13.5 13.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
         </svg>
-        <input className="w-full py-[0.6875rem] pr-4 pl-10 bg-white/[0.03] border border-white/[0.06] rounded-[0.625rem] text-(--text-primary) font-[var(--font-ui)] text-[0.875rem] outline-none transition-[background,border-color] duration-150 ease placeholder:text-white/20 focus:bg-white/[0.05] focus:border-white/10" type="text" placeholder={t('grid.search')} value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input className="w-full py-[0.6875rem] pr-4 pl-10 bg-white/[0.03] border border-white/[0.06] rounded-[0.625rem] text-(--text-primary) font-[var(--font-ui)] text-body outline-none transition-[background,border-color] duration-150 ease placeholder:text-white/20 focus:bg-white/[0.05] focus:border-white/10" type="text" placeholder={t('grid.search')} value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       {needsApiKey && activeProvider && (
@@ -118,10 +119,10 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
             <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M7 1.5L12.5 11H1.5L7 1.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/><path d="M7 5.5V8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/><circle cx="7" cy="9.75" r="0.7" fill="currentColor"/></svg>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[0.875rem] font-semibold text-(--text-primary) leading-[1.3]">{t('apiKeyBanner.title', { provider: activeProvider.name })}</div>
-            <div className="text-[0.75rem] text-(--text-muted) mt-[0.2rem] leading-[1.4]">{t('apiKeyBanner.subtitle')}</div>
+            <div className="text-body font-semibold text-(--text-primary) leading-[1.3]">{t('apiKeyBanner.title', { provider: activeProvider.name })}</div>
+            <div className="text-xs text-(--text-muted) mt-[0.2rem] leading-[1.4]">{t('apiKeyBanner.subtitle')}</div>
           </div>
-          <button type="button" className="shrink-0 bg-white/[0.06] border border-[0.5px] border-white/12 rounded-[8px] py-2 px-4 text-[0.8125rem] font-semibold text-(--text-primary) cursor-pointer whitespace-nowrap font-[inherit] transition-[background,border-color] duration-150 hover:bg-white/10 hover:border-white/[0.18]" onClick={() => router.push(`/settings/providers/${activeProvider.id}`)}>
+          <button type="button" className="shrink-0 bg-white/[0.06] border border-[0.5px] border-white/12 rounded-[8px] py-2 px-4 text-sm font-semibold text-(--text-primary) cursor-pointer whitespace-nowrap font-[inherit] transition-[background,border-color] duration-150 hover:bg-white/10 hover:border-white/[0.18]" onClick={() => router.push(`/settings/providers/${activeProvider.id}`)}>
             {t('apiKeyBanner.cta')}
           </button>
         </div>
@@ -136,7 +137,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
               key={provider.id}
               className={cn(
                 'relative bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] border-l-2 border-l-transparent rounded-[8px] p-4 cursor-pointer transition-[background,border-color] duration-[120ms] ease flex flex-col min-h-[114px] overflow-hidden select-none outline-none hover:bg-[var(--panel-input-bg-hover)] hover:border-[var(--panel-input-border-hover)] focus-visible:shadow-[0_0_0_2px_rgba(53,116,240,0.4)]',
-                isActive && !isWarning && 'border-[#2a5040] border-l-[#22c55e] bg-[#162820] hover:bg-[#1a3025] hover:border-[#2a5040]',
+                isActive && !isWarning && 'border-[#2a5040] border-l-[var(--color-online)] bg-[#162820] hover:bg-[#1a3025] hover:border-[#2a5040]',
                 isWarning && 'border-[rgba(245,158,11,0.35)] border-l-[rgba(245,158,11,0.75)] bg-[rgba(245,158,11,0.03)] hover:bg-[rgba(245,158,11,0.06)]',
               )}
               role="button"
@@ -145,22 +146,22 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
               onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !isActive) onUpdate({ tts: { ...character.tts, providerId: provider.id, voiceId: null, modelId: null } }) }}
             >
               {provider.badge && (
-                <span className="absolute top-2 right-2 text-[0.6875rem] font-medium py-[0.15rem] px-2 rounded-full leading-[1.5] pointer-events-none whitespace-nowrap" style={{ color: provider.badge.color, background: `${provider.badge.color}14`, border: `1px solid ${provider.badge.color}30` }}>
+                <span className="absolute top-2 right-2 text-caption font-medium py-[0.15rem] px-2 rounded-full leading-[1.5] pointer-events-none whitespace-nowrap" style={{ color: provider.badge.color, background: `${provider.badge.color}14`, border: `1px solid ${provider.badge.color}30` }}>
                   {provider.badge.label}
                 </span>
               )}
               <div className={cn('w-9 h-9 flex items-center justify-center mb-[0.625rem] shrink-0', !provider.iconSrc && 'bg-white/[0.05] border border-white/[0.08] rounded-[8px]')}>
                 {provider.iconSrc ? <img src={provider.iconSrc} alt={provider.name} className="w-full h-full object-contain rounded-[10px]" /> : <span className="text-[1.5rem] leading-none">{provider.icon}</span>}
               </div>
-              <div className="text-[0.8125rem] font-semibold text-(--text-primary) leading-[1.3]">{provider.name}</div>
-              <div className="text-[0.6875rem] text-white/38 leading-[1.45] mt-[0.2rem]">{provider.description}</div>
+              <div className="text-sm font-semibold text-(--text-primary) leading-[1.3]">{provider.name}</div>
+              <div className="text-caption text-white/38 leading-[1.45] mt-[0.2rem]">{provider.description}</div>
               <div className="flex items-center justify-between mt-auto pt-[0.625rem]">
-                <div className={cn('w-[14px] h-[14px] rounded-full border-[1.5px] border-white/15 shrink-0 transition-all duration-150 ease flex items-center justify-center', isActive && !isWarning && 'border-[#22c55e] bg-[#22c55e]', isWarning && 'border-[#f59e0b]')}>
+                <div className={cn('w-[14px] h-[14px] rounded-full border-[1.5px] border-white/15 shrink-0 transition-all duration-150 ease flex items-center justify-center', isActive && !isWarning && 'border-[var(--color-online)] bg-[var(--color-online)]', isWarning && 'border-[#f59e0b]')}>
                   {isActive && !isWarning && <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.5 6L6.5 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                   {isWarning && <svg width="7" height="7" viewBox="0 0 7 7" fill="none"><path d="M3.5 2V4M3.5 5.5H3.51" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round"/></svg>}
                 </div>
                 {provider.hasSettings && (
-                  <button type="button" className="inline-flex items-center gap-[0.2rem] text-[0.6875rem] font-medium text-white/35 bg-transparent border-none p-0 cursor-pointer font-[inherit] transition-[color] duration-[120ms] ease leading-none hover:text-white/70" onClick={(e) => { e.stopPropagation(); router.push(`/settings/providers/${provider.id}`) }}>
+                  <button type="button" className="inline-flex items-center gap-[0.2rem] text-caption font-medium text-white/35 bg-transparent border-none p-0 cursor-pointer font-[inherit] transition-[color] duration-[120ms] ease leading-none hover:text-white/70" onClick={(e) => { e.stopPropagation(); router.push(`/settings/providers/${provider.id}`) }}>
                     {t('grid.configure')}
                   </button>
                 )}
@@ -169,12 +170,12 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
           )
         })}
 
-        <div className="relative bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] border-l-2 border-l-transparent rounded-[8px] p-4 cursor-pointer transition-[background,border-color] duration-[120ms] ease flex flex-col min-h-[114px] overflow-hidden select-none outline-none hover:bg-[var(--panel-input-bg-hover)] hover:border-[var(--panel-input-border-hover)]" role="button" tabIndex={0} onClick={() => router.push('sandbox')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.push('sandbox') }}>
+        <div className="relative bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] border-l-2 border-l-transparent rounded-[8px] p-4 cursor-pointer transition-[background,border-color] duration-[120ms] ease flex flex-col min-h-[114px] overflow-hidden select-none outline-none hover:bg-[var(--panel-input-bg-hover)] hover:border-[var(--panel-input-border-hover)]" role="button" tabIndex={0} onClick={() => router.push(SANDBOX_ROUTE)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.push(SANDBOX_ROUTE) }}>
           <div className="w-9 h-9 flex items-center justify-center mb-[0.625rem] shrink-0 bg-white/[0.05] border border-white/[0.08] rounded-[8px]">
             <span className="text-[1.5rem] leading-none">🎙</span>
           </div>
-          <div className="text-[0.8125rem] font-semibold text-(--text-primary) leading-[1.3]">{t('sandbox.title')}</div>
-          <div className="text-[0.6875rem] text-white/38 leading-[1.45] mt-[0.2rem]">{t('sandbox.desc')}</div>
+          <div className="text-sm font-semibold text-(--text-primary) leading-[1.3]">{t('sandbox.title')}</div>
+          <div className="text-caption text-white/38 leading-[1.45] mt-[0.2rem]">{t('sandbox.desc')}</div>
           <div className="flex items-center justify-between mt-auto pt-[0.625rem]">
             <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{t('sandbox.open')}</span>
           </div>

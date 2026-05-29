@@ -1,6 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { getChatModels, type ChatModelInfo } from '@/api/chat'
+import { useQuery } from '@tanstack/react-query'
+import { getChatModels, type ChatModelInfo } from '@/features/brain/api/chat'
+import { useDebounce } from '@/shared/hooks'
 
 export interface UseOllamaModelsResult {
   models: ChatModelInfo[]
@@ -8,32 +9,23 @@ export interface UseOllamaModelsResult {
   modelsError: boolean
 }
 
-/**
- * Fetches the list of locally available Ollama models.
- * Waits until credentials have finished loading (`credLoading = false`) before making
- * the first request. Re-fetches whenever `effectiveBaseUrl` changes (debounced 500ms).
- */
 export function useOllamaModels(
   effectiveBaseUrl: string,
   credLoading: boolean,
 ): UseOllamaModelsResult {
-  const [models, setModels]               = useState<ChatModelInfo[]>([])
-  const [modelsLoading, setModelsLoading] = useState(false)
-  const [modelsError, setModelsError]     = useState(false)
+  const debouncedUrl = useDebounce(effectiveBaseUrl, 500)
 
-  useEffect(() => {
-    if (credLoading) return
-    let cancelled = false
-    setModelsError(false)
-    const timer = setTimeout(() => {
-      setModelsLoading(true)
-      getChatModels('ollama', effectiveBaseUrl)
-        .then((list) => { if (!cancelled) { setModels(list); setModelsError(false) } })
-        .catch(() => { if (!cancelled) { setModels([]); setModelsError(true) } })
-        .finally(() => { if (!cancelled) setModelsLoading(false) })
-    }, 500)
-    return () => { cancelled = true; clearTimeout(timer) }
-  }, [effectiveBaseUrl, credLoading])
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['ollama-models', debouncedUrl],
+    queryFn: () => getChatModels('ollama', debouncedUrl),
+    enabled: !credLoading && Boolean(debouncedUrl),
+    staleTime: 30_000,
+    retry: 1,
+  })
 
-  return { models, modelsLoading, modelsError }
+  return {
+    models: data ?? [],
+    modelsLoading: isLoading,
+    modelsError: isError,
+  }
 }

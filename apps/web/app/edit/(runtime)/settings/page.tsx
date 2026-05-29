@@ -1,2 +1,2 @@
-import SettingsHubPage from '@/features/character-editor/settings-hub-page'
+import { SettingsHubPage } from '@/features/character-editor'
 export default function Page() { return <SettingsHubPage /> }

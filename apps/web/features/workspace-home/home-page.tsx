@@ -10,7 +10,7 @@ import type { SoulCardData } from '@/features/soul'
 import { SoulCardVertical, SoulCardVerticalSkeleton, useFavorites, createDiscordCustomBotChannel, toSoulCardData } from '@/features/soul'
 import { TwitchIcon } from '@/shared/ui/icons/twitch-icon'
 import { useCharactersContext } from '@/entities/character'
-import { fetchDashboardStats } from '@/api/stats'
+import { fetchDashboardStats } from '@/features/workspace-home/api/stats'
 import { queryKeys } from '@/shared/lib/query/keys'
 import { SectionHeader, SoulCreationWizard, ProjectCardConnected, ProjectCreationWizard, StatCard, TemplateCard, WorkspaceTopBar } from '@/features/workspace-home'
 import { listProjects } from '@/features/projects'
@@ -35,6 +35,7 @@ export default function HomePage() {
   const [showWizard, setShowWizard] = useState(false)
   const [showProjectWizard, setShowProjectWizard] = useState(false)
   const [showUpgraded, setShowUpgraded] = useState(searchParams.get('upgraded') === '1')
+  const [soulTab, setSoulTab] = useState<'all' | 'active' | 'idle' | 'archive'>('all')
 
   const { data: stats = null } = useQuery({
     queryKey: queryKeys.stats.dashboard,
@@ -56,12 +57,18 @@ export default function HomePage() {
   const visible = useMemo<SoulCardData[]>(
     () => cardList
       .map(toSoulCardData)
+      .filter(s => {
+        if (soulTab === 'active')  return s.status === 'online' || s.status === 'active'
+        if (soulTab === 'idle')    return s.status === 'idle'
+        if (soulTab === 'archive') return s.status === 'offline'
+        return true
+      })
       .sort((a, b) => {
         const af = favs.has(a.id) ? 0 : 1
         const bf = favs.has(b.id) ? 0 : 1
         return af - bf || a.name.localeCompare(b.name)
       }),
-    [cardList, favs],
+    [cardList, favs, soulTab],
   )
 
   const activeChannels = useMemo(
@@ -130,24 +137,24 @@ export default function HomePage() {
 
               <section className="mb-7 grid grid-cols-4 gap-3">
                 <StatCard
-                  label="Total Souls"
+                  label={t('home.statsSouls')}
                   value={String(cardList.length)}
                   accentColor="var(--stat-accent-primary)"
                   spark={buildSpark(allProjects.map(p => p.updated_at))}
                 />
                 <StatCard
-                  label="Active Channels"
+                  label={t('home.statsChannels')}
                   value={String(activeChannels)}
                   accentColor="var(--stat-accent-success)"
                   spark={buildSpark(allProjects.filter(p => p.active_soul_id != null).map(p => p.updated_at))}
                 />
                 <StatCard
-                  label="Memory"
+                  label={t('home.statsMemory')}
                   value={stats ? String(stats.totalMemories) : '—'}
                   accentColor="var(--stat-accent-warn)"
                 />
                 <StatCard
-                  label="API Calls"
+                  label={t('home.statsApiCalls')}
                   value={stats ? formatApiCalls(stats.monthlyApiCalls) : '—'}
                   accentColor="var(--stat-accent-info)"
                 />
@@ -155,54 +162,84 @@ export default function HomePage() {
 
               <section className="mb-8">
                 <SectionHeader
-                  title="Your Souls"
+                  title={t('home.yourSouls')}
                   tabs={[
-                    { id: 'all',     label: 'All',     active: true },
-                    { id: 'active',  label: 'Active'              },
-                    { id: 'idle',    label: 'Idle'                },
-                    { id: 'archive', label: 'Archive'             },
+                    { id: 'all',     label: t('home.filterAll'),     active: soulTab === 'all'     },
+                    { id: 'active',  label: t('home.filterActive'),  active: soulTab === 'active'  },
+                    { id: 'idle',    label: t('home.filterIdle'),    active: soulTab === 'idle'    },
+                    { id: 'archive', label: t('home.filterArchive'), active: soulTab === 'archive' },
                   ]}
+                  onTabChange={id => setSoulTab(id as typeof soulTab)}
                 />
-                {loading ? (
-                  <div className="grid grid-cols-2 gap-3 py-3 sm:grid-cols-3 xl:grid-cols-4">
-                    {[...Array(3)].map((_, i) => <SoulCardVerticalSkeleton key={i} />)}
-                  </div>
-                ) : visible.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3 py-3 sm:grid-cols-3 xl:grid-cols-4">
-                    {visible.map(soul => (
-                      <SoulCardVertical
-                        key={soul.id}
-                        data={soul}
-                        isFavorite={favs.has(soul.id)}
-                        onFavoriteToggle={() => toggle(soul.id)}
-                        onOpen={() => router.push(`/souls/${soul.id}`)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-4 py-6 px-2">
-                    <div className="flex h-[160px] w-[300px] shrink-0 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--border-subtle)] text-center">
-                      <p className="home-ui-font text-body text-[var(--text-tertiary)]">No souls yet</p>
-                      <button
-                        type="button"
-                        onClick={() => setShowWizard(true)}
-                        className="home-ui-font rounded-lg bg-[var(--accent-primary)] px-4 py-1.5 text-body font-semibold text-white hover:bg-[var(--accent-hover)]"
-                      >
-                        Create your first soul
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <AnimatePresence mode="wait" initial={false}>
+                  {loading ? (
+                    <motion.div
+                      key="loading"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="grid grid-cols-2 gap-3 py-3 sm:grid-cols-3 xl:grid-cols-4"
+                    >
+                      {[...Array(3)].map((_, i) => <SoulCardVerticalSkeleton key={i} />)}
+                    </motion.div>
+                  ) : visible.length > 0 ? (
+                    <motion.div
+                      key={soulTab}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0, transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1], staggerChildren: 0.04 } }}
+                      exit={{ opacity: 0, transition: { duration: 0.1 } }}
+                      className="grid grid-cols-2 gap-3 py-3 sm:grid-cols-3 xl:grid-cols-4"
+                    >
+                      {visible.map(soul => (
+                        <motion.div
+                          key={soul.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0, transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] } }}
+                          whileHover={{ scale: 1.012, transition: { duration: 0.15 } }}
+                          whileTap={{ scale: 0.995 }}
+                        >
+                          <SoulCardVertical
+                            data={soul}
+                            isFavorite={favs.has(soul.id)}
+                            onFavoriteToggle={() => toggle(soul.id)}
+                            onOpen={() => router.push(`/souls/${soul.id}`)}
+                          />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="empty"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="flex items-center gap-4 py-6 px-2"
+                    >
+                      <div className="flex h-[160px] w-[300px] shrink-0 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--border-subtle)] text-center">
+                        <p className="home-ui-font text-body text-[var(--text-tertiary)]">{t('home.noSouls')}</p>
+                        <button
+                          type="button"
+                          onClick={() => setShowWizard(true)}
+                          className="home-ui-font rounded-lg bg-[var(--accent-primary)] px-4 py-1.5 text-body font-semibold text-white hover:bg-[var(--accent-hover)]"
+                        >
+                          {t('home.createFirstSoul')}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </section>
 
               <section className="mb-8">
-                <SectionHeader title="Recent Projects" />
+                <SectionHeader title={t('home.recentProjects')} />
                 <div className="flex gap-3 overflow-x-auto pb-2 py-2">
                   {projects.map(p => (
                     <ProjectCardConnected
                       key={p.id}
                       project={p}
-                      editedLabel={editedLabel(p.updated_at)}
+                      editedLabel={editedLabel(p.updated_at, t)}
                       coverUrlFallback={cardList.find(c => c.id === p.active_soul_id)?.avatar_url ?? undefined}
                       icon={<Folder size={14} />}
                       onClick={() => router.push(`/projects/${p.id}`)}
@@ -214,23 +251,23 @@ export default function HomePage() {
                     className="flex h-[160px] w-[232px] flex-shrink-0 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--border-subtle)] text-body text-[var(--text-tertiary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
                   >
                     <span className="text-[18px] leading-none">+</span>
-                    New Project
+                    {t('home.newProject')}
                   </button>
                 </div>
               </section>
 
               <section>
-                <SectionHeader title="Start from a template" withArrows={false} />
+                <SectionHeader title={t('home.fromTemplate')} withArrows={false} />
                 <div className="grid grid-cols-6 gap-2">
                   {HOME_TEMPLATES.map(template => (
                     <TemplateCard
                       key={template.id}
                       title={template.title}
-                      subtitle={template.subtitle}
+                      subtitle={t('home.readyToUse')}
                       icon={TEMPLATE_ICONS[template.icon]}
                     />
                   ))}
-                  <TemplateCard title="Blank Project" subtitle="Start from scratch" icon={<span className="text-[18px]">+</span>} />
+                  <TemplateCard title={t('home.blankProject')} subtitle={t('home.blankProjectDesc')} icon={<span className="text-[18px]">+</span>} />
                 </div>
               </section>
             </div>

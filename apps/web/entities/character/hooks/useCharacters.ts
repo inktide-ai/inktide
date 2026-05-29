@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import equal from 'fast-deep-equal'
 import type { AiCharacter } from '@/shared/lib/character/types'
-import { SoulCardRepository } from '@/entities/soul'
+import { SoulCardRepository } from '@/entities/soul/services/cards/SoulCardRepository'
 import { useCharacterList } from './characters/useCharacterList'
 import { useSelectedCharacter } from './characters/useSelectedCharacter'
 import { useDirtyState } from './characters/useDirtyState'

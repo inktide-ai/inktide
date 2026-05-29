@@ -10,7 +10,7 @@ import {
   uninstallConnector,
   type ConnectorResponse,
   type InstallationResponse,
-} from '@/api/marketplace'
+} from '@/features/soul/channels/api/marketplace'
 
 /* ── platform icons ─────────────────────────────────────────────────── */
 

@@ -47,7 +47,7 @@ export function WizardChannelsPanel({ initialBotToken, onConfirm }: WizardChanne
         </div>
         <div className="min-w-0 flex-1">
           <span className="block truncate text-[12.5px] font-medium leading-4 text-[var(--text-primary)]">Discord</span>
-          <span className="block truncate text-[12px] leading-4 text-[var(--text-tertiary)]">{DISCORD_PLATFORM.subtitle}</span>
+          <span className="block truncate text-xs leading-4 text-[var(--text-tertiary)]">{DISCORD_PLATFORM.subtitle}</span>
         </div>
       </div>
     </button>
@@ -73,7 +73,7 @@ export function WizardChannelsPanel({ initialBotToken, onConfirm }: WizardChanne
           <h2 className="home-heading-font text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
             Каналы и коннекторы
           </h2>
-          <p className="home-ui-font mt-1 text-[14px] text-[var(--text-secondary)]">
+          <p className="home-ui-font mt-1 text-body text-[var(--text-secondary)]">
             Подключите Discord бота к вашей душе.
           </p>
         </div>
@@ -110,7 +110,7 @@ export function WizardChannelsPanel({ initialBotToken, onConfirm }: WizardChanne
           >
             <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-[var(--border-default)]" />
             <div className="flex items-center justify-between px-5 py-3">
-              <span className="home-ui-font text-[14px] font-semibold text-[var(--text-primary)]">Configure Discord</span>
+              <span className="home-ui-font text-body font-semibold text-[var(--text-primary)]">Configure Discord</span>
               <button type="button" onClick={() => setDiscordActive(false)} className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-secondary)] transition-colors">
                 <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
                   <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

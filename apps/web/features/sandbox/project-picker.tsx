@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Search, Plus } from 'lucide-react'
 import { listProjects, type ProjectListItem } from '@/entities/project/api'
 import { Badge, type BadgeVariant } from '@/shared/ui/badge'
+import { PROJECTS_ROUTE, sandboxWithProject } from '@/lib/routes'
 
 type Filter = 'all' | 'active' | 'paused' | 'archived'
 
@@ -55,14 +56,14 @@ function ProjectCard({ project, onClick }: { project: ProjectListItem; onClick: 
     >
       {/* Name + badge */}
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[14px] font-semibold leading-snug text-[var(--text-primary)] group-hover:text-white transition-colors line-clamp-1">
+        <p className="text-body font-semibold leading-snug text-[var(--text-primary)] group-hover:text-white transition-colors line-clamp-1">
           {project.name}
         </p>
         <Badge variant={badgeVariant} className="shrink-0 capitalize">{project.status}</Badge>
       </div>
 
       {/* Description */}
-      <p className="line-clamp-2 text-[14px] leading-relaxed text-[var(--text-secondary)]">
+      <p className="line-clamp-2 text-body leading-relaxed text-[var(--text-secondary)]">
         {project.description || 'No description'}
       </p>
 
@@ -79,10 +80,10 @@ function ProjectCard({ project, onClick }: { project: ProjectListItem; onClick: 
             {project.active_soul ? project.active_soul.name[0] : '?'}
           </span>
         )}
-        <span className="truncate text-[14px] text-[var(--text-secondary)]">
+        <span className="truncate text-body text-[var(--text-secondary)]">
           {project.active_soul?.name ?? <span className="italic text-[var(--text-tertiary)]">No soul bound</span>}
         </span>
-        <span className="ml-auto shrink-0 text-[12px] text-[var(--text-tertiary)]">
+        <span className="ml-auto shrink-0 text-xs text-[var(--text-tertiary)]">
           {updatedLabel(project.updated_at)}
         </span>
       </div>
@@ -115,10 +116,10 @@ export default function ProjectPicker() {
       <div className="w-full max-w-[860px]">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="font-serif text-[28px] font-semibold tracking-tight text-[var(--text-primary)]">
+          <h1 className="font-sans text-[28px] font-semibold tracking-tight text-[var(--text-primary)]">
             Select a project
           </h1>
-          <p className="mt-2 text-[14px] text-[var(--text-secondary)]">
+          <p className="mt-2 text-body text-[var(--text-secondary)]">
             Each project owns channels, memory and pipeline config.
           </p>
         </div>
@@ -133,7 +134,7 @@ export default function ProjectPicker() {
               placeholder="Search projects…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full bg-transparent text-[14px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
+              className="w-full bg-transparent text-body text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
             />
           </div>
 
@@ -144,7 +145,7 @@ export default function ProjectPicker() {
                 key={f.key}
                 type="button"
                 onClick={() => setFilter(f.key)}
-                className={`rounded-lg px-3 py-1 text-[14px] font-medium transition-colors ${
+                className={`rounded-lg px-3 py-1 text-body font-medium transition-colors ${
                   filter === f.key
                     ? 'bg-[var(--sidebar-active)] text-[var(--text-primary)]'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -158,8 +159,8 @@ export default function ProjectPicker() {
           {/* New project */}
           <button
             type="button"
-            onClick={() => router.push('/projects')}
-            className="flex h-9 items-center gap-1.5 rounded-xl bg-[var(--accent-primary)] px-3.5 text-[14px] font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
+            onClick={() => router.push(PROJECTS_ROUTE)}
+            className="flex h-9 items-center gap-1.5 rounded-xl bg-[var(--accent-primary)] px-3.5 text-body font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
           >
             <Plus size={14} />
             New Project
@@ -172,7 +173,7 @@ export default function ProjectPicker() {
             {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex h-[200px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-[14px] text-[var(--text-tertiary)]">
+          <div className="flex h-[200px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-body text-[var(--text-tertiary)]">
             {search ? 'No projects match your search' : 'No projects yet — click "New Project" to create one'}
           </div>
         ) : (
@@ -181,7 +182,7 @@ export default function ProjectPicker() {
               <ProjectCard
                 key={p.id}
                 project={p}
-                onClick={() => router.push(`/edit/sandbox?projectId=${p.id}`)}
+                onClick={() => router.push(sandboxWithProject(p.id))}
               />
             ))}
           </div>

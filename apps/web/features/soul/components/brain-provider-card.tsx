@@ -24,7 +24,7 @@ export function BrainProviderCard({ provider, selected, onSelect, credentialStat
           'flex items-center gap-3 rounded-lg p-3',
           'font-[var(--font-ui)] transition-[background-color,box-shadow] duration-150 ease-out',
           selected
-            ? 'bg-[var(--surface-card-hover)] shadow-[inset_0_0_0_1.5px_#3B82F6]'
+            ? 'bg-[var(--surface-card-hover)] shadow-[inset_0_0_0_1.5px_var(--color-blue-primary)]'
             : 'bg-[var(--surface-card)] shadow-[inset_0_0_0_1px_var(--border-default)] hover:bg-[var(--surface-card-hover)] hover:shadow-[inset_0_0_0_1px_var(--border-strong)]',
         )}
       >
@@ -39,7 +39,7 @@ export function BrainProviderCard({ provider, selected, onSelect, credentialStat
             draggable={false}
           />
         </div>
-        <span className="min-w-0 flex-1 truncate text-[14px] font-medium leading-5 text-[var(--text-primary)]">
+        <span className="min-w-0 flex-1 truncate text-body font-medium leading-5 text-[var(--text-primary)]">
           {provider.name}
         </span>
         {credentialStatus && (

@@ -86,3 +86,8 @@ Thumbs.db
 keycloakify/
 keycloak/
 *.textClipping
+
+# Diploma / local scratch files
+diploma_screens/
+generate_diploma_section.py
+result.docx

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, Atom, Microphone } from '@/shared/ui/icons'
 import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-providers'
@@ -38,6 +39,7 @@ export interface SoulCreationWizardProps {
 }
 
 export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTtsSelect }: SoulCreationWizardProps) {
+  const { t } = useTranslation('common')
   const wizard = useWizardState()
   const { state, navigate, selectTemplate, selectProvider, setPersonality, openPersonality, closePersonality, confirmChannels, clearDraft } = wizard
 
@@ -128,8 +130,8 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
           {state.screen === 'llm' && (
             <motion.div key="llm" custom={state.direction} {...panelMotionProps} className="flex w-full justify-center">
               <WizardProviderPanel
-                title="Select LLM"
-                subtitle="Choose the language model that will power your soul."
+                title={t('wizard.selectLlm')}
+                subtitle={t('wizard.selectLlmDesc')}
                 icon={<Atom size={20} />}
                 panelType="llm"
                 items={llmItems}
@@ -143,8 +145,8 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
           {state.screen === 'tts' && (
             <motion.div key="tts" custom={state.direction} {...panelMotionProps} className="flex w-full justify-center">
               <WizardProviderPanel
-                title="Select Voice"
-                subtitle="Choose the text-to-speech engine for your soul's voice."
+                title={t('wizard.selectVoice')}
+                subtitle={t('wizard.selectVoiceDesc')}
                 icon={<Microphone size={20} />}
                 panelType="tts"
                 items={ttsItems}

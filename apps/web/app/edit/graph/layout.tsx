@@ -1,9 +1,7 @@
-'use client'
-
 import { type ReactNode } from 'react'
-import ProtectedRoute from '@/features/account/protected-route'
-import { CharactersProvider } from '@/entities/character/context/CharactersContext'
-import { WorkspaceSidebar } from '@/features/workspace-home/workspace-sidebar'
+import { ProtectedRoute } from '@/features/account'
+import { CharactersProvider } from '@/entities/character'
+import { WorkspaceSidebar } from '@/widgets/workspace-sidebar'
 
 export default function GraphLayout({ children }: { children: ReactNode }) {
   return (

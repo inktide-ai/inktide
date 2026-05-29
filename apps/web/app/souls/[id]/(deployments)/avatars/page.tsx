@@ -1,6 +1,6 @@
 'use client'
-import { useCharactersContext } from '@/entities/character/context/CharactersContext'
-import ModelTab from '@/features/character-editor/tabs/model-tab'
+import { useCharactersContext } from '@/entities/character'
+import { ModelTab } from '@/features/character-editor'
 
 export default function SoulAvatarsPage() {
   const { selected, updateCharacter } = useCharactersContext()

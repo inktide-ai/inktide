@@ -25,13 +25,13 @@ export function ServiceCards({ character, onNavigateTab }: ServiceCardsProps) {
               {getBrainLogo(character.llm.providerId)}
             </div>
             <div>
-              <div className="text-[0.9375rem] font-bold text-(--text-primary) tracking-[-0.01em] leading-[1.2] mt-[0.15rem]">{t('identity.brainAI')}</div>
-              <div className="text-[0.75rem] text-(--text-muted) mt-[0.2rem]">{formatLlmProvider(character.llm.providerId, character.llm.modelId, t('identity.notConfigured'))}</div>
+              <div className="text-body-md font-bold text-(--text-primary) tracking-[-0.01em] leading-[1.2] mt-[0.15rem]">{t('identity.brainAI')}</div>
+              <div className="text-xs text-(--text-muted) mt-[0.2rem]">{formatLlmProvider(character.llm.providerId, character.llm.modelId, t('identity.notConfigured'))}</div>
             </div>
           </div>
           <img src="/images/illustrations/brain.png" className="absolute right-0 top-1/2 -translate-y-1/2 h-[80%] max-h-[130px] w-auto object-contain opacity-[0.28] pointer-events-none select-none" alt="" aria-hidden />
           <div className="flex items-center justify-between relative z-[1]">
-            <button type="button" className="text-[0.75rem] text-(--text-muted) bg-transparent border-none p-0 cursor-pointer font-[var(--font-ui)] transition-[color] duration-150 ease hover:text-(--text-primary)" onClick={() => onNavigateTab?.('brain')}>{t('identity.configure')}</button>
+            <button type="button" className="text-xs text-(--text-muted) bg-transparent border-none p-0 cursor-pointer font-[var(--font-ui)] transition-[color] duration-150 ease hover:text-(--text-primary)" onClick={() => onNavigateTab?.('brain')}>{t('identity.configure')}</button>
             <Toggle on={!!character.llm.providerId} />
           </div>
         </div>
@@ -43,13 +43,13 @@ export function ServiceCards({ character, onNavigateTab }: ServiceCardsProps) {
               {getVoiceLogo(character.tts.providerId)}
             </div>
             <div>
-              <div className="text-[0.9375rem] font-bold text-(--text-primary) tracking-[-0.01em] leading-[1.2] mt-[0.15rem]">{t('identity.voiceAI')}</div>
-              <div className="text-[0.75rem] text-(--text-muted) mt-[0.2rem]">{formatTtsProvider(character.tts.providerId, t('identity.notConfigured'))}</div>
+              <div className="text-body-md font-bold text-(--text-primary) tracking-[-0.01em] leading-[1.2] mt-[0.15rem]">{t('identity.voiceAI')}</div>
+              <div className="text-xs text-(--text-muted) mt-[0.2rem]">{formatTtsProvider(character.tts.providerId, t('identity.notConfigured'))}</div>
             </div>
           </div>
           <img src="/images/illustrations/voice.png" className="absolute right-0 top-1/2 -translate-y-1/2 h-[80%] max-h-[130px] w-auto object-contain opacity-[0.28] pointer-events-none select-none" alt="" aria-hidden />
           <div className="flex items-center justify-between relative z-[1]">
-            <button type="button" className="text-[0.75rem] text-(--text-muted) bg-transparent border-none p-0 cursor-pointer font-[var(--font-ui)] transition-[color] duration-150 ease hover:text-(--text-primary)" onClick={() => onNavigateTab?.('voice')}>{t('identity.configure')}</button>
+            <button type="button" className="text-xs text-(--text-muted) bg-transparent border-none p-0 cursor-pointer font-[var(--font-ui)] transition-[color] duration-150 ease hover:text-(--text-primary)" onClick={() => onNavigateTab?.('voice')}>{t('identity.configure')}</button>
             <Toggle on={!!character.tts.providerId && character.tts.providerId !== 'none'} />
           </div>
         </div>
@@ -61,13 +61,13 @@ export function ServiceCards({ character, onNavigateTab }: ServiceCardsProps) {
               <img src="/images/providers/brain/chatgpt.svg" style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 10 }} alt="" aria-hidden />
             </div>
             <div>
-              <div className="text-[0.9375rem] font-bold text-(--text-primary) tracking-[-0.01em] leading-[1.2] mt-[0.15rem]">{t('identity.visionAI')}</div>
-              <div className="text-[0.75rem] text-(--text-muted) mt-[0.2rem]">{t('identity.notConfigured')}</div>
+              <div className="text-body-md font-bold text-(--text-primary) tracking-[-0.01em] leading-[1.2] mt-[0.15rem]">{t('identity.visionAI')}</div>
+              <div className="text-xs text-(--text-muted) mt-[0.2rem]">{t('identity.notConfigured')}</div>
             </div>
           </div>
           <img src="/images/illustrations/vision.webp" className="absolute right-0 top-1/2 -translate-y-1/2 h-[80%] max-h-[130px] w-auto object-contain opacity-[0.28] pointer-events-none select-none" alt="" aria-hidden />
           <div className="flex items-center justify-between relative z-[1]">
-            <button type="button" className="text-[0.75rem] text-(--text-muted) bg-transparent border-none p-0 cursor-pointer font-[var(--font-ui)] transition-[color] duration-150 ease hover:text-(--text-primary)" onClick={() => onNavigateTab?.('skills')}>{t('identity.configure')}</button>
+            <button type="button" className="text-xs text-(--text-muted) bg-transparent border-none p-0 cursor-pointer font-[var(--font-ui)] transition-[color] duration-150 ease hover:text-(--text-primary)" onClick={() => onNavigateTab?.('skills')}>{t('identity.configure')}</button>
             <Toggle on={false} />
           </div>
         </div>

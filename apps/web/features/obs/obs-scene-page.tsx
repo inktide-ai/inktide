@@ -1,6 +1,6 @@
 'use client'
 import { useSearchParams } from 'next/navigation'
-import AvatarRenderer from '@/features/avatar/avatar-renderer'
+import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok — OBS scene embeds avatar preview
 import { useLipSync } from '@/shared/hooks/useLipSync'
 import { useAudioStream } from '@/shared/hooks/useAudioStream'
 import type { ModelType } from '@/shared/lib/character'

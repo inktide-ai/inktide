@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import {
   getDiscordInstallUrl,
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export function DiscordChannelManager({ soulId, channels }: Props) {
+  const { t } = useTranslation('channels')
   const [actionError,     setActionError]     = useState<string | null>(null)
   const [busy,            setBusy]            = useState(false)
   const [rowBusy,         setRowBusy]         = useState<string | null>(null)
@@ -63,7 +65,7 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
       saveOAuthPending({ soulId, connectorId: 'discord', initiatedAt: Date.now() })
       window.location.href = url
     } catch (e) {
-      setActionError(e instanceof ApiError ? e.message : 'Failed to get Discord install URL')
+      setActionError(e instanceof ApiError ? e.message : t('discord.errors.getInstallUrl'))
       setBusy(false)
     }
   }
@@ -76,24 +78,24 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
       saveOAuthPending({ soulId, connectorId: 'discord', initiatedAt: Date.now() })
       window.location.href = url
     } catch (e) {
-      setActionError(e instanceof ApiError ? e.message : 'Failed to reconnect')
+      setActionError(e instanceof ApiError ? e.message : t('discord.errors.reconnect'))
     } finally {
       setRowBusy(null)
     }
   }
 
   const handleRevoke = (row: ChannelResponse) => {
-    if (!window.confirm(`Disconnect "${row.channel_name}" from Discord? The bot will stop responding.`)) return
+    if (!window.confirm(t('discord.disconnectConfirm', { channel: row.channel_name }))) return
     setActionError(null)
     revokeMutation.mutate(row.id, {
-      onError: (e) => setActionError(e instanceof ApiError ? e.message : 'Failed to disconnect'),
+      onError: (e) => setActionError(e instanceof ApiError ? e.message : t('discord.errors.disconnect')),
     })
   }
 
   const handleToggle = (row: ChannelResponse, next: boolean) => {
     setActionError(null)
     toggleMutation.mutate({ id: row.id, isActive: next }, {
-      onError: (e) => setActionError(e instanceof ApiError ? e.message : 'Failed to update'),
+      onError: (e) => setActionError(e instanceof ApiError ? e.message : t('discord.errors.update')),
     })
   }
 
@@ -104,10 +106,10 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
     try {
       const result = await validateDiscordToken(customBotToken.trim())
       setCustomBotStatus(result.valid ? 'verified' : 'failed')
-      setCustomBotError(result.valid ? null : (result.error ?? 'Token is invalid'))
+      setCustomBotError(result.valid ? null : (result.error ?? t('discord.errors.invalidToken')))
     } catch {
       setCustomBotStatus('failed')
-      setCustomBotError('Could not reach validation service')
+      setCustomBotError(t('discord.errors.cannotReachValidation'))
     }
   }
 
@@ -120,16 +122,16 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
         onSuccess: () => { setCustomBotToken(''); setCustomBotStatus('idle') },
         onError: (e) => {
           setCustomBotStatus('failed')
-          setCustomBotError(e instanceof Error ? e.message : 'Failed to save bot token')
+          setCustomBotError(e instanceof Error ? e.message : t('discord.errors.saveBotToken'))
         },
       },
     )
   }
 
   const handleCustomBotRemove = (channelId: string) => {
-    if (!window.confirm('Remove custom bot token from this channel?')) return
+    if (!window.confirm(t('discord.removeCustomBotConfirm'))) return
     customBotRemoveMutation.mutate(channelId, {
-      onError: (e) => setActionError(e instanceof Error ? e.message : 'Failed to remove custom bot'),
+      onError: (e) => setActionError(e instanceof Error ? e.message : t('discord.errors.removeCustomBot')),
     })
   }
 
@@ -142,9 +144,9 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
       {channels.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
           <div className="px-6 pt-5 pb-4">
-            <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Connected channels</h3>
-            <p className="mt-1 text-[14px] text-[var(--text-secondary)]">
-              Manage your connected Discord channels.
+            <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('discord.connectedChannels')}</h3>
+            <p className="mt-1 text-body text-[var(--text-secondary)]">
+              {t('discord.connectedDesc')}
             </p>
           </div>
           <div className="border-t border-[var(--border-subtle)]">
@@ -159,8 +161,8 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
                   )}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-semibold m-0 text-[var(--text-primary)]">{row.channel_name}</p>
-                    <p className="text-[14px] font-mono m-0 text-[var(--text-secondary)] truncate">
+                    <p className="text-body font-semibold m-0 text-[var(--text-primary)]">{row.channel_name}</p>
+                    <p className="text-body font-mono m-0 text-[var(--text-secondary)] truncate">
                       {row.channel_id ?? '—'} · @{row.bot_username}
                     </p>
                   </div>
@@ -182,17 +184,17 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
                         type="button"
                         disabled={isRowBusy}
                         onClick={() => void handleReconnect(row)}
-                        className="px-2.5 py-1 rounded-lg text-[14px] font-medium text-[#5865f2] border border-[#5865f2]/40 hover:bg-[#5865f2]/10 transition-colors disabled:opacity-40"
+                        className="px-2.5 py-1 rounded-lg text-body font-medium text-[var(--platform-discord)] border border-[var(--platform-discord)]/40 hover:bg-[var(--platform-discord)]/10 transition-colors disabled:opacity-40"
                       >
-                        Reconnect
+                        {t('discord.reconnect')}
                       </button>
                     )}
                     <button
                       type="button"
                       disabled={isRowBusy}
                       onClick={() => handleRevoke(row)}
-                      className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-[14px] text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      aria-label="Disconnect"
+                      className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-body text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      aria-label={t('discord.disconnect')}
                     >
                       ✕
                     </button>
@@ -206,21 +208,21 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
 
       <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
         <div className="px-6 pt-5 pb-5">
-          <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Add Discord server</h3>
-          <p className="mt-1 text-[14px] text-[var(--text-secondary)]">
-            Click below to authorize Inktide bot on your Discord server. You&apos;ll be redirected to Discord to select a server.
+          <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('discord.addServer')}</h3>
+          <p className="mt-1 text-body text-[var(--text-secondary)]">
+            {t('discord.addServerDesc')}
           </p>
-          {actionError && <p className="mt-3 text-[14px] text-red-400">{actionError}</p>}
+          {actionError && <p className="mt-3 text-body text-red-400">{actionError}</p>}
         </div>
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--border-subtle)]">
           <button
             type="button"
             disabled={busy}
             onClick={() => void handleConnect()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-[14px] bg-[#5865f2] hover:bg-[#4752c4] text-white transition-[filter,opacity] duration-150 hover:brightness-110 disabled:opacity-45 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-body bg-[var(--platform-discord)] hover:bg-[#4752c4] text-white transition-[filter,opacity] duration-150 hover:brightness-110 disabled:opacity-45 disabled:cursor-not-allowed"
           >
             <IconDiscordMono />
-            {busy ? 'Redirecting…' : 'Connect with Discord'}
+            {busy ? t('discord.redirecting') : t('discord.connectWithDiscord')}
           </button>
         </div>
       </div>
@@ -228,15 +230,15 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
       <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
         <div className="px-6 pt-5 pb-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Use your own bot</h3>
+            <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('discord.ownBot')}</h3>
             {existingCustom && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[12px] font-semibold text-emerald-400">
-                Connected
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
+                {t('discord.connected')}
               </span>
             )}
           </div>
-          <p className="mt-1 text-[14px] text-[var(--text-secondary)]">
-            Paste your Discord bot token to connect your own bot instead of the shared Inktide bot.
+          <p className="mt-1 text-body text-[var(--text-secondary)]">
+            {t('discord.ownBotDesc')}
           </p>
         </div>
         <div className="px-6 pb-5 flex flex-col gap-3">
@@ -245,12 +247,12 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
               type="password"
               value={customBotToken}
               onChange={e => { setCustomBotToken(e.target.value); setCustomBotStatus('idle'); setCustomBotError(null) }}
-              placeholder="Bot token…"
+              placeholder={t('discord.botTokenPlaceholder')}
               autoComplete="off"
               className={cn(
                 'flex-1 h-9 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)]/60 px-3',
-                'text-[14px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)] transition-colors',
-                'focus:border-[#5865f2]/50',
+                'text-body text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)] transition-colors',
+                'focus:border-[var(--platform-discord)]/50',
               )}
             />
             <button
@@ -261,29 +263,29 @@ export function DiscordChannelManager({ soulId, channels }: Props) {
                 : () => void handleCustomBotVerify()
               }
               className={cn(
-                'shrink-0 px-3 py-1.5 rounded-lg text-[14px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed',
+                'shrink-0 px-3 py-1.5 rounded-lg text-body font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed',
                 isVerified
-                  ? 'bg-[#5865f2] text-white hover:bg-[#4752c4]'
+                  ? 'bg-[var(--platform-discord)] text-white hover:bg-[#4752c4]'
                   : 'border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-2)]',
               )}
             >
-              {isSaving ? 'Saving…' : customBotStatus === 'verifying' ? 'Verifying…' : isVerified ? 'Save' : 'Verify'}
+              {isSaving ? t('discord.saving') : customBotStatus === 'verifying' ? t('discord.verifying') : isVerified ? 'Save' : t('discord.verify')}
             </button>
           </div>
           {customBotStatus === 'verified' && (
-            <p className="text-[14px] text-emerald-400">Token verified — click Save to connect.</p>
+            <p className="text-body text-emerald-400">{t('discord.tokenVerified')}</p>
           )}
           {customBotStatus === 'failed' && customBotError && (
-            <p className="text-[14px] text-red-400">{customBotError}</p>
+            <p className="text-body text-red-400">{customBotError}</p>
           )}
           {existingCustom && !customBotToken && (
             <button
               type="button"
               disabled={customBotRemoveMutation.isPending}
               onClick={() => handleCustomBotRemove(existingCustom.id)}
-              className="self-start text-[14px] text-red-400 hover:text-red-300 transition-colors disabled:opacity-40"
+              className="self-start text-body text-red-400 hover:text-red-300 transition-colors disabled:opacity-40"
             >
-              Remove custom bot
+              {t('discord.removeCustomBot')}
             </button>
           )}
         </div>

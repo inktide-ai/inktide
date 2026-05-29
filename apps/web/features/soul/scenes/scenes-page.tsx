@@ -128,7 +128,7 @@ export function ScenesPage() {
           <h1 className="home-heading-font text-[20px] font-semibold text-[var(--text-heading)]">
             Runtime Scenes
           </h1>
-          <p className="home-ui-font mt-1 text-[14px] text-[var(--text-tertiary)]">
+          <p className="home-ui-font mt-1 text-body text-[var(--text-tertiary)]">
             Named configuration presets that override soul defaults at runtime — without changing the base config.
           </p>
         </div>
@@ -136,7 +136,7 @@ export function ScenesPage() {
         <button
           type="button"
           onClick={() => { setEditing(null); setModalOpen(true) }}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] bg-[var(--accent-base)] px-3 py-2 text-[14px] font-semibold text-white hover:opacity-90 transition-opacity"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] bg-[var(--accent-base)] px-3 py-2 text-body font-semibold text-white hover:opacity-90 transition-opacity"
         >
           <Plus size={14} />
           Create Scene
@@ -156,10 +156,10 @@ export function ScenesPage() {
             <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--accent-base)]" />
             <div className="flex items-center gap-2">
               {activePreset.icon && <span className="text-[16px]">{activePreset.icon}</span>}
-              <span className="home-ui-font text-[14px] font-semibold text-[var(--text-primary)]">
+              <span className="home-ui-font text-body font-semibold text-[var(--text-primary)]">
                 {activePreset.name}
               </span>
-              <span className="home-ui-font text-[14px] text-[var(--text-tertiary)]">is active</span>
+              <span className="home-ui-font text-body text-[var(--text-tertiary)]">is active</span>
             </div>
           </motion.div>
         ) : (
@@ -171,23 +171,23 @@ export function ScenesPage() {
             className="flex items-center gap-3 rounded-[12px] border border-[var(--border-card)] bg-[var(--surface-0)] px-4 py-3"
           >
             <span className="h-2 w-2 rounded-full bg-[var(--text-tertiary)]" />
-            <span className="home-ui-font text-[14px] text-[var(--text-tertiary)]">Running on soul defaults</span>
+            <span className="home-ui-font text-body text-[var(--text-tertiary)]">Running on soul defaults</span>
           </motion.div>
         )}
       </AnimatePresence>
 
       {mutationError && (
-        <p className="home-ui-font text-[14px] text-red-400">{mutationError}</p>
+        <p className="home-ui-font text-body text-red-400">{mutationError}</p>
       )}
 
       {/* Content */}
       {loading ? (
         <div className="py-12 text-center">
-          <p className="home-ui-font text-[14px] text-[var(--text-tertiary)]">Loading scenes…</p>
+          <p className="home-ui-font text-body text-[var(--text-tertiary)]">Loading scenes…</p>
         </div>
       ) : error ? (
         <div className="py-12 text-center">
-          <p className="home-ui-font text-[14px] text-red-400">{error}</p>
+          <p className="home-ui-font text-body text-red-400">{error}</p>
         </div>
       ) : presets.length === 0 ? (
         <motion.div
@@ -198,14 +198,14 @@ export function ScenesPage() {
           <div className="text-[40px] leading-none select-none">🎬</div>
           <div>
             <p className="home-heading-font text-[15px] font-semibold text-[var(--text-primary)]">No runtime scenes yet</p>
-            <p className="home-ui-font mt-1 max-w-xs text-[14px] text-[var(--text-tertiary)]">
+            <p className="home-ui-font mt-1 max-w-xs text-body text-[var(--text-tertiary)]">
               Create a scene to switch your soul&apos;s model, temperature, or voice at runtime.
             </p>
           </div>
           <button
             type="button"
             onClick={() => { setEditing(null); setModalOpen(true) }}
-            className="inline-flex items-center gap-1.5 rounded-[10px] bg-[var(--accent-base)] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-1.5 rounded-[10px] bg-[var(--accent-base)] px-4 py-2 text-body font-semibold text-white hover:opacity-90 transition-opacity"
           >
             <Plus size={14} />
             Create Scene
@@ -259,24 +259,24 @@ export function ScenesPage() {
               <h3 className="home-heading-font mb-1 text-[15px] font-semibold text-[var(--text-heading)]">
                 Delete scene?
               </h3>
-              <p className="home-ui-font text-[14px] text-[var(--text-secondary)]">
+              <p className="home-ui-font text-body text-[var(--text-secondary)]">
                 &ldquo;{deleteTarget.name}&rdquo; will be permanently removed.
               </p>
               {deleteError && (
-                <p className="mt-2 text-[14px] text-red-400">{deleteError}</p>
+                <p className="mt-2 text-body text-red-400">{deleteError}</p>
               )}
               <div className="mt-4 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => { setDeleteTarget(null); setDeleteError(null) }}
-                  className="rounded-md border border-[var(--border-card)] px-4 py-2 text-[14px] text-[var(--text-secondary)] hover:border-[var(--border-divider)] transition-colors"
+                  className="rounded-md border border-[var(--border-card)] px-4 py-2 text-body text-[var(--text-secondary)] hover:border-[var(--border-divider)] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleDelete}
-                  className="rounded-md bg-red-500 px-4 py-2 text-[14px] font-semibold text-white hover:bg-red-600 transition-colors"
+                  className="rounded-md bg-red-500 px-4 py-2 text-body font-semibold text-white hover:bg-red-600 transition-colors"
                 >
                   Delete
                 </button>

@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes'
 import { useLayoutEffect, useRef, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -60,24 +61,15 @@ const BORDER_DARK_H = 'color-mix(in srgb, var(--accent-base, #6c47ff) 32%, color
 
 // ── Status ────────────────────────────────────────────────────────────────────
 
-interface StatusCfg { label: string; dot: string; text: string }
-
-const STATUS: Record<SoulStatus, StatusCfg> = {
-  online:  { label: 'Online',  dot: '#22c55e', text: '#16a34a' },
-  active:  { label: 'Active',  dot: '#22c55e', text: '#16a34a' },
-  idle:    { label: 'Idle',    dot: '#9ca3af', text: 'var(--text-tertiary, #9ca3af)' },
-  offline: { label: 'Offline', dot: '#9ca3af', text: 'var(--text-tertiary, #9ca3af)' },
-}
-
-function StatusBadge({ status, s, isLight }: { status: SoulStatus; s: (v: number) => number; isLight: boolean }) {
-  const cfg = STATUS[status]
+function StatusBadge({ status, label, s }: { status: SoulStatus; label: string; s: (v: number) => number }) {
   const isActive = status === 'online' || status === 'active'
+  const dotColor = isActive ? 'var(--stat-accent-success)' : 'var(--text-tertiary)'
 
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: s(5), flexShrink: 0 }}>
-      <div style={{ width: s(7), height: s(7), borderRadius: '50%', background: isLight ? cfg.dot : (isActive ? 'var(--stat-accent-success, #39D98A)' : 'var(--text-tertiary, #9ca3af)'), flexShrink: 0 }} />
-      <span style={{ fontSize: s(12), fontWeight: 600, fontFamily: 'Inter, system-ui, sans-serif', lineHeight: 1, color: isLight ? cfg.text : (isActive ? 'var(--stat-accent-success, #39D98A)' : 'var(--text-tertiary, #9ca3af)') }}>
-        {cfg.label}
+      <div style={{ width: s(7), height: s(7), borderRadius: '50%', background: dotColor, flexShrink: 0 }} />
+      <span style={{ fontSize: s(12), fontWeight: 600, fontFamily: 'Inter, system-ui, sans-serif', lineHeight: 1, color: dotColor }}>
+        {label}
       </span>
     </div>
   )
@@ -119,10 +111,18 @@ function readLightClass(): boolean {
 // ── Card ──────────────────────────────────────────────────────────────────────
 
 export function SoulCard({ data, width, isFavorite, onFavoriteToggle, onOpen }: SoulCardProps) {
+  const { t } = useTranslation('common')
   const { resolvedTheme } = useTheme()
   const [docLight, setDocLight] = useState(readLightClass)
   useLayoutEffect(() => { setDocLight(readLightClass()) }, [resolvedTheme])
   const isLight = resolvedTheme === 'light' || (resolvedTheme === undefined && docLight)
+
+  const STATUS_LABEL: Record<SoulStatus, string> = {
+    online:  t('soulCard.online'),
+    active:  t('soulCard.active'),
+    idle:    t('soulCard.idle'),
+    offline: t('soulCard.offline'),
+  }
 
   const [hovered, setHovered] = useState(false)
   const outerRef = useRef<HTMLDivElement | null>(null)
@@ -189,7 +189,7 @@ export function SoulCard({ data, width, isFavorite, onFavoriteToggle, onOpen }: 
 
             {/* Status + star row */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: s(GAP_BADGE) }}>
-              <StatusBadge status={data.status} s={s} isLight={isLight} />
+              <StatusBadge status={data.status} label={STATUS_LABEL[data.status]} s={s} />
               <button
                 type="button"
                 onClick={e => { e.stopPropagation(); onFavoriteToggle() }}
@@ -203,7 +203,7 @@ export function SoulCard({ data, width, isFavorite, onFavoriteToggle, onOpen }: 
                     : (isFavorite ? '#facc15' : 'var(--text-secondary, #888888)'),
                   transition: 'color 0.15s',
                 }}
-                title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                title={isFavorite ? t('soulCard.removeFavorite') : t('soulCard.addFavorite')}
               >
                 {isFavorite ? <IcStarFilled size={s(18)} /> : <IcStarEmpty size={s(18)} />}
               </button>
@@ -248,7 +248,7 @@ export function SoulCard({ data, width, isFavorite, onFavoriteToggle, onOpen }: 
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
           >
             <IcPlay size={s(12)} />
-            Open
+            {t('soulCard.open')}
           </button>
 
           <button
@@ -263,7 +263,7 @@ export function SoulCard({ data, width, isFavorite, onFavoriteToggle, onOpen }: 
             }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = isLight ? 'rgba(55,53,47,0.05)' : 'rgba(255,255,255,0.06)' }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
-            title="More options"
+            title={t('soulCard.moreOptions')}
           >
             <IcDots size={s(15)} />
           </button>

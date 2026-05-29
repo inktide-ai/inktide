@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from 'next-themes'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/shared/services/auth'
 import { cn } from '@/lib/utils'
 import { HOME_ROUTE } from '@/lib/routes'
 

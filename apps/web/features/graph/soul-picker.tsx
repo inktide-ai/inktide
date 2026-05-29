@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import { graphWithCharacter, SOULS_ROUTE } from '@/lib/routes'
 import type { AiCardListItem } from '@/shared/types/soul-api'
 
 type Filter = 'all' | 'active' | 'idle' | 'archived'
@@ -44,16 +45,13 @@ function SoulCard({ card, index, onClick }: { card: AiCardListItem; index: numbe
           )}
         </div>
         {/* Online indicator */}
-        <span
-          className="absolute top-1 right-1 block rounded-full border-2 border-[var(--bg-0)]"
-          style={{ width: 12, height: 12, background: '#22c55e' }}
-        />
+        <span className="absolute top-1 right-1 block w-3 h-3 rounded-full border-2 border-[var(--bg-0)] bg-[var(--color-online)]" />
       </div>
       <div className="text-center">
-        <p className="text-[14px] font-semibold text-[var(--text-primary)] group-hover:text-white transition-colors">
+        <p className="text-body font-semibold text-[var(--text-primary)] group-hover:text-white transition-colors">
           {card.name}
         </p>
-        <p className="text-[14px] text-[var(--text-secondary)] mt-0.5 max-w-[110px] truncate">
+        <p className="text-body text-[var(--text-secondary)] mt-0.5 max-w-[110px] truncate">
           {card.personality || card.description || 'Soul'}
         </p>
       </div>
@@ -82,7 +80,7 @@ function AddSoulCard({ onClick }: { onClick: () => void }) {
         </svg>
       </div>
       <div className="text-center">
-        <p className="text-[14px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+        <p className="text-body font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
           Add{' '}
           <span className="text-[var(--accent-primary)]">Soul</span>
         </p>
@@ -125,7 +123,7 @@ export default function SoulPicker() {
         <h1 className="text-[28px] font-semibold text-[var(--text-primary)] tracking-tight">
           Select a soul to work with
         </h1>
-        <p className="mt-2 text-[14px] text-[var(--text-secondary)]">
+        <p className="mt-2 text-body text-[var(--text-secondary)]">
           Each soul has its own memory, personality and workflow.
         </p>
 
@@ -144,10 +142,10 @@ export default function SoulPicker() {
                   key={card.id}
                   card={card}
                   index={cardList.indexOf(card)}
-                  onClick={() => router.push(`/edit/graph?characterId=${card.id}`)}
+                  onClick={() => router.push(graphWithCharacter(card.id))}
                 />
               ))}
-              <AddSoulCard onClick={() => router.push('/souls')} />
+              <AddSoulCard onClick={() => router.push(SOULS_ROUTE)} />
             </>
           )}
         </div>
@@ -159,7 +157,7 @@ export default function SoulPicker() {
               key={f.key}
               type="button"
               onClick={() => setFilter(f.key)}
-              className="rounded-full px-4 py-1.5 text-[14px] font-medium transition-colors outline-none"
+              className="rounded-full px-4 py-1.5 text-body font-medium transition-colors outline-none"
               style={{
                 background: filter === f.key ? 'var(--surface-2)' : 'transparent',
                 color: filter === f.key ? 'var(--text-primary)' : 'var(--text-secondary)',

@@ -20,7 +20,7 @@ export function SidebarMenuItem({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'flex items-center gap-2.5 w-full px-3 py-[7px] rounded-lg text-[0.8125rem] font-medium',
+        'flex items-center gap-2.5 w-full px-3 py-[7px] rounded-lg text-sm font-medium',
         'bg-transparent border-none cursor-pointer text-left transition-colors',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         variant === 'default' && 'text-[var(--text-primary)] hover:bg-[var(--surface-2)]',
@@ -35,7 +35,7 @@ export function SidebarMenuItem({
       )}
       <span className="flex-1">{label}</span>
       {shortcut && (
-        <span className="pl-3 text-[14px] flex-shrink-0 text-[var(--text-tertiary)]">{shortcut}</span>
+        <span className="pl-3 text-body flex-shrink-0 text-[var(--text-tertiary)]">{shortcut}</span>
       )}
     </button>
   )

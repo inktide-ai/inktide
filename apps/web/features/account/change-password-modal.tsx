@@ -1,7 +1,8 @@
 'use client'
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
-import * as Dialog from '@radix-ui/react-dialog'
-import { changeKcPassword } from '@/api/keycloak-account'
+import { Dialog, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from '@/shared/ui/dialog'
+import { changeKcPassword } from '@/features/account/api/keycloak-account'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -22,10 +23,10 @@ function scorePassword(p: string): number {
   return Math.min(4, s)
 }
 
-const STRENGTH_LABELS = ['', 'Weak', 'Fair', 'Good', 'Strong']
 const STRENGTH_CLASSES = ['', 'bg-[#E24B4A]', 'bg-[#EF9F27]', 'bg-[#1D9E75]', 'bg-[#1D9E75]']
 
 export default function ChangePasswordModal({ open, onClose, hasExistingPassword, onSaved }: Props) {
+  const { t } = useTranslation('account')
   const [currentPw, setCurrentPw] = useState('')
   const [newPw, setNewPw] = useState('')
   const [confirmPw, setConfirmPw] = useState('')
@@ -47,37 +48,37 @@ export default function ChangePasswordModal({ open, onClose, hasExistingPassword
 
   async function handleSubmit() {
     setError(null)
-    if (hasExistingPassword && !currentPw) { setError('Enter your current password.'); return }
-    if (!newPw) { setError('Enter a new password.'); return }
-    if (newPw.length < 8) { setError('Password must be at least 8 characters.'); return }
-    if (newPw !== confirmPw) { setError('Passwords do not match.'); return }
+    if (hasExistingPassword && !currentPw) { setError(t('changePassword.errors.enterCurrent')); return }
+    if (!newPw) { setError(t('changePassword.errors.enterNew')); return }
+    if (newPw.length < 8) { setError(t('changePassword.errors.tooShort')); return }
+    if (newPw !== confirmPw) { setError(t('changePassword.errors.mismatch')); return }
     setBusy(true)
     try {
       await changeKcPassword(currentPw, newPw)
       onSaved()
       onClose()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not change password.')
+      setError(e instanceof Error ? e.message : t('changePassword.errors.failed'))
     } finally {
       setBusy(false)
     }
   }
 
   const score = scorePassword(newPw)
-  const title = hasExistingPassword ? 'Change password' : 'Set a password'
+  const STRENGTH_LABELS = ['', t('changePassword.strength.weak'), t('changePassword.strength.fair'), t('changePassword.strength.good'), t('changePassword.strength.strong')]
+  const title = hasExistingPassword ? t('changePassword.title') : t('changePassword.setTitle')
   const inputCls =
-    'w-full rounded-[8px] border border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] px-[11px] py-[9px] text-[14px] text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-disabled)] focus:border-[var(--accent-primary)]'
+    'w-full rounded-[8px] border border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] px-[11px] py-[9px] text-body text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-disabled)] focus:border-[var(--accent-primary)]'
 
   return (
-    <Dialog.Root open={open} onOpenChange={(next) => { if (!next) onClose() }}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[2100]" style={{ background: 'rgba(0,0,0,0.45)' }} />
-        <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-[2100] w-[400px] max-w-[94vw] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[14px] p-6 outline-none"
-          style={{ background: 'var(--menu-panel-bg)', boxShadow: 'var(--menu-panel-shadow)' }}
+    <Dialog open={open} onOpenChange={(next) => { if (!next) onClose() }}>
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 z-[2100] bg-black/45" />
+        <DialogContent
+          className="fixed left-1/2 top-1/2 z-[2100] w-[400px] max-w-[94vw] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[14px] p-6 outline-none bg-[var(--menu-panel-bg)] shadow-[var(--menu-panel-shadow)]"
           onInteractOutside={() => onClose()}
         >
-          <Dialog.Title className="sr-only">{title}</Dialog.Title>
+          <DialogTitle className="sr-only">{title}</DialogTitle>
 
           <div className="mb-4 flex flex-col items-center gap-2 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-2)] text-[var(--text-secondary)]">
@@ -87,13 +88,13 @@ export default function ChangePasswordModal({ open, onClose, hasExistingPassword
               </svg>
             </div>
             <div className="text-[15px] font-semibold text-[var(--text-heading)]">{title}</div>
-            <div className="text-[14px] text-[var(--text-tertiary)]">
-              Use a password at least 15 letters long, or at least 8 characters long with both letters and numbers.
+            <div className="text-body text-[var(--text-tertiary)]">
+              {t('changePassword.desc')}
             </div>
           </div>
 
           {error && (
-            <div className="mb-3 rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-[14px] text-[var(--danger-text)]">
+            <div className="mb-3 rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-body text-[var(--danger-text)]">
               {error}
             </div>
           )}
@@ -101,40 +102,40 @@ export default function ChangePasswordModal({ open, onClose, hasExistingPassword
           <div className="flex flex-col gap-3">
             {hasExistingPassword && (
               <div>
-                <label className="mb-[5px] block text-[14px] text-[var(--text-tertiary)]">Current password</label>
+                <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">{t('changePassword.currentPassword')}</label>
                 <input
                   ref={firstRef}
                   type="password"
                   value={currentPw}
                   onChange={(e) => setCurrentPw(e.target.value)}
-                  placeholder="Current password"
+                  placeholder={t('changePassword.currentPassword')}
                   autoComplete="current-password"
                   className={inputCls}
                 />
               </div>
             )}
             <div>
-              <label className="mb-[5px] block text-[14px] text-[var(--text-tertiary)]">
-                {hasExistingPassword ? 'Enter a new password' : 'New password'}
+              <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">
+                {hasExistingPassword ? t('changePassword.enterNewPassword') : t('changePassword.newPassword')}
               </label>
               <input
                 ref={hasExistingPassword ? undefined : firstRef}
                 type="password"
                 value={newPw}
                 onChange={(e) => setNewPw(e.target.value)}
-                placeholder="New password"
+                placeholder={t('changePassword.newPassword')}
                 autoComplete="new-password"
                 className={inputCls}
               />
             </div>
             <div>
-              <label className="mb-[5px] block text-[14px] text-[var(--text-tertiary)]">Confirm your new password</label>
+              <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">{t('changePassword.confirmPassword')}</label>
               <input
                 type="password"
                 value={confirmPw}
                 onChange={(e) => setConfirmPw(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && void handleSubmit()}
-                placeholder="Confirm password"
+                placeholder={t('changePassword.confirmPlaceholder')}
                 autoComplete="new-password"
                 className={inputCls}
               />
@@ -153,8 +154,8 @@ export default function ChangePasswordModal({ open, onClose, hasExistingPassword
                     />
                   ))}
                 </div>
-                <div className="mt-1 text-[10px] text-[var(--text-disabled)]">
-                  Password strength: {STRENGTH_LABELS[score] || '—'}
+                <div className="mt-1 text-2xs text-[var(--text-disabled)]">
+                  {t('changePassword.strengthLabel')}{STRENGTH_LABELS[score] || '—'}
                 </div>
               </div>
             )}
@@ -163,13 +164,13 @@ export default function ChangePasswordModal({ open, onClose, hasExistingPassword
               type="button"
               onClick={() => void handleSubmit()}
               disabled={busy}
-              className="mt-1 w-full rounded-[7px] bg-[var(--accent-primary)] py-[9px] text-[14px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="mt-1 w-full rounded-[7px] bg-[var(--accent-primary)] py-[9px] text-body font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40"
             >
-              {busy ? 'Saving…' : title}
+              {busy ? t('changePassword.saving') : title}
             </button>
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
   )
 }

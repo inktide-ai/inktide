@@ -1,4 +1,5 @@
 'use client'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Atom, CaretRightSmall } from '@/shared/ui/icons'
 import { SOUL_TEMPLATES } from '@/shared/data/soul-templates'
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export function WizardStepsScreen({ direction, state, setPersonality, closePersonality, onStepClick }: Props) {
+  const { t } = useTranslation('common')
   return (
     <motion.div
       key="steps"
@@ -77,13 +79,11 @@ export function WizardStepsScreen({ direction, state, setPersonality, closePerso
                 <Atom size={20} />
               </div>
               <h2 className="home-heading-font text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
-                Configure your soul
+                {t('wizard.configureSoul')}
               </h2>
               {state.selectedTemplate && (
                 <p className="home-ui-font mt-1 text-body text-[var(--text-secondary)]">
-                  Based on <span className="font-semibold text-[var(--text-primary)]">
-                    {SOUL_TEMPLATES.find(t => t.id === state.selectedTemplate)?.name}
-                  </span> template
+                  {t('wizard.basedOnTemplate', { name: SOUL_TEMPLATES.find(tmpl => tmpl.id === state.selectedTemplate)?.name })}
                 </p>
               )}
             </div>
@@ -99,7 +99,7 @@ export function WizardStepsScreen({ direction, state, setPersonality, closePerso
                   : step.id === 'personality' && state.personalityConfigured
                     ? (state.personalityConfig.presetId
                         ? state.personalityConfig.presetId.charAt(0).toUpperCase() + state.personalityConfig.presetId.slice(1)
-                        : 'Custom')
+                        : t('wizard.myOwn'))
                     : (selection?.name ?? step.subtitle)
                 return (
                   <motion.li

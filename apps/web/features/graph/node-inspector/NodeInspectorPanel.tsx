@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { useShortcut } from '@/shared/lib/keyboard'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { X } from 'lucide-react'
 import type { Node as RFNode } from '@xyflow/react'
@@ -53,11 +54,7 @@ export default function NodeInspectorPanel({ node, onClose, onNameChange, onNode
     setLlmCfg(c => ({ ...c, [key]: val }))
   }, [])
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
+  useShortcut('escape', onClose, { priority: 10 })
 
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
@@ -95,7 +92,7 @@ export default function NodeInspectorPanel({ node, onClose, onNameChange, onNode
         <span className="flex items-center justify-center shrink-0 text-[#8E8B86]">
           {NODE_ICONS[nodeData.pipelineType]}
         </span>
-        <span className="flex-1 truncate text-[0.8125rem] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
+        <span className="flex-1 truncate text-sm font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
           {def.label}
         </span>
         <button
@@ -109,7 +106,7 @@ export default function NodeInspectorPanel({ node, onClose, onNameChange, onNode
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto text-[12px] text-[var(--text-primary)]">
+      <div className="flex-1 overflow-y-auto text-xs text-[var(--text-primary)]">
 
         {/* Basic — all nodes */}
         <Section title="Basic">

@@ -1,6 +1,7 @@
 'use client'
 
 import { Gamepad2, MessageCircle, Radio, ExternalLink, Download, Tv2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Card } from '@/shared/ui/card'
 import { Badge, type BadgeVariant } from '@/shared/ui/badge'
 
@@ -33,17 +34,11 @@ interface ProjectGridCardProps {
   onExport?: () => void
 }
 
-const STATUS_LABELS: Record<ProjectStatus, string> = {
-  active:   'Active',
-  paused:   'Paused',
-  archived: 'Archived',
-}
-
 function PlatformIcon({ platform }: { platform: string }) {
-  if (platform === 'discord') return <Gamepad2 size={12} className="text-[#60A5FA]" />
-  if (platform === 'twitch')  return <MessageCircle size={12} className="text-[#A78BFA]" />
-  if (platform === 'telegram') return <Tv2 size={12} className="text-[#38BDF8]" />
-  return <Radio size={12} className="text-[#9CA3AF]" />
+  if (platform === 'discord') return <Gamepad2 size={12} className="text-blue-400" />
+  if (platform === 'twitch')  return <MessageCircle size={12} className="text-violet-400" />
+  if (platform === 'telegram') return <Tv2 size={12} className="text-sky-300" />
+  return <Radio size={12} className="text-gray-400" />
 }
 
 export function ProjectGridCard({
@@ -59,6 +54,12 @@ export function ProjectGridCard({
   onOpen,
   onExport,
 }: ProjectGridCardProps) {
+  const { t } = useTranslation('common')
+  const STATUS_LABELS: Record<ProjectStatus, string> = {
+    active:   t('projectDetail.statusActive'),
+    paused:   t('projectDetail.statusPaused'),
+    archived: t('projectDetail.statusArchived'),
+  }
   const safeStatus: ProjectStatus = ['active', 'paused', 'archived'].includes(status) ? status : 'active'
   const bgImage = coverUrl ?? activeSoul?.avatar_url ?? null
 
@@ -106,8 +107,8 @@ export function ProjectGridCard({
           <Badge className="shrink-0" variant={STATUS_TO_BADGE[safeStatus]}>{STATUS_LABELS[safeStatus]}</Badge>
         </div>
 
-        <p className="min-h-[30px] text-[12px] leading-[1.25] text-[var(--text-secondary)]">
-          {description || 'No description'}
+        <p className="min-h-[30px] text-xs leading-[1.25] text-[var(--text-secondary)]">
+          {description || t('projectDetail.noDescription')}
         </p>
 
         {activeSoul && (
@@ -119,16 +120,16 @@ export function ProjectGridCard({
                 {activeSoul.name.charAt(0).toUpperCase()}
               </div>
             )}
-            <span className="text-[12px] text-[var(--text-secondary)]">{activeSoul.name}</span>
+            <span className="text-xs text-[var(--text-secondary)]">{activeSoul.name}</span>
           </div>
         )}
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[14px]">
+          <div className="flex items-center gap-2 text-body">
             {platforms.slice(0, 3).map(p => <PlatformIcon key={p} platform={p} />)}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[12px] text-[var(--text-tertiary)]">{updatedLabel}</span>
+            <span className="text-xs text-[var(--text-tertiary)]">{updatedLabel}</span>
             {onOpen && (
               <ExternalLink
                 size={11}

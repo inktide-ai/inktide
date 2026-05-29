@@ -152,7 +152,7 @@ export const NODE_DEFINITIONS: Record<PipelineNodeType, NodeDefinition> = {
       bits_only:    { fieldType: 'bool',   default: false, description: 'Process only bit cheer messages' },
       subs_only:    { fieldType: 'bool',   default: false, description: 'Process only subscriber messages' },
     },
-    accent: '#9146FF',
+    accent: 'var(--platform-twitch)',
     category: 'core',
   },
 

@@ -20,18 +20,18 @@ const sectionCls = 'flex flex-col gap-3 border-t border-(--border) pt-4 mt-6 [&:
 const sectionTitle = 'text-[1.125rem] font-bold text-(--text-primary) tracking-[-0.02em] mb-2'
 const infoContent = 'py-2'
 const formGroup = 'mb-7'
-const labelCls = 'block text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2'
-const labelHint = 'text-[0.75rem] text-(--text-muted) mt-0.5 leading-[1.4]'
-const inputCls = 'w-full py-[0.625rem] px-[0.875rem] bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] rounded-[6px] text-(--text-primary) font-[var(--font-ui)] text-[0.8125rem] outline-none transition-[border-color,background] duration-[120ms] ease focus:border-white/20 focus:bg-[var(--panel-input-bg-hover)] placeholder:text-[rgba(139,144,154,0.45)] mt-2'
+const labelCls = 'block text-body font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2'
+const labelHint = 'text-xs text-(--text-muted) mt-0.5 leading-[1.4]'
+const inputCls = 'w-full py-[0.625rem] px-[0.875rem] bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] rounded-[6px] text-(--text-primary) font-[var(--font-ui)] text-sm outline-none transition-[border-color,background] duration-[120ms] ease focus:border-white/20 focus:bg-[var(--panel-input-bg-hover)] placeholder:text-[rgba(139,144,154,0.45)] mt-2'
 const textareaCls = `${inputCls} min-h-[120px] resize-y leading-relaxed mt-2`
 const voiceSelectWrap = 'relative flex items-center mt-2'
-const voiceSelect = 'w-full appearance-none bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] rounded-[6px] py-[0.625rem] pr-11 pl-[0.875rem] text-(--text-primary) font-[var(--font-ui)] text-[0.875rem] cursor-pointer outline-none transition-[background,border-color] duration-[120ms] ease hover:bg-[var(--panel-input-bg-hover)] hover:border-[var(--panel-input-border-hover)] focus:bg-[var(--panel-input-bg-hover)] focus:border-white/20 [&_option]:bg-[var(--panel-input-bg)]'
+const voiceSelect = 'w-full appearance-none bg-[var(--panel-input-bg)] border border-[var(--panel-input-border)] rounded-[6px] py-[0.625rem] pr-11 pl-[0.875rem] text-(--text-primary) font-[var(--font-ui)] text-body cursor-pointer outline-none transition-[background,border-color] duration-[120ms] ease hover:bg-[var(--panel-input-bg-hover)] hover:border-[var(--panel-input-border-hover)] focus:bg-[var(--panel-input-bg-hover)] focus:border-white/20 [&_option]:bg-[var(--panel-input-bg)]'
 const voiceSelectChevron = 'absolute right-4 text-white/30 pointer-events-none shrink-0'
 const sliderHeader = 'flex justify-between items-start gap-4 mb-3'
-const sliderValue = 'text-[0.6875rem] font-semibold font-mono text-(--accent-red-bright) bg-[linear-gradient(135deg,rgba(237,62,62,0.15),rgba(237,62,62,0.08))] py-0.5 px-[0.375rem] rounded-[0.25rem] border border-[rgba(237,62,62,0.2)] shrink-0'
+const sliderValue = 'text-caption font-semibold font-mono text-(--accent-red-bright) bg-[linear-gradient(135deg,rgba(237,62,62,0.15),rgba(237,62,62,0.08))] py-0.5 px-[0.375rem] rounded-[0.25rem] border border-[rgba(237,62,62,0.2)] shrink-0'
 const toggleRow = 'flex items-center justify-between py-2 mb-12 last:mb-0'
-const btnPrimary = 'py-2 px-5 bg-(--accent-red) text-white border-none rounded-lg font-[var(--font-ui)] text-[0.8125rem] font-semibold cursor-pointer transition-[background] duration-200 ease hover:bg-(--accent-red-bright) disabled:opacity-50 disabled:cursor-not-allowed'
-const btnGhost = 'py-2 px-5 bg-transparent text-(--text-muted) border border-(--border) rounded-lg font-[var(--font-ui)] text-[0.8125rem] font-medium cursor-pointer transition-all duration-200 ease hover:border-white/12 hover:text-(--text-primary) disabled:opacity-50 disabled:cursor-not-allowed'
+const btnPrimary = 'py-2 px-5 bg-(--accent-red) text-white border-none rounded-lg font-[var(--font-ui)] text-sm font-semibold cursor-pointer transition-[background] duration-200 ease hover:bg-(--accent-red-bright) disabled:opacity-50 disabled:cursor-not-allowed'
+const btnGhost = 'py-2 px-5 bg-transparent text-(--text-muted) border border-(--border) rounded-lg font-[var(--font-ui)] text-sm font-medium cursor-pointer transition-all duration-200 ease hover:border-white/12 hover:text-(--text-primary) disabled:opacity-50 disabled:cursor-not-allowed'
 
 const ChevronSVG = () => (
   <svg className={voiceSelectChevron} width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -95,7 +95,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
             <label className={labelCls}>{t('provider.label')}</label>
             <div className={labelHint}>{t('provider.hint')}</div>
             {providersLoading ? (
-              <div className="text-[0.75rem] text-(--text-muted) py-[0.375rem] italic">{t('provider.loading')}</div>
+              <div className="text-xs text-(--text-muted) py-[0.375rem] italic">{t('provider.loading')}</div>
             ) : (
               <div className={voiceSelectWrap}>
                 <select className={voiceSelect} value={selectedProviderId} onChange={(e) => handleProviderChange(e.target.value)}>
@@ -120,7 +120,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
             <div className={labelHint}>{canListVoices ? t('voice.hintList') : t('voice.hintManual')}</div>
             {canListVoices ? (
               voicesLoading ? (
-                <div className="text-[0.75rem] text-(--text-muted) py-[0.375rem] italic">{t('voice.loading')}</div>
+                <div className="text-xs text-(--text-muted) py-[0.375rem] italic">{t('voice.loading')}</div>
               ) : (
                 <div className={voiceSelectWrap}>
                   <select className={voiceSelect} value={voiceId} onChange={(e) => setVoiceId(e.target.value)}>
@@ -154,7 +154,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
           <div className="mb-7">
             <div className={sliderHeader}>
               <div className="min-w-0 flex-1">
-                <label className="block text-[0.9375rem] font-bold text-(--text-primary) mb-1">{t('speed.label')}</label>
+                <label className="block text-body-md font-bold text-(--text-primary) mb-1">{t('speed.label')}</label>
               </div>
               <span className={sliderValue}>{speed.toFixed(2)}×</span>
             </div>
@@ -163,7 +163,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
 
           <div className={toggleRow}>
             <div>
-              <div className="text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary)">{t('ssml.toggle')}</div>
+              <div className="text-body font-semibold font-[var(--font-ui)] text-(--text-primary)">{t('ssml.toggle')}</div>
               <div className={labelHint}>{t('ssml.toggleHint')}</div>
             </div>
             <label className="toggle-control">
@@ -175,16 +175,16 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
           <div className={formGroup}>
             <label className={labelCls}>{ssmlMode ? t('ssml.inputLabel') : t('text.label')}</label>
             <div className={labelHint}>{ssmlMode ? t('ssml.inputHint') : t('text.hint')}</div>
-            <textarea className={ssmlMode ? `${textareaCls} min-h-[200px] font-mono text-[0.75rem]` : textareaCls} placeholder={ssmlMode ? t('ssml.inputPlaceholder') : t('text.placeholder')} value={text} onChange={(e) => setText(e.target.value)} rows={ssmlMode ? 8 : 4} />
+            <textarea className={ssmlMode ? `${textareaCls} min-h-[200px] font-mono text-xs` : textareaCls} placeholder={ssmlMode ? t('ssml.inputPlaceholder') : t('text.placeholder')} value={text} onChange={(e) => setText(e.target.value)} rows={ssmlMode ? 8 : 4} />
           </div>
 
           {validationErrors.length > 0 && (
-            <div className="py-3 px-4 bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] rounded-lg text-[#ef4444] text-[0.8125rem] mb-4 flex items-center gap-2">
+            <div className="py-3 px-4 bg-[var(--color-error-strong)]/10 border border-[var(--color-error-strong)]/20 rounded-lg text-[var(--color-error-strong)] text-sm mb-4 flex items-center gap-2">
               {validationErrors.map((e) => <div key={e}>{e}</div>)}
             </div>
           )}
           {state === 'error' && synthError && (
-            <div className="py-3 px-4 bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] rounded-lg text-[#ef4444] text-[0.8125rem] mb-4">{synthError}</div>
+            <div className="py-3 px-4 bg-[var(--color-error-strong)]/10 border border-[var(--color-error-strong)]/20 rounded-lg text-[var(--color-error-strong)] text-sm mb-4">{synthError}</div>
           )}
 
           <button type="button" className={btnPrimary} disabled={!canTest} onClick={() => { if (!canTest) return; synthesize({ text, voiceId, speed, audioFormat: format, stream: false, providerId: selectedProviderId, apiKey: needsApiKey ? apiKey : undefined }) }} style={{ width: '100%', marginTop: '0.5rem' }}>
@@ -215,7 +215,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
                     <div key={c.index} className="w-2 rounded-t-[2px] bg-[var(--accent-voice,#f0abfc)] opacity-75 min-h-1 shrink-0 transition-[height] duration-100 ease" style={{ height: `${Math.max(4, Math.round((c.byteLength / maxChunkBytes) * BAR_MAX_H))}px` }} title={`Chunk ${c.index}: ${c.byteLength} B`} />
                   ))}
                 </div>
-                <div className="flex gap-5 text-[0.6875rem] font-mono text-(--text-muted) mt-[0.375rem]">
+                <div className="flex gap-5 text-caption font-mono text-(--text-muted) mt-[0.375rem]">
                   {[{ label: 'chunks', val: chunks.length }, { label: 'total', val: `${(totalBytes / 1024).toFixed(1)} KB` }, ...(elapsedMs > 0 ? [{ label: 'elapsed', val: `${elapsedMs} ms` }] : [])].map(({ label, val }) => (
                     <span key={label} className="flex gap-1">
                       <span className="opacity-60">{label}</span>

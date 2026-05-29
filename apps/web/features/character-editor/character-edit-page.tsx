@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
+import { SANDBOX_ROUTE } from '@/lib/routes'
 import { getCard, updateCard, uploadCardAvatar } from '@/features/soul/api/index' // fsd:cross-feature-ok — soul editor
 import {
   apiResponseToCharacter,
@@ -24,7 +25,7 @@ function PencilIcon() {
   )
 }
 
-const inputCls = 'w-full py-[0.55rem] px-3 rounded-lg border border-white/10 bg-black/[0.28] text-(--text-primary) font-[var(--font-ui)] text-[0.875rem] outline-none focus:border-[rgba(237,62,62,0.4)] focus:shadow-[0_0_0_2px_rgba(237,62,62,0.1)]'
+const inputCls = 'w-full py-[0.55rem] px-3 rounded-lg border border-white/10 bg-black/[0.28] text-(--text-primary) font-[var(--font-ui)] text-body outline-none focus:border-[rgba(237,62,62,0.4)] focus:shadow-[0_0_0_2px_rgba(237,62,62,0.1)]'
 
 export default function CharacterEditPage() {
   const { cardId } = useParams<{ cardId: string }>()
@@ -89,7 +90,7 @@ export default function CharacterEditPage() {
       try {
         const res = await updateCard(cardId, characterToUpdateRequest(character))
         setCharacter(apiResponseToCharacter(res))
-        router.push('/edit/sandbox')
+        router.push(SANDBOX_ROUTE)
       } catch (err) {
         setSaveError(err instanceof Error ? err.message : 'Save failed')
       } finally {
@@ -100,8 +101,8 @@ export default function CharacterEditPage() {
   )
 
   const goWorkshop = useCallback(() => {
-    if (cardId) router.push('/edit/sandbox')
-    else router.push('/edit/sandbox')
+    if (cardId) router.push(SANDBOX_ROUTE)
+    else router.push(SANDBOX_ROUTE)
   }, [cardId, router])
 
   const onBannerFile = useCallback(
@@ -156,12 +157,12 @@ export default function CharacterEditPage() {
   const initial = character?.name?.charAt(0).toUpperCase() ?? '?'
 
   const pageCls = 'min-h-screen bg-(--bg-dark) py-8 px-10 max-w-[720px] mx-auto'
-  const backCls = 'inline-flex items-center gap-[0.35rem] mb-5 py-[0.35rem] px-2 -ml-2 border-none bg-transparent text-(--text-muted) font-[var(--font-ui)] text-[0.875rem] font-medium cursor-pointer rounded-[0.375rem] transition-[color,background] duration-150 ease hover:text-(--text-primary) hover:bg-white/[0.05]'
+  const backCls = 'inline-flex items-center gap-[0.35rem] mb-5 py-[0.35rem] px-2 -ml-2 border-none bg-transparent text-(--text-muted) font-[var(--font-ui)] text-body font-medium cursor-pointer rounded-[0.375rem] transition-[color,background] duration-150 ease hover:text-(--text-primary) hover:bg-white/[0.05]'
 
   if (!cardId) {
     return (
       <div className={pageCls}>
-        <p className="text-[#f87171]">{t('common:status.invalidLink')}</p>
+        <p className="text-[var(--color-error-mid)]">{t('common:status.invalidLink')}</p>
       </div>
     )
   }
@@ -172,7 +173,7 @@ export default function CharacterEditPage() {
         <button type="button" className={backCls} onClick={goWorkshop}>
           {t('common:action.back')}
         </button>
-        <p className="text-[#f87171]">{loadError}</p>
+        <p className="text-[var(--color-error-mid)]">{loadError}</p>
       </div>
     )
   }
@@ -203,7 +204,7 @@ export default function CharacterEditPage() {
       <h1 className="text-[1.5rem] font-bold tracking-[-0.02em] m-0 mb-2 text-(--text-primary)">
         {t('profile:edit.title')}
       </h1>
-      <p className="m-0 mb-6 text-[0.875rem] leading-relaxed text-(--text-muted)">
+      <p className="m-0 mb-6 text-body leading-relaxed text-(--text-muted)">
         {t('profile:edit.lead')}
       </p>
 
@@ -226,7 +227,7 @@ export default function CharacterEditPage() {
             onClick={() => !bannerBusy && bannerFileRef.current?.click()}
             disabled={bannerBusy}
           >
-            <span className="font-[var(--font-ui)] text-[0.9375rem] font-semibold text-white opacity-0 transition-opacity duration-200 ease tracking-[0.01em] [text-shadow:0_1px_4px_rgba(0,0,0,0.6)] group-hover:opacity-100">
+            <span className="font-[var(--font-ui)] text-body-md font-semibold text-white opacity-0 transition-opacity duration-200 ease tracking-[0.01em] [text-shadow:0_1px_4px_rgba(0,0,0,0.6)] group-hover:opacity-100">
               {bannerBusy ? '…' : t('profile:edit.banner.change')}
             </span>
           </button>
@@ -234,7 +235,7 @@ export default function CharacterEditPage() {
           {character.appearance.bannerImageUrl && (
             <button
               type="button"
-              className="absolute bottom-[0.625rem] right-3 border-none bg-black/55 text-white/65 font-[var(--font-ui)] text-[0.75rem] font-medium py-1 px-[0.625rem] rounded-[6px] cursor-pointer opacity-0 transition-[opacity,color] duration-200 ease backdrop-blur-[4px] group-hover:opacity-100 hover:text-[#f87171]"
+              className="absolute bottom-[0.625rem] right-3 border-none bg-black/55 text-white/65 font-[var(--font-ui)] text-xs font-medium py-1 px-[0.625rem] rounded-[6px] cursor-pointer opacity-0 transition-[opacity,color] duration-200 ease backdrop-blur-[4px] group-hover:opacity-100 hover:text-[var(--color-error-mid)]"
               onClick={onBannerRemove}
               disabled={bannerBusy}
             >
@@ -268,7 +269,7 @@ export default function CharacterEditPage() {
                   {initial}
                 </div>
               )}
-              <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white opacity-0 transition-opacity duration-[180ms] ease text-[0.75rem] font-semibold group-hover:opacity-100">
+              <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white opacity-0 transition-opacity duration-[180ms] ease text-xs font-semibold group-hover:opacity-100">
                 {avatarBusy ? '…' : <PencilIcon />}
               </span>
             </button>
@@ -279,12 +280,12 @@ export default function CharacterEditPage() {
               className="absolute w-0 h-0 opacity-0 pointer-events-none"
               onChange={onAvatar}
             />
-            <p className="m-0 text-[0.75rem] text-(--text-muted) text-center max-w-[200px] leading-[1.4]">
+            <p className="m-0 text-xs text-(--text-muted) text-center max-w-[200px] leading-[1.4]">
               {t('profile:edit.avatar.hint')}
             </p>
 
             <div className="flex flex-col items-center gap-2 mt-2">
-              <span className="text-[0.8125rem] font-semibold text-(--text-primary)">
+              <span className="text-sm font-semibold text-(--text-primary)">
                 {t('profile:edit.banner.colorLabel')}
               </span>
               <BannerColorPicker
@@ -298,7 +299,7 @@ export default function CharacterEditPage() {
 
           {/* Fields */}
           <div className="flex flex-col gap-[0.35rem] min-w-0 max-[640px]:w-full">
-            <label className="text-[0.8125rem] font-semibold text-(--text-primary) mt-0" htmlFor="ec-name">
+            <label className="text-sm font-semibold text-(--text-primary) mt-0" htmlFor="ec-name">
               {t('profile:edit.field.displayName')}
             </label>
             <input
@@ -309,11 +310,11 @@ export default function CharacterEditPage() {
               required
             />
 
-            <label className="text-[0.8125rem] font-semibold text-(--text-primary) mt-2" htmlFor="ec-slug">
+            <label className="text-sm font-semibold text-(--text-primary) mt-2" htmlFor="ec-slug">
               {t('profile:edit.field.slug')}
             </label>
             <div className="flex items-center gap-1">
-              <span className="text-(--text-muted) font-mono text-[0.875rem]">/</span>
+              <span className="text-(--text-muted) font-mono text-body">/</span>
               <input
                 id="ec-slug"
                 className={inputCls}
@@ -323,7 +324,7 @@ export default function CharacterEditPage() {
               />
             </div>
 
-            <label className="text-[0.8125rem] font-semibold text-(--text-primary) mt-2" htmlFor="ec-lang">
+            <label className="text-sm font-semibold text-(--text-primary) mt-2" htmlFor="ec-lang">
               {t('profile:edit.field.language')}
             </label>
             <input
@@ -334,7 +335,7 @@ export default function CharacterEditPage() {
               placeholder="en"
             />
 
-            <label className="text-[0.8125rem] font-semibold text-(--text-primary) mt-2" htmlFor="ec-phrases">
+            <label className="text-sm font-semibold text-(--text-primary) mt-2" htmlFor="ec-phrases">
               {t('profile:edit.field.keyPhrases')}
             </label>
             <input
@@ -345,7 +346,7 @@ export default function CharacterEditPage() {
               placeholder={t('profile:edit.field.keyPhrasesPlaceholder')}
             />
 
-            <label className="text-[0.8125rem] font-semibold text-(--text-primary) mt-2" htmlFor="ec-personality">
+            <label className="text-sm font-semibold text-(--text-primary) mt-2" htmlFor="ec-personality">
               {t('profile:edit.field.personality')}
             </label>
             <textarea
@@ -360,7 +361,7 @@ export default function CharacterEditPage() {
         </div>
 
         {saveError && (
-          <p className="mx-6 mt-4 mb-0 text-[0.875rem] text-[#f87171]" role="alert">
+          <p className="mx-6 mt-4 mb-0 text-body text-[var(--color-error-mid)]" role="alert">
             {saveError}
           </p>
         )}
@@ -368,14 +369,14 @@ export default function CharacterEditPage() {
         <div className="flex justify-end gap-3 mt-6 px-6 py-5 pb-6 border-t border-(--border)">
           <button
             type="button"
-            className="py-[0.55rem] px-4 rounded-lg border border-(--border) bg-transparent text-(--text-muted) font-[var(--font-ui)] text-[0.875rem] font-medium cursor-pointer hover:text-(--text-primary) hover:border-white/[0.12]"
+            className="py-[0.55rem] px-4 rounded-lg border border-(--border) bg-transparent text-(--text-muted) font-[var(--font-ui)] text-body font-medium cursor-pointer hover:text-(--text-primary) hover:border-white/[0.12]"
             onClick={goWorkshop}
           >
             {t('common:action.cancel')}
           </button>
           <button
             type="submit"
-            className="py-[0.55rem] px-5 rounded-lg border-none bg-[#ED3E3E] text-white font-[var(--font-ui)] text-[0.875rem] font-semibold cursor-pointer transition-[background] duration-200 ease hover:enabled:bg-[#FF5252] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="py-[0.55rem] px-5 rounded-lg border-none bg-[var(--color-error-strong)] text-white font-[var(--font-ui)] text-body font-semibold cursor-pointer transition-[background] duration-200 ease hover:enabled:bg-[#FF5252] disabled:opacity-60 disabled:cursor-not-allowed"
             disabled={saving}
           >
             {saving ? t('common:action.saving') : t('common:action.save')}

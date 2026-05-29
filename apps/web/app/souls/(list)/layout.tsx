@@ -1,10 +1,8 @@
-'use client'
-
 import { type ReactNode } from 'react'
-import ProtectedRoute from '@/features/account/protected-route'
-import { CharactersProvider } from '@/entities/character/context/CharactersContext'
-import { WorkspaceSidebar } from '@/features/workspace-home/workspace-sidebar'
-import { AppTopBar } from '@/features/workspace-home/app-topbar'
+import { ProtectedRoute } from '@/features/account'
+import { CharactersProvider } from '@/entities/character'
+import { WorkspaceSidebar } from '@/widgets/workspace-sidebar'
+import { AppTopBar } from '@/features/workspace-home'
 
 export default function SoulsListLayout({ children }: { children: ReactNode }) {
   return (

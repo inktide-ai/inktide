@@ -1,5 +1,6 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useShortcut } from '@/shared/lib/keyboard'
 import { useTranslation } from 'react-i18next'
 import { HexColorPicker } from 'react-colorful'
 import { cn } from '@/lib/utils'
@@ -8,8 +9,8 @@ import { addCustomSceneTag } from '@/features/soul/api/index' // fsd:cross-featu
 const MAX_LEN = 128
 const TAG_COLOR_PRESETS = ['#818cf8', '#a78bfa', '#f472b6', '#4ade80', '#38bdf8', '#fb923c', '#f87171', '#facc15']
 
-const modalFieldLabel = 'text-[14px] font-medium tracking-[0.07em] uppercase text-white/35 mb-2 flex items-center gap-[6px]'
-const modalTextInput = 'w-full bg-white/[0.05] border border-[0.5px] border-white/12 rounded-[10px] p-[11px_14px] text-[14px] text-(--text-primary) outline-none font-[inherit] transition-[border-color] duration-150 placeholder:text-white/25 focus:border-white/30'
+const modalFieldLabel = 'text-body font-medium tracking-[0.07em] uppercase text-white/35 mb-2 flex items-center gap-[6px]'
+const modalTextInput = 'w-full bg-white/[0.05] border border-[0.5px] border-white/12 rounded-[10px] p-[11px_14px] text-body text-(--text-primary) outline-none font-[inherit] transition-[border-color] duration-150 placeholder:text-white/25 focus:border-white/30'
 
 interface NewTagModalProps {
   cardId: string
@@ -27,11 +28,7 @@ export function NewTagModal({ cardId, onClose, onCreated }: NewTagModalProps) {
   const trimmed = label.trim()
   const canSubmit = trimmed.length > 0 && !submitting
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  useShortcut('escape', onClose, { priority: 10 })
 
   async function handleCreate() {
     if (!trimmed) { setError(t('newTag.errorEmpty')); return }
@@ -60,7 +57,7 @@ export function NewTagModal({ cardId, onClose, onCreated }: NewTagModalProps) {
           <div>
             <div className={modalFieldLabel}>{t('newTag.label')}</div>
             <input className={modalTextInput} placeholder={t('newTag.placeholder')} value={label} onChange={e => setLabel(e.target.value.slice(0, MAX_LEN))} maxLength={MAX_LEN} autoFocus />
-            <div className="text-[14px] text-white/25 text-right mt-1">{label.length}/{MAX_LEN} · {t('newTag.maxLength', { max: MAX_LEN })}</div>
+            <div className="text-body text-white/25 text-right mt-1">{label.length}/{MAX_LEN} · {t('newTag.maxLength', { max: MAX_LEN })}</div>
           </div>
 
           <div>
@@ -76,20 +73,20 @@ export function NewTagModal({ cardId, onClose, onCreated }: NewTagModalProps) {
                 ))}
               </div>
               <div className="flex items-center gap-[10px]">
-                <span className="text-[0.6875rem] font-semibold tracking-[0.04em] uppercase py-[3px] px-2 rounded-[4px] whitespace-nowrap" style={{ color, background: `${color}1a`, border: `1px solid ${color}59` }}>
+                <span className="text-caption font-semibold tracking-[0.04em] uppercase py-[3px] px-2 rounded-[4px] whitespace-nowrap" style={{ color, background: `${color}1a`, border: `1px solid ${color}59` }}>
                   {trimmed || 'Тег'}
                 </span>
-                <span className="text-[0.75rem] font-medium text-[rgba(191,191,203,0.45)] tabular-nums">{color.toUpperCase()}</span>
+                <span className="text-xs font-medium text-[rgba(191,191,203,0.45)] tabular-nums">{color.toUpperCase()}</span>
               </div>
             </div>
           </div>
 
-          {error && <div className="mt-3 text-[0.75rem] text-[#e05c5c]">{error}</div>}
+          {error && <div className="mt-3 text-xs text-[#e05c5c]">{error}</div>}
         </div>
 
         <div className="flex gap-[10px] p-[0_24px_24px]">
-          <button type="button" className="flex-1 p-[11px] rounded-[10px] bg-white/[0.06] border border-[0.5px] border-white/12 text-white/60 text-[14px] cursor-pointer font-[inherit] transition-[background] duration-[120ms] hover:enabled:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed" onClick={onClose} disabled={submitting}>{t('newTag.cancel')}</button>
-          <button type="button" className="flex-[2] p-[11px] rounded-[10px] bg-[#7c3aed] border-none text-white text-[14px] font-medium cursor-pointer font-[inherit] transition-[background] duration-[120ms] hover:enabled:bg-[#6d28d9] disabled:bg-[rgba(124,58,237,0.3)] disabled:text-white/30 disabled:cursor-not-allowed" disabled={!canSubmit} onClick={handleCreate}>{submitting ? t('newTag.creating') : t('newTag.create')}</button>
+          <button type="button" className="flex-1 p-[11px] rounded-[10px] bg-white/[0.06] border border-[0.5px] border-white/12 text-white/60 text-body cursor-pointer font-[inherit] transition-[background] duration-[120ms] hover:enabled:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed" onClick={onClose} disabled={submitting}>{t('newTag.cancel')}</button>
+          <button type="button" className="flex-[2] p-[11px] rounded-[10px] bg-[#7c3aed] border-none text-white text-body font-medium cursor-pointer font-[inherit] transition-[background] duration-[120ms] hover:enabled:bg-[#6d28d9] disabled:bg-[rgba(124,58,237,0.3)] disabled:text-white/30 disabled:cursor-not-allowed" disabled={!canSubmit} onClick={handleCreate}>{submitting ? t('newTag.creating') : t('newTag.create')}</button>
         </div>
       </div>
     </div>

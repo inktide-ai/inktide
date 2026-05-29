@@ -1,5 +1,6 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
+import { useShortcut } from '@/shared/lib/keyboard'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import type { HubTabId } from '@/shared/hooks/useHubLayout'
@@ -17,10 +18,10 @@ const MIN_WIDTH     = 240
 const MAX_WIDTH     = 500
 const DEFAULT_WIDTH = 260
 
-const PANEL_BG = '#0F1117'
-const BORDER   = 'rgba(255,255,255,0.06)'
-const TEXT     = '#E6EAF2'
-const HOVER_BG = 'rgba(255,255,255,0.06)'
+const PANEL_BG = 'var(--graph-canvas-bg)'
+const BORDER   = 'var(--inspector-section-separator)'
+const TEXT     = 'var(--text-primary)'
+const HOVER_BG = 'var(--surface-1)'
 
 interface Props {
   tabId: HubTabId
@@ -36,11 +37,7 @@ export default function SettingsInspectorPanel({ tabId, onClose }: Props) {
   const { Component } = def
   const label = t(def.labelKey as never)
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
+  useShortcut('escape', onClose, { priority: 10 })
 
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
@@ -100,7 +97,7 @@ export default function SettingsInspectorPanel({ tabId, onClose }: Props) {
         )}
 
         <span
-          className="flex-1 truncate text-[0.8125rem] font-semibold tracking-[-0.01em]"
+          className="flex-1 truncate text-sm font-semibold tracking-[-0.01em]"
           style={{ color: TEXT }}
         >
           {label}
@@ -140,8 +137,8 @@ export default function SettingsInspectorPanel({ tabId, onClose }: Props) {
       {/* Error toast — only shown on save failure */}
       {saveStatus === 'error' && (
         <div
-          className="px-3 py-2 flex-shrink-0 text-[0.75rem]"
-          style={{ borderTop: `1px solid ${BORDER}`, color: '#ef4444' }}
+          className="px-3 py-2 flex-shrink-0 text-xs"
+          style={{ borderTop: `1px solid ${BORDER}`, color: 'var(--color-error-mid)' }}
         >
           {saveError ?? t('common:saveBar.failed')}
         </div>

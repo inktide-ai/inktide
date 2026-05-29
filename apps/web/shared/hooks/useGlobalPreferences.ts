@@ -52,7 +52,9 @@ function deleteLegacyKeys() {
     localStorage.removeItem(LEGACY_APPEARANCE_KEY)
     localStorage.removeItem(LEGACY_NOTIFICATIONS_KEY)
     localStorage.removeItem(LEGACY_FAVORITES_KEY)
-    localStorage.removeItem(LEGACY_LANG_KEY)
+    // inktide_lang is NOT removed — i18next-browser-languagedetector reads it on
+    // every page load for language detection. Deleting it causes the language to
+    // reset to the browser's navigator language on reload.
   } catch { /* ignore */ }
 }
 

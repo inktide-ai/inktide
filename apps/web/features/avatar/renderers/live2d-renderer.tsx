@@ -45,7 +45,7 @@ export default function Live2dRenderer({ className, modelVisible = true }: Live2
         href="https://www.live2d.com/en/sdk/download/web/"
         target="_blank"
         rel="noreferrer"
-        style={{ color: 'var(--accent, #7c5cbf)', textDecoration: 'underline' }}
+        style={{ color: 'var(--accent-primary)', textDecoration: 'underline' }}
       >
         Download SDK →
       </a>

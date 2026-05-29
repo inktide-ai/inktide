@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
-import * as Dialog from '@radix-ui/react-dialog'
+import { Dialog, DialogPortal, DialogOverlay, DialogContent, DialogTitle, DialogClose } from '@/shared/ui/dialog'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import { cn } from '@/lib/utils'
 import {
   parseInktFile,
   finalizeImport,
@@ -96,58 +97,41 @@ export default function ImportProjectDialog({ open, onClose, onImported }: Props
   }, [parseResult, targetSoulId, onImported])
 
   return (
-    <Dialog.Root
+    <Dialog
       open={open}
       onOpenChange={next => {
         if (!next) handleClose()
       }}
     >
-      <Dialog.Portal>
-        <Dialog.Overlay
-          className="fixed inset-0 z-[2000]"
-          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+      <DialogPortal>
+        <DialogOverlay
+          className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-[4px]"
         />
-        <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-[2001] -translate-x-1/2 -translate-y-1/2 flex flex-col rounded-[14px] overflow-hidden outline-none"
-          style={{
-            width: 'min(520px, 95vw)',
-            maxHeight: '85vh',
-            background: 'var(--menu-panel-bg)',
-            boxShadow: 'var(--menu-panel-shadow)',
-          }}
+        <DialogContent
+          className="fixed left-1/2 top-1/2 z-[2001] -translate-x-1/2 -translate-y-1/2 flex flex-col w-[min(520px,95vw)] max-h-[85vh] rounded-[14px] overflow-hidden outline-none bg-[var(--menu-panel-bg)] shadow-[var(--menu-panel-shadow)]"
         >
-          <Dialog.Title className="sr-only">Import Project</Dialog.Title>
+          <DialogTitle className="sr-only">Import Project</DialogTitle>
 
           {/* Header */}
-          <div
-            className="flex items-start justify-between px-6 pt-5 pb-4 flex-shrink-0"
-            style={{ borderBottom: '1px solid var(--border-subtle)' }}
-          >
+          <div className="flex items-start justify-between px-6 pt-5 pb-4 flex-shrink-0 border-b border-[var(--border-subtle)]">
             <div>
-              <h2 className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
                 Import Project
               </h2>
-              <p className="mt-0.5 text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+              <p className="mt-0.5 text-body text-[var(--text-secondary)]">
                 {phase === 'preview'
                   ? 'Review your project before importing.'
                   : 'Upload a .inkt file to import a project.'}
               </p>
             </div>
-            <Dialog.Close
-              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors"
-              style={{ color: 'var(--text-tertiary)' }}
-              onMouseEnter={e =>
-                ((e.currentTarget as HTMLElement).style.background = 'var(--surface-2)')
-              }
-              onMouseLeave={e =>
-                ((e.currentTarget as HTMLElement).style.background = 'transparent')
-              }
+            <DialogClose
+              className="flex h-7 w-7 items-center justify-center rounded-md transition-colors text-[var(--text-tertiary)] hover:bg-[var(--surface-2)]"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
-            </Dialog.Close>
+            </DialogClose>
           </div>
 
           {/* Body */}
@@ -177,7 +161,7 @@ export default function ImportProjectDialog({ open, onClose, onImported }: Props
             {phase === 'finalizing' && (
               <div className="flex flex-col items-center gap-3 py-8">
                 <Spinner />
-                <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-body text-[var(--text-secondary)]">
                   Importing project…
                 </p>
               </div>
@@ -185,18 +169,15 @@ export default function ImportProjectDialog({ open, onClose, onImported }: Props
 
             {phase === 'done' && (
               <div className="flex flex-col items-center gap-3 py-8 text-center">
-                <div
-                  className="flex h-12 w-12 items-center justify-center rounded-full"
-                  style={{ background: 'var(--accent-soft)' }}
-                >
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-soft)]">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
-                <p className="text-[14px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+                <p className="text-body font-semibold text-[var(--text-primary)]">
                   Project imported
                 </p>
-                <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-body text-[var(--text-secondary)]">
                   Your project is ready. Connectors need to be reconnected manually.
                 </p>
               </div>
@@ -205,25 +186,20 @@ export default function ImportProjectDialog({ open, onClose, onImported }: Props
 
           {/* Footer */}
           {(phase === 'preview' || phase === 'done') && (
-            <div
-              className="flex items-center justify-end gap-3 px-6 py-4 flex-shrink-0"
-              style={{ borderTop: '1px solid var(--border-subtle)' }}
-            >
+            <div className="flex items-center justify-end gap-3 px-6 py-4 flex-shrink-0 border-t border-[var(--border-subtle)]">
               {phase === 'preview' && (
                 <>
                   <button
                     type="button"
                     onClick={() => { setPhase('idle'); setParseResult(null); setError(null) }}
-                    className="h-9 px-4 rounded-lg text-[14px] font-medium transition-colors"
-                    style={{ color: 'var(--text-secondary)', background: 'var(--surface-2)' }}
+                    className="h-9 px-4 rounded-lg text-body font-medium transition-colors text-[var(--text-secondary)] bg-[var(--surface-2)]"
                   >
                     Back
                   </button>
                   <button
                     type="button"
                     onClick={() => void handleFinalize()}
-                    className="h-9 px-4 rounded-lg text-[14px] font-medium text-white"
-                    style={{ background: 'var(--accent-primary)' }}
+                    className="h-9 px-4 rounded-lg text-body font-medium text-white bg-[var(--accent-primary)]"
                   >
                     Import Project
                   </button>
@@ -233,16 +209,15 @@ export default function ImportProjectDialog({ open, onClose, onImported }: Props
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="h-9 px-4 rounded-lg text-[14px] font-medium text-white"
-                  style={{ background: 'var(--accent-primary)' }}
+                  className="h-9 px-4 rounded-lg text-body font-medium text-white bg-[var(--accent-primary)]"
                 >
                   Done
                 </button>
               )}
             </div>
           )}
-        </Dialog.Content>
-      </Dialog.Portal>
+        </DialogContent>
+      </DialogPortal>
 
       <input
         ref={fileInputRef}
@@ -252,7 +227,7 @@ export default function ImportProjectDialog({ open, onClose, onImported }: Props
         onChange={handleFileInput}
         tabIndex={-1}
       />
-    </Dialog.Root>
+    </Dialog>
   )
 }
 
@@ -276,11 +251,12 @@ function DropZone({
         onDragLeave={onDragLeave}
         onDrop={onDrop}
         onClick={onBrowse}
-        className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed py-12 cursor-pointer transition-colors"
-        style={{
-          borderColor: isDragOver ? 'var(--accent-primary)' : 'var(--border-default)',
-          background: isDragOver ? 'var(--accent-soft)' : 'var(--surface-1)',
-        }}
+        className={cn(
+          'flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed py-12 cursor-pointer transition-colors',
+          isDragOver
+            ? 'border-[var(--accent-primary)] bg-[var(--accent-soft)]'
+            : 'border-[var(--border-default)] bg-[var(--surface-1)]',
+        )}
       >
         {loading ? (
           <Spinner />
@@ -292,10 +268,10 @@ function DropZone({
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
             <div className="text-center">
-              <p className="text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-body font-medium text-[var(--text-primary)]">
                 Drop your .inkt file here
               </p>
-              <p className="text-[14px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-body mt-0.5 text-[var(--text-secondary)]">
                 or click to browse
               </p>
             </div>
@@ -303,7 +279,7 @@ function DropZone({
         )}
       </div>
       {error && (
-        <p className="text-[14px] text-center" style={{ color: '#f87171' }}>
+        <p className="text-body text-center text-[var(--color-error-mid)]">
           {error}
         </p>
       )}
@@ -324,16 +300,13 @@ function PreviewPanel({
     <div className="flex flex-col gap-4">
       {/* Warnings */}
       {result.warnings.length > 0 && (
-        <div
-          className="rounded-lg px-4 py-3"
-          style={{ background: '#92400e22', border: '1px solid #92400e55' }}
-        >
-          <p className="text-[14px] font-semibold mb-1.5" style={{ color: '#fbbf24' }}>
+        <div className="rounded-lg px-4 py-3 bg-[#92400e22] border border-[#92400e55]">
+          <p className="text-body font-semibold mb-1.5 text-amber-400">
             Compatibility warnings
           </p>
           <ul className="list-disc list-inside space-y-1">
             {result.warnings.map((w, i) => (
-              <li key={i} className="text-[14px]" style={{ color: '#fcd34d' }}>
+              <li key={i} className="text-body text-amber-300">
                 {w}
               </li>
             ))}
@@ -342,16 +315,13 @@ function PreviewPanel({
       )}
 
       {/* Project info */}
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{ border: '1px solid var(--border-subtle)' }}
-      >
-        <div className="px-4 py-2.5" style={{ background: 'var(--surface-1)', borderBottom: '1px solid var(--border-subtle)' }}>
-          <p className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
+      <div className="rounded-xl overflow-hidden border border-[var(--border-subtle)]">
+        <div className="px-4 py-2.5 bg-[var(--surface-1)] border-b border-[var(--border-subtle)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
             Project details
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-px" style={{ background: 'var(--border-subtle)' }}>
+        <div className="grid grid-cols-2 gap-px bg-[var(--border-subtle)]">
           <InfoRow label="Name" value={result.project_name} />
           {result.soul_name && <InfoRow label="Soul" value={result.soul_name} />}
           <InfoRow label="Graph" value={result.has_graph ? 'Yes' : 'No'} />
@@ -370,25 +340,20 @@ function PreviewPanel({
       {/* Soul mapping */}
       {result.soul_name && (
         <div className="flex flex-col gap-2">
-          <label className="text-[14px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+          <label className="text-body font-medium text-[var(--text-secondary)]">
             Import Soul as
           </label>
           <select
             value={targetSoulId}
             onChange={e => onTargetSoulIdChange(e.target.value)}
-            className="h-9 w-full rounded-lg px-3 text-[14px] outline-none"
-            style={{
-              background: 'var(--surface-1)',
-              border: '1px solid var(--border-default)',
-              color: 'var(--text-primary)',
-            }}
+            className="h-9 w-full rounded-lg px-3 text-body outline-none bg-[var(--surface-1)] border border-[var(--border-default)] text-[var(--text-primary)]"
           >
             <option value="__new__">Create new Soul from template</option>
             {souls.map(s => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
           </select>
-          <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+          <p className="text-xs text-[var(--text-tertiary)]">
             {targetSoulId === '__new__'
               ? 'A new Soul will be created with the exported configuration.'
               : 'The selected Soul will be linked to the new project (its configuration will not change).'}
@@ -397,7 +362,7 @@ function PreviewPanel({
       )}
 
       {error && (
-        <p className="text-[14px]" style={{ color: '#f87171' }}>
+        <p className="text-body text-[var(--color-error-mid)]">
           {error}
         </p>
       )}
@@ -407,9 +372,9 @@ function PreviewPanel({
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5 px-4 py-2.5" style={{ background: 'var(--surface-1)' }}>
-      <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{label}</span>
-      <span className="text-[14px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>{value}</span>
+    <div className="flex flex-col gap-0.5 px-4 py-2.5 bg-[var(--surface-1)]">
+      <span className="text-xs text-[var(--text-tertiary)]">{label}</span>
+      <span className="text-body font-medium truncate text-[var(--text-primary)]">{value}</span>
     </div>
   )
 }

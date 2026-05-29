@@ -87,7 +87,7 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
           <div className="px-6 pt-5 pb-4">
             <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Connected channels</h3>
-            <p className="mt-1 text-[14px] text-[var(--text-secondary)]">
+            <p className="mt-1 text-body text-[var(--text-secondary)]">
               Manage your connected Twitch channels.
             </p>
           </div>
@@ -103,8 +103,8 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
                   )}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-semibold m-0 text-[var(--text-primary)]">#{row.channel_name}</p>
-                    <p className="text-[14px] font-mono m-0 text-[var(--text-secondary)] truncate">
+                    <p className="text-body font-semibold m-0 text-[var(--text-primary)]">#{row.channel_name}</p>
+                    <p className="text-body font-mono m-0 text-[var(--text-secondary)] truncate">
                       @{row.bot_username}
                     </p>
                   </div>
@@ -117,7 +117,7 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
                     />
                     <span
                       className="integration-toggle-slider"
-                      style={{ background: row.is_active ? '#9146ff' : 'rgba(128,128,128,0.22)' }}
+                      style={{ background: row.is_active ? 'var(--platform-twitch)' : 'rgba(128,128,128,0.22)' }}
                     />
                   </label>
                   <div className="flex items-center gap-1.5">
@@ -126,7 +126,7 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
                         type="button"
                         disabled={isRowBusy}
                         onClick={() => void handleReconnect(row)}
-                        className="px-2.5 py-1 rounded-lg text-[14px] font-medium text-[#9146ff] border border-[#9146ff]/40 hover:bg-[#9146ff]/10 transition-colors disabled:opacity-40"
+                        className="px-2.5 py-1 rounded-lg text-body font-medium text-[var(--platform-twitch)] border border-[var(--platform-twitch)]/40 hover:bg-[var(--platform-twitch)]/10 transition-colors disabled:opacity-40"
                       >
                         Reconnect
                       </button>
@@ -135,7 +135,7 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
                       type="button"
                       disabled={isRowBusy}
                       onClick={() => handleRevoke(row)}
-                      className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-[14px] text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-body text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       aria-label="Disconnect"
                     >
                       ✕
@@ -151,17 +151,17 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
       <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
         <div className="px-6 pt-5 pb-5">
           <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Add Twitch channel</h3>
-          <p className="mt-1 text-[14px] text-[var(--text-secondary)]">
+          <p className="mt-1 text-body text-[var(--text-secondary)]">
             Click below to authorize Inktide bot on your Twitch channel. You&apos;ll be redirected to Twitch to grant access.
           </p>
-          {actionError && <p className="mt-3 text-[14px] text-red-400">{actionError}</p>}
+          {actionError && <p className="mt-3 text-body text-red-400">{actionError}</p>}
         </div>
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--border-subtle)]">
           <button
             type="button"
             disabled={busy}
             onClick={() => void handleConnect()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-[14px] bg-[#9146ff] hover:bg-[#7d34e6] text-white transition-[filter,opacity] duration-150 hover:brightness-110 disabled:opacity-45 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-body bg-[var(--platform-twitch)] hover:bg-[#7d34e6] text-white transition-[filter,opacity] duration-150 hover:brightness-110 disabled:opacity-45 disabled:cursor-not-allowed"
           >
             <IconTwitchMono />
             {busy ? 'Redirecting…' : 'Connect with Twitch'}

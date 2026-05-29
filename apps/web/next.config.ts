@@ -13,9 +13,27 @@ import path from 'path'
   return null
 }
 
+const devOrigins = process.env.DEV_ORIGINS?.split(',').filter(Boolean) ?? []
+const backendUrl = process.env.BACKEND_URL
+  ?? (process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:5001'
+    : (() => { throw new Error('Missing required env var: BACKEND_URL') })())
+
+if (process.env.NODE_ENV === 'production') {
+  const requiredEnvVars = [
+    'NEXT_PUBLIC_KEYCLOAK_URL',
+    'NEXT_PUBLIC_KEYCLOAK_REALM',
+    'NEXT_PUBLIC_KEYCLOAK_CLIENT_ID',
+  ]
+  for (const key of requiredEnvVars) {
+    if (!process.env[key]) throw new Error(`Missing required env var: ${key}`)
+  }
+}
+
 const nextConfig: NextConfig = {
   devIndicators: false,
-  allowedDevOrigins: ['disburse-womanhood-thicken.ngrok-free.dev'],
+  ...(process.env.NODE_ENV === 'development' && devOrigins.length > 0
+    ? { allowedDevOrigins: devOrigins }
+    : {}),
   async headers() {
     return [
       {
@@ -50,16 +68,13 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://127.0.0.1:5001/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
       {
         source: '/hubs/:path*',
-        destination: 'http://127.0.0.1:5001/hubs/:path*',
+        destination: `${backendUrl}/hubs/:path*`,
       },
     ]
-  },
-  images: {
-    unoptimized: true,
   },
 }
 

@@ -65,14 +65,14 @@ export function BrainLlmSliders({ llm, onPatch }: BrainLlmSlidersProps) {
           <div key={s.key}>
             <div className="mb-2 flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <label className="block text-[0.875rem] font-semibold text-zinc-100">
+                <label className="block text-body font-semibold text-zinc-100">
                   {s.label}
                 </label>
-                <span className="mt-0.5 block text-[0.6875rem] text-zinc-500">
+                <span className="mt-0.5 block text-caption text-zinc-500">
                   {s.hint}
                 </span>
               </div>
-              <span className="shrink-0 rounded-md bg-[rgba(34,197,94,0.12)] px-2 py-0.5 font-mono text-[0.6875rem] font-semibold text-[#22c55e]">
+              <span className="shrink-0 rounded-md bg-[var(--color-online)]/12 px-2 py-0.5 font-mono text-caption font-semibold text-[var(--color-online)]">
                 {s.format(value)}
               </span>
             </div>

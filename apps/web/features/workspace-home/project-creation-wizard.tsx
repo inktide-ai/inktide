@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ChevronDown, X } from 'lucide-react'
 import { createProject } from '@/entities/project/api'
 import type { AiCardListItem } from '@/entities/soul/api'
+import { SOULS_ROUTE } from '@/lib/routes'
 import { TetrisAssemble } from './tetris-assemble'
 
 interface ProjectCreationWizardProps {
@@ -101,7 +102,7 @@ export function ProjectCreationWizard({ onClose, onCreated, defaultSoulId, defau
             </svg>
           </div>
           <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">New Project</h2>
-          <p className="mt-1.5 text-[14px] text-[var(--text-secondary)]">
+          <p className="mt-1.5 text-body text-[var(--text-secondary)]">
             A project owns channels, memory, and pipeline config.
           </p>
         </div>
@@ -109,7 +110,7 @@ export function ProjectCreationWizard({ onClose, onCreated, defaultSoulId, defau
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Soul selector */}
           <div>
-            <label className="mb-1.5 block text-[14px] font-medium text-[var(--text-secondary)]">
+            <label className="mb-1.5 block text-body font-medium text-[var(--text-secondary)]">
               Soul <span className="text-[var(--accent-primary)]">*</span>
             </label>
 
@@ -121,14 +122,14 @@ export function ProjectCreationWizard({ onClose, onCreated, defaultSoulId, defau
                 ) : (
                   <span className="h-2 w-2 rounded-full bg-emerald-400 shrink-0" />
                 )}
-                <span className="text-[14px] text-[var(--text-primary)]">{selectedSoulName}</span>
-                <span className="ml-auto text-[12px] text-[var(--text-tertiary)]">from overview</span>
+                <span className="text-body text-[var(--text-primary)]">{selectedSoulName}</span>
+                <span className="ml-auto text-xs text-[var(--text-tertiary)]">from overview</span>
               </div>
             ) : souls.length === 0 ? (
               /* No souls — CTA to create one */
-              <div className="flex items-center justify-between rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--bg-0)] px-3.5 py-2.5 text-[14px]">
+              <div className="flex items-center justify-between rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--bg-0)] px-3.5 py-2.5 text-body">
                 <span className="text-[var(--text-tertiary)]">No souls yet</span>
-                <Link href="/souls" onClick={onClose} className="text-[var(--accent-primary)] hover:underline">
+                <Link href={SOULS_ROUTE} onClick={onClose} className="text-[var(--accent-primary)] hover:underline">
                   Create your first Soul →
                 </Link>
               </div>
@@ -138,7 +139,7 @@ export function ProjectCreationWizard({ onClose, onCreated, defaultSoulId, defau
                 <button
                   type="button"
                   onClick={() => setSoulOpen(v => !v)}
-                  className="flex w-full items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-0)] px-3.5 py-2.5 text-[14px] transition-colors hover:border-[var(--accent-primary)] focus:outline-none"
+                  className="flex w-full items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-0)] px-3.5 py-2.5 text-body transition-colors hover:border-[var(--accent-primary)] focus:outline-none"
                 >
                   {selectedSoulId ? (
                     <>
@@ -172,18 +173,18 @@ export function ProjectCreationWizard({ onClose, onCreated, defaultSoulId, defau
                           <button
                             type="button"
                             onClick={() => selectSoul(soul)}
-                            className={`flex w-full items-center gap-2.5 px-3 py-2 text-[14px] transition-colors hover:bg-[var(--surface-1)] ${soul.id === selectedSoulId ? 'text-[var(--accent-primary)]' : 'text-[var(--text-primary)]'}`}
+                            className={`flex w-full items-center gap-2.5 px-3 py-2 text-body transition-colors hover:bg-[var(--surface-1)] ${soul.id === selectedSoulId ? 'text-[var(--accent-primary)]' : 'text-[var(--text-primary)]'}`}
                           >
                             {soul.avatar_url ? (
                               <img src={soul.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />
                             ) : (
-                              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--surface-2)] text-[10px] font-semibold uppercase text-[var(--text-secondary)]">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--surface-2)] text-2xs font-semibold uppercase text-[var(--text-secondary)]">
                                 {soul.name[0]}
                               </span>
                             )}
                             <span>{soul.name}</span>
                             {soul.status !== 'active' && (
-                              <span className="ml-auto text-[12px] capitalize text-[var(--text-tertiary)]">{soul.status}</span>
+                              <span className="ml-auto text-xs capitalize text-[var(--text-tertiary)]">{soul.status}</span>
                             )}
                           </button>
                         </li>
@@ -197,7 +198,7 @@ export function ProjectCreationWizard({ onClose, onCreated, defaultSoulId, defau
 
           {/* Name */}
           <div>
-            <label className="mb-1.5 block text-[14px] font-medium text-[var(--text-secondary)]">
+            <label className="mb-1.5 block text-body font-medium text-[var(--text-secondary)]">
               Project name <span className="text-[var(--accent-primary)]">*</span>
             </label>
             <input
@@ -207,13 +208,13 @@ export function ProjectCreationWizard({ onClose, onCreated, defaultSoulId, defau
               onChange={e => setName(e.target.value)}
               placeholder="My Twitch Project"
               maxLength={80}
-              className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-0)] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-primary)]"
+              className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-0)] px-3.5 py-2.5 text-body text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-primary)]"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="mb-1.5 block text-[14px] font-medium text-[var(--text-secondary)]">
+            <label className="mb-1.5 block text-body font-medium text-[var(--text-secondary)]">
               Description <span className="text-[var(--text-tertiary)]">(optional)</span>
             </label>
             <textarea
@@ -222,19 +223,19 @@ export function ProjectCreationWizard({ onClose, onCreated, defaultSoulId, defau
               placeholder="What is this project for?"
               rows={2}
               maxLength={300}
-              className="w-full resize-none rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-0)] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-primary)]"
+              className="w-full resize-none rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-0)] px-3.5 py-2.5 text-body text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-primary)]"
             />
           </div>
 
           {error && (
-            <p className="rounded-lg border border-red-900/40 bg-red-950/30 px-3 py-2 text-[14px] text-red-400">{error}</p>
+            <p className="rounded-lg border border-red-900/40 bg-red-950/30 px-3 py-2 text-body text-red-400">{error}</p>
           )}
 
           {/* Submit */}
           <button
             type="submit"
             disabled={!name.trim() || !selectedSoulId || creating}
-            className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent-primary)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent-primary)] text-body font-semibold text-white transition-colors hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {creating ? (
               <>

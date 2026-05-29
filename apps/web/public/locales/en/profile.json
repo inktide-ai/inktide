@@ -63,6 +63,26 @@
       "keyPhrasesPlaceholder": "hey chat, poggers, gg"
     }
   },
+  "badge": {
+    "memory": "Memory",
+    "autoPilot": "AutoPilot",
+    "tts": "TTS"
+  },
+  "characterCard": {
+    "soulDetails": "Soul Details",
+    "copied": "Copied!",
+    "share": "Share",
+    "created": "Created",
+    "status": "Status",
+    "model": "Model",
+    "type": "Type",
+    "noModel": "No model",
+    "tags": "Tags",
+    "addTag": "Add tag…",
+    "personality": "Personality",
+    "changeAvatar": "Change Avatar",
+    "uploading": "Uploading…"
+  },
   "identity": {
     "editCharacter": "Edit Character",
     "about": "About",

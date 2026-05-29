@@ -14,7 +14,7 @@ export function SidebarNavItem({ href, active, icon, label, className }: Sidebar
     <Link
       href={href}
       className={cn(
-        'flex items-center gap-2.5 rounded-lg px-3 py-[7px] text-[0.8125rem] font-medium transition-colors',
+        'flex items-center gap-2.5 rounded-lg px-3 py-[7px] text-sm font-medium transition-colors',
         active
           ? 'bg-[var(--sidebar-active)] text-[var(--text-primary)]'
           : 'text-[var(--text-tertiary)] hover:bg-[var(--surface-1)] hover:text-[var(--text-secondary)]',

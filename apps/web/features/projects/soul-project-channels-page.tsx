@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Layers } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { ChannelTab } from '@/features/character-editor'
 import { getProject, type Project } from '@/features/projects'
 import { getCard } from '@/features/soul'
@@ -76,6 +77,7 @@ const btnPrimary =
 
 export default function SoulProjectChannelsPage() {
   const { projectId } = useParams<{ id: string; projectId: string }>()
+  const { t } = useTranslation('common')
 
   const [project, setProject]     = useState<Project | null>(null)
   const [character, setCharacter] = useState<AiCharacter | null>(null)
@@ -95,7 +97,7 @@ export default function SoulProjectChannelsPage() {
   }, [projectId])
 
   if (loading) {
-    return <div className="p-8 text-sm text-[var(--text-secondary)]">Loading…</div>
+    return <div className="p-8 text-sm text-[var(--text-secondary)]">{t('projectDetail.loading')}</div>
   }
 
   if (!character) return null
@@ -110,18 +112,18 @@ export default function SoulProjectChannelsPage() {
           <div className="flex flex-col items-stretch justify-between gap-4 md:flex-row md:items-center md:gap-2">
             <div className="flex flex-col gap-2">
               <h2 className="text-[1.5rem] font-semibold leading-[1.2] text-[var(--text-heading)]">
-                Channels
+                {t('projectDetail.channels')}
               </h2>
               <span className="text-body text-balance text-[var(--text-secondary)]">
-                Connect your streaming and social platforms to this project.
+                {t('projectDetail.channelsSubtitle')}
                 {project?.active_soul && (
-                  <> Powered by soul <span className="font-medium text-[var(--text-primary)]">{project.active_soul.name}</span>.</>
+                  <> {t('projectDetail.channelsPoweredBy')} <span className="font-medium text-[var(--text-primary)]">{project.active_soul.name}</span>.</>
                 )}
               </span>
             </div>
             <div className="flex flex-col items-stretch gap-2 md:flex-row">
-              <a href="#" className={btnSecondary}>Channels Console</a>
-              <a href={`/souls/${character.id}/channels/marketplace`} className={btnPrimary}>Browse Marketplace</a>
+              <a href="#" className={btnSecondary}>{t('projectDetail.channelsConsole')}</a>
+              <a href={`/souls/${character.id}/channels/marketplace`} className={btnPrimary}>{t('projectDetail.browseMarketplace')}</a>
             </div>
           </div>
 
@@ -139,10 +141,10 @@ export default function SoulProjectChannelsPage() {
 
               <div className="flex flex-col items-center justify-start gap-1">
                 <p className="text-[1rem] font-semibold text-center text-[var(--text-heading)]">
-                  Latest Platforms
+                  {t('projectDetail.latestPlatforms')}
                 </p>
                 <p className="text-body text-[var(--text-secondary)] text-center">
-                  Explore more platforms to expand your streaming reach.
+                  {t('projectDetail.latestPlatformsDesc')}
                 </p>
               </div>
 
@@ -173,7 +175,7 @@ export default function SoulProjectChannelsPage() {
               <hr className="w-full border-t border-[var(--border-subtle)]" />
 
               <a href={`/souls/${character.id}/channels/marketplace`} className={btnSecondary + ' w-full justify-center'}>
-                Browse Marketplace
+                {t('projectDetail.browseMarketplace')}
               </a>
             </div>
 

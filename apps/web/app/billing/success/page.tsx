@@ -1,9 +1,11 @@
 'use client'
 import { useEffect } from 'react'
 import Link from 'next/link'
-import { useBilling } from '@/entities/billing/context/BillingContext'
+import { useTranslation } from 'react-i18next'
+import { useBilling } from '@/entities/billing'
 
 export default function BillingSuccessPage() {
+  const { t } = useTranslation('common')
   const { refresh } = useBilling()
 
   useEffect(() => {
@@ -21,18 +23,18 @@ export default function BillingSuccessPage() {
 
       <div>
         <h1 className="text-[1.75rem] font-bold tracking-[-0.02em] text-[var(--text-heading)]">
-          Welcome to Pro!
+          {t('billing.welcomeToPro')}
         </h1>
-        <p className="mt-2 max-w-sm text-[0.9375rem] text-[var(--text-secondary)]">
-          Your subscription is now active. Enjoy all Pro features.
+        <p className="mt-2 max-w-sm text-body-md text-[var(--text-secondary)]">
+          {t('billing.subscriptionActive')}
         </p>
       </div>
 
       <Link
         href="/"
-        className="rounded-xl bg-[var(--accent-primary)] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition-opacity hover:opacity-90"
+        className="rounded-xl bg-[var(--accent-primary)] px-6 py-2.5 text-body font-semibold text-white transition-opacity hover:opacity-90"
       >
-        Back to app
+        {t('billing.backToApp')}
       </Link>
     </div>
   )

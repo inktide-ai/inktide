@@ -26,7 +26,7 @@ interface CreatePresetModalProps {
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <label className="home-ui-font block text-[14px] font-medium text-[var(--text-secondary)] mb-1">
+    <label className="home-ui-font block text-body font-medium text-[var(--text-secondary)] mb-1">
       {children}
     </label>
   )
@@ -45,7 +45,7 @@ function Select({
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="w-full rounded-[8px] border border-[var(--border-card)] bg-[var(--surface-0)] px-3 py-2 text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-base)] transition-colors"
+      className="w-full rounded-[8px] border border-[var(--border-card)] bg-[var(--surface-0)] px-3 py-2 text-body text-[var(--text-primary)] outline-none focus:border-[var(--accent-base)] transition-colors"
     >
       {children}
     </select>
@@ -173,7 +173,7 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="e.g. Streaming Mode"
-                    className="w-full rounded-[8px] border border-[var(--border-card)] bg-[var(--surface-0)] px-3 py-2 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none focus:border-[var(--accent-base)] transition-colors"
+                    className="w-full rounded-[8px] border border-[var(--border-card)] bg-[var(--surface-0)] px-3 py-2 text-body text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none focus:border-[var(--accent-base)] transition-colors"
                   />
                 </div>
               </div>
@@ -185,13 +185,13 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Short tagline for this scene"
-                  className="w-full rounded-[8px] border border-[var(--border-card)] bg-[var(--surface-0)] px-3 py-2 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none focus:border-[var(--accent-base)] transition-colors"
+                  className="w-full rounded-[8px] border border-[var(--border-card)] bg-[var(--surface-0)] px-3 py-2 text-body text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none focus:border-[var(--accent-base)] transition-colors"
                 />
               </div>
 
               {/* Overrides */}
               <div className="rounded-[10px] border border-[var(--border-card)] bg-[var(--surface-0)] p-3">
-                <p className="home-ui-font mb-3 text-[14px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
+                <p className="home-ui-font mb-3 text-body font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
                   Runtime overrides
                 </p>
                 <div className="flex flex-col gap-3">
@@ -224,7 +224,7 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
                           onChange={e => setTemperatureValue(Number(e.target.value))}
                           className="flex-1 accent-[var(--accent-base)]"
                         />
-                        <span className="w-8 text-right text-[14px] font-medium text-[var(--text-primary)]">
+                        <span className="w-8 text-right text-body font-medium text-[var(--text-primary)]">
                           {temperatureValue.toFixed(2)}
                         </span>
                       </div>
@@ -256,21 +256,21 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
               </div>
 
               {error && (
-                <p className="text-[14px] text-red-400">{error}</p>
+                <p className="text-body text-red-400">{error}</p>
               )}
 
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-md border border-[var(--border-card)] px-4 py-2 text-[14px] text-[var(--text-secondary)] hover:border-[var(--border-divider)] hover:text-[var(--text-primary)] transition-colors"
+                  className="rounded-md border border-[var(--border-card)] px-4 py-2 text-body text-[var(--text-secondary)] hover:border-[var(--border-divider)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-md bg-[var(--accent-base)] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="rounded-md bg-[var(--accent-base)] px-4 py-2 text-body font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {busy ? 'Saving…' : editing ? 'Save scene' : 'Create scene'}
                 </button>

@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
-import { ThemeProvider } from '@/components/theme-provider'
-import { Providers } from '@/components/providers'
+import { ThemeProvider } from '@/shared/ui/theme-provider'
+import { Providers } from './_providers'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Inktide — AI Streaming Platform',
+  title: {
+    default: 'Inktide — AI Streaming Platform',
+    template: '%s — Inktide',
+  },
   description: 'AI-powered streaming platform with reactive VRM avatars',
   other: {
     enot: 'd1ef7c50',

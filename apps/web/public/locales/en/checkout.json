@@ -1,0 +1,34 @@
+{
+  "title": "Subscribe",
+  "paymentMethod": "1. Payment method",
+  "billingAddress": "2. Billing address",
+  "fillStep1": "Complete step 1 to continue.",
+  "card": "Card",
+  "robokassa": {
+    "selected": "Robokassa selected.",
+    "redirect": "You will be redirected to a secure page to complete the next steps.",
+    "consent": "By confirming payment via Robokassa, you authorize future charges per the subscription terms. Cancel anytime."
+  },
+  "cardConsent": "By confirming card payment, you authorize future charges per the subscription terms. Cancel anytime.",
+  "loadingForm": "Loading payment form...",
+  "cardUnavailable": "Card payment is temporarily unavailable. Please contact support.",
+  "next": "Continue",
+  "loading": "Loading...",
+  "subscribe": "Subscribe",
+  "plan": {
+    "title": "{{name}} Plan",
+    "features": "Key features",
+    "periodYearly": "Yearly",
+    "periodMonthly": "Monthly",
+    "billingYearly": "Billed annually in EUR",
+    "billingMonthly": "Billed monthly in EUR",
+    "tax": "Estimated tax",
+    "dueToday": "Due today",
+    "renewsYearly": "Renews annually until cancelled. You will be charged {{price}} €/year (incl. tax).",
+    "renewsMonthly": "Renews monthly until cancelled. You will be charged {{price}} €/month (incl. tax)."
+  },
+  "error": {
+    "payment": "Payment error",
+    "loading": "Loading error"
+  }
+}

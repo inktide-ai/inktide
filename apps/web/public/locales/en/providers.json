@@ -38,5 +38,23 @@
     "ok":              "Connection successful",
     "failed":          "Connection test failed",
     "continueAnyway":  "Continue anyway"
+  },
+  "brain": {
+    "title": "Brain",
+    "subtitle": "Manage language model providers and behavior settings.",
+    "section": {
+      "title": "Brain Providers",
+      "subtitle": "Choose a language model to power your soul's thinking."
+    },
+    "search": "Search providers...",
+    "noResults": "No providers match your filters.",
+    "type": {
+      "local": "Local",
+      "apiKey": "API Key",
+      "openaiV1": "OpenAI v1",
+      "openSource": "Open Source",
+      "recommended": "Recommended",
+      "enterprise": "Enterprise"
+    }
   }
 }

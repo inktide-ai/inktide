@@ -65,7 +65,7 @@ export function ElevenLabsPanel({ character, onUpdate }: PanelProps) {
       <SliderField label={t('volume.label')} hint={t('volume.hintElevenLabs')} value={tts.volume} min={0.1} max={2.0} step={0.05} format={(v) => `${v.toFixed(2)}×`} onChange={(v) => patch({ volume: v })} />
       <div className={toggleRow}>
         <div>
-          <div className="text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary)">{t('speakerBoost.label')}</div>
+          <div className="text-body font-semibold font-[var(--font-ui)] text-(--text-primary)">{t('speakerBoost.label')}</div>
           <div className={labelHint}>{t('speakerBoost.hint')}</div>
         </div>
         <label className="toggle-control">

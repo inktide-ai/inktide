@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getTtsVoices, type SpeechVoice } from '@/api/tts'
+import { getTtsVoices, type SpeechVoice } from '@/features/soul/api/tts'
 
 /**
  * Fetches the voice list for a TTS provider whenever the API key changes.

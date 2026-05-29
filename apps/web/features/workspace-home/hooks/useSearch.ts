@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { listProjects } from '@/entities/project/api'
 import { queryKeys } from '@/shared/lib/query/keys'
+import { useShortcut } from '@/shared/lib/keyboard'
 
 export interface SearchResult {
   type: 'soul' | 'project'
@@ -102,18 +103,11 @@ export function useSearch() {
     }
   }, [isOpen, results, activeIndex, navigate, close])
 
-  // ⌘K / Ctrl+K global shortcut
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        inputRef.current?.focus()
-        inputRef.current?.select()
-      }
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [])
+  // ⌘K / Ctrl+K — focus search
+  useShortcut('$mod+k', () => {
+    inputRef.current?.focus()
+    inputRef.current?.select()
+  })
 
   return {
     query,

@@ -1,3 +1,3 @@
-import ChannelsPage from '@/features/character-editor/settings/channels-page'
-import ProfileSettingsSectionLayout from '@/features/account/profile-settings-section-layout'
+import { ChannelsPage } from '@/features/character-editor'
+import { ProfileSettingsSectionLayout } from '@/features/account'
 export default function Page() { return <ProfileSettingsSectionLayout><ChannelsPage /></ProfileSettingsSectionLayout> }

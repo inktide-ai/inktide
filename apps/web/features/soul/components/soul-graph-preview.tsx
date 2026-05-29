@@ -2,8 +2,8 @@ export function SoulGraphPreview() {
   return (
     <div className="p-4">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-[14px] font-medium text-[var(--text-heading)]">Graph Overview</p>
-        <button type="button" className="text-[12px] text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]">
+        <p className="text-body font-medium text-[var(--text-heading)]">Graph Overview</p>
+        <button type="button" className="text-xs text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]">
           Open →
         </button>
       </div>

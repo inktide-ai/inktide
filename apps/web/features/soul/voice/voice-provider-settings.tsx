@@ -62,7 +62,7 @@ export default function VoiceProviderSettings() {
     <div className="min-h-screen px-6 py-8">
       <div className="mx-auto max-w-[1200px]">
 
-        <nav className="mb-6 flex items-center gap-2 text-[14px] text-[var(--text-secondary)]">
+        <nav className="mb-6 flex items-center gap-2 text-body text-[var(--text-secondary)]">
           <Link href={`/souls/${params.id}/voice`} className="hover:text-[var(--text-primary)] transition-colors">
             Voice
           </Link>
@@ -83,7 +83,7 @@ export default function VoiceProviderSettings() {
               <h1 className="text-[22px] font-semibold leading-tight text-[var(--text-primary)]">
                 {catalog?.name ?? params.providerId}
               </h1>
-              <p className="mt-1 text-[14px] text-[var(--text-secondary)] max-w-md">
+              <p className="mt-1 text-body text-[var(--text-secondary)] max-w-md">
                 {catalog?.description ?? 'Voice provider settings'}
               </p>
             </div>
@@ -95,7 +95,7 @@ export default function VoiceProviderSettings() {
                   href={catalog.supportUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3.5 py-2 text-[14px] font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3.5 py-2 text-body font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
                 >
                   <Headphones size={14} className="text-[var(--text-secondary)]" />
                   {catalog.name} Support
@@ -106,7 +106,7 @@ export default function VoiceProviderSettings() {
                   href={catalog.websiteUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--text-primary)] px-3.5 py-2 text-[14px] font-medium text-[var(--bg-0)] hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--text-primary)] px-3.5 py-2 text-body font-medium text-[var(--bg-0)] hover:opacity-90 transition-opacity"
                 >
                   Open in {catalog.name}
                   <ExternalLink size={13} />
@@ -123,7 +123,7 @@ export default function VoiceProviderSettings() {
             <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
               <div className="px-6 pt-5 pb-4">
                 <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Global Voice Settings</h3>
-                <p className="mt-1 text-[14px] text-[var(--text-secondary)]">Applied across all providers.</p>
+                <p className="mt-1 text-body text-[var(--text-secondary)]">Applied across all providers.</p>
               </div>
               <div className="border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
                 <GlobalParamRow name="Speed" desc="Speech rate multiplier" min={0.5} max={2.0} step={0.01} decimals={2} value={speed} onChange={setSpeed} />
@@ -140,7 +140,7 @@ export default function VoiceProviderSettings() {
                 <button
                   type="button"
                   onClick={handleSaveGlobal}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--text-primary)] px-4 py-2 text-[14px] font-semibold text-[var(--bg-0)] hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--text-primary)] px-4 py-2 text-body font-semibold text-[var(--bg-0)] hover:opacity-90 transition-opacity"
                 >
                   Save changes
                 </button>
@@ -159,8 +159,8 @@ export default function VoiceProviderSettings() {
                 { label: 'API Key', value: catalog.requiresApiKey ? 'Required' : 'Not required' },
               ].map((row) => (
                 <div key={row.label} className="flex items-center justify-between px-6 py-3">
-                  <span className="text-[14px] text-[var(--text-secondary)]">{row.label}</span>
-                  <span className="text-[14px] text-[var(--text-primary)]">{row.value}</span>
+                  <span className="text-body text-[var(--text-secondary)]">{row.label}</span>
+                  <span className="text-body text-[var(--text-primary)]">{row.value}</span>
                 </div>
               )) : null}
             </div>

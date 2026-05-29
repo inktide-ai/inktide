@@ -53,7 +53,7 @@ export function WizardProviderCard({
             {item.name}
           </span>
           {item.subtitle && (
-            <span className="block truncate text-[12px] leading-4 text-[var(--text-tertiary)]">
+            <span className="block truncate text-xs leading-4 text-[var(--text-tertiary)]">
               {item.subtitle}
             </span>
           )}

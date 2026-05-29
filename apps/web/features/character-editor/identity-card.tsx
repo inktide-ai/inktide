@@ -29,17 +29,17 @@ const IdentityCard = ({ character, onUpdate, onDelete, onNavigateTab }: Identity
         <div className="grid grid-cols-4 gap-2">
           <div className="bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-[0.875rem] flex flex-col gap-[0.3rem]">
             <div className="text-[0.625rem] font-medium uppercase tracking-[0.07em] text-white/35">{t('identity.language')}</div>
-            <div className="text-[0.9375rem] font-semibold text-(--text-primary) tracking-[-0.01em]">{character.behavior.language.toUpperCase()}</div>
+            <div className="text-body-md font-semibold text-(--text-primary) tracking-[-0.01em]">{character.behavior.language.toUpperCase()}</div>
           </div>
           <div className="bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-[0.875rem] flex flex-col gap-[0.3rem]">
             <div className="text-[0.625rem] font-medium uppercase tracking-[0.07em] text-white/35">{t('identity.visibility')}</div>
-            <div className="text-[0.9375rem] font-semibold text-(--text-primary) tracking-[-0.01em]" style={{ textTransform: 'capitalize' }}>{character.visibility}</div>
+            <div className="text-body-md font-semibold text-(--text-primary) tracking-[-0.01em]" style={{ textTransform: 'capitalize' }}>{character.visibility}</div>
           </div>
           <div className="bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-[0.875rem] flex flex-col gap-[0.3rem]">
             <div className="text-[0.625rem] font-medium uppercase tracking-[0.07em] text-white/35">{t('identity.autoPilot')}</div>
             <div className={cn(
-              'text-[0.9375rem] font-semibold tracking-[-0.01em]',
-              character.autoPilot.enabled ? 'text-[#4ade80]' : 'text-white/30',
+              'text-body-md font-semibold tracking-[-0.01em]',
+              character.autoPilot.enabled ? 'text-[var(--color-online)]' : 'text-white/30',
             )}>
               {character.autoPilot.enabled ? t('common:badge.on') : t('common:badge.off')}
             </div>
@@ -47,8 +47,8 @@ const IdentityCard = ({ character, onUpdate, onDelete, onNavigateTab }: Identity
           <div className="bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-[0.875rem] flex flex-col gap-[0.3rem]">
             <div className="text-[0.625rem] font-medium uppercase tracking-[0.07em] text-white/35">{t('identity.autoModerate')}</div>
             <div className={cn(
-              'text-[0.9375rem] font-semibold tracking-[-0.01em]',
-              character.behavior.autoModerate ? 'text-[#4ade80]' : 'text-white/30',
+              'text-body-md font-semibold tracking-[-0.01em]',
+              character.behavior.autoModerate ? 'text-[var(--color-online)]' : 'text-white/30',
             )}>
               {character.behavior.autoModerate ? t('common:badge.on') : t('common:badge.off')}
             </div>

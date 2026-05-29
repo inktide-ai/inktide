@@ -6,7 +6,7 @@ import {
   getCard,
   type ChannelResponse,
 } from '@/features/soul/api/index' // fsd:cross-feature-ok — soul editor
-import { ApiError } from '../../../api/client'
+import { ApiError } from '@/api/client'
 import type { AiCharacter } from '@/shared/lib/character'
 
 interface ChannelTabProps {
@@ -25,7 +25,7 @@ interface PlatformConfig {
 function IconDiscord() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden width="36" height="36">
-      <rect width="512" height="512" fill="#5865F2"/>
+      <rect width="512" height="512" fill="var(--platform-discord)"/>
       <path fill="#fff" fillRule="nonzero" d="M368.896 153.381a269.506 269.506 0 00-67.118-20.637 186.88 186.88 0 00-8.57 17.475 250.337 250.337 0 00-37.247-2.8c-12.447 0-24.955.946-37.25 2.776-2.511-5.927-5.427-11.804-8.592-17.454a271.73 271.73 0 00-67.133 20.681c-42.479 62.841-53.991 124.112-48.235 184.513a270.622 270.622 0 0082.308 41.312c6.637-8.959 12.582-18.497 17.63-28.423a173.808 173.808 0 01-27.772-13.253c2.328-1.688 4.605-3.427 6.805-5.117 25.726 12.083 53.836 18.385 82.277 18.385 28.442 0 56.551-6.302 82.279-18.387 2.226 1.817 4.503 3.557 6.805 5.117a175.002 175.002 0 01-27.823 13.289 197.847 197.847 0 0017.631 28.4 269.513 269.513 0 0082.363-41.305l-.007.007c6.754-70.045-11.538-130.753-48.351-184.579zM201.968 300.789c-16.04 0-29.292-14.557-29.292-32.465s12.791-32.592 29.241-32.592 29.599 14.684 29.318 32.592c-.282 17.908-12.919 32.465-29.267 32.465zm108.062 0c-16.066 0-29.267-14.557-29.267-32.465s12.791-32.592 29.267-32.592c16.475 0 29.522 14.684 29.241 32.592-.281 17.908-12.894 32.465-29.241 32.465z"/>
     </svg>
   )
@@ -101,7 +101,7 @@ const ChannelTab = ({ character }: ChannelTabProps) => {
   return (
     <div className="flex flex-col gap-5 flex-1 w-full">
       {loadError && (
-        <p className="text-[0.8125rem] text-red-500 dark:text-red-400">{loadError}</p>
+        <p className="text-sm text-red-500 dark:text-red-400">{loadError}</p>
       )}
 
       {/* search + filter */}
@@ -119,14 +119,14 @@ const ChannelTab = ({ character }: ChannelTabProps) => {
             aria-label="Search"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full h-9 pl-9 pr-3 text-[0.8125rem] border border-[var(--border-subtle)] rounded-lg bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--border-subtle)]"
+            className="w-full h-9 pl-9 pr-3 text-sm border border-[var(--border-subtle)] rounded-lg bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--border-subtle)]"
           />
         </div>
         <div className="relative shrink-0">
           <select
             value={filter}
             onChange={e => setFilter(e.target.value)}
-            className="h-9 pl-3 pr-8 text-[0.8125rem] border border-[var(--border-subtle)] rounded-lg bg-[var(--bg-0)] text-[var(--text-primary)] appearance-none focus:outline-none cursor-pointer"
+            className="h-9 pl-3 pr-8 text-sm border border-[var(--border-subtle)] rounded-lg bg-[var(--bg-0)] text-[var(--text-primary)] appearance-none focus:outline-none cursor-pointer"
           >
             <option value="all">All Channels</option>
             {categories.map(cat => (
@@ -166,23 +166,23 @@ const ChannelTab = ({ character }: ChannelTabProps) => {
                   </div>
                   <div className="flex flex-col gap-1">
                     <div className="flex flex-row items-center gap-2">
-                      <span className="text-[0.875rem] leading-5 font-medium text-[var(--text-primary)]">
+                      <span className="text-body leading-5 font-medium text-[var(--text-primary)]">
                         {cfg.title}
                       </span>
                       {channels !== null && (
                         hasActive ? (
-                          <span className="flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-[0.6875rem] font-medium text-green-500">
+                          <span className="flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-caption font-medium text-green-500">
                             <span className="h-1 w-1 rounded-full bg-green-500" aria-hidden />
                             Connected
                           </span>
                         ) : (
-                          <span className="rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)] px-2 py-0.5 text-[0.6875rem] font-medium text-[var(--text-tertiary)]">
+                          <span className="rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)] px-2 py-0.5 text-caption font-medium text-[var(--text-tertiary)]">
                             Not configured
                           </span>
                         )
                       )}
                     </div>
-                    <span className="text-[0.875rem] text-[var(--text-secondary)]">{cfg.category}</span>
+                    <span className="text-body text-[var(--text-secondary)]">{cfg.category}</span>
                   </div>
                 </div>
 
@@ -190,7 +190,7 @@ const ChannelTab = ({ character }: ChannelTabProps) => {
                 <a
                   href={href}
                   onClick={e => { e.preventDefault(); router.push(href) }}
-                  className="relative z-10 inline-flex h-7 items-center px-3 text-[0.75rem] font-medium rounded-md border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors shrink-0"
+                  className="relative z-10 inline-flex h-7 items-center px-3 text-xs font-medium rounded-md border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors shrink-0"
                 >
                   Configure
                 </a>

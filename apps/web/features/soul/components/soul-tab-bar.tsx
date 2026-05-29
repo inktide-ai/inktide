@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import * as Tabs from '@radix-ui/react-tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { cn } from '@/lib/utils'
 
 interface SoulTabBarProps {
@@ -18,19 +18,19 @@ const TABS = [
 
 const activeCls = cn(
   'inline-flex items-center rounded-md border px-3 py-1.5',
-  'text-[14px] font-semibold whitespace-nowrap transition-colors outline-none',
+  'text-body font-semibold whitespace-nowrap transition-colors outline-none',
   'border-[var(--border-default)] bg-[var(--surface-1)] text-[var(--text-primary)]',
 )
 
 const inactiveCls = cn(
   'inline-flex items-center rounded-md px-3 py-1.5',
-  'text-[14px] font-medium whitespace-nowrap transition-colors outline-none',
+  'text-body font-medium whitespace-nowrap transition-colors outline-none',
   'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
 )
 
 const disabledCls = cn(
   'inline-flex items-center rounded-md px-3 py-1.5',
-  'text-[14px] font-medium whitespace-nowrap',
+  'text-body font-medium whitespace-nowrap',
   'cursor-not-allowed opacity-40 text-[var(--text-secondary)]',
 )
 
@@ -50,8 +50,8 @@ export function SoulTabBar({ soulId }: SoulTabBarProps) {
   const tabValue  = tabValueFromPath(pathname, soulId)
 
   return (
-    <Tabs.Root value={tabValue} className="w-full">
-      <Tabs.List
+    <Tabs value={tabValue} className="w-full">
+      <TabsList
         className={cn(
           'flex items-center gap-1 overflow-x-auto',
           'border-b border-[var(--border-divider)] bg-[var(--surface-topbar)]',
@@ -68,19 +68,19 @@ export function SoulTabBar({ soulId }: SoulTabBarProps) {
 
           if (isPlaceholder) {
             return (
-              <Tabs.Trigger
+              <TabsTrigger
                 key={tab.key}
                 value={tab.key}
                 disabled
                 className={disabledCls}
               >
                 {tab.label}
-              </Tabs.Trigger>
+              </TabsTrigger>
             )
           }
 
           return (
-            <Tabs.Trigger key={tab.key} value={tab.key} asChild>
+            <TabsTrigger key={tab.key} value={tab.key} asChild>
               <Link
                 href={href}
                 scroll={false}
@@ -88,10 +88,10 @@ export function SoulTabBar({ soulId }: SoulTabBarProps) {
               >
                 {tab.label}
               </Link>
-            </Tabs.Trigger>
+            </TabsTrigger>
           )
         })}
-      </Tabs.List>
-    </Tabs.Root>
+      </TabsList>
+    </Tabs>
   )
 }

@@ -8,7 +8,7 @@ import { MicIcon } from './voice-icons'
 
 export const inputCls = cn(
   'h-9 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3',
-  'text-[0.8125rem] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]',
+  'text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]',
   'transition-colors focus:border-[var(--border-default)]',
 )
 
@@ -32,8 +32,8 @@ export function ParamRow({ icon, name, desc, min, max, step, value, onChange, de
     <div className="flex items-center gap-4 px-5 py-4">
       <span className="w-5 shrink-0">{icon}</span>
       <div className="w-52 shrink-0">
-        <p className="text-[0.875rem] font-medium text-[var(--text-primary)]">{name}</p>
-        <p className="mt-0.5 text-[0.75rem] leading-snug text-[var(--text-tertiary)]">{desc}</p>
+        <p className="text-body font-medium text-[var(--text-primary)]">{name}</p>
+        <p className="mt-0.5 text-xs leading-snug text-[var(--text-tertiary)]">{desc}</p>
       </div>
       <input
         type="range"
@@ -42,7 +42,7 @@ export function ParamRow({ icon, name, desc, min, max, step, value, onChange, de
         className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-[var(--border-subtle)] outline-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--text-primary)]"
         style={{ background: `linear-gradient(to right, var(--text-primary) ${((value - min) / (max - min)) * 100}%, var(--border-subtle) ${((value - min) / (max - min)) * 100}%)` }}
       />
-      <span className="w-[4.5rem] shrink-0 text-center text-[0.8125rem] text-[var(--text-primary)]">
+      <span className="w-[4.5rem] shrink-0 text-center text-sm text-[var(--text-primary)]">
         {format ? format(value) : value.toFixed(decimals)}
       </span>
     </div>
@@ -68,11 +68,11 @@ export function SelectField({
 }) {
   return (
     <div className="p-5">
-      <div className="mb-2 flex items-center gap-2 text-[0.8125rem] font-medium text-[var(--text-primary)]">
+      <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
         <MicIcon />
         {label}
       </div>
-      {hint && <p className="mb-3 text-[0.75rem] text-[var(--text-tertiary)]">{hint}</p>}
+      {hint && <p className="mb-3 text-xs text-[var(--text-tertiary)]">{hint}</p>}
       <div className="relative">
         <select
           className={cn(inputCls, 'appearance-none cursor-pointer pr-8')}
@@ -100,8 +100,8 @@ export function GlobalParamRow({ name, desc, min, max, step, value, onChange, de
   return (
     <div className="flex items-center justify-between px-6 py-4">
       <div className="min-w-0 flex-1">
-        <p className="text-[14px] font-medium text-[var(--text-primary)]">{name}</p>
-        <p className="mt-0.5 text-[14px] text-[var(--text-secondary)]">{desc}</p>
+        <p className="text-body font-medium text-[var(--text-primary)]">{name}</p>
+        <p className="mt-0.5 text-body text-[var(--text-secondary)]">{desc}</p>
       </div>
       <div className="flex shrink-0 items-center gap-3 ml-8">
         <input
@@ -119,7 +119,7 @@ export function GlobalParamRow({ name, desc, min, max, step, value, onChange, de
             const v = parseFloat(e.target.value)
             if (!isNaN(v)) onChange(Math.min(max, Math.max(min, v)))
           }}
-          className="w-16 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] py-1 text-center text-[14px] text-[var(--text-primary)] outline-none transition-colors focus:border-[var(--border-default)] [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="w-16 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] py-1 text-center text-body text-[var(--text-primary)] outline-none transition-colors focus:border-[var(--border-default)] [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
       </div>
     </div>
@@ -134,8 +134,8 @@ export function GlobalToggleRow({ name, desc, value, onChange }: {
   return (
     <div className="flex items-center justify-between px-6 py-4">
       <div className="min-w-0 flex-1">
-        <p className="text-[14px] font-medium text-[var(--text-primary)]">{name}</p>
-        <p className="mt-0.5 text-[14px] text-[var(--text-secondary)]">{desc}</p>
+        <p className="text-body font-medium text-[var(--text-primary)]">{name}</p>
+        <p className="mt-0.5 text-body text-[var(--text-secondary)]">{desc}</p>
       </div>
       <button
         type="button"

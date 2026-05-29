@@ -1,9 +1,7 @@
-'use client'
-
 import { type ReactNode } from 'react'
-import { CharactersProvider } from '@/entities/character/context/CharactersContext'
-import ProtectedRoute from '@/features/account/protected-route'
-import ProfileShell from '@/features/account/profile-shell'
+import { CharactersProvider } from '@/entities/character'
+import { ProtectedRoute } from '@/features/account'
+import { ProfileShell } from '@/widgets/profile-shell'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (

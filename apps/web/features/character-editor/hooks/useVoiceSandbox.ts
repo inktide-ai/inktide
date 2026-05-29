@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { getTtsProviders, getTtsVoices, type SpeechProviderDescriptor, type SpeechVoice } from '@/api/tts'
+import { getTtsProviders, getTtsVoices, type SpeechProviderDescriptor, type SpeechVoice } from '@/features/soul/api/tts'
 
 function getFallbackVoices(_providerId: string): SpeechVoice[] { return [] }
 

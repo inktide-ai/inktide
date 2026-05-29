@@ -31,7 +31,7 @@ export function WizardFinishPanel({ llmName, ttsName, hasDiscord, onConfirm }: W
 
   const inputCls = cn(
     'h-9 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)]/60 px-3',
-    'home-ui-font text-[14px] text-[var(--text-primary)] outline-none',
+    'home-ui-font text-body text-[var(--text-primary)] outline-none',
     'placeholder:text-[var(--text-tertiary)] transition-colors',
     'focus:border-[var(--accent-base)]/50 focus:bg-[var(--surface-2)]',
   )
@@ -63,14 +63,14 @@ export function WizardFinishPanel({ llmName, ttsName, hasDiscord, onConfirm }: W
         <h2 className="home-heading-font text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
           Завершение и создание
         </h2>
-        <p className="home-ui-font mt-1 text-[14px] text-[var(--text-secondary)]">
+        <p className="home-ui-font mt-1 text-body text-[var(--text-secondary)]">
           Проверьте настройки и создайте свою душу.
         </p>
       </div>
 
       <div className="px-6 pb-5 space-y-4">
         <div>
-          <span className="home-ui-font mb-1.5 block text-[12px] font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">
+          <span className="home-ui-font mb-1.5 block text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">
             Название души
           </span>
           <input
@@ -88,15 +88,15 @@ export function WizardFinishPanel({ llmName, ttsName, hasDiscord, onConfirm }: W
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)]/40 divide-y divide-[var(--border-subtle)]">
           {summarySteps.map(({ label, value, required }) => (
             <div key={label} className="flex items-center justify-between px-3.5 py-2.5">
-              <span className="home-ui-font text-[14px] text-[var(--text-secondary)]">{label}</span>
+              <span className="home-ui-font text-body text-[var(--text-secondary)]">{label}</span>
               <span className={cn(
                 'home-ui-font text-[12.5px] font-medium',
-                value ? 'text-[var(--text-primary)]' : required ? 'text-[#f87171]' : 'text-[var(--text-tertiary)]',
+                value ? 'text-[var(--text-primary)]' : required ? 'text-[var(--color-error-mid)]' : 'text-[var(--text-tertiary)]',
               )}>
                 {value
-                  ? <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#22c55e] inline-block" />{value}</span>
+                  ? <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--color-online)] inline-block" />{value}</span>
                   : required
-                    ? <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#ef4444] inline-block" />Не выбран</span>
+                    ? <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--color-error-strong)] inline-block" />Не выбран</span>
                     : <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[rgba(255,255,255,0.2)] inline-block" />Не выбран</span>
                 }
               </span>
@@ -105,7 +105,7 @@ export function WizardFinishPanel({ llmName, ttsName, hasDiscord, onConfirm }: W
         </div>
 
         {error && (
-          <p className="home-ui-font text-[14px] text-[#f87171] text-center">{error}</p>
+          <p className="home-ui-font text-body text-[var(--color-error-mid)] text-center">{error}</p>
         )}
       </div>
 
@@ -114,7 +114,7 @@ export function WizardFinishPanel({ llmName, ttsName, hasDiscord, onConfirm }: W
           type="button"
           onClick={handleCreate}
           disabled={!canCreate || creating}
-          className="home-ui-font flex h-9 w-full items-center justify-center rounded-xl text-[14px] font-semibold text-white transition-colors hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="home-ui-font flex h-9 w-full items-center justify-center rounded-xl text-body font-semibold text-white transition-colors hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ background: 'var(--accent-base)' }}
         >
           {creating ? 'Создание…' : 'Создать душу'}

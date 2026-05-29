@@ -1,4 +1,6 @@
 'use client'
+import { useTranslation } from 'react-i18next'
+import { SlidersHorizontal } from 'lucide-react'
 import { createContext, useContext, useState } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs'
 import { cn } from '@/lib/utils'
@@ -21,75 +23,65 @@ interface NavItem {
   icon: React.ReactNode
 }
 
-const NAV: NavItem[] = [
-  {
-    id: 'profile',
-    section: 'Account',
-    label: 'Account',
-    title: 'Account',
-    sub: 'Manage your personal information and account details',
-    icon: null,
-  },
-  {
-    id: 'security',
-    section: 'Account',
-    label: 'Security',
-    title: 'Security',
-    sub: 'Manage your password and two-factor authentication',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
-        <rect x="3" y="11" width="18" height="11" rx="2"/>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'sessions',
-    section: 'Account',
-    label: 'Sessions',
-    title: 'Sessions',
-    sub: 'Manage your active sessions across devices',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
-        <rect x="2" y="3" width="20" height="14" rx="2"/>
-        <path d="M8 21h8M12 17v4"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'appearance',
-    section: 'Workspace',
-    label: 'Appearance',
-    title: 'Appearance',
-    sub: 'Customize how the interface looks to you',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
-        <circle cx="12" cy="12" r="5"/>
-        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'conn',
-    section: 'Workspace',
-    label: 'Connections',
-    title: 'Connections',
-    sub: 'Manage your connected accounts and integrations',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-      </svg>
-    ),
-  },
-]
-
-const NAV_SECTIONS = NAV.reduce<{ section: string; items: NavItem[] }[]>((acc, item) => {
-  const last = acc[acc.length - 1]
-  if (last && last.section === item.section) last.items.push(item)
-  else acc.push({ section: item.section, items: [item] })
-  return acc
-}, [])
+function buildNav(t: (key: string) => string): NavItem[] {
+  return [
+    {
+      id: 'profile',
+      section: t('nav.account'),
+      label: t('nav.account'),
+      title: t('nav.account'),
+      sub: t('nav.accountDesc'),
+      icon: null,
+    },
+    {
+      id: 'security',
+      section: t('nav.account'),
+      label: t('nav.security'),
+      title: t('nav.security'),
+      sub: t('nav.securityDesc'),
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      ),
+    },
+    {
+      id: 'sessions',
+      section: t('nav.account'),
+      label: t('nav.sessions'),
+      title: t('nav.sessions'),
+      sub: t('nav.sessionsDesc'),
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/>
+        </svg>
+      ),
+    },
+    {
+      id: 'appearance',
+      section: t('nav.workspace'),
+      label: t('nav.preferences'),
+      title: t('nav.preferences'),
+      sub: t('nav.preferencesDesc'),
+      icon: <SlidersHorizontal size={18} strokeWidth={1.8} />,
+    },
+    {
+      id: 'conn',
+      section: t('nav.workspace'),
+      label: t('nav.connections'),
+      title: t('nav.connections'),
+      sub: t('nav.connectionsDesc'),
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="18" height="18">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      ),
+    },
+  ]
+}
 
 const TAB_CLS = cn(
   'flex h-[28px] w-full cursor-pointer select-none items-center gap-2',
@@ -120,8 +112,17 @@ interface UserAccountSettingsProps {
 }
 
 export default function UserAccountSettings({ initialPage, onClose }: UserAccountSettingsProps = {}) {
+  const { t } = useTranslation('account')
   const { user } = useAuth()
   const [activePage, setActivePage] = useState<PageId>(initialPage ?? 'profile')
+
+  const NAV = buildNav(t)
+  const NAV_SECTIONS = NAV.reduce<{ section: string; items: NavItem[] }[]>((acc, item) => {
+    const last = acc[acc.length - 1]
+    if (last && last.section === item.section) last.items.push(item)
+    else acc.push({ section: item.section, items: [item] })
+    return acc
+  }, [])
 
   const initial = user?.userName?.replace(/^\./, '').charAt(0).toUpperCase() ?? 'U'
   const displayName = user?.nickname?.trim() || user?.userName || 'User'

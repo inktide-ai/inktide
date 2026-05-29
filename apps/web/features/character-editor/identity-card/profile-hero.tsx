@@ -83,12 +83,12 @@ export function ProfileHero({ character, onUpdate }: ProfileHeroProps) {
             className="absolute w-0 h-0 opacity-0 pointer-events-none"
             onChange={onAvatarFile}
           />
-          {character.isActive && <span className="absolute bottom-1 right-1 w-[14px] h-[14px] rounded-full bg-[#22c55e] border-[3px] border-(--bg-surface)" />}
+          {character.isActive && <span className="absolute bottom-1 right-1 w-[14px] h-[14px] rounded-full bg-[var(--color-online)] border-[3px] border-(--bg-surface)" />}
         </div>
 
         <div className="flex-1 min-w-0 pt-2">
           <div className="text-[1.25rem] font-extrabold text-(--text-primary) tracking-[-0.02em]">{character.name}</div>
-          <div className="text-[0.8125rem] text-(--text-muted) mt-0.5 font-mono">/{character.slug}</div>
+          <div className="text-sm text-(--text-muted) mt-0.5 font-mono">/{character.slug}</div>
           <div className="flex gap-1.5 mt-2 flex-wrap">
             <span
               className="text-[0.5625rem] font-semibold py-0.5 px-2 rounded-[0.25rem] bg-white/[0.08] text-(--text-muted)"
@@ -105,7 +105,7 @@ export function ProfileHero({ character, onUpdate }: ProfileHeroProps) {
 
         <button
           type="button"
-          className="ml-auto px-[1.125rem] py-2 bg-white/[0.06] border border-(--border) rounded-lg text-(--text-primary) font-[var(--font-ui)] text-[0.8125rem] font-semibold cursor-pointer transition-all duration-200 ease whitespace-nowrap self-end hover:bg-white/10 hover:border-white/[0.12]"
+          className="ml-auto px-[1.125rem] py-2 bg-white/[0.06] border border-(--border) rounded-lg text-(--text-primary) font-[var(--font-ui)] text-sm font-semibold cursor-pointer transition-all duration-200 ease whitespace-nowrap self-end hover:bg-white/10 hover:border-white/[0.12]"
           onClick={() => router.push(`/home/bot/${character.id}/edit`)}
         >
           {t('identity.editCharacter')}
@@ -114,8 +114,8 @@ export function ProfileHero({ character, onUpdate }: ProfileHeroProps) {
 
       {character.personality ? (
         <div className="px-5 pb-5 pt-4 border-t border-white/[0.06]">
-          <div className="text-[0.6875rem] font-semibold uppercase tracking-[0.06em] text-(--text-muted) mb-2">{t('identity.about')}</div>
-          <p className="m-0 text-[0.875rem] leading-relaxed text-[rgba(200,204,214,0.9)]">
+          <div className="text-caption font-semibold uppercase tracking-[0.06em] text-(--text-muted) mb-2">{t('identity.about')}</div>
+          <p className="m-0 text-body leading-relaxed text-[rgba(200,204,214,0.9)]">
             {character.personality.length > 160
               ? `${character.personality.slice(0, 160)}…`
               : character.personality}

@@ -81,7 +81,7 @@ export default function BannerCropModal({ imageSrc, onApply, onCancel }: Props) 
 
         {/* Header */}
         <div className="flex items-center justify-between px-[1.125rem] py-[0.875rem] border-b border-white/[0.07] shrink-0">
-          <span className="text-[0.9375rem] font-semibold text-[#f1f5f9] tracking-[-0.01em]">Crop banner</span>
+          <span className="text-body-md font-semibold text-[#f1f5f9] tracking-[-0.01em]">Crop banner</span>
           <button
             type="button"
             className="flex items-center justify-center w-[30px] h-[30px] border-none bg-transparent text-white/40 rounded-[6px] cursor-pointer transition-[background,color] duration-150 hover:bg-white/[0.08] hover:text-white/85"
@@ -120,18 +120,18 @@ export default function BannerCropModal({ imageSrc, onApply, onCancel }: Props) 
 
         {/* Footer */}
         <div className="flex items-center justify-between gap-4 px-[1.125rem] py-3 border-t border-white/[0.07] shrink-0">
-          <span className="text-[0.75rem] text-white/35 whitespace-nowrap">Drag to pan · Scroll to zoom</span>
+          <span className="text-xs text-white/35 whitespace-nowrap">Drag to pan · Scroll to zoom</span>
           <div className="flex gap-2 shrink-0">
             <button
               type="button"
-              className="px-[0.875rem] py-[0.45rem] rounded-[7px] border border-white/10 bg-transparent text-white/55 text-[0.875rem] font-medium cursor-pointer transition-[background,color] duration-150 hover:bg-white/[0.06] hover:text-white/85"
+              className="px-[0.875rem] py-[0.45rem] rounded-[7px] border border-white/10 bg-transparent text-white/55 text-body font-medium cursor-pointer transition-[background,color] duration-150 hover:bg-white/[0.06] hover:text-white/85"
               onClick={onCancel}
             >
               Cancel
             </button>
             <button
               type="button"
-              className="px-[1.125rem] py-[0.45rem] rounded-[7px] border-none bg-[#ED3E3E] text-white text-[0.875rem] font-semibold cursor-pointer transition-[background] duration-150 hover:enabled:bg-[#ff5252] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="px-[1.125rem] py-[0.45rem] rounded-[7px] border-none bg-[var(--color-error-strong)] text-white text-body font-semibold cursor-pointer transition-[background] duration-150 hover:enabled:bg-[#ff5252] disabled:opacity-60 disabled:cursor-not-allowed"
               onClick={() => void handleApply()}
               disabled={applying || !croppedAreaPixels}
             >

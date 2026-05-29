@@ -14,7 +14,7 @@ export function ToggleRow({ label, hint, checked, onChange, disabled, className 
   return (
     <div className={cn('flex items-center justify-between py-2', className)}>
       <div className="min-w-0 flex-1 pr-4">
-        <div className="text-[0.875rem] font-semibold text-[var(--text-primary)] font-[var(--font-ui)]">
+        <div className="text-body font-semibold text-[var(--text-primary)] font-[var(--font-ui)]">
           {label}
         </div>
         {hint && (

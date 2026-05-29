@@ -11,7 +11,7 @@ export interface ChannelStaticConfig {
 
 export const CHANNEL_STATIC: Record<string, ChannelStaticConfig> = {
   discord:  { theme: 'discord',  bg: 'rgba(88,101,242,0.15)',  fg: '#5865f2', addBtn: 'bg-[#5865f2] hover:bg-[#4752c4] text-white',  validateChannelId: (v) => /^\d{17,20}$/.test(v.trim()) },
-  twitch:   { theme: 'twitch',   bg: 'rgba(145,70,255,0.15)', fg: '#9146ff', addBtn: 'bg-[#9146ff] hover:bg-[#7d34e6] text-white',  validateChannelId: (v) => /^[a-zA-Z0-9_\-]{1,100}$/.test(v.trim()) },
+  twitch:   { theme: 'twitch',   bg: 'rgba(145,70,255,0.15)', fg: 'var(--platform-twitch)', addBtn: 'bg-[var(--platform-twitch)] hover:bg-[#7d34e6] text-white',  validateChannelId: (v) => /^[a-zA-Z0-9_\-]{1,100}$/.test(v.trim()) },
   kick:     { theme: 'kick',     bg: 'rgba(83,252,24,0.12)',  fg: '#2ecc00', addBtn: 'bg-[#3fb800] hover:bg-[#309200] text-white',  validateChannelId: (v) => /^[a-zA-Z0-9_\-]{1,100}$/.test(v.trim()) },
   vk_video: { theme: 'vk',       bg: 'rgba(0,119,255,0.15)',  fg: '#0077ff', addBtn: 'bg-[#0077ff] hover:bg-[#005bcc] text-white',  validateChannelId: (v) => /^[a-zA-Z0-9_\-]{1,100}$/.test(v.trim()) },
   telegram: { theme: 'telegram', bg: 'rgba(0,136,204,0.12)',  fg: '#0088cc', addBtn: 'bg-[#0088cc] hover:bg-[#006ba3] text-white',  validateChannelId: (v) => /^[a-zA-Z0-9_\-]{1,200}$/.test(v.trim()) },

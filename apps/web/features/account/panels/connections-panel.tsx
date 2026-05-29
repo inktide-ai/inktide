@@ -1,11 +1,12 @@
 'use client'
+import { useTranslation } from 'react-i18next'
 import { useEffect, useMemo, useState } from 'react'
 import { cn } from '@/lib/utils'
 import {
   deleteKcLinkedAccount,
   getKcLinkedAccounts,
   type KcLinkedAccount,
-} from '@/api/keycloak-account'
+} from '@/features/account/api/keycloak-account'
 
 function DiscordIcon() {
   return (
@@ -44,8 +45,8 @@ interface ProviderMeta {
 }
 
 const PROVIDER_META: Record<string, ProviderMeta> = {
-  discord: { name: 'Discord',  iconCls: 'bg-[#5865F229] text-[#7b89f5]', icon: <DiscordIcon /> },
-  twitch:  { name: 'Twitch',   iconCls: 'bg-[#9146FF29] text-[#a983ff]',  icon: <TwitchIcon /> },
+  discord: { name: 'Discord',  iconCls: 'bg-[var(--platform-discord)]/16 text-[#7b89f5]', icon: <DiscordIcon /> },
+  twitch:  { name: 'Twitch',   iconCls: 'bg-[var(--platform-twitch)]/16 text-[#a983ff]',  icon: <TwitchIcon /> },
   github:  { name: 'GitHub',   iconCls: 'bg-[var(--surface-2)] text-[var(--text-secondary)]', icon: <GithubIcon /> },
   google:  { name: 'Google',   iconCls: 'bg-[#34A85329] text-[#5fc880]', icon: <GoogleIcon /> },
 }
@@ -63,6 +64,7 @@ const SUGGESTED_INTEGRATIONS = [
 ]
 
 export default function ConnectionsPanel() {
+  const { t } = useTranslation('account')
   const [accounts, setAccounts] = useState<KcLinkedAccount[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -72,7 +74,7 @@ export default function ConnectionsPanel() {
     let cancelled = false
     getKcLinkedAccounts()
       .then((a) => { if (!cancelled) setAccounts(a) })
-      .catch((e) => { if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load accounts') })
+      .catch((e) => { if (!cancelled) setError(e instanceof Error ? e.message : t('connections.loading')) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [])
@@ -90,7 +92,7 @@ export default function ConnectionsPanel() {
       await deleteKcLinkedAccount(alias)
       setAccounts((prev) => prev.map((a) => a.providerAlias === alias ? { ...a, connected: false, linkedUsername: undefined } : a))
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to disconnect account')
+      setError(e instanceof Error ? e.message : t('connections.disconnect'))
     } finally {
       setBusyAlias(null)
     }
@@ -99,19 +101,19 @@ export default function ConnectionsPanel() {
   return (
     <>
       {error && (
-        <div className="mt-[16px] rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-[14px] text-[var(--danger-text)]">
+        <div className="mt-[16px] rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-body text-[var(--danger-text)]">
           {error}
         </div>
       )}
 
       {/* ── Connected Accounts ────────────────────────────────────────────── */}
       <div className="mt-[36px]" />
-      <SectionHeader>Connected accounts</SectionHeader>
+      <SectionHeader>{t('connections.connectedAccounts')}</SectionHeader>
 
       <div>
-        {loading && <div className="py-6 text-center text-[14px] text-[var(--text-disabled)]">Loading…</div>}
+        {loading && <div className="py-6 text-center text-body text-[var(--text-disabled)]">{t('connections.loading')}</div>}
         {!loading && connected.length === 0 && (
-          <div className="py-6 text-center text-[14px] text-[var(--text-disabled)]">No connected accounts yet.</div>
+          <div className="py-6 text-center text-body text-[var(--text-disabled)]">{t('connections.noConnected')}</div>
         )}
         {!loading && connected.map((acc, idx) => {
           const meta = getProviderMeta(acc.providerAlias, acc.providerName)
@@ -121,15 +123,15 @@ export default function ConnectionsPanel() {
               <ProviderRow
                 meta={meta}
                 title={meta.name}
-                sub={acc.linkedUsername ?? 'Connected'}
+                sub={acc.linkedUsername ?? t('connections.connected')}
                 action={
                   <button
                     type="button"
                     onClick={() => void handleDisconnect(acc.providerAlias)}
                     disabled={busyAlias === acc.providerAlias}
-                    className="shrink-0 rounded-[7px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-[5px] text-[14px] font-medium text-[var(--danger-text)] transition-opacity hover:opacity-80 disabled:opacity-40"
+                    className="shrink-0 rounded-[7px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-[5px] text-body font-medium text-[var(--danger-text)] transition-opacity hover:opacity-80 disabled:opacity-40"
                   >
-                    {busyAlias === acc.providerAlias ? '…' : 'Disconnect'}
+                    {busyAlias === acc.providerAlias ? '…' : t('connections.disconnect')}
                   </button>
                 }
               />
@@ -140,12 +142,12 @@ export default function ConnectionsPanel() {
 
       {/* ── Available Integrations ────────────────────────────────────────── */}
       <div className="mt-[48px]" />
-      <SectionHeader>Available integrations</SectionHeader>
+      <SectionHeader>{t('connections.availableIntegrations')}</SectionHeader>
 
       <div>
-        {loading && <div className="py-6 text-center text-[14px] text-[var(--text-disabled)]">Loading…</div>}
+        {loading && <div className="py-6 text-center text-body text-[var(--text-disabled)]">{t('connections.loading')}</div>}
         {!loading && availableFromKc.length === 0 && fallbackAvailable.length === 0 && (
-          <div className="py-6 text-center text-[14px] text-[var(--text-disabled)]">All available providers are connected.</div>
+          <div className="py-6 text-center text-body text-[var(--text-disabled)]">{t('connections.allConnected')}</div>
         )}
         {!loading && availableFromKc.map((acc, idx) => {
           const meta = getProviderMeta(acc.providerAlias, acc.providerName)
@@ -155,15 +157,15 @@ export default function ConnectionsPanel() {
               <ProviderRow
                 meta={meta}
                 title={meta.name}
-                sub={`Connect your ${meta.name} account.`}
+                sub={t('connections.connectAccount', { name: meta.name })}
                 action={
                   <button
                     type="button"
                     disabled
-                    className="shrink-0 rounded-[7px] border border-[var(--border-default)] bg-[var(--surface-1)] px-3 py-[5px] text-[14px] font-medium text-[var(--text-primary)] opacity-70"
-                    title="Connect via Keycloak account portal"
+                    className="shrink-0 rounded-[7px] border border-[var(--border-default)] bg-[var(--surface-1)] px-3 py-[5px] text-body font-medium text-[var(--text-primary)] opacity-70"
+                    title={t('connections.connectViaPortal')}
                   >
-                    Connect
+                    {t('connections.connect')}
                   </button>
                 }
               />
@@ -183,9 +185,9 @@ export default function ConnectionsPanel() {
                   <button
                     type="button"
                     disabled
-                    className="shrink-0 rounded-[7px] border border-[var(--border-default)] bg-[var(--surface-1)] px-3 py-[5px] text-[14px] font-medium text-[var(--text-primary)] opacity-70"
+                    className="shrink-0 rounded-[7px] border border-[var(--border-default)] bg-[var(--surface-1)] px-3 py-[5px] text-body font-medium text-[var(--text-primary)] opacity-70"
                   >
-                    Connect
+                    {t('connections.connect')}
                   </button>
                 }
               />
@@ -217,14 +219,14 @@ function ProviderRow({
   action: React.ReactNode
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 py-[11px]">
+    <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex min-w-[200px] flex-1 items-center gap-3">
         <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-full [&>svg]:h-[16px] [&>svg]:w-[16px]', meta.iconCls)}>
           {meta.icon}
         </div>
         <div className="flex min-w-0 flex-col gap-1">
-          <div className="text-[14px] font-medium leading-[20px] text-[var(--text-primary)]">{title}</div>
-          {sub && <div className="text-[14px] font-normal leading-[18px] text-pretty text-[var(--text-secondary)]">{sub}</div>}
+          <div className="text-body font-medium leading-[20px] text-[var(--text-primary)]">{title}</div>
+          {sub && <div className="text-body font-normal leading-[18px] text-pretty text-[var(--text-secondary)]">{sub}</div>}
         </div>
       </div>
       <div className="shrink-0">{action}</div>

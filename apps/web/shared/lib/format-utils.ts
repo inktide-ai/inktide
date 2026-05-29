@@ -9,9 +9,16 @@ export function formatApiCalls(n: number): string {
 
 /**
  * Human-readable "edited N ago" label from an ISO timestamp.
+ * Pass a t() function from useTranslation('common') for localization.
  */
-export function editedLabel(iso: string): string {
+export function editedLabel(iso: string, t?: (key: string, opts?: Record<string, unknown>) => string): string {
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+  if (t) {
+    if (m < 60) return t('home.editedM', { n: m })
+    const h = Math.floor(m / 60)
+    if (h < 24) return t('home.editedH', { n: h })
+    return t('home.editedD', { n: Math.floor(h / 24) })
+  }
   if (m < 60) return `Edited ${m}m ago`
   const h = Math.floor(m / 60)
   if (h < 24) return `Edited ${h}h ago`

@@ -1,0 +1,131 @@
+{
+  "title": "Emotion",
+  "badge": "Beta",
+  "subtitle": "Configure emotional intelligence, personality dynamics, and speech expression.",
+  "baseline": {
+    "title": "Emotional Baseline",
+    "defaultMood": "Default Mood",
+    "moods": {
+      "neutral": "Neutral",
+      "happy": "Happy",
+      "chill": "Chill",
+      "melancholic": "Melancholic",
+      "hyped": "Hyped"
+    },
+    "metrics": {
+      "emotionalIntensity": "Emotional Intensity",
+      "responsiveness": "Responsiveness",
+      "memoryPersistence": "Memory Persistence",
+      "stability": "Emotional Stability"
+    }
+  },
+  "profiles": {
+    "title": "Emotional Profiles",
+    "subtitle": "One-tap personality presets",
+    "hint": "Dots represent warmth · energy · empathy. Custom is selected automatically when you edit traits."
+  },
+  "traits": {
+    "title": "Personality Traits",
+    "subtitle": "Core character dimensions that persist across all conversations.",
+    "warmth": {
+      "label": "Warmth",
+      "hint": "Emotional warmth and care in expression",
+      "low": "Cold",
+      "high": "Warm"
+    },
+    "empathy": {
+      "label": "Empathy",
+      "hint": "How strongly the AI mirrors and acknowledges emotions",
+      "low": "Detached",
+      "high": "Empathetic"
+    },
+    "playfulness": {
+      "label": "Playfulness",
+      "hint": "Tendency to use humor, wit, and banter",
+      "low": "Serious",
+      "high": "Playful"
+    },
+    "assertiveness": {
+      "label": "Assertiveness",
+      "hint": "Directness and confidence in expression",
+      "low": "Passive",
+      "high": "Assertive"
+    },
+    "formality": {
+      "label": "Formality",
+      "hint": "Speech register and vocabulary formality",
+      "low": "Casual",
+      "high": "Formal"
+    },
+    "sarcasm": {
+      "label": "Sarcasm",
+      "hint": "Ironic or sarcastic edge in responses",
+      "low": "Sincere",
+      "high": "Sarcastic"
+    }
+  },
+  "stress": {
+    "label": "Stress Expression",
+    "description": "How the AI responds under pressure or repeated stimuli",
+    "deflect": "Deflect",
+    "humor": "Humor",
+    "withdraw": "Withdraw",
+    "confront": "Confront",
+    "deflectDesc": "Redirect tension",
+    "humorDesc": "Lighten the mood",
+    "withdrawDesc": "Become quieter",
+    "confrontDesc": "Address directly"
+  },
+  "speech": {
+    "title": "Speech Expression",
+    "subtitle": "How emotion shapes vocal delivery and TTS parameters.",
+    "energy": {
+      "label": "Emotional Energy",
+      "hint": "How energetically the AI speaks during strong emotional states",
+      "low": "Reserved",
+      "high": "Expressive"
+    },
+    "reactivity": {
+      "label": "Emotional Reactivity",
+      "hint": "How strongly emotions modulate speech pacing, energy, and pitch",
+      "low": "Subtle",
+      "high": "Reactive"
+    },
+    "providers": {
+      "title": "Provider Support",
+      "provider": "Provider",
+      "speed": "Speed",
+      "energy": "Energy",
+      "pitch": "Pitch"
+    }
+  },
+  "continuity": {
+    "title": "Emotional Continuity",
+    "subtitle": "How emotional states evolve and persist across conversation turns.",
+    "stateTtl": {
+      "label": "State TTL",
+      "desc": "Emotion resets after inactivity",
+      "badge": "20 min"
+    },
+    "trajectory": {
+      "label": "Trajectory Tracking",
+      "desc": "Emotional arc injected into LLM context",
+      "badge": "Active"
+    },
+    "blending": {
+      "label": "Blending Mode",
+      "desc": "New emotions average with prior state via personality weights",
+      "badge": "Weighted"
+    },
+    "persistence": {
+      "label": "Memory Persistence",
+      "low": "Forgetful",
+      "high": "Persistent"
+    },
+    "volatility": {
+      "label": "Mood Volatility",
+      "low": "Stable",
+      "high": "Volatile"
+    }
+  }
+}

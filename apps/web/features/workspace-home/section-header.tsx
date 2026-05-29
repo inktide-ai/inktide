@@ -11,21 +11,23 @@ interface SectionTab {
 interface SectionHeaderProps {
   title: string
   tabs?: SectionTab[]
+  onTabChange?: (id: string) => void
   withArrows?: boolean
 }
 
-export function SectionHeader({ title, tabs, withArrows = true }: SectionHeaderProps) {
+export function SectionHeader({ title, tabs, onTabChange, withArrows = true }: SectionHeaderProps) {
   return (
     <div className="mb-3 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
-        <h2 className="font-serif text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{title}</h2>
+        <h2 className="font-sans text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{title}</h2>
         {tabs && tabs.length > 0 && (
           <div className="flex items-center gap-1 rounded-xl bg-[var(--surface-1)] p-1">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 type="button"
-                className={`home-ui-font h-7 rounded-lg px-3 text-[14px] font-medium transition-colors ${
+                onClick={() => onTabChange?.(tab.id)}
+                className={`home-ui-font h-7 rounded-lg px-3 text-body font-medium transition-colors ${
                   tab.active
                     ? 'bg-[var(--sidebar-active)] text-[var(--text-primary)]'
                     : 'text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]'

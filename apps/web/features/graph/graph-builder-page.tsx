@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getGraph, saveGraph, graphDtoToFlow } from '@/api/graph'
+import { getGraph, saveGraph, graphDtoToFlow } from '@/features/graph/api/graph'
 import {
   ReactFlow,
   addEdge,

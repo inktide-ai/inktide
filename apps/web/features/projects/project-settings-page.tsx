@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Check, Copy, Download, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getProject, updateProject, deleteProject, exportProject } from './api'
 import { SoulBindingPicker } from './soul-binding-picker'
 import type { Project, ProjectActiveSoul } from './api'
 import { PROJECTS_ROUTE } from '@/lib/routes'
 
 function SaveButton({ saving, disabled, onClick }: { saving: boolean; disabled?: boolean; onClick: () => void }) {
+  const { t } = useTranslation('common')
   return (
     <button
       type="button"
@@ -16,7 +18,7 @@ function SaveButton({ saving, disabled, onClick }: { saving: boolean; disabled?:
       onClick={onClick}
       className="h-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 text-body font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-2)]/80 disabled:opacity-40"
     >
-      {saving ? 'Saving…' : 'Save'}
+      {saving ? t('projectDetail.saving') : t('projectDetail.save')}
     </button>
   )
 }
@@ -62,6 +64,7 @@ function SettingsCard({ id, title, description, children, footerLeft, footerRigh
 export default function ProjectSettingsPage() {
   const { id }    = useParams<{ id: string }>()
   const router    = useRouter()
+  const { t }     = useTranslation('common')
 
   const [project, setProject]       = useState<Project | null>(null)
   const [loading, setLoading]       = useState(true)
@@ -163,11 +166,11 @@ export default function ProjectSettingsPage() {
   }
 
   if (loading) {
-    return <div className="p-8 text-body text-[var(--text-secondary)]">Loading…</div>
+    return <div className="p-8 text-body text-[var(--text-secondary)]">{t('projectDetail.loading')}</div>
   }
 
   if (!project) {
-    return <div className="p-8 text-body text-[var(--text-secondary)]">Project not found</div>
+    return <div className="p-8 text-body text-[var(--text-secondary)]">{t('projectDetail.projectNotFound')}</div>
   }
 
   return (
@@ -178,9 +181,9 @@ export default function ProjectSettingsPage() {
 
           {/* Project Name */}
           <SettingsCard
-            title="Project Name"
-            description="Used to identify your project on the Dashboard and in URLs."
-            footerLeft="Learn more about project names"
+            title={t('projectDetail.projectName')}
+            description={t('projectDetail.projectNameDesc')}
+            footerLeft={t('projectDetail.learnMoreProjectNames')}
             footerRight={
               <SaveButton saving={savingName} disabled={!name.trim()} onClick={saveName} />
             }
@@ -201,9 +204,9 @@ export default function ProjectSettingsPage() {
 
           {/* Project ID */}
           <SettingsCard
-            title="Project ID"
-            description="Used when interacting with the Inktide API."
-            footerLeft="Used when calling the API"
+            title={t('projectDetail.projectId')}
+            description={t('projectDetail.projectIdDesc')}
+            footerLeft={t('projectDetail.projectIdFooter')}
           >
             <div className="flex items-center gap-2">
               <div className="flex-1 overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2">
@@ -212,7 +215,7 @@ export default function ProjectSettingsPage() {
               <button
                 type="button"
                 onClick={copyId}
-                title="Copy ID"
+                title={t('projectDetail.copyId')}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
               >
                 {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
@@ -222,8 +225,8 @@ export default function ProjectSettingsPage() {
 
           {/* Description */}
           <SettingsCard
-            title="Description"
-            description="A short description of what this project does."
+            title={t('projectDetail.description')}
+            description={t('projectDetail.descriptionDesc')}
             footerLeft={
               <span className="ml-auto text-right">{description.length}/300</span>
             }
@@ -236,16 +239,16 @@ export default function ProjectSettingsPage() {
               onChange={e => setDescription(e.target.value)}
               rows={3}
               maxLength={300}
-              placeholder="What is this project for?"
+              placeholder={t('projectDetail.descriptionPlaceholderLong')}
               className="w-full resize-none rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2.5 text-body text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-primary)]"
             />
           </SettingsCard>
 
           {/* Linked Soul */}
           <SettingsCard
-            title="Linked Soul"
-            description="The AI soul that powers this project."
-            footerLeft="Changes are saved immediately"
+            title={t('projectDetail.linkedSoul')}
+            description={t('projectDetail.linkedSoulDesc')}
+            footerLeft={t('projectDetail.linkedSoulFooter')}
           >
             <SoulBindingPicker
               projectId={id}
@@ -256,9 +259,9 @@ export default function ProjectSettingsPage() {
 
           {/* Status */}
           <SettingsCard
-            title="Status"
-            description="Control the operational state of this project."
-            footerLeft="Pausing a project stops all active pipelines"
+            title={t('projectDetail.status')}
+            description={t('projectDetail.statusDesc')}
+            footerLeft={t('projectDetail.statusFooter')}
             footerRight={
               <SaveButton saving={savingStatus} onClick={saveStatus} />
             }
@@ -268,17 +271,17 @@ export default function ProjectSettingsPage() {
               onChange={e => setStatus(e.target.value as 'active' | 'paused' | 'archived')}
               className="w-48 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2 text-body text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)]"
             >
-              <option value="active">Active</option>
-              <option value="paused">Paused</option>
-              <option value="archived">Archived</option>
+              <option value="active">{t('projectDetail.statusActive')}</option>
+              <option value="paused">{t('projectDetail.statusPaused')}</option>
+              <option value="archived">{t('projectDetail.statusArchived')}</option>
             </select>
           </SettingsCard>
 
           {/* Export */}
           <SettingsCard
-            title="Export Project"
-            description="Download this project as a .inkt file. The archive includes the project config, soul settings, and graph — but never secrets or tokens."
-            footerLeft="Connectors must be reconnected after import"
+            title={t('projectDetail.exportProject')}
+            description={t('projectDetail.exportProjectDesc')}
+            footerLeft={t('projectDetail.exportFooter')}
             footerRight={
               <button
                 type="button"
@@ -287,23 +290,22 @@ export default function ProjectSettingsPage() {
                 className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 text-body font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-2)]/80 disabled:opacity-40"
               >
                 <Download size={12} />
-                {exporting ? 'Exporting…' : 'Export .inkt'}
+                {exporting ? t('projectDetail.exporting') : t('projectDetail.exportInkt')}
               </button>
             }
           >
             <p className="text-body text-[var(--text-tertiary)]">
-              Share this project with another account or keep it as a backup. The recipient can
-              import it via the Projects page.
+              {t('projectDetail.exportBody')}
             </p>
           </SettingsCard>
 
           {/* Danger Zone */}
           <SettingsCard
             id="danger"
-            title="Delete Project"
-            description="Permanently delete this project and all associated data. This action cannot be undone."
+            title={t('projectDetail.deleteProject')}
+            description={t('projectDetail.deleteProjectDesc')}
             danger
-            footerLeft="This will delete all pipelines, settings, and history"
+            footerLeft={t('projectDetail.deleteFooter')}
             footerRight={
               <button
                 type="button"
@@ -312,13 +314,12 @@ export default function ProjectSettingsPage() {
                 className="flex h-8 items-center gap-1.5 rounded-lg border border-red-800/50 px-3 text-body text-red-400 transition-colors hover:bg-red-950/40 disabled:opacity-40"
               >
                 <Trash2 size={12} />
-                {deleting ? 'Deleting…' : 'Delete Project'}
+                {deleting ? t('projectDetail.deleting') : t('projectDetail.deleteProject')}
               </button>
             }
           >
             <p className="text-body text-[var(--text-tertiary)]">
-              Once you delete a project, there is no going back. All pipelines, channels, and
-              configuration will be permanently removed.
+              {t('projectDetail.deleteBody')}
             </p>
           </SettingsCard>
 

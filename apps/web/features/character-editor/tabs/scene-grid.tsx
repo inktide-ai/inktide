@@ -110,10 +110,10 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
       <div className="flex items-center justify-between mb-[1.375rem] gap-4">
         <div>
           <div className="text-[1.1875rem] font-bold tracking-[-0.02em] text-(--text-primary)">{t('grid.title')}</div>
-          <div className="text-[0.75rem] text-(--text-muted) mt-1">{t('grid.subtitle')}</div>
+          <div className="text-xs text-(--text-muted) mt-1">{t('grid.subtitle')}</div>
         </div>
         <button
-          className="inline-flex items-center gap-[6px] py-2 px-4 shrink-0 text-[0.8125rem] font-semibold text-(--text-secondary) bg-white/[0.05] border border-white/10 rounded-[0.625rem] cursor-pointer font-[inherit] transition-[background,color,border-color] duration-150 whitespace-nowrap hover:bg-white/[0.09] hover:border-white/[0.18] hover:text-(--text-primary) disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-[6px] py-2 px-4 shrink-0 text-sm font-semibold text-(--text-secondary) bg-white/[0.05] border border-white/10 rounded-[0.625rem] cursor-pointer font-[inherit] transition-[background,color,border-color] duration-150 whitespace-nowrap hover:bg-white/[0.09] hover:border-white/[0.18] hover:text-(--text-primary) disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setShowModal(true)}
           disabled={!cardId}
         >
@@ -133,7 +133,7 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
           </svg>
         </span>
         <input
-          className="w-full py-[0.6875rem] pr-4 pl-10 bg-white/[0.03] border border-white/[0.06] rounded-[0.625rem] text-(--text-primary) font-[inherit] text-[0.875rem] outline-none transition-[background,border-color] duration-150 placeholder:text-white/20 focus:bg-white/[0.05] focus:border-white/10"
+          className="w-full py-[0.6875rem] pr-4 pl-10 bg-white/[0.03] border border-white/[0.06] rounded-[0.625rem] text-(--text-primary) font-[inherit] text-body outline-none transition-[background,border-color] duration-150 placeholder:text-white/20 focus:bg-white/[0.05] focus:border-white/10"
           type="text"
           placeholder={t('grid.search')}
           value={search}
@@ -150,7 +150,7 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
             <button
               key={tag}
               type="button"
-              className="shrink-0 text-[0.75rem] font-medium text-(--text-muted) bg-white/[0.04] border border-white/[0.09] rounded-full py-[5px] px-[14px] cursor-pointer font-[inherit] transition-[color,background,border-color] duration-150 whitespace-nowrap hover:text-(--text-secondary) hover:border-white/[0.16] hover:bg-white/[0.07]"
+              className="shrink-0 text-xs font-medium text-(--text-muted) bg-white/[0.04] border border-white/[0.09] rounded-full py-[5px] px-[14px] cursor-pointer font-[inherit] transition-[color,background,border-color] duration-150 whitespace-nowrap hover:text-(--text-secondary) hover:border-white/[0.16] hover:bg-white/[0.07]"
               style={isActive ? { color: colors.text, background: colors.bg, borderColor: colors.border } : undefined}
               onClick={() => setActiveTag(tag)}
             >
@@ -199,10 +199,10 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
                   <path d="M16 16l3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
               </div>
-              <div className="text-[0.9375rem] font-semibold text-(--text-secondary)">
+              <div className="text-body-md font-semibold text-(--text-secondary)">
                 {emptyForTagOnly ? t('grid.emptyTag') : q ? t('grid.emptySearch') : t('grid.empty')}
               </div>
-              <div className="text-[0.8125rem] text-(--text-muted)">
+              <div className="text-sm text-(--text-muted)">
                 {emptyForTagOnly ? t('grid.emptyTagHint') : q ? t('grid.emptySearchHint') : t('grid.emptyHint')}
               </div>
             </div>
@@ -210,7 +210,7 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
         </div>
       )}
 
-      {deleteError && <div className="mt-3 text-[0.75rem] text-[#e05c5c]">{deleteError}</div>}
+      {deleteError && <div className="mt-3 text-xs text-[var(--color-error-mid)]">{deleteError}</div>}
 
       {showModal && cardId && (
         <NewSceneModal cardId={cardId} tagOptions={tagPickOptions} onClose={() => setShowModal(false)} onCreated={handleCreated} />

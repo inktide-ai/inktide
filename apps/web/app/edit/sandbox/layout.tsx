@@ -1,50 +1,15 @@
-'use client'
-
-import { useEffect, useState, type ReactNode } from 'react'
-import { useSearchParams } from 'next/navigation'
-import ProtectedRoute from '@/features/account/protected-route'
-import { CharactersProvider } from '@/entities/character/context/CharactersContext'
-import { WorkspaceSidebar } from '@/features/workspace-home/workspace-sidebar'
-import { AppTopBar } from '@/features/workspace-home/app-topbar'
-import { getProject } from '@/features/projects/api/projects'
-
-function SandboxLayoutContent({ children }: { children: ReactNode }) {
-  const searchParams = useSearchParams()
-  const projectId = searchParams.get('projectId')
-  const [projectName, setProjectName] = useState('Loading...')
-
-  useEffect(() => {
-    if (!projectId) { setProjectName('Sandbox'); return }
-    getProject(projectId)
-      .then(p => setProjectName(p.name))
-      .catch(() => setProjectName('Project'))
-  }, [projectId])
-
-  return (
-    <div className="app-font-split sandbox-text-render flex h-screen overflow-hidden bg-[var(--bg-0)]">
-      <WorkspaceSidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <AppTopBar
-          title={projectName}
-          parentLabel="Projects"
-          parentHref="/projects"
-          titleHref={projectId ? `/projects/${projectId}` : '/projects'}
-          subTitle={projectId ? 'Sandbox' : undefined}
-          showActions
-        />
-        <main className="flex-1 overflow-hidden">
-          {children}
-        </main>
-      </div>
-    </div>
-  )
-}
+import { Suspense, type ReactNode } from 'react'
+import { ProtectedRoute } from '@/features/account'
+import { CharactersProvider } from '@/entities/character'
+import { SandboxLayoutClient } from './_sandbox-layout-client'
 
 export default function SandboxLayout({ children }: { children: ReactNode }) {
   return (
     <ProtectedRoute>
       <CharactersProvider>
-        <SandboxLayoutContent>{children}</SandboxLayoutContent>
+        <Suspense fallback={null}>
+          <SandboxLayoutClient>{children}</SandboxLayoutClient>
+        </Suspense>
       </CharactersProvider>
     </ProtectedRoute>
   )

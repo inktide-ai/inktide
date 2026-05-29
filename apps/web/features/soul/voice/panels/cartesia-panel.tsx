@@ -18,11 +18,11 @@ export function CartesiaSettings() {
   return (
     <>
       <section className="mb-6">
-        <h2 className="mb-3 text-[0.9375rem] font-semibold text-[var(--text-heading)]">Connection</h2>
+        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">Connection</h2>
         <ApiKeyConnectionPanel providerName="Cartesia" providerId="cartesia" />
       </section>
       <section className="mb-6">
-        <h2 className="mb-3 text-[0.9375rem] font-semibold text-[var(--text-heading)]">Voice & Model</h2>
+        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">Voice & Model</h2>
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] divide-y divide-[var(--border-subtle)]">
           <SelectField
             label="Voice"
@@ -40,7 +40,7 @@ export function CartesiaSettings() {
         </div>
       </section>
       <section>
-        <h2 className="mb-3 text-[0.9375rem] font-semibold text-[var(--text-heading)]">Parameters</h2>
+        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">Parameters</h2>
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] divide-y divide-[var(--border-subtle)]">
           <ParamRow icon={<SpeedIcon />} name="Speed" desc="Playback speed multiplier" min={0.0} max={2.0} step={0.05} decimals={2} value={Math.min(2.0, Math.max(0.0, tts.speed))} onChange={(v) => patch({ speed: v })} format={(v) => `${v.toFixed(2)}×`} />
         </div>

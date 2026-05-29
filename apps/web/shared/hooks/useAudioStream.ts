@@ -6,7 +6,7 @@ import type { VisemeCue } from '@/shared/types/IVisemeProvider'
 import { WebAudioPlayer } from '../services/audio/WebAudioPlayer'
 import type { LipSyncHandle } from './useLipSync'
 import type { EmotionState } from '@/shared/types/IVrmController'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/shared/services/auth'
 import { getFreshAuthToken } from '@/api/client'
 
 interface AudioPayload {

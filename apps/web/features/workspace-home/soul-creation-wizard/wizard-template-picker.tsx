@@ -34,13 +34,13 @@ export function TemplateListItem({ template, onSelect }: { template: SoulTemplat
         <span className="home-ui-font block truncate text-[13.5px] font-semibold text-[var(--text-primary)]">
           {template.name}
         </span>
-        <span className="home-ui-font block truncate text-[14px] text-[var(--text-secondary)]">
+        <span className="home-ui-font block truncate text-body text-[var(--text-secondary)]">
           {template.description}
         </span>
       </span>
       {template.badge && (
         <span
-          className="home-ui-font shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+          className="home-ui-font shrink-0 rounded-full px-2 py-0.5 text-2xs font-semibold"
           style={{ background: `${template.accent}20`, color: template.accent }}
         >
           {template.badge}

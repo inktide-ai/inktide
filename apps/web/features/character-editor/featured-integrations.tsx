@@ -82,7 +82,7 @@ function IntegrationCard({ benefit, name, description, iconSrc, darkIcon, href }
       href={href}
       className="flex flex-col rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-6 transition-colors hover:bg-[var(--surface-2)]"
     >
-      <span className="inline-flex self-start rounded-md border border-[var(--border-default)] bg-[var(--surface-1)] px-2 py-0.5 text-[0.6875rem] font-medium text-[var(--text-secondary)]">
+      <span className="inline-flex self-start rounded-md border border-[var(--border-default)] bg-[var(--surface-1)] px-2 py-0.5 text-caption font-medium text-[var(--text-secondary)]">
         {benefit}
       </span>
       <div className="flex flex-1 items-center justify-center py-6">
@@ -99,8 +99,8 @@ function IntegrationCard({ benefit, name, description, iconSrc, darkIcon, href }
         </div>
       </div>
       <div>
-        <p className="text-[0.9375rem] font-semibold text-[var(--text-primary)]">{name}</p>
-        <p className="mt-1 text-[0.8125rem] leading-5 text-[var(--text-secondary)]">{description}</p>
+        <p className="text-body-md font-semibold text-[var(--text-primary)]">{name}</p>
+        <p className="mt-1 text-sm leading-5 text-[var(--text-secondary)]">{description}</p>
       </div>
     </Link>
   )
@@ -113,7 +113,7 @@ export function FeaturedIntegrations({ baseHref, type }: { baseHref: string; typ
   return (
     <section className="mb-10 mt-10">
       <h2 className="text-[1.0625rem] font-semibold text-[var(--text-heading)]">Featured</h2>
-      <p className="mt-0.5 text-[0.875rem] text-[var(--text-secondary)]">
+      <p className="mt-0.5 text-body text-[var(--text-secondary)]">
         A selection of integrations curated by our marketplace team.
       </p>
       <div className="mt-5 grid grid-cols-4 gap-6">

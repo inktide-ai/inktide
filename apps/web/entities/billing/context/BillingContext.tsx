@@ -7,9 +7,9 @@ import {
   type ReactNode,
 } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { getSubscription, createCheckout, createPortal, type SubscriptionDto } from '@/api/billing'
+import { getSubscription, createCheckout, createPortal, type SubscriptionDto } from '@/entities/billing/api/billing'
 import { queryKeys } from '@/shared/lib/query/keys'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/shared/services/auth'
 
 interface BillingContextValue {
   plan: 'free' | 'starter' | 'pro'

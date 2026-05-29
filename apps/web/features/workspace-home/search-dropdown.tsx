@@ -53,7 +53,7 @@ export function SearchDropdown({ results, activeIndex, onSelect, onClose }: Sear
         ref={ref}
         className="absolute left-0 top-[calc(100%+6px)] z-50 w-full overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-1)] shadow-xl"
       >
-        <p className="home-ui-font px-4 py-3 text-[14px] text-[var(--text-tertiary)]">No results</p>
+        <p className="home-ui-font px-4 py-3 text-body text-[var(--text-tertiary)]">No results</p>
       </div>
     )
   }
@@ -75,7 +75,7 @@ export function SearchDropdown({ results, activeIndex, onSelect, onClose }: Sear
         const items = results.filter(r => r.type === group)
         return (
           <div key={group}>
-            <p className="home-ui-font px-3 pb-1 pt-2.5 text-[12px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
+            <p className="home-ui-font px-3 pb-1 pt-2.5 text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
               {TYPE_LABEL[group]}
             </p>
             {items.map(result => {
@@ -94,11 +94,11 @@ export function SearchDropdown({ results, activeIndex, onSelect, onClose }: Sear
                 >
                   <ResultIcon result={result} />
                   <div className="min-w-0">
-                    <p className="home-ui-font truncate text-[14px] font-medium text-[var(--text-primary)]">
+                    <p className="home-ui-font truncate text-body font-medium text-[var(--text-primary)]">
                       {result.name}
                     </p>
                     {result.description && (
-                      <p className="home-ui-font truncate text-[12px] text-[var(--text-tertiary)]">
+                      <p className="home-ui-font truncate text-xs text-[var(--text-tertiary)]">
                         {result.description}
                       </p>
                     )}
@@ -109,7 +109,7 @@ export function SearchDropdown({ results, activeIndex, onSelect, onClose }: Sear
           </div>
         )
       })}
-      <div className="home-ui-font border-t border-[var(--border-subtle)] px-3 py-2 text-[12px] text-[var(--text-tertiary)]">
+      <div className="home-ui-font border-t border-[var(--border-subtle)] px-3 py-2 text-xs text-[var(--text-tertiary)]">
         ↑↓ navigate · Enter select · Esc close
       </div>
     </div>

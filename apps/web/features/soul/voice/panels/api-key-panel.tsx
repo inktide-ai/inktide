@@ -56,13 +56,13 @@ export function ApiKeyConnectionPanel({ providerName, providerId }: ApiKeyConnec
     <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
       <div className="p-5">
         <div className="mb-1 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[0.8125rem] font-medium text-[var(--text-primary)]">
+          <div className="flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
             <LockIcon />
             API Key
           </div>
           <CredentialStatusBadge status={testStatus} error={testError} />
         </div>
-        <p className="mb-3 text-[0.75rem] text-[var(--text-tertiary)]">Enter your {providerName} API key to connect.</p>
+        <p className="mb-3 text-xs text-[var(--text-tertiary)]">Enter your {providerName} API key to connect.</p>
         <div className="flex gap-2">
           <input
             type="password"
@@ -77,7 +77,7 @@ export function ApiKeyConnectionPanel({ providerName, providerId }: ApiKeyConnec
             type="button"
             disabled={saving || !inputKey.trim()}
             onClick={() => void handleSave()}
-            className="h-9 shrink-0 rounded-lg bg-[var(--accent-primary)] px-4 text-[0.8125rem] font-semibold text-[var(--text-on-accent)] transition-colors hover:bg-[var(--accent-hover)] active:bg-[var(--accent-active)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-9 shrink-0 rounded-lg bg-[var(--accent-primary)] px-4 text-sm font-semibold text-[var(--text-on-accent)] transition-colors hover:bg-[var(--accent-hover)] active:bg-[var(--accent-active)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>

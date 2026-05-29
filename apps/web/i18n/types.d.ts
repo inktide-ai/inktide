@@ -20,6 +20,9 @@ declare module 'i18next' {
       backup: typeof import('../../public/locales/en/backup.json')
       landing: typeof import('../../public/locales/en/landing.json')
       providers: typeof import('../../public/locales/en/providers.json')
+      checkout: typeof import('../../public/locales/en/checkout.json')
+      emotion: typeof import('../../public/locales/en/emotion.json')
+      account: typeof import('../../public/locales/en/account.json')
     }
   }
 }

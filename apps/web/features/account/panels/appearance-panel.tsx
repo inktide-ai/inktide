@@ -18,29 +18,6 @@ import {
 import { useAppearancePrefs } from '@/shared/hooks/useAppearancePrefs'
 import { usePatchGlobalPreferences } from '@/shared/hooks/useGlobalPreferences'
 
-const THEMES: { id: AppearancePrefs['theme']; label: string; icon: React.ReactNode }[] = [
-  {
-    id: 'dark',
-    label: 'Dark',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    ),
-  },
-  {
-    id: 'light',
-    label: 'Light',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-    ),
-  },
-  {
-    id: 'system',
-    label: 'System',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-    ),
-  },
-]
 
 
 const LANGUAGES = [
@@ -64,7 +41,32 @@ function parseTheme(next: string | undefined): AppearancePrefs['theme'] | undefi
 
 export default function AppearancePanel() {
   const { t, i18n } = useTranslation('common')
+  const { t: ta } = useTranslation('account')
   const { setTheme } = useTheme()
+
+  const THEMES: { id: AppearancePrefs['theme']; label: string; icon: React.ReactNode }[] = [
+    {
+      id: 'dark',
+      label: ta('appearance.dark'),
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      ),
+    },
+    {
+      id: 'light',
+      label: ta('appearance.light'),
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      ),
+    },
+    {
+      id: 'system',
+      label: ta('appearance.system'),
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      ),
+    },
+  ]
   const { prefs, update } = useAppearancePrefs()
   const { mutate: patchGlobal } = usePatchGlobalPreferences()
 
@@ -85,14 +87,14 @@ export default function AppearancePanel() {
       <div className="mt-[36px]" />
 
       {/* ── Preferences section ─────────────────────────────────────────────── */}
-      <SectionHeader>Preferences</SectionHeader>
+      <SectionHeader>{ta('nav.preferences')}</SectionHeader>
 
       <div className="sm-settings-group">
 
         {/* Theme */}
         <SettingRow
-          label="Theme"
-          description="Choose a theme for this device"
+          label={ta('appearance.theme')}
+          description={ta('appearance.themeChoose')}
           action={
             <Select value={prefs.theme} onValueChange={(v) => { const id = parseTheme(v); if (id) handleUpdate('theme', id) }}>
               <SelectTrigger
@@ -158,8 +160,8 @@ export default function AppearancePanel() {
 
         {/* Accent color */}
         <SettingRow
-          label="Accent color"
-          description="Choose the highlight colour used across the app"
+          label={ta('appearance.accentColor')}
+          description={ta('appearance.accentColorDesc')}
           action={
             <Select value={prefs.accentColor} onValueChange={(v) => handleUpdate('accentColor', v)}>
               <SelectTrigger
@@ -231,18 +233,18 @@ export default function AppearancePanel() {
 
         {/* Compact mode */}
         <SettingRow
-          label="Compact mode"
-          description="Reduce spacing and element sizes."
-          action={<Toggle checked={prefs.compact} onChange={v => handleUpdate('compact', v)} ariaLabel="Compact mode" />}
+          label={ta('appearance.compact')}
+          description={ta('appearance.compactDesc')}
+          action={<Toggle checked={prefs.compact} onChange={v => handleUpdate('compact', v)} ariaLabel={ta('appearance.compact')} />}
         />
 
         <div className="h-[24px]" />
 
         {/* Reduce motion */}
         <SettingRow
-          label="Reduce motion"
-          description="Minimize animations across the app."
-          action={<Toggle checked={prefs.reduceMotion} onChange={v => handleUpdate('reduceMotion', v)} ariaLabel="Reduce motion" />}
+          label={ta('appearance.reduceMotion')}
+          description={ta('appearance.reduceMotionDesc')}
+          action={<Toggle checked={prefs.reduceMotion} onChange={v => handleUpdate('reduceMotion', v)} ariaLabel={ta('appearance.reduceMotion')} />}
         />
 
       </div>

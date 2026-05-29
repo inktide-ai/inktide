@@ -9,7 +9,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     <input
       ref={ref}
       className={cn(
-        'h-9 w-full rounded-lg px-3 text-[14px]',
+        'h-9 w-full rounded-lg px-3 text-body',
         'bg-[var(--input-bg)] border border-[var(--input-border)]',
         'text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]',
         'outline-none focus:border-[var(--input-border-focus)]',

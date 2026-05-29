@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
 import { Sun } from 'lucide-react'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/shared/services/auth'
 import { Moon } from '@/shared/ui/icons'
 import { SidebarMenuItem } from '@/shared/ui/sidebar-menu-item'
 
@@ -31,9 +31,13 @@ export interface SidebarAccountMenuProps {
   onOpenProfile?: () => void
   /** Open account modal on security tab. */
   onOpenSettings?: () => void
+  /** Open .inkt import dialog. */
+  onOpen?: () => void
+  /** Export / save current or selected project as .inkt. */
+  onSave?: () => void
 }
 
-export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpenSettings }: SidebarAccountMenuProps) {
+export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpenSettings, onOpen, onSave }: SidebarAccountMenuProps) {
   const router = useRouter()
   const { logout } = useAuth()
   const { setTheme, resolvedTheme } = useTheme()
@@ -47,6 +51,16 @@ export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpen
     onClose()
     onOpenSettings?.()
   }, [onClose, onOpenSettings])
+
+  const handleOpen = useCallback(() => {
+    onClose()
+    onOpen?.()
+  }, [onClose, onOpen])
+
+  const handleSave = useCallback(() => {
+    onClose()
+    onSave?.()
+  }, [onClose, onSave])
 
   const handleLogout = useCallback(() => {
     onClose()
@@ -77,8 +91,8 @@ export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpen
         aria-label="Account menu"
       >
         <div className="flex flex-col gap-0.5 px-1.5 pb-1.5">
-          <SidebarMenuItem icon={<MenuIcon src="/icons/menu-open.svg" />} label="Открыть" shortcut="Cmd + O" />
-          <SidebarMenuItem icon={<MenuIcon src="/icons/menu-save.svg" />} label="Сохранить" shortcut="Cmd + \\" />
+          <SidebarMenuItem icon={<MenuIcon src="/icons/menu-open.svg" />} label="Открыть" onClick={handleOpen} />
+          <SidebarMenuItem icon={<MenuIcon src="/icons/menu-save.svg" />} label="Сохранить" shortcut="Cmd + \\" onClick={handleSave} />
           <SidebarMenuItem icon={<MenuIcon src="/icons/menu-clear.svg" />} label="Очистить данные" />
         </div>
 
@@ -88,6 +102,7 @@ export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpen
           <SidebarMenuItem
             icon={<MenuIcon src="/icons/menu-profile.svg" />}
             label="Профиль"
+            shortcut="Cmd + ."
             onClick={handleOpenProfile}
           />
           <SidebarMenuItem
@@ -106,7 +121,7 @@ export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpen
         <div className="mx-3 my-0.5 h-px bg-[var(--menu-divider)]" />
 
         <div className="flex items-center justify-between px-3 py-2.5">
-          <span className="text-[0.8125rem] font-medium text-[var(--text-primary)]">Тема</span>
+          <span className="text-sm font-medium text-[var(--text-primary)]">Тема</span>
           <div
             className="flex items-center gap-0.5 rounded-lg p-[3px]"
             style={{ background: 'var(--menu-segment-track)' }}

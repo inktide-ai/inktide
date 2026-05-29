@@ -1,6 +1,7 @@
 'use client'
 
 import { ExternalLink } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { SoulCardData, SoulStatus } from './soul-card'
 
 // ── Status dot ────────────────────────────────────────────────────────────────
@@ -10,13 +11,6 @@ const STATUS_DOT: Record<SoulStatus, string> = {
   online:  'bg-[#22C55E]',
   idle:    'bg-[#FACC15]',
   offline: 'bg-[#6B7280]',
-}
-
-const STATUS_LABEL: Record<SoulStatus, string> = {
-  active:  'Active',
-  online:  'Online',
-  idle:    'Idle',
-  offline: 'Offline',
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -29,6 +23,14 @@ interface SoulListRowProps {
 }
 
 export function SoulListRow({ data, onOpen }: SoulListRowProps) {
+  const { t } = useTranslation('common')
+
+  const STATUS_LABEL: Record<SoulStatus, string> = {
+    active:  t('soulCard.active'),
+    online:  t('soulCard.online'),
+    idle:    t('soulCard.idle'),
+    offline: t('soulCard.offline'),
+  }
   const { name, subtitle, avatarUrl, accentColor, status } = data
 
   return (
@@ -53,8 +55,8 @@ export function SoulListRow({ data, onOpen }: SoulListRowProps) {
 
       {/* Name + subtitle */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[14px] font-semibold leading-tight text-[var(--text-primary)]">{name}</p>
-        <p className="truncate text-[12px] leading-tight text-[var(--text-secondary)]">{subtitle}</p>
+        <p className="truncate text-body font-semibold leading-tight text-[var(--text-primary)]">{name}</p>
+        <p className="truncate text-xs leading-tight text-[var(--text-secondary)]">{subtitle}</p>
       </div>
 
       {/* Status label */}

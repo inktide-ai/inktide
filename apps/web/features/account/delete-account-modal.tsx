@@ -1,4 +1,5 @@
 'use client'
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 
 interface DeleteAccountModalProps {
@@ -16,6 +17,7 @@ export default function DeleteAccountModal({
   onClose,
   onConfirm,
 }: DeleteAccountModalProps) {
+  const { t } = useTranslation('account')
   const [typed, setTyped] = useState('')
 
   const confirmed = userEmail
@@ -36,17 +38,16 @@ export default function DeleteAccountModal({
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id="delete-account-title" className="m-0 mb-3 text-[1.125rem] font-semibold text-(--text-primary)">
-          Delete account
+          {t('deleteAccount.title')}
         </h2>
         <p className="m-0 mb-4 text-body leading-relaxed text-(--text-muted)">
-          This removes your characters and related data from Inktide. If the server is configured
-          for it, your login identity is removed from Keycloak as well.
+          {t('deleteAccount.desc')}
         </p>
 
         <label className="block mb-1 text-sm font-medium text-(--text-secondary)">
           {userEmail
-            ? <>Type <span className="font-semibold text-(--text-primary)">{userEmail}</span> to confirm</>
-            : 'Type anything to confirm'}
+            ? <>{t('deleteAccount.confirmLabelEmail', { email: userEmail })}</>
+            : t('deleteAccount.confirmLabel')}
         </label>
         <input
           type="email"
@@ -55,7 +56,7 @@ export default function DeleteAccountModal({
           value={typed}
           onChange={(e) => setTyped(e.target.value)}
           disabled={isDeleting}
-          placeholder={userEmail ?? 'your email'}
+          placeholder={userEmail ?? t('deleteAccount.placeholder')}
           className="mb-4 w-full rounded-[8px] border border-white/15 bg-white/[0.04] px-3 py-[9px] text-body text-(--text-primary) placeholder:text-(--text-muted) outline-none focus:border-[rgba(237,62,62,0.6)] transition-colors disabled:opacity-65"
         />
 
@@ -71,7 +72,7 @@ export default function DeleteAccountModal({
             onClick={onClose}
             disabled={isDeleting}
           >
-            Cancel
+            {t('deleteAccount.cancel')}
           </button>
           <button
             type="button"
@@ -79,7 +80,7 @@ export default function DeleteAccountModal({
             onClick={onConfirm}
             disabled={isDeleting || !confirmed}
           >
-            {isDeleting ? 'Deleting…' : 'Delete my account'}
+            {isDeleting ? t('deleteAccount.deleting') : t('deleteAccount.delete')}
           </button>
         </div>
       </div>

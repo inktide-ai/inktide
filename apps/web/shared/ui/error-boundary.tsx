@@ -22,13 +22,13 @@ function DefaultFallback({ onReset }: { onReset: () => void }) {
         </svg>
       </div>
       <div>
-        <p className="text-[0.9375rem] font-semibold text-[var(--text-primary)]">Something went wrong</p>
-        <p className="mt-1 text-[0.875rem] text-[var(--text-secondary)]">An unexpected error occurred.</p>
+        <p className="text-body-md font-semibold text-[var(--text-primary)]">Something went wrong</p>
+        <p className="mt-1 text-body text-[var(--text-secondary)]">An unexpected error occurred.</p>
       </div>
       <button
         type="button"
         onClick={onReset}
-        className="rounded-xl bg-[var(--accent-primary)] px-5 py-2 text-[0.875rem] font-semibold text-white hover:opacity-90"
+        className="rounded-xl bg-[var(--accent-primary)] px-5 py-2 text-body font-semibold text-white hover:opacity-90"
       >
         Try again
       </button>

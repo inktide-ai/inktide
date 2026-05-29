@@ -33,7 +33,7 @@ export function Toggle({ on }: { on: boolean }) {
   return (
     <div className={cn(
       'relative w-9 h-5 rounded-[10px] shrink-0 transition-[background] duration-200 ease cursor-default',
-      on ? 'bg-[#22c55e]' : 'bg-white/[0.12]',
+      on ? 'bg-[var(--color-online)]' : 'bg-white/[0.12]',
     )}>
       <span className={cn(
         'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-[left] duration-200 ease shadow-[0_1px_3px_rgba(0,0,0,0.35)]',

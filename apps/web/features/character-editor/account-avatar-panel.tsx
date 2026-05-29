@@ -1,9 +1,9 @@
 'use client'
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@/shared/services/auth'
 import { getStorageStatus, patchAvatar, uploadProfileFile } from '../../api/me'
 import type { AiCardListItem } from '@/shared/types/soul-api'
-import { MAX_NICKNAME_LEN } from '../../utils/profileStorage'
+import { MAX_NICKNAME_LEN } from '@/shared/lib/profileStorage'
 import { getBannerAccent, getBannerGradient } from '@/shared/ui/banner-presets'
 import type { AiCharacter } from '@/shared/lib/character'
 function getInitialLetter(userName: string | undefined): string {
@@ -108,7 +108,7 @@ export default function AccountAvatarPanel({
     <div className="w-full max-w-[1080px] mx-auto pb-10">
       <button
         type="button"
-        className="inline-flex items-center gap-[0.35rem] mb-5 py-[0.35rem] px-2 -ml-2 border-none bg-transparent text-(--text-muted) font-[var(--font-ui)] text-[0.875rem] font-medium cursor-pointer rounded-[0.375rem] transition-[color,background] duration-150 ease hover:text-(--text-primary) hover:bg-white/[0.05]"
+        className="inline-flex items-center gap-[0.35rem] mb-5 py-[0.35rem] px-2 -ml-2 border-none bg-transparent text-(--text-muted) font-[var(--font-ui)] text-body font-medium cursor-pointer rounded-[0.375rem] transition-[color,background] duration-150 ease hover:text-(--text-primary) hover:bg-white/[0.05]"
         onClick={onBack}
       >
         ← Back to workshop
@@ -125,7 +125,7 @@ export default function AccountAvatarPanel({
           >
             Your profile
           </h1>
-          <p className="m-0 text-[0.875rem] leading-relaxed text-(--text-muted) max-w-[52ch]">
+          <p className="m-0 text-body leading-relaxed text-(--text-muted) max-w-[52ch]">
             Account identity: display name and photo. Bots are configured separately — see Projects
             below.
           </p>
@@ -145,7 +145,7 @@ export default function AccountAvatarPanel({
                 </div>
               )}
               {busy && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-white text-[0.8125rem] font-semibold tracking-[0.02em]">
+                <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-white text-sm font-semibold tracking-[0.02em]">
                   Updating…
                 </div>
               )}
@@ -162,13 +162,13 @@ export default function AccountAvatarPanel({
 
             <button
               type="button"
-              className="py-[0.55rem] px-[1.1rem] border-none rounded-lg bg-[linear-gradient(135deg,var(--accent-red),#c026d3)] text-white font-[var(--font-ui)] text-[0.8125rem] font-semibold cursor-pointer transition-[opacity,transform] duration-[150ms,100ms] ease w-full max-w-[220px] hover:enabled:opacity-95 disabled:opacity-45 disabled:cursor-not-allowed"
+              className="py-[0.55rem] px-[1.1rem] border-none rounded-lg bg-[linear-gradient(135deg,var(--accent-red),#c026d3)] text-white font-[var(--font-ui)] text-sm font-semibold cursor-pointer transition-[opacity,transform] duration-[150ms,100ms] ease w-full max-w-[220px] hover:enabled:opacity-95 disabled:opacity-45 disabled:cursor-not-allowed"
               disabled={busy || storageEnabled === false}
               onClick={() => inputRef.current?.click()}
             >
               {busy ? 'Working…' : 'Upload new photo'}
             </button>
-            <p className="m-0 text-[0.75rem] text-(--text-muted) leading-[1.4] text-center max-w-[220px]">
+            <p className="m-0 text-xs text-(--text-muted) leading-[1.4] text-center max-w-[220px]">
               PNG, JPG, WebP — up to ~50 MB.
             </p>
           </div>
@@ -176,19 +176,19 @@ export default function AccountAvatarPanel({
           <div className="min-w-0">
             <div className="mb-1">
               <label
-                className="block text-[0.9375rem] font-semibold text-(--text-primary) mb-[0.35rem]"
+                className="block text-body-md font-semibold text-(--text-primary) mb-[0.35rem]"
                 htmlFor="profile-display-name-input"
               >
                 Display name
               </label>
-              <p className="m-0 mb-3 text-[0.8125rem] leading-[1.45] text-(--text-muted)">
+              <p className="m-0 mb-3 text-sm leading-[1.45] text-(--text-muted)">
                 Shown in the sidebar instead of your login handle. Stored in this browser until
                 Keycloak stores it.
               </p>
               <div className="flex flex-wrap gap-2 items-center max-sm:flex-col max-sm:items-stretch">
                 <input
                   id="profile-display-name-input"
-                  className="flex-1 min-w-[160px] py-[0.55rem] px-[0.85rem] rounded-lg border border-white/10 bg-black/[0.28] text-(--text-primary) font-[var(--font-ui)] text-[0.875rem] outline-none focus:border-[rgba(236,72,153,0.45)] focus:shadow-[0_0_0_2px_rgba(236,72,153,0.12)] disabled:opacity-60"
+                  className="flex-1 min-w-[160px] py-[0.55rem] px-[0.85rem] rounded-lg border border-white/10 bg-black/[0.28] text-(--text-primary) font-[var(--font-ui)] text-body outline-none focus:border-[rgba(236,72,153,0.45)] focus:shadow-[0_0_0_2px_rgba(236,72,153,0.12)] disabled:opacity-60"
                   type="text"
                   maxLength={MAX_NICKNAME_LEN}
                   value={nickDraft}
@@ -199,7 +199,7 @@ export default function AccountAvatarPanel({
                 />
                 <button
                   type="button"
-                  className="py-[0.55rem] px-[1.1rem] rounded-lg border-none bg-white/10 text-(--text-primary) font-[var(--font-ui)] text-[0.875rem] font-semibold cursor-pointer transition-[background] duration-150 ease shrink-0 hover:enabled:bg-white/[0.14] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="py-[0.55rem] px-[1.1rem] rounded-lg border-none bg-white/10 text-(--text-primary) font-[var(--font-ui)] text-body font-semibold cursor-pointer transition-[background] duration-150 ease shrink-0 hover:enabled:bg-white/[0.14] disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={saveNickname}
                   disabled={busy}
                 >
@@ -207,7 +207,7 @@ export default function AccountAvatarPanel({
                 </button>
               </div>
               {nickSaved && (
-                <p className="mt-2 mb-0 text-[0.8125rem] text-[#34d399]" role="status">
+                <p className="mt-2 mb-0 text-sm text-[#34d399]" role="status">
                   Saved
                 </p>
               )}
@@ -215,7 +215,7 @@ export default function AccountAvatarPanel({
 
             {storageEnabled === false && (
               <div
-                className="mt-3 py-3 px-4 rounded-lg bg-[rgba(251,191,36,0.1)] border border-[rgba(251,191,36,0.32)] text-[#fcd34d] text-[0.8125rem] leading-[1.4]"
+                className="mt-3 py-3 px-4 rounded-lg bg-[rgba(251,191,36,0.1)] border border-[rgba(251,191,36,0.32)] text-[#fcd34d] text-sm leading-[1.4]"
                 role="status"
               >
                 File storage is not configured on the server — avatar upload is unavailable.
@@ -223,7 +223,7 @@ export default function AccountAvatarPanel({
             )}
 
             {error && (
-              <p className="mt-3 mb-0 text-[0.875rem] text-[#f87171]" role="alert">
+              <p className="mt-3 mb-0 text-body text-[var(--color-error-mid)]" role="alert">
                 {error}
               </p>
             )}
@@ -257,7 +257,7 @@ export default function AccountAvatarPanel({
             >
               Projects
             </h2>
-            <p className="m-0 text-[0.8125rem] leading-[1.45] text-(--text-muted) max-w-[60ch]">
+            <p className="m-0 text-sm leading-[1.45] text-(--text-muted) max-w-[60ch]">
               Each project is a bot — identity, skills, voice, and model. Open one to edit in the
               workshop.
             </p>
@@ -266,8 +266,8 @@ export default function AccountAvatarPanel({
 
         {projects.length === 0 ? (
           <div className="py-8 px-6 rounded-[14px] border border-dashed border-white/[0.12] bg-black/20 text-center">
-            <p className="m-0 text-(--text-muted) text-[0.9375rem]">No projects yet.</p>
-            <p className="mt-2 text-[0.8125rem] m-0 text-(--text-muted)">
+            <p className="m-0 text-(--text-muted) text-body-md">No projects yet.</p>
+            <p className="mt-2 text-sm m-0 text-(--text-muted)">
               Use <strong>Create new</strong> in the sidebar to add your first bot.
             </p>
           </div>
@@ -300,7 +300,7 @@ export default function AccountAvatarPanel({
                       </div>
                       {c.is_active && (
                         <span
-                          className="absolute -right-px -bottom-px w-[10px] h-[10px] rounded-full bg-[#22c55e] shadow-[0_0_0_2px_rgba(22,24,30,0.95)] z-[1] pointer-events-none"
+                          className="absolute -right-px -bottom-px w-[10px] h-[10px] rounded-full bg-[var(--color-online)] shadow-[0_0_0_2px_rgba(22,24,30,0.95)] z-[1] pointer-events-none"
                           title="Active"
                           aria-hidden
                         />
@@ -308,7 +308,7 @@ export default function AccountAvatarPanel({
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2 mb-[0.2rem]">
-                        <h3 className="m-0 text-[0.9375rem] font-semibold text-(--text-primary) leading-[1.3] break-words">
+                        <h3 className="m-0 text-body-md font-semibold text-(--text-primary) leading-[1.3] break-words">
                           {c.name}
                         </h3>
                         <span
@@ -321,15 +321,15 @@ export default function AccountAvatarPanel({
                           Bot
                         </span>
                       </div>
-                      <p className="m-0 mb-[0.35rem] text-[0.75rem] text-(--text-muted) font-mono">
+                      <p className="m-0 mb-[0.35rem] text-xs text-(--text-muted) font-mono">
                         /{c.slug}
                       </p>
                       {desc ? (
-                        <p className="m-0 text-[0.8125rem] leading-[1.45] text-[rgba(200,204,214,0.88)] line-clamp-3">
+                        <p className="m-0 text-sm leading-[1.45] text-[rgba(200,204,214,0.88)] line-clamp-3">
                           {desc}
                         </p>
                       ) : (
-                        <p className="m-0 text-[0.8125rem] italic text-(--text-muted) opacity-85">
+                        <p className="m-0 text-sm italic text-(--text-muted) opacity-85">
                           No description yet
                         </p>
                       )}

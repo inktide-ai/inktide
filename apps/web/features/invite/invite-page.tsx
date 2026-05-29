@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/shared/services/auth'
 import { ROOT_ROUTE } from '@/lib/routes'
 import { keycloak } from '@/lib/keycloak'
-import { acceptInvite } from '@/api/organization'
+import { acceptInvite } from '@/features/organization/api/organization' // fsd:cross-feature-ok
 import { ApiError } from '@/api/client'
 
 type PageStatus =
@@ -18,6 +19,7 @@ type PageStatus =
   | 'error'
 
 export default function AcceptInvitePage() {
+  const { t } = useTranslation('common')
   const params = useParams()
   const router = useRouter()
   const token = typeof params.token === 'string' ? params.token : ''
@@ -66,7 +68,7 @@ export default function AcceptInvitePage() {
             className="h-8 w-8 rounded-full border-2 animate-spin border-[var(--border-subtle)] border-t-[var(--accent-primary)]"
           />
           <p className="text-body text-[var(--text-secondary)]">
-            {status === 'accepting' ? 'Accepting invitation…' : 'Loading…'}
+            {status === 'accepting' ? t('status.acceptingInvite') : t('status.loading')}
           </p>
         </div>
       </div>
@@ -80,12 +82,12 @@ export default function AcceptInvitePage() {
           <>
             <div className="text-3xl mb-4">🎉</div>
             <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">
-              Welcome aboard!
+              {t('invite.welcome')}
             </h1>
             <p className="mt-2 text-body text-[var(--text-secondary)]">
-              You've joined{orgName ? ` ${orgName}` : ' the workspace'}.
+              {orgName ? t('invite.joined', { org: orgName }) : t('invite.joinedWorkspace')}
               <br />
-              Redirecting you now…
+              {t('status.redirectingNow')}
             </p>
           </>
         )}
@@ -93,12 +95,12 @@ export default function AcceptInvitePage() {
         {status === 'already_member' && (
           <>
             <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">
-              Already a member
+              {t('invite.alreadyMember')}
             </h1>
             <p className="mt-2 text-body text-[var(--text-secondary)]">
-              You're already part of{orgName ? ` ${orgName}` : ' this workspace'}.
+              {orgName ? t('invite.alreadyMemberDesc', { org: orgName }) : t('invite.alreadyMemberDescWorkspace')}
               <br />
-              Redirecting you now…
+              {t('status.redirectingNow')}
             </p>
           </>
         )}
@@ -106,10 +108,10 @@ export default function AcceptInvitePage() {
         {status === 'expired' && (
           <>
             <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">
-              Invitation expired
+              {t('invite.expired')}
             </h1>
             <p className="mt-2 text-body text-[var(--text-secondary)]">
-              This invite link has expired. Ask the workspace admin to send you a new invitation.
+              {t('invite.expiredDesc')}
             </p>
           </>
         )}
@@ -117,10 +119,10 @@ export default function AcceptInvitePage() {
         {(status === 'invalid' || status === 'error') && (
           <>
             <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">
-              Invalid invitation
+              {t('invite.invalid')}
             </h1>
             <p className="mt-2 text-body text-[var(--text-secondary)]">
-              This invite link is not valid or has already been used. Please contact your admin.
+              {t('invite.invalidDesc')}
             </p>
           </>
         )}

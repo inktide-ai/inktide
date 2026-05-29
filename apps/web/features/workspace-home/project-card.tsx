@@ -35,8 +35,8 @@ export function ProjectCard({ title, editedLabel, coverUrl, previewUrl, icon }: 
         <div className="flex min-w-0 items-center gap-2">
           <span className="text-[var(--accent-hover)]">{icon}</span>
           <div className="min-w-0">
-            <p className="home-heading-font truncate text-[14px] font-semibold text-[var(--text-primary)]">{title}</p>
-            <p className="home-ui-font truncate text-[12px] text-[var(--text-secondary)]">{editedLabel}</p>
+            <p className="home-heading-font truncate text-body font-semibold text-[var(--text-primary)]">{title}</p>
+            <p className="home-ui-font truncate text-xs text-[var(--text-secondary)]">{editedLabel}</p>
           </div>
         </div>
         <button type="button" className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">

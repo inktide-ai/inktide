@@ -2,7 +2,7 @@
 import { useTranslation } from 'react-i18next'
 import type { AiCharacter } from '@/shared/lib/character'
 
-const inputBase = 'w-full py-[0.625rem] px-[0.875rem] bg-[#1e1f22] border border-[#2d2f33] rounded-[6px] text-(--text-primary) font-[var(--font-ui)] text-[0.8125rem] outline-none transition-[border-color,background] duration-[120ms] ease focus:border-white/20 focus:bg-[#26282e] placeholder:text-[rgba(139,144,154,0.45)]'
+const inputBase = 'w-full py-[0.625rem] px-[0.875rem] bg-[#1e1f22] border border-[#2d2f33] rounded-[6px] text-(--text-primary) font-[var(--font-ui)] text-sm outline-none transition-[border-color,background] duration-[120ms] ease focus:border-white/20 focus:bg-[#26282e] placeholder:text-[rgba(139,144,154,0.45)]'
 
 interface PromptsTabProps {
   character: AiCharacter
@@ -19,12 +19,12 @@ const PromptsTab = ({ character, onUpdate }: PromptsTabProps) => {
         <div className="py-2">
           <div className="mb-7">
             <label className="block cursor-text">
-              <span className="block text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2">{t('coreInstructions.label')}</span>
-              <div className="text-[0.75rem] text-(--text-muted) mt-0.5 leading-[1.4]">{t('coreInstructions.hint')}</div>
+              <span className="block text-body font-semibold font-[var(--font-ui)] text-(--text-primary) mb-2">{t('coreInstructions.label')}</span>
+              <div className="text-xs text-(--text-muted) mt-0.5 leading-[1.4]">{t('coreInstructions.hint')}</div>
               <textarea
                 id="prompts-system-prompt"
                 name="systemPrompt"
-                className={`${inputBase} min-h-[200px] resize-y leading-relaxed font-mono text-[0.75rem]`}
+                className={`${inputBase} min-h-[200px] resize-y leading-relaxed font-mono text-xs`}
                 value={character.systemPrompt}
                 onChange={(e) => onUpdate({ systemPrompt: e.target.value })}
                 placeholder={t('coreInstructions.placeholder')}

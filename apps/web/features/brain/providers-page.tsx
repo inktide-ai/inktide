@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { BrainProviderCard, getCredentials, statusFromCredential, type CredentialResponse } from '@/features/soul'
 import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-providers'
 import { useCharactersContext } from '@/entities/character'
@@ -21,20 +22,11 @@ const TYPE_ICONS: Record<string, ({ className }: { className?: string }) => JSX.
   'enterprise':  TrustIcon,
 }
 
-// ── Type filter definitions ────────────────────────────────────────────────────
-
-const TYPE_DEFS = [
-  { id: 'local',       label: 'Local',           icon: '/images/icons/computer.svg' },
-  { id: 'api-key',     label: 'API Key',          icon: '/images/icons/lock.svg' },
-  { id: 'openai-v1',   label: 'OpenAI v1',        icon: '/images/icons/code.svg' },
-  { id: 'open-source', label: 'Open Source',      icon: '/images/icons/github.svg' },
-  { id: 'recommended', label: 'Recommended',      icon: '/images/icons/star.svg' },
-  { id: 'enterprise',  label: 'Enterprise',       icon: '/images/icons/trust.svg' },
-] as const
-
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function ProvidersPage() {
+  const { t } = useTranslation('providers')
+  const { t: tc } = useTranslation('common')
   const { selected, selectedId, updateCharacter } = useCharactersContext()
   const router = useRouter()
   const params = useParams<{ id: string }>()
@@ -49,6 +41,15 @@ export default function ProvidersPage() {
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [credMap, setCredMap] = useState<Map<string, CredentialResponse>>(new Map())
 
+  const TYPE_DEFS = [
+    { id: 'local',       label: t('brain.type.local'),        icon: '/images/icons/computer.svg' },
+    { id: 'api-key',     label: t('brain.type.apiKey'),       icon: '/images/icons/lock.svg' },
+    { id: 'openai-v1',   label: t('brain.type.openaiV1'),     icon: '/images/icons/code.svg' },
+    { id: 'open-source', label: t('brain.type.openSource'),   icon: '/images/icons/github.svg' },
+    { id: 'recommended', label: t('brain.type.recommended'),  icon: '/images/icons/star.svg' },
+    { id: 'enterprise',  label: t('brain.type.enterprise'),   icon: '/images/icons/trust.svg' },
+  ] as const
+
   useEffect(() => {
     getCredentials().then((creds) => {
       setCredMap(new Map(creds.map((c) => [c.providerId, c])))
@@ -58,24 +59,24 @@ export default function ProvidersPage() {
   // counts per type across full catalog
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = {}
-    for (const t of TYPE_DEFS) counts[t.id] = 0
+    for (const typeDef of TYPE_DEFS) counts[typeDef.id] = 0
     for (const p of LLM_PROVIDER_CATALOG) {
-      for (const t of p.types) if (t in counts) counts[t]++
+      for (const typeId of p.types) if (typeId in counts) counts[typeId]++
     }
     return counts
-  }, [])
+  }, [TYPE_DEFS])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return LLM_PROVIDER_CATALOG.filter((p) => {
-      const typeMatch = activeTypes.size === 0 || p.types.some((t) => activeTypes.has(t))
+      const typeMatch = activeTypes.size === 0 || p.types.some((typeId) => activeTypes.has(typeId))
       const searchMatch =
         !q ||
         p.name.toLowerCase().includes(q) ||
         p.model.toLowerCase().includes(q) ||
         p.description.toLowerCase().includes(q) ||
         p.kind.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.toLowerCase().includes(q))
+        p.tags.some((tag) => tag.toLowerCase().includes(q))
       return typeMatch && searchMatch
     })
   }, [search, activeTypes])
@@ -116,7 +117,7 @@ export default function ProvidersPage() {
   }
 
   const selectAllTypes = () => {
-    setPendingTypes(new Set(TYPE_DEFS.map((t) => t.id)))
+    setPendingTypes(new Set(TYPE_DEFS.map((typeDef) => typeDef.id)))
   }
 
   const removeActiveType = (id: string) => {
@@ -145,15 +146,15 @@ export default function ProvidersPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-24 pb-14 pt-9 xl:max-w-[90rem]">
       <header className="mb-9">
-        <h1 className="text-[1.625rem] font-semibold leading-8 text-[var(--text-heading)]">Brain</h1>
-        <p className="mt-1 text-[1rem] leading-6 text-[var(--text-secondary)]">Manage language model providers and behavior settings.</p>
+        <h1 className="text-[1.625rem] font-semibold leading-8 text-[var(--text-heading)]">{t('brain.title')}</h1>
+        <p className="mt-1 text-[1rem] leading-6 text-[var(--text-secondary)]">{t('brain.subtitle')}</p>
       </header>
       <FeaturedIntegrations baseHref={`/souls/${params.id}/brain`} type="brain" />
       <div>
       {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
       <div className="mb-6">
-        <h2 className="text-[1.0625rem] font-semibold text-[var(--text-heading)]">Brain Providers</h2>
-        <p className="mt-0.5 text-body text-[var(--text-secondary)]">Choose a language model to power your soul&apos;s thinking.</p>
+        <h2 className="text-[1.0625rem] font-semibold text-[var(--text-heading)]">{t('brain.section.title')}</h2>
+        <p className="mt-0.5 text-body text-[var(--text-secondary)]">{t('brain.section.subtitle')}</p>
       </div>
       <div className="mb-4 flex items-center justify-between gap-2 py-1.5">
         {/* Type filter button */}
@@ -173,7 +174,7 @@ export default function ProvidersPage() {
             )}
           >
             <GridIcon className="h-4 w-4 text-[var(--text-tertiary)]" />
-            Type
+            {tc('filter.type')}
             {isTypeActive && (
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--color-blue-primary)] text-2xs font-bold text-white leading-none">
                 {activeTypes.size}
@@ -186,13 +187,13 @@ export default function ProvidersPage() {
           {typeOpen && (
             <div className="absolute left-0 top-full z-50 mt-1 w-56 overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
               <div className="py-1">
-                {TYPE_DEFS.map((t) => {
-                  const checked = pendingTypes.has(t.id)
+                {TYPE_DEFS.map((typeDef) => {
+                  const checked = pendingTypes.has(typeDef.id)
                   return (
                     <button
-                      key={t.id}
+                      key={typeDef.id}
                       type="button"
-                      onClick={() => toggleType(t.id)}
+                      onClick={() => toggleType(typeDef.id)}
                       className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-[var(--surface-card-hover)]"
                     >
                       {/* Checkbox */}
@@ -208,9 +209,9 @@ export default function ProvidersPage() {
                           </svg>
                         )}
                       </span>
-                      {(() => { const Icon = TYPE_ICONS[t.id]; return Icon ? <Icon className="h-4 w-4 shrink-0 text-[var(--text-secondary)]" /> : null })()}
-                      <span className="flex-1 text-sm text-[var(--text-primary)]">{t.label}</span>
-                      <span className="text-xs text-[var(--text-tertiary)]">{typeCounts[t.id]}</span>
+                      {(() => { const Icon = TYPE_ICONS[typeDef.id]; return Icon ? <Icon className="h-4 w-4 shrink-0 text-[var(--text-secondary)]" /> : null })()}
+                      <span className="flex-1 text-sm text-[var(--text-primary)]">{typeDef.label}</span>
+                      <span className="text-xs text-[var(--text-tertiary)]">{typeCounts[typeDef.id]}</span>
                     </button>
                   )
                 })}
@@ -222,7 +223,7 @@ export default function ProvidersPage() {
                     onClick={selectAllTypes}
                     className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   >
-                    Select all
+                    {tc('filter.selectAll')}
                   </button>
                   <span className="text-[var(--text-tertiary)]">·</span>
                   <button
@@ -230,7 +231,7 @@ export default function ProvidersPage() {
                     onClick={clearTypes}
                     className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   >
-                    Clear
+                    {tc('filter.clear')}
                   </button>
                 </div>
                 <button
@@ -238,7 +239,7 @@ export default function ProvidersPage() {
                   onClick={applyTypes}
                   className="rounded-md bg-[var(--color-blue-primary)] px-3 py-1 text-xs font-semibold text-white hover:bg-blue-500 transition-colors"
                 >
-                  Apply
+                  {tc('filter.apply')}
                 </button>
               </div>
             </div>
@@ -251,7 +252,7 @@ export default function ProvidersPage() {
             <input
               ref={searchInputRef}
               type="search"
-              placeholder="Search providers..."
+              placeholder={t('brain.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={cn(
@@ -280,7 +281,7 @@ export default function ProvidersPage() {
       {hasActiveFilters && (
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {Array.from(activeTypes).map((id) => {
-            const def = TYPE_DEFS.find((t) => t.id === id)
+            const def = TYPE_DEFS.find((typeDef) => typeDef.id === id)
             if (!def) return null
             return (
               <span
@@ -304,7 +305,7 @@ export default function ProvidersPage() {
             onClick={() => { setActiveTypes(new Set()); setPendingTypes(new Set()) }}
             className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
           >
-            Clear all
+            {tc('filter.clearAll')}
           </button>
         </div>
       )}
@@ -327,7 +328,7 @@ export default function ProvidersPage() {
       </div>
 
       {filtered.length === 0 && (
-        <p className="mt-8 text-center text-body text-[var(--text-tertiary)]">No providers match your filters.</p>
+        <p className="mt-8 text-center text-body text-[var(--text-tertiary)]">{t('brain.noResults')}</p>
       )}
       </div>
     </div>

@@ -5,9 +5,9 @@ import type { AiCharacter } from '@/shared/lib/character'
 
 const section = 'flex flex-col gap-3 border-t border-(--border) pt-4 mt-6 [&:first-child]:border-t-0 [&:first-child]:pt-0 [&:first-child]:mt-0'
 const sliderHeader = 'flex justify-between items-start gap-4 mb-3'
-const sliderValue = 'text-[0.6875rem] font-semibold font-mono text-(--accent-red-bright) bg-[linear-gradient(135deg,rgba(237,62,62,0.15),rgba(237,62,62,0.08))] py-0.5 px-[0.375rem] rounded-[0.25rem] border border-[rgba(237,62,62,0.2)] shrink-0'
-const labelInBlock = 'block text-[0.9375rem] font-bold text-(--text-primary) mb-1'
-const labelHint = 'text-[0.75rem] text-(--text-muted) mt-0.5 leading-[1.4]'
+const sliderValue = 'text-caption font-semibold font-mono text-(--accent-red-bright) bg-[linear-gradient(135deg,rgba(237,62,62,0.15),rgba(237,62,62,0.08))] py-0.5 px-[0.375rem] rounded-[0.25rem] border border-[rgba(237,62,62,0.2)] shrink-0'
+const labelInBlock = 'block text-body-md font-bold text-(--text-primary) mb-1'
+const labelHint = 'text-xs text-(--text-muted) mt-0.5 leading-[1.4]'
 const toggleRow = 'flex items-center justify-between py-2 mb-12 last:mb-0'
 
 interface MemoryTabProps {
@@ -25,7 +25,7 @@ const MemoryTab = ({ character, onUpdate }: MemoryTabProps) => {
         <div className="py-2">
           <div className={toggleRow}>
             <div>
-              <div className="text-[0.875rem] font-semibold font-[var(--font-ui)] text-(--text-primary)">{t('memory.enable.label')}</div>
+              <div className="text-body font-semibold font-[var(--font-ui)] text-(--text-primary)">{t('memory.enable.label')}</div>
               <div className={labelHint}>{t('memory.enable.hint')}</div>
             </div>
             <label className="toggle-control">

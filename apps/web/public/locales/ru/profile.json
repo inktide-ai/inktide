@@ -63,6 +63,26 @@
       "keyPhrasesPlaceholder": "hey chat, poggers, gg"
     }
   },
+  "badge": {
+    "memory": "Память",
+    "autoPilot": "Автопилот",
+    "tts": "TTS"
+  },
+  "characterCard": {
+    "soulDetails": "Детали персонажа",
+    "copied": "Скопировано!",
+    "share": "Поделиться",
+    "created": "Создан",
+    "status": "Статус",
+    "model": "Модель",
+    "type": "Тип",
+    "noModel": "Без модели",
+    "tags": "Теги",
+    "addTag": "Добавить тег…",
+    "personality": "Личность",
+    "changeAvatar": "Сменить аватар",
+    "uploading": "Загрузка…"
+  },
   "identity": {
     "editCharacter": "Редактировать персонажа",
     "about": "О персонаже",

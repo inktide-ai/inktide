@@ -50,7 +50,7 @@ export default async function Navigation() {
                     'origin-center transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
                     item.active ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0',
                   )}
-                  style={{ backgroundColor: '#6D62C4', boxShadow: '0 0 8px #6D62C450' }}
+                  style={{ backgroundColor: 'var(--nav-item-active-indicator)', boxShadow: '0 0 8px color-mix(in srgb, var(--nav-item-active-indicator) 32%, transparent)' }}
                 />
               </a>
             ))}

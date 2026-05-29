@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { getProject, type Project } from '@/features/projects/api/projects'
-import SoulCharacterHubPage from '@/features/character-editor/character-hub-page'
+import { getProject, type Project } from '@/features/projects'
+import { CharacterHubPage as SoulCharacterHubPage } from '@/features/character-editor'
 
 export default function SoulProjectCharacterPage() {
   const { projectId } = useParams<{ id: string; projectId: string }>()
@@ -29,7 +29,7 @@ export default function SoulProjectCharacterPage() {
 
   if (!soulId) {
     return (
-      <div className="mx-6 mt-8 flex h-[200px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-[14px] text-[var(--text-tertiary)]">
+      <div className="mx-6 mt-8 flex h-[200px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-body text-[var(--text-tertiary)]">
         Bind a soul to this project first — go to Overview and use the Soul picker.
       </div>
     )

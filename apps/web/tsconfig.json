@@ -22,6 +22,7 @@
       "@/shared/*": ["./shared/*"],
       "@/features/*": ["./features/*"],
       "@/entities/*": ["./entities/*"],
+      "@/widgets/*": ["./widgets/*"],
       "@/*": ["./*"]
     },
     /* Linting */
@@ -40,7 +41,6 @@
   },
   "include": [
     "app",
-    "components",
     "hooks",
     "lib",
     "services",
@@ -49,14 +49,13 @@
     "domain",
     "ports",
     "constants",
-    "utils",
     "i18n",
-    "types",
     "layouts",
     "pages",
     "features",
     "entities",
     "shared",
+    "widgets",
     "next.config.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"

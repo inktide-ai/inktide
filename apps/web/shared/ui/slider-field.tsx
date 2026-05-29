@@ -25,12 +25,12 @@ export function SliderField({
     <div className={cn('mb-7', disabled && 'opacity-50 pointer-events-none', className)}>
       <div className="flex justify-between items-start gap-4 mb-3">
         <div className="flex-1 min-w-0">
-          <div className="text-[0.9375rem] font-bold text-[var(--text-primary)] mb-1">{label}</div>
+          <div className="text-body-md font-bold text-[var(--text-primary)] mb-1">{label}</div>
           {hint && (
-            <div className="text-[0.6875rem] text-[var(--text-muted)] leading-snug opacity-85">{hint}</div>
+            <div className="text-caption text-[var(--text-muted)] leading-snug opacity-85">{hint}</div>
           )}
         </div>
-        <span className="text-[0.6875rem] font-semibold font-mono text-[var(--accent-red-bright)] bg-[rgba(237,62,62,0.12)] px-1.5 py-0.5 rounded border border-[rgba(237,62,62,0.2)] flex-shrink-0 tracking-wide">
+        <span className="text-caption font-semibold font-mono text-[var(--accent-red-bright)] bg-[rgba(237,62,62,0.12)] px-1.5 py-0.5 rounded border border-[rgba(237,62,62,0.2)] flex-shrink-0 tracking-wide">
           {format(value)}
         </span>
       </div>

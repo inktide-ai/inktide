@@ -114,5 +114,31 @@
     "maxLength": "не больше {{max}} символов",
     "errorEmpty": "Введите название",
     "errorGeneric": "Не удалось создать тег"
+  },
+  "soulPage": {
+    "activeBadge": "Активная сцена",
+    "livePreview": "Живой предпросмотр",
+    "allScenes": "Все сцены",
+    "allScenesDesc": "Выберите или создайте идеальный фон.",
+    "uploadScene": "Загрузить сцену",
+    "uploadSceneSubtitle": "Изображение, видео или GIF",
+    "noSceneSelected": "Сцена не выбрана",
+    "controls": {
+      "title": "Управление сценой",
+      "subtitle": "Настройте и персонализируйте текущую сцену.",
+      "brightness": "Яркость",
+      "blur": "Размытие",
+      "colorFilter": "Цветовой фильтр"
+    },
+    "filterAll": "Все",
+    "filterDefault": "По умолчанию",
+    "filterCustom": "Пользовательские",
+    "kindDefault": "По умолчанию",
+    "kindCustom": "Пользовательская",
+    "colorNone": "Без фильтра",
+    "colorPurpleDream": "Фиолетовая мечта",
+    "colorNightBlue": "Ночной синий",
+    "colorWarmSunset": "Тёплый закат",
+    "colorMintCool": "Мятная прохлада"
   }
 }

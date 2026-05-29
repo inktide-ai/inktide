@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { PROVIDER_DEFS } from '@/shared/data/providers'
 import { VOICE_PROVIDER_CATALOG } from '@/shared/data/voice-providers'
@@ -26,6 +27,7 @@ export interface WizardProviderConfigProps {
 }
 
 export function WizardProviderConfig({ panelType, item, config, onChange, onConfirm }: WizardProviderConfigProps) {
+  const { t } = useTranslation('common')
   const llmDef = panelType === 'llm' ? PROVIDER_DEFS.find(d => d.id === item.id) : null
   const ttsDef = panelType === 'tts' ? VOICE_PROVIDER_CATALOG.find(e => e.id === item.id) : null
 
@@ -67,12 +69,12 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
 
   const isTesting = testStatus === 'testing'
   const buttonLabel = isTesting
-    ? 'Testing…'
+    ? t('wizard.testing')
     : hasTested && testStatus === 'verified'
-      ? 'Continue ✓'
+      ? t('wizard.continueCheck')
       : hasTested && testStatus === 'failed'
-        ? 'Continue anyway'
-        : `Select ${item.name}`
+        ? t('wizard.continueAnyway')
+        : t('wizard.select', { name: item.name })
 
   return (
     <div className="flex h-full flex-col">
@@ -107,17 +109,17 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
         {!hasFields && panelType === 'tts' && (
           <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)]/40 px-4 py-3">
             <p className="home-ui-font text-body leading-relaxed text-[var(--text-secondary)]">
-              No API key required. {item.name} runs locally on your machine.
+              {t('wizard.noApiKey', { name: item.name })}
             </p>
             <p className="home-ui-font mt-1 text-xs text-[var(--text-tertiary)]">
-              Full voice configuration is available in soul settings.
+              {t('wizard.voiceConfigHint')}
             </p>
           </div>
         )}
 
         {fixedEndpoint && (
           <div className="mb-4">
-            <span className={labelCls}>Endpoint</span>
+            <span className={labelCls}>{t('wizard.endpoint')}</span>
             <div className="flex h-9 items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)]/60 px-3">
               <span className="home-ui-font text-[12.5px] text-[var(--text-tertiary)]">{fixedEndpoint}</span>
             </div>
@@ -127,7 +129,7 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
         {needsApiKey && (
           <div className="mb-4">
             <div className="mb-1.5 flex items-center gap-2">
-              <span className={labelCls.replace('mb-1.5 ', '')}>API Key</span>
+              <span className={labelCls.replace('mb-1.5 ', '')}>{t('wizard.apiKey')}</span>
               {testStatus !== 'untested' && (
                 <CredentialStatusBadge status={testStatus} error={testError} />
               )}
@@ -136,7 +138,7 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
               type="password"
               value={config.apiKey ?? ''}
               onChange={e => onChange('apiKey', e.target.value)}
-              placeholder={panelType === 'llm' ? 'sk-...' : 'API key'}
+              placeholder={panelType === 'llm' ? t('wizard.apiKeyPlaceholder') : t('wizard.apiKey')}
               className={inputCls}
               autoComplete="new-password"
             />
@@ -145,7 +147,7 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
 
         {editableEndpoint && (
           <div className="mb-4">
-            <span className={labelCls}>Server URL</span>
+            <span className={labelCls}>{t('wizard.serverUrl')}</span>
             <input
               type="text"
               value={config.baseUrl ?? editableEndpoint}
@@ -173,7 +175,7 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
 
         {panelType === 'tts' && hasFields && (
           <p className="home-ui-font mt-1 text-xs text-[var(--text-tertiary)]">
-            Voice selection and advanced settings are available after creating your soul.
+            {t('wizard.voiceSettingsHint')}
           </p>
         )}
       </div>

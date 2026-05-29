@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { Bell, ChevronDown, List, Search, Upload } from 'lucide-react'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
@@ -17,6 +18,17 @@ import type { ProjectStatus } from './project-grid-card'
 import { queryKeys } from '@/shared/lib/query/keys'
 import { buildSpark } from '@/shared/lib/spark'
 import { useCharactersContext } from '@/entities/character'
+import { PageMotion } from '@/shared/ui'
+
+const listVariants: Variants = {
+  initial: {},
+  animate: { transition: { staggerChildren: 0.04 } },
+}
+
+const cardVariant: Variants = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
+}
 
 type FilterTab = 'all' | ProjectStatus
 
@@ -78,6 +90,7 @@ function SortableProjectListRow({ project, coverUrlFallback, onOpen, onExport }:
 }
 
 export default function ProjectsListPage() {
+  const { t } = useTranslation('common')
   const router = useRouter()
   const queryClient = useQueryClient()
   const { selectedId, cardList } = useCharactersContext()
@@ -107,6 +120,13 @@ export default function ProjectsListPage() {
   const activeCount = projects.filter(p => p.status === 'active').length
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+
+  const FILTER_TABS: Array<{ id: FilterTab; label: string }> = [
+    { id: 'all',      label: t('projects.filterAll') },
+    { id: 'active',   label: t('projects.filterActive') },
+    { id: 'paused',   label: t('projects.filterPaused') },
+    { id: 'archived', label: t('projects.filterArchived') },
+  ]
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -142,6 +162,7 @@ export default function ProjectsListPage() {
     }
   }
 
+  const emptyText = search ? t('projects.noResults') : t('projects.empty')
   const listContainer = 'rounded-2xl overflow-hidden border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]'
 
   const projectList = loading ? (
@@ -152,7 +173,7 @@ export default function ProjectsListPage() {
     </div>
   ) : filtered.length === 0 ? (
     <div className="flex h-[200px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-body text-[var(--text-tertiary)]">
-      {search ? 'No projects match your search' : 'No projects yet — click "+ New Project" to get started'}
+      {emptyText}
     </div>
   ) : isDndEnabled ? (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -192,7 +213,7 @@ export default function ProjectsListPage() {
     </div>
   ) : filtered.length === 0 ? (
     <div className="flex h-[200px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-body text-[var(--text-tertiary)]">
-      {search ? 'No projects match your search' : 'No projects yet — click "+ New Project" to get started'}
+      {emptyText}
     </div>
   ) : isDndEnabled ? (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -211,20 +232,35 @@ export default function ProjectsListPage() {
       </SortableContext>
     </DndContext>
   ) : (
-    <div className="grid grid-cols-4 gap-3">
-      {filtered.map(project => (
-        <ProjectGridCardConnected
-          key={project.id}
-          project={project}
-          coverUrlFallback={activeSoul?.avatar_url ?? project.active_soul?.avatar_url ?? undefined}
-          onOpen={() => router.push(`/projects/${project.id}`)}
-          onExport={() => handleExport(project)}
-        />
-      ))}
-    </div>
+    <motion.div
+      className="grid grid-cols-4 gap-3"
+      variants={listVariants}
+      initial="initial"
+      animate="animate"
+    >
+      <AnimatePresence>
+        {filtered.map(project => (
+          <motion.div
+            key={project.id}
+            variants={cardVariant}
+            exit={{ opacity: 0, transition: { duration: 0.1 } }}
+            whileHover={{ scale: 1.012, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.995 }}
+          >
+            <ProjectGridCardConnected
+              project={project}
+              coverUrlFallback={activeSoul?.avatar_url ?? project.active_soul?.avatar_url ?? undefined}
+              onOpen={() => router.push(`/projects/${project.id}`)}
+              onExport={() => handleExport(project)}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </motion.div>
   )
 
   return (
+    <PageMotion>
     <>
     <ImportProjectDialog
       open={importDialogOpen}
@@ -247,9 +283,9 @@ export default function ProjectsListPage() {
       <div className="mx-auto max-w-[1300px]">
         <header className="mb-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="font-serif text-[36px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">Projects</h1>
+            <h1 className="font-sans text-[36px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">{t('projects.title')}</h1>
             <p className="mt-1 text-body text-[var(--text-secondary)]">
-              Organize and manage your AI projects and pipelines
+              {t('projects.subtitle')}
             </p>
           </div>
 
@@ -258,7 +294,7 @@ export default function ProjectsListPage() {
               <Search size={15} className="text-[var(--text-tertiary)]" />
               <input
                 type="text"
-                placeholder="Search projects..."
+                placeholder={t('projects.searchPlaceholder')}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="w-full bg-transparent text-body text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
@@ -268,7 +304,7 @@ export default function ProjectsListPage() {
 
             <button
               type="button"
-              title="Import .inkt"
+              title={t('projects.importInkt')}
               onClick={() => setImportDialogOpen(true)}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
             >
@@ -287,43 +323,43 @@ export default function ProjectsListPage() {
               onClick={() => setShowWizard(true)}
               className="flex h-10 items-center gap-1 rounded-xl bg-[var(--accent-primary)] px-3 text-body font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-60"
             >
-              + New Project
+              {t('projects.newProject')}
               <ChevronDown size={14} />
             </button>
           </div>
         </header>
 
         <section className="mb-4 grid grid-cols-4 gap-3">
-          <StatCard label="Total Projects"  value={String(totalCount)}  accentColor={STAT_CARD_COLORS.violet} spark={buildSpark(projects.map(p => p.updated_at))} />
-          <StatCard label="Active Projects" value={String(activeCount)} accentColor={STAT_CARD_COLORS.green}  spark={buildSpark(projects.filter(p => p.status === 'active').map(p => p.updated_at))} />
-          <StatCard label="API Calls (24h)" value="—" accentColor={STAT_CARD_COLORS.indigo} />
-          <StatCard label="Compute Usage"   value="—" accentColor={STAT_CARD_COLORS.amber} />
+          <StatCard label={t('projects.statsTotal')}    value={String(totalCount)}  accentColor={STAT_CARD_COLORS.violet} spark={buildSpark(projects.map(p => p.updated_at))} />
+          <StatCard label={t('projects.statsActive')}   value={String(activeCount)} accentColor={STAT_CARD_COLORS.green}  spark={buildSpark(projects.filter(p => p.status === 'active').map(p => p.updated_at))} />
+          <StatCard label={t('projects.statsApiCalls')} value="—" accentColor={STAT_CARD_COLORS.indigo} />
+          <StatCard label={t('projects.statsCompute')}  value="—" accentColor={STAT_CARD_COLORS.amber} />
         </section>
 
         <section className="mb-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <h2 className="font-serif text-[30px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">Your Projects</h2>
+              <h2 className="font-sans text-[30px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{t('projects.yourProjects')}</h2>
               <div className="flex items-center gap-2">
-                {(['all', 'active', 'paused', 'archived'] as const).map(tab => (
+                {FILTER_TABS.map(tab => (
                   <button
-                    key={tab}
+                    key={tab.id}
                     type="button"
-                    onClick={() => setFilter(tab)}
-                    className={`h-8 rounded-lg px-3 text-body capitalize transition-colors ${
-                      filter === tab
+                    onClick={() => setFilter(tab.id)}
+                    className={`h-8 rounded-lg px-3 text-body transition-colors ${
+                      filter === tab.id
                         ? 'bg-[var(--sidebar-active)] text-[var(--text-primary)]'
                         : 'text-[var(--text-secondary)] hover:bg-[var(--surface-1)] hover:text-[var(--text-primary)]'
                     }`}
                   >
-                    {tab}
+                    {tab.label}
                   </button>
                 ))}
               </div>
             </div>
             <button
               type="button"
-              title={viewMode === 'list' ? 'Switch to grid view' : 'Switch to list view'}
+              title={viewMode === 'list' ? t('projects.switchToGrid') : t('projects.switchToList')}
               onClick={() => setViewMode(v => v === 'list' ? 'grid' : 'list')}
               className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
                 viewMode === 'list'
@@ -340,17 +376,18 @@ export default function ProjectsListPage() {
 
         <section className="rounded-2xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)]">
           <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-4 py-3">
-            <h3 className="font-serif text-[30px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">Recent Activity</h3>
+            <h3 className="font-sans text-[30px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{t('projects.recentActivity')}</h3>
             <button type="button" className="text-body font-medium text-[var(--accent-hover)] hover:text-[var(--accent-primary)]">
-              View All Activity
+              {t('projects.viewAllActivity')}
             </button>
           </div>
           <div className="px-4 py-6 text-center text-body text-[var(--text-tertiary)]">
-            Activity feed coming soon
+            {t('projects.activityComingSoon')}
           </div>
         </section>
       </div>
     </div>
     </>
+    </PageMotion>
   )
 }

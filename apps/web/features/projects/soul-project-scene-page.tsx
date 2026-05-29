@@ -1,6 +1,7 @@
 'use client'
 
 import { Check, ImageIcon, Box } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useProjectRuntimeContext } from '@/features/projects'
 
 function inferModelLabel(fileName: string): string {
@@ -11,6 +12,7 @@ function inferModelLabel(fileName: string): string {
 
 export default function SoulProjectScenePage() {
   const { project, models, scenes, loading, setActiveModel, setActiveScene } = useProjectRuntimeContext()
+  const { t } = useTranslation('common')
 
   if (loading) {
     return (
@@ -23,7 +25,7 @@ export default function SoulProjectScenePage() {
   if (!project?.active_soul_id) {
     return (
       <div className="flex h-full items-center justify-center text-body text-[var(--text-tertiary)]">
-        Bind a soul to this project first — go to Overview and use the Soul picker.
+        {t('projectDetail.bindSoulFirst')}
       </div>
     )
   }
@@ -31,24 +33,24 @@ export default function SoulProjectScenePage() {
   return (
     <div className="mx-auto max-w-[860px] px-6 py-8">
       <header className="mb-7">
-        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">Scene</h1>
+        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{t('projectDetail.scene')}</h1>
         <p className="mt-1 text-body text-[var(--text-secondary)]">
-          Choose which 3D model and background scene to render for this project.
+          {t('projectDetail.sceneSubtitle')}
         </p>
       </header>
 
       <section className="mb-8">
         <div className="mb-3 flex items-center gap-2">
           <Box size={15} className="text-[var(--text-secondary)]" />
-          <h2 className="text-body font-semibold text-[var(--text-primary)]">3D Model</h2>
+          <h2 className="text-body font-semibold text-[var(--text-primary)]">{t('projectDetail.model3d')}</h2>
           {project.active_model_id && (
-            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">Active</span>
+            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">{t('projectDetail.active')}</span>
           )}
         </div>
 
         {models.length === 0 ? (
           <div className="flex h-[120px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-body text-[var(--text-tertiary)]">
-            No models uploaded yet — go to Soul → Avatars to upload one.
+            {t('projectDetail.noModelsUploaded')}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">
@@ -91,15 +93,15 @@ export default function SoulProjectScenePage() {
       <section>
         <div className="mb-3 flex items-center gap-2">
           <ImageIcon size={15} className="text-[var(--text-secondary)]" />
-          <h2 className="text-body font-semibold text-[var(--text-primary)]">Background</h2>
+          <h2 className="text-body font-semibold text-[var(--text-primary)]">{t('projectDetail.background')}</h2>
           {project.active_scene_id && (
-            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">Active</span>
+            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">{t('projectDetail.active')}</span>
           )}
         </div>
 
         {scenes.length === 0 ? (
           <div className="flex h-[120px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-body text-[var(--text-tertiary)]">
-            No scenes uploaded yet — go to Soul → Scenes to upload one.
+            {t('projectDetail.noScenesUploaded')}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">

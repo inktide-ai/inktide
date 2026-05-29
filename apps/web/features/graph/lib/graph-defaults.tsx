@@ -8,16 +8,23 @@ import { ProcessNode } from '../nodes/process-node'
 import { OutputNode } from '../nodes/output-node'
 import { FloatingEdge } from '../edges/floating-edge'
 
+// ── Node accent colors (mirror --node-* CSS vars) ─────────────────────────────
+const NODE_ACCENT = {
+  input: '#EAB308',
+  llm:   '#6366F1',
+  tts:   '#10B981',
+} as const
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type Tool = 'select' | 'pan' | 'connect' | 'lock'
 export type SaveStatus = 'saved' | 'saving' | 'dirty' | 'error'
 
 export const STATUS_COLOR: Record<SaveStatus, string> = {
-  saved:  '#4B5563',
-  saving: '#6366F1',
-  dirty:  '#F59E0B',
-  error:  '#EF4444',
+  saved:  'var(--graph-status-saved)',
+  saving: 'var(--graph-status-saving)',
+  dirty:  'var(--graph-status-dirty)',
+  error:  'var(--graph-status-error)',
 }
 
 // ── Shared handle style ───────────────────────────────────────────────────────
@@ -42,12 +49,12 @@ export function ThemeNode({ data, selected }: NodeProps) {
   const d = data as unknown as ThemeNodeData
   return (
     <div style={{
-      background: '#252524',
-      border: `1px solid ${selected ? '#6b6b67' : '#3E3E3B'}`,
+      background: 'var(--graph-node-surface)',
+      border: `1px solid ${selected ? 'var(--graph-node-border-focus)' : 'var(--graph-node-border)'}`,
       borderRadius: 9, padding: '9px 13px',
       minWidth: 117, maxWidth: 153,
       boxShadow: selected
-        ? '0 0 0 1.5px #6b6b67, 0 6px 22px rgba(0,0,0,0.5)'
+        ? '0 0 0 1.5px var(--graph-node-border-focus), 0 6px 22px rgba(0,0,0,0.5)'
         : '0 4px 14px rgba(0,0,0,0.4)',
       transition: 'border-color 0.15s, box-shadow 0.15s',
       userSelect: 'none',
@@ -55,16 +62,16 @@ export function ThemeNode({ data, selected }: NodeProps) {
       {!d.isStart && <Handle type="target" position={Position.Left} style={handleStyle} />}
       {d.badge && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-          <span style={{ background: d.badgeColor ?? '#555', borderRadius: 4, width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, flexShrink: 0 }}>
+          <span style={{ background: d.badgeColor ?? 'var(--graph-node-border)', borderRadius: 4, width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, flexShrink: 0 }}>
             {d.badge}
           </span>
-          <span style={{ fontSize: 10, fontWeight: 600, color: '#c8c8c4', letterSpacing: 0.1 }}>{d.label}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--graph-node-text)', letterSpacing: 0.1 }}>{d.label}</span>
         </div>
       )}
       {!d.badge && (
-        <div style={{ fontSize: 10, fontWeight: 600, color: '#c8c8c4', marginBottom: d.sub ? 4 : 0 }}>{d.label}</div>
+        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--graph-node-text)', marginBottom: d.sub ? 4 : 0 }}>{d.label}</div>
       )}
-      {d.sub && <div style={{ fontSize: 10, color: '#7a7a76', lineHeight: 1.4 }}>{d.sub}</div>}
+      {d.sub && <div style={{ fontSize: 10, color: 'var(--graph-node-text-muted)', lineHeight: 1.4 }}>{d.sub}</div>}
       <Handle type="source" position={Position.Right} style={handleStyle} />
     </div>
   )
@@ -96,21 +103,21 @@ export const initialNodes = [
   { id: 'n-twitch',   type: 'source',  position: { x: 80,   y: 360 }, data: { platform: 'twitch' } },
 
   // Input aggregator
-  { id: 'n-input',    type: 'process', position: { x: 340,  y: 220 }, data: { label: 'Input', subLabel: 'INPUT', accent: '#EAB308', icon: 'input' } },
+  { id: 'n-input',    type: 'process', position: { x: 340,  y: 220 }, data: { label: 'Input', subLabel: 'INPUT', accent: NODE_ACCENT.input, icon: 'input' } },
 
   // Agent Context group card
   { id: 'n-context',  type: 'agentContext', position: { x: 590, y: 80 }, data: {} },
 
   // Right pipeline
-  { id: 'n-llm',      type: 'process', position: { x: 960,  y: 220 }, data: { label: 'LLM', subLabel: 'LLM', accent: '#6366F1', icon: 'llm' } },
-  { id: 'n-tts',      type: 'process', position: { x: 1160, y: 220 }, data: { label: 'TTS', subLabel: 'TTS', accent: '#10B981', icon: 'tts' } },
+  { id: 'n-llm',      type: 'process', position: { x: 960,  y: 220 }, data: { label: 'LLM', subLabel: 'LLM', accent: NODE_ACCENT.llm, icon: 'llm' } },
+  { id: 'n-tts',      type: 'process', position: { x: 1160, y: 220 }, data: { label: 'TTS', subLabel: 'TTS', accent: NODE_ACCENT.tts, icon: 'tts' } },
   { id: 'n-output',   type: 'outputNode', position: { x: 1360, y: 220 }, data: {} },
 ]
 
 const mkFloat = (id: string, source: string, target: string) => ({
   id, source, target,
   type: 'floating',
-  style: { stroke: 'rgba(255,255,255,0.14)', strokeWidth: 1.5 },
+  style: { stroke: 'var(--graph-edge-stroke)', strokeWidth: 1.5 },
 })
 
 export const initialEdges = [

@@ -83,7 +83,7 @@ export function GenericChannelForm({ soulId, connectorId, channels }: Props) {
   }
 
   const fieldCls = cn(
-    'w-full rounded-xl border px-3 py-2.5 text-[0.875rem] outline-none transition-[border-color,box-shadow] duration-150',
+    'w-full rounded-xl border px-3 py-2.5 text-body outline-none transition-[border-color,box-shadow] duration-150',
     'border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]',
     'focus:border-[var(--border-default)] focus:ring-0 focus:shadow-[0_0_0_2px_rgba(255,255,255,0.08)]',
   )
@@ -94,7 +94,7 @@ export function GenericChannelForm({ soulId, connectorId, channels }: Props) {
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
           <div className="px-6 pt-5 pb-4">
             <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Connected channels</h3>
-            <p className="mt-1 text-[14px] text-[var(--text-secondary)]">
+            <p className="mt-1 text-body text-[var(--text-secondary)]">
               Manage your connected {t(`${connectorId}.title`)} channels.
             </p>
           </div>
@@ -110,8 +110,8 @@ export function GenericChannelForm({ soulId, connectorId, channels }: Props) {
                   )}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-semibold m-0 text-[var(--text-primary)]">{row.channel_name}</p>
-                    <p className="text-[14px] font-mono m-0 text-[var(--text-secondary)] truncate">
+                    <p className="text-body font-semibold m-0 text-[var(--text-primary)]">{row.channel_name}</p>
+                    <p className="text-body font-mono m-0 text-[var(--text-secondary)] truncate">
                       {row.channel_id ?? '—'} · @{row.bot_username}
                     </p>
                   </div>
@@ -131,7 +131,7 @@ export function GenericChannelForm({ soulId, connectorId, channels }: Props) {
                     type="button"
                     disabled={isRowBusy}
                     onClick={() => handleRemove(row)}
-                    className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-[14px] text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-body text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     aria-label="Remove"
                   >
                     ✕
@@ -146,13 +146,13 @@ export function GenericChannelForm({ soulId, connectorId, channels }: Props) {
       <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
         <div className="px-6 pt-5 pb-2">
           <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Add a channel</h3>
-          <p className="mt-1 text-[14px] text-[var(--text-secondary)]">
+          <p className="mt-1 text-body text-[var(--text-secondary)]">
             Connect a new {t(`${connectorId}.title`)} channel to this soul.
           </p>
         </div>
         <div className="px-6 pb-5 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="field-channelId" className="text-[12px] font-semibold uppercase tracking-[0.06em] text-[var(--text-secondary)]">
+            <label htmlFor="field-channelId" className="text-xs font-semibold uppercase tracking-[0.06em] text-[var(--text-secondary)]">
               {t(`${connectorId}.channelIdLabel`)}
             </label>
             <input
@@ -164,14 +164,14 @@ export function GenericChannelForm({ soulId, connectorId, channels }: Props) {
               autoComplete="off"
             />
             {t(`${connectorId}.channelIdHint`) && (
-              <span className="text-[14px] text-[var(--text-secondary)] leading-snug">
+              <span className="text-body text-[var(--text-secondary)] leading-snug">
                 {t(`${connectorId}.channelIdHint`)}
               </span>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="field-displayName" className="text-[12px] font-semibold uppercase tracking-[0.06em] text-[var(--text-secondary)]">
+            <label htmlFor="field-displayName" className="text-xs font-semibold uppercase tracking-[0.06em] text-[var(--text-secondary)]">
               {t('form.displayName')}
             </label>
             <input
@@ -185,7 +185,7 @@ export function GenericChannelForm({ soulId, connectorId, channels }: Props) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="field-botUsername" className="text-[12px] font-semibold uppercase tracking-[0.06em] text-[var(--text-secondary)]">
+            <label htmlFor="field-botUsername" className="text-xs font-semibold uppercase tracking-[0.06em] text-[var(--text-secondary)]">
               {t('form.botName')}
             </label>
             <input
@@ -198,7 +198,7 @@ export function GenericChannelForm({ soulId, connectorId, channels }: Props) {
             />
           </div>
 
-          {actionError && <p className="text-[14px] text-red-400 m-0">{actionError}</p>}
+          {actionError && <p className="text-body text-red-400 m-0">{actionError}</p>}
         </div>
         <div className="flex items-center justify-end px-6 py-4 border-t border-[var(--border-subtle)]">
           <button
@@ -206,7 +206,7 @@ export function GenericChannelForm({ soulId, connectorId, channels }: Props) {
             disabled={addMutation.isPending}
             onClick={handleAdd}
             className={cn(
-              'px-4 py-2 rounded-lg font-semibold text-[14px] transition-[filter,opacity] duration-150',
+              'px-4 py-2 rounded-lg font-semibold text-body transition-[filter,opacity] duration-150',
               'hover:brightness-110 disabled:opacity-45 disabled:cursor-not-allowed',
               sc.addBtn,
             )}

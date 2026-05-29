@@ -23,7 +23,7 @@ export function SoulListItem({ id, name, href, selected, avatarUrl }: SoulListIt
           : 'text-[var(--text-secondary)] hover:bg-[var(--surface-1)] hover:text-[var(--text-primary)]',
       )}
     >
-      <div className="h-7 w-7 overflow-hidden rounded-md bg-gradient-to-br from-[#8456FF] to-[#EC4899] text-[14px] font-semibold text-white grid place-items-center shrink-0">
+      <div className="h-7 w-7 overflow-hidden rounded-md bg-gradient-to-br from-[#8456FF] to-[#EC4899] text-body font-semibold text-white grid place-items-center shrink-0">
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
@@ -31,7 +31,7 @@ export function SoulListItem({ id, name, href, selected, avatarUrl }: SoulListIt
           name.charAt(0).toUpperCase()
         )}
       </div>
-      <p className="min-w-0 flex-1 truncate text-[14px] font-medium">{name}</p>
+      <p className="min-w-0 flex-1 truncate text-body font-medium">{name}</p>
       <span className="hidden">{id}</span>
     </Link>
   )

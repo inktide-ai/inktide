@@ -18,11 +18,11 @@ export function ElevenLabsSettings() {
   return (
     <>
       <section className="mb-6">
-        <h2 className="mb-3 text-[0.9375rem] font-semibold text-[var(--text-heading)]">Connection</h2>
+        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">Connection</h2>
         <ApiKeyConnectionPanel providerName="ElevenLabs" providerId="elevenlabs" />
       </section>
       <section className="mb-6">
-        <h2 className="mb-3 text-[0.9375rem] font-semibold text-[var(--text-heading)]">Voice & Model</h2>
+        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">Voice & Model</h2>
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] divide-y divide-[var(--border-subtle)]">
           <SelectField
             label="Voice"
@@ -40,7 +40,7 @@ export function ElevenLabsSettings() {
         </div>
       </section>
       <section>
-        <h2 className="mb-3 text-[0.9375rem] font-semibold text-[var(--text-heading)]">Parameters</h2>
+        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">Parameters</h2>
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] divide-y divide-[var(--border-subtle)]">
           <ParamRow icon={<SliderIcon />} name="Stability" desc="Higher = more consistent, lower = more expressive" min={0} max={1} step={0.01} decimals={2} value={tts.stability} onChange={(v) => patch({ stability: v })} />
           <ParamRow icon={<SliderIcon />} name="Similarity Boost" desc="How closely the voice matches the original speaker" min={0} max={1} step={0.01} decimals={2} value={tts.similarityBoost} onChange={(v) => patch({ similarityBoost: v })} />
@@ -49,8 +49,8 @@ export function ElevenLabsSettings() {
           <div className="flex items-center gap-4 px-5 py-4">
             <span className="w-5 shrink-0"><SliderIcon /></span>
             <div className="w-52 shrink-0">
-              <p className="text-[0.875rem] font-medium text-[var(--text-primary)]">Speaker Boost</p>
-              <p className="mt-0.5 text-[0.75rem] leading-snug text-[var(--text-tertiary)]">Enhances speaker similarity</p>
+              <p className="text-body font-medium text-[var(--text-primary)]">Speaker Boost</p>
+              <p className="mt-0.5 text-xs leading-snug text-[var(--text-tertiary)]">Enhances speaker similarity</p>
             </div>
             <div className="flex-1" />
             <label className="relative inline-flex cursor-pointer items-center">

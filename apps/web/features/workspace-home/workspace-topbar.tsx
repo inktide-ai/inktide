@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
 import { Add, CaretDownSmall, Notification, Search } from '@/shared/ui/icons'
 import { useSearch } from '@/features/workspace-home/hooks/useSearch'
 import { SearchDropdown } from './search-dropdown'
@@ -10,13 +11,14 @@ interface WorkspaceTopBarProps {
 
 export function WorkspaceTopBar({ onCreateSoul }: WorkspaceTopBarProps = {}) {
   const { query, setQuery, results, isOpen, activeIndex, inputRef, close, navigate, handleKeyDown } = useSearch()
+  const { t } = useTranslation('common')
 
   return (
     <header className="mb-5 flex items-start justify-between gap-4">
       <div>
-        <h1 className="font-serif text-[34px] font-bold tracking-[-0.03em] text-[var(--text-primary)]">Dashboard</h1>
+        <h1 className="font-sans text-[34px] font-bold tracking-[-0.03em] text-[var(--text-primary)]">{t('home.title')}</h1>
         <p className="home-ui-font mt-1 text-[15px] font-medium text-[var(--text-secondary)]">
-          All your souls, projects and creations in one place.
+          {t('home.subtitle')}
         </p>
       </div>
 
@@ -30,11 +32,11 @@ export function WorkspaceTopBar({ onCreateSoul }: WorkspaceTopBarProps = {}) {
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Search souls, projects..."
-              className="home-ui-font w-full bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
+              placeholder={t('home.searchPlaceholder')}
+              className="home-ui-font w-full bg-transparent text-body font-medium text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
             />
             {!query && (
-              <span className="home-ui-font rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-[14px] font-medium text-[var(--text-secondary)]">
+              <span className="home-ui-font rounded bg-[var(--surface-2)] px-1.5 py-0.5 text-body font-medium text-[var(--text-secondary)]">
                 ⌘K
               </span>
             )}
@@ -60,10 +62,10 @@ export function WorkspaceTopBar({ onCreateSoul }: WorkspaceTopBarProps = {}) {
         <button
           type="button"
           onClick={onCreateSoul}
-          className="home-ui-font flex h-10 items-center gap-1 rounded-xl bg-[var(--accent-primary)] px-3 text-[14px] font-semibold text-white hover:bg-[var(--accent-hover)]"
+          className="home-ui-font flex h-10 items-center gap-1 rounded-xl bg-[var(--accent-primary)] px-3 text-body font-semibold text-white hover:bg-[var(--accent-hover)]"
         >
           <Add size={15} />
-          New soul
+          {t('home.newSoul')}
           <CaretDownSmall size={14} />
         </button>
       </div>

@@ -114,5 +114,31 @@
     "maxLength": "max {{max}} characters",
     "errorEmpty": "Enter a name",
     "errorGeneric": "Could not create tag"
+  },
+  "soulPage": {
+    "activeBadge": "Active Scene",
+    "livePreview": "Live Preview",
+    "allScenes": "All Scenes",
+    "allScenesDesc": "Choose or create the perfect background.",
+    "uploadScene": "Upload Scene",
+    "uploadSceneSubtitle": "Image, Video, or GIF",
+    "noSceneSelected": "No scene selected",
+    "controls": {
+      "title": "Scene Controls",
+      "subtitle": "Adjust and customize your current scene.",
+      "brightness": "Brightness",
+      "blur": "Blur",
+      "colorFilter": "Color Filter"
+    },
+    "filterAll": "All",
+    "filterDefault": "Default",
+    "filterCustom": "Custom",
+    "kindDefault": "Default",
+    "kindCustom": "Custom",
+    "colorNone": "None",
+    "colorPurpleDream": "Purple Dream",
+    "colorNightBlue": "Night Blue",
+    "colorWarmSunset": "Warm Sunset",
+    "colorMintCool": "Mint Cool"
   }
 }

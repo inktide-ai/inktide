@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import React from 'react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { GridLayout, useContainerWidth, verticalCompactor } from 'react-grid-layout'
 import type { LayoutItem, Layout } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
@@ -18,15 +19,6 @@ import { getBannerAccent } from '@/shared/ui/banner-presets'
 import { type HubTabId, type CardLayout, useSoulHubLayout } from '@/shared/hooks/useHubLayout'
 
 type SoulTabId = 'profile' | 'brain' | 'voice' | 'emotion' | 'avatars' | 'scene'
-
-const SOUL_CARD_META: Record<SoulTabId, { label: string; desc: string }> = {
-  profile:  { label: 'Profile',  desc: 'Identity, name, slug, personality, and appearance.' },
-  brain:    { label: 'Brain',    desc: 'Language model provider, temperature, and generation settings.' },
-  voice:    { label: 'Voice',    desc: 'Text-to-speech provider and voice style.' },
-  emotion:  { label: 'Emotion',  desc: 'Emotional expression mapping and reaction thresholds.' },
-  avatars:  { label: 'Avatars',  desc: 'Visual models — VRM, GLB, Live2D, and avatar presets.' },
-  scene:    { label: 'Scenes',   desc: 'Background scene and OBS browser-source configuration.' },
-}
 
 function buildSoulLinks(soulId: string): { tabId: SoulTabId; href: string; icon: ReactNode }[] {
   return [
@@ -78,11 +70,23 @@ function SizeIcon({ w, h }: { w: number; h: number }) {
 function capitalize(s: string) { return s.charAt(0).toUpperCase() + s.slice(1) }
 
 export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
+  const { t: tp } = useTranslation('profile')
+  const { t: tc } = useTranslation('common')
+  const { t: te } = useTranslation('emotion')
   const { selected, loading, loadError, selectCard, selectedId } = useCharactersContext()
   const [isEditMode, setIsEditMode] = useState(false)
   const [activeMenu, setActiveMenu] = useState<HubTabId | null>(null)
   const { layout, updateLayout, resetLayout } = useSoulHubLayout(soulId)
   const { width, containerRef } = useContainerWidth({ initialWidth: 1100 })
+
+  const SOUL_CARD_META: Record<SoulTabId, { label: string; desc: string }> = {
+    profile: { label: tp('tabs.profile.label'), desc: tp('tabs.profile.desc') },
+    brain:   { label: tp('tabs.brain.label'),   desc: tp('tabs.brain.desc') },
+    voice:   { label: tp('tabs.voice.label'),   desc: tp('tabs.voice.desc') },
+    emotion: { label: te('title'),              desc: te('subtitle') },
+    avatars: { label: tp('tabs.avatars.label'), desc: tp('tabs.avatars.desc') },
+    scene:   { label: tp('tabs.scene.label'),   desc: tp('tabs.scene.desc') },
+  }
 
   useEffect(() => {
     if (soulId && (!selected || selectedId !== soulId)) {
@@ -112,13 +116,13 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
     return (
       <div className="text-center py-16 px-8 text-(--text-muted)">
         <div className="text-[3rem] mb-4 opacity-40">⚠</div>
-        <div className="text-[1.125rem] font-bold text-(--text-primary) mb-2">Failed to load</div>
-        <p className="text-[0.8125rem] max-w-[360px] mx-auto leading-relaxed">{loadError}</p>
+        <div className="text-[1.125rem] font-bold text-(--text-primary) mb-2">{tc('emptyState.failedToLoad')}</div>
+        <p className="text-sm max-w-[360px] mx-auto leading-relaxed">{loadError}</p>
       </div>
     )
   }
 
-  const accentColor = selected ? getBannerAccent(selected.appearance.bannerColorIndex) : '#6366f1'
+  const accentColor = selected ? getBannerAccent(selected.appearance?.bannerColorIndex) : '#6366f1'
 
   const tags: TagItem[] = selected ? [
     ...selected.channels.map(ch => {
@@ -126,10 +130,10 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
       const cat: TagCategory = p === 'discord' ? 'discord' : p === 'twitch' ? 'twitch' : 'channel'
       return { label: capitalize(ch.platform), style: tagStyle(cat) }
     }),
-    selected.tts.providerId ? { label: capitalize(selected.tts.providerId), style: tagStyle('tts') } : null,
-    selected.llm.modelId ? { label: selected.llm.modelId, style: tagStyle('llm') } : null,
-    selected.memory.enabled ? { label: 'Memory', style: tagStyle('memory') } : null,
-    selected.autoPilot.enabled ? { label: 'AutoPilot', style: tagStyle('autopilot') } : null,
+    selected.tts?.providerId ? { label: capitalize(selected.tts.providerId), style: tagStyle('tts') } : null,
+    selected.llm?.modelId ? { label: selected.llm.modelId, style: tagStyle('llm') } : null,
+    selected.memory?.enabled ? { label: 'Memory', style: tagStyle('memory') } : null,
+    selected.autoPilot?.enabled ? { label: 'AutoPilot', style: tagStyle('autopilot') } : null,
   ].filter(Boolean) as TagItem[] : []
 
   function handleLayoutChange(newLayout: Layout) {
@@ -165,16 +169,16 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
             <div className="flex items-start gap-2.5">
               <div className="flex flex-col gap-0.5">
                 <span className="text-[1rem] font-bold text-(--text-primary) leading-[1.2]">{selected?.name ?? '…'}</span>
-                {selected?.slug && <span className="text-[0.8125rem] text-(--text-muted)">/{selected.slug}</span>}
+                {selected?.slug && <span className="text-sm text-(--text-muted)">/{selected.slug}</span>}
               </div>
             </div>
             {selected?.personality && (
-              <p className="text-[0.8125rem] text-(--text-muted) leading-relaxed m-0 whitespace-nowrap overflow-hidden text-ellipsis">{selected.personality}</p>
+              <p className="text-sm text-(--text-muted) leading-relaxed m-0 whitespace-nowrap overflow-hidden text-ellipsis">{selected.personality}</p>
             )}
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-[0.3125rem]">
                 {tags.map(tag => (
-                  <span key={tag.label} className="py-[0.1875rem] px-2 bg-white/[0.055] border border-white/[0.07] rounded-full text-[0.6875rem] font-medium text-(--text-muted) whitespace-nowrap" style={tag.style}>
+                  <span key={tag.label} className="py-[0.1875rem] px-2 bg-white/[0.055] border border-white/[0.07] rounded-full text-caption font-medium text-(--text-muted) whitespace-nowrap" style={tag.style}>
                     {tag.label}
                   </span>
                 ))}
@@ -185,12 +189,12 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
           <div className="shrink-0 ml-auto flex items-center gap-0 pl-6">
             <div className="flex flex-col items-center text-center px-4">
               <span className="text-[1.75rem] font-bold text-(--text-primary) leading-none block">{soulLinks.length}</span>
-              <span className="text-[0.6875rem] text-(--text-muted) mt-[0.2rem]">settings</span>
+              <span className="text-caption text-(--text-muted) mt-[0.2rem]">{tc('hub.settings')}</span>
             </div>
             <div className="w-px h-8 bg-white/[0.07] shrink-0" />
             <div className="flex flex-col items-center text-center px-4">
               <span className="text-[1.75rem] font-bold text-(--text-primary) leading-none block">{selected?.channels.length ?? 0}</span>
-              <span className="text-[0.6875rem] text-(--text-muted) mt-[0.2rem]">channels</span>
+              <span className="text-caption text-(--text-muted) mt-[0.2rem]">{tc('hub.channels')}</span>
             </div>
           </div>
         </div>
@@ -227,8 +231,8 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
                         {link.icon}
                       </div>
                       <div className="tab-card-body relative z-[2] min-w-0">
-                        <div className="tab-card-label text-[0.9375rem] font-semibold text-white/88 tracking-[-0.01em] mb-[0.3rem]">{meta.label}</div>
-                        <div className="tab-card-desc text-[0.8125rem] text-white/36 leading-[1.45] pr-6">{meta.desc}</div>
+                        <div className="tab-card-label text-body-md font-semibold text-white/88 tracking-[-0.01em] mb-[0.3rem]">{meta.label}</div>
+                        <div className="tab-card-desc text-sm text-white/36 leading-[1.45] pr-6">{meta.desc}</div>
                       </div>
                     </div>
                   ) : (
@@ -245,15 +249,15 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
                         {link.icon}
                       </div>
                       <div className="tab-card-body relative z-[2] min-w-0">
-                        <div className="tab-card-label text-[0.9375rem] font-semibold text-white/88 tracking-[-0.01em] mb-[0.3rem]">{meta.label}</div>
-                        <div className="tab-card-desc text-[0.8125rem] text-white/36 leading-[1.45] pr-6">{meta.desc}</div>
+                        <div className="tab-card-label text-body-md font-semibold text-white/88 tracking-[-0.01em] mb-[0.3rem]">{meta.label}</div>
+                        <div className="tab-card-desc text-sm text-white/36 leading-[1.45] pr-6">{meta.desc}</div>
                       </div>
                     </Link>
                   )}
                   {isEditMode && (
                     <>
                       <button
-                        className="absolute top-2 right-2 w-[26px] h-[26px] rounded-[6px] bg-black/35 border border-white/12 text-white/50 cursor-pointer flex items-center justify-center z-[20] transition-[background,color,border-color] duration-150 backdrop-blur-[6px] hover:bg-[rgba(99,102,241,0.2)] hover:border-[rgba(99,102,241,0.4)] hover:text-[#a5b4fc]"
+                        className="absolute top-2 right-2 w-[26px] h-[26px] rounded-[6px] bg-black/35 border border-white/12 text-white/50 cursor-pointer flex items-center justify-center z-[20] transition-[background,color,border-color] duration-150 backdrop-blur-[6px] hover:bg-[rgba(99,102,241,0.2)] hover:border-[rgba(99,102,241,0.4)] hover:text-indigo-300"
                         onClick={e => { e.stopPropagation(); setActiveMenu(prev => prev === item.i ? null : item.i) }}
                       >
                         <Grid size={13} />
@@ -267,8 +271,8 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
                             <button
                               key={label}
                               className={cn(
-                                'flex flex-col items-center gap-[5px] py-2 px-[10px] rounded-[8px] bg-transparent border border-white/[0.07] text-white/45 cursor-pointer text-[10px] font-semibold tracking-[0.03em] transition-all duration-[120ms] whitespace-nowrap hover:bg-white/[0.06] hover:border-white/[0.15] hover:text-white/85',
-                                item.w === w && item.h === h && 'bg-[rgba(99,102,241,0.15)] border-[rgba(99,102,241,0.45)] text-[#a5b4fc]',
+                                'flex flex-col items-center gap-[5px] py-2 px-[10px] rounded-[8px] bg-transparent border border-white/[0.07] text-white/45 cursor-pointer text-2xs font-semibold tracking-[0.03em] transition-all duration-[120ms] whitespace-nowrap hover:bg-white/[0.06] hover:border-white/[0.15] hover:text-white/85',
+                                item.w === w && item.h === h && 'bg-[rgba(99,102,241,0.15)] border-[rgba(99,102,241,0.45)] text-indigo-300',
                               )}
                               onClick={() => handleSizeChange(item.i, w, h)}
                             >
@@ -290,20 +294,20 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
         <div className="flex justify-end items-center gap-[0.625rem] max-w-[1100px] mx-auto w-full pt-6 pb-8">
           {isEditMode && (
             <button
-              className="inline-flex items-center py-2 px-4 bg-[rgba(15,15,20,0.7)] border border-white/[0.07] rounded-full text-white/35 font-[var(--font-ui)] text-[0.8125rem] cursor-pointer transition-all duration-150 backdrop-blur-[8px] hover:border-[rgba(244,63,94,0.35)] hover:text-[rgba(244,63,94,0.75)] hover:bg-[rgba(244,63,94,0.05)]"
+              className="inline-flex items-center py-2 px-4 bg-[rgba(15,15,20,0.7)] border border-white/[0.07] rounded-full text-white/35 font-[var(--font-ui)] text-sm cursor-pointer transition-all duration-150 backdrop-blur-[8px] hover:border-[rgba(244,63,94,0.35)] hover:text-[rgba(244,63,94,0.75)] hover:bg-[rgba(244,63,94,0.05)]"
               onClick={() => resetLayout()}
             >
-              Reset to default
+              {tc('hub.resetToDefault')}
             </button>
           )}
           <button
             className={cn(
-              'inline-flex items-center gap-1.5 py-2 px-[1.125rem] bg-[rgba(15,15,20,0.85)] border border-white/10 rounded-full text-white/65 font-[var(--font-ui)] text-[0.8125rem] font-medium cursor-pointer transition-all duration-150 ease backdrop-blur-[12px] shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:bg-[rgba(30,30,40,0.9)] hover:border-white/[0.18] hover:text-white/90',
-              isEditMode && 'bg-[rgba(99,102,241,0.15)] border-[rgba(99,102,241,0.4)] text-[#a5b4fc] hover:bg-[rgba(99,102,241,0.25)] hover:border-[rgba(99,102,241,0.55)]',
+              'inline-flex items-center gap-1.5 py-2 px-[1.125rem] bg-[rgba(15,15,20,0.85)] border border-white/10 rounded-full text-white/65 font-[var(--font-ui)] text-sm font-medium cursor-pointer transition-all duration-150 ease backdrop-blur-[12px] shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:bg-[rgba(30,30,40,0.9)] hover:border-white/[0.18] hover:text-white/90',
+              isEditMode && 'bg-[rgba(99,102,241,0.15)] border-[rgba(99,102,241,0.4)] text-indigo-300 hover:bg-[rgba(99,102,241,0.25)] hover:border-[rgba(99,102,241,0.55)]',
             )}
             onClick={() => setIsEditMode(prev => !prev)}
           >
-            {isEditMode ? 'Done' : 'Edit layout'}
+            {isEditMode ? tc('hub.done') : tc('hub.editLayout')}
           </button>
         </div>
 

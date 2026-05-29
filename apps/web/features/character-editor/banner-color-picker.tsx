@@ -71,9 +71,9 @@ export function BannerColorPicker({ value, onChange }: BannerColorPickerProps) {
 
           {/* Hex input row */}
           <div className="flex items-center gap-[0.375rem] bg-[#12161C] border border-[#2A2E32] rounded-[8px] px-3 py-[0.45rem] transition-[border-color] duration-150 focus-within:border-[rgba(237,62,62,0.5)] focus-within:shadow-[0_0_0_2px_rgba(237,62,62,0.08)]">
-            <span className="font-mono text-[0.875rem] text-(--text-muted) select-none">#</span>
+            <span className="font-mono text-body text-(--text-muted) select-none">#</span>
             <input
-              className="flex-1 bg-transparent border-none outline-none font-mono text-[0.875rem] text-(--text-primary) tracking-[0.06em] uppercase"
+              className="flex-1 bg-transparent border-none outline-none font-mono text-body text-(--text-primary) tracking-[0.06em] uppercase"
               value={hexInput}
               onChange={(e) => applyHex(e.target.value)}
               spellCheck={false}

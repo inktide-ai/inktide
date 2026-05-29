@@ -1166,6 +1166,7 @@
         "dependencies": {
           "Inktide.API.Billing.Application": "1.0.0",
           "Inktide.API.Core": "1.0.0",
+          "MailKit": "4.9.0",
           "Microsoft.EntityFrameworkCore": "10.0.0",
           "Microsoft.EntityFrameworkCore.Relational": "10.0.0",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.0",
@@ -1222,6 +1223,7 @@
           "AspNetCore.HealthChecks.UI.Client": "9.0.0",
           "Inktide.API.Connector.Application": "1.0.0",
           "Inktide.API.Core": "1.0.0",
+          "Inktide.API.Soul.Domain": "1.0.0",
           "Microsoft.EntityFrameworkCore": "10.0.0",
           "StackExchange.Redis": "2.8.24"
         },
@@ -1434,7 +1436,8 @@
       },
       "Inktide.API.Organization.Application/1.0.0": {
         "dependencies": {
-          "Inktide.API.Core": "1.0.0"
+          "Inktide.API.Core": "1.0.0",
+          "Microsoft.EntityFrameworkCore": "10.0.0"
         },
         "runtime": {
           "Inktide.API.Organization.Application.dll": {

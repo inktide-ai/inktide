@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 
 const PLUGINS: Array<[string, string, boolean]> = [
@@ -27,19 +28,27 @@ export function SoulPluginsCard() {
           size={14}
           className={`mr-3 shrink-0 text-[var(--text-tertiary)] transition-transform duration-150 ${open ? 'rotate-90' : ''}`}
         />
-        <span className="text-[14px] font-medium text-[var(--text-heading)]">Active Plugins</span>
-        <span className="ml-auto mr-3 text-[14px] text-[var(--text-secondary)]">{PLUGINS.length} plugins · {active} active</span>
+        <span className="text-body font-medium text-[var(--text-heading)]">Active Plugins</span>
+        <span className="ml-auto mr-3 text-body text-[var(--text-secondary)]">{PLUGINS.length} plugins · {active} active</span>
         <button
           type="button"
-          className="text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           onClick={e => e.stopPropagation()}
         >
           Manage
         </button>
       </div>
 
-      {open && (
-        <div className="border-t border-[var(--border-divider)] px-5 pb-4 pt-3">
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div className="border-t border-[var(--border-divider)] px-5 pb-4 pt-3">
           <div className="space-y-1.5">
             {PLUGINS.map(([name, version, enabled]) => (
               <div
@@ -47,8 +56,8 @@ export function SoulPluginsCard() {
                 className="flex items-center justify-between rounded-md border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2"
               >
                 <div>
-                  <p className="text-[14px] text-[var(--text-primary)]">{name}</p>
-                  <p className="text-[12px] text-[var(--text-tertiary)]">{version}</p>
+                  <p className="text-body text-[var(--text-primary)]">{name}</p>
+                  <p className="text-xs text-[var(--text-tertiary)]">{version}</p>
                 </div>
                 <button
                   type="button"
@@ -61,12 +70,14 @@ export function SoulPluginsCard() {
           </div>
           <button
             type="button"
-            className="mt-3 h-8 w-full rounded-md border border-[var(--border-default)] bg-[var(--surface-1)] text-[14px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
+            className="mt-3 h-8 w-full rounded-md border border-[var(--border-default)] bg-[var(--surface-1)] text-body font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
           >
             Browse Plugins
           </button>
-        </div>
-      )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -116,7 +116,7 @@ export function AddNodePanel({ anchorRef, onAdd, onClose }: AddNodePanelProps) {
       style={{
         position: 'absolute', bottom: 80, left: '50%', transform: 'translateX(-50%)',
         zIndex: 20, minWidth: 210,
-        background: '#0F1117',
+        background: 'var(--graph-canvas-bg)',
         border: '1px solid rgba(255,255,255,0.10)',
         borderRadius: 10, padding: '4px',
         boxShadow: '0 16px 48px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.4)',
@@ -131,7 +131,7 @@ export function AddNodePanel({ anchorRef, onAdd, onClose }: AddNodePanelProps) {
           <div style={{
             padding: '5px 10px 2px',
             fontSize: 10, fontWeight: 500,
-            color: '#4B5563', letterSpacing: '0.01em',
+            color: 'var(--graph-toolbar-icon)', letterSpacing: '0.01em',
           }}>
             {cat.label}
           </div>
@@ -145,7 +145,7 @@ export function AddNodePanel({ anchorRef, onAdd, onClose }: AddNodePanelProps) {
                   width: '100%', display: 'flex', alignItems: 'center', gap: 8,
                   padding: '6px 10px', borderRadius: 6, border: 'none',
                   background: 'transparent', cursor: 'pointer',
-                  color: '#E6EAF2', transition: 'background 0.08s',
+                  color: 'var(--graph-toolbar-text)', transition: 'background 0.08s',
                 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
@@ -154,7 +154,7 @@ export function AddNodePanel({ anchorRef, onAdd, onClose }: AddNodePanelProps) {
                 <span style={{ flex: 1, fontSize: 13, textAlign: 'left', letterSpacing: '-0.01em' }}>
                   {def.label}
                 </span>
-                <span style={{ fontSize: 11, color: '#4B5563', letterSpacing: '0.02em' }}>
+                <span style={{ fontSize: 11, color: 'var(--graph-toolbar-icon)', letterSpacing: '0.02em' }}>
                   {shortcut}
                 </span>
               </button>
@@ -206,10 +206,10 @@ const IcTrash = () => (
 
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 
-const T_BG      = '#0F1117'
+const T_BG      = 'var(--graph-canvas-bg)'
 const T_BORDER  = 'rgba(255,255,255,0.10)'
-const T_ICON    = '#6B7280'
-const T_ACTIVE  = '#E6EAF2'
+const T_ICON    = 'var(--graph-toolbar-icon)'
+const T_ACTIVE  = 'var(--graph-toolbar-text)'
 const T_ACT_BG  = 'rgba(255,255,255,0.08)'
 const T_HOVER   = 'rgba(255,255,255,0.05)'
 const T_DIV     = <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.08)', margin: '0 2px', flexShrink: 0 }} />

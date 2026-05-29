@@ -1,7 +1,7 @@
 'use client'
 
-import BehaviorTab from '@/features/character-editor/tabs/behavior-tab'
-import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import { BehaviorTab } from '@/features/character-editor'
+import { useCharactersContext } from '@/entities/character'
 
 export default function SoulBehaviorPage() {
   const { selected, updateCharacter } = useCharactersContext()
@@ -11,8 +11,8 @@ export default function SoulBehaviorPage() {
       <div className="overflow-hidden rounded-lg border border-[var(--border-card)]">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-divider)]">
           <div>
-            <p className="text-[14px] font-semibold text-[var(--text-primary)]">Behavior</p>
-            <p className="text-[14px] text-[var(--text-tertiary)] mt-0.5">Configure how your soul responds and interacts.</p>
+            <p className="text-body font-semibold text-[var(--text-primary)]">Behavior</p>
+            <p className="text-body text-[var(--text-tertiary)] mt-0.5">Configure how your soul responds and interacts.</p>
           </div>
         </div>
         <div className="px-4 py-4">

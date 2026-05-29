@@ -1,8 +1,7 @@
 import { cn } from '@/lib/utils'
 import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import { SCENE_RENDERER_DEFAULTS } from '@/shared/hooks/useSceneRendererSettings'
-// fsd:cross-feature-ok — renderer composition in soul editor
-import type { LookAtMode } from '@/features/avatar/avatar-renderer'
+import type { LookAtMode } from '@/features/avatar' // fsd:cross-feature-ok — editor embeds avatar preview
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -20,8 +19,8 @@ function SliderField({ label, value, min, max, step, format = (v) => String(v), 
   return (
     <div className="flex flex-col gap-[7px]">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[12px] text-[rgba(255,255,255,0.45)]">{label}</span>
-        <span className="text-[12px] font-medium text-[rgba(255,255,255,0.85)] tabular-nums">{format(value)}</span>
+        <span className="text-xs text-[rgba(255,255,255,0.45)]">{label}</span>
+        <span className="text-xs font-medium text-[rgba(255,255,255,0.85)] tabular-nums">{format(value)}</span>
       </div>
       <input
         type="range"
@@ -45,7 +44,7 @@ interface ColorFieldProps {
 function ColorField({ label, value, onChange }: ColorFieldProps) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[12px] text-[rgba(255,255,255,0.45)]">{label}</span>
+      <span className="text-xs text-[rgba(255,255,255,0.45)]">{label}</span>
       <div className="flex items-center gap-2">
         <input
           type="color"
@@ -53,7 +52,7 @@ function ColorField({ label, value, onChange }: ColorFieldProps) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
-        <span className="text-[12px] font-medium text-[rgba(255,255,255,0.4)] tabular-nums">{value.toUpperCase()}</span>
+        <span className="text-xs font-medium text-[rgba(255,255,255,0.4)] tabular-nums">{value.toUpperCase()}</span>
       </div>
     </div>
   )
@@ -79,7 +78,7 @@ const f2  = (v: number) => v.toFixed(2)
 const f1  = (v: number) => v.toFixed(1)
 
 const sectionCls = 'flex flex-col gap-3 pt-3 mt-3 border-t border-[rgba(255,255,255,0.06)] [&:first-child]:border-t-0 [&:first-child]:pt-0 [&:first-child]:mt-0'
-const sectionHeadCls = 'text-[10px] font-medium uppercase tracking-[0.08em] text-[rgba(255,255,255,0.28)] m-0'
+const sectionHeadCls = 'text-2xs font-medium uppercase tracking-[0.08em] text-[rgba(255,255,255,0.28)] m-0'
 
 export default function SceneRendererPanel({ settings, onSet, onReset }: SceneRendererPanelProps) {
   const set = <K extends keyof SceneRendererSettings>(key: K, value: SceneRendererSettings[K]) =>
@@ -89,10 +88,10 @@ export default function SceneRendererPanel({ settings, onSet, onReset }: SceneRe
     <div className="absolute bottom-[13px] left-[13px] w-[272px] max-h-[calc(100%-27px)] flex flex-col bg-[rgba(9,9,11,0.92)] backdrop-blur-2xl border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden z-10 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_8px_40px_rgba(0,0,0,0.6)]">
       {/* Header */}
       <div className="flex items-center justify-between px-3.5 py-3 border-b border-[rgba(255,255,255,0.06)] shrink-0">
-        <span className="text-[14px] font-semibold text-[rgba(255,255,255,0.88)] tracking-[-0.01em]">Renderer</span>
+        <span className="text-body font-semibold text-[rgba(255,255,255,0.88)] tracking-[-0.01em]">Renderer</span>
         <button
           type="button"
-          className="py-0.5 px-2.5 border border-[rgba(255,255,255,0.1)] rounded-md bg-transparent text-[rgba(255,255,255,0.35)] text-[12px] font-medium cursor-pointer transition-all duration-150 font-[inherit] leading-[1.6] hover:border-red-500/30 hover:text-red-400/80"
+          className="py-0.5 px-2.5 border border-[rgba(255,255,255,0.1)] rounded-md bg-transparent text-[rgba(255,255,255,0.35)] text-xs font-medium cursor-pointer transition-all duration-150 font-[inherit] leading-[1.6] hover:border-red-500/30 hover:text-red-400/80"
           onClick={onReset}
         >
           Reset
@@ -128,7 +127,7 @@ export default function SceneRendererPanel({ settings, onSet, onReset }: SceneRe
                 key={mode}
                 type="button"
                 className={cn(
-                  'flex-1 py-[5px] px-1 border-none rounded-md bg-transparent text-[12px] font-medium cursor-pointer transition-all duration-150 whitespace-nowrap font-[inherit] leading-none text-center',
+                  'flex-1 py-[5px] px-1 border-none rounded-md bg-transparent text-xs font-medium cursor-pointer transition-all duration-150 whitespace-nowrap font-[inherit] leading-none text-center',
                   settings.lookAtMode === mode
                     ? 'bg-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.9)] shadow-[0_1px_3px_rgba(0,0,0,0.3)]'
                     : 'text-[rgba(255,255,255,0.35)] hover:text-[rgba(255,255,255,0.65)]'

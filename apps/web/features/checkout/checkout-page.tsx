@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ChevronLeft, ExternalLink, Zap } from 'lucide-react'
@@ -30,6 +31,7 @@ interface CardPaymentPanelProps {
 }
 
 function CardPaymentPanel({ loading, setLoading }: CardPaymentPanelProps) {
+  const { t } = useTranslation('checkout')
   const stripe = useStripe()
   const elements = useElements()
   const [error, setError] = useState('')
@@ -45,7 +47,7 @@ function CardPaymentPanel({ loading, setLoading }: CardPaymentPanelProps) {
       },
     })
     // confirmPayment redirects on success — we only reach here on error
-    if (stripeError) setError(stripeError.message ?? 'Ошибка оплаты')
+    if (stripeError) setError(stripeError.message ?? t('error.payment'))
     setLoading(false)
   }
 
@@ -63,7 +65,7 @@ function CardPaymentPanel({ loading, setLoading }: CardPaymentPanelProps) {
         disabled={loading || !stripe}
         className="w-full rounded-full py-3 text-[15px] font-semibold transition-colors disabled:opacity-50 bg-white text-black"
       >
-        {loading ? 'Загрузка...' : 'Далее'}
+        {loading ? t('loading') : t('next')}
       </button>
     </div>
   )
@@ -72,6 +74,7 @@ function CardPaymentPanel({ loading, setLoading }: CardPaymentPanelProps) {
 // ── Main checkout content ─────────────────────────────────────────────────────
 
 function CheckoutContent() {
+  const { t } = useTranslation('checkout')
   const router = useRouter()
   const params = useSearchParams()
   const planKey = (params.get('plan') ?? 'starter') as PlanKey
@@ -122,10 +125,10 @@ function CheckoutContent() {
     })
       .then(r => jsonOrThrow<{ clientSecret: string }>(r))
       .then(d => { if (!cancelled) setClientSecret(d.clientSecret) })
-      .catch(e => { if (!cancelled) setFetchError(e instanceof Error ? e.message : 'Ошибка загрузки') })
+      .catch(e => { if (!cancelled) setFetchError(e instanceof Error ? e.message : t('error.loading')) })
       .finally(() => { if (!cancelled) setFetchingSecret(false) })
     return () => { cancelled = true }
-  }, [method, planKey, yearly])
+  }, [method, planKey, yearly, t])
 
   async function handleRoboNext() {
     setLoading(true)
@@ -133,7 +136,7 @@ function CheckoutContent() {
     try {
       await openCheckout(planKey)
     } catch (e) {
-      setRoboError(e instanceof Error ? e.message : 'Ошибка оплаты')
+      setRoboError(e instanceof Error ? e.message : t('error.payment'))
     } finally {
       setLoading(false)
     }
@@ -154,12 +157,12 @@ function CheckoutContent() {
           >
             <ChevronLeft size={20} className="text-gray-500" />
             <h1 className="font-serif text-[30px] font-medium tracking-tight text-white">
-              Оформление подписки
+              {t('title')}
             </h1>
           </button>
 
           {/* Section 1 label */}
-          <p className="text-[13px] font-medium mb-3 text-white">1. Способ оплаты</p>
+          <p className="text-[13px] font-medium mb-3 text-white">{t('paymentMethod')}</p>
 
           {/* Method tabs */}
           <div className="flex gap-2.5 mb-3">
@@ -186,7 +189,7 @@ function CheckoutContent() {
                 method === 'card' ? 'border-white' : 'border-[var(--checkout-border)]',
               )}
             >
-              <span className="text-body font-medium text-white">Карта</span>
+              <span className="text-body font-medium text-white">{t('card')}</span>
             </button>
           </div>
 
@@ -196,19 +199,19 @@ function CheckoutContent() {
               <div className="rounded-xl border border-[var(--checkout-border)] bg-[var(--checkout-surface)] mb-4 p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <img src="/images/robokassa.svg" alt="" style={{ height: 18, filter: 'invert(1) brightness(10)' }} />
-                  <span className="text-body text-white">Выбрана система Robokassa.</span>
+                  <span className="text-body text-white">{t('robokassa.selected')}</span>
                 </div>
                 <div className="mb-3 border-t border-[var(--checkout-border)]" />
                 <div className="flex items-start gap-3">
                   <ExternalLink size={14} className="text-gray-500 mt-0.5 shrink-0" />
                   <p className="text-[13px] leading-relaxed text-gray-400">
-                    После отправки вас перенаправят на страницу для безопасного выполнения следующих шагов.
+                    {t('robokassa.redirect')}
                   </p>
                 </div>
               </div>
 
               <p className="text-xs leading-relaxed mb-5 text-gray-500">
-                Подтверждая платёж через Robokassa, вы разрешаете списывать суммы будущих платежей согласно условиям подписки. Отменить можно в любое время.
+                {t('robokassa.consent')}
               </p>
 
               <button
@@ -217,7 +220,7 @@ function CheckoutContent() {
                 disabled={loading}
                 className="w-full rounded-full py-3 text-[15px] font-semibold transition-colors disabled:opacity-50 bg-white text-black"
               >
-                {loading ? 'Загрузка...' : 'Далее'}
+                {loading ? t('loading') : t('next')}
               </button>
 
               {roboError && (
@@ -227,17 +230,17 @@ function CheckoutContent() {
           ) : (
             <>
               <p className="text-xs leading-relaxed mb-4 text-gray-500">
-                Подтверждая платёж картой, вы разрешаете списывать суммы будущих платежей согласно условиям подписки. Отменить можно в любое время.
+                {t('cardConsent')}
               </p>
 
               {fetchError ? (
                 <p className="text-[13px] mb-4 text-red-500">{fetchError}</p>
               ) : fetchingSecret || !clientSecret ? (
                 <div className="rounded-xl border border-[var(--checkout-border)] bg-[var(--checkout-stripe-bg)] flex items-center justify-center py-10 mb-4 text-[13px] text-gray-500">
-                  Загрузка формы оплаты...
+                  {t('loadingForm')}
                 </div>
               ) : !stripePromise ? (
-                <p className="text-sm mb-4 text-red-500">Оплата картой временно недоступна. Обратитесь в поддержку.</p>
+                <p className="text-sm mb-4 text-red-500">{t('cardUnavailable')}</p>
               ) : (
                 <Elements stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance }}>
                   <CardPaymentPanel loading={loading} setLoading={setLoading} />
@@ -248,9 +251,9 @@ function CheckoutContent() {
 
           {/* Section 2 — disabled */}
           <div className="mt-6 pt-6 pointer-events-none select-none opacity-35 border-t border-[var(--checkout-border)]">
-            <p className="text-[13px] font-medium mb-3 text-white">2. Платёжный адрес</p>
+            <p className="text-[13px] font-medium mb-3 text-white">{t('billingAddress')}</p>
             <div className="rounded-xl border border-[var(--checkout-border)] bg-[var(--checkout-surface)] px-4 py-3 text-[13px] text-gray-500">
-              Заполните шаг 1, чтобы продолжить.
+              {t('fillStep1')}
             </div>
           </div>
         </div>
@@ -259,9 +262,9 @@ function CheckoutContent() {
         <div className="lg:w-[360px] w-full shrink-0">
           <div className="sticky top-8 rounded-3xl border border-[var(--checkout-border)] bg-[var(--checkout-surface)] p-7">
             <h2 className="font-serif text-[28px] font-medium mb-0.5 text-white">
-              План {plan.name}
+              {t('plan.title', { name: plan.name })}
             </h2>
-            <p className="text-[13px] mb-4 text-gray-500">Основные функции</p>
+            <p className="text-[13px] mb-4 text-gray-500">{t('plan.features')}</p>
 
             <ul className="space-y-2.5 mb-5">
               {plan.features.map(f => (
@@ -277,19 +280,21 @@ function CheckoutContent() {
             <div className="space-y-2 mb-5">
               <div>
                 <div className="flex justify-between text-[13px]">
-                  <span className="text-gray-300">Подписка {yearly ? 'Ежегодно' : 'Ежемесячно'}</span>
+                  <span className="text-gray-300">
+                    {t('plan.features')} {t(yearly ? 'plan.periodYearly' : 'plan.periodMonthly')}
+                  </span>
                   <span className="text-white">{price} €</span>
                 </div>
                 <p className="text-[11px] mt-0.5 text-gray-500">
-                  {yearly ? 'Ежегодное' : 'Ежемесячное'} списание в EUR
+                  {t(yearly ? 'plan.billingYearly' : 'plan.billingMonthly')}
                 </p>
               </div>
               <div className="flex justify-between text-[13px]">
-                <span className="text-gray-300">Расчётный налог</span>
+                <span className="text-gray-300">{t('plan.tax')}</span>
                 <span className="text-gray-400">0,00 €</span>
               </div>
               <div className="flex justify-between text-body font-semibold pt-2 text-white border-t border-[var(--checkout-border)]">
-                <span>К оплате сегодня</span>
+                <span>{t('plan.dueToday')}</span>
                 <span>{price} €</span>
               </div>
             </div>
@@ -299,12 +304,11 @@ function CheckoutContent() {
               disabled
               className="w-full rounded-xl py-3 text-body font-semibold cursor-not-allowed text-gray-500 bg-[var(--checkout-border)]"
             >
-              Подписаться
+              {t('subscribe')}
             </button>
 
             <p className="mt-3 text-center text-[11px] text-gray-500">
-              Подписка продлевается {yearly ? 'ежегодно' : 'ежемесячно'} до отмены.{' '}
-              Будет списано {price} €/{yearly ? 'год' : 'мес'} (включая налоги).
+              {t(yearly ? 'plan.renewsYearly' : 'plan.renewsMonthly', { price })}
             </p>
           </div>
         </div>

@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useRef, useState } from 'react'
+import { useShortcut } from '@/shared/lib/keyboard'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link2, Unlink, X } from 'lucide-react'
 import type { AiCardListItem } from '@/shared/types/soul-api'
 import { getCards } from '@/entities/soul/api'
@@ -22,26 +23,17 @@ export function SoulBindingPicker({ projectId, activeSoul, onChanged, open: cont
   const [internalOpen, setInternalOpen] = useState(false)
   const open = controlledOpen ?? internalOpen
   const setOpen = onOpenChange ?? setInternalOpen
-  const [souls, setSouls] = useState<AiCardListItem[]>([])
-  const [loading, setLoading] = useState(false)
   const [binding, setBinding] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!open) return
-    setLoading(true)
-    getCards()
-      .then(setSouls)
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [open])
+  const { data: souls = [], isLoading: loading } = useQuery<AiCardListItem[]>({
+    queryKey: ['soul-cards-list'],
+    queryFn: getCards,
+    enabled: open,
+    staleTime: 60_000,
+  })
 
-  useEffect(() => {
-    if (!open) return
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [open])
+  useShortcut('escape', () => setOpen(false), { enabled: open, priority: 10 })
 
   async function handleBind(soul: AiCardListItem) {
     if (binding) return
@@ -83,16 +75,16 @@ export function SoulBindingPicker({ projectId, activeSoul, onChanged, open: cont
               {activeSoul.avatar_url ? (
                 <img src={activeSoul.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--surface-2)] text-[14px] font-medium text-[var(--text-secondary)]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--surface-2)] text-body font-medium text-[var(--text-secondary)]">
                   {activeSoul.name.charAt(0).toUpperCase()}
                 </div>
               )}
-              <span className="text-[14px] font-medium text-[var(--text-primary)]">{activeSoul.name}</span>
+              <span className="text-body font-medium text-[var(--text-primary)]">{activeSoul.name}</span>
             </div>
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="h-8 rounded-lg border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 text-[14px] text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+              className="h-8 rounded-lg border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
             >
               Change
             </button>
@@ -100,7 +92,7 @@ export function SoulBindingPicker({ projectId, activeSoul, onChanged, open: cont
               type="button"
               disabled={binding}
               onClick={handleUnbind}
-              className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 text-[14px] text-[var(--text-secondary)] hover:bg-[var(--surface-2)] disabled:opacity-50"
+              className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-2)] disabled:opacity-50"
             >
               <Unlink size={12} />
               Unlink
@@ -110,7 +102,7 @@ export function SoulBindingPicker({ projectId, activeSoul, onChanged, open: cont
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="flex h-9 items-center gap-2 rounded-xl border border-dashed border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-4 text-[14px] text-[var(--text-secondary)] hover:bg-[var(--surface-1)] hover:text-[var(--text-primary)]"
+            className="flex h-9 items-center gap-2 rounded-xl border border-dashed border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-4 text-body text-[var(--text-secondary)] hover:bg-[var(--surface-1)] hover:text-[var(--text-primary)]"
           >
             <Link2 size={14} />
             Link a Soul
@@ -136,7 +128,7 @@ export function SoulBindingPicker({ projectId, activeSoul, onChanged, open: cont
                   ))}
                 </div>
               ) : souls.length === 0 ? (
-                <p className="py-8 text-center text-[14px] text-[var(--text-tertiary)]">No souls found</p>
+                <p className="py-8 text-center text-body text-[var(--text-tertiary)]">No souls found</p>
               ) : (
                 <div className="space-y-1">
                   {souls.map(soul => (
@@ -152,14 +144,14 @@ export function SoulBindingPicker({ projectId, activeSoul, onChanged, open: cont
                       {soul.avatar_url ? (
                         <img src={soul.avatar_url} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
                       ) : (
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface-2)] text-[14px] font-medium text-[var(--text-secondary)]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface-2)] text-body font-medium text-[var(--text-secondary)]">
                           {soul.name.charAt(0).toUpperCase()}
                         </div>
                       )}
                       <div className="min-w-0">
-                        <div className="truncate text-[14px] font-medium text-[var(--text-primary)]">{soul.name}</div>
+                        <div className="truncate text-body font-medium text-[var(--text-primary)]">{soul.name}</div>
                         {soul.description && (
-                          <div className="truncate text-[12px] text-[var(--text-tertiary)]">{soul.description}</div>
+                          <div className="truncate text-xs text-[var(--text-tertiary)]">{soul.description}</div>
                         )}
                       </div>
                       {activeSoul?.id === soul.id && (
