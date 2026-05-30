@@ -43,7 +43,7 @@ public static class AiCardEntityFactory
         if (request.Slug             is not null) existing.Slug             = request.Slug;
         if (request.Personality      is not null) existing.Personality      = request.Personality;
         if (request.SystemPrompt     is not null) existing.SystemPrompt     = request.SystemPrompt;
-        if (request.AvatarUrl        is not null) existing.AvatarUrl        = request.AvatarUrl;
+        // AvatarUrl is intentionally not handled here — use POST /avatar to change it.
         if (request.LlmCatalogId.HasValue)        existing.LlmCatalogId     = request.LlmCatalogId.Value;
         if (request.LlmConfig        is not null) existing.LlmConfig        = Serialize(request.LlmConfig) ?? "{}";
         if (request.TtsCatalogId.HasValue)        existing.TtsCatalogId     = request.TtsCatalogId.Value;

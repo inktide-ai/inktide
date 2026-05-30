@@ -80,7 +80,7 @@ export default function ObsScenePage() {
   // Audio pipeline — renderer-agnostic. MouthWeights flow down as a callback,
   // so swapping AvatarRenderer internals (three.js → anything) has zero impact here.
   const lipSync = useLipSync()
-  const { getEmotionState } = useAudioStream(channelId, { lipSync })
+  const { getEmotionState, getSoulState } = useAudioStream(channelId, { lipSync })
 
   if (!modelUrl) {
     return (
@@ -102,6 +102,7 @@ export default function ObsScenePage() {
         className="obs-fill"
         getMouthWeights={lipSync.getMouthWeights}
         getEmotionState={getEmotionState}
+        getSoulState={getSoulState}
       />
     </div>
   )

@@ -8,7 +8,7 @@ import type { VRM } from '@pixiv/three-vrm'
 import { VRMAnimationLoaderPlugin } from '@pixiv/three-vrm-animation'
 
 import type { MouthWeights } from '@/shared/types/IVisemeProvider'
-import type { EmotionState, VrmAnimationContext } from '@/shared/types/IVrmController'
+import type { EmotionState, SoulState, VrmAnimationContext } from '@/shared/types/IVrmController'
 import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import { createVrmControllers } from '@/shared/services/animation/registry'
 
@@ -22,6 +22,8 @@ interface VrmRendererProps {
   getMouthWeights?: () => MouthWeights
   /** Called each animation frame to obtain current emotion state. */
   getEmotionState?: () => EmotionState
+  /** Called each animation frame to obtain SoulState (VAD + PhysicalState). */
+  getSoulState?: () => SoulState | null
   /** Hide only the VRM mesh; keep CSS / Three.js scene background. */
   modelVisible?: boolean
   /** Full renderer settings (camera, lights, model transform, look-at mode). */
@@ -60,6 +62,7 @@ export default function VrmRenderer({
   className,
   getMouthWeights,
   getEmotionState,
+  getSoulState,
   modelVisible = true,
   rendererSettings,
   baselineMood,
@@ -68,6 +71,7 @@ export default function VrmRenderer({
   const modelVisibleRef       = useRef(modelVisible)
   const getMouthWeightsRef    = useRef(getMouthWeights)
   const getEmotionStateRef    = useRef(getEmotionState)
+  const getSoulStateRef       = useRef(getSoulState)
   const rendererSettingsRef   = useRef(rendererSettings)
   const baselineMoodRef       = useRef(baselineMood)
   const mousePosRef           = useRef({ x: 0, y: 0 })
@@ -75,6 +79,7 @@ export default function VrmRenderer({
   modelVisibleRef.current     = modelVisible
   getMouthWeightsRef.current  = getMouthWeights
   getEmotionStateRef.current  = getEmotionState
+  getSoulStateRef.current     = getSoulState
   rendererSettingsRef.current = rendererSettings
   baselineMoodRef.current     = baselineMood
 
@@ -198,6 +203,7 @@ export default function VrmRenderer({
         const rs           = rendererSettingsRef.current
         const mouthWeights = getMouthWeightsRef.current?.() ?? null
         const emotionState = getEmotionStateRef.current?.() ?? { emotion: null, intensity: 0 }
+        const soulState    = getSoulStateRef.current?.() ?? null
 
         // Apply lip-sync mouth weights directly to VRM expression manager
         if (mouthWeights && vrm.expressionManager) {
@@ -220,6 +226,7 @@ export default function VrmRenderer({
           lookAtMode:    rs?.lookAtMode    ?? 'camera',
           jiggleEnabled: rs?.jiggleEnabled ?? false,
           jiggleMult:    rs?.jiggleMult    ?? 1.0,
+          soulState,
         }
 
         controllers.forEach((c) => c.update(delta, ctx))

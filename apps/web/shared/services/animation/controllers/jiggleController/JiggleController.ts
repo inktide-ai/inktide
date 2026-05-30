@@ -1,44 +1,117 @@
 import * as THREE from 'three'
 import type { IVrmController, VrmControllerSetup, VrmAnimationContext } from '@/shared/types/IVrmController'
 
-// Matches VRoid Studio bust/breast spring bone naming conventions
 const BREAST_RE = /bust|breast|boob/i
 
+// Spring-damper constants
+const K      = 15    // stiffness (1/s²)
+const D      = 6     // damping   (1/s) — ζ≈0.77
+const SENS   = 4.0   // camera angular velocity → force multiplier
+const SPREAD = 0.5   // gravityDir max lateral tilt
+const MAX_F  = 8.0   // clamp raw force
+
+interface JointEntry {
+  joint: {
+    settings: {
+      stiffness: number
+      gravityPower: number
+      gravityDir: THREE.Vector3
+      dragForce: number
+    }
+  }
+  origStiffness: number
+  origGravityPower: number
+  origGravityDir: THREE.Vector3
+  origDragForce: number
+}
+
+/**
+ * Jiggle physics driven by SoulState.vad.arousal:
+ *   arousal=+1 → stiffness=0.22, gravityPower=0.30, jiggleMult=2.2
+ *   arousal= 0 → stiffness=0.13, gravityPower=0.20, jiggleMult=1.0
+ *   arousal=-1 → stiffness=0.03, gravityPower=0.10, jiggleMult=0.1
+ *
+ * Falls back to ctx.jiggleMult when soulState is null.
+ */
 export class JiggleController implements IVrmController {
   readonly id = 'jiggle'
 
-  private phase = 0
-  private parents: THREE.Object3D[] = []
+  private dispX = 0; private dispZ = 0
+  private velX  = 0; private velZ  = 0
+
+  private prevCamQuat = new THREE.Quaternion()
+  private entries: JointEntry[] = []
+  private prevEnabled = false
 
   async init({ vrm }: VrmControllerSetup): Promise<void> {
-    const seen = new Set<THREE.Object3D>()
     vrm.springBoneManager?.joints.forEach(joint => {
       if (!BREAST_RE.test(joint.bone.name)) return
-      const parent = joint.bone.parent
-      if (!parent || seen.has(parent)) return
-      seen.add(parent)
-      this.parents.push(parent)
+      this.entries.push({
+        joint,
+        origStiffness:    joint.settings.stiffness,
+        origGravityPower: joint.settings.gravityPower,
+        origGravityDir:   joint.settings.gravityDir.clone(),
+        origDragForce:    joint.settings.dragForce,
+      })
     })
   }
 
   update(delta: number, ctx: VrmAnimationContext): void {
-    if (!ctx.jiggleEnabled || this.parents.length === 0) return
+    if (!ctx.jiggleEnabled) {
+      if (this.prevEnabled) { this._restore(); this._reset(); this.prevEnabled = false }
+      this.prevCamQuat.copy(ctx.camera.quaternion)
+      return
+    }
+    this.prevEnabled = true
 
-    this.phase += delta * 7  // ~7 rad/s ≈ natural frequency
-    const amp = 0.012 * ctx.jiggleMult
+    // Resolve arousal-driven multiplier
+    const soul = ctx.soulState
+    const a    = soul?.vad.a ?? 0
 
-    // Primary: vertical bob; secondary: slight lateral wobble (offset phase)
-    const dy = Math.sin(this.phase) * amp
-    const dz = Math.sin(this.phase * 0.7 + 0.8) * amp * 0.4
+    const jiggleMult   = soul
+      ? Math.min(Math.max(1.0 + a * 1.1, 0.1), 2.5)
+      : ctx.jiggleMult
+    const stiffness    = Math.min(Math.max(0.125 + a * 0.095, 0.02), 0.25)
+    const gravityPower = Math.min(Math.max(0.20  + a * 0.10,  0.03), 0.30)
 
-    for (const bone of this.parents) {
-      bone.rotation.x += dy
-      bone.rotation.z += dz
+    const dq = ctx.camera.quaternion.clone().premultiply(this.prevCamQuat.clone().invert())
+    this.prevCamQuat.copy(ctx.camera.quaternion)
+
+    const safeD = Math.max(delta, 0.001)
+    const clamp = (v: number) => Math.max(-MAX_F, Math.min(MAX_F, v))
+    const forceX = clamp((dq.y / safeD) * SENS * jiggleMult)
+    const forceZ = clamp((dq.x / safeD) * SENS * jiggleMult)
+
+    this.velX += (-K * this.dispX - D * this.velX + forceX) * delta
+    this.velZ += (-K * this.dispZ - D * this.velZ + forceZ) * delta
+    this.dispX = Math.max(-1, Math.min(1, this.dispX + this.velX * delta))
+    this.dispZ = Math.max(-1, Math.min(1, this.dispZ + this.velZ * delta))
+
+    for (const e of this.entries) {
+      e.joint.settings.stiffness    = stiffness
+      e.joint.settings.gravityPower = gravityPower * jiggleMult
+      e.joint.settings.dragForce    = 0.2
+      e.joint.settings.gravityDir.set(this.dispX * SPREAD, -1, this.dispZ * SPREAD).normalize()
     }
   }
 
   dispose(): void {
-    this.parents = []
-    this.phase = 0
+    this._restore()
+    this._reset()
+    this.entries = []
+    this.prevEnabled = false
+  }
+
+  private _reset(): void {
+    this.dispX = this.dispZ = this.velX = this.velZ = 0
+  }
+
+  private _restore(): void {
+    for (const e of this.entries) {
+      e.joint.settings.stiffness    = e.origStiffness
+      e.joint.settings.gravityPower = e.origGravityPower
+      e.joint.settings.gravityDir.copy(e.origGravityDir)
+      e.joint.settings.dragForce    = e.origDragForce
+    }
   }
 }

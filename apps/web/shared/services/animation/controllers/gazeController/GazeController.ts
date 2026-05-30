@@ -16,12 +16,12 @@ for (let i = 1; i < SACCADE_TABLE.length; i++) {
   SACCADE_TABLE[i][1]  = SACCADE_TABLE[i - 1][1] + SACCADE_STEP
 }
 
-function randomSaccadeInterval(): number {
+function randomSaccadeInterval(energyScale: number): number {
   const r = Math.random()
   for (const [p, t] of SACCADE_TABLE) {
-    if (r <= p) return t + Math.random() * SACCADE_STEP
+    if (r <= p) return (t + Math.random() * SACCADE_STEP) * energyScale
   }
-  return SACCADE_TABLE[SACCADE_TABLE.length - 1][1] + Math.random() * SACCADE_STEP
+  return (SACCADE_TABLE[SACCADE_TABLE.length - 1][1] + Math.random() * SACCADE_STEP) * energyScale
 }
 
 
@@ -48,8 +48,19 @@ function worldPosFromMouse(
 }
 
 
+/**
+ * Gaze controller with SoulState integration:
+ *
+ *  attention < 0.3 → override to idle saccade regardless of lookAtMode
+ *    (character's focus drifts when not engaged)
+ *
+ *  energy < 0.1 → saccade interval ×3 (droopy, barely looking around)
+ *
+ *  attention > 0.95 (surprised spike) → saccade interval shrinks to 50ms for 1s
+ *    (eyes dart around quickly on surprise)
+ */
 export class GazeController implements IVrmController {
-  
+
   readonly id = 'gaze'
 
   private vrm: VRM | null = null
@@ -58,6 +69,9 @@ export class GazeController implements IVrmController {
   private saccadeTarget = new THREE.Vector3(0, 1.3, -5)
   private saccadeTimeSinceLast = 0
   private saccadeNextAfter = -1
+
+  // Surprise dart state — after a spike, eyes move rapidly for a brief window
+  private surpriseDartRemaining = 0
 
   async init({ vrm }: VrmControllerSetup): Promise<void> {
     this.vrm = vrm
@@ -70,7 +84,22 @@ export class GazeController implements IVrmController {
 
     vrm.lookAt.target = this.lookAtObj
 
-    switch (ctx.lookAtMode) {
+    const soul      = ctx.soulState
+    const attention = soul?.physical.attention ?? 1.0
+    const energy    = soul?.physical.energy    ?? 1.0
+
+    // Surprise dart window
+    if (soul && attention > 0.95) {
+      this.surpriseDartRemaining = 1.0 // 1 second of rapid saccade
+    }
+    if (this.surpriseDartRemaining > 0) {
+      this.surpriseDartRemaining -= delta
+    }
+
+    // When attention is very low, override mode to idle regardless of setting
+    const effectiveMode = attention < 0.3 ? 'idle' : ctx.lookAtMode
+
+    switch (effectiveMode) {
       case 'camera':
         this.lookAtObj.position.copy(ctx.camera.position)
         vrm.lookAt.update(delta)
@@ -90,13 +119,20 @@ export class GazeController implements IVrmController {
 
       case 'idle':
       default:
-        this._updateSaccade(delta)
+        this._updateSaccade(delta, energy)
         vrm.lookAt.update(delta)
     }
   }
 
-  private _updateSaccade(delta: number): void {
+  private _updateSaccade(delta: number, energy: number): void {
     this.saccadeTimeSinceLast += delta
+
+    // Energy scale: sleepy = 3× slower saccades; surprise dart = 50ms intervals
+    const energyScale = this.surpriseDartRemaining > 0
+      ? 0.05 / 0.4                // ~50ms interval during dart
+      : energy < 0.1
+        ? 3.0                     // sleepy: very slow
+        : 1.0
 
     if (this.saccadeTimeSinceLast >= this.saccadeNextAfter) {
       this.saccadeTarget.set(
@@ -105,7 +141,7 @@ export class GazeController implements IVrmController {
         -5,
       )
       this.saccadeTimeSinceLast = 0
-      this.saccadeNextAfter = randomSaccadeInterval() / 1000
+      this.saccadeNextAfter = randomSaccadeInterval(energyScale) / 1000
     }
 
     this.lookAtObj.position.lerp(this.saccadeTarget, 0.1)

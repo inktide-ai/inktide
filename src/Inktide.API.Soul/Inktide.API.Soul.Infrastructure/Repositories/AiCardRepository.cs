@@ -40,6 +40,18 @@ public sealed class AiCardRepository : IAiCardRepository
             .FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null, ct);
     }
 
+    public async Task<AiCard?> GetByIdForUserAsync(Guid id, Guid userId, CancellationToken ct = default)
+    {
+        return await _db.AiCards
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(c => c.LlmCatalog)
+            .Include(c => c.TtsCatalog)
+            .Include(c => c.Channels)
+            .Include(c => c.Tools)
+            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId && c.DeletedAt == null, ct);
+    }
+
     public async Task<IReadOnlyList<AiCard>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
     {
         return await _db.AiCards
@@ -75,10 +87,15 @@ public sealed class AiCardRepository : IAiCardRepository
         return Task.FromResult(card);
     }
 
-    public Task UpdateAsync(AiCard card, CancellationToken ct = default)
+    public async Task UpdateAsync(AiCard card, CancellationToken ct = default)
     {
-        _db.AiCards.Update(card);
-        return Task.CompletedTask;
+        var tracked = await _db.AiCards.FirstOrDefaultAsync(c => c.Id == card.Id, ct);
+        if (tracked is null) return;
+        _db.Entry(tracked).CurrentValues.SetValues(card);
+        // AvatarUrl is owned exclusively by UpdateAvatarUrlAsync (POST /avatar path).
+        // Resetting IsModified prevents any stale value in `card` from overwriting a
+        // concurrently uploaded avatar URL.
+        _db.Entry(tracked).Property(c => c.AvatarUrl).IsModified = false;
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
@@ -118,6 +135,24 @@ public sealed class AiCardRepository : IAiCardRepository
             .ConfigureAwait(false);
 
         return rows.Select(r => (r.Id, r.SortKey)).ToList();
+    }
+
+    public async Task UpdateAvatarUrlAsync(Guid cardId, string? avatarUrl, DateTime updatedAt, CancellationToken ct = default)
+    {
+        var entity = await _db.AiCards.FirstOrDefaultAsync(c => c.Id == cardId, ct);
+        if (entity is null) return;
+        entity.AvatarUrl = avatarUrl;
+        entity.UpdatedAt = updatedAt;
+        // SaveChangesAsync is called by the caller via ITransactionManager.
+    }
+
+    public async Task UpdateAppearanceAsync(Guid cardId, string appearance, DateTime updatedAt, CancellationToken ct = default)
+    {
+        var entity = await _db.AiCards.FirstOrDefaultAsync(c => c.Id == cardId, ct);
+        if (entity is null) return;
+        entity.Appearance = appearance;
+        entity.UpdatedAt  = updatedAt;
+        // SaveChangesAsync is called by the caller via ITransactionManager.
     }
 
     public async Task BulkUpdateSortKeysAsync(Guid userId, IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default)

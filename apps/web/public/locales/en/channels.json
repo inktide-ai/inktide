@@ -25,6 +25,8 @@
   },
   "confirm": "Remove {{label}} link \"{{channel}}\"?",
   "discord": {
+    "title": "Discord",
+    "subtitle": "Discord Chat",
     "connectedChannels": "Connected channels",
     "connectedDesc": "Manage your connected Discord channels.",
     "reconnect": "Reconnect",

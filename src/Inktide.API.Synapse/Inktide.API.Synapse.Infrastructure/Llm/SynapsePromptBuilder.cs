@@ -1,4 +1,5 @@
 using Inktide.API.Synapse.Application.Models;
+using Inktide.API.Synapse.Infrastructure.Constants;
 using Inktide.API.Synapse.Infrastructure.Llm.Sections;
 using Microsoft.SemanticKernel.ChatCompletion;
 
@@ -39,7 +40,13 @@ internal sealed class SynapsePromptBuilder
             }
         }
 
-        history.AddUserMessage($"{envelope.Message.Sender.UserName}: {envelope.Message.Text}");
+        // Autonomous idle: don't expose the internal trigger marker to the LLM
+        var userText = envelope.Message.Text == SynapseConstants.AutonomousIdleTrigger
+            ? string.Empty
+            : $"{envelope.Message.Sender.UserName}: {envelope.Message.Text}";
+
+        if (!string.IsNullOrEmpty(userText))
+            history.AddUserMessage(userText);
         return history;
     }
 

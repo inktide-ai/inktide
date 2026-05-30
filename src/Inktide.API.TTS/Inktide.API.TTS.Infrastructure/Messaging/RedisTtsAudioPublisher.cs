@@ -55,6 +55,13 @@ public sealed class RedisTtsAudioPublisher : ITtsAudioPublisher
             visemeTimeline,
             emotionId        = payload.EmotionId,
             emotionIntensity = payload.EmotionIntensity,
+            // SoulState pass-through
+            vadV      = payload.VadV,
+            vadA      = payload.VadA,
+            vadD      = payload.VadD,
+            energy    = payload.Energy,
+            attention = payload.Attention,
+            comfort   = payload.Comfort,
         });
 
         var db = _redis.GetDatabase();

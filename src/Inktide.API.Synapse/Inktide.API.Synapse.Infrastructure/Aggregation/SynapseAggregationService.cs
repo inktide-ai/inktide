@@ -40,7 +40,8 @@ internal sealed class SynapseAggregationService : ISynapseAggregationService
             context.Get<SessionContext>(),
             context.Get<EmotionalState>(),
             Screen:   context.Get<ScreenContext>(),
-            Webhook:  context.Get<WebhookContext>());
+            Webhook:  context.Get<WebhookContext>(),
+            Physical: context.Get<PhysicalState>());
 
         var json = JsonSerializer.Serialize(envelope, SynapseConstants.Json.Write);
         var opt = _options.Value;

@@ -53,10 +53,11 @@ public sealed class AiCardRunPresetRepository : IAiCardRunPresetRepository
         return Task.FromResult(preset);
     }
 
-    public Task UpdateAsync(AiCardRunPreset preset, CancellationToken ct = default)
+    public async Task UpdateAsync(AiCardRunPreset preset, CancellationToken ct = default)
     {
-        _db.AiCardRunPresets.Update(preset);
-        return Task.CompletedTask;
+        var tracked = await _db.AiCardRunPresets.FirstOrDefaultAsync(c => c.Id == preset.Id, ct);
+        if (tracked is null) return;
+        _db.Entry(tracked).CurrentValues.SetValues(preset);
     }
 
     public async Task DeleteAsync(AiCardRunPreset preset, CancellationToken ct = default)

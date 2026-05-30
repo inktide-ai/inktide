@@ -43,7 +43,7 @@ const SceneFullscreen = ({ character, cardId, showToolbar = true, showChat = tru
   const lipSync = useLipSync()
   const { settings, setSettings, resetSettings } = useSceneRendererSettings(cardId)
 
-  const { getEmotionState } = useAudioStream(channelId, { lipSync })
+  const { getEmotionState, getSoulState } = useAudioStream(channelId, { lipSync })
 
   const effectiveModelUrl = overrideModelUrl ?? model?.public_url ?? null
   const effectiveModelType = overrideModelUrl
@@ -94,6 +94,7 @@ const SceneFullscreen = ({ character, cardId, showToolbar = true, showChat = tru
               modelVisible={modelVisible}
               rendererSettings={settings}
               getEmotionState={getEmotionState}
+              getSoulState={getSoulState}
               baselineMood={character.personalityConfig?.baselineMood ?? 'neutral'}
             />
           </div>

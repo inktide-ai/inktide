@@ -49,10 +49,11 @@ public sealed class AiCardChannelRepository : IAiCardChannelRepository
         return Task.FromResult(channel);
     }
 
-    public Task UpdateAsync(AiCardChannel channel, CancellationToken ct = default)
+    public async Task UpdateAsync(AiCardChannel channel, CancellationToken ct = default)
     {
-        _db.AiCardChannels.Update(channel);
-        return Task.CompletedTask;
+        var tracked = await _db.AiCardChannels.FirstOrDefaultAsync(c => c.Id == channel.Id, ct);
+        if (tracked is null) return;
+        _db.Entry(tracked).CurrentValues.SetValues(channel);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)

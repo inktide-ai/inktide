@@ -47,10 +47,17 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         [property: JsonPropertyName("emotionId")]        string? EmotionId        = null,
         /// <summary>Emotion intensity 0.0–1.0.</summary>
         [property: JsonPropertyName("emotionIntensity")] float   EmotionIntensity = 0f,
-        /// <summary>Speed multiplier from personality emotion responsiveness. Applied on top of TtsSpeed. Default 1.0 = no change.</summary>
+        /// <summary>Speed multiplier from VAD arousal formula. Applied on top of TtsSpeed. Default 1.0 = no change.</summary>
         [property: JsonPropertyName("ttsSpeedModifier")]  float  TtsSpeedModifier  = 1.0f,
-        /// <summary>Energy/style modifier for providers that support it (e.g. ElevenLabs style). Default 1.0 = no change.</summary>
-        [property: JsonPropertyName("ttsEnergyModifier")] float  TtsEnergyModifier = 1.0f);
+        /// <summary>Energy/style modifier from VAD formula. Default 1.0 = no change.</summary>
+        [property: JsonPropertyName("ttsEnergyModifier")] float  TtsEnergyModifier = 1.0f,
+        // SoulState — VAD vector and PhysicalState for frontend animation
+        [property: JsonPropertyName("vadV")]      float VadV      = 0f,
+        [property: JsonPropertyName("vadA")]      float VadA      = 0f,
+        [property: JsonPropertyName("vadD")]      float VadD      = 0f,
+        [property: JsonPropertyName("energy")]    float Energy    = 1f,
+        [property: JsonPropertyName("attention")] float Attention = 0f,
+        [property: JsonPropertyName("comfort")]   float Comfort   = 0.5f);
 
 
     private readonly IConnectionMultiplexer _redis;
@@ -299,7 +306,13 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
                         ContentType:     ok.ContentType,
                         LlmModel:        response.Model,
                         EmotionId:       response.EmotionId,
-                        EmotionIntensity: response.EmotionIntensity), ct);
+                        EmotionIntensity: response.EmotionIntensity,
+                        VadV:      response.VadV,
+                        VadA:      response.VadA,
+                        VadD:      response.VadD,
+                        Energy:    response.Energy,
+                        Attention: response.Attention,
+                        Comfort:   response.Comfort), ct);
                 }
                 break;
 

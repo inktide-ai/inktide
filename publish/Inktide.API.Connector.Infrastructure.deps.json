@@ -12,6 +12,7 @@
           "AspNetCore.HealthChecks.UI.Client": "9.0.0",
           "Inktide.API.Connector.Application": "1.0.0",
           "Inktide.API.Core": "1.0.0",
+          "Inktide.API.Soul.Domain": "1.0.0",
           "Microsoft.EntityFrameworkCore": "10.0.0",
           "Microsoft.Extensions.Configuration.Binder": "10.0.3",
           "Microsoft.Extensions.Hosting.Abstractions": "10.0.3",
@@ -404,6 +405,17 @@
             "fileVersion": "1.0.0.0"
           }
         }
+      },
+      "Inktide.API.Soul.Domain/1.0.0": {
+        "dependencies": {
+          "Inktide.API.Core": "1.0.0"
+        },
+        "runtime": {
+          "Inktide.API.Soul.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
       }
     }
   },
@@ -655,6 +667,11 @@
       "sha512": ""
     },
     "Inktide.API.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Inktide.API.Soul.Domain/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

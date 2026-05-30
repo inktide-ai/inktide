@@ -5,6 +5,7 @@ using System.Text.Json;
 using Inktide.API.Developer.Domain.Entities;
 using Inktide.API.Developer.Domain.Repositories;
 using Inktide.API.Developer.Infrastructure.Settings;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
@@ -25,8 +26,7 @@ internal sealed class WebhookDeliveryWorker : BackgroundService
     ];
 
     private readonly IConnectionMultiplexer _redis;
-    private readonly IWebhookDeliveryRepository _deliveryRepo;
-    private readonly IDeveloperApplicationRepository _appRepo;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly IHttpClientFactory _httpFactory;
     private readonly DeveloperSettings _settings;
     private readonly ILogger<WebhookDeliveryWorker> _logger;
@@ -34,15 +34,13 @@ internal sealed class WebhookDeliveryWorker : BackgroundService
 
     public WebhookDeliveryWorker(
         IConnectionMultiplexer redis,
-        IWebhookDeliveryRepository deliveryRepo,
-        IDeveloperApplicationRepository appRepo,
+        IServiceScopeFactory scopeFactory,
         IHttpClientFactory httpFactory,
         DeveloperSettings settings,
         ILogger<WebhookDeliveryWorker> logger)
     {
         _redis        = redis        ?? throw new ArgumentNullException(nameof(redis));
-        _deliveryRepo = deliveryRepo ?? throw new ArgumentNullException(nameof(deliveryRepo));
-        _appRepo      = appRepo      ?? throw new ArgumentNullException(nameof(appRepo));
+        _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _httpFactory  = httpFactory  ?? throw new ArgumentNullException(nameof(httpFactory));
         _settings     = settings     ?? throw new ArgumentNullException(nameof(settings));
         _logger       = logger       ?? throw new ArgumentNullException(nameof(logger));
@@ -133,6 +131,11 @@ internal sealed class WebhookDeliveryWorker : BackgroundService
     {
         try
         {
+            // Scoped repositories must not be captured as singletons — create a fresh scope per message.
+            using var scope      = _scopeFactory.CreateScope();
+            var deliveryRepo     = scope.ServiceProvider.GetRequiredService<IWebhookDeliveryRepository>();
+            var appRepo          = scope.ServiceProvider.GetRequiredService<IDeveloperApplicationRepository>();
+
             var fields = entry.Values.ToDictionary(v => v.Name.ToString(), v => v.Value.ToString());
 
             fields.TryGetValue("event_type", out var eventType);
@@ -152,8 +155,7 @@ internal sealed class WebhookDeliveryWorker : BackgroundService
             }
             else if (!string.IsNullOrWhiteSpace(connectorSlug))
             {
-                // Indirect dispatch: look up all apps subscribed to this connector
-                var apps = await _appRepo.GetByConnectorSlugAsync(connectorSlug, ct);
+                var apps = await appRepo.GetByConnectorSlugAsync(connectorSlug, ct);
                 foreach (var a in apps)
                 {
                     if (!string.IsNullOrWhiteSpace(a.WebhookUrl))
@@ -170,11 +172,11 @@ internal sealed class WebhookDeliveryWorker : BackgroundService
             bool allSucceeded = true;
             foreach (var (targetAppId, webhookUrl, secretHash) in targets)
             {
-                await DeliverToAppAsync(db, entry, targetAppId, webhookUrl, secretHash, eventType, payloadJson, ct);
-                // Don't break on failure — try all targets
+                await DeliverToAppAsync(db, entry, targetAppId, webhookUrl, secretHash,
+                    eventType, payloadJson, deliveryRepo, ct);
             }
 
-            _ = allSucceeded; // ACK happens inside DeliverToAppAsync per-target
+            _ = allSucceeded;
         }
         catch (Exception ex)
         {
@@ -190,10 +192,11 @@ internal sealed class WebhookDeliveryWorker : BackgroundService
         string webhookSecretHash,
         string? eventType,
         string? payloadJson,
+        IWebhookDeliveryRepository deliveryRepo,
         CancellationToken ct)
     {
         var delivery = WebhookDelivery.Create(applicationId, eventType ?? "unknown", payloadJson ?? "{}");
-        await _deliveryRepo.AddAsync(delivery, ct);
+        await deliveryRepo.AddAsync(delivery, ct);
 
         var (statusCode, responseBody) = await PostWebhookAsync(
             webhookUrl, payloadJson ?? "{}", webhookSecretHash, eventType ?? "unknown", ct);
@@ -218,7 +221,7 @@ internal sealed class WebhookDeliveryWorker : BackgroundService
             }
         }
 
-        await _deliveryRepo.UpdateAsync(delivery, ct);
+        await deliveryRepo.UpdateAsync(delivery, ct);
     }
 
     private async Task<(int? StatusCode, string? Body)> PostWebhookAsync(

@@ -1,8 +1,9 @@
 using Inktide.API.Core.Generators;
+using Inktide.API.Core.Transactions;
 using Inktide.API.Profile.Application.Interfaces;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Storage;
-using Inktide.API.Soul.Domain.Entities;
+using Inktide.API.Soul.Domain.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Soul.Application.Services;
@@ -15,21 +16,27 @@ namespace Inktide.API.Soul.Application.Services;
 /// </summary>
 public sealed class AiCardAvatarService : IAiCardAvatarService
 {
-    private readonly IAiCardService _cards;
+    private readonly IAiCardRepository _cardRepo;
     private readonly IObjectStorageService _storage;
+    private readonly ITransactionManager _txManager;
     private readonly ObjectStorageSettings _s3;
+    private readonly TimeProvider _time;
     private readonly ILogger<AiCardAvatarService> _logger;
 
     public AiCardAvatarService(
-        IAiCardService cards,
+        IAiCardRepository cardRepo,
         IObjectStorageService storage,
+        ITransactionManager txManager,
         ObjectStorageSettings s3,
+        TimeProvider time,
         ILogger<AiCardAvatarService> logger)
     {
-        _cards   = cards   ?? throw new ArgumentNullException(nameof(cards));
-        _storage = storage ?? throw new ArgumentNullException(nameof(storage));
-        _s3      = s3      ?? throw new ArgumentNullException(nameof(s3));
-        _logger  = logger  ?? throw new ArgumentNullException(nameof(logger));
+        _cardRepo  = cardRepo  ?? throw new ArgumentNullException(nameof(cardRepo));
+        _storage   = storage   ?? throw new ArgumentNullException(nameof(storage));
+        _txManager = txManager ?? throw new ArgumentNullException(nameof(txManager));
+        _s3        = s3        ?? throw new ArgumentNullException(nameof(s3));
+        _time      = time      ?? throw new ArgumentNullException(nameof(time));
+        _logger    = logger    ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<AiCardAvatarUpdateResult> UploadAvatarAsync(
@@ -46,7 +53,7 @@ public sealed class AiCardAvatarService : IAiCardAvatarService
         if (string.IsNullOrWhiteSpace(_s3.DefaultBucket))
             return AiCardAvatarUpdateResult.Fail(AiCardAvatarError.StorageUnavailable, "S3 default bucket is not configured.");
 
-        var card = await _cards.GetByIdAsync(userId, cardId, ct).ConfigureAwait(false);
+        var card = await _cardRepo.GetByIdForUserAsync(cardId, userId, ct).ConfigureAwait(false);
         if (card is null)
             return AiCardAvatarUpdateResult.Fail(AiCardAvatarError.CardNotFound, "AI card not found.");
 
@@ -57,10 +64,11 @@ public sealed class AiCardAvatarService : IAiCardAvatarService
 
         var publicUrl = ObjectStoragePublicUrl.Build(_s3.ServiceUrl, _s3.PublicBaseUrl, _s3.DefaultBucket, objectKey);
 
-        card.AvatarUrl = publicUrl;
-        var updated = await _cards.UpdateAsync(userId, card, ct).ConfigureAwait(false);
+        await _cardRepo.UpdateAvatarUrlAsync(cardId, publicUrl, _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
+        await _txManager.SaveChangesAsync(ct).ConfigureAwait(false);
 
+        card.AvatarUrl = publicUrl;
         _logger.LogInformation("AI card {CardId} avatar set to {Url}", cardId, publicUrl);
-        return AiCardAvatarUpdateResult.Ok(updated);
+        return AiCardAvatarUpdateResult.Ok(card);
     }
 }

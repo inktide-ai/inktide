@@ -10,7 +10,10 @@ public static class ObjectStoragePublicUrl
             : publicBaseUrl.TrimEnd('/');
 
         var b = bucket.Trim('/');
-        var key = objectKey.TrimStart('/');
-        return $"{baseUrl}/{b}/{key}";
+        // Percent-encode each path segment so filenames with spaces, Cyrillic, or
+        // other RFC 3986 reserved characters produce valid, loadable URLs.
+        var encodedKey = string.Join("/",
+            objectKey.TrimStart('/').Split('/').Select(Uri.EscapeDataString));
+        return $"{baseUrl}/{b}/{encodedKey}";
     }
 }

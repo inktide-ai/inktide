@@ -18,6 +18,22 @@ export interface EmotionState {
   intensity: number
 }
 
+/**
+ * Single source of truth for character aliveness.
+ * All animation controllers read from here — changing SoulState changes
+ * voice, body physics, blink rhythm and head posture simultaneously.
+ */
+export interface SoulState {
+  /** Valence-Arousal-Dominance, each axis in [-1, +1] */
+  vad: { v: number; a: number; d: number }
+  /**
+   * Physical state — updated per-message and decays between messages.
+   * energy < 0.1 → sleepy override on all controllers
+   * attention < 0.3 → force idle gaze regardless of lookAtMode
+   */
+  physical: { energy: number; attention: number; comfort: number }
+}
+
 /** Передаётся в IVrmController.init() после загрузки VRM модели. */
 export interface VrmControllerSetup {
   vrm: VRM
@@ -35,8 +51,13 @@ export interface VrmAnimationContext {
   mouse: { x: number; y: number }
   lookAtMode: LookAtMode
   jiggleEnabled: boolean
-  /** 0.5–3.0; масштабирует амплитуду JiggleController */
+  /** 0.5–3.0; масштабирует амплитуду JiggleController (fallback если soulState недоступен) */
   jiggleMult: number
+  /**
+   * SoulState — VAD vector + PhysicalState. Null until first audioReceived from SignalR.
+   * Controllers must handle null gracefully and fall back to legacy ctx fields.
+   */
+  soulState: SoulState | null
 }
 
 export interface IVrmController {

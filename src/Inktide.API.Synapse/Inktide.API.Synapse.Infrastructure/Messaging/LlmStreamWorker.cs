@@ -449,10 +449,13 @@ internal sealed class LlmStreamWorker : BackgroundService
     {
         var emotionId        = envelope.Emotion?.CurrentEmotion;
         var emotionIntensity = envelope.Emotion?.Intensity ?? 0f;
-        var speechProfile    = EmotionSpeechProfiles.Compute(
-            emotionId,
-            emotionIntensity,
-            envelope.Context?.EmotionResponsiveness ?? 0.7f);
+
+        // VAD-based TTS prosody — continuous formula replaces static lookup table
+        var vad              = EmotionVadTable.Map(emotionId);
+        var ttsSpeedModifier  = Math.Clamp(1.0f + vad.A * 0.28f, 0.75f, 1.35f);
+        var ttsEnergyModifier = Math.Clamp(1.0f + (vad.A * 0.5f + vad.V * 0.2f) * 0.25f, 0.80f, 1.30f);
+
+        var physical = envelope.Physical;
 
         var payload = JsonSerializer.Serialize(new
         {
@@ -469,8 +472,15 @@ internal sealed class LlmStreamWorker : BackgroundService
             ttsSpeed         = ctx?.TtsSpeed ?? 1.0f,
             emotionId,
             emotionIntensity,
-            ttsSpeedModifier  = speechProfile.SpeedModifier,
-            ttsEnergyModifier = speechProfile.EnergyModifier,
+            ttsSpeedModifier,
+            ttsEnergyModifier,
+            // SoulState — drives all frontend animation controllers
+            vadV = vad.V,
+            vadA = vad.A,
+            vadD = vad.D,
+            energy    = physical?.Energy    ?? 1.0f,
+            attention = physical?.Attention ?? 0.0f,
+            comfort   = physical?.Comfort   ?? 0.5f,
         }, SynapseConstants.Json.Write);
 
         await db.StreamAddAsync(

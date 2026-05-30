@@ -4,7 +4,7 @@ import type { ModelType } from '@/shared/lib/character'
 import type { MouthWeights } from '@/shared/hooks/useLipSync'
 import type { LookAtMode } from './renderers/vrm-renderer'
 import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
-import type { EmotionState } from '@/shared/types/IVrmController'
+import type { EmotionState, SoulState } from '@/shared/types/IVrmController'
 
 // Lazy-load heavy renderers — three.js is ~600KB, don't load until needed
 const VrmRenderer   = lazy(() => import('./renderers/vrm-renderer'))
@@ -30,6 +30,11 @@ export interface AvatarRendererProps {
    * Only consumed by VrmRenderer — other renderers ignore it.
    */
   getEmotionState?: () => EmotionState
+  /**
+   * Called every animation frame to obtain SoulState (VAD + PhysicalState).
+   * Only consumed by VrmRenderer — other renderers ignore it.
+   */
+  getSoulState?: () => SoulState | null
   /** When false, only the avatar mesh is hidden; scene / CSS background stays visible. */
   modelVisible?: boolean
   /** Full renderer settings (camera, lights, model transform, look-at mode). VRM only. */
@@ -44,6 +49,7 @@ export default function AvatarRenderer({
   className,
   getMouthWeights,
   getEmotionState,
+  getSoulState,
   modelVisible = true,
   rendererSettings,
   baselineMood,
@@ -62,6 +68,7 @@ export default function AvatarRenderer({
             className="w-full h-full"
             getMouthWeights={getMouthWeights}
             getEmotionState={getEmotionState}
+            getSoulState={getSoulState}
             modelVisible={modelVisible}
             rendererSettings={rendererSettings}
             baselineMood={baselineMood}

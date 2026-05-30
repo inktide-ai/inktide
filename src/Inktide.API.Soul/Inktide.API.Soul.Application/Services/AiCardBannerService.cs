@@ -1,10 +1,12 @@
 using Inktide.API.Core.Generators;
+using Inktide.API.Core.Transactions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Inktide.API.Profile.Application.Interfaces;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Storage;
 using Inktide.API.Soul.Domain.Entities;
+using Inktide.API.Soul.Domain.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Soul.Application.Services;
@@ -16,21 +18,27 @@ namespace Inktide.API.Soul.Application.Services;
 /// </summary>
 public sealed class AiCardBannerService : IAiCardBannerService
 {
-    private readonly IAiCardService _cards;
+    private readonly IAiCardRepository _cardRepo;
     private readonly IObjectStorageService _storage;
+    private readonly ITransactionManager _txManager;
     private readonly ObjectStorageSettings _s3;
+    private readonly TimeProvider _time;
     private readonly ILogger<AiCardBannerService> _logger;
 
     public AiCardBannerService(
-        IAiCardService cards,
+        IAiCardRepository cardRepo,
         IObjectStorageService storage,
+        ITransactionManager txManager,
         ObjectStorageSettings s3,
+        TimeProvider time,
         ILogger<AiCardBannerService> logger)
     {
-        _cards   = cards   ?? throw new ArgumentNullException(nameof(cards));
-        _storage = storage ?? throw new ArgumentNullException(nameof(storage));
-        _s3      = s3      ?? throw new ArgumentNullException(nameof(s3));
-        _logger  = logger  ?? throw new ArgumentNullException(nameof(logger));
+        _cardRepo  = cardRepo  ?? throw new ArgumentNullException(nameof(cardRepo));
+        _storage   = storage   ?? throw new ArgumentNullException(nameof(storage));
+        _txManager = txManager ?? throw new ArgumentNullException(nameof(txManager));
+        _s3        = s3        ?? throw new ArgumentNullException(nameof(s3));
+        _time      = time      ?? throw new ArgumentNullException(nameof(time));
+        _logger    = logger    ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<AiCardBannerUpdateResult> UploadBannerAsync(
@@ -47,7 +55,7 @@ public sealed class AiCardBannerService : IAiCardBannerService
         if (string.IsNullOrWhiteSpace(_s3.DefaultBucket))
             return AiCardBannerUpdateResult.Fail(AiCardBannerError.StorageUnavailable, "S3 default bucket is not configured.");
 
-        var card = await _cards.GetByIdAsync(userId, cardId, ct).ConfigureAwait(false);
+        var card = await _cardRepo.GetByIdForUserAsync(cardId, userId, ct).ConfigureAwait(false);
         if (card is null)
             return AiCardBannerUpdateResult.Fail(AiCardBannerError.CardNotFound, "AI card not found.");
 
@@ -59,10 +67,11 @@ public sealed class AiCardBannerService : IAiCardBannerService
         var publicUrl = ObjectStoragePublicUrl.Build(_s3.ServiceUrl, _s3.PublicBaseUrl, _s3.DefaultBucket, objectKey);
 
         SetBannerImageUrl(card, publicUrl);
-        var updated = await _cards.UpdateAsync(userId, card, ct).ConfigureAwait(false);
+        await _cardRepo.UpdateAppearanceAsync(cardId, card.Appearance, _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
+        await _txManager.SaveChangesAsync(ct).ConfigureAwait(false);
 
         _logger.LogInformation("AI card {CardId} banner set to {Url}", cardId, publicUrl);
-        return AiCardBannerUpdateResult.Ok(updated);
+        return AiCardBannerUpdateResult.Ok(card);
     }
 
     public async Task<AiCardBannerUpdateResult> RemoveBannerAsync(
@@ -70,15 +79,16 @@ public sealed class AiCardBannerService : IAiCardBannerService
         Guid cardId,
         CancellationToken ct = default)
     {
-        var card = await _cards.GetByIdAsync(userId, cardId, ct).ConfigureAwait(false);
+        var card = await _cardRepo.GetByIdForUserAsync(cardId, userId, ct).ConfigureAwait(false);
         if (card is null)
             return AiCardBannerUpdateResult.Fail(AiCardBannerError.CardNotFound, "AI card not found.");
 
         SetBannerImageUrl(card, null);
-        var updated = await _cards.UpdateAsync(userId, card, ct).ConfigureAwait(false);
+        await _cardRepo.UpdateAppearanceAsync(cardId, card.Appearance, _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
+        await _txManager.SaveChangesAsync(ct).ConfigureAwait(false);
 
         _logger.LogInformation("AI card {CardId} banner removed", cardId);
-        return AiCardBannerUpdateResult.Ok(updated);
+        return AiCardBannerUpdateResult.Ok(card);
     }
 
     private static void SetBannerImageUrl(AiCard card, string? url)

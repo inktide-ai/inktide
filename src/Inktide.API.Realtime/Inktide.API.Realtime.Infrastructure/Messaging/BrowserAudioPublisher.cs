@@ -31,7 +31,14 @@ public sealed class BrowserAudioPublisher
         /// </summary>
         [property: JsonPropertyName("visemeTimeline")]  JsonElement?  VisemeTimeline,
         [property: JsonPropertyName("emotionId")]        string?       EmotionId        = null,
-        [property: JsonPropertyName("emotionIntensity")] float         EmotionIntensity = 0f);
+        [property: JsonPropertyName("emotionIntensity")] float         EmotionIntensity = 0f,
+        // SoulState — VAD vector and PhysicalState forwarded from LlmStreamWorker
+        [property: JsonPropertyName("vadV")]      float VadV      = 0f,
+        [property: JsonPropertyName("vadA")]      float VadA      = 0f,
+        [property: JsonPropertyName("vadD")]      float VadD      = 0f,
+        [property: JsonPropertyName("energy")]    float Energy    = 1f,
+        [property: JsonPropertyName("attention")] float Attention = 0f,
+        [property: JsonPropertyName("comfort")]   float Comfort   = 0.5f);
 
 
     public BrowserAudioPublisher(
@@ -62,11 +69,20 @@ public sealed class BrowserAudioPublisher
                 visemeTimeline   = payload.VisemeTimeline,  // null → frontend uses formant fallback
                 emotion          = payload.EmotionId,
                 emotionIntensity = payload.EmotionIntensity,
+                // SoulState sent to all frontend animation controllers
+                vad = new { v = payload.VadV, a = payload.VadA, d = payload.VadD },
+                physical = new
+                {
+                    energy    = payload.Energy,
+                    attention = payload.Attention,
+                    comfort   = payload.Comfort,
+                },
             },
             ct);
 
         Logger.LogDebug(
-            "Audio pushed to SignalR. Channel={Channel} Correlation={Correlation}",
-            payload.ChannelId, payload.CorrelationId);
+            "Audio pushed to SignalR. Channel={Channel} Correlation={Correlation} emotion={Emotion} vad=({V:F2},{A:F2},{D:F2})",
+            payload.ChannelId, payload.CorrelationId, payload.EmotionId ?? "-",
+            payload.VadV, payload.VadA, payload.VadD);
     }
 }

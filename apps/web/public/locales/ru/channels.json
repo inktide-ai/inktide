@@ -25,6 +25,8 @@
   },
   "confirm": "Удалить ссылку {{label}} \"{{channel}}\"?",
   "discord": {
+    "title": "Discord",
+    "subtitle": "Discord Chat",
     "connectedChannels": "Подключённые каналы",
     "connectedDesc": "Управление подключёнными каналами Discord.",
     "reconnect": "Переподключить",

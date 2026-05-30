@@ -80,8 +80,26 @@ export class AnimationStateMachineController implements IVrmController {
   update(delta: number, ctx: VrmAnimationContext): void {
     if (this._disposed || !this.mixer) return
 
-    // 1. Advance Three.js mixer every frame regardless of state.
+    // 1. Advance Three.js mixer with arousal-driven tempo.
+    //    In idle state: arousal drives timeScale (excited=1.6×, sleepy=0.3×).
+    //    In emote/transitioning states: use 1.0 to avoid disrupting choreographed timing.
+    if (ctx.soulState && this.actor.getSnapshot().value === 'idle') {
+      const a = ctx.soulState.vad.a
+      this.mixer.timeScale = Math.min(Math.max(0.9 + a * 0.55, 0.3), 1.6)
+    } else {
+      this.mixer.timeScale = 1.0
+    }
     this.mixer.update(delta)
+
+    // Suppress horizontal root motion so the character stays in place.
+    // The .vrma files encode hips X/Z translation which causes world-space drift;
+    // zeroing X/Z after each mixer tick keeps the character rooted while preserving
+    // vertical movement (breathing, landing bounce, etc.).
+    const hips = this.vrm?.humanoid.getNormalizedBoneNode('hips')
+    if (hips) {
+      hips.position.x = 0
+      hips.position.z = 0
+    }
 
     // 2. Sync emotion changes to XState machine.
     const incomingEmotion = ctx.emotion.emotion

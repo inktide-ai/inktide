@@ -42,6 +42,9 @@ internal static class SynapseConstants
         internal static readonly TimeSpan MessageStalenessThreshold = TimeSpan.FromSeconds(10);
     }
 
+    /// <summary>Synthetic message text that marks an autonomous idle trigger from IdleEventDispatcher.</summary>
+    internal const string AutonomousIdleTrigger = "[INTERNAL:autonomous_idle]";
+
     internal static class Json
     {
         internal static readonly JsonSerializerOptions Read = new()

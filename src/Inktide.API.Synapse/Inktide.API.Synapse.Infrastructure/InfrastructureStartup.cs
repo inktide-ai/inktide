@@ -13,6 +13,7 @@ using Inktide.API.Synapse.Infrastructure.Messaging;
 using Inktide.API.Synapse.Infrastructure.Providers;
 using Inktide.API.Synapse.Infrastructure.Llm;
 using Inktide.API.Synapse.Infrastructure.Llm.Sections;
+using Inktide.API.Synapse.Infrastructure.Autonomy;
 using Inktide.API.Synapse.Infrastructure.Scattering;
 using Inktide.API.Synapse.Infrastructure.Session;
 using Inktide.API.Synapse.Infrastructure.Startup;
@@ -88,6 +89,13 @@ public sealed class InfrastructureStartup : IStartup
                 ?? throw new InvalidOperationException(
                     "IEmotionClassificationService implementation must also implement IEmotionClassifier."));
         services.AddSingleton<IEmotionalStateService, RedisEmotionalStateService>();
+
+        // ---------------------------------------------------------------
+        // Idle event dispatcher — autonomous speech driven by SoulState
+        // ---------------------------------------------------------------
+        services.AddSingleton<IdleEventDispatcher>();
+        services.AddSingleton<IIdleActivityTracker>(sp => sp.GetRequiredService<IdleEventDispatcher>());
+        services.AddHostedService(sp => sp.GetRequiredService<IdleEventDispatcher>());
 
         // OllamaChatProvider stays for ListModelsAsync (model catalog REST endpoint).
         // LLM inference is now handled by LlmStreamWorker via Semantic Kernel.
@@ -180,6 +188,7 @@ public sealed class InfrastructureStartup : IStartup
         services.AddSingleton<IPromptSection, RagContextSection>();
         services.AddSingleton<IPromptSection, PersonalitySection>();
         services.AddSingleton<IPromptSection, EmotionSection>();
+        services.AddSingleton<IPromptSection, AutonomousIdleSection>();
         services.AddSingleton<IPromptSection, ScreenAwarenessSection>();
         services.AddSingleton<IPromptSection, WebhookContextSection>();
         services.AddSingleton<SynapsePromptBuilder>();
