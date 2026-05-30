@@ -118,6 +118,10 @@ public sealed class AiCardService : IAiCardService
         card.UserId    = userId;
         card.UpdatedAt = _time.GetUtcNow().UtcDateTime;
         card.CreatedAt = existing.CreatedAt;
+        // Preserve the DB-current AvatarUrl so a concurrent avatar upload is never
+        // overwritten by a stale value carried in `card` from a controller-level read.
+        // Safe: avatar uploads now go through SetAvatarUrlAsync, not this method.
+        card.AvatarUrl = existing.AvatarUrl;
 
         await _cardRepo.UpdateAsync(card, ct);
         await _auditLog.LogAsync(userId, "ai_card", card.Id, "updated", ct: ct);

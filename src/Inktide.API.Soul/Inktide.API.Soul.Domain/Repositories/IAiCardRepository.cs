@@ -6,9 +6,6 @@ public interface IAiCardRepository
 {
     Task<AiCard?> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<AiCard?> GetByIdWithRelationsAsync(Guid id, CancellationToken ct = default);
-
-    /// <summary>Returns the card with all relations if it exists and belongs to the user. Returns null if not found or unauthorized.</summary>
-    Task<AiCard?> GetByIdForUserAsync(Guid id, Guid userId, CancellationToken ct = default);
     Task<IReadOnlyList<AiCard>> GetByUserIdAsync(Guid userId, CancellationToken ct = default);
 
     /// <summary>
@@ -34,9 +31,6 @@ public interface IAiCardRepository
     /// <summary>Updates sort_key for each entry in the list. Only rows owned by <paramref name="userId"/> are updated.</summary>
     Task BulkUpdateSortKeysAsync(Guid userId, IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default);
 
-    /// <summary>Targeted avatar-only update via EF change tracking — never goes through the general UpdateAsync path.</summary>
-    Task UpdateAvatarUrlAsync(Guid cardId, string? avatarUrl, DateTime updatedAt, CancellationToken ct = default);
-
-    /// <summary>Targeted appearance update — bypasses general UpdateAsync to prevent concurrent PUT from overwriting banner_image_url.</summary>
-    Task UpdateAppearanceAsync(Guid cardId, string appearance, DateTime updatedAt, CancellationToken ct = default);
+    /// <summary>Targeted single-column update — avoids tracking the full entity graph.</summary>
+    Task SetAvatarUrlAsync(Guid cardId, string? avatarUrl, DateTime updatedAt, CancellationToken ct = default);
 }

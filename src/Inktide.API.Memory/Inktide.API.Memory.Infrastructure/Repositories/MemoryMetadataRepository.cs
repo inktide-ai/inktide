@@ -11,8 +11,6 @@ public sealed class MemoryMetadataRepository : IMemoryMetadataRepository, IMemor
 
     public MemoryMetadataRepository(MemoryDbContext db) => _db = db;
 
-    // ExecuteSqlAsync(FormattableString) is the safe EF Core overload — interpolated holes become
-    // SQL parameters, not string concatenation. No SQL injection risk despite the $ syntax.
     public Task UpsertAsync(MemoryMetadata m, CancellationToken ct = default) =>
         _db.Database.ExecuteSqlAsync(
             $"""

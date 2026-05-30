@@ -43,7 +43,7 @@ public sealed class UserProviderCredentialRepository : IUserProviderCredentialRe
         if (existing is null)
             _db.UserProviderCredentials.Add(credential);
         else
-            _db.Entry(existing).CurrentValues.SetValues(credential);
+            _db.UserProviderCredentials.Update(credential);
 
         return credential;
     }

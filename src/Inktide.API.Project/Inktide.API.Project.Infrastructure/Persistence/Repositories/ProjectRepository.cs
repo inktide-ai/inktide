@@ -41,7 +41,7 @@ internal sealed class ProjectRepository : IProjectRepository
 
     public async Task<ProjectEntity> UpdateAsync(ProjectEntity project, CancellationToken ct = default)
     {
-        // entity is already tracked via FindById* — change tracker detects mutations automatically
+        _db.Projects.Update(project);
         await _db.SaveChangesAsync(ct);
         return project;
     }
