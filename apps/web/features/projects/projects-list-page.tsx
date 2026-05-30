@@ -206,7 +206,7 @@ export default function ProjectsListPage() {
   )
 
   const projectGrid = loading ? (
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
       {[...Array(4)].map((_, i) => (
         <div key={i} className="h-[230px] animate-pulse rounded-2xl bg-[hsla(var(--bg-1),_1)]" />
       ))}
@@ -218,7 +218,7 @@ export default function ProjectsListPage() {
   ) : isDndEnabled ? (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={filtered.map(p => p.id)} strategy={rectSortingStrategy}>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
           {filtered.map(project => (
             <SortableProjectCard
               key={project.id}
@@ -233,7 +233,7 @@ export default function ProjectsListPage() {
     </DndContext>
   ) : (
     <motion.div
-      className="grid grid-cols-4 gap-3"
+      className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3"
       variants={listVariants}
       initial="initial"
       animate="animate"
@@ -329,7 +329,7 @@ export default function ProjectsListPage() {
           </div>
         </header>
 
-        <section className="mb-4 grid grid-cols-4 gap-3">
+        <section className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
           <StatCard label={t('projects.statsTotal')}    value={String(totalCount)}  accentColor={STAT_CARD_COLORS.violet} spark={buildSpark(projects.map(p => p.updated_at))} />
           <StatCard label={t('projects.statsActive')}   value={String(activeCount)} accentColor={STAT_CARD_COLORS.green}  spark={buildSpark(projects.filter(p => p.status === 'active').map(p => p.updated_at))} />
           <StatCard label={t('projects.statsApiCalls')} value="—" accentColor={STAT_CARD_COLORS.indigo} />
@@ -376,7 +376,7 @@ export default function ProjectsListPage() {
 
         <section className="rounded-2xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)]">
           <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-4 py-3">
-            <h3 className="font-sans text-[30px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{t('projects.recentActivity')}</h3>
+            <h3 className="font-sans text-[18px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{t('projects.recentActivity')}</h3>
             <button type="button" className="text-body font-medium text-[var(--accent-hover)] hover:text-[var(--accent-primary)]">
               {t('projects.viewAllActivity')}
             </button>

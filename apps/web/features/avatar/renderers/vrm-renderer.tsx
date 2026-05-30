@@ -217,7 +217,9 @@ export default function VrmRenderer({
           emotion:    emotionState,
           camera:     camera!,
           mouse:      mousePosRef.current,
-          lookAtMode: rs?.lookAtMode ?? 'idle',
+          lookAtMode:    rs?.lookAtMode    ?? 'camera',
+          jiggleEnabled: rs?.jiggleEnabled ?? false,
+          jiggleMult:    rs?.jiggleMult    ?? 1.0,
         }
 
         controllers.forEach((c) => c.update(delta, ctx))

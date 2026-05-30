@@ -1,6 +1,6 @@
 'use client'
 
-import { Gamepad2, MessageCircle, Radio, ExternalLink, Download, Tv2 } from 'lucide-react'
+import { MessageSquare, Tv2, Send, Radio, ExternalLink, Download } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/shared/ui/card'
 import { Badge, type BadgeVariant } from '@/shared/ui/badge'
@@ -35,9 +35,9 @@ interface ProjectGridCardProps {
 }
 
 function PlatformIcon({ platform }: { platform: string }) {
-  if (platform === 'discord') return <Gamepad2 size={12} className="text-blue-400" />
-  if (platform === 'twitch')  return <MessageCircle size={12} className="text-violet-400" />
-  if (platform === 'telegram') return <Tv2 size={12} className="text-sky-300" />
+  if (platform === 'discord')  return <MessageSquare size={12} className="text-blue-400" />
+  if (platform === 'twitch')   return <Tv2           size={12} className="text-violet-400" />
+  if (platform === 'telegram') return <Send          size={12} className="text-sky-300" />
   return <Radio size={12} className="text-gray-400" />
 }
 

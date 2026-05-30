@@ -33,14 +33,21 @@ export function KeycloakBootstrap({ children }: { children: ReactNode }) {
       refreshToken: localStorage.getItem(KC_REFRESH_KEY) ?? undefined,
     }
 
-    keycloak
-      .init({
-        onLoad: 'check-sso',
-        silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
-        token: stored.token,
-        refreshToken: stored.refreshToken,
-        checkLoginIframe: false,
-      })
+    const initPromise = keycloak.init({
+      onLoad: 'check-sso',
+      silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
+      token: stored.token,
+      refreshToken: stored.refreshToken,
+      checkLoginIframe: false,
+    })
+
+    // If Keycloak is restarting, the silent-SSO iframe hangs indefinitely.
+    // Race with a 6s timeout so we can redirect to login instead of spinning forever.
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Keycloak init timeout')), 6000),
+    )
+
+    Promise.race([initPromise, timeoutPromise])
       .then(() => {
         if (keycloak.authenticated && keycloak.token) {
           localStorage.setItem(KC_TOKEN_KEY, keycloak.token)
@@ -48,6 +55,13 @@ export function KeycloakBootstrap({ children }: { children: ReactNode }) {
           setAuthCookie()
         } else {
           clearAuthCookie()
+          // Had stored tokens but Keycloak says not authenticated → stale session (e.g. server restart)
+          if (stored.token || stored.refreshToken) {
+            localStorage.removeItem(KC_TOKEN_KEY)
+            localStorage.removeItem(KC_REFRESH_KEY)
+            keycloak.login()
+            return
+          }
         }
 
         keycloak.onTokenExpired = () => {
@@ -61,7 +75,7 @@ export function KeycloakBootstrap({ children }: { children: ReactNode }) {
             localStorage.removeItem(KC_TOKEN_KEY)
             localStorage.removeItem(KC_REFRESH_KEY)
             clearAuthCookie()
-            window.location.replace('/')
+            keycloak.login()
           })
         }
 
@@ -73,18 +87,33 @@ export function KeycloakBootstrap({ children }: { children: ReactNode }) {
       })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : String(err)
-        if (msg.includes('Timeout') || msg.includes('3rd party')) {
-          console.warn('[keycloak] init silenced (expected in restrictive browser environments):', msg)
+        // 3rd-party cookie block: Keycloak IS available but browser blocks the SSO iframe.
+        // Redirecting to login would succeed, but keep this silent to avoid noise on public pages.
+        if (msg.includes('3rd party')) {
+          console.warn('[keycloak] init silenced (3rd-party cookie restriction):', msg)
           return
         }
+        // All other errors (including Timeout when Keycloak is restarting):
+        // clear stale tokens and redirect to login.
+        // Loop guard: if Keycloak is fully down, stop after one attempt for 10s.
         console.error('[keycloak] init failed:', err)
+        localStorage.removeItem(KC_TOKEN_KEY)
+        localStorage.removeItem(KC_REFRESH_KEY)
+        clearAuthCookie()
+        const lastAttempt = sessionStorage.getItem('kc_login_attempt')
+        if (lastAttempt && Date.now() - parseInt(lastAttempt) < 10_000) {
+          console.error('[keycloak] Keycloak unavailable — stopping redirect loop')
+          return
+        }
+        sessionStorage.setItem('kc_login_attempt', Date.now().toString())
+        keycloak.login()
       })
 
     const forceRelogin = () => {
       localStorage.removeItem(KC_TOKEN_KEY)
       localStorage.removeItem(KC_REFRESH_KEY)
       clearAuthCookie()
-      window.location.replace('/')
+      keycloak.login()
     }
 
     configureApiAuth({

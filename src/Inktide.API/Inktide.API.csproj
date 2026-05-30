@@ -88,6 +88,7 @@
     <!-- ScreenAwareness: vision model + frame ingestion + scatter shard -->
     <ProjectReference Include="..\Inktide.API.ScreenAwareness\Inktide.API.ScreenAwareness.Infrastructure\Inktide.API.ScreenAwareness.Infrastructure.csproj" />
     <ProjectReference Include="..\Inktide.API.ScreenAwareness\Inktide.API.ScreenAwareness.REST\Inktide.API.ScreenAwareness.REST.csproj" />
+    <ProjectReference Include="..\Inktide.API.Developer\Inktide.API.Developer.REST\Inktide.API.Developer.REST.csproj" />
   </ItemGroup>
 
 </Project>

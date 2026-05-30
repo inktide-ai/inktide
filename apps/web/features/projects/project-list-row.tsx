@@ -1,6 +1,6 @@
 'use client'
 
-import { Download, ExternalLink, Gamepad2, MessageCircle, Radio, Tv2 } from 'lucide-react'
+import { Download, ExternalLink, MessageSquare, Tv2, Send, Radio } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Badge, type BadgeVariant } from '@/shared/ui/badge'
 import type { ProjectStatus } from './project-grid-card'
@@ -12,9 +12,9 @@ const STATUS_TO_BADGE: Record<ProjectStatus, BadgeVariant> = {
 }
 
 function PlatformIcon({ platform }: { platform: string }) {
-  if (platform === 'discord')  return <Gamepad2     size={12} className="text-blue-400" />
-  if (platform === 'twitch')   return <MessageCircle size={12} className="text-violet-400" />
-  if (platform === 'telegram') return <Tv2          size={12} className="text-sky-300" />
+  if (platform === 'discord')  return <MessageSquare size={12} className="text-blue-400" />
+  if (platform === 'twitch')   return <Tv2           size={12} className="text-violet-400" />
+  if (platform === 'telegram') return <Send          size={12} className="text-sky-300" />
   return <Radio size={12} className="text-gray-400" />
 }
 

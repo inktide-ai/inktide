@@ -34,6 +34,9 @@ export interface VrmAnimationContext {
   camera: THREE.PerspectiveCamera
   mouse: { x: number; y: number }
   lookAtMode: LookAtMode
+  jiggleEnabled: boolean
+  /** 0.5–3.0; масштабирует амплитуду JiggleController */
+  jiggleMult: number
 }
 
 export interface IVrmController {

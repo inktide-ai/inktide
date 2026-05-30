@@ -1,4 +1,5 @@
 export { AppTopBar } from './app-topbar'
+export type { MoreActionItem } from './app-topbar'
 export { SectionHeader } from './section-header'
 export { ProjectCardConnected } from './project-card-connected'
 export { ProjectCreationWizard } from './project-creation-wizard'

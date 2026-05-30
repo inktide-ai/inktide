@@ -29,6 +29,22 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<Guid?>("ApplicationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("application_id");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("author_name");
+
+                    b.Property<string>("AuthType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("auth_type");
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -51,11 +67,21 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_available");
 
+                    b.Property<bool>("IsNative")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_native");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("name");
+
+                    b.Property<string>("ShortDescription")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("short_description");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -66,6 +92,11 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                     b.Property<int>("SortOrder")
                         .HasColumnType("integer")
                         .HasColumnName("sort_order");
+
+                    b.Property<string>("WebsiteUrl")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("website_url");
 
                     b.HasKey("Id");
 
@@ -78,57 +109,79 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            AuthorName = "Inktide",
+                            AuthType = "oauth",
                             Category = "Chat",
                             Description = "Route guild messages to your AI character in real-time.",
                             IconUrl = "/icons/connectors/discord.svg",
                             IsAvailable = true,
+                            IsNative = true,
                             Name = "Discord",
+                            ShortDescription = "Route guild messages to your AI character",
                             Slug = "discord",
                             SortOrder = 1
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
+                            AuthorName = "Inktide",
+                            AuthType = "oauth",
                             Category = "Stream",
                             Description = "Let your character react to live chat and stream events.",
                             IconUrl = "/icons/connectors/twitch.svg",
                             IsAvailable = true,
+                            IsNative = true,
                             Name = "Twitch",
+                            ShortDescription = "Read and respond to Twitch chat live",
                             Slug = "twitch",
                             SortOrder = 2
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000003"),
+                            AuthorName = "Inktide",
+                            AuthType = "apikey",
                             Category = "Chat",
                             Description = "Connect a Telegram bot to relay chat messages to your AI.",
                             IconUrl = "/icons/connectors/telegram.svg",
                             IsAvailable = true,
+                            IsNative = true,
                             Name = "Telegram",
+                            ShortDescription = "Telegram bot token — no OAuth needed",
                             Slug = "telegram",
                             SortOrder = 3
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000004"),
+                            AuthorName = "Inktide",
+                            AuthType = "oauth",
                             Category = "Stream",
                             Description = "Connect live stream chat to drive AI responses.",
                             IconUrl = "/icons/connectors/youtube.svg",
                             IsAvailable = false,
+                            IsNative = false,
                             Name = "YouTube",
+                            ShortDescription = "YouTube Live chat (coming soon)",
                             Slug = "youtube",
-                            SortOrder = 4
+                            SortOrder = 4,
+                            WebsiteUrl = "https://youtube.com"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000005"),
+                            AuthorName = "Inktide",
+                            AuthType = "webhook",
                             Category = "Stream",
                             Description = "Engage your TikTok live audience with AI replies.",
                             IconUrl = "/icons/connectors/tiktok.svg",
                             IsAvailable = false,
+                            IsNative = false,
                             Name = "TikTok",
+                            ShortDescription = "TikTok LIVE comments (coming soon)",
                             Slug = "tiktok",
-                            SortOrder = 5
+                            SortOrder = 5,
+                            WebsiteUrl = "https://developers.tiktok.com"
                         });
                 });
 

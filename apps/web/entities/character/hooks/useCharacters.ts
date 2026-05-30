@@ -126,8 +126,12 @@ export function useCharacters() {
 
     if (newAvatarUrl !== undefined) {
       updateListItem(id, { avatar_url: newAvatarUrl ?? null })
-      // Синхронизируем снимок при avatar-only обновлении
-      if (current) recordSnapshot({ ...current, ...patch })
+      if (current) {
+        const merged = { ...current, ...patch }
+        // Sync TQ detail cache so avatarUrl survives CharactersProvider remount
+        setCharacter(id, merged)
+        recordSnapshot(merged)
+      }
     }
 
     if (!avatarOnly) {

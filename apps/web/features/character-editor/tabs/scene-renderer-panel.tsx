@@ -59,7 +59,6 @@ function ColorField({ label, value, onChange }: ColorFieldProps) {
 }
 
 const LOOK_AT_MODES: { mode: LookAtMode; label: string }[] = [
-  { mode: 'idle',     label: 'Auto'     },
   { mode: 'camera',   label: 'Camera'   },
   { mode: 'mouse',    label: 'Mouse'    },
   { mode: 'disabled', label: 'Off'      },
@@ -138,6 +137,37 @@ export default function SceneRendererPanel({ settings, onSet, onReset }: SceneRe
               </button>
             ))}
           </div>
+        </div>
+
+        {/* ── Breast physics ── */}
+        <div className={sectionCls}>
+          <h3 className={sectionHeadCls}>Breast Physics</h3>
+          <div className="flex gap-[3px] bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] rounded-lg p-[3px]">
+            {([false, true] as const).map(v => (
+              <button
+                key={String(v)}
+                type="button"
+                className={cn(
+                  'flex-1 py-[5px] px-1 border-none rounded-md bg-transparent text-xs font-medium cursor-pointer transition-all duration-150 font-[inherit] leading-none text-center',
+                  settings.jiggleEnabled === v
+                    ? 'bg-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.9)] shadow-[0_1px_3px_rgba(0,0,0,0.3)]'
+                    : 'text-[rgba(255,255,255,0.35)] hover:text-[rgba(255,255,255,0.65)]'
+                )}
+                onClick={() => set('jiggleEnabled', v)}
+              >
+                {v ? 'On' : 'Off'}
+              </button>
+            ))}
+          </div>
+          {settings.jiggleEnabled && (
+            <SliderField
+              label="Intensity"
+              value={settings.jiggleMult}
+              min={0.5} max={3} step={0.1}
+              format={f1}
+              onChange={v => set('jiggleMult', v)}
+            />
+          )}
         </div>
 
         {/* ── Directional light ── */}

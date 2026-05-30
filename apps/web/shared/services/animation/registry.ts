@@ -9,6 +9,7 @@ import { BlinkController } from './controllers/BlinkController'
 import { GazeController } from './controllers/gazeController/GazeController'
 import { AnimationStateMachineController } from './controllers/stateMachine'
 import { ExpressionController } from './controllers/ExpressionController'
+import { JiggleController } from './controllers/jiggleController/JiggleController'
 import { buildAnimationGraph } from './buildAnimationGraph'
 
 export function createVrmControllers(baselineMood?: string): IVrmController[] {
@@ -18,5 +19,6 @@ export function createVrmControllers(baselineMood?: string): IVrmController[] {
     new GazeController(),
     new AnimationStateMachineController(graphConfig),
     new ExpressionController(),
+    new JiggleController(),
   ]
 }

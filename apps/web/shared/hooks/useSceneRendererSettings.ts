@@ -17,6 +17,9 @@ export interface SceneRendererSettings {
   renderScale: number    // 0.5–3.0
   // Eye tracking
   lookAtMode: LookAtMode
+  // Breast jiggle
+  jiggleEnabled: boolean
+  jiggleMult: number
   // Directional light
   dirLightIntensity: number  // 0–5
   dirLightColor: string      // hex
@@ -37,7 +40,9 @@ export const SCENE_RENDERER_DEFAULTS: SceneRendererSettings = {
   fov: 30,
   cameraDistance: 2.5,
   renderScale: 1.0,
-  lookAtMode: 'idle',
+  lookAtMode: 'camera',
+  jiggleEnabled: false,
+  jiggleMult: 1.0,
   dirLightIntensity: 1.0,
   dirLightColor: '#ffffff',
   dirLightRotX: 30,

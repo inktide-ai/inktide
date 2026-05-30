@@ -109,7 +109,7 @@ export function AuthProvider({
     keycloak.onAuthRefreshSuccess = sync
     keycloak.onAuthLogout         = clear
     keycloak.onAuthError          = clear
-    keycloak.onAuthRefreshError   = clear
+    keycloak.onAuthRefreshError   = () => { clear(); keycloak.login() }
 
     return () => {
       keycloak.onReady              = undefined

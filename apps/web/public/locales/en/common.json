@@ -205,6 +205,7 @@
     "brain": "Brain",
     "voice": "Voice",
     "emotion": "Emotion",
+    "channels": "Channels",
     "loading": "Loading...",
     "backToSouls": "Souls",
     "failedToLoad": "Failed to load soul — try refreshing the page."

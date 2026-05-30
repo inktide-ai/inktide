@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Clock } from 'lucide-react'
+import { ArrowLeft, Check, Clock, ExternalLink, Globe, Shield, Tag, Zap } from 'lucide-react'
 import {
   getConnector,
   getSoulInstallations,
-  installConnector,
-  uninstallConnector,
   type ConnectorResponse,
   type InstallationResponse,
 } from '@/features/soul/channels/api/marketplace'
+import { getCard } from '@/entities/soul/api/cards'
+import type { ChannelResponse } from '@/shared/types/soul-api'
 
 /* ── platform icons ─────────────────────────────────────────────────── */
 
@@ -63,6 +63,7 @@ function IconTikTok() {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden width="56" height="56">
       <rect width="512" height="512" fill="#000"/>
       <path d="M389.25 153.8a102.7 102.7 0 01-62.5-20.9V287c0 72.6-59 131.5-131.7 131.5S63.4 359.6 63.4 287s59-131.5 131.7-131.5c7.3 0 14.4.6 21.3 1.8v72.9a60.4 60.4 0 00-21.3-3.8 60.6 60.6 0 100 121.2 60.6 60.6 0 0060.6-60.6V93.5h71.2a102.8 102.8 0 0062.4 60.3z" fill="#fff"/>
+      <path d="M389.25 153.8a102.7 102.7 0 01-62.5-20.9V287c0 72.6-59 131.5-131.7 131.5S63.4 359.6 63.4 287s59-131.5 131.7-131.5c7.3 0 14.4.6 21.3 1.8v72.9a60.4 60.4 0 00-21.3-3.8 60.6 60.6 0 100 121.2 60.6 60.6 0 0060.6-60.6V93.5h71.2a102.8 102.8 0 0062.4 60.3z" fill="#EE1D52" opacity="0.5"/>
     </svg>
   )
 }
@@ -75,6 +76,13 @@ const ICON_MAP: Record<string, () => React.JSX.Element> = {
   tiktok:   IconTikTok,
 }
 
+const AUTH_TYPE_LABELS: Record<string, string> = {
+  oauth:   'OAuth 2.0',
+  apikey:  'API Key',
+  webhook: 'Webhook',
+  none:    'No auth required',
+}
+
 /* ── page ────────────────────────────────────────────────────────────── */
 
 export default function ConnectorDetailPage() {
@@ -83,43 +91,46 @@ export default function ConnectorDetailPage() {
 
   const [connector,     setConnector]     = useState<ConnectorResponse | null>(null)
   const [installations, setInstallations] = useState<InstallationResponse[]>([])
+  const [soulChannels,  setSoulChannels]  = useState<ChannelResponse[]>([])
   const [loading,       setLoading]       = useState(true)
-  const [busy,          setBusy]          = useState(false)
+
+  const searchParams = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search)
+    : null
+  const justInstalled = searchParams?.get('installed') === 'true'
 
   useEffect(() => {
-    Promise.all([getConnector(slug), getSoulInstallations(id)])
-      .then(([c, i]) => { setConnector(c); setInstallations(i) })
+    Promise.all([
+      getConnector(slug),
+      getSoulInstallations(id).catch(() => [] as InstallationResponse[]),
+      getCard(id).then(card => card.channels ?? []).catch(() => [] as ChannelResponse[]),
+    ])
+      .then(([c, i, ch]) => { setConnector(c); setInstallations(i); setSoulChannels(ch) })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [id, slug])
 
-  const installation = installations.find(i => i.connector_slug === slug)
-  const isInstalled  = !!installation
+  const isInstalled = connector?.isNative
+    ? soulChannels.some(ch => ch.platform === slug)
+    : installations.some(i => i.connectorSlug === slug)
 
-  async function handleInstall() {
-    if (busy || !connector) return
-    setBusy(true)
-    try {
-      const inst = await installConnector(id, slug)
-      setInstallations(prev => [...prev, inst])
+  function handleAddIntegration() {
+    if (!connector?.isAvailable) return
+    // native connectors: navigate to their dedicated setup page
+    if (connector.isNative) {
       router.push(`/souls/${id}/channels/${slug}`)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setBusy(false)
+      return
     }
-  }
-
-  async function handleUninstall() {
-    if (busy || !installation) return
-    setBusy(true)
-    try {
-      await uninstallConnector(installation.id)
-      setInstallations(prev => prev.filter(i => i.id !== installation.id))
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setBusy(false)
+    // third-party with linked application: launch Keycloak OAuth flow
+    if (connector.applicationId) {
+      const params = new URLSearchParams({
+        client_id:     connector.applicationId,
+        redirect_uri:  `${window.location.origin}/souls/${id}/channels/marketplace/${slug}?installed=true`,
+        response_type: 'code',
+        scope:         'openid',
+        state:         crypto.randomUUID(),
+      })
+      window.location.href = `/oauth/authorize?${params}`
     }
   }
 
@@ -135,83 +146,200 @@ export default function ConnectorDetailPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1248px] px-6 flex-none">
-      <div className="my-6 flex flex-1 flex-col min-w-0">
-        <section className="flex flex-col gap-8">
+      <div className="my-6 flex flex-1 flex-col min-w-0 gap-6">
 
-          {/* back */}
-          <button
-            onClick={() => router.push(`/souls/${id}/channels/marketplace`)}
-            className="flex items-center gap-2 text-body text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors w-fit"
-          >
-            <ArrowLeft size={16} />
-            Back to Marketplace
-          </button>
+        {/* back */}
+        <button
+          onClick={() => router.push(`/souls/${id}/channels/marketplace`)}
+          className="flex items-center gap-2 text-body text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors w-fit"
+        >
+          <ArrowLeft size={16} />
+          Back to Marketplace
+        </button>
 
-          {/* detail card */}
-          <div className="flex flex-col sm:flex-row gap-6 p-6 rounded-xl border border-[var(--border-subtle)]">
-            {/* icon */}
-            <div className="relative w-14 h-14 rounded-full flex overflow-hidden shrink-0" aria-hidden>
-              {Icon ? <Icon /> : null}
-              <span className="absolute inset-0 rounded-full border border-[#ffffff24] pointer-events-none" />
-            </div>
+        {/* main layout: content + sidebar */}
+        <div className="flex flex-col lg:flex-row gap-8">
 
-            <div className="flex flex-col gap-4 flex-1">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-[1.5rem] font-semibold text-[var(--text-heading)]">
-                    {connector.name}
-                  </h1>
-                  <span className="inline-flex items-center rounded-full border border-[var(--border-subtle)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-tertiary)]">
-                    {connector.category}
-                  </span>
-                  {isInstalled && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-500">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden />
-                      Installed
-                    </span>
-                  )}
-                </div>
-                <p className="text-body-md text-[var(--text-secondary)]">{connector.description}</p>
+          {/* left: main content */}
+          <div className="flex-1 min-w-0 flex flex-col gap-6">
+
+            {/* Success banner after OAuth redirect */}
+            {justInstalled && (
+              <div className="rounded-xl border border-green-500/20 bg-green-500/5 px-4 py-3 flex items-center gap-2 text-sm text-green-400">
+                <span className="h-2 w-2 rounded-full bg-green-500 shrink-0" />
+                Successfully connected! You can now configure the integration below.
+              </div>
+            )}
+
+            {/* hero card */}
+            <div className="flex flex-col sm:flex-row gap-5 p-6 rounded-xl border border-[var(--border-subtle)]">
+              {/* icon */}
+              <div className="relative w-14 h-14 rounded-full flex overflow-hidden shrink-0" aria-hidden>
+                {Icon ? <Icon /> : (
+                  <div className="w-full h-full bg-[var(--surface-2)] flex items-center justify-center text-xl font-bold text-[var(--text-tertiary)]">
+                    {connector.name.charAt(0)}
+                  </div>
+                )}
+                <span className="absolute inset-0 rounded-full border border-[#ffffff24] pointer-events-none" />
               </div>
 
-              <div className="flex gap-3 flex-wrap">
-                {connector.is_available ? (
-                  isInstalled ? (
-                    <>
-                      <button
-                        onClick={() => router.push(`/souls/${id}/channels/${slug}`)}
-                        className="inline-flex h-9 items-center justify-center rounded-md bg-[var(--text-primary)] px-5 text-body font-medium text-[var(--bg-0)] transition-opacity hover:opacity-90"
-                      >
-                        Configure
-                      </button>
-                      <button
-                        onClick={handleUninstall}
-                        disabled={busy}
-                        className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--border-subtle)] px-5 text-body font-medium text-[var(--text-primary)] hover:bg-[var(--surface-1)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {busy ? 'Removing…' : 'Uninstall'}
-                      </button>
-                    </>
+              <div className="flex flex-col gap-3 flex-1 min-w-0">
+                {/* name + badges */}
+                <div className="flex items-start gap-3 flex-wrap">
+                  <div className="flex flex-col gap-0.5">
+                    <h1 className="text-[1.5rem] font-semibold text-[var(--text-heading)] leading-tight">
+                      {connector.name}
+                    </h1>
+                    <p className="text-sm text-[var(--text-tertiary)]">
+                      by {connector.authorName ?? 'Inktide'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                    {connector.isNative && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 text-xs font-medium text-blue-400">
+                        <Zap size={10} />
+                        Native
+                      </span>
+                    )}
+                    {isInstalled && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 border border-green-500/20 px-2.5 py-0.5 text-xs font-medium text-green-500">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden />
+                        Connected
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* description */}
+                <p className="text-body text-[var(--text-secondary)]">{connector.description}</p>
+
+                {/* actions */}
+                <div className="flex gap-3 flex-wrap">
+                  {!connector.isAvailable ? (
+                    <span className="inline-flex items-center gap-2 text-body font-medium text-[var(--text-tertiary)]">
+                      <Clock size={15} />
+                      Coming soon
+                    </span>
+                  ) : isInstalled ? (
+                    <button
+                      onClick={() => router.push(`/souls/${id}/channels/${slug}`)}
+                      className="inline-flex h-9 items-center justify-center rounded-md bg-[var(--text-primary)] px-5 text-body font-medium text-[var(--bg-0)] transition-opacity hover:opacity-90"
+                    >
+                      Configure
+                    </button>
                   ) : (
                     <button
-                      onClick={handleInstall}
-                      disabled={busy}
-                      className="inline-flex h-9 items-center justify-center rounded-md bg-[var(--text-primary)] px-5 text-body font-medium text-[var(--bg-0)] transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleAddIntegration}
+                      className="inline-flex h-9 items-center justify-center rounded-md bg-[var(--text-primary)] px-5 text-body font-medium text-[var(--bg-0)] transition-opacity hover:opacity-90"
                     >
-                      {busy ? 'Installing…' : 'Install'}
+                      Add Integration
                     </button>
-                  )
-                ) : (
-                  <span className="inline-flex items-center gap-2 text-body font-medium text-[var(--text-tertiary)]">
-                    <Clock size={15} />
-                    Coming soon
-                  </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* what this connector does */}
+            {connector.isAvailable && (
+              <div className="flex flex-col gap-3 p-6 rounded-xl border border-[var(--border-subtle)]">
+                <h2 className="text-body-md font-semibold text-[var(--text-heading)]">
+                  What this connector can do
+                </h2>
+                <ul className="flex flex-col gap-2">
+                  <li className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
+                    <Check size={14} className="mt-0.5 shrink-0 text-green-500" />
+                    Receive messages from {connector.name} and route them to your AI character
+                  </li>
+                  <li className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
+                    <Check size={14} className="mt-0.5 shrink-0 text-green-500" />
+                    Send AI-generated responses back to {connector.name} in real-time
+                  </li>
+                  {connector.isNative && (
+                    <li className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
+                      <Check size={14} className="mt-0.5 shrink-0 text-green-500" />
+                      First-party integration — maintained by Inktide
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* right: sidebar */}
+          <aside className="lg:w-64 shrink-0 flex flex-col gap-4">
+
+            <div className="rounded-xl border border-[var(--border-subtle)] p-4 flex flex-col gap-4">
+              <h3 className="text-sm font-semibold text-[var(--text-heading)]">Details</h3>
+
+              <dl className="flex flex-col gap-3">
+                {/* category */}
+                <div className="flex items-center justify-between gap-2">
+                  <dt className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
+                    <Tag size={12} />
+                    Category
+                  </dt>
+                  <dd className="text-xs text-[var(--text-primary)] font-medium">{connector.category}</dd>
+                </div>
+
+                {/* type */}
+                <div className="flex items-center justify-between gap-2">
+                  <dt className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
+                    <Zap size={12} />
+                    Type
+                  </dt>
+                  <dd className="text-xs text-[var(--text-primary)] font-medium">
+                    {connector.isNative ? 'Native' : 'Third-party'}
+                  </dd>
+                </div>
+
+                {/* auth type */}
+                <div className="flex items-center justify-between gap-2">
+                  <dt className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
+                    <Shield size={12} />
+                    Auth
+                  </dt>
+                  <dd className="text-xs text-[var(--text-primary)] font-medium">
+                    {AUTH_TYPE_LABELS[connector.authType ?? 'none'] ?? connector.authType}
+                  </dd>
+                </div>
+
+                {/* author */}
+                <div className="flex items-center justify-between gap-2">
+                  <dt className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
+                    <Globe size={12} />
+                    Developer
+                  </dt>
+                  <dd className="text-xs text-[var(--text-primary)] font-medium">
+                    {connector.authorName ?? 'Inktide'}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            {/* resources */}
+            <div className="rounded-xl border border-[var(--border-subtle)] p-4 flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-[var(--text-heading)]">Resources</h3>
+              <div className="flex flex-col gap-2">
+                {connector.websiteUrl && (
+                  <a
+                    href={connector.websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    <ExternalLink size={12} />
+                    Website
+                  </a>
+                )}
+                {!connector.websiteUrl && (
+                  <span className="text-xs text-[var(--text-tertiary)]">No external resources</span>
                 )}
               </div>
             </div>
-          </div>
 
-        </section>
+          </aside>
+        </div>
+
       </div>
     </div>
   )

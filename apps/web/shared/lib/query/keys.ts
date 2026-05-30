@@ -52,4 +52,9 @@ export const queryKeys = {
   stats: {
     dashboard: ['stats', 'dashboard'] as const,
   },
+  developer: {
+    apps: () => ['developer', 'apps'] as const,
+    app: (id: string) => ['developer', 'apps', id] as const,
+    deliveries: (appId: string) => ['developer', 'apps', appId, 'deliveries'] as const,
+  },
 }

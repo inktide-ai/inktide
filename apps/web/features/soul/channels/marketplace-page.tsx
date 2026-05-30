@@ -2,14 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Check, Clock } from 'lucide-react'
+import { ArrowLeft, Check, Clock, Zap } from 'lucide-react'
 import {
   getConnectors,
   getSoulInstallations,
-  installConnector,
   type ConnectorResponse,
   type InstallationResponse,
 } from '@/features/soul/channels/api/marketplace'
+import { getCard } from '@/entities/soul/api/cards'
+import type { ChannelResponse } from '@/shared/types/soul-api'
 
 /* ── platform icons ─────────────────────────────────────────────────── */
 
@@ -83,22 +84,48 @@ export default function MarketplacePage() {
 
   const [connectors,     setConnectors]     = useState<ConnectorResponse[]>([])
   const [installations,  setInstallations]  = useState<InstallationResponse[]>([])
+  const [soulChannels,   setSoulChannels]   = useState<ChannelResponse[]>([])
   const [loading,        setLoading]        = useState(true)
-  const [installing,     setInstalling]     = useState<string | null>(null)
   const [search,         setSearch]         = useState('')
   const [categoryFilter, setCategoryFilter] = useState('All')
 
   useEffect(() => {
-    Promise.all([getConnectors(), getSoulInstallations(id)])
-      .then(([c, i]) => { setConnectors(c); setInstallations(i) })
+    Promise.all([
+      getConnectors(),
+      getSoulInstallations(id).catch(() => [] as InstallationResponse[]),
+      getCard(id).then(card => card.channels ?? []).catch(() => [] as ChannelResponse[]),
+    ])
+      .then(([c, i, ch]) => { setConnectors(c); setInstallations(i); setSoulChannels(ch) })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [id])
 
-  const installedSlugs = useMemo(
-    () => new Set(installations.map(i => i.connector_slug)),
+  // third-party installs tracked via ConnectorInstallation
+  const thirdPartyInstalledSlugs = useMemo(
+    () => new Set(installations.map(i => i.connectorSlug)),
     [installations],
   )
+
+  // native installs derived from soul AiCardChannel records
+  const nativeInstalledPlatforms = useMemo(
+    () => new Set(soulChannels.map(ch => ch.platform)),
+    [soulChannels],
+  )
+
+  function isInstalled(connector: ConnectorResponse): boolean {
+    return connector.isNative
+      ? nativeInstalledPlatforms.has(connector.slug)
+      : thirdPartyInstalledSlugs.has(connector.slug)
+  }
+
+  function handleAction(connector: ConnectorResponse) {
+    // native connectors always route to their dedicated setup page
+    if (connector.isNative) {
+      router.push(`/souls/${id}/channels/${connector.slug}`)
+      return
+    }
+    // third-party: future OAuth/APIKey install flow
+  }
 
   const categories = useMemo(
     () => ['All', ...Array.from(new Set(connectors.map(c => c.category)))],
@@ -107,25 +134,19 @@ export default function MarketplacePage() {
 
   const visible = useMemo(() => {
     const q = search.toLowerCase()
-    return connectors.filter(c => {
-      const matchQ = !q || c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)
-      const matchCat = categoryFilter === 'All' || c.category === categoryFilter
-      return matchQ && matchCat
-    })
+    return connectors
+      .filter(c => {
+        const matchQ   = !q || c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)
+        const matchCat = categoryFilter === 'All' || c.category === categoryFilter
+        return matchQ && matchCat
+      })
+      .sort((a, b) => {
+        // native first, then by sortOrder
+        if (a.isNative && !b.isNative) return -1
+        if (!a.isNative && b.isNative) return 1
+        return (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+      })
   }, [connectors, search, categoryFilter])
-
-  async function handleInstall(slug: string) {
-    if (installing) return
-    setInstalling(slug)
-    try {
-      const installation = await installConnector(id, slug)
-      setInstallations(prev => [...prev, installation])
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setInstalling(null)
-    }
-  }
 
   if (loading) {
     return <div className="p-8 text-sm text-[var(--text-secondary)]">Loading…</div>
@@ -195,54 +216,68 @@ export default function MarketplacePage() {
           {/* connector grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {visible.map(connector => {
-              const Icon        = ICON_MAP[connector.slug]
-              const isInstalled = installedSlugs.has(connector.slug)
-              const isBusy      = installing === connector.slug
+              const Icon      = ICON_MAP[connector.slug]
+              const installed = isInstalled(connector)
 
               return (
                 <div
                   key={connector.id}
-                  className="relative flex flex-col gap-4 rounded-xl border border-[var(--border-subtle)] p-5 transition-colors hover:bg-[var(--surface-1)]"
+                  className="relative flex flex-col gap-4 rounded-xl border border-[var(--border-subtle)] p-5 transition-colors hover:bg-[var(--surface-1)] cursor-pointer"
+                  onClick={() => router.push(`/souls/${id}/channels/marketplace/${connector.slug}`)}
                 >
                   <div className="flex items-start justify-between gap-3">
                     {/* icon */}
-                    <div className="relative w-11 h-11 rounded-full flex overflow-hidden shrink-0" aria-hidden>
-                      {Icon ? <Icon /> : null}
+                    <div className="relative w-11 h-11 rounded-full flex items-center justify-center overflow-hidden shrink-0" aria-hidden>
+                      {Icon ? <Icon /> : (
+                        <div className="w-full h-full bg-[var(--surface-2)] flex items-center justify-center text-xs font-bold text-[var(--text-tertiary)]">
+                          {connector.name.charAt(0)}
+                        </div>
+                      )}
                       <span className="absolute inset-0 rounded-full border border-[#ffffff24] pointer-events-none" />
                     </div>
 
-                    {/* badge */}
-                    <span className="mt-0.5 inline-flex items-center gap-1 rounded-full border border-[var(--border-subtle)] px-2 py-0.5 text-caption font-medium text-[var(--text-tertiary)] shrink-0">
-                      {connector.category}
-                    </span>
+                    {/* badges */}
+                    <div className="flex items-center gap-1.5 mt-0.5 shrink-0 flex-wrap justify-end">
+                      {connector.isNative && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-caption font-medium text-blue-400">
+                          <Zap size={10} />
+                          Native
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border-subtle)] px-2 py-0.5 text-caption font-medium text-[var(--text-tertiary)]">
+                        {connector.category}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex flex-col gap-1 flex-1">
                     <p className="text-body-md font-semibold text-[var(--text-heading)]">{connector.name}</p>
-                    <p className="text-sm text-[var(--text-secondary)] leading-snug">{connector.description}</p>
+                    <p className="text-sm text-[var(--text-secondary)] leading-snug">
+                      {connector.shortDescription || connector.description}
+                    </p>
                   </div>
 
-                  {connector.is_available ? (
-                    isInstalled ? (
+                  {/* action */}
+                  <div onClick={e => e.stopPropagation()}>
+                    {!connector.isAvailable ? (
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-tertiary)]">
+                        <Clock size={14} />
+                        Coming soon
+                      </span>
+                    ) : installed ? (
                       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-500">
                         <Check size={14} />
-                        Installed
+                        Connected
                       </span>
                     ) : (
                       <button
-                        onClick={() => handleInstall(connector.slug)}
-                        disabled={!!installing}
-                        className="inline-flex h-8 items-center justify-center rounded-md bg-[var(--text-primary)] px-4 text-sm font-medium text-[var(--bg-0)] transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleAction(connector)}
+                        className="inline-flex h-8 items-center justify-center rounded-md bg-[var(--text-primary)] px-4 text-sm font-medium text-[var(--bg-0)] transition-opacity hover:opacity-90"
                       >
-                        {isBusy ? 'Installing…' : 'Install'}
+                        Add Integration
                       </button>
-                    )
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-tertiary)]">
-                      <Clock size={14} />
-                      Coming soon
-                    </span>
-                  )}
+                    )}
+                  </div>
                 </div>
               )
             })}

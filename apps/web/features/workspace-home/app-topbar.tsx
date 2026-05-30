@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/shared/ui/dropdown-menu'
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipPortal, TooltipContent } from '@/shared/ui/tooltip'
 import { ChevronsUpDown, Pause } from 'lucide-react'
-import { Play, Upload, Star, Settings, Trash } from '@/shared/ui/icons'
+import { Play, Upload, Star } from '@/shared/ui/icons'
 import { cn } from '@/lib/utils'
 import { ScopeSwitcher } from './scope-switcher'
 

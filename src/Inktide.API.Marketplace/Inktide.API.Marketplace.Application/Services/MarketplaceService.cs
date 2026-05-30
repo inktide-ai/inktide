@@ -11,6 +11,7 @@ public sealed class MarketplaceService(
     IConnectorRepository connectorRepo,
     IConnectorInstallationRepository installationRepo,
     ISoulOwnershipChecker ownershipChecker,
+    IConnectorEventPublisher eventPublisher,
     ILogger<MarketplaceService> logger) : IMarketplaceService
 {
     public Task<IReadOnlyList<Connector>> GetConnectorsAsync(CancellationToken ct)
@@ -52,6 +53,15 @@ public sealed class MarketplaceService(
             "Connector {ConnectorSlug} installed (installation {InstallationId}) for soul {SoulId}",
             connectorSlug, result.Id, soulId);
 
+        try
+        {
+            await eventPublisher.PublishInstalledAsync(result.Id, soulId, connectorSlug, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to publish connector.installed event for {InstallationId}", result.Id);
+        }
+
         return InstallResult.New(result);
     }
 
@@ -67,6 +77,16 @@ public sealed class MarketplaceService(
             installationId, installation.SoulId);
 
         await installationRepo.RemoveAsync(installationId, ct);
+
+        var connectorSlug = installation.Connector?.Slug ?? string.Empty;
+        try
+        {
+            await eventPublisher.PublishUninstalledAsync(installationId, installation.SoulId, connectorSlug, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to publish connector.uninstalled event for {InstallationId}", installationId);
+        }
     }
 
     public async Task<IReadOnlyList<ConnectorInstallation>> GetInstallationsAsync(

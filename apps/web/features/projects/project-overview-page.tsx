@@ -253,7 +253,7 @@ export function ProjectOverviewPage() {
             </div>
             <button
               type="button"
-              onClick={() => router.push(`${base}/sandbox`)}
+              onClick={() => router.push(`/edit/sandbox?projectId=${id}`)}
               className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-4 text-body font-medium text-white backdrop-blur-sm hover:bg-white/20"
             >
               <FlaskConical size={13} /> {t('projectDetail.openSandbox')}

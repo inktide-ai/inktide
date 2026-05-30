@@ -8,18 +8,26 @@ export interface ConnectorResponse {
   name: string
   description: string
   category: string
-  icon_url: string
-  is_available: boolean
-  sort_order: number
+  iconUrl: string
+  isAvailable: boolean
+  sortOrder: number
+  // enriched fields (added in migration AddConnectorMetadata)
+  shortDescription?: string
+  authType?: string
+  isNative?: boolean
+  websiteUrl?: string | null
+  authorName?: string
+  // Platform Layer: linked Developer application
+  applicationId?: string | null
 }
 
 export interface InstallationResponse {
   id: string
-  soul_id: string
-  connector_id: string
-  connector_slug: string
-  connector_name: string
-  installed_at: string
+  soulId: string
+  connectorId: string
+  connectorSlug: string
+  connectorName: string
+  installedAt: string
 }
 
 // ── API calls ──
@@ -46,7 +54,7 @@ export async function installConnector(
   const res = await apiFetch(`/api/marketplace/souls/${soulId}/installs`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ connector_slug: connectorSlug }),
+    body: JSON.stringify({ connectorSlug }),
   })
   return jsonOrThrow(res)
 }

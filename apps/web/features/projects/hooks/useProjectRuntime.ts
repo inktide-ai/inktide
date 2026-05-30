@@ -58,7 +58,10 @@ export function useProjectRuntime(projectId: string): ProjectRuntime {
   const soulId = project?.active_soul_id ?? null
 
   const soulQuery = useQuery({
-    queryKey: queryKeys.souls.detail(soulId ?? ''),
+    // Use a project-runtime-scoped key to avoid colliding with the CharactersContext
+    // loadFullCard cache (queryKeys.souls.detail), which stores a mapped AiCharacter.
+    // This query stores the raw AiCardResponse; mixing them corrupts avatarUrl.
+    queryKey: ['project-runtime', 'soul', soulId ?? ''],
     queryFn: () => getCard(soulId!),
     staleTime: 60_000,
     enabled: !!soulId,

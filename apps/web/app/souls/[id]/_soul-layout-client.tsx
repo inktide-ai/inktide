@@ -16,12 +16,13 @@ export function SoulLayoutClient({ children }: { children: ReactNode }) {
   const { t } = useTranslation('common')
 
   const NAV_ITEMS = [
-    { label: t('soulLayout.overview'), href: ''          },
-    { label: t('soulLayout.avatars'),  href: '/avatars'  },
-    { label: t('soulLayout.scenes'),   href: '/scenes'   },
-    { label: t('soulLayout.brain'),    href: '/brain'    },
-    { label: t('soulLayout.voice'),    href: '/voice'    },
-    { label: t('soulLayout.emotion'),  href: '/emotion'  },
+    { label: t('soulLayout.overview'),  href: ''           },
+    { label: t('soulLayout.avatars'),   href: '/avatars'   },
+    { label: t('soulLayout.scenes'),    href: '/scenes'    },
+    { label: t('soulLayout.brain'),     href: '/brain'     },
+    { label: t('soulLayout.voice'),     href: '/voice'     },
+    { label: t('soulLayout.emotion'),   href: '/emotion'   },
+    { label: t('soulLayout.channels'),  href: '/channels'  },
   ]
 
   useEffect(() => {
