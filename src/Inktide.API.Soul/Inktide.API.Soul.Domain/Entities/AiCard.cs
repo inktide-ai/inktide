@@ -15,6 +15,7 @@ public sealed class AiCard
     private string _name = string.Empty;
     private string _slug = string.Empty;
     private string? _avatarUrl;
+    private string? _bannerUrl;
     private string _personality = string.Empty;
     private string _systemPrompt = string.Empty;
     private Guid _llmCatalogId;
@@ -72,6 +73,12 @@ public sealed class AiCard
     {
         get => _avatarUrl;
         set => _avatarUrl = value;
+    }
+
+    public string? BannerUrl
+    {
+        get => _bannerUrl;
+        set => _bannerUrl = value;
     }
 
     public string Personality
@@ -220,6 +227,32 @@ public sealed class AiCard
         if (string.IsNullOrEmpty(key)) throw new ArgumentException("sort key required", nameof(key));
         _sortKey = key;
     }
+
+    /// <summary>Marks the card as soft-deleted. Throws if already deleted.</summary>
+    public void SoftDelete(DateTime now)
+    {
+        if (_deletedAt.HasValue)
+            throw new InvalidOperationException($"AiCard {_id} is already deleted.");
+        _deletedAt  = now;
+        _updatedAt  = now;
+        _isActive   = false;
+    }
+
+    /// <summary>Transitions the run status. Throws if the card is deleted.</summary>
+    public void ChangeStatus(bool isActive, AiCardStatus status, DateTime now)
+    {
+        if (_deletedAt.HasValue)
+            throw new InvalidOperationException($"Cannot change status of deleted AiCard {_id}.");
+        _isActive  = isActive;
+        _status    = status;
+        _updatedAt = now;
+    }
+
+    /// <summary>Updates the in-memory avatar URL (actual DB write uses SetAvatarUrlAsync).</summary>
+    public void SetAvatar(string? url) => _avatarUrl = url;
+
+    /// <summary>Updates the in-memory banner URL (actual DB write uses SetBannerUrlAsync).</summary>
+    public void SetBanner(string? url) => _bannerUrl = url;
 
     public string? Category
     {

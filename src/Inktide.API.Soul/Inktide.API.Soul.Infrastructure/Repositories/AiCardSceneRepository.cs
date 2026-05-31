@@ -19,14 +19,10 @@ public sealed class AiCardSceneRepository : IAiCardSceneRepository
     }
 
 
-    public async Task<AiCardScene> AddAsync(AiCardScene scene, CancellationToken ct = default)
+    public Task<AiCardScene> AddAsync(AiCardScene scene, CancellationToken ct = default)
     {
-        // TODO: SaveChangesAsync called here directly because SoulDbContext DI scope
-        // mismatch between repositories and SoulTransactionManager (DryIoc vs MS DI).
-        // Real fix: ensure single SoulDbContext instance per request in DryIoc registration.
         _db.AiCardScenes.Add(scene);
-        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
-        return scene;
+        return Task.FromResult(scene);
     }
 
     public async Task<int> CountByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default)

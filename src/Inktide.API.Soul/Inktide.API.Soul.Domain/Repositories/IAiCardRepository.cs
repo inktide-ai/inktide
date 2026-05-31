@@ -33,4 +33,7 @@ public interface IAiCardRepository
 
     /// <summary>Targeted single-column update — avoids tracking the full entity graph.</summary>
     Task SetAvatarUrlAsync(Guid cardId, string? avatarUrl, DateTime updatedAt, CancellationToken ct = default);
+
+    /// <summary>Targeted single-column update for the banner image URL.</summary>
+    Task SetBannerUrlAsync(Guid cardId, string? bannerUrl, DateTime updatedAt, CancellationToken ct = default);
 }

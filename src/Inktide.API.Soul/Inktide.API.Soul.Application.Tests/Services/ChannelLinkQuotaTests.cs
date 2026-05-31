@@ -1,4 +1,5 @@
 using Inktide.API.Core.Contracts;
+using Inktide.API.Core.Transactions;
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Models;
 using Inktide.API.Soul.Application.Services;
@@ -20,10 +21,12 @@ public sealed class ChannelLinkQuotaTests
         IAiCardChannelRepository channelRepo,
         IUserPlanResolver planResolver)
     {
+        var txManager = Substitute.For<ITransactionManager>();
         return new AiCardChannelLinkService(
             cardRepo,
             channelRepo,
             planResolver,
+            txManager,
             TimeProvider.System,
             NullLogger<AiCardChannelLinkService>.Instance);
     }

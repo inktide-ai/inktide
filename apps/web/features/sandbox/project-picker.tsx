@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { Search, Plus } from 'lucide-react'
 import { listProjects, type ProjectListItem } from '@/entities/project/api'
 import { Badge, type BadgeVariant } from '@/shared/ui/badge'
@@ -46,7 +47,13 @@ function SkeletonCard() {
 }
 
 function ProjectCard({ project, onClick }: { project: ProjectListItem; onClick: () => void }) {
+  const { t } = useTranslation('common')
   const badgeVariant: BadgeVariant = project.status === 'active' ? 'active' : project.status === 'paused' ? 'paused' : 'archived'
+  const STATUS_LABELS: Record<string, string> = {
+    active:   t('projectDetail.statusActive'),
+    paused:   t('projectDetail.statusPaused'),
+    archived: t('projectDetail.statusArchived'),
+  }
 
   return (
     <button
@@ -56,15 +63,15 @@ function ProjectCard({ project, onClick }: { project: ProjectListItem; onClick: 
     >
       {/* Name + badge */}
       <div className="flex items-start justify-between gap-2">
-        <p className="text-body font-semibold leading-snug text-[var(--text-primary)] group-hover:text-white transition-colors line-clamp-1">
+        <p className="text-body font-semibold leading-snug text-[var(--text-primary)] transition-colors line-clamp-1">
           {project.name}
         </p>
-        <Badge variant={badgeVariant} className="shrink-0 capitalize">{project.status}</Badge>
+        <Badge variant={badgeVariant} className="shrink-0">{STATUS_LABELS[project.status] ?? project.status}</Badge>
       </div>
 
       {/* Description */}
       <p className="line-clamp-2 text-body leading-relaxed text-[var(--text-secondary)]">
-        {project.description || 'No description'}
+        {project.description || t('projectDetail.noDescription')}
       </p>
 
       {/* Soul row */}

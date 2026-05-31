@@ -9,6 +9,7 @@ import {
   type Project,
   type UpdateProjectRequest,
 } from '@/features/projects/api/projects'
+import type { ProjectListItem } from '@/entities/project/api'
 
 function buildUpdate(project: Project | null, overrides: Partial<UpdateProjectRequest>): UpdateProjectRequest {
   return {
@@ -119,10 +120,20 @@ export function useProjectRuntime(projectId: string): ProjectRuntime {
 
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: queryKeys.projects.detail(projectId) })
+    qc.invalidateQueries({ predicate: q => q.queryKey[0] === 'projects' && typeof q.queryKey[1] === 'object' })
     if (soulId) {
       qc.invalidateQueries({ queryKey: queryKeys.souls.models(soulId) })
       qc.invalidateQueries({ queryKey: queryKeys.souls.scenes(soulId) })
     }
+  }
+
+  function patchProjectCache(patch: Partial<ProjectListItem>) {
+    const detail = qc.getQueryData<Project>(queryKeys.projects.detail(projectId))
+    if (detail) qc.setQueryData(queryKeys.projects.detail(projectId), { ...detail, ...patch })
+    qc.setQueriesData<ProjectListItem[]>(
+      { predicate: q => q.queryKey[0] === 'projects' && typeof q.queryKey[1] === 'object' },
+      old => old?.map(p => p.id === projectId ? { ...p, ...patch } : p),
+    )
   }
 
   const bindSoulMutation = useMutation({
@@ -142,13 +153,17 @@ export function useProjectRuntime(projectId: string): ProjectRuntime {
   const setActiveModelMutation = useMutation({
     mutationFn: (modelId: string | null) =>
       updateProject(projectId, buildUpdate(project, { active_model_id: modelId })),
-    onSuccess: invalidateAll,
+    onMutate: (modelId) => patchProjectCache({ active_model_id: modelId }),
+    onError: (_err, _modelId, _ctx) => invalidateAll(),
+    onSettled: invalidateAll,
   })
 
   const setActiveSceneMutation = useMutation({
     mutationFn: (sceneId: string | null) =>
       updateProject(projectId, buildUpdate(project, { active_scene_id: sceneId })),
-    onSuccess: invalidateAll,
+    onMutate: (sceneId) => patchProjectCache({ active_scene_id: sceneId }),
+    onError: (_err, _sceneId, _ctx) => invalidateAll(),
+    onSettled: invalidateAll,
   })
 
   const updateProjectMetaMutation = useMutation({

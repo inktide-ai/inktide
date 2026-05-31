@@ -1,5 +1,6 @@
 using Inktide.API.Core.Contracts;
 using Inktide.API.Core.Generators;
+using Inktide.API.Core.Transactions;
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Models;
@@ -17,6 +18,7 @@ public sealed class AiCardChannelLinkService :
     private readonly IAiCardRepository _cardRepo;
     private readonly IAiCardChannelRepository _channelRepo;
     private readonly IUserPlanResolver _planResolver;
+    private readonly ITransactionManager _txManager;
     private readonly TimeProvider _time;
     private readonly ILogger<AiCardChannelLinkService> _logger;
 
@@ -24,12 +26,14 @@ public sealed class AiCardChannelLinkService :
         IAiCardRepository cardRepo,
         IAiCardChannelRepository channelRepo,
         IUserPlanResolver planResolver,
+        ITransactionManager txManager,
         TimeProvider time,
         ILogger<AiCardChannelLinkService> logger)
     {
         _cardRepo     = cardRepo     ?? throw new ArgumentNullException(nameof(cardRepo));
         _channelRepo  = channelRepo  ?? throw new ArgumentNullException(nameof(channelRepo));
         _planResolver = planResolver ?? throw new ArgumentNullException(nameof(planResolver));
+        _txManager    = txManager    ?? throw new ArgumentNullException(nameof(txManager));
         _time         = time         ?? throw new ArgumentNullException(nameof(time));
         _logger       = logger       ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -91,6 +95,7 @@ public sealed class AiCardChannelLinkService :
         };
 
         await _channelRepo.CreateAsync(entity, ct);
+        await _txManager.SaveChangesAsync(ct);
 
         _logger.LogInformation(
             "User {UserId} linked card {CardId} to {Platform} channel {ChannelName}",
@@ -103,11 +108,12 @@ public sealed class AiCardChannelLinkService :
     {
         await RequireCardOwnershipAsync(userId, cardId, ct);
 
-        var link = await _channelRepo.GetByIdForUpdateAsync(linkId, ct);
+        var link = await _channelRepo.GetByIdTrackedAsync(linkId, ct);
         if (link is null || link.AiCardId != cardId)
             throw new ChannelLinkNotFoundException();
 
         await _channelRepo.DeleteAsync(linkId, ct);
+        await _txManager.SaveChangesAsync(ct);
 
         _logger.LogInformation(
             "User {UserId} removed channel link {LinkId} from card {CardId}",
@@ -123,12 +129,13 @@ public sealed class AiCardChannelLinkService :
     {
         await RequireCardOwnershipAsync(userId, cardId, ct);
 
-        var link = await _channelRepo.GetByIdForUpdateAsync(linkId, ct);
+        var link = await _channelRepo.GetByIdTrackedAsync(linkId, ct);
         if (link is null || link.AiCardId != cardId)
             throw new ChannelLinkNotFoundException();
 
         link.IsActive = command.IsActive;
         await _channelRepo.UpdateAsync(link, ct);
+        await _txManager.SaveChangesAsync(ct);
 
         return ToDto(link);
     }
@@ -156,6 +163,7 @@ public sealed class AiCardChannelLinkService :
         channel.RefreshTokenEnc = null;
         channel.TokenExpiresAt = null;
         await _channelRepo.UpdateAsync(channel, ct);
+        await _txManager.SaveChangesAsync(ct);
         return true;
     }
 
@@ -171,6 +179,7 @@ public sealed class AiCardChannelLinkService :
         var channel = owned.Value.channel;
         channel.CustomBotTokenEnc = encryptedToken;
         await _channelRepo.UpdateAsync(channel, ct);
+        await _txManager.SaveChangesAsync(ct);
         return true;
     }
 
@@ -222,6 +231,7 @@ public sealed class AiCardChannelLinkService :
             await _channelRepo.UpdateAsync(channel, ct);
         }
 
+        await _txManager.SaveChangesAsync(ct);
         return channel.Id;
     }
 

@@ -55,8 +55,26 @@ public sealed class PersonalitySettings
     public string? PresetId { get; set; }
 
 
-    public static PersonalitySettings Parse(string? json) => ValueObjectJson.ParseOrDefault<PersonalitySettings>(json);
+    public static PersonalitySettings Parse(string? json)
+    {
+        var s = ValueObjectJson.ParseOrDefault<PersonalitySettings>(json);
+        s.Clamp();
+        return s;
+    }
 
     public string ToJson() => JsonSerializer.Serialize(this, ValueObjectJson.Opts);
+
+    private void Clamp()
+    {
+        Warmth                = Math.Clamp(Warmth,                0f, 1f);
+        Playfulness           = Math.Clamp(Playfulness,           0f, 1f);
+        Assertiveness         = Math.Clamp(Assertiveness,         0f, 1f);
+        Empathy               = Math.Clamp(Empathy,               0f, 1f);
+        Formality             = Math.Clamp(Formality,             0f, 1f);
+        Sarcasm               = Math.Clamp(Sarcasm,               0f, 1f);
+        EmotionVolatility     = Math.Clamp(EmotionVolatility,     0f, 1f);
+        EmotionResponsiveness = Math.Clamp(EmotionResponsiveness, 0f, 1f);
+        EmotionMemory         = Math.Clamp(EmotionMemory,         0f, 1f);
+    }
 
 }

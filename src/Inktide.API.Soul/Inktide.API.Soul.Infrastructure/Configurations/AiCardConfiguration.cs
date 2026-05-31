@@ -39,6 +39,9 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
         b.Property(e => e.AvatarUrl)
             .HasColumnName("avatar_url");
 
+        b.Property(e => e.BannerUrl)
+            .HasColumnName("banner_url");
+
         b.Property(e => e.Personality)
             .HasColumnName("personality")
             .IsRequired()

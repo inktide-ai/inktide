@@ -1,8 +1,8 @@
+using System.Text.Json;
 using Inktide.API.Soul.Domain.Entities;
 using Inktide.API.Soul.Domain.Enums;
 using Inktide.API.Soul.Domain.ValueObjects;
 using Inktide.API.Soul.REST.Models;
-using Newtonsoft.Json;
 
 namespace Inktide.API.Soul.REST.Mappers;
 
@@ -12,6 +12,11 @@ namespace Inktide.API.Soul.REST.Mappers;
 /// </summary>
 public static class AiCardEntityFactory
 {
+    private static readonly JsonSerializerOptions SerializerOpts = new()
+    {
+        PropertyNamingPolicy        = JsonNamingPolicy.SnakeCaseLower,
+        PropertyNameCaseInsensitive = true,
+    };
     public static AiCard ToEntity(CreateAiCardRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -68,20 +73,20 @@ public static class AiCardEntityFactory
     private static PersonalitySettings MapPersonality(AiCardPersonalityDto? dto) =>
         dto is null ? new PersonalitySettings() : new PersonalitySettings
         {
-            Warmth                = (float)dto.Warmth,
-            Playfulness           = (float)dto.Playfulness,
-            Assertiveness         = (float)dto.Assertiveness,
-            Empathy               = (float)dto.Empathy,
-            Formality             = (float)dto.Formality,
-            Sarcasm               = (float)dto.Sarcasm,
-            EmotionVolatility     = (float)dto.EmotionVolatility,
-            EmotionResponsiveness = (float)dto.EmotionResponsiveness,
-            EmotionMemory         = (float)dto.EmotionMemory,
+            Warmth                = Math.Clamp((float)dto.Warmth,                0f, 1f),
+            Playfulness           = Math.Clamp((float)dto.Playfulness,           0f, 1f),
+            Assertiveness         = Math.Clamp((float)dto.Assertiveness,         0f, 1f),
+            Empathy               = Math.Clamp((float)dto.Empathy,               0f, 1f),
+            Formality             = Math.Clamp((float)dto.Formality,             0f, 1f),
+            Sarcasm               = Math.Clamp((float)dto.Sarcasm,               0f, 1f),
+            EmotionVolatility     = Math.Clamp((float)dto.EmotionVolatility,     0f, 1f),
+            EmotionResponsiveness = Math.Clamp((float)dto.EmotionResponsiveness, 0f, 1f),
+            EmotionMemory         = Math.Clamp((float)dto.EmotionMemory,         0f, 1f),
             StressBehavior        = dto.StressBehavior,
             BaselineMood          = dto.BaselineMood,
             PresetId              = dto.PresetId,
         };
 
     private static string? Serialize<T>(T? obj) where T : class =>
-        obj is null ? null : JsonConvert.SerializeObject(obj);
+        obj is null ? null : JsonSerializer.Serialize(obj, SerializerOpts);
 }

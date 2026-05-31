@@ -106,22 +106,14 @@ public sealed class AiCardService : IAiCardService
     {
         ArgumentNullException.ThrowIfNull(card);
 
-        var existing = await _cardRepo.GetByIdAsync(card.Id, ct)
-            ?? throw new AiCardNotFoundException(card.Id);
-
-        if (existing.UserId != userId)
+        if (card.UserId != userId)
             throw new AiCardNotFoundException(card.Id);
 
-        if (card.Slug != existing.Slug && await _cardRepo.SlugExistsAsync(userId, card.Slug, card.Id, ct))
+        // SlugExistsAsync excludes card.Id so this correctly detects collisions on slug change.
+        if (await _cardRepo.SlugExistsAsync(userId, card.Slug, card.Id, ct))
             throw new SlugAlreadyExistsException(card.Slug);
 
-        card.UserId    = userId;
         card.UpdatedAt = _time.GetUtcNow().UtcDateTime;
-        card.CreatedAt = existing.CreatedAt;
-        // Preserve the DB-current AvatarUrl so a concurrent avatar upload is never
-        // overwritten by a stale value carried in `card` from a controller-level read.
-        // Safe: avatar uploads now go through SetAvatarUrlAsync, not this method.
-        card.AvatarUrl = existing.AvatarUrl;
 
         await _cardRepo.UpdateAsync(card, ct);
         await _auditLog.LogAsync(userId, "ai_card", card.Id, "updated", ct: ct);
@@ -173,14 +165,20 @@ public sealed class AiCardService : IAiCardService
         return card;
     }
 
-    public async Task<AiCard?> ChangeStatusAsync(Guid userId, Guid cardId, bool isActive, AiCardStatus status, CancellationToken ct = default)
+    public async Task<AiCard?> ChangeStatusAsync(Guid userId, Guid cardId, string action, CancellationToken ct = default)
     {
+        var (isActive, status) = action.ToLowerInvariant() switch
+        {
+            "start" => (true,  AiCardStatus.Active),
+            "pause" => (true,  AiCardStatus.Paused),
+            "stop"  => (false, AiCardStatus.Stopped),
+            _       => throw new ArgumentException($"Unknown action '{action}'. Valid values: start, pause, stop.", nameof(action)),
+        };
+
         var card = await _cardRepo.GetByIdAsync(cardId, ct).ConfigureAwait(false);
         if (card is null || card.UserId != userId) return null;
 
-        card.IsActive  = isActive;
-        card.Status    = status;
-        card.UpdatedAt = _time.GetUtcNow().UtcDateTime;
+        card.ChangeStatus(isActive, status, _time.GetUtcNow().UtcDateTime);
 
         await _cardRepo.UpdateAsync(card, ct).ConfigureAwait(false);
 

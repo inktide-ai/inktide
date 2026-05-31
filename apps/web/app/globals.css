@@ -227,6 +227,8 @@
   --info-text: var(--ds-blue-900);
   --warn-bg: var(--ds-amber-100);
   --warn-text: var(--ds-amber-900);
+  --active-bg: #16332A;
+  --active-text: #22c55e;
 
   /* Brand accents */
   --accent-violet-bg: color-mix(in srgb, var(--accent-base) 30%, var(--bg-0));
@@ -548,6 +550,8 @@
   --info-text: var(--ds-blue-900);
   --warn-bg: var(--ds-amber-100);
   --warn-text: var(--ds-amber-900);
+  --active-bg: var(--ds-green-100);
+  --active-text: var(--ds-green-900);
 
   /* Brand accents */
   --accent-violet-bg: color-mix(in srgb, var(--accent-base) 22%, white);
@@ -903,6 +907,31 @@ body {
 }
 .tab-card-active::after { opacity: 1; transform: translateX(0); }
 
+.light .tab-card {
+  background: var(--surface-card);
+  border-color: var(--border-subtle);
+}
+.light .tab-card::after { color: var(--text-secondary); }
+.light .tab-card:hover { border-color: var(--border-default); background: var(--surface-card-hover); }
+.light .tab-card-editing:hover { border-color: var(--border-strong); }
+.light .tab-card-active { border-color: var(--accent-primary) !important; background: var(--accent-soft) !important; }
+
+/* Character hub page — light theme overrides */
+.light .chub-header { background: var(--surface-1); border-color: var(--border-subtle); }
+.light .chub-tag { background: var(--surface-2); border-color: var(--border-subtle); }
+.light .chub-divider { background: var(--border-subtle); }
+.light .tab-card-label { color: var(--text-primary); }
+.light .tab-card-desc { color: var(--text-secondary); }
+.light .tab-card-ghost { color: var(--border-default); opacity: 0.6; }
+.light [data-tabid="profile"] .tab-card-desc { color: var(--text-muted); }
+.light .chub-size-toggle { background: var(--surface-2); border-color: var(--border-subtle); color: var(--text-secondary); }
+.light .chub-size-menu { background: var(--menu-panel-bg); border-color: var(--border-subtle); box-shadow: var(--menu-panel-shadow); }
+.light .chub-size-btn { border-color: var(--border-subtle); color: var(--text-secondary); }
+.light .chub-size-btn:hover { background: var(--surface-2); border-color: var(--border-default); color: var(--text-primary); }
+.light .chub-action-btn { background: var(--surface-1); border-color: var(--border-subtle); color: var(--text-secondary); }
+.light .chub-layout-btn { background: var(--surface-2); border-color: var(--border-subtle); color: var(--text-secondary); }
+.light .chub-layout-btn:hover { background: var(--surface-3); border-color: var(--border-default); color: var(--text-primary); }
+
 /* Theme-aware icon filter for <img> SVG icons */
 .ui-icon { filter: var(--menu-icon-filter); }
 
@@ -919,6 +948,33 @@ body {
 [data-tabid="backup"]     .tab-card-icon { background: rgba(14,165,233,0.1);  border: 1px solid rgba(14,165,233,0.18);  color: #38bdf8; }
 [data-tabid="emotion"]   .tab-card-icon { background: rgba(244,114,182,0.1); border: 1px solid rgba(244,114,182,0.18); color: #f472b6; }
 [data-tabid="behavior"]  .tab-card-icon { background: rgba(45,212,191,0.1);  border: 1px solid rgba(45,212,191,0.18);  color: #2dd4bf; }
+
+/* Per-card accent borders */
+.tab-card[data-tabid="profile"]    { border-color: rgba(139,92,246,0.28); }
+.tab-card[data-tabid="skills"]     { border-color: rgba(245,158,11,0.22); }
+.tab-card[data-tabid="avatars"]    { border-color: rgba(217,70,239,0.22); }
+.tab-card[data-tabid="scene"]      { border-color: rgba(6,182,212,0.22); }
+.tab-card[data-tabid="memory"]     { border-color: rgba(59,130,246,0.24); }
+.tab-card[data-tabid="brain"]      { border-color: rgba(99,102,241,0.28); }
+.tab-card[data-tabid="voice"]      { border-color: rgba(16,185,129,0.22); }
+.tab-card[data-tabid="connection"] { border-color: rgba(249,115,22,0.22); }
+.tab-card[data-tabid="obs"]        { border-color: rgba(244,63,94,0.22); }
+.tab-card[data-tabid="backup"]     { border-color: rgba(14,165,233,0.22); }
+.tab-card[data-tabid="emotion"]    { border-color: rgba(244,114,182,0.22); }
+.tab-card[data-tabid="behavior"]   { border-color: rgba(45,212,191,0.22); }
+
+.tab-card[data-tabid="profile"]:hover    { border-color: rgba(139,92,246,0.55); }
+.tab-card[data-tabid="skills"]:hover     { border-color: rgba(245,158,11,0.5); }
+.tab-card[data-tabid="avatars"]:hover    { border-color: rgba(217,70,239,0.5); }
+.tab-card[data-tabid="scene"]:hover      { border-color: rgba(6,182,212,0.5); }
+.tab-card[data-tabid="memory"]:hover     { border-color: rgba(59,130,246,0.52); }
+.tab-card[data-tabid="brain"]:hover      { border-color: rgba(99,102,241,0.55); }
+.tab-card[data-tabid="voice"]:hover      { border-color: rgba(16,185,129,0.5); }
+.tab-card[data-tabid="connection"]:hover { border-color: rgba(249,115,22,0.5); }
+.tab-card[data-tabid="obs"]:hover        { border-color: rgba(244,63,94,0.5); }
+.tab-card[data-tabid="backup"]:hover     { border-color: rgba(14,165,233,0.5); }
+.tab-card[data-tabid="emotion"]:hover    { border-color: rgba(244,114,182,0.5); }
+.tab-card[data-tabid="behavior"]:hover   { border-color: rgba(45,212,191,0.5); }
 
 /* Per-tabid icon sizes */
 [data-tabid="profile"] .tab-card-icon      { width: 52px; height: 52px; border-radius: 0.75rem; }

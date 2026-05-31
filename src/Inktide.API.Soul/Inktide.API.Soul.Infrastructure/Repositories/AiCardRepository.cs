@@ -78,6 +78,11 @@ public sealed class AiCardRepository : IAiCardRepository
     public Task UpdateAsync(AiCard card, CancellationToken ct = default)
     {
         _db.AiCards.Update(card);
+        // AvatarUrl and BannerUrl have dedicated atomic update methods (SetAvatarUrlAsync,
+        // SetBannerUrlAsync). Exclude them here so a concurrent upload is never silently
+        // overwritten when the caller loaded the card before the upload completed.
+        _db.Entry(card).Property(c => c.AvatarUrl).IsModified  = false;
+        _db.Entry(card).Property(c => c.BannerUrl).IsModified  = false;
         return Task.CompletedTask;
     }
 
@@ -86,8 +91,7 @@ public sealed class AiCardRepository : IAiCardRepository
         var card = await _db.AiCards.FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null, ct);
         if (card is null) return;
 
-        card.DeletedAt = _time.GetUtcNow().UtcDateTime;
-        card.UpdatedAt = _time.GetUtcNow().UtcDateTime;
+        card.SoftDelete(_time.GetUtcNow().UtcDateTime);
     }
 
     public async Task<bool> SlugExistsAsync(Guid userId, string slug, Guid? excludeCardId = null, CancellationToken ct = default)
@@ -125,6 +129,13 @@ public sealed class AiCardRepository : IAiCardRepository
               .Where(c => c.Id == cardId && c.DeletedAt == null)
               .ExecuteUpdateAsync(s => s
                   .SetProperty(c => c.AvatarUrl, avatarUrl)
+                  .SetProperty(c => c.UpdatedAt, updatedAt), ct);
+
+    public Task SetBannerUrlAsync(Guid cardId, string? bannerUrl, DateTime updatedAt, CancellationToken ct = default)
+        => _db.AiCards
+              .Where(c => c.Id == cardId && c.DeletedAt == null)
+              .ExecuteUpdateAsync(s => s
+                  .SetProperty(c => c.BannerUrl, bannerUrl)
                   .SetProperty(c => c.UpdatedAt, updatedAt), ct);
 
     public async Task BulkUpdateSortKeysAsync(Guid userId, IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default)

@@ -67,7 +67,7 @@ public sealed class AiCardAvatarService : IAiCardAvatarService
         // graph (Channels, Tools, etc.) which can cause conflicts and unexpected saves.
         await _cardRepo.SetAvatarUrlAsync(cardId, publicUrl, _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
 
-        card.AvatarUrl = publicUrl;
+        card.SetAvatar(publicUrl);
         _logger.LogInformation("AI card {CardId} avatar set to {Url}", cardId, publicUrl);
         return AiCardAvatarUpdateResult.Ok(card);
     }

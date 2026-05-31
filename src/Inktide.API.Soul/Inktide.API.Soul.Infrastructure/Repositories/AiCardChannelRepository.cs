@@ -30,7 +30,7 @@ public sealed class AiCardChannelRepository : IAiCardChannelRepository
         return await _db.AiCardChannels.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, ct).ConfigureAwait(false);
     }
 
-    public async Task<AiCardChannel?> GetByIdForUpdateAsync(Guid id, CancellationToken ct = default)
+    public async Task<AiCardChannel?> GetByIdTrackedAsync(Guid id, CancellationToken ct = default)
     {
         return await _db.AiCardChannels.FirstOrDefaultAsync(c => c.Id == id, ct).ConfigureAwait(false);
     }

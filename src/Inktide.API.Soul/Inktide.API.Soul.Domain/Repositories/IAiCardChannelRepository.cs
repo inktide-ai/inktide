@@ -8,7 +8,7 @@ public interface IAiCardChannelRepository
     Task<AiCardChannel?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>Tracked entity for updates (not no-tracking).</summary>
-    Task<AiCardChannel?> GetByIdForUpdateAsync(Guid id, CancellationToken ct = default);
+    Task<AiCardChannel?> GetByIdTrackedAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>Tracked channel with its owning card loaded in a single join — for update operations.</summary>
     Task<AiCardChannel?> GetByIdWithCardAsync(Guid id, CancellationToken ct = default);

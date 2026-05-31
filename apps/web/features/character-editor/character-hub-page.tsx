@@ -153,7 +153,7 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
       <div className="flex-1 overflow-y-auto px-6 py-6">
 
         {/* Character card header */}
-        <div className="flex items-center gap-5 p-5 px-6 bg-white/[0.025] border border-white/[0.08] rounded-[0.875rem] max-w-[1100px] mx-auto w-full mb-4">
+        <div className="chub-header flex items-center gap-5 p-5 px-6 bg-white/[0.025] border border-white/[0.08] rounded-[0.875rem] max-w-[1100px] mx-auto w-full mb-4">
           <div
             className="w-[52px] h-[52px] rounded-lg shrink-0 flex items-center justify-center overflow-hidden"
             style={{ background: selected?.appearance.avatarUrl ? undefined : accentColor }}
@@ -178,7 +178,7 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-[0.3125rem]">
                 {tags.map(tag => (
-                  <span key={tag.label} className="py-[0.1875rem] px-2 bg-white/[0.055] border border-white/[0.07] rounded-full text-caption font-medium text-(--text-muted) whitespace-nowrap" style={tag.style}>
+                  <span key={tag.label} className="chub-tag py-[0.1875rem] px-2 bg-white/[0.055] border border-white/[0.07] rounded-full text-caption font-medium text-(--text-muted) whitespace-nowrap" style={tag.style}>
                     {tag.label}
                   </span>
                 ))}
@@ -191,7 +191,7 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
               <span className="text-[1.75rem] font-bold text-(--text-primary) leading-none block">{soulLinks.length}</span>
               <span className="text-caption text-(--text-muted) mt-[0.2rem]">{tc('hub.settings')}</span>
             </div>
-            <div className="w-px h-8 bg-white/[0.07] shrink-0" />
+            <div className="chub-divider w-px h-8 bg-white/[0.07] shrink-0" />
             <div className="flex flex-col items-center text-center px-4">
               <span className="text-[1.75rem] font-bold text-(--text-primary) leading-none block">{selected?.channels.length ?? 0}</span>
               <span className="text-caption text-(--text-muted) mt-[0.2rem]">{tc('hub.channels')}</span>
@@ -257,21 +257,21 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
                   {isEditMode && (
                     <>
                       <button
-                        className="absolute top-2 right-2 w-[26px] h-[26px] rounded-[6px] bg-black/35 border border-white/12 text-white/50 cursor-pointer flex items-center justify-center z-[20] transition-[background,color,border-color] duration-150 backdrop-blur-[6px] hover:bg-[rgba(99,102,241,0.2)] hover:border-[rgba(99,102,241,0.4)] hover:text-indigo-300"
+                        className="chub-size-toggle absolute top-2 right-2 w-[26px] h-[26px] rounded-[6px] bg-black/35 border border-white/12 text-white/50 cursor-pointer flex items-center justify-center z-[20] transition-[background,color,border-color] duration-150 backdrop-blur-[6px] hover:bg-[rgba(99,102,241,0.2)] hover:border-[rgba(99,102,241,0.4)] hover:text-indigo-300"
                         onClick={e => { e.stopPropagation(); setActiveMenu(prev => prev === item.i ? null : item.i) }}
                       >
                         <Grid size={13} />
                       </button>
                       {activeMenu === item.i && (
                         <div
-                          className="absolute top-[38px] right-2 bg-[rgba(14,14,22,0.96)] border border-white/12 rounded-xl p-2 grid grid-cols-2 gap-[6px] z-[200] shadow-[0_12px_40px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-[20px] animate-[sizeMenuIn_0.12s_ease]"
+                          className="chub-size-menu absolute top-[38px] right-2 bg-[rgba(14,14,22,0.96)] border border-white/12 rounded-xl p-2 grid grid-cols-2 gap-[6px] z-[200] shadow-[0_12px_40px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-[20px] animate-[sizeMenuIn_0.12s_ease]"
                           onClick={e => e.stopPropagation()}
                         >
                           {SIZES.map(({ w, h, label }) => (
                             <button
                               key={label}
                               className={cn(
-                                'flex flex-col items-center gap-[5px] py-2 px-[10px] rounded-[8px] bg-transparent border border-white/[0.07] text-white/45 cursor-pointer text-2xs font-semibold tracking-[0.03em] transition-all duration-[120ms] whitespace-nowrap hover:bg-white/[0.06] hover:border-white/[0.15] hover:text-white/85',
+                                'chub-size-btn flex flex-col items-center gap-[5px] py-2 px-[10px] rounded-[8px] bg-transparent border border-white/[0.07] text-white/45 cursor-pointer text-2xs font-semibold tracking-[0.03em] transition-all duration-[120ms] whitespace-nowrap hover:bg-white/[0.06] hover:border-white/[0.15] hover:text-white/85',
                                 item.w === w && item.h === h && 'bg-[rgba(99,102,241,0.15)] border-[rgba(99,102,241,0.45)] text-indigo-300',
                               )}
                               onClick={() => handleSizeChange(item.i, w, h)}
@@ -294,7 +294,7 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
         <div className="flex justify-end items-center gap-[0.625rem] max-w-[1100px] mx-auto w-full pt-6 pb-8">
           {isEditMode && (
             <button
-              className="inline-flex items-center py-2 px-4 bg-[rgba(15,15,20,0.7)] border border-white/[0.07] rounded-full text-white/35 font-[var(--font-ui)] text-sm cursor-pointer transition-all duration-150 backdrop-blur-[8px] hover:border-[rgba(244,63,94,0.35)] hover:text-[rgba(244,63,94,0.75)] hover:bg-[rgba(244,63,94,0.05)]"
+              className="chub-action-btn inline-flex items-center py-2 px-4 bg-[rgba(15,15,20,0.7)] border border-white/[0.07] rounded-full text-white/35 font-[var(--font-ui)] text-sm cursor-pointer transition-all duration-150 backdrop-blur-[8px] hover:border-[rgba(244,63,94,0.35)] hover:text-[rgba(244,63,94,0.75)] hover:bg-[rgba(244,63,94,0.05)]"
               onClick={() => resetLayout()}
             >
               {tc('hub.resetToDefault')}
@@ -302,7 +302,7 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
           )}
           <button
             className={cn(
-              'inline-flex items-center gap-1.5 py-2 px-[1.125rem] bg-[rgba(15,15,20,0.85)] border border-white/10 rounded-full text-white/65 font-[var(--font-ui)] text-sm font-medium cursor-pointer transition-all duration-150 ease backdrop-blur-[12px] shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:bg-[rgba(30,30,40,0.9)] hover:border-white/[0.18] hover:text-white/90',
+              'chub-layout-btn inline-flex items-center gap-1.5 py-2 px-[1.125rem] bg-[rgba(15,15,20,0.85)] border border-white/10 rounded-full text-white/65 font-[var(--font-ui)] text-sm font-medium cursor-pointer transition-all duration-150 ease backdrop-blur-[12px] shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:bg-[rgba(30,30,40,0.9)] hover:border-white/[0.18] hover:text-white/90',
               isEditMode && 'bg-[rgba(99,102,241,0.15)] border-[rgba(99,102,241,0.4)] text-indigo-300 hover:bg-[rgba(99,102,241,0.25)] hover:border-[rgba(99,102,241,0.55)]',
             )}
             onClick={() => setIsEditMode(prev => !prev)}

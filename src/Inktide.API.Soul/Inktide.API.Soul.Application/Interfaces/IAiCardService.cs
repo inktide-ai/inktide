@@ -40,6 +40,9 @@ public interface IAiCardService
     /// </summary>
     Task<Guid> CreateFromImportAsync(Guid userId, ImportSoulCommand command, CancellationToken ct = default);
 
-    /// <summary>Changes the run status (start / pause / stop) of a soul card. Returns null when not found or not owned by userId.</summary>
-    Task<AiCard?> ChangeStatusAsync(Guid userId, Guid cardId, bool isActive, AiCardStatus status, CancellationToken ct = default);
+    /// <summary>
+    /// Changes the run status of a soul card. <paramref name="action"/> must be "start", "pause", or "stop" (case-insensitive).
+    /// Returns null when not found or not owned by userId. Throws <see cref="ArgumentException"/> for unknown actions.
+    /// </summary>
+    Task<AiCard?> ChangeStatusAsync(Guid userId, Guid cardId, string action, CancellationToken ct = default);
 }

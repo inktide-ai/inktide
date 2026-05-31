@@ -1,6 +1,5 @@
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
-using Inktide.API.Soul.Domain.Enums;
 using Inktide.API.Soul.REST.Mappers;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -173,23 +172,19 @@ public sealed class AiCardsController : ApiController
         if (request is null || string.IsNullOrWhiteSpace(request.Action))
             return BadRequest(ApiErrorResponse.From("action is required.", ErrorCodes.ValidationError));
 
-        var (isActive, status) = request.Action.ToLowerInvariant() switch
+        try
         {
-            "start" => (true,  AiCardStatus.Active),
-            "pause" => (true,  AiCardStatus.Paused),
-            "stop"  => (false, AiCardStatus.Stopped),
-            _       => ((bool?)null, (AiCardStatus?)null)
-        };
+            var userId = GetUserId();
+            var card   = await _cardService.ChangeStatusAsync(userId, cardId, request.Action, ct);
+            if (card is null)
+                return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
 
-        if (isActive is null || status is null)
-            return BadRequest(ApiErrorResponse.From("action must be 'start', 'pause', or 'stop'.", ErrorCodes.ValidationError));
-
-        var userId = GetUserId();
-        var card   = await _cardService.ChangeStatusAsync(userId, cardId, isActive.Value, status.Value, ct);
-        if (card is null)
-            return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
-
-        return NoContent();
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ApiErrorResponse.From(ex.Message, ErrorCodes.ValidationError));
+        }
     }
 
     /// <summary>Move a soul to a new position. previousId=null → beginning; nextId=null → end.</summary>
