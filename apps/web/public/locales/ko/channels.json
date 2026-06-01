@@ -1,0 +1,49 @@
+{
+  "section": {
+    "title": "채널"
+  },
+  "intro": "이 캐릭터를 라이브 채팅 플랫폼에 연결합니다.",
+  "form": {
+    "displayName": "표시 이름",
+    "displayNamePlaceholder": "대시보드의 레이블",
+    "botName": "봇 / 서비스 이름",
+    "botNamePlaceholder": "이 플랫폼에서 봇이 표시되는 방법"
+  },
+  "status": {
+    "loading": "연결 로딩 중…",
+    "adding": "추가 중…",
+    "remove": "제거",
+    "paused": "일시 중지됨"
+  },
+  "error": {
+    "load": "연결을 로드하지 못했습니다.",
+    "add": "연결을 추가할 수 없습니다.",
+    "update": "업데이트 실패.",
+    "remove": "제거 실패.",
+    "displayNameRequired": "이 연결의 표시 이름을 입력하세요.",
+    "botNameRequired": "이 플랫폼의 봇 이름을 입력하세요."
+  },
+  "confirm": "{{label}} 링크 \"{{channel}}\"을 제거하시겠습니까?",
+  "connector": {
+    "notAvailable": "이 채널은 아직 사용할 수 없습니다.",
+    "backToChannels": "채널로 돌아가기",
+    "myIntegrations": "내 통합",
+    "installation": "설치",
+    "settings": "설정",
+    "editSettings": "이 채널의 설정을 편집합니다.",
+    "developer": "개발자",
+    "website": "웹사이트",
+    "documentation": "문서",
+    "terms": "약관",
+    "privacy": "개인정보 처리방침",
+    "support": "지원",
+    "details": "세부 정보",
+    "read": "읽기",
+    "openIn": "에서 열기",
+    "successDiscord": "Discord 서버가 성공적으로 연결됨!",
+    "successTwitch": "Twitch 채널 연결됨!",
+    "success": "성공적으로 연결됨!",
+    "discordSupport": "Discord 지원",
+    "openInDiscord": "Discord에서 열기"
+  }
+}

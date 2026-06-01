@@ -1,0 +1,31 @@
+{
+  "grid": {
+    "title": "Proveedores Brain",
+    "desc": "Elige un proveedor LLM para tu personaje IA.",
+    "search": "Buscar proveedores…",
+    "configure": "Configurar →"
+  },
+  "settings": "Configuración",
+  "llmParams": "Parámetros LLM",
+  "baseUrl": {
+    "label": "URL base",
+    "hint": "URL de tu servidor Ollama"
+  },
+  "model": {
+    "label": "Modelo",
+    "loading": "Cargando modelos…",
+    "error": "No se puede conectar a Ollama.",
+    "empty": "No se encontraron modelos.",
+    "hint": "Seleccionar modelo",
+    "selectPlaceholder": "— Seleccionar modelo —"
+  },
+  "providers": {
+    "ollama": "Servidor Ollama local — sin clave API.",
+    "anthropic": "Modelos Claude via API Anthropic.",
+    "deepseek": "DeepSeek Chat & R1."
+  },
+  "remoteProvider": {
+    "keyHint": "La clave API se gestiona globalmente en",
+    "manageLink": "Configuración → Proveedores"
+  }
+}

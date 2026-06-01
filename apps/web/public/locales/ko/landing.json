@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "product": "제품",
+    "solutions": "솔루션",
+    "howItWorks": "작동 방식",
+    "docs": "문서",
+    "logIn": "로그인",
+    "signUpFree": "무료로 가입",
+    "profile": "프로필",
+    "logOut": "로그아웃",
+    "goToProfile": "프로필로 이동",
+    "navigation": "탐색",
+    "toggleMenu": "메뉴 전환",
+    "closeMenu": "메뉴 닫기"
+  },
+  "hero": {
+    "title": "스트리밍을 위한 <accent>AI 동반자</accent> 만들기",
+    "subtitle": "프롬프트, 알고리즘, 모델 커스터마이즈",
+    "ctaPrimary": "무료로 가입"
+  },
+  "footer": {
+    "copyright": "© {{year}} Inktide. 모든 권리 보유."
+  }
+}

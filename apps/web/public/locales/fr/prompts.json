@@ -1,0 +1,11 @@
+{
+  "section": {
+    "systemPrompt": "Invite système"
+  },
+  "coreInstructions": {
+    "label": "Instructions principales",
+    "hint": "Définissez la personnalité, le comportement et le contexte de l'IA.",
+    "placeholder": "ex. Vous êtes un compagnon IA amical.",
+    "counter": "{{count}} caractères"
+  }
+}

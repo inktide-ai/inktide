@@ -25,29 +25,6 @@ function randomSaccadeInterval(energyScale: number): number {
 }
 
 
-const _raycaster = new THREE.Raycaster()
-const _mouseNdc  = new THREE.Vector2()
-const _cameraDir = new THREE.Vector3()
-const _plane     = new THREE.Plane()
-const _hit       = new THREE.Vector3()
-
-function worldPosFromMouse(
-  mouseX: number,
-  mouseY: number,
-  camera: THREE.PerspectiveCamera,
-): THREE.Vector3 | null {
-  _mouseNdc.x = (mouseX / window.innerWidth) * 2 - 1
-  _mouseNdc.y = -(mouseY / window.innerHeight) * 2 + 1
-  _raycaster.setFromCamera(_mouseNdc, camera)
-  camera.getWorldDirection(_cameraDir)
-  _plane.setFromNormalAndCoplanarPoint(
-    _cameraDir,
-    camera.position.clone().add(_cameraDir.clone().multiplyScalar(1)),
-  )
-  return _raycaster.ray.intersectPlane(_plane, _hit)
-}
-
-
 /**
  * Gaze controller with SoulState integration:
  *
@@ -72,6 +49,13 @@ export class GazeController implements IVrmController {
 
   // Surprise dart state — after a spike, eyes move rapidly for a brief window
   private surpriseDartRemaining = 0
+
+  // Instance-owned scratch objects — safe for multi-avatar rendering
+  private readonly _raycaster = new THREE.Raycaster()
+  private readonly _mouseNdc  = new THREE.Vector2()
+  private readonly _cameraDir = new THREE.Vector3()
+  private readonly _plane     = new THREE.Plane()
+  private readonly _hit       = new THREE.Vector3()
 
   async init({ vrm }: VrmControllerSetup): Promise<void> {
     this.vrm = vrm
@@ -106,8 +90,8 @@ export class GazeController implements IVrmController {
         break
 
       case 'mouse': {
-        const t = worldPosFromMouse(ctx.mouse.x, ctx.mouse.y, ctx.camera)
-        if (t) this.lookAtObj.position.lerp(t, 0.1)
+        const t = this._worldPosFromMouse(ctx.mouse.x, ctx.mouse.y, ctx.camera)
+        if (t) this.lookAtObj.position.lerp(t, 1 - Math.pow(0.9, delta * 60))
         vrm.lookAt.update(delta)
         break
       }
@@ -144,7 +128,25 @@ export class GazeController implements IVrmController {
       this.saccadeNextAfter = randomSaccadeInterval(energyScale) / 1000
     }
 
-    this.lookAtObj.position.lerp(this.saccadeTarget, 0.1)
+    // Frame-rate independent lerp — normalised to 60 fps
+    this.lookAtObj.position.lerp(this.saccadeTarget, 1 - Math.pow(0.9, delta * 60))
+  }
+
+  private _worldPosFromMouse(
+    mouseX: number,
+    mouseY: number,
+    camera: THREE.PerspectiveCamera,
+  ): THREE.Vector3 | null {
+    // TODO: pass canvas dimensions via VrmAnimationContext to avoid window mismatch
+    this._mouseNdc.x = (mouseX / window.innerWidth) * 2 - 1
+    this._mouseNdc.y = -(mouseY / window.innerHeight) * 2 + 1
+    this._raycaster.setFromCamera(this._mouseNdc, camera)
+    camera.getWorldDirection(this._cameraDir)
+    this._plane.setFromNormalAndCoplanarPoint(
+      this._cameraDir,
+      camera.position.clone().add(this._cameraDir.clone().multiplyScalar(1)),
+    )
+    return this._raycaster.ray.intersectPlane(this._plane, this._hit)
   }
 
   dispose(): void {

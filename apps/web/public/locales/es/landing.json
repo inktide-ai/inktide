@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "product": "Producto",
+    "solutions": "Soluciones",
+    "howItWorks": "Cómo funciona",
+    "docs": "Documentación",
+    "logIn": "Iniciar sesión",
+    "signUpFree": "Registrarse gratis",
+    "profile": "Perfil",
+    "logOut": "Cerrar sesión",
+    "goToProfile": "Ir al perfil",
+    "navigation": "Navegación",
+    "toggleMenu": "Alternar menú",
+    "closeMenu": "Cerrar menú"
+  },
+  "hero": {
+    "title": "Crea tu <accent>compañero IA</accent> para streaming",
+    "subtitle": "Personaliza prompts, algoritmos y modelos",
+    "ctaPrimary": "Registrarse gratis"
+  },
+  "footer": {
+    "copyright": "© {{year}} Inktide. Todos los derechos reservados."
+  }
+}

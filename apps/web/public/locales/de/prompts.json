@@ -1,0 +1,11 @@
+{
+  "section": {
+    "systemPrompt": "System-Prompt"
+  },
+  "coreInstructions": {
+    "label": "Kernanweisungen",
+    "hint": "Definiere Persönlichkeit, Verhalten und Kontext der KI.",
+    "placeholder": "z.B. Du bist ein freundlicher KI-Begleiter.",
+    "counter": "{{count}} Zeichen"
+  }
+}

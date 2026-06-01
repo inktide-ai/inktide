@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { getPublicCard } from '@/features/soul'
+import { ActivityFeed } from '@/features/soul/activity'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { HOME_ROUTE } from '@/lib/routes'
 
@@ -154,6 +155,14 @@ export function PageClient() {
             <p className="text-body leading-relaxed text-[var(--text-secondary)]">{personalityExcerpt}</p>
           </div>
         )}
+
+        {/* Recent Activity */}
+        <div className="mt-5 w-full">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
+            Recent Activity
+          </p>
+          <ActivityFeed slug={slug} />
+        </div>
 
         {/* Powered by Inktide */}
         <div className="mt-8 flex items-center justify-center gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] px-6 py-4">

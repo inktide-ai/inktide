@@ -1,0 +1,49 @@
+{
+  "section": {
+    "title": "チャンネル"
+  },
+  "intro": "このキャラクターをライブチャットプラットフォームに接続します。",
+  "form": {
+    "displayName": "表示名",
+    "displayNamePlaceholder": "ダッシュボードのラベル",
+    "botName": "ボット/サービス名",
+    "botNamePlaceholder": "このプラットフォームでのボット名"
+  },
+  "status": {
+    "loading": "接続を読み込み中…",
+    "adding": "追加中…",
+    "remove": "削除",
+    "paused": "一時停止中"
+  },
+  "error": {
+    "load": "接続を読み込めません。",
+    "add": "接続を追加できません。",
+    "update": "更新失敗。",
+    "remove": "削除失敗。",
+    "displayNameRequired": "表示名を入力してください。",
+    "botNameRequired": "ボット名を入力してください。"
+  },
+  "confirm": "{{label}}のリンク「{{channel}}」を削除しますか？",
+  "connector": {
+    "notAvailable": "このチャンネルはまだ利用できません。",
+    "backToChannels": "チャンネルに戻る",
+    "myIntegrations": "マイインテグレーション",
+    "installation": "インストール",
+    "settings": "設定",
+    "editSettings": "設定を編集。",
+    "developer": "開発者",
+    "website": "ウェブサイト",
+    "documentation": "ドキュメント",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー",
+    "support": "サポート",
+    "details": "詳細",
+    "read": "読む",
+    "openIn": "で開く",
+    "successDiscord": "Discordサーバーが接続されました！",
+    "successTwitch": "Twitchチャンネルが接続されました！",
+    "success": "接続成功！",
+    "discordSupport": "Discordサポート",
+    "openInDiscord": "Discordで開く"
+  }
+}

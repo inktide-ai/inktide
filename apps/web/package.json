@@ -57,6 +57,7 @@
     "react-easy-crop": "^5.5.7",
     "react-grid-layout": "^2.2.3",
     "react-i18next": "^17.0.2",
+    "shiki": "^4.1.0",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4",
     "three": "^0.183.2",

@@ -1,0 +1,182 @@
+{
+  "section": {
+    "personality": "パーソナリティエンジン",
+    "response": "応答",
+    "llmConfig": "LLM設定",
+    "memory": "メモリ",
+    "autoPilot": "オートパイロット"
+  },
+  "personality": {
+    "presetsLabel": "プリセット",
+    "traitsTitle": "コア特性",
+    "dynamicsTitle": "感情ダイナミクス",
+    "preset": {
+      "streamer": "ストリーマー",
+      "mentor": "メンター",
+      "comedian": "コメディアン",
+      "philosopher": "哲学者",
+      "tsundere": "ツンデレ",
+      "custom": "カスタム"
+    },
+    "warmth": {
+      "label": "温かさ",
+      "hint": "温かく思いやりある vs 冷たい",
+      "low": "冷たい",
+      "high": "温かい"
+    },
+    "playfulness": {
+      "label": "遊び心",
+      "hint": "ユーモア、冗談、機知",
+      "low": "真面目",
+      "high": "遊び心"
+    },
+    "assertiveness": {
+      "label": "自己主張",
+      "hint": "直接的で自信ある vs 受動的",
+      "low": "受動的",
+      "high": "自己主張"
+    },
+    "empathy": {
+      "label": "共感力",
+      "hint": "他者の感情を認識する程度",
+      "low": "無関心",
+      "high": "共感的"
+    },
+    "formality": {
+      "label": "フォーマル度",
+      "hint": "フォーマルかカジュアルな話し方",
+      "low": "カジュアル",
+      "high": "フォーマル"
+    },
+    "sarcasm": {
+      "label": "皮肉度",
+      "hint": "誠実 vs 皮肉",
+      "low": "誠実",
+      "high": "皮肉"
+    },
+    "volatility": {
+      "label": "気分の変動",
+      "hint": "気分の変化の幅",
+      "low": "安定",
+      "high": "不安定"
+    },
+    "responsiveness": {
+      "label": "感情的反応",
+      "hint": "感情的反応の強さ",
+      "low": "控えめ",
+      "high": "反応的"
+    },
+    "emotionMemory": {
+      "label": "感情記憶",
+      "hint": "過去の感情の持続時間",
+      "low": "忘れっぽい",
+      "high": "持続的"
+    },
+    "stressBehavior": {
+      "label": "ストレス行動",
+      "hint": "圧力下での反応",
+      "deflect": "回避",
+      "humor": "ユーモア",
+      "withdraw": "引きこもり",
+      "confront": "対峙"
+    },
+    "baselineMood": {
+      "label": "基本的な気分",
+      "hint": "デフォルトの感情トーン",
+      "neutral": "中立",
+      "happy": "楽しい",
+      "chill": "のんびり",
+      "melancholic": "憂鬱",
+      "hyped": "ハイテンション"
+    }
+  },
+  "response": {
+    "delay": {
+      "label": "応答遅延",
+      "hint": "返信前の待機時間"
+    },
+    "maxLength": {
+      "label": "最大応答長",
+      "hint": "1回の返信の最大文字数"
+    },
+    "language": {
+      "label": "言語",
+      "hint": "AI応答の主要言語"
+    },
+    "autoModerate": {
+      "label": "自動モデレート",
+      "hint": "不適切なコンテンツを自動フィルタリング"
+    },
+    "typingSimulation": {
+      "label": "入力シミュレーション",
+      "hint": "応答前に入力インジケーターを表示"
+    },
+    "emotionScale": {
+      "label": "感情強度",
+      "hint": "0=感情なし、1=通常、2=増幅"
+    }
+  },
+  "llm": {
+    "temperature": {
+      "label": "温度",
+      "hint": "高いほどランダム"
+    },
+    "maxTokens": {
+      "label": "最大トークン",
+      "hint": "生成応答の最大長"
+    },
+    "topP": {
+      "label": "Top P",
+      "hint": "核サンプリング"
+    },
+    "frequencyPenalty": {
+      "label": "頻度ペナルティ",
+      "hint": "繰り返しを減らす"
+    },
+    "presencePenalty": {
+      "label": "存在ペナルティ",
+      "hint": "新しいトピックを促進"
+    }
+  },
+  "memory": {
+    "enable": {
+      "label": "メモリを有効化",
+      "hint": "AIが過去の会話を記憶"
+    },
+    "maxMemories": {
+      "label": "最大メモリ数",
+      "hint": "AIが記憶できる事実の数"
+    },
+    "retentionDays": {
+      "label": "保持日数",
+      "hint": "メモリの保持期間"
+    },
+    "importanceThreshold": {
+      "label": "重要度閾値",
+      "hint": "事実を保存するための最低スコア"
+    }
+  },
+  "autoPilot": {
+    "enable": {
+      "label": "自律モードを有効化",
+      "hint": "チャットが静かな時に自律的に発言"
+    },
+    "idleTimeout": {
+      "label": "アイドルタイムアウト",
+      "hint": "自律発言までの静寂秒数"
+    },
+    "minInterval": {
+      "label": "最小間隔",
+      "hint": "自律メッセージ間の最小秒数"
+    },
+    "mood": {
+      "label": "気分",
+      "hint": "自律メッセージのデフォルトトーン",
+      "neutral": "中立",
+      "happy": "楽しい",
+      "chill": "のんびり",
+      "hyped": "ハイテンション",
+      "sarcastic": "皮肉"
+    }
+  }
+}

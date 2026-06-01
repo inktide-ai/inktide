@@ -11,6 +11,7 @@ import { projectPath, PROJECTS_ROUTE } from '@/lib/routes'
 const panelClass = cn(
   'z-[3000] w-[280px] overflow-hidden rounded-md border border-[var(--border-default)]',
   'bg-[var(--menu-panel-bg)] text-body text-[var(--text-primary)] shadow-md',
+  'data-[state=open]:animate-menu-in data-[state=closed]:animate-menu-out',
 )
 
 const rowClass = cn(

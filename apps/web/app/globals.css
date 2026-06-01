@@ -639,10 +639,16 @@
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+@keyframes menuOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(4px) scale(0.98); }
+}
+
 @theme {
   --animate-marquee: marquee 25s linear infinite;
   --animate-settings-page-in: settingsPageIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-menu-in: menuIn 0.18s cubic-bezier(0.2, 0.9, 0.2, 1);
+  --animate-menu-out: menuOut 0.12s ease-in forwards;
 
   --text-2xs: 0.625rem;
   --text-caption: 0.6875rem;

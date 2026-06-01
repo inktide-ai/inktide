@@ -1,0 +1,11 @@
+{
+  "section": {
+    "systemPrompt": "系统提示词"
+  },
+  "coreInstructions": {
+    "label": "核心指令",
+    "hint": "定义AI的个性、行为和背景。",
+    "placeholder": "例：你是一个友好的AI伴侣。",
+    "counter": "{{count}}个字符"
+  }
+}

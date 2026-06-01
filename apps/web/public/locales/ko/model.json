@@ -1,0 +1,21 @@
+{
+  "section": {
+    "preview": "미리보기",
+    "model": "모델"
+  },
+  "loading": "로딩 중…",
+  "type": {
+    "label": "모델 유형",
+    "hint": "AI 캐릭터의 시각적 표현"
+  },
+  "upload": {
+    "label": "모델 업로드",
+    "hint": "3D 또는 Live2D 모델 파일 업로드",
+    "busy": "업로드 중…",
+    "choose": "파일 선택",
+    "noFile": "파일 없음 — {{ext}} 허용",
+    "remove": "삭제",
+    "saveFirst": "먼저 캐릭터를 저장하세요.",
+    "success": "업로드됨 — 미리보기 업데이트."
+  }
+}

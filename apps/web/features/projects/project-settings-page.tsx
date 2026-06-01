@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Check, Copy, Download, Trash2 } from 'lucide-react'
+import { AnimatePresence } from 'framer-motion'
+import { Check, Copy, Download, LayoutTemplate, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getProject, updateProject, deleteProject, exportProject } from './api'
 import { SoulBindingPicker } from './soul-binding-picker'
 import type { Project, ProjectActiveSoul } from './api'
 import { PROJECTS_ROUTE } from '@/lib/routes'
+import { TemplateEditorModal } from '@/features/templates'
+import { useTemplateStore } from '@/shared/lib/templates/useTemplateStore'
 
 function SaveButton({ saving, disabled, onClick }: { saving: boolean; disabled?: boolean; onClick: () => void }) {
   const { t } = useTranslation('common')
@@ -82,6 +85,9 @@ export default function ProjectSettingsPage() {
   const [copied, setCopied]         = useState(false)
   const [exporting, setExporting]   = useState(false)
   const [deleting, setDeleting]     = useState(false)
+  const [showSaveAsTemplate, setShowSaveAsTemplate] = useState(false)
+  const [savedTemplate, setSavedTemplate] = useState(false)
+  const templateStore = useTemplateStore()
 
   useEffect(() => {
     getProject(id)
@@ -277,6 +283,21 @@ export default function ProjectSettingsPage() {
             </select>
           </SettingsCard>
 
+          {/* Save as Template */}
+          <SettingsCard
+            title={t('templates.saveAsTemplateTitle')}
+            description={t('templates.saveAsTemplateDesc')}
+          >
+            <button
+              type="button"
+              onClick={() => setShowSaveAsTemplate(true)}
+              className="flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
+            >
+              <LayoutTemplate size={14} />
+              {savedTemplate ? '✓ Saved' : t('templates.saveAsTemplateButton')}
+            </button>
+          </SettingsCard>
+
           {/* Export */}
           <SettingsCard
             title={t('projectDetail.exportProject')}
@@ -325,6 +346,39 @@ export default function ProjectSettingsPage() {
 
         </div>
       </div>
+
+      <AnimatePresence>
+        {showSaveAsTemplate && project && (
+          <TemplateEditorModal
+            mode="create"
+            initialData={{
+              id: '',
+              name: project.name,
+              emoji: '🤖',
+              tagline: 'Custom',
+              description: project.description ?? '',
+              longDescription: project.description ?? '',
+              accentColor: '#7c3aed',
+              defaultName: project.name,
+              systemPrompt: project.system_prompt ?? '',
+              category: 'utility',
+              platforms: ['any'],
+              features: [],
+              nextSteps: [],
+              isSystem: false,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            }}
+            onClose={() => setShowSaveAsTemplate(false)}
+            onSave={async data => {
+              await templateStore.create(data)
+              setShowSaveAsTemplate(false)
+              setSavedTemplate(true)
+              setTimeout(() => setSavedTemplate(false), 3000)
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

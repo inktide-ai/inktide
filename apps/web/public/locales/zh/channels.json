@@ -1,0 +1,49 @@
+{
+  "section": {
+    "title": "频道"
+  },
+  "intro": "将此角色连接到直播聊天平台。",
+  "form": {
+    "displayName": "显示名称",
+    "displayNamePlaceholder": "仪表盘中的标签",
+    "botName": "机器人/服务名称",
+    "botNamePlaceholder": "机器人在此平台的显示名称"
+  },
+  "status": {
+    "loading": "加载连接中…",
+    "adding": "添加中…",
+    "remove": "删除",
+    "paused": "已暂停"
+  },
+  "error": {
+    "load": "无法加载连接。",
+    "add": "无法添加连接。",
+    "update": "更新失败。",
+    "remove": "删除失败。",
+    "displayNameRequired": "请输入显示名称。",
+    "botNameRequired": "请输入机器人或服务账户名称。"
+  },
+  "confirm": "删除 {{label}} 的链接 \"{{channel}}\"？",
+  "connector": {
+    "notAvailable": "此频道尚不可用。",
+    "backToChannels": "返回频道",
+    "myIntegrations": "我的集成",
+    "installation": "安装",
+    "settings": "设置",
+    "editSettings": "编辑此频道的设置。",
+    "developer": "开发者",
+    "website": "网站",
+    "documentation": "文档",
+    "terms": "条款",
+    "privacy": "隐私政策",
+    "support": "支持",
+    "details": "详情",
+    "read": "阅读",
+    "openIn": "在…中打开",
+    "successDiscord": "Discord服务器连接成功！",
+    "successTwitch": "Twitch频道已连接！",
+    "success": "连接成功！",
+    "discordSupport": "Discord支持",
+    "openInDiscord": "在Discord中打开"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "section": {
+    "title": "OBS Studio",
+    "requirements": "要件",
+    "channel": "チャンネル",
+    "browserUrl": "ブラウザーソースURL",
+    "setup": "OBS設定"
+  }
+}

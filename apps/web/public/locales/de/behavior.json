@@ -1,0 +1,182 @@
+{
+  "section": {
+    "personality": "Persönlichkeits-Engine",
+    "response": "Antwort",
+    "llmConfig": "LLM-Konfiguration",
+    "memory": "Gedächtnis",
+    "autoPilot": "Auto-Pilot"
+  },
+  "personality": {
+    "presetsLabel": "Voreinstellungen",
+    "traitsTitle": "Kernmerkmale",
+    "dynamicsTitle": "Emotionale Dynamik",
+    "preset": {
+      "streamer": "Streamer",
+      "mentor": "Mentor",
+      "comedian": "Komiker",
+      "philosopher": "Philosoph",
+      "tsundere": "Tsundere",
+      "custom": "Benutzerdefiniert"
+    },
+    "warmth": {
+      "label": "Wärme",
+      "hint": "Warm und fürsorglich vs. distanziert",
+      "low": "Kalt",
+      "high": "Warm"
+    },
+    "playfulness": {
+      "label": "Verspieltheit",
+      "hint": "Humor, Witz und Schlagfertigkeit",
+      "low": "Ernst",
+      "high": "Verspielt"
+    },
+    "assertiveness": {
+      "label": "Durchsetzungsvermögen",
+      "hint": "Direkt und selbstbewusst vs. passiv",
+      "low": "Passiv",
+      "high": "Durchsetzungsfähig"
+    },
+    "empathy": {
+      "label": "Einfühlungsvermögen",
+      "hint": "Emotionen anderer anerkennen",
+      "low": "Distanziert",
+      "high": "Einfühlsam"
+    },
+    "formality": {
+      "label": "Formalität",
+      "hint": "Formelle oder informelle Sprache",
+      "low": "Informell",
+      "high": "Formell"
+    },
+    "sarcasm": {
+      "label": "Sarkasmus",
+      "hint": "Aufrichtig vs. ironisch",
+      "low": "Aufrichtig",
+      "high": "Sarkastisch"
+    },
+    "volatility": {
+      "label": "Stimmungsvolatilität",
+      "hint": "Wie stark die Stimmung schwankt",
+      "low": "Stabil",
+      "high": "Volatil"
+    },
+    "responsiveness": {
+      "label": "Emotionale Reaktionsfähigkeit",
+      "hint": "Wie stark emotional reagiert wird",
+      "low": "Zurückhaltend",
+      "high": "Reaktiv"
+    },
+    "emotionMemory": {
+      "label": "Emotionales Gedächtnis",
+      "hint": "Wie lange vergangene Emotionen nachwirken",
+      "low": "Vergesslich",
+      "high": "Beständig"
+    },
+    "stressBehavior": {
+      "label": "Stressverhalten",
+      "hint": "Reaktion bei Überforderung",
+      "deflect": "Ablenken",
+      "humor": "Humor",
+      "withdraw": "Zurückziehen",
+      "confront": "Konfrontieren"
+    },
+    "baselineMood": {
+      "label": "Grundstimmung",
+      "hint": "Emotionaler Grundton",
+      "neutral": "Neutral",
+      "happy": "Fröhlich",
+      "chill": "Entspannt",
+      "melancholic": "Melancholisch",
+      "hyped": "Aufgedreht"
+    }
+  },
+  "response": {
+    "delay": {
+      "label": "Antwortverzögerung",
+      "hint": "Wartezeit vor dem Senden"
+    },
+    "maxLength": {
+      "label": "Maximale Antwortlänge",
+      "hint": "Maximale Zeichenanzahl"
+    },
+    "language": {
+      "label": "Sprache",
+      "hint": "Primärsprache für KI-Antworten"
+    },
+    "autoModerate": {
+      "label": "Automatische Moderation",
+      "hint": "Unangemessene Inhalte filtern"
+    },
+    "typingSimulation": {
+      "label": "Tipp-Simulation",
+      "hint": "Tipp-Indikator anzeigen"
+    },
+    "emotionScale": {
+      "label": "Emotionsintensität",
+      "hint": "Skaliert Emotionseinfluss (0=keine, 1=normal, 2=verstärkt)"
+    }
+  },
+  "llm": {
+    "temperature": {
+      "label": "Temperatur",
+      "hint": "Höhere Werte = zufälliger"
+    },
+    "maxTokens": {
+      "label": "Max. Tokens",
+      "hint": "Maximale Länge der Antwort"
+    },
+    "topP": {
+      "label": "Top P",
+      "hint": "Kern-Sampling — Ausgabevielfalt"
+    },
+    "frequencyPenalty": {
+      "label": "Häufigkeitsstrafe",
+      "hint": "Reduziert Wiederholungen"
+    },
+    "presencePenalty": {
+      "label": "Präsenzstrafe",
+      "hint": "Ermutigt neue Themen"
+    }
+  },
+  "memory": {
+    "enable": {
+      "label": "Gedächtnis aktivieren",
+      "hint": "KI erinnert sich an vergangene Gespräche"
+    },
+    "maxMemories": {
+      "label": "Max. Erinnerungen",
+      "hint": "Wie viele Fakten die KI speichern kann"
+    },
+    "retentionDays": {
+      "label": "Aufbewahrungstage",
+      "hint": "Wie lange Erinnerungen aufbewahrt werden"
+    },
+    "importanceThreshold": {
+      "label": "Wichtigkeitsschwelle",
+      "hint": "Mindestwert für gespeicherte Fakten"
+    }
+  },
+  "autoPilot": {
+    "enable": {
+      "label": "Autonomen Modus aktivieren",
+      "hint": "KI spricht eigenständig bei ruhigem Chat"
+    },
+    "idleTimeout": {
+      "label": "Leerlauf-Timeout",
+      "hint": "Sekunden bis KI eigenständig spricht"
+    },
+    "minInterval": {
+      "label": "Mindestintervall",
+      "hint": "Mindestsekunden zwischen autonomen Nachrichten"
+    },
+    "mood": {
+      "label": "Stimmung",
+      "hint": "Emotionaler Grundton für autonome Nachrichten",
+      "neutral": "Neutral",
+      "happy": "Fröhlich",
+      "chill": "Entspannt",
+      "hyped": "Aufgedreht",
+      "sarcastic": "Sarkastisch"
+    }
+  }
+}

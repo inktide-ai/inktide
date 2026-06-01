@@ -21,16 +21,14 @@ import { usePatchGlobalPreferences } from '@/shared/hooks/useGlobalPreferences'
 
 
 const LANGUAGES = [
-  { code: 'en', nativeName: 'English (US)', englishName: 'English (US)' },
-  { code: 'ru', nativeName: 'Русский',       englishName: 'Russian'       },
-  // { code: 'de', nativeName: 'Deutsch',                englishName: 'German'           },
-  // { code: 'fr', nativeName: 'Français (France)',      englishName: 'French (France)'  },
-  // { code: 'es', nativeName: 'Español',                englishName: 'Spanish'          },
-  // { code: 'ja', nativeName: '日本語',                  englishName: 'Japanese'         },
-  // { code: 'zh', nativeName: '中文',                   englishName: 'Chinese'          },
-  // { code: 'ko', nativeName: '한국어',                  englishName: 'Korean'           },
-  // { code: 'pt', nativeName: 'Português',              englishName: 'Portuguese'       },
-  // { code: 'nl', nativeName: 'Nederlands',             englishName: 'Dutch'            },
+  { code: 'en', nativeName: 'English (US)',       englishName: 'English (US)'    },
+  { code: 'ru', nativeName: 'Русский',            englishName: 'Russian'         },
+  { code: 'zh', nativeName: '中文（简体）',        englishName: 'Chinese (Simplified)' },
+  { code: 'ja', nativeName: '日本語',              englishName: 'Japanese'        },
+  { code: 'ko', nativeName: '한국어',              englishName: 'Korean'          },
+  { code: 'de', nativeName: 'Deutsch',            englishName: 'German'          },
+  { code: 'fr', nativeName: 'Français',           englishName: 'French'          },
+  { code: 'es', nativeName: 'Español',            englishName: 'Spanish'         },
 ] as const
 
 function parseTheme(next: string | undefined): AppearancePrefs['theme'] | undefined {

@@ -1,0 +1,11 @@
+{
+  "section": {
+    "systemPrompt": "Prompt del sistema"
+  },
+  "coreInstructions": {
+    "label": "Instrucciones principales",
+    "hint": "Define la personalidad, comportamiento y contexto de la IA.",
+    "placeholder": "ej. Eres un compañero IA amigable.",
+    "counter": "{{count}} caracteres"
+  }
+}

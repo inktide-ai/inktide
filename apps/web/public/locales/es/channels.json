@@ -1,0 +1,49 @@
+{
+  "section": {
+    "title": "Canales"
+  },
+  "intro": "Conecta este personaje a plataformas de chat en vivo.",
+  "form": {
+    "displayName": "Nombre para mostrar",
+    "displayNamePlaceholder": "Etiqueta en tu panel",
+    "botName": "Bot / nombre de servicio",
+    "botNamePlaceholder": "Cómo aparece el bot en esta plataforma"
+  },
+  "status": {
+    "loading": "Cargando conexiones…",
+    "adding": "Añadiendo…",
+    "remove": "Eliminar",
+    "paused": "pausado"
+  },
+  "error": {
+    "load": "Error al cargar conexiones.",
+    "add": "No se pudo añadir la conexión.",
+    "update": "Actualización fallida.",
+    "remove": "Error al eliminar.",
+    "displayNameRequired": "Ingresa un nombre para mostrar.",
+    "botNameRequired": "Ingresa el nombre del bot."
+  },
+  "confirm": "Eliminar enlace \"{{channel}}\" para {{label}}?",
+  "connector": {
+    "notAvailable": "Este canal aún no está disponible.",
+    "backToChannels": "Volver a canales",
+    "myIntegrations": "Mis integraciones",
+    "installation": "Instalación",
+    "settings": "Configuración",
+    "editSettings": "Editar configuración.",
+    "developer": "Desarrollador",
+    "website": "Sitio web",
+    "documentation": "Documentación",
+    "terms": "Términos",
+    "privacy": "Privacidad",
+    "support": "Soporte",
+    "details": "Detalles",
+    "read": "Leer",
+    "openIn": "Abrir en",
+    "successDiscord": "Servidor Discord conectado!",
+    "successTwitch": "Canal de Twitch conectado!",
+    "success": "Conectado con éxito!",
+    "discordSupport": "Soporte Discord",
+    "openInDiscord": "Abrir en Discord"
+  }
+}

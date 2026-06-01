@@ -1,0 +1,21 @@
+{
+  "section": {
+    "preview": "Vorschau",
+    "model": "Modell"
+  },
+  "loading": "Lädt…",
+  "type": {
+    "label": "Modelltyp",
+    "hint": "Visuelle Darstellung deines KI-Charakters"
+  },
+  "upload": {
+    "label": "Modell hochladen",
+    "hint": "3D- oder Live2D-Modelldatei hochladen",
+    "busy": "Hochladen…",
+    "choose": "Datei auswählen",
+    "noFile": "Keine Datei — akzeptiert {{ext}}",
+    "remove": "Entfernen",
+    "saveFirst": "Zuerst Charakter speichern.",
+    "success": "Hochgeladen — Vorschau aktualisiert."
+  }
+}

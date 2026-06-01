@@ -18,7 +18,7 @@ export async function initI18n() {
 
   await i18n.init({
     fallbackLng: 'en',
-    supportedLngs: ['en', 'ru'],
+    supportedLngs: ['en', 'ru', 'zh', 'ja', 'ko', 'de', 'fr', 'es'],
     defaultNS: 'common',
     ns: ['common', 'landing', 'model', 'behavior', 'brain', 'backup', 'providers', 'obs', 'channels', 'scene', 'scenes', 'prompts', 'voice', 'profile'],
     backend: {

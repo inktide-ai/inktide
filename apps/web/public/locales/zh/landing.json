@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "product": "产品",
+    "solutions": "解决方案",
+    "howItWorks": "工作原理",
+    "docs": "文档",
+    "logIn": "登录",
+    "signUpFree": "免费注册",
+    "profile": "个人资料",
+    "logOut": "退出登录",
+    "goToProfile": "前往个人资料",
+    "navigation": "导航",
+    "toggleMenu": "切换菜单",
+    "closeMenu": "关闭菜单"
+  },
+  "hero": {
+    "title": "为直播创建您的<accent>AI伴侣</accent>",
+    "subtitle": "自定义提示词、算法和模型",
+    "ctaPrimary": "免费注册"
+  },
+  "footer": {
+    "copyright": "© {{year}} Inktide. 保留所有权利。"
+  }
+}

@@ -19,6 +19,7 @@ import type { ProjectActiveSoul } from './api'
 import {
   SectionCard, NoSoulPlaceholder, ProjectMetaRow, ProjectStatusBadge,
 } from './ui/project-overview-primitives'
+import { SetupChecklist } from './setup-checklist'
 
 export function ProjectOverviewPage() {
   const { id } = useParams<{ id: string }>()
@@ -122,6 +123,8 @@ export function ProjectOverviewPage() {
 
   return (
     <div className="mx-auto max-w-[1000px] px-6 py-8">
+
+      <SetupChecklist project={project} channelCount={activeChannels.length} />
 
       {/* ── Header ── */}
       <div className="mb-8 flex items-start justify-between gap-4">

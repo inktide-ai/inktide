@@ -1,0 +1,9 @@
+{
+  "section": {
+    "title": "OBS Studio",
+    "requirements": "Anforderungen",
+    "channel": "Kanal",
+    "browserUrl": "Browser-Quell-URL",
+    "setup": "OBS-Einrichtung"
+  }
+}

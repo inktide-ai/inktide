@@ -1,0 +1,60 @@
+{
+  "page": {
+    "title": "Fournisseurs LLM",
+    "desc": "Entrez vos clés API."
+  },
+  "status": {
+    "connected": "Connecté",
+    "notConnected": "Non connecté"
+  },
+  "detail": {
+    "status": "Statut",
+    "unknownProvider": "Fournisseur inconnu",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "delete": "Supprimer la clé",
+    "deleting": "Suppression…",
+    "savedOk": "Enregistré.",
+    "addHeader": "Ajouter un en-tête",
+    "apiKey": {
+      "label": "Clé API",
+      "hint": "Stockée chiffrée.",
+      "replaceHint": "Entrez une nouvelle clé pour la remplacer."
+    },
+    "baseUrl": {
+      "label": "URL du serveur",
+      "hint": "URL du serveur Ollama local"
+    },
+    "errors": {
+      "keyRequired": "Clé API requise.",
+      "saveFailed": "Échec de l'enregistrement.",
+      "deleteFailed": "Échec de la suppression."
+    }
+  },
+  "validation": {
+    "checking": "Vérification…",
+    "testConnection": "Tester la connexion",
+    "autoOk": "Format correct",
+    "ok": "Connexion réussie",
+    "failed": "Test échoué",
+    "continueAnyway": "Continuer quand même"
+  },
+  "brain": {
+    "title": "Cerveau",
+    "subtitle": "Gérer les fournisseurs LLM.",
+    "section": {
+      "title": "Fournisseurs Brain",
+      "subtitle": "Choisir un modèle."
+    },
+    "search": "Rechercher...",
+    "noResults": "Aucun résultat.",
+    "type": {
+      "local": "Local",
+      "apiKey": "Clé API",
+      "openaiV1": "OpenAI v1",
+      "openSource": "Open Source",
+      "recommended": "Recommandé",
+      "enterprise": "Entreprise"
+    }
+  }
+}

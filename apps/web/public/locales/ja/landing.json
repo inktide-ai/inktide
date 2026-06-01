@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "product": "製品",
+    "solutions": "ソリューション",
+    "howItWorks": "仕組み",
+    "docs": "ドキュメント",
+    "logIn": "ログイン",
+    "signUpFree": "無料で登録",
+    "profile": "プロフィール",
+    "logOut": "ログアウト",
+    "goToProfile": "プロフィールへ",
+    "navigation": "ナビゲーション",
+    "toggleMenu": "メニューを切り替え",
+    "closeMenu": "メニューを閉じる"
+  },
+  "hero": {
+    "title": "配信用の<accent>AIコンパニオン</accent>を作成",
+    "subtitle": "プロンプト、アルゴリズム、モデルをカスタマイズ",
+    "ctaPrimary": "無料で登録"
+  },
+  "footer": {
+    "copyright": "© {{year}} Inktide. All rights reserved."
+  }
+}

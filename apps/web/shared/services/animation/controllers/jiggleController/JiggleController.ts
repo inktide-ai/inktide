@@ -4,11 +4,11 @@ import type { IVrmController, VrmControllerSetup, VrmAnimationContext } from '@/
 const BREAST_RE = /bust|breast|boob/i
 
 // Spring-damper constants
-const K      = 15    // stiffness (1/s²)
-const D      = 6     // damping   (1/s) — ζ≈0.77
-const SENS   = 4.0   // camera angular velocity → force multiplier
-const SPREAD = 0.5   // gravityDir max lateral tilt
-const MAX_F  = 8.0   // clamp raw force
+const K      = 5     // stiffness (1/s²)
+const D      = 1.5   // damping   (1/s) — ζ≈0.34, underdamped → jiggle
+const SENS   = 10.0  // camera angular velocity → force multiplier
+const SPREAD = 0.9   // gravityDir max lateral tilt
+const MAX_F  = 20.0  // clamp raw force
 
 interface JointEntry {
   joint: {
@@ -79,8 +79,16 @@ export class JiggleController implements IVrmController {
 
     const safeD = Math.max(delta, 0.001)
     const clamp = (v: number) => Math.max(-MAX_F, Math.min(MAX_F, v))
-    const forceX = clamp((dq.y / safeD) * SENS * jiggleMult)
-    const forceZ = clamp((dq.x / safeD) * SENS * jiggleMult)
+
+    // Extract axis and angle from delta quaternion — dq.y/x are NOT angles
+    const angle    = 2 * Math.acos(Math.min(Math.abs(dq.w), 1.0))
+    const sinHalf  = Math.sqrt(Math.max(0, 1 - dq.w * dq.w))
+    const axisY    = sinHalf > 0.001 ? dq.y / sinHalf : 0  // yaw  → X sway
+    const axisX    = sinHalf > 0.001 ? dq.x / sinHalf : 0  // pitch → Z sway
+    const angSpeed = angle / safeD                          // true rad/s
+
+    const forceX = clamp(axisY * angSpeed * SENS * jiggleMult)
+    const forceZ = clamp(axisX * angSpeed * SENS * jiggleMult)
 
     this.velX += (-K * this.dispX - D * this.velX + forceX) * delta
     this.velZ += (-K * this.dispZ - D * this.velZ + forceZ) * delta

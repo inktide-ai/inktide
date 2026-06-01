@@ -1,0 +1,60 @@
+{
+  "page": {
+    "title": "LLM提供商",
+    "desc": "输入API密钥以启用云端LLM提供商。"
+  },
+  "status": {
+    "connected": "已连接",
+    "notConnected": "未连接"
+  },
+  "detail": {
+    "status": "状态",
+    "unknownProvider": "未知提供商",
+    "save": "保存",
+    "saving": "保存中…",
+    "delete": "删除密钥",
+    "deleting": "删除中…",
+    "savedOk": "保存成功。",
+    "addHeader": "添加请求头",
+    "apiKey": {
+      "label": "API密钥",
+      "hint": "加密存储。",
+      "replaceHint": "已有密钥，输入新密钥替换。"
+    },
+    "baseUrl": {
+      "label": "服务器URL",
+      "hint": "本地Ollama服务器URL"
+    },
+    "errors": {
+      "keyRequired": "需要API密钥。",
+      "saveFailed": "保存失败。",
+      "deleteFailed": "删除失败。"
+    }
+  },
+  "validation": {
+    "checking": "检查中…",
+    "testConnection": "测试连接",
+    "autoOk": "格式正确",
+    "ok": "连接成功",
+    "failed": "连接测试失败",
+    "continueAnyway": "仍然继续"
+  },
+  "brain": {
+    "title": "大脑",
+    "subtitle": "管理语言模型提供商。",
+    "section": {
+      "title": "Brain提供商",
+      "subtitle": "为灵魂选择语言模型。"
+    },
+    "search": "搜索提供商...",
+    "noResults": "没有匹配的提供商。",
+    "type": {
+      "local": "本地",
+      "apiKey": "API密钥",
+      "openaiV1": "OpenAI v1",
+      "openSource": "开源",
+      "recommended": "推荐",
+      "enterprise": "企业"
+    }
+  }
+}

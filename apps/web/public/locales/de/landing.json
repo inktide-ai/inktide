@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "product": "Produkt",
+    "solutions": "Lösungen",
+    "howItWorks": "So funktioniert es",
+    "docs": "Dokumentation",
+    "logIn": "Anmelden",
+    "signUpFree": "Kostenlos anmelden",
+    "profile": "Profil",
+    "logOut": "Abmelden",
+    "goToProfile": "Zum Profil",
+    "navigation": "Navigation",
+    "toggleMenu": "Menü umschalten",
+    "closeMenu": "Menü schließen"
+  },
+  "hero": {
+    "title": "Erstelle deinen <accent>KI-Begleiter</accent> fürs Streaming",
+    "subtitle": "Prompts, Algorithmen und Modelle anpassen",
+    "ctaPrimary": "Kostenlos anmelden"
+  },
+  "footer": {
+    "copyright": "© {{year}} Inktide. Alle Rechte vorbehalten."
+  }
+}

@@ -22,7 +22,8 @@ import { SidebarItem } from '@/features/workspace-home/sidebar-item'
 import { useShortcut } from '@/shared/lib/keyboard'
 import { getBannerGradient } from '@/shared/ui/banner-presets'
 import Link from 'next/link'
-import { Box, Gem } from 'lucide-react'
+import { Box, Code2, Gem, LayoutTemplate, Store } from 'lucide-react'
+import { DEVELOPER_ROUTE, MARKETPLACE_ROUTE, TEMPLATES_ROUTE } from '@/lib/routes'
 import {
   Agent,
   CaretDownSmall,
@@ -116,7 +117,9 @@ export function WorkspaceSidebar() {
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [savePickerOpen, setSavePickerOpen] = useState(false)
-  const [mainOpen, setMainOpen] = useState(true)
+  const [mainOpen, setMainOpen]       = useState(true)
+  const [toolsOpen, setToolsOpen]     = useState(true)
+  const [apiOpen, setApiOpen]         = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(true)
 
   const { exportAndDownload } = useProjectExport()
@@ -279,9 +282,33 @@ export function WorkspaceSidebar() {
                 <SidebarItem href="/souls" icon={<Agent size={16} viewBox="0 0 24 24" />} label={t('sidebar.souls')} badge={cardList.length || undefined} active={isSoulsRoute} layoutId="sidebar-pill" />
               )}
               <SidebarItem href={projectsHref} icon={<ProjectsIcon size={16} viewBox="0 0 24 24" />} label={t('sidebar.projects')} badge={projects.length || undefined} active={isProjectsRoute} layoutId="sidebar-pill" />
-              <SidebarItem href="/edit/sandbox" icon={<Box size={16} />} label={t('sidebar.sandboxes')} active={pathname?.startsWith('/edit/sandbox')} layoutId="sidebar-pill" />
+              <SidebarItem href={TEMPLATES_ROUTE} icon={<LayoutTemplate size={16} />} label={t('templates.title')} active={pathname?.startsWith('/templates')} layoutId="sidebar-pill" />
             </div>
           </SidebarCollapsibleSection>
+
+          <SidebarCollapsibleSection
+            sectionId="tools"
+            title={t('sidebar.tools')}
+            open={toolsOpen}
+            onToggle={() => setToolsOpen(o => !o)}
+          >
+            <div className="space-y-0.5">
+              <SidebarItem href="/edit/sandbox" icon={<Box size={16} />} label={t('sidebar.sandboxes')} active={pathname?.startsWith('/edit/sandbox')} layoutId="sidebar-pill" />
+              <SidebarItem href={MARKETPLACE_ROUTE} icon={<Store size={16} />} label={t('sidebar.marketplace')} active={pathname?.startsWith('/marketplace')} layoutId="sidebar-pill" />
+            </div>
+          </SidebarCollapsibleSection>
+
+          <SidebarCollapsibleSection
+            sectionId="api"
+            title={t('sidebar.api')}
+            open={apiOpen}
+            onToggle={() => setApiOpen(o => !o)}
+          >
+            <div className="space-y-0.5">
+              <SidebarItem href={DEVELOPER_ROUTE} icon={<Code2 size={16} />} label={t('sidebar.developer')} active={pathname?.startsWith('/developer')} layoutId="sidebar-pill" />
+            </div>
+          </SidebarCollapsibleSection>
+
         </div>
       </LayoutGroup>
 

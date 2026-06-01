@@ -1,0 +1,12 @@
+{
+  "grid": {
+    "title": "音声プロバイダー",
+    "desc": "AIキャラクターのTTSプロバイダーを選択。",
+    "search": "プロバイダーを検索…",
+    "configure": "設定"
+  },
+  "advanced": "詳細",
+  "settings": "設定",
+  "back": "戻る",
+  "noSettings": "このプロバイダーの設定なし。"
+}

@@ -1,0 +1,49 @@
+{
+  "section": {
+    "title": "Kanäle"
+  },
+  "intro": "Verbinde diesen Charakter mit Live-Chat-Plattformen.",
+  "form": {
+    "displayName": "Anzeigename",
+    "displayNamePlaceholder": "Bezeichnung im Dashboard",
+    "botName": "Bot / Dienstname",
+    "botNamePlaceholder": "Bot-Name auf der Plattform"
+  },
+  "status": {
+    "loading": "Verbindungen laden…",
+    "adding": "Hinzufügen…",
+    "remove": "Entfernen",
+    "paused": "pausiert"
+  },
+  "error": {
+    "load": "Verbindungen konnten nicht geladen werden.",
+    "add": "Verbindung konnte nicht hinzugefügt werden.",
+    "update": "Update fehlgeschlagen.",
+    "remove": "Entfernen fehlgeschlagen.",
+    "displayNameRequired": "Anzeigename eingeben.",
+    "botNameRequired": "Bot-Namen eingeben."
+  },
+  "confirm": "Link \"{{channel}}\" für {{label}} entfernen?",
+  "connector": {
+    "notAvailable": "Dieser Kanal ist noch nicht verfügbar.",
+    "backToChannels": "Zurück zu Kanälen",
+    "myIntegrations": "Meine Integrationen",
+    "installation": "Installation",
+    "settings": "Einstellungen",
+    "editSettings": "Einstellungen bearbeiten.",
+    "developer": "Entwickler",
+    "website": "Website",
+    "documentation": "Dokumentation",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutz",
+    "support": "Support",
+    "details": "Details",
+    "read": "Lesen",
+    "openIn": "Öffnen in",
+    "successDiscord": "Discord-Server erfolgreich verbunden!",
+    "successTwitch": "Twitch-Kanal verbunden!",
+    "success": "Erfolgreich verbunden!",
+    "discordSupport": "Discord-Support",
+    "openInDiscord": "In Discord öffnen"
+  }
+}

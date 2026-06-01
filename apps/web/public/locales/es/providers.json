@@ -1,0 +1,60 @@
+{
+  "page": {
+    "title": "Proveedores LLM",
+    "desc": "Ingresa tus claves API."
+  },
+  "status": {
+    "connected": "Conectado",
+    "notConnected": "No conectado"
+  },
+  "detail": {
+    "status": "Estado",
+    "unknownProvider": "Proveedor desconocido",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "delete": "Eliminar clave",
+    "deleting": "Eliminando…",
+    "savedOk": "Guardado.",
+    "addHeader": "Agregar encabezado",
+    "apiKey": {
+      "label": "Clave API",
+      "hint": "Almacenada cifrada.",
+      "replaceHint": "Ingresa una nueva clave para reemplazar."
+    },
+    "baseUrl": {
+      "label": "URL del servidor",
+      "hint": "URL del servidor Ollama local"
+    },
+    "errors": {
+      "keyRequired": "Se requiere clave API.",
+      "saveFailed": "Error al guardar.",
+      "deleteFailed": "Error al eliminar."
+    }
+  },
+  "validation": {
+    "checking": "Verificando…",
+    "testConnection": "Probar conexión",
+    "autoOk": "Formato correcto",
+    "ok": "Conexión exitosa",
+    "failed": "Prueba fallida",
+    "continueAnyway": "Continuar de todas formas"
+  },
+  "brain": {
+    "title": "Cerebro",
+    "subtitle": "Gestionar proveedores LLM.",
+    "section": {
+      "title": "Proveedores Brain",
+      "subtitle": "Elegir modelo."
+    },
+    "search": "Buscar...",
+    "noResults": "Sin resultados.",
+    "type": {
+      "local": "Local",
+      "apiKey": "Clave API",
+      "openaiV1": "OpenAI v1",
+      "openSource": "Código abierto",
+      "recommended": "Recomendado",
+      "enterprise": "Empresarial"
+    }
+  }
+}

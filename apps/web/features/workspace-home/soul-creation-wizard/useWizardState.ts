@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useReducer } from 'react'
 import type { CharacterPersonality } from '@/shared/lib/character'
 import type { SoulTemplate } from '@/shared/data/soul-templates'
+import { PERSONALITY_PRESETS } from '@/shared/data/personality-presets'
 import { STORAGE_KEYS } from '@/shared/lib/storage-keys'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -54,7 +55,8 @@ export type WizardState = {
 
 type WizardAction =
   | { type: 'NAVIGATE';          to: Screen; dir: 1 | -1 }
-  | { type: 'SELECT_TEMPLATE';   id: string | null }
+  | { type: 'SELECT_TEMPLATE';   id: string;        personalityConfig: CharacterPersonality; personalityConfigured: true }
+  | { type: 'SELECT_TEMPLATE';   id: string | null; personalityConfigured: false }
   | { type: 'SELECT_PROVIDER';   stepId: string; id: string; name: string; config?: Record<string, string> }
   | { type: 'SET_PERSONALITY';   config: CharacterPersonality }
   | { type: 'OPEN_PERSONALITY' }
@@ -71,8 +73,15 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
       return { ...state, screen: action.to, direction: action.dir }
 
     case 'SELECT_TEMPLATE':
-      // stepSelections / personalityConfig / channelsSelected — same refs
-      return { ...state, screen: 'steps', direction: 1, selectedTemplate: action.id }
+      return {
+        ...state,
+        screen: 'steps',
+        direction: 1,
+        selectedTemplate: action.id,
+        // personalityConfig present only in the true-branch; false-branch returns same ref → persist stays silent
+        personalityConfig:     'personalityConfig' in action ? action.personalityConfig : state.personalityConfig,
+        personalityConfigured: action.personalityConfigured,
+      }
 
     case 'SELECT_PROVIDER':
       // personalityConfig / channelsSelected — same refs; stepSelections — NEW ref (intentional persist)
@@ -150,7 +159,12 @@ export function useWizardState(): UseWizardStateResult {
   // Template selection has an additional side effect: persist the full template
   // object (id + personality string) so clearWizardDraft can remove it.
   const selectTemplate = useCallback((tmpl: SoulTemplate | null) => {
-    dispatch({ type: 'SELECT_TEMPLATE', id: tmpl?.id ?? null })
+    const presetId = tmpl?.personalityPresetId
+    if (presetId) {
+      dispatch({ type: 'SELECT_TEMPLATE', id: tmpl!.id, personalityConfig: PERSONALITY_PRESETS[presetId], personalityConfigured: true })
+    } else {
+      dispatch({ type: 'SELECT_TEMPLATE', id: tmpl?.id ?? null, personalityConfigured: false })
+    }
     if (typeof window !== 'undefined') {
       if (tmpl) {
         saveWithTTL(STORAGE_KEYS.wizard.template, { id: tmpl.id, personality: tmpl.personality })

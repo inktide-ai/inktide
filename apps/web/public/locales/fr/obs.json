@@ -1,0 +1,9 @@
+{
+  "section": {
+    "title": "OBS Studio",
+    "requirements": "Prérequis",
+    "channel": "Chaîne",
+    "browserUrl": "URL source navigateur",
+    "setup": "Configuration OBS"
+  }
+}

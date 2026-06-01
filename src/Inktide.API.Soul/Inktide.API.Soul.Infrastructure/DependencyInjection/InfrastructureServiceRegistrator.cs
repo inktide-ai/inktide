@@ -39,6 +39,7 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
         registrator.Register<IAiCardSceneRepository, AiCardSceneRepository>(Reuse.Scoped);
         registrator.Register<IAiCardCustomSceneTagRepository, AiCardCustomSceneTagRepository>(Reuse.Scoped);
         registrator.Register<IAiCardRunPresetRepository, AiCardRunPresetRepository>(Reuse.Scoped);
+        registrator.Register<ISoulActivityFeedRepository, SoulActivityFeedRepository>(Reuse.Scoped);
         registrator.Register<IAiCardRunPresetQueryService, AiCardRunPresetQueryService>(Reuse.Scoped);
         registrator.Register<IUserProviderCredentialRepository, UserProviderCredentialRepository>(Reuse.Scoped);
         registrator.Register<IApiKeyProtector, ApiKeyProtector>(Reuse.Scoped);

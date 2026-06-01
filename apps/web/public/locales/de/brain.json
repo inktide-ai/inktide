@@ -1,0 +1,31 @@
+{
+  "grid": {
+    "title": "Brain-Anbieter",
+    "desc": "Wähle einen LLM-Anbieter für deinen KI-Charakter.",
+    "search": "Anbieter suchen…",
+    "configure": "Konfigurieren →"
+  },
+  "settings": "Einstellungen",
+  "llmParams": "LLM-Parameter",
+  "baseUrl": {
+    "label": "Basis-URL",
+    "hint": "URL deines Ollama-Servers"
+  },
+  "model": {
+    "label": "Modell",
+    "loading": "Modelle laden…",
+    "error": "Ollama nicht erreichbar.",
+    "empty": "Keine Modelle gefunden.",
+    "hint": "Modell auswählen",
+    "selectPlaceholder": "— Modell auswählen —"
+  },
+  "providers": {
+    "ollama": "Lokaler Ollama-Server — kein API-Schlüssel.",
+    "anthropic": "Claude-Modelle über Anthropic API.",
+    "deepseek": "DeepSeek Chat & R1."
+  },
+  "remoteProvider": {
+    "keyHint": "API-Schlüssel wird global verwaltet in",
+    "manageLink": "Einstellungen → Anbieter"
+  }
+}

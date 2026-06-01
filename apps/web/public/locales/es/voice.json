@@ -1,0 +1,12 @@
+{
+  "grid": {
+    "title": "Proveedores de voz",
+    "desc": "Elige un proveedor TTS para tu personaje IA.",
+    "search": "Buscar proveedores…",
+    "configure": "Configurar"
+  },
+  "advanced": "Avanzado",
+  "settings": "Configuración",
+  "back": "Volver",
+  "noSettings": "Sin configuración para este proveedor."
+}

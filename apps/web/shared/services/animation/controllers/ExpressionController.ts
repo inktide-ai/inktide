@@ -44,9 +44,7 @@ export class ExpressionController implements IVrmController {
     const mapped = ctx.emotion.emotion
       ? EMOTION_EXPRESSION_MAP[ctx.emotion.emotion]
       : undefined
-    if (ctx.emotion.emotion && !mapped) {
-      console.warn(`[ExpressionController] unknown emotion '${ctx.emotion.emotion}' — falling back to neutral`)
-    }
+    // Unknown emotions silently fall back to neutral — no warn spam in production
     const targetExpr = mapped ?? null
 
     const targetIntensity = ctx.emotion.intensity

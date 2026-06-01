@@ -120,7 +120,7 @@ export default function ProjectPicker() {
 
   return (
     <div className="flex h-full flex-col items-center bg-[var(--bg-0)] px-6 py-12">
-      <div className="w-full max-w-[860px]">
+      <div className="w-full max-w-[1300px]">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="font-sans text-[28px] font-semibold tracking-tight text-[var(--text-primary)]">

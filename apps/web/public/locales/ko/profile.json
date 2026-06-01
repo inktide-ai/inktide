@@ -1,0 +1,15 @@
+{
+  "tab": {
+    "behavior": "동작",
+    "voice": "보이스",
+    "brain": "브레인",
+    "memory": "메모리",
+    "skills": "스킬",
+    "prompts": "프롬프트",
+    "model": "모델",
+    "integrations": "통합",
+    "obs": "OBS",
+    "scene": "장면",
+    "backup": "백업"
+  }
+}

@@ -5,10 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Bot, Folder, Mic, Radio, Siren } from 'lucide-react'
+import { Folder } from 'lucide-react'
 import type { SoulCardData } from '@/features/soul'
 import { SoulCardVertical, SoulCardVerticalSkeleton, useFavorites, createDiscordCustomBotChannel, toSoulCardData } from '@/features/soul'
-import { TwitchIcon } from '@/shared/ui/icons/twitch-icon'
 import { useCharactersContext } from '@/entities/character'
 import { fetchDashboardStats } from '@/features/workspace-home/api/stats'
 import { queryKeys } from '@/shared/lib/query/keys'
@@ -16,15 +15,11 @@ import { SectionHeader, SoulCreationWizard, ProjectCardConnected, ProjectCreatio
 import { listProjects } from '@/features/projects'
 import { buildSpark } from '@/shared/lib/spark'
 import { formatApiCalls, editedLabel } from '@/shared/lib/format-utils'
-import { HOME_TEMPLATES } from '@/shared/data/home-templates'
-
-const TEMPLATE_ICONS: Record<string, React.ReactNode> = {
-  twitch: <TwitchIcon size={16} />,
-  bot:    <Bot size={16} />,
-  radio:  <Radio size={16} />,
-  mic:    <Mic size={16} />,
-  siren:  <Siren size={16} />,
-}
+import { SYSTEM_TEMPLATES, type AnyProjectTemplate } from '@/shared/data/project-templates'
+import { TemplatePreviewDrawer, TEMPLATE_ICONS } from '@/features/templates'
+import { ProjectTemplateWizard } from '@/features/workspace-home/project-template-wizard'
+import { ApiError } from '@/api/client'
+import { PRICING_ROUTE } from '@/lib/routes'
 
 export default function HomePage() {
   const { t } = useTranslation('common')
@@ -35,6 +30,8 @@ export default function HomePage() {
   const [showWizard, setShowWizard] = useState(false)
   const [showProjectWizard, setShowProjectWizard] = useState(false)
   const [showUpgraded, setShowUpgraded] = useState(searchParams.get('upgraded') === '1')
+  const [previewTemplate, setPreviewTemplate] = useState<AnyProjectTemplate | null>(null)
+  const [activeTemplate, setActiveTemplate] = useState<AnyProjectTemplate | null>(null)
   const [soulTab, setSoulTab] = useState<'all' | 'active' | 'idle' | 'archive'>('all')
 
   const { data: stats = null } = useQuery({
@@ -98,6 +95,32 @@ export default function HomePage() {
           />
         )}
       </AnimatePresence>
+      <AnimatePresence>
+        {previewTemplate && (
+          <TemplatePreviewDrawer
+            template={previewTemplate}
+            onClose={() => setPreviewTemplate(null)}
+            onUse={() => {
+              const tpl = previewTemplate
+              setPreviewTemplate(null)
+              setActiveTemplate(tpl)
+            }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {activeTemplate && (
+          <ProjectTemplateWizard
+            template={activeTemplate}
+            souls={cardList}
+            onClose={() => setActiveTemplate(null)}
+            onCreated={id => {
+              setActiveTemplate(null)
+              router.push(`/projects/${id}`)
+            }}
+          />
+        )}
+      </AnimatePresence>
       <AnimatePresence initial={false}>
         {showWizard ? (
           <motion.div
@@ -111,15 +134,24 @@ export default function HomePage() {
             <SoulCreationWizard
               onBack={() => setShowWizard(false)}
               onFinish={async (character, discordBotToken) => {
-                const id = await addCharacter(character)
-                if (id) {
-                  if (discordBotToken) {
-                    await createDiscordCustomBotChannel(id, discordBotToken).catch(() => {})
+                try {
+                  const id = await addCharacter(character)
+                  if (id) {
+                    if (discordBotToken) {
+                      await createDiscordCustomBotChannel(id, discordBotToken).catch(() => {})
+                    }
+                    setShowWizard(false)
+                    router.push(`/souls/${id}`)
                   }
-                  setShowWizard(false)
-                  router.push(`/souls/${id}`)
+                  return id
+                } catch (err) {
+                  if (err instanceof ApiError && err.status === 402) {
+                    setShowWizard(false)
+                    router.push(PRICING_ROUTE)
+                    return null
+                  }
+                  throw err
                 }
-                return id
               }}
             />
           </motion.div>
@@ -259,15 +291,29 @@ export default function HomePage() {
               <section>
                 <SectionHeader title={t('home.fromTemplate')} withArrows={false} />
                 <div className="grid grid-cols-6 gap-2">
-                  {HOME_TEMPLATES.map(template => (
-                    <TemplateCard
-                      key={template.id}
-                      title={template.title}
-                      subtitle={t('home.readyToUse')}
-                      icon={TEMPLATE_ICONS[template.icon]}
-                    />
-                  ))}
-                  <TemplateCard title={t('home.blankProject')} subtitle={t('home.blankProjectDesc')} icon={<span className="text-[18px]">+</span>} />
+                  {SYSTEM_TEMPLATES.filter(tpl => tpl.id !== 'blank').map(tpl => {
+                    const Icon = TEMPLATE_ICONS[tpl.id]
+                    return (
+                      <TemplateCard
+                        key={tpl.id}
+                        title={tpl.name}
+                        subtitle={tpl.tagline}
+                        icon={<Icon size={20} style={{ color: tpl.accentColor }} aria-hidden />}
+                        onClick={() => setPreviewTemplate(tpl)}
+                      />
+                    )
+                  })}
+                  {(() => {
+                    const BlankIcon = TEMPLATE_ICONS['blank']
+                    return (
+                      <TemplateCard
+                        title={t('home.blankProject')}
+                        subtitle={t('home.blankProjectDesc')}
+                        icon={<BlankIcon size={20} style={{ color: '#6b7280' }} aria-hidden />}
+                        onClick={() => setShowProjectWizard(true)}
+                      />
+                    )
+                  })()}
                 </div>
               </section>
             </div>

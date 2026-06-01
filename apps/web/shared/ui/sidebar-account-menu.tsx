@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
 import { Sun } from 'lucide-react'
@@ -38,6 +39,7 @@ export interface SidebarAccountMenuProps {
 }
 
 export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpenSettings, onOpen, onSave }: SidebarAccountMenuProps) {
+  const { t } = useTranslation('common')
   const router = useRouter()
   const { logout } = useAuth()
   const { setTheme, resolvedTheme } = useTheme()
@@ -88,12 +90,12 @@ export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpen
           animation: 'sidebarMenuIn 0.16s cubic-bezier(0.2,0.9,0.2,1)',
         }}
         role="menu"
-        aria-label="Account menu"
+        aria-label={t('accountMenu.ariaLabel')}
       >
         <div className="flex flex-col gap-0.5 px-1.5 pb-1.5">
-          <SidebarMenuItem icon={<MenuIcon src="/icons/menu-open.svg" />} label="Открыть" onClick={handleOpen} />
-          <SidebarMenuItem icon={<MenuIcon src="/icons/menu-save.svg" />} label="Сохранить" shortcut="Cmd + \\" onClick={handleSave} />
-          <SidebarMenuItem icon={<MenuIcon src="/icons/menu-clear.svg" />} label="Очистить данные" />
+          <SidebarMenuItem icon={<MenuIcon src="/icons/menu-open.svg" />} label={t('accountMenu.open')} onClick={handleOpen} />
+          <SidebarMenuItem icon={<MenuIcon src="/icons/menu-save.svg" />} label={t('accountMenu.save')} shortcut="Cmd + \\" onClick={handleSave} />
+          <SidebarMenuItem icon={<MenuIcon src="/icons/menu-clear.svg" />} label={t('accountMenu.clearData')} />
         </div>
 
         <div className="mx-3 my-0.5 h-px bg-[var(--menu-divider)]" />
@@ -101,19 +103,19 @@ export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpen
         <div className="flex flex-col gap-0.5 px-1.5 py-1.5">
           <SidebarMenuItem
             icon={<MenuIcon src="/icons/menu-profile.svg" />}
-            label="Профиль"
+            label={t('accountMenu.profile')}
             shortcut="Cmd + ."
             onClick={handleOpenProfile}
           />
           <SidebarMenuItem
             icon={<MenuIcon src="/icons/menu-settings.svg" />}
-            label="Настройки"
+            label={t('accountMenu.settings')}
             shortcut="Cmd + ,"
             onClick={handleOpenSettings}
           />
           <SidebarMenuItem
             icon={<MenuIcon src="/icons/menu-logout.svg" />}
-            label="Выйти"
+            label={t('accountMenu.logout')}
             onClick={handleLogout}
           />
         </div>
@@ -121,7 +123,7 @@ export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpen
         <div className="mx-3 my-0.5 h-px bg-[var(--menu-divider)]" />
 
         <div className="flex items-center justify-between px-3 py-2.5">
-          <span className="text-sm font-medium text-[var(--text-primary)]">Тема</span>
+          <span className="text-sm font-medium text-[var(--text-primary)]">{t('accountMenu.theme')}</span>
           <div
             className="flex items-center gap-0.5 rounded-lg p-[3px]"
             style={{ background: 'var(--menu-segment-track)' }}
@@ -134,7 +136,7 @@ export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpen
                 background: isLight ? 'var(--menu-segment-active)' : 'transparent',
                 color: isLight ? 'var(--text-primary)' : 'var(--text-tertiary)',
               }}
-              aria-label="Светлая тема"
+              aria-label={t('accountMenu.lightTheme')}
               aria-pressed={isLight}
             >
               <Sun size={14} />
@@ -147,7 +149,7 @@ export function SidebarAccountMenu({ open, onClose, panel, onOpenProfile, onOpen
                 background: !isLight ? 'var(--menu-segment-active)' : 'transparent',
                 color: !isLight ? 'var(--text-primary)' : 'var(--text-tertiary)',
               }}
-              aria-label="Тёмная тема"
+              aria-label={t('accountMenu.darkTheme')}
               aria-pressed={!isLight}
             >
               <Moon size={14} />

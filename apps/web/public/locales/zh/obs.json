@@ -1,0 +1,9 @@
+{
+  "section": {
+    "title": "OBS Studio",
+    "requirements": "要求",
+    "channel": "频道",
+    "browserUrl": "浏览器源URL",
+    "setup": "OBS设置"
+  }
+}

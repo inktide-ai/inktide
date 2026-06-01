@@ -26,6 +26,7 @@ public sealed class SoulDbContext : Microsoft.EntityFrameworkCore.DbContext, IDa
     public DbSet<UserProviderCredential> UserProviderCredentials => Set<UserProviderCredential>();
     public DbSet<OutboxEvent> OutboxEvents => Set<OutboxEvent>();
     public DbSet<AiCardRunPreset> AiCardRunPresets => Set<AiCardRunPreset>();
+    public DbSet<SoulActivityFeedEvent> SoulActivityFeedEvents => Set<SoulActivityFeedEvent>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -47,6 +48,7 @@ public sealed class SoulDbContext : Microsoft.EntityFrameworkCore.DbContext, IDa
         modelBuilder.ApplyConfiguration(new UserProviderCredentialConfiguration());
         modelBuilder.ApplyConfiguration(new OutboxEventConfiguration());
         modelBuilder.ApplyConfiguration(new AiCardRunPresetConfiguration());
+        modelBuilder.ApplyConfiguration(new SoulActivityFeedEventConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }

@@ -1,0 +1,8 @@
+{
+  "loading": "Cargando…",
+  "chat": {
+    "emptyText": "Aquí puedes probar tu personaje",
+    "inputPlaceholder": "Mensaje…",
+    "thinking": "Pensando"
+  }
+}

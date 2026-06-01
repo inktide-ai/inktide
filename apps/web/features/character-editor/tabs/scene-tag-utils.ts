@@ -92,11 +92,11 @@ const TAG_DISPLAY_STYLES: Record<string, TagDisplayStyle> = {
     activeBg: 'rgba(251,146,60,0.06)',
   },
   Приключение: {
-    text: '#fb923c',
-    bg: 'rgba(251,146,60,0.1)',
-    border: 'rgba(251,146,60,0.35)',
-    activeBorder: 'rgba(251,146,60,0.45)',
-    activeBg: 'rgba(251,146,60,0.06)',
+    text: '#a3e635',
+    bg: 'rgba(163,230,53,0.1)',
+    border: 'rgba(163,230,53,0.35)',
+    activeBorder: 'rgba(163,230,53,0.45)',
+    activeBg: 'rgba(163,230,53,0.06)',
   },
   Экшн: {
     text: '#f87171',

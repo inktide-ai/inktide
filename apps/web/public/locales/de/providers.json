@@ -1,0 +1,60 @@
+{
+  "page": {
+    "title": "LLM-Anbieter",
+    "desc": "API-Schlüssel für Cloud-LLM-Anbieter eingeben."
+  },
+  "status": {
+    "connected": "Verbunden",
+    "notConnected": "Nicht verbunden"
+  },
+  "detail": {
+    "status": "Status",
+    "unknownProvider": "Unbekannter Anbieter",
+    "save": "Speichern",
+    "saving": "Speichern…",
+    "delete": "Schlüssel entfernen",
+    "deleting": "Entfernen…",
+    "savedOk": "Erfolgreich gespeichert.",
+    "addHeader": "Header hinzufügen",
+    "apiKey": {
+      "label": "API-Schlüssel",
+      "hint": "Verschlüsselt gespeichert.",
+      "replaceHint": "Neuen Schlüssel eingeben zum Ersetzen."
+    },
+    "baseUrl": {
+      "label": "Server-URL",
+      "hint": "Lokale Ollama-Server-URL"
+    },
+    "errors": {
+      "keyRequired": "API-Schlüssel erforderlich.",
+      "saveFailed": "Speichern fehlgeschlagen.",
+      "deleteFailed": "Entfernen fehlgeschlagen."
+    }
+  },
+  "validation": {
+    "checking": "Prüfen…",
+    "testConnection": "Verbindung testen",
+    "autoOk": "Format korrekt",
+    "ok": "Verbindung erfolgreich",
+    "failed": "Verbindungstest fehlgeschlagen",
+    "continueAnyway": "Trotzdem fortfahren"
+  },
+  "brain": {
+    "title": "Gehirn",
+    "subtitle": "Sprachmodell-Anbieter verwalten.",
+    "section": {
+      "title": "Brain-Anbieter",
+      "subtitle": "Sprachmodell wählen."
+    },
+    "search": "Anbieter suchen...",
+    "noResults": "Keine Anbieter gefunden.",
+    "type": {
+      "local": "Lokal",
+      "apiKey": "API-Schlüssel",
+      "openaiV1": "OpenAI v1",
+      "openSource": "Open Source",
+      "recommended": "Empfohlen",
+      "enterprise": "Enterprise"
+    }
+  }
+}

@@ -16,17 +16,18 @@ export interface PresetMeta {
   label: string
   tagline: string
   dots: [number, number, number]
+  accent: string
 }
 
 export const PERSONALITY_PRESET_META: Record<PresetKey | 'custom', PresetMeta> = {
-  streamer:    { label: 'Streamer',    tagline: 'Live & reactive',  dots: [0.80, 0.85, 0.70] },
-  mentor:      { label: 'Mentor',      tagline: 'Calm & guiding',   dots: [0.75, 0.20, 0.90] },
-  comedian:    { label: 'Comedian',    tagline: 'Chaotic energy',   dots: [0.65, 0.90, 0.50] },
-  philosopher: { label: 'Philosopher', tagline: 'Measured & deep',  dots: [0.50, 0.15, 0.60] },
-  tsundere:    { label: 'Tsundere',    tagline: 'Sharp & cold',     dots: [0.20, 0.85, 0.35] },
-  supportive:  { label: 'Supportive',  tagline: 'Warm & patient',   dots: [0.90, 0.25, 0.95] },
-  tactical:    { label: 'Tactical',    tagline: 'Focused & direct', dots: [0.30, 0.30, 0.40] },
-  custom:      { label: 'Custom',      tagline: 'Your config',      dots: [0.50, 0.50, 0.50] },
+  streamer:    { label: 'Streamer',    tagline: 'Live & reactive',  dots: [0.80, 0.85, 0.70], accent: '#f43f5e' },
+  mentor:      { label: 'Mentor',      tagline: 'Calm & guiding',   dots: [0.75, 0.20, 0.90], accent: '#06b6d4' },
+  comedian:    { label: 'Comedian',    tagline: 'Chaotic energy',   dots: [0.65, 0.90, 0.50], accent: '#f97316' },
+  philosopher: { label: 'Philosopher', tagline: 'Measured & deep',  dots: [0.50, 0.15, 0.60], accent: '#8b5cf6' },
+  tsundere:    { label: 'Tsundere',    tagline: 'Sharp & cold',     dots: [0.20, 0.85, 0.35], accent: '#e11d48' },
+  supportive:  { label: 'Supportive',  tagline: 'Warm & patient',   dots: [0.90, 0.25, 0.95], accent: '#84cc16' },
+  tactical:    { label: 'Tactical',    tagline: 'Focused & direct', dots: [0.30, 0.30, 0.40], accent: '#3b82f6' },
+  custom:      { label: 'Custom',      tagline: 'Your config',      dots: [0.50, 0.50, 0.50], accent: '#6b7280' },
 }
 
 export const ALL_PRESET_KEYS: Array<PresetKey | 'custom'> = [

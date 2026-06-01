@@ -1,0 +1,21 @@
+{
+  "section": {
+    "preview": "Vista previa",
+    "model": "Modelo"
+  },
+  "loading": "Cargando…",
+  "type": {
+    "label": "Tipo de modelo",
+    "hint": "Representación visual de tu personaje"
+  },
+  "upload": {
+    "label": "Subir modelo",
+    "hint": "Sube tu modelo 3D o Live2D",
+    "busy": "Subiendo…",
+    "choose": "Elegir archivo",
+    "noFile": "Sin archivo — acepta {{ext}}",
+    "remove": "Eliminar",
+    "saveFirst": "Guarda el personaje primero.",
+    "success": "Subido — vista previa actualizada."
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "section": {
+    "preview": "Aperçu",
+    "model": "Modèle"
+  },
+  "loading": "Chargement…",
+  "type": {
+    "label": "Type de modèle",
+    "hint": "Représentation visuelle de votre personnage"
+  },
+  "upload": {
+    "label": "Télécharger le modèle",
+    "hint": "Télécharger votre modèle 3D ou Live2D",
+    "busy": "Téléchargement…",
+    "choose": "Choisir un fichier",
+    "noFile": "Aucun fichier — accepte {{ext}}",
+    "remove": "Supprimer",
+    "saveFirst": "Sauvegardez d'abord le personnage.",
+    "success": "Téléchargé — aperçu mis à jour."
+  }
+}

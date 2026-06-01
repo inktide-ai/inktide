@@ -1,0 +1,31 @@
+{
+  "grid": {
+    "title": "Brain 제공업체",
+    "desc": "AI 캐릭터를 위한 LLM 제공업체 선택.",
+    "search": "제공업체 검색…",
+    "configure": "설정 →"
+  },
+  "settings": "설정",
+  "llmParams": "LLM 매개변수",
+  "baseUrl": {
+    "label": "기본 URL",
+    "hint": "Ollama 서버 URL"
+  },
+  "model": {
+    "label": "모델",
+    "loading": "모델 로딩 중…",
+    "error": "Ollama에 연결할 수 없습니다.",
+    "empty": "모델을 찾을 수 없습니다.",
+    "hint": "모델 선택",
+    "selectPlaceholder": "— 모델 선택 —"
+  },
+  "providers": {
+    "ollama": "로컬 Ollama 서버 — API 키 불필요.",
+    "anthropic": "Anthropic API를 통한 Claude 모델.",
+    "deepseek": "DeepSeek Chat & R1 추론 모델."
+  },
+  "remoteProvider": {
+    "keyHint": "API 키는 전역적으로 관리됩니다",
+    "manageLink": "설정 → 제공업체"
+  }
+}

@@ -122,7 +122,7 @@ export function useCharacterMutations({
       return char.id
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Create failed')
-      return null
+      throw err
     }
   }, [llmModels, createMutation, onCharacterCreated, onSnapshotUpdate])
 

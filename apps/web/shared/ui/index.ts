@@ -1,5 +1,6 @@
 export * from './api-key-callout'
 export * from './PageMotion'
+export * from './page-content'
 export * from './checkbox'
 export * from './label'
 export * from './badge'

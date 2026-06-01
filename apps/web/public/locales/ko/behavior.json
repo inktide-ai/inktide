@@ -1,0 +1,182 @@
+{
+  "section": {
+    "personality": "개성 엔진",
+    "response": "응답",
+    "llmConfig": "LLM 설정",
+    "memory": "메모리",
+    "autoPilot": "자동 조종"
+  },
+  "personality": {
+    "presetsLabel": "프리셋",
+    "traitsTitle": "핵심 특성",
+    "dynamicsTitle": "감정 역학",
+    "preset": {
+      "streamer": "스트리머",
+      "mentor": "멘토",
+      "comedian": "코미디언",
+      "philosopher": "철학자",
+      "tsundere": "츤데레",
+      "custom": "사용자 지정"
+    },
+    "warmth": {
+      "label": "따뜻함",
+      "hint": "따뜻하고 배려 vs 차갑고 거리감",
+      "low": "냉담",
+      "high": "따뜻함"
+    },
+    "playfulness": {
+      "label": "장난기",
+      "hint": "유머, 농담, 재치",
+      "low": "진지함",
+      "high": "장난기"
+    },
+    "assertiveness": {
+      "label": "자기주장",
+      "hint": "직접적이고 자신감 vs 수동적",
+      "low": "수동적",
+      "high": "주장적"
+    },
+    "empathy": {
+      "label": "공감력",
+      "hint": "타인의 감정을 인식하는 정도",
+      "low": "무관심",
+      "high": "공감적"
+    },
+    "formality": {
+      "label": "격식",
+      "hint": "격식체 또는 비격식체",
+      "low": "캐주얼",
+      "high": "격식"
+    },
+    "sarcasm": {
+      "label": "풍자",
+      "hint": "진지함 vs 비꼬기",
+      "low": "진지함",
+      "high": "풍자"
+    },
+    "volatility": {
+      "label": "기분 변동성",
+      "hint": "기분 변화의 폭",
+      "low": "안정적",
+      "high": "변동적"
+    },
+    "responsiveness": {
+      "label": "감정 반응성",
+      "hint": "감정적 반응 강도",
+      "low": "자제력",
+      "high": "반응적"
+    },
+    "emotionMemory": {
+      "label": "감정 기억",
+      "hint": "과거 감정 지속 시간",
+      "low": "잘 잊음",
+      "high": "지속적"
+    },
+    "stressBehavior": {
+      "label": "스트레스 행동",
+      "hint": "압박 시 반응",
+      "deflect": "전환",
+      "humor": "유머",
+      "withdraw": "위축",
+      "confront": "대면"
+    },
+    "baselineMood": {
+      "label": "기본 기분",
+      "hint": "기본 감정 톤",
+      "neutral": "중립",
+      "happy": "행복",
+      "chill": "편안",
+      "melancholic": "우울",
+      "hyped": "흥분"
+    }
+  },
+  "response": {
+    "delay": {
+      "label": "응답 지연",
+      "hint": "답장 전 대기 시간"
+    },
+    "maxLength": {
+      "label": "최대 응답 길이",
+      "hint": "답장당 최대 문자 수"
+    },
+    "language": {
+      "label": "언어",
+      "hint": "AI 응답의 기본 언어"
+    },
+    "autoModerate": {
+      "label": "자동 중재",
+      "hint": "부적절한 콘텐츠 자동 필터"
+    },
+    "typingSimulation": {
+      "label": "타이핑 시뮬레이션",
+      "hint": "응답 전 입력 표시기 표시"
+    },
+    "emotionScale": {
+      "label": "감정 강도",
+      "hint": "0=감정 없음, 1=보통, 2=증폭"
+    }
+  },
+  "llm": {
+    "temperature": {
+      "label": "온도",
+      "hint": "높을수록 더 무작위적"
+    },
+    "maxTokens": {
+      "label": "최대 토큰",
+      "hint": "생성된 응답의 최대 길이"
+    },
+    "topP": {
+      "label": "Top P",
+      "hint": "핵 샘플링 — 출력 다양성"
+    },
+    "frequencyPenalty": {
+      "label": "빈도 패널티",
+      "hint": "같은 구절 반복 감소"
+    },
+    "presencePenalty": {
+      "label": "존재 패널티",
+      "hint": "새 주제 장려"
+    }
+  },
+  "memory": {
+    "enable": {
+      "label": "메모리 활성화",
+      "hint": "AI가 과거 대화를 기억"
+    },
+    "maxMemories": {
+      "label": "최대 메모리",
+      "hint": "AI가 기억할 수 있는 사실 수"
+    },
+    "retentionDays": {
+      "label": "보존 일수",
+      "hint": "메모리 보존 기간"
+    },
+    "importanceThreshold": {
+      "label": "중요도 임계값",
+      "hint": "사실을 저장하기 위한 최소 점수"
+    }
+  },
+  "autoPilot": {
+    "enable": {
+      "label": "자율 모드 활성화",
+      "hint": "채팅이 조용할 때 AI가 자율적으로 발언"
+    },
+    "idleTimeout": {
+      "label": "유휴 시간 초과",
+      "hint": "AI가 자율적으로 발언하기 전 침묵 시간"
+    },
+    "minInterval": {
+      "label": "최소 간격",
+      "hint": "자율 메시지 간 최소 초"
+    },
+    "mood": {
+      "label": "기분",
+      "hint": "자율 메시지의 기본 감정 톤",
+      "neutral": "중립",
+      "happy": "행복",
+      "chill": "편안",
+      "hyped": "흥분",
+      "sarcastic": "풍자"
+    }
+  }
+}

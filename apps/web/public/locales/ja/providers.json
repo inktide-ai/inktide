@@ -1,0 +1,60 @@
+{
+  "page": {
+    "title": "LLMプロバイダー",
+    "desc": "APIキーを入力してクラウドLLMを有効化。"
+  },
+  "status": {
+    "connected": "接続済み",
+    "notConnected": "未接続"
+  },
+  "detail": {
+    "status": "ステータス",
+    "unknownProvider": "不明なプロバイダー",
+    "save": "保存",
+    "saving": "保存中…",
+    "delete": "キーを削除",
+    "deleting": "削除中…",
+    "savedOk": "保存されました。",
+    "addHeader": "ヘッダーを追加",
+    "apiKey": {
+      "label": "APIキー",
+      "hint": "暗号化して保存。",
+      "replaceHint": "新しいキーを入力して置き換え。"
+    },
+    "baseUrl": {
+      "label": "サーバーURL",
+      "hint": "ローカルOllamaサーバーURL"
+    },
+    "errors": {
+      "keyRequired": "APIキーが必要。",
+      "saveFailed": "保存失敗。",
+      "deleteFailed": "削除失敗。"
+    }
+  },
+  "validation": {
+    "checking": "確認中…",
+    "testConnection": "接続テスト",
+    "autoOk": "フォーマットOK",
+    "ok": "接続成功",
+    "failed": "接続テスト失敗",
+    "continueAnyway": "とにかく続行"
+  },
+  "brain": {
+    "title": "ブレイン",
+    "subtitle": "言語モデルプロバイダーを管理。",
+    "section": {
+      "title": "Brainプロバイダー",
+      "subtitle": "ソウルのモデルを選択。"
+    },
+    "search": "検索...",
+    "noResults": "一致なし。",
+    "type": {
+      "local": "ローカル",
+      "apiKey": "APIキー",
+      "openaiV1": "OpenAI v1",
+      "openSource": "オープンソース",
+      "recommended": "推奨",
+      "enterprise": "エンタープライズ"
+    }
+  }
+}

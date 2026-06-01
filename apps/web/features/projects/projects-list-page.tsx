@@ -278,7 +278,7 @@ export default function ProjectsListPage() {
         />
       )}
     </AnimatePresence>
-    <div className="min-h-screen bg-[var(--bg-0)] px-6 py-5 font-[Inter,sans-serif]">
+    <div className="min-h-screen bg-[var(--bg-0)] px-6 py-6">
 
       <div className="mx-auto max-w-[1300px]">
         <header className="mb-3 flex items-start justify-between gap-4">

@@ -1,0 +1,182 @@
+{
+  "section": {
+    "personality": "个性引擎",
+    "response": "响应",
+    "llmConfig": "LLM配置",
+    "memory": "记忆",
+    "autoPilot": "自动驾驶"
+  },
+  "personality": {
+    "presetsLabel": "预设",
+    "traitsTitle": "核心特征",
+    "dynamicsTitle": "情感动态",
+    "preset": {
+      "streamer": "主播",
+      "mentor": "导师",
+      "comedian": "喜剧演员",
+      "philosopher": "哲学家",
+      "tsundere": "傲娇",
+      "custom": "自定义"
+    },
+    "warmth": {
+      "label": "温暖度",
+      "hint": "温暖关怀vs冷漠疏远",
+      "low": "冷漠",
+      "high": "温暖"
+    },
+    "playfulness": {
+      "label": "玩闹性",
+      "hint": "幽默、打趣和机智程度",
+      "low": "严肃",
+      "high": "活泼"
+    },
+    "assertiveness": {
+      "label": "自信度",
+      "hint": "直接自信vs被动顺从",
+      "low": "被动",
+      "high": "自信"
+    },
+    "empathy": {
+      "label": "共情力",
+      "hint": "对他人情感的认可程度",
+      "low": "冷漠",
+      "high": "共情"
+    },
+    "formality": {
+      "label": "正式度",
+      "hint": "正式或随意的说话风格",
+      "low": "随意",
+      "high": "正式"
+    },
+    "sarcasm": {
+      "label": "讽刺度",
+      "hint": "真诚vs讽刺",
+      "low": "真诚",
+      "high": "讽刺"
+    },
+    "volatility": {
+      "label": "情绪波动",
+      "hint": "情绪变化幅度",
+      "low": "稳定",
+      "high": "波动"
+    },
+    "responsiveness": {
+      "label": "情感反应力",
+      "hint": "情感反应强度",
+      "low": "内敛",
+      "high": "反应强"
+    },
+    "emotionMemory": {
+      "label": "情感记忆",
+      "hint": "过去情感持续时间",
+      "low": "健忘",
+      "high": "持久"
+    },
+    "stressBehavior": {
+      "label": "压力行为",
+      "hint": "压力下的反应",
+      "deflect": "转移",
+      "humor": "幽默",
+      "withdraw": "退缩",
+      "confront": "对抗"
+    },
+    "baselineMood": {
+      "label": "基础情绪",
+      "hint": "默认情感基调",
+      "neutral": "中性",
+      "happy": "快乐",
+      "chill": "轻松",
+      "melancholic": "忧郁",
+      "hyped": "亢奋"
+    }
+  },
+  "response": {
+    "delay": {
+      "label": "响应延迟",
+      "hint": "发送前等待时间"
+    },
+    "maxLength": {
+      "label": "最大响应长度",
+      "hint": "每条回复的最大字符数"
+    },
+    "language": {
+      "label": "语言",
+      "hint": "AI响应的主要语言"
+    },
+    "autoModerate": {
+      "label": "自动审核",
+      "hint": "自动过滤不当内容"
+    },
+    "typingSimulation": {
+      "label": "打字模拟",
+      "hint": "响应前显示打字指示器"
+    },
+    "emotionScale": {
+      "label": "情感强度",
+      "hint": "0=无情感，1=正常，2=放大"
+    }
+  },
+  "llm": {
+    "temperature": {
+      "label": "温度",
+      "hint": "值越高输出越随机"
+    },
+    "maxTokens": {
+      "label": "最大Token",
+      "hint": "生成响应的最大长度"
+    },
+    "topP": {
+      "label": "Top P",
+      "hint": "核采样—控制输出多样性"
+    },
+    "frequencyPenalty": {
+      "label": "频率惩罚",
+      "hint": "减少相同短语重复"
+    },
+    "presencePenalty": {
+      "label": "存在惩罚",
+      "hint": "鼓励谈论新话题"
+    }
+  },
+  "memory": {
+    "enable": {
+      "label": "启用记忆",
+      "hint": "AI记住过去的对话"
+    },
+    "maxMemories": {
+      "label": "最大记忆数",
+      "hint": "AI能记住多少事实"
+    },
+    "retentionDays": {
+      "label": "保留天数",
+      "hint": "记忆保留多长时间"
+    },
+    "importanceThreshold": {
+      "label": "重要性阈值",
+      "hint": "存储事实的最低分数"
+    }
+  },
+  "autoPilot": {
+    "enable": {
+      "label": "启用自主模式",
+      "hint": "聊天安静时AI自主说话"
+    },
+    "idleTimeout": {
+      "label": "空闲超时",
+      "hint": "AI自主说话前的静默秒数"
+    },
+    "minInterval": {
+      "label": "最小间隔",
+      "hint": "自主消息间的最小秒数"
+    },
+    "mood": {
+      "label": "情绪",
+      "hint": "自主消息的默认情感基调",
+      "neutral": "中性",
+      "happy": "快乐",
+      "chill": "轻松",
+      "hyped": "亢奋",
+      "sarcastic": "讽刺"
+    }
+  }
+}

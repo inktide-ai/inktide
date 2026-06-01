@@ -1,0 +1,15 @@
+{
+  "tab": {
+    "behavior": "行動",
+    "voice": "ボイス",
+    "brain": "ブレイン",
+    "memory": "メモリ",
+    "skills": "スキル",
+    "prompts": "プロンプト",
+    "model": "モデル",
+    "integrations": "インテグレーション",
+    "obs": "OBS",
+    "scene": "シーン",
+    "backup": "バックアップ"
+  }
+}

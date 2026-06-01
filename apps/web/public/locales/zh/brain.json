@@ -1,0 +1,31 @@
+{
+  "grid": {
+    "title": "Brain提供商",
+    "desc": "为您的AI角色选择LLM提供商。",
+    "search": "搜索提供商…",
+    "configure": "配置 →"
+  },
+  "settings": "设置",
+  "llmParams": "LLM参数",
+  "baseUrl": {
+    "label": "基础URL",
+    "hint": "您的Ollama服务器URL"
+  },
+  "model": {
+    "label": "模型",
+    "loading": "加载模型中…",
+    "error": "无法访问Ollama。",
+    "empty": "未找到模型。",
+    "hint": "选择模型",
+    "selectPlaceholder": "— 选择模型 —"
+  },
+  "providers": {
+    "ollama": "本地Ollama服务器 — 无需API密钥。",
+    "anthropic": "通过Anthropic API的Claude模型。",
+    "deepseek": "DeepSeek Chat & R1推理模型。"
+  },
+  "remoteProvider": {
+    "keyHint": "API密钥在此全局管理",
+    "manageLink": "设置 → 提供商"
+  }
+}

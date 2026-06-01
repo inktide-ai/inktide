@@ -225,19 +225,12 @@ export class AnimationStateMachineController implements IVrmController {
         this.lastFadedTo = t.toNodeId
       }
 
-      // Advance elapsed and signal completion.
-      // We track elapsed via Three.js toAction.time vs crossFadeDuration.
-      if (toAction.time >= t.crossFadeDuration) {
+      // Transition is complete when the target clip has played past the crossfade window,
+      // OR when the clip is near its end (guards against clip.duration < crossFadeDuration).
+      if (toAction.time >= t.crossFadeDuration || blend.isActionNearEnd(toAction, 0)) {
         this.actor.send({ type: 'TRANSITION_COMPLETE' })
         this.lastFadedTo = t.toNodeId
       }
-    }
-
-    // Advance transition elapsed in context each frame.
-    // We do this by checking if we've exceeded totalDuration.
-    const elapsed = (t.elapsed ?? 0) + delta
-    if (elapsed >= t.totalDuration) {
-      this.actor.send({ type: 'TRANSITION_COMPLETE' })
     }
   }
 

@@ -1,0 +1,21 @@
+{
+  "section": {
+    "preview": "预览",
+    "model": "模型"
+  },
+  "loading": "加载中…",
+  "type": {
+    "label": "模型类型",
+    "hint": "AI角色的视觉表现"
+  },
+  "upload": {
+    "label": "上传模型",
+    "hint": "上传3D或Live2D模型文件",
+    "busy": "上传中…",
+    "choose": "选择文件",
+    "noFile": "无文件 — 接受{{ext}}",
+    "remove": "删除",
+    "saveFirst": "先保存角色。",
+    "success": "已上传 — 预览已更新。"
+  }
+}

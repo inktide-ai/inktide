@@ -1,0 +1,11 @@
+{
+  "section": {
+    "systemPrompt": "システムプロンプト"
+  },
+  "coreInstructions": {
+    "label": "コア指示",
+    "hint": "AIのパーソナリティと動作を定義します。",
+    "placeholder": "例：あなたは友好的なAIコンパニオンです。",
+    "counter": "{{count}}文字"
+  }
+}

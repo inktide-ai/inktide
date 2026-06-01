@@ -7,9 +7,10 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type D
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useCharactersContext } from '@/entities/character'
-import { useCardScene, reorderScene, type AiCardSceneResponse } from '@/entities/soul'
+import { useCardScene, reorderScene, deleteCardScene, type AiCardSceneResponse } from '@/entities/soul'
 import { PRESET_SCENES, NewSceneModal, getSceneDisplayTitle, BUILTIN_SCENE_TAGS } from '@/features/character-editor'
 import type { PresetScene } from '@/features/character-editor'
+import { getPillColors } from '@/features/character-editor/tabs/scene-tag-utils'
 import { cn } from '@/lib/utils'
 
 type TabFilter = 'All' | 'Default' | 'Custom'
@@ -35,10 +36,17 @@ interface SceneButtonProps {
   kindLabel: string
   activeLabel: string
   bgStyle: React.CSSProperties
+  tagName?: string
+  onDelete?: () => void
+  deleting?: boolean
   onClick: () => void
 }
 
-function SceneButton({ id, name, isActive, kindLabel, activeLabel, bgStyle, onClick }: SceneButtonProps) {
+function SceneButton({ id, name, isActive, kindLabel, activeLabel, bgStyle, tagName, onDelete, deleting, onClick }: SceneButtonProps) {
+  const { t } = useTranslation('scene')
+  const pillColors = tagName ? getPillColors(tagName) : null
+  const [confirming, setConfirming] = useState(false)
+
   return (
     <button
       key={id}
@@ -52,16 +60,66 @@ function SceneButton({ id, name, isActive, kindLabel, activeLabel, bgStyle, onCl
       )}
     >
       <div className="aspect-[4/3] w-full" style={bgStyle} />
+
+      {/* Trash icon — only for deletable scenes */}
+      {onDelete && !confirming && (
+        <button
+          type="button"
+          className="absolute top-1.5 right-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-md border border-transparent bg-black/40 text-white/50 opacity-0 backdrop-blur-sm transition-[opacity,background,color,border-color] duration-150 group-hover:opacity-100 hover:border-[rgba(248,113,113,0.35)] hover:bg-[rgba(248,113,113,0.18)] hover:text-[var(--color-error-mid)]"
+          onPointerDown={e => e.stopPropagation()}
+          onClick={e => { e.stopPropagation(); setConfirming(true) }}
+          aria-label="Delete scene"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+          </svg>
+        </button>
+      )}
+
+      {/* Delete confirmation overlay */}
+      {confirming && (
+        <div
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-1.5 rounded-[inherit] bg-[rgba(6,4,12,0.92)] p-3 backdrop-blur-[3px] animate-[cardOverlayIn_0.14s_ease]"
+          onClick={e => { e.stopPropagation(); setConfirming(false) }}
+        >
+          <p className="text-center text-xs font-bold leading-tight text-[var(--text-primary)] line-clamp-2">{name}</p>
+          <p className="text-center text-[10px] text-[var(--text-muted)] leading-snug">{t('card.deleteDesc')}</p>
+          <div className="mt-1 flex w-full gap-1.5" onClick={e => e.stopPropagation()}>
+            <button
+              type="button"
+              className="flex-1 rounded-lg border border-white/[0.14] bg-transparent py-1.5 text-[10px] font-semibold text-[var(--text-secondary)] transition-[background,color,border-color] duration-150 hover:border-white/25 hover:bg-white/[0.09] hover:text-[var(--text-primary)]"
+              onClick={() => setConfirming(false)}
+            >
+              {t('card.cancel')}
+            </button>
+            <button
+              type="button"
+              disabled={deleting}
+              className="flex-1 rounded-lg border border-[rgba(248,113,113,0.25)] bg-[rgba(248,113,113,0.08)] py-1.5 text-[10px] font-semibold text-[var(--color-error-mid)] transition-[background,color,border-color] duration-150 hover:border-[rgba(248,113,113,0.45)] hover:bg-[rgba(248,113,113,0.16)] disabled:opacity-50"
+              onClick={() => { onDelete?.(); setConfirming(false) }}
+            >
+              {deleting ? '…' : t('card.delete')}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="bg-[var(--surface-1)] px-2 py-1.5">
         <p className="truncate text-xs font-medium text-[var(--text-primary)]">{name}</p>
         <div className="mt-0.5 flex items-center gap-1">
           {isActive && <span className="h-1.5 w-1.5 rounded-full bg-green-400" />}
-          <span className={cn(
-            'text-2xs font-medium',
-            isActive ? 'text-green-400' : 'text-[var(--text-tertiary)]',
-          )}>
-            {isActive ? activeLabel : kindLabel}
-          </span>
+          {isActive ? (
+            <span className="text-2xs font-medium text-green-400">{activeLabel}</span>
+          ) : pillColors ? (
+            <span
+              className="text-2xs font-semibold tracking-wide uppercase px-1.5 py-px rounded border"
+              style={{ color: pillColors.text, background: pillColors.bg, borderColor: pillColors.border }}
+            >
+              {tagName}
+            </span>
+          ) : (
+            <span className="text-2xs font-medium text-[var(--text-tertiary)]">{kindLabel}</span>
+          )}
         </div>
       </div>
     </button>
@@ -99,6 +157,7 @@ export default function SoulScenesPage() {
 
   const [localCustomScenes, setLocalCustomScenes] = useState<AiCardSceneResponse[]>([])
   useEffect(() => { setLocalCustomScenes(scenes) }, [scenes])
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const [activeSceneId, setActiveSceneId] = useState<string | null>(null)
   const [tab, setTab] = useState<TabFilter>('All')
@@ -146,13 +205,26 @@ export default function SoulScenesPage() {
 
   const previewBg: React.CSSProperties = activeItem
     ? activeItem.kind === 'preset'
-      ? { background: activeItem.data.charGradient }
+      ? activeItem.data.imagePath
+        ? { backgroundImage: `url(${activeItem.data.imagePath})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : { background: activeItem.data.charGradient }
       : { backgroundImage: `url(${activeItem.data.public_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : {}
 
   const activeLabel = activeItem
     ? activeItem.kind === 'preset' ? activeItem.data.name : getSceneDisplayTitle(activeItem.data)
     : t('soulPage.noSceneSelected')
+
+  async function handleDeleteCustom(sceneId: string) {
+    if (!cardId) return
+    setDeletingId(sceneId)
+    try {
+      await deleteCardScene(cardId, sceneId)
+      setLocalCustomScenes(prev => prev.filter(s => s.id !== sceneId))
+      if (resolvedActiveId === sceneId) setActiveSceneId(null)
+    } catch { /* silently restore — button exits deleting state */ }
+    finally { setDeletingId(null) }
+  }
 
   function handleSceneDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -275,7 +347,12 @@ export default function SoulScenesPage() {
                     isActive={item.data.id === resolvedActiveId}
                     kindLabel={t('soulPage.kindDefault')}
                     activeLabel={t('card.active')}
-                    bgStyle={{ background: item.data.charGradient }}
+                    tagName={item.data.tagName}
+                    bgStyle={
+                      item.data.imagePath
+                        ? { backgroundImage: `url(${item.data.imagePath})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                        : { background: item.data.charGradient }
+                    }
                     onClick={() => setActiveSceneId(item.data.id)}
                   />
                 ))}
@@ -291,6 +368,8 @@ export default function SoulScenesPage() {
                       kindLabel={t('soulPage.kindCustom')}
                       activeLabel={t('card.active')}
                       bgStyle={{ backgroundImage: `url(${item.data.public_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                      onDelete={() => handleDeleteCustom(item.data.id)}
+                      deleting={deletingId === item.data.id}
                       onClick={() => setActiveSceneId(item.data.id)}
                     />
                   ))}

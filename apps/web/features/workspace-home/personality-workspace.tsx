@@ -1,27 +1,23 @@
 'use client'
 
+import { Flame, BookText, Shapes, Lightbulb, Lock, MessageCircle, Zap, type LucideProps } from 'lucide-react'
 import { motion, type Variants } from 'framer-motion'
 import SliderWithTicks from '@/shared/ui/slider-with-ticks'
 import type { CharacterPersonality } from '@/shared/lib/character'
+import { PERSONALITY_PRESETS, PERSONALITY_PRESET_META, ALL_PRESET_KEYS, type PresetKey } from '@/shared/data/personality-presets'
 
-// ── Presets ───────────────────────────────────────────────────────────────────
+// ── Preset icons (React components — not stored in the data file) ──────────────
 
-type PresetId = 'friendly' | 'streamer' | 'tactical' | 'cozy' | 'chaotic' | 'companion' | 'therapist'
+type IconComponent = React.FC<LucideProps>
 
-interface PresetDef {
-  label: string
-  emoji: string
-  values: Omit<CharacterPersonality, 'presetId'>
-}
-
-const PRESETS: Record<PresetId, PresetDef> = {
-  friendly:  { label: 'Friendly',   emoji: '😊', values: { warmth: 0.90, playfulness: 0.70, empathy: 0.85, assertiveness: 0.45, formality: 0.30, sarcasm: 0.10, emotionVolatility: 0.35, emotionResponsiveness: 0.75, emotionMemory: 0.55, baselineMood: 'happy',   stressBehavior: 'deflect'  } },
-  streamer:  { label: 'Streamer',   emoji: '🎮', values: { warmth: 0.80, playfulness: 0.85, empathy: 0.70, assertiveness: 0.60, formality: 0.10, sarcasm: 0.30, emotionVolatility: 0.70, emotionResponsiveness: 0.85, emotionMemory: 0.40, baselineMood: 'happy',   stressBehavior: 'humor'    } },
-  tactical:  { label: 'Tactical',   emoji: '⚡', values: { warmth: 0.40, playfulness: 0.30, empathy: 0.50, assertiveness: 0.85, formality: 0.65, sarcasm: 0.20, emotionVolatility: 0.25, emotionResponsiveness: 0.55, emotionMemory: 0.75, baselineMood: 'neutral',  stressBehavior: 'confront' } },
-  cozy:      { label: 'Cozy',       emoji: '🌙', values: { warmth: 0.85, playfulness: 0.50, empathy: 0.80, assertiveness: 0.35, formality: 0.25, sarcasm: 0.05, emotionVolatility: 0.25, emotionResponsiveness: 0.60, emotionMemory: 0.65, baselineMood: 'chill',   stressBehavior: 'deflect'  } },
-  chaotic:   { label: 'Chaotic',    emoji: '🌀', values: { warmth: 0.55, playfulness: 0.95, empathy: 0.45, assertiveness: 0.55, formality: 0.05, sarcasm: 0.70, emotionVolatility: 0.95, emotionResponsiveness: 0.95, emotionMemory: 0.20, baselineMood: 'hyped',   stressBehavior: 'humor'    } },
-  companion: { label: 'Companion',  emoji: '🤝', values: { warmth: 0.90, playfulness: 0.55, empathy: 0.95, assertiveness: 0.40, formality: 0.35, sarcasm: 0.05, emotionVolatility: 0.30, emotionResponsiveness: 0.80, emotionMemory: 0.80, baselineMood: 'neutral',  stressBehavior: 'deflect'  } },
-  therapist: { label: 'Therapist',  emoji: '💜', values: { warmth: 0.85, playfulness: 0.25, empathy: 0.95, assertiveness: 0.50, formality: 0.55, sarcasm: 0.05, emotionVolatility: 0.15, emotionResponsiveness: 0.65, emotionMemory: 0.90, baselineMood: 'neutral',  stressBehavior: 'withdraw' } },
+const PRESET_ICONS: Record<PresetKey, IconComponent> = {
+  streamer:    Flame,
+  mentor:      BookText,
+  comedian:    Shapes,
+  philosopher: Lightbulb,
+  tsundere:    Lock,
+  supportive:  MessageCircle,
+  tactical:    Zap,
 }
 
 // ── Human-readable descriptors ─────────────────────────────────────────────────
@@ -197,8 +193,8 @@ const STRESS_OPTIONS = [
 export function PersonalityWorkspace({ personality, onChange, onClose }: PersonalityWorkspaceProps) {
   const set = (patch: Partial<CharacterPersonality>) => onChange({ ...personality, ...patch })
 
-  const applyPreset = (id: PresetId) =>
-    onChange({ ...PRESETS[id].values, presetId: id })
+  const applyPreset = (id: PresetKey) =>
+    onChange({ ...PERSONALITY_PRESETS[id] })
 
   return (
     <div className="flex flex-col gap-4">
@@ -227,19 +223,27 @@ export function PersonalityWorkspace({ personality, onChange, onClose }: Persona
       {/* Section 1 — Emotional Profiles */}
       <Section index={0}>
         <span className={sectionLabel}>Emotional Profiles</span>
-        <div className="flex flex-wrap gap-2">
-          {(Object.keys(PRESETS) as PresetId[]).map((id) => {
-            const p = PRESETS[id]
+        <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+          {(ALL_PRESET_KEYS.filter((k): k is PresetKey => k !== 'custom')).map((id) => {
+            const meta = PERSONALITY_PRESET_META[id]
+            const Icon = PRESET_ICONS[id]
             const isActive = personality.presetId === id
             return (
               <button
                 key={id}
                 type="button"
                 onClick={() => applyPreset(id)}
-                className={`${chipBase} flex items-center gap-1.5 ${isActive ? chipActive : chipInactive}`}
+                className="flex flex-col gap-2 rounded-2xl border px-3 py-3 text-left outline-none transition-all duration-150 hover:bg-[var(--surface-2)]"
+                style={{
+                  borderColor: isActive ? meta.accent : 'var(--border-subtle)',
+                  background: isActive ? `${meta.accent}15` : undefined,
+                }}
               >
-                <span>{p.emoji}</span>
-                <span>{p.label}</span>
+                <Icon size={20} aria-hidden="true" style={{ color: meta.accent }} />
+                <div>
+                  <p className="text-[12px] font-semibold text-[var(--text-primary)]">{meta.label}</p>
+                  <p className="text-[10px] text-[var(--text-tertiary)]">{meta.tagline}</p>
+                </div>
               </button>
             )
           })}

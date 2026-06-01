@@ -1,0 +1,31 @@
+{
+  "grid": {
+    "title": "Brainプロバイダー",
+    "desc": "AIキャラクターのLLMプロバイダーを選択。",
+    "search": "プロバイダーを検索…",
+    "configure": "設定 →"
+  },
+  "settings": "設定",
+  "llmParams": "LLMパラメータ",
+  "baseUrl": {
+    "label": "ベースURL",
+    "hint": "OllamaサーバーのURL"
+  },
+  "model": {
+    "label": "モデル",
+    "loading": "モデル読み込み中…",
+    "error": "Ollamaに接続できません。",
+    "empty": "モデルが見つかりません。",
+    "hint": "モデルを選択",
+    "selectPlaceholder": "— モデルを選択 —"
+  },
+  "providers": {
+    "ollama": "ローカルOllamaサーバー — APIキー不要。",
+    "anthropic": "Anthropic APIを通じたClaudeモデル。",
+    "deepseek": "DeepSeek Chat & R1推論モデル。"
+  },
+  "remoteProvider": {
+    "keyHint": "APIキーはグローバルに管理されています",
+    "manageLink": "設定 → プロバイダー"
+  }
+}

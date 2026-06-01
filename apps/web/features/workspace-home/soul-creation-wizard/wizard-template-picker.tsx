@@ -1,7 +1,27 @@
 'use client'
+import {
+  Gamepad2, Moon, Mic2, Globe, Radio, Laptop, Zap,
+  Sparkles, Shuffle, Snowflake, Leaf, type LucideProps,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CaretRightSmall } from '@/shared/ui/icons'
 import type { SoulTemplate } from '@/shared/data/soul-templates'
+
+type IconComponent = React.FC<LucideProps>
+
+const TEMPLATE_ICONS: Record<string, IconComponent> = {
+  gaming:      Gamepad2,
+  chill:       Moon,
+  variety:     Mic2,
+  irl:         Globe,
+  news:        Radio,
+  tech:        Laptop,
+  coach:       Zap,
+  philosopher: Sparkles,
+  chaos:       Shuffle,
+  tsundere:    Snowflake,
+  cozy:        Leaf,
+}
 
 export function TemplateSectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +32,7 @@ export function TemplateSectionLabel({ children }: { children: React.ReactNode }
 }
 
 export function TemplateListItem({ template, onSelect }: { template: SoulTemplate; onSelect: () => void }) {
+  const Icon = TEMPLATE_ICONS[template.id]
   return (
     <button
       type="button"
@@ -25,10 +46,10 @@ export function TemplateListItem({ template, onSelect }: { template: SoulTemplat
       )}
     >
       <span
-        className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[10px] text-[18px] leading-none"
-        style={{ background: `${template.accent}1a` }}
+        className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[10px]"
+        style={{ background: `${template.accent}1a`, color: template.accent }}
       >
-        {template.emoji}
+        {Icon && <Icon size={18} aria-hidden="true" />}
       </span>
       <span className="min-w-0 flex-1">
         <span className="home-ui-font block truncate text-[13.5px] font-semibold text-[var(--text-primary)]">

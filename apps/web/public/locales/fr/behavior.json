@@ -1,0 +1,182 @@
+{
+  "section": {
+    "personality": "Moteur de personnalité",
+    "response": "Réponse",
+    "llmConfig": "Config LLM",
+    "memory": "Mémoire",
+    "autoPilot": "Auto-pilote"
+  },
+  "personality": {
+    "presetsLabel": "Préréglages",
+    "traitsTitle": "Traits principaux",
+    "dynamicsTitle": "Dynamiques émotionnelles",
+    "preset": {
+      "streamer": "Streamer",
+      "mentor": "Mentor",
+      "comedian": "Comédien",
+      "philosopher": "Philosophe",
+      "tsundere": "Tsundere",
+      "custom": "Personnalisé"
+    },
+    "warmth": {
+      "label": "Chaleur",
+      "hint": "Chaleureux vs. distant",
+      "low": "Froid",
+      "high": "Chaleureux"
+    },
+    "playfulness": {
+      "label": "Espièglerie",
+      "hint": "Humour, plaisanteries et wit",
+      "low": "Sérieux",
+      "high": "Espiègle"
+    },
+    "assertiveness": {
+      "label": "Assertivité",
+      "hint": "Direct et confiant vs. passif",
+      "low": "Passif",
+      "high": "Assertif"
+    },
+    "empathy": {
+      "label": "Empathie",
+      "hint": "Reconnaître les émotions des autres",
+      "low": "Détaché",
+      "high": "Empathique"
+    },
+    "formality": {
+      "label": "Formalité",
+      "hint": "Langage formel ou informel",
+      "low": "Casual",
+      "high": "Formel"
+    },
+    "sarcasm": {
+      "label": "Sarcasme",
+      "hint": "Sincère vs. ironique",
+      "low": "Sincère",
+      "high": "Sarcastique"
+    },
+    "volatility": {
+      "label": "Volatilité d'humeur",
+      "hint": "Amplitude des changements d'humeur",
+      "low": "Stable",
+      "high": "Volatile"
+    },
+    "responsiveness": {
+      "label": "Réactivité émotionnelle",
+      "hint": "Force des réactions émotionnelles",
+      "low": "Réservé",
+      "high": "Réactif"
+    },
+    "emotionMemory": {
+      "label": "Mémoire émotionnelle",
+      "hint": "Durée des émotions passées",
+      "low": "Oublieur",
+      "high": "Persistant"
+    },
+    "stressBehavior": {
+      "label": "Comportement sous stress",
+      "hint": "Réaction face à la surcharge",
+      "deflect": "Déflexion",
+      "humor": "Humour",
+      "withdraw": "Retrait",
+      "confront": "Confronter"
+    },
+    "baselineMood": {
+      "label": "Humeur de base",
+      "hint": "Ton émotionnel par défaut",
+      "neutral": "Neutre",
+      "happy": "Joyeux",
+      "chill": "Zen",
+      "melancholic": "Mélancolique",
+      "hyped": "Survolté"
+    }
+  },
+  "response": {
+    "delay": {
+      "label": "Délai de réponse",
+      "hint": "Temps d'attente avant d'envoyer"
+    },
+    "maxLength": {
+      "label": "Longueur max",
+      "hint": "Nombre max de caractères"
+    },
+    "language": {
+      "label": "Langue",
+      "hint": "Langue principale pour les réponses"
+    },
+    "autoModerate": {
+      "label": "Modération auto",
+      "hint": "Filtrer le contenu inapproprié"
+    },
+    "typingSimulation": {
+      "label": "Simulation de frappe",
+      "hint": "Afficher l'indicateur de saisie"
+    },
+    "emotionScale": {
+      "label": "Intensité émotionnelle",
+      "hint": "0=aucune, 1=normal, 2=amplifiée"
+    }
+  },
+  "llm": {
+    "temperature": {
+      "label": "Température",
+      "hint": "Valeurs élevées = plus aléatoire"
+    },
+    "maxTokens": {
+      "label": "Tokens max",
+      "hint": "Longueur maximale de la réponse"
+    },
+    "topP": {
+      "label": "Top P",
+      "hint": "Échantillonnage nucléaire"
+    },
+    "frequencyPenalty": {
+      "label": "Pénalité de fréquence",
+      "hint": "Réduit les répétitions"
+    },
+    "presencePenalty": {
+      "label": "Pénalité de présence",
+      "hint": "Encourage de nouveaux sujets"
+    }
+  },
+  "memory": {
+    "enable": {
+      "label": "Activer la mémoire",
+      "hint": "L'IA se souvient des conversations"
+    },
+    "maxMemories": {
+      "label": "Mémoires max",
+      "hint": "Nombre de faits mémorisables"
+    },
+    "retentionDays": {
+      "label": "Jours de rétention",
+      "hint": "Durée de conservation"
+    },
+    "importanceThreshold": {
+      "label": "Seuil d'importance",
+      "hint": "Score minimum pour stocker"
+    }
+  },
+  "autoPilot": {
+    "enable": {
+      "label": "Mode autonome",
+      "hint": "L'IA parle seule quand le chat est calme"
+    },
+    "idleTimeout": {
+      "label": "Timeout inactif",
+      "hint": "Secondes avant parole autonome"
+    },
+    "minInterval": {
+      "label": "Intervalle min",
+      "hint": "Secondes min entre messages"
+    },
+    "mood": {
+      "label": "Humeur",
+      "hint": "Ton pour les messages autonomes",
+      "neutral": "Neutre",
+      "happy": "Joyeux",
+      "chill": "Zen",
+      "hyped": "Survolté",
+      "sarcastic": "Sarcastique"
+    }
+  }
+}

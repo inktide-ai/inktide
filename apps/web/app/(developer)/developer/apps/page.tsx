@@ -16,9 +16,47 @@ export default function MyAppsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10 flex flex-col gap-6">
+    <div className="mx-auto max-w-[1300px] px-6 py-10 flex flex-col gap-10">
+
+      {/* Hero */}
+      <section className="flex flex-col-reverse items-center gap-8 sm:flex-row sm:items-center sm:gap-12">
+        <div className="flex-1">
+          <span className="text-xs font-medium text-[var(--text-tertiary)]">Developer</span>
+          <h1 className="home-heading-font mt-2 text-[3.75rem] font-bold leading-[1.05] tracking-[-0.04em] text-[var(--text-primary)]">
+            Build integrations<br />that talk to Inktide
+          </h1>
+          <p className="mt-4 max-w-[460px] text-[1.125rem] leading-relaxed text-[var(--text-secondary)]">
+            Register an OAuth app, subscribe to webhook events, and control your Soul
+            from any external service — all through a single API.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <a
+              href="/developer/apps/new"
+              className="inline-flex h-11 items-center gap-1.5 rounded-xl bg-[var(--accent-primary)] px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            >
+              New Application
+            </a>
+            <a
+              href="/developer/api"
+              className="inline-flex h-11 items-center rounded-xl border border-[var(--border-default)] px-5 text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-1)]"
+            >
+              Browse API docs
+            </a>
+          </div>
+        </div>
+        <div className="shrink-0 sm:w-[300px] lg:w-[380px]">
+          <img
+            src="/images/developer-apps-hero.png"
+            alt=""
+            aria-hidden
+            className="w-full object-contain opacity-90"
+          />
+        </div>
+      </section>
+
+      <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-[var(--text-heading)]">My Applications</h1>
+        <h2 className="text-xl font-semibold text-[var(--text-heading)]">My Applications</h2>
         <button
           onClick={() => router.push('/developer/apps/new')}
           className="inline-flex items-center gap-1.5 h-9 px-4 rounded-md bg-[var(--text-primary)] text-sm font-medium text-[var(--bg-0)] hover:opacity-90 transition-opacity"
@@ -47,6 +85,7 @@ export default function MyAppsPage() {
           ))}
         </div>
       )}
+      </div>
     </div>
   )
 }

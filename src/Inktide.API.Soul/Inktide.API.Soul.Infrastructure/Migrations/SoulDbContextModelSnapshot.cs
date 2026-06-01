@@ -44,6 +44,10 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("avatar_url");
 
+                    b.Property<string>("BannerUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("banner_url");
+
                     b.Property<string>("Category")
                         .HasColumnType("text")
                         .HasColumnName("category");
@@ -760,6 +764,63 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                     b.ToTable("outbox_events", "soul");
                 });
 
+            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.SoulActivityFeedEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AiCardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ai_card_id");
+
+                    b.Property<string>("Emoji")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)")
+                        .HasColumnName("emoji");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("event_type");
+
+                    b.Property<string>("MetadataJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<string>("RenderedCopy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("rendered_copy");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("PUBLIC")
+                        .HasColumnName("visibility");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AiCardId", "EventType", "OccurredAt")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("idx_saf_card_type_time");
+
+                    b.HasIndex("AiCardId", "Visibility", "OccurredAt")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("idx_saf_card_visibility_time");
+
+                    b.ToTable("soul_activity_feed", "soul");
+                });
+
             modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.TtsCatalogEntry", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1073,6 +1134,15 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("AiCard");
+                });
+
+            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.SoulActivityFeedEvent", b =>
+                {
+                    b.HasOne("Inktide.API.Soul.Domain.Entities.AiCard", null)
+                        .WithMany()
+                        .HasForeignKey("AiCardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.UsageDaily", b =>

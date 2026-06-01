@@ -1,0 +1,12 @@
+{
+  "grid": {
+    "title": "语音提供商",
+    "desc": "为AI角色选择TTS提供商。",
+    "search": "搜索提供商…",
+    "configure": "配置"
+  },
+  "advanced": "高级",
+  "settings": "设置",
+  "back": "返回",
+  "noSettings": "此提供商没有设置。"
+}

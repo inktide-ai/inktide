@@ -1,0 +1,8 @@
+{
+  "loading": "Lädt…",
+  "chat": {
+    "emptyText": "Hier kannst du deinen Charakter testen",
+    "inputPlaceholder": "Nachricht…",
+    "thinking": "Denkt nach"
+  }
+}

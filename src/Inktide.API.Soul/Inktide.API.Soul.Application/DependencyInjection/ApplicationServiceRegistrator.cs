@@ -1,10 +1,13 @@
 using Inktide.API.Core;
+using Inktide.API.Core.Transactions;
+using Inktide.API.Soul.Application.ActivityFeed.Handlers;
 using Inktide.API.Soul.Application.Guards;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Policies;
 using Inktide.API.Soul.Application.Queries;
 using Inktide.API.Soul.Application.Services;
 using Inktide.API.Soul.Application.Storage;
+using Inktide.API.Soul.Domain.Events;
 using DryIoc;
 using Microsoft.Extensions.Configuration;
 
@@ -27,6 +30,14 @@ public sealed class ApplicationServiceRegistrator : IServiceRegistrator
         registrator.Register<SoulCreationValidationQueryService>(Reuse.Scoped);
         registrator.Register<SoulCreationGuard>(Reuse.Scoped);
         registrator.Register<IAiCardActivityService, AiCardActivityService>(Reuse.Scoped);
+        registrator.Register<ISoulActivityFeedService, SoulActivityFeedService>(Reuse.Scoped);
+
+        // Activity feed domain event handlers — resolved by InMemoryDomainEventDispatcher via IServiceProvider.GetServices
+        registrator.Register<IDomainEventHandler<AiCardMoodShiftedEvent>,      MoodShiftFeedHandler>(Reuse.Scoped);
+        registrator.Register<IDomainEventHandler<AiCardAppearanceChangedEvent>, AppearanceChangeFeedHandler>(Reuse.Scoped);
+        registrator.Register<IDomainEventHandler<AiCardMilestoneReachedEvent>,  MilestoneFeedHandler>(Reuse.Scoped);
+        registrator.Register<IDomainEventHandler<AiCardKnowledgeGainedEvent>,   KnowledgeGainedFeedHandler>(Reuse.Scoped);
+        registrator.Register<IDomainEventHandler<AiCardPersonalityDriftedEvent>,PersonalityDriftFeedHandler>(Reuse.Scoped);
 
         // --- Upload services ---
         registrator.Register<IAiCardAvatarService, AiCardAvatarService>(Reuse.Scoped);

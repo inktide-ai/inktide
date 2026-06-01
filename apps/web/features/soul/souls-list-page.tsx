@@ -12,7 +12,7 @@ import type { SoulCardData, AiCardListItem } from '@/features/soul'
 import { SoulCardVertical, SoulListRow, SortableSoulCard, useFavorites, reorderCard, toSoulCardData } from '@/features/soul'
 import { useCharactersContext } from '@/entities/character'
 import { queryKeys } from '@/shared/lib/query/keys'
-import { PageMotion } from '@/shared/ui'
+import { PageContent } from '@/shared/ui'
 
 const listVariants: Variants = {
   initial: {},
@@ -96,8 +96,7 @@ export default function SoulsListPage() {
   ))
 
   return (
-    <PageMotion className="min-h-screen bg-[var(--bg-0)] px-6 py-6 font-[Inter,sans-serif]">
-      <div className="mx-auto max-w-[1300px]">
+    <PageContent>
         <header className="mb-3 flex items-start justify-between gap-4">
           <div>
             <h1 className="font-sans text-[36px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">{t('souls.title')}</h1>
@@ -249,7 +248,6 @@ export default function SoulsListPage() {
             </AnimatePresence>
           </motion.div>
         )}
-      </div>
-    </PageMotion>
+    </PageContent>
   )
 }

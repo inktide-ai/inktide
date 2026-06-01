@@ -1,0 +1,15 @@
+{
+  "tab": {
+    "behavior": "Comportement",
+    "voice": "Voix",
+    "brain": "Cerveau",
+    "memory": "Mémoire",
+    "skills": "Compétences",
+    "prompts": "Invites",
+    "model": "Modèle",
+    "integrations": "Intégrations",
+    "obs": "OBS",
+    "scene": "Scène",
+    "backup": "Sauvegarde"
+  }
+}

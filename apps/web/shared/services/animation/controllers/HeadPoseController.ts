@@ -26,12 +26,16 @@ export class HeadPoseController implements IVrmController {
   private headBone: THREE.Object3D | null = null
   private prevAttention = 0
 
+  // Separate base rotation so spike never bleeds into the lerp target
+  private baseRotX = 0
+
   // Surprised spike state
   private spikePhase: 'none' | 'rising' | 'falling' = 'none'
   private spikeProgress = 0
 
   async init({ vrm }: VrmControllerSetup): Promise<void> {
     this.headBone = vrm.humanoid.getNormalizedBoneNode('head') ?? null
+    this.baseRotX = 0
   }
 
   update(delta: number, ctx: VrmAnimationContext): void {
@@ -47,47 +51,48 @@ export class HeadPoseController implements IVrmController {
     }
     this.prevAttention = att
 
-    // Dominance-driven base tilt (smooth lerp toward target)
-    const d               = vad.d
-    const targetTiltDeg   = d >= 0 ? d * 5 : d * 10
-    const targetTiltRad   = targetTiltDeg * DEG2RAD
-    this.headBone.rotation.x = MathUtils.lerp(
-      this.headBone.rotation.x,
-      targetTiltRad,
-      delta * 0.5,
-    )
+    // 1. Advance base tilt independently from spike overlay
+    const d             = vad.d
+    const targetTiltDeg = d >= 0 ? d * 5 : d * 10
+    const targetTiltRad = targetTiltDeg * DEG2RAD
+    this.baseRotX = MathUtils.lerp(this.baseRotX, targetTiltRad, delta * 0.5)
 
-    // Surprised spike overlay
+    // 2. Advance spike animation and compute its current offset
     if (this.spikePhase !== 'none') {
       this._updateSpike(delta)
     }
+
+    // 3. Apply base + spike as a clean sum — spike never contaminates baseRotX
+    this.headBone.rotation.x = this.baseRotX + this._spikeOffset()
   }
 
   dispose(): void {
-    this.headBone       = null
-    this.spikePhase     = 'none'
-    this.spikeProgress  = 0
-    this.prevAttention  = 0
+    this.headBone      = null
+    this.spikePhase    = 'none'
+    this.spikeProgress = 0
+    this.prevAttention = 0
+    this.baseRotX      = 0
   }
 
   private _updateSpike(delta: number): void {
-    if (!this.headBone) return
-
     if (this.spikePhase === 'rising') {
       this.spikeProgress += delta / SPIKE_RISE_SEC
       if (this.spikeProgress >= 1) {
         this.spikeProgress = 1
         this.spikePhase    = 'falling'
       }
-      this.headBone.rotation.x += SPIKE_ANGLE_RAD * this.spikeProgress
     } else {
       this.spikeProgress += delta / SPIKE_FALL_SEC
       if (this.spikeProgress >= 1) {
         this.spikeProgress = 0
         this.spikePhase    = 'none'
-        return
       }
-      this.headBone.rotation.x += SPIKE_ANGLE_RAD * (1 - this.spikeProgress)
     }
+  }
+
+  private _spikeOffset(): number {
+    if (this.spikePhase === 'none') return 0
+    if (this.spikePhase === 'rising') return SPIKE_ANGLE_RAD * this.spikeProgress
+    return SPIKE_ANGLE_RAD * (1 - this.spikeProgress)
   }
 }

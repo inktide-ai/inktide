@@ -6,6 +6,7 @@ export const queryKeys = {
     scenes: (id: string) => ['souls', id, 'scenes'] as const,
     runPresets: (id: string) => ['souls', id, 'run-presets'] as const,
     activity: (id: string) => ['souls', id, 'activity'] as const,
+    publicActivity: (slug: string) => ['souls', 'public', slug, 'activity'] as const,
     channels: (id: string) => ['souls', id, 'channels'] as const,
   },
   catalog: {

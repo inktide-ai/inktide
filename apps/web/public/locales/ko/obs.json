@@ -1,0 +1,9 @@
+{
+  "section": {
+    "title": "OBS Studio",
+    "requirements": "요구 사항",
+    "channel": "채널",
+    "browserUrl": "브라우저 소스 URL",
+    "setup": "OBS 설정"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "tab": {
+    "behavior": "行为",
+    "voice": "声音",
+    "brain": "大脑",
+    "memory": "记忆",
+    "skills": "技能",
+    "prompts": "提示词",
+    "model": "模型",
+    "integrations": "集成",
+    "obs": "OBS",
+    "scene": "场景",
+    "backup": "备份"
+  }
+}

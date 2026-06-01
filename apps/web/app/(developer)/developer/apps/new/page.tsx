@@ -42,7 +42,7 @@ export default function NewAppPage() {
 
   if (createdSecret) {
     return (
-      <div className="max-w-xl mx-auto px-6 py-10 flex flex-col gap-6">
+      <div className="mx-auto max-w-[1300px] px-6 py-10 flex flex-col gap-6">
         <h1 className="text-xl font-semibold text-[var(--text-heading)]">Application Created</h1>
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5 flex flex-col gap-3">
           <p className="text-sm font-medium text-amber-400">Save your client secret now — it will not be shown again.</p>
@@ -59,7 +59,7 @@ export default function NewAppPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-6 py-10 flex flex-col gap-6">
+    <div className="mx-auto max-w-[1300px] px-6 py-10 flex flex-col gap-6">
       <h1 className="text-xl font-semibold text-[var(--text-heading)]">New Application</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">

@@ -1,0 +1,12 @@
+{
+  "grid": {
+    "title": "Stimm-Anbieter",
+    "desc": "TTS-Anbieter für deinen KI-Charakter auswählen.",
+    "search": "Anbieter suchen…",
+    "configure": "Konfigurieren"
+  },
+  "advanced": "Erweitert",
+  "settings": "Einstellungen",
+  "back": "Zurück",
+  "noSettings": "Keine Einstellungen für diesen Anbieter."
+}

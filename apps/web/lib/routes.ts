@@ -13,6 +13,13 @@ export const TAB_TO_ROUTE: Record<string, string> = {
 }
 
 export const HOME_ROUTE = '/home'
+export const TEMPLATES_ROUTE = '/templates'
+export const MARKETPLACE_ROUTE = '/marketplace'
+export const DEVELOPER_ROUTE   = '/developer'
+
+export function templatePath(id?: string): string {
+  return id ? `${TEMPLATES_ROUTE}/${id}` : TEMPLATES_ROUTE
+}
 export const ROOT_ROUTE = '/'
 export const REGISTER_ROUTE = '/register'
 export const PRICING_ROUTE = '/pricing'
