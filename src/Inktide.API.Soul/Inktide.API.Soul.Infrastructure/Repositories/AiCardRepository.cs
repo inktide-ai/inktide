@@ -2,8 +2,6 @@ using Inktide.API.Soul.Domain.Entities;
 using Inktide.API.Soul.Domain.Repositories;
 using Inktide.API.Soul.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using NpgsqlTypes;
 
 namespace Inktide.API.Soul.Infrastructure.Repositories;
 
@@ -142,20 +140,19 @@ public sealed class AiCardRepository : IAiCardRepository
     {
         if (updates.Count == 0) return;
 
-        var ids  = updates.Select(u => u.Id).ToArray();
-        var keys = updates.Select(u => u.SortKey).ToArray();
+        var ids    = updates.Select(u => u.Id).ToHashSet();
+        var keyMap = updates.ToDictionary(u => u.Id, u => u.SortKey);
 
-        await _db.Database.ExecuteSqlRawAsync(
-            @"UPDATE soul.ai_cards
-              SET sort_key = v.sort_key, updated_at = @updated_at
-              FROM UNNEST(@ids, @keys) AS v(id, sort_key)
-              WHERE soul.ai_cards.id = v.id
-                AND soul.ai_cards.user_id = @user_id",
-            new NpgsqlParameter("ids",        NpgsqlDbType.Array | NpgsqlDbType.Uuid) { Value = ids },
-            new NpgsqlParameter("keys",       NpgsqlDbType.Array | NpgsqlDbType.Text) { Value = keys },
-            new NpgsqlParameter("updated_at", NpgsqlDbType.TimestampTz)               { Value = (DateTimeOffset)updatedAt },
-            new NpgsqlParameter("user_id",    NpgsqlDbType.Uuid)                      { Value = userId })
+        var cards = await _db.AiCards
+            .Where(c => ids.Contains(c.Id) && c.UserId == userId)
+            .ToListAsync(ct)
             .ConfigureAwait(false);
+
+        foreach (var card in cards)
+        {
+            card.SortKey   = keyMap[card.Id];
+            card.UpdatedAt = updatedAt;
+        }
     }
 
 }

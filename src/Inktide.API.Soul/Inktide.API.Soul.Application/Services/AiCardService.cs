@@ -160,6 +160,7 @@ public sealed class AiCardService : IAiCardService
         string newKey = FractionalIndexer.GenerateKeyBetween(prevKey, nextKey);
 
         await _cardRepo.BulkUpdateSortKeysAsync(userId, [(cardId, newKey)], _time.GetUtcNow().UtcDateTime, ct).ConfigureAwait(false);
+        await _txManager.SaveChangesAsync(ct).ConfigureAwait(false);
 
         card.SortKey = newKey;
         return card;
