@@ -181,7 +181,8 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
 
         b.HasOne(e => e.LlmCatalog)
             .WithMany()
-            .HasForeignKey(e => e.LlmCatalogId);
+            .HasForeignKey(e => e.LlmCatalogId)
+            .IsRequired(false);
 
         b.HasOne(e => e.TtsCatalog)
             .WithMany()

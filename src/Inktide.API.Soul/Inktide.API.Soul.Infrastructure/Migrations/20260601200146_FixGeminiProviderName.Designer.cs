@@ -4,6 +4,7 @@ using System.Net;
 using Inktide.API.Soul.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Inktide.API.Soul.Infrastructure.Migrations
 {
     [DbContext(typeof(SoulDbContext))]
-    partial class SoulDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260601200146_FixGeminiProviderName")]
+    partial class FixGeminiProviderName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -5,6 +5,7 @@ import type { AiCharacter } from '@/shared/lib/character/types'
 import type { ICardRepository } from '@/shared/types/ICardRepository'
 import { apiResponseToCharacter } from '@/shared/lib/character/mappers'
 import { queryKeys } from '@/shared/lib/query/keys'
+import { ApiError } from '@/api/client'
 
 const SOUL_STORAGE_KEY = 'inktide_selected_soul'
 
@@ -54,6 +55,9 @@ export function useSelectedCharacter(repo: ICardRepository) {
         console.error('[selectCard] failed to load card', id, err)
         if (requestSeqRef.current !== requestToken) return
         setCardLoadError('Failed to load soul')
+        if (err instanceof ApiError && err.status === 404) {
+          setSelectedId(null)
+        }
       }
     } else {
       onSnapshotUpdate(existing)

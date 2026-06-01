@@ -1,6 +1,5 @@
 using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
-using Inktide.API.Core.Transactions;
 using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.Domain.Repositories;
 using Inktide.API.Project.Infrastructure.DependencyInjection;
@@ -28,9 +27,12 @@ public sealed class InfrastructureStartup : IStartup
         });
 
         services.AddSingleton(TimeProvider.System);
-        services.AddScoped<ITransactionManager, ProjectTransactionManager>();
+        services.AddScoped<ProjectTransactionManager>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
-        services.AddScoped<ProjectService>();
+        services.AddScoped<ProjectService>(sp => new ProjectService(
+            sp.GetRequiredService<IProjectRepository>(),
+            sp.GetRequiredService<ProjectTransactionManager>(),
+            sp.GetRequiredService<TimeProvider>()));
         services.AddScoped<IProjectCrudService>(sp => sp.GetRequiredService<ProjectService>());
         services.AddScoped<IProjectOrderingService>(sp => sp.GetRequiredService<ProjectService>());
         services.AddScoped<IProjectPluginService>(sp => sp.GetRequiredService<ProjectService>());
