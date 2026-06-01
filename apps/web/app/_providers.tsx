@@ -26,7 +26,6 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <KeyboardProvider>
-      <UserAccentHydration />
       {i18nReady ? (
         <AuthProvider
           keycloak={keycloak}
@@ -34,6 +33,7 @@ export function Providers({ children }: { children: ReactNode }) {
           localeSync={localeSync}
           avatarService={avatarService}
         >
+          <UserAccentHydration />
           <LanguageSync />
           <BillingProvider>
             <KeycloakBootstrap>

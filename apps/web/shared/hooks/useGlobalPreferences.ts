@@ -6,6 +6,7 @@ import {
   type GlobalPreferencesDto,
 } from '@/api/preferences'
 import { queryKeys } from '@/shared/lib/query/keys'
+import { useAuth } from '@/shared/services/auth'
 
 // ── localStorage cache keys (warm paint before React hydrates) ─────────────────
 
@@ -84,9 +85,11 @@ async function fetchWithMigration(): Promise<GlobalPreferencesDto> {
 // ── Hooks ──────────────────────────────────────────────────────────────────────
 
 export function useGlobalPreferences() {
+  const { isInitialized, isLoggedIn } = useAuth()
   return useQuery({
     queryKey: queryKeys.me.preferences.global,
     queryFn: fetchWithMigration,
+    enabled: isInitialized && isLoggedIn,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
     // Seed from localStorage immediately (zero-flicker before first network response)
