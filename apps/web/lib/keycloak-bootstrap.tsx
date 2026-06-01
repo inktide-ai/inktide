@@ -1,8 +1,11 @@
 'use client'
 
-import { type ReactNode, useEffect, useRef } from 'react'
+import { type ReactNode, useEffect } from 'react'
 import { configureApiAuth } from '@/api/client'
 import { keycloak } from '@/lib/keycloak'
+
+// Module-level guard survives Fast Refresh HMR re-mounts — useRef does not.
+let keycloakInitialized = false
 
 function setAuthCookie() {
   document.cookie = 'inktide_auth=1; path=/; SameSite=Lax; max-age=86400'
@@ -16,10 +19,9 @@ const KC_TOKEN_KEY = 'v1_inktide_kc_token'
 const KC_REFRESH_KEY = 'v1_inktide_kc_refresh'
 
 export function KeycloakBootstrap({ children }: { children: ReactNode }) {
-  const initializedRef = useRef(false)
   useEffect(() => {
-    if (initializedRef.current) return
-    initializedRef.current = true
+    if (keycloakInitialized) return
+    keycloakInitialized = true
 
     // one-time migration from unversioned keys — preserves existing sessions on upgrade
     for (const [oldKey, newKey] of [['inktide_kc_token', KC_TOKEN_KEY], ['inktide_kc_refresh', KC_REFRESH_KEY]] as const) {
