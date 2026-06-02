@@ -49,8 +49,9 @@ public sealed class GraphDefinitionImporterService : IGraphDefinitionImporter
             e.TargetHandle ?? string.Empty
         )).ToList();
 
-        var graph = GraphDefinition.Create(projectId, userId, nodes, edges);
-        await _graphs.UpsertAsync(graph, ct).ConfigureAwait(false);
+        var graph    = GraphDefinition.Create(projectId, userId, nodes, edges);
+        var existing = await _graphs.FindByProjectIdAsync(projectId, ct).ConfigureAwait(false);
+        await _graphs.UpsertAsync(graph, existing, ct).ConfigureAwait(false);
 
         _logger.LogInformation(
             "GraphDefinitionImporterService: imported graph for project {ProjectId} ({NodeCount} nodes, {EdgeCount} edges)",

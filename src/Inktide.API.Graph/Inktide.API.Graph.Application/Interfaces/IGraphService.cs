@@ -7,7 +7,7 @@ public interface IGraphService
 {
     Task<GraphDefinition?> GetByProjectAsync(Guid projectId, Guid userId, CancellationToken ct = default);
 
-    Task<GraphDefinition> SaveAsync(
+    Task<GraphDefinition?> SaveAsync(
         Guid projectId,
         Guid userId,
         IEnumerable<GraphNodeRecord> nodes,

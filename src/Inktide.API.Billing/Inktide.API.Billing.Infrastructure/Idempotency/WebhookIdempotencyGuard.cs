@@ -43,9 +43,9 @@ internal static class WebhookIdempotencyGuard
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex,
-                "Webhook idempotency check failed for key {DoneKey}, processing without dedup", doneKey);
-            lockAcquired = false;
+            logger.LogError(ex,
+                "Webhook idempotency check failed for key {DoneKey}, refusing to process without dedup", doneKey);
+            throw;
         }
 
         try

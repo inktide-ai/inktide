@@ -10,5 +10,5 @@ public interface IGraphRepository
     /// <summary>Used by the REST API — returns only if the caller owns the graph.</summary>
     Task<GraphDefinition?> FindByProjectAndUserAsync(Guid projectId, Guid userId, CancellationToken ct = default);
 
-    Task<GraphDefinition> UpsertAsync(GraphDefinition graph, CancellationToken ct = default);
+    Task<GraphDefinition> UpsertAsync(GraphDefinition graph, GraphDefinition? existing, CancellationToken ct = default);
 }

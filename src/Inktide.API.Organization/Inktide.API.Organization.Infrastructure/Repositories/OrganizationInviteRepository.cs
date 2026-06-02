@@ -22,6 +22,10 @@ public sealed class OrganizationInviteRepository : IOrganizationInviteRepository
                  && i.Status == InviteStatus.Pending,
             ct);
 
+    public Task<OrganizationInvite?> GetPendingByIdTrackedAsync(Guid inviteId, CancellationToken ct) =>
+        _db.OrganizationInvites.FirstOrDefaultAsync(
+            i => i.Id == inviteId && i.Status == InviteStatus.Pending, ct);
+
     public async Task<IReadOnlyList<OrganizationInvite>> GetPendingByOrganizationAsync(Guid organizationId, CancellationToken ct) =>
         await _db.OrganizationInvites
             .AsNoTracking()

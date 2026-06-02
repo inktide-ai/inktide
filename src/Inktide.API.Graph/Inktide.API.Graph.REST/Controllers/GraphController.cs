@@ -77,6 +77,8 @@ public sealed class GraphController : ControllerBase
             e.TargetHandle));
 
         var saved = await _graphService.SaveAsync(projectId, userId, nodes, edges, ct);
+        if (saved is null)
+            return NotFound();
         return Ok(MapToDto(saved));
     }
 

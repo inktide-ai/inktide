@@ -1,8 +1,8 @@
+using System.Data.Common;
 using Inktide.API.Marketplace.Domain.Entities;
 using Inktide.API.Marketplace.Domain.Repositories;
 using Inktide.API.Marketplace.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 
 namespace Inktide.API.Marketplace.Infrastructure.Repositories;
 
@@ -52,5 +52,5 @@ internal sealed class EfConnectorInstallationRepository(MarketplaceDbContext db)
             .ExecuteDeleteAsync(ct);
 
     private static bool IsUniqueConstraintViolation(DbUpdateException ex)
-        => ex.InnerException is PostgresException { SqlState: "23505" };
+        => ex.InnerException is DbException { SqlState: "23505" };
 }

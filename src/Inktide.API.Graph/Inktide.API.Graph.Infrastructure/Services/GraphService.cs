@@ -14,14 +14,18 @@ public sealed class GraphService : IGraphService
     public Task<GraphDefinition?> GetByProjectAsync(Guid projectId, Guid userId, CancellationToken ct = default) =>
         _repository.FindByProjectAndUserAsync(projectId, userId, ct);
 
-    public async Task<GraphDefinition> SaveAsync(
+    public async Task<GraphDefinition?> SaveAsync(
         Guid projectId,
         Guid userId,
         IEnumerable<GraphNodeRecord> nodes,
         IEnumerable<GraphEdgeRecord> edges,
         CancellationToken ct = default)
     {
+        var existing = await _repository.FindByProjectIdAsync(projectId, ct);
+        if (existing is not null && existing.UserId != userId)
+            return null;
+
         var graph = GraphDefinition.Create(projectId, userId, nodes, edges);
-        return await _repository.UpsertAsync(graph, ct);
+        return await _repository.UpsertAsync(graph, existing, ct);
     }
 }

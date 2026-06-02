@@ -45,6 +45,7 @@ public sealed class UserProviderCredentialRepository : IUserProviderCredentialRe
         else
             _db.UserProviderCredentials.Update(credential);
 
+        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
         return credential;
     }
 
@@ -54,7 +55,10 @@ public sealed class UserProviderCredentialRepository : IUserProviderCredentialRe
             .FirstOrDefaultAsync(c => c.UserId == userId && c.ProviderId == providerId, ct);
 
         if (cred is not null)
+        {
             _db.UserProviderCredentials.Remove(cred);
+            await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+        }
     }
 
     public async Task UpdateVerificationAsync(

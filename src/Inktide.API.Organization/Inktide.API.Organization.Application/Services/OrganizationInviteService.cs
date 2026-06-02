@@ -119,14 +119,11 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         var orgId = await GetOrgIdForUserAsync(requestingUserId, ct)
             ?? throw new InviteNotFoundException();
 
-        var pending = await _inviteRepo.GetPendingByOrganizationAsync(orgId, ct);
-        var target = pending.FirstOrDefault(i => i.Id == inviteId)
+        var target = await _inviteRepo.GetPendingByIdTrackedAsync(inviteId, ct)
             ?? throw new InviteNotFoundException();
 
-        var org = await _orgRepo.GetByIdAsync(target.OrganizationId, ct)
-            ?? throw new InviteNotFoundException();
-
-        EnsureIsOwner(requestingUserId, org);
+        if (target.OrganizationId != orgId)
+            throw new InviteNotFoundException();
 
         target.Status = InviteStatus.Expired;
         await _inviteRepo.SaveChangesAsync(ct);
