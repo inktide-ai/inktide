@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { CreateTemplateData } from '@/shared/lib/templates/ITemplateStore'
-import type { UserProjectTemplate } from '@/shared/data/project-templates'
+import type { TemplateCategory, UserProjectTemplate } from '@/shared/data/project-templates'
 
 const ACCENT_COLORS = [
   '#7c3aed',
@@ -32,7 +32,7 @@ export function TemplateEditorModal({ mode, initialData, onClose, onSave }: Temp
   const [emoji, setEmoji] = useState(initialData?.emoji ?? '🤖')
   const [name, setName] = useState(initialData?.name ?? '')
   const [description, setDescription] = useState(initialData?.description ?? '')
-  const [category, setCategory] = useState<string>(initialData?.category ?? 'utility')
+  const [category, setCategory] = useState<TemplateCategory>(initialData?.category ?? 'utility')
   const [accentColor, setAccentColor] = useState(initialData?.accentColor ?? '#7c3aed')
   const [systemPrompt, setSystemPrompt] = useState(initialData?.systemPrompt ?? '')
   const [saving, setSaving] = useState(false)
@@ -148,7 +148,7 @@ export function TemplateEditorModal({ mode, initialData, onClose, onSave }: Temp
               </label>
               <select
                 value={category}
-                onChange={e => setCategory(e.target.value)}
+                onChange={e => setCategory(e.target.value as TemplateCategory)}
                 className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-0)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none transition-colors focus:border-[var(--accent-primary)]"
               >
                 {CATEGORIES.map(c => (

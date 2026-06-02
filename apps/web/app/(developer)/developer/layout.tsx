@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Code2, Webhook } from 'lucide-react'
+import { Code2 } from 'lucide-react'
 
 const DOC_LINKS = [
   { href: '/developer',              label: 'Overview' },

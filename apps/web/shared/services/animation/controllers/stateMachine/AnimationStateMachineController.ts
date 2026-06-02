@@ -185,7 +185,7 @@ export class AnimationStateMachineController implements IVrmController {
   }
 
   private _driveTransitioning(
-    delta: number,
+    _delta: number,
     t: import('./types').InTransitionState | null,
   ): void {
     if (!t || t.paused) return

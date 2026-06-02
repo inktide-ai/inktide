@@ -1,4 +1,4 @@
-import { CodeBlock, DocPage, InlineCode, PageSubtitle, PageTitle, SectionHeading, Table, TableRow, Td } from './shared'
+import { CodeBlock, DocPage, InlineCode, PageSubtitle, PageTitle, SectionHeading, TableRow, Td } from './shared'
 
 export function OAuthPage() {
   return (

@@ -1,4 +1,4 @@
-import type { UserProjectTemplate } from '@/shared/data/project-templates'
+import type { TemplateCategory, TemplatePlatform, UserProjectTemplate } from '@/shared/data/project-templates'
 
 export type CreateTemplateData = {
   name: string
@@ -8,8 +8,8 @@ export type CreateTemplateData = {
   accentColor: string
   defaultName: string
   systemPrompt: string
-  category: string
-  platforms: string[]
+  category: TemplateCategory
+  platforms: TemplatePlatform[]
 }
 
 export interface ITemplateStore {
