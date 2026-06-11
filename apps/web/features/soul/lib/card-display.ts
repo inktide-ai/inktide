@@ -26,7 +26,7 @@ export function toSoulCardData(card: AiCardListItem): SoulCardData {
     name: card.name,
     subtitle,
     ...(description ? { description } : {}),
-    avatarUrl: card.avatar_url || '/avatars/nova.png',
+    avatarUrl: card.avatar_url || null,
     accentColor: accentFromCard(card.id),
     status: statusFromCard(card.id, card.is_active),
     platforms: ['twitch', 'discord', 'telegram'] as SoulPlatform[],

@@ -35,14 +35,34 @@ const nextConfig: NextConfig = {
     ? { allowedDevOrigins: devOrigins }
     : {}),
   async headers() {
+    const keycloakOrigin  = process.env.NEXT_PUBLIC_KEYCLOAK_URL  ?? 'http://localhost:8080'
+    const storageOrigin   = process.env.NEXT_PUBLIC_STORAGE_URL   ?? 'http://localhost:9000'
+    const csp = [
+      "default-src 'self'",
+      // unsafe-eval + unsafe-inline required by Next.js dev mode; removed in production
+      process.env.NODE_ENV === 'production'
+        ? "script-src 'self' https://js.stripe.com"
+        : "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
+      "style-src 'self' 'unsafe-inline'",
+      `img-src 'self' data: blob: https: ${storageOrigin}`,
+      "font-src 'self' data:",
+      `connect-src 'self' blob: wss: ${keycloakOrigin} ${storageOrigin} https://api.stripe.com https://*.stripe.com`,
+      `frame-src 'self' ${keycloakOrigin} https://js.stripe.com`,
+      "frame-ancestors 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "media-src 'self' blob:",
+    ].join('; ')
+
     return [
       {
         source: '/(.*)',
         headers: [
-          { key: 'X-Frame-Options',       value: 'DENY' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy',        value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy',     value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'X-Frame-Options',        value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options',  value: 'nosniff' },
+          { key: 'Referrer-Policy',         value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy',      value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Content-Security-Policy', value: csp },
           ...(process.env.NODE_ENV === 'production' ? [
             { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
           ] : []),
@@ -56,20 +76,9 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  turbopack: {
-    rules: {
-      '*.svg': {
-        loaders: [{ loader: '@svgr/webpack', options: { svgo: false } }],
-        as: '*.js',
-      },
-    },
-  },
   async rewrites() {
     return [
-      {
-        source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
-      },
+      // /api/* is handled by app/api/[...path]/route.ts (BFF proxy) — no rewrite needed
       {
         source: '/hubs/:path*',
         destination: `${backendUrl}/hubs/:path*`,

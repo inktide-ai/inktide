@@ -6,7 +6,6 @@ import { visemeProviderRegistry } from '../services/lipsync/registry'
 // Re-export из ports/ для backward compat (useChatChannel, useAudioStream импортируют отсюда)
 export type { MouthWeights, RhubarbViseme, VisemeCue }
 
-// ── Public types ──────────────────────────────────────────────────────────────
 
 export interface LipSyncHandle {
   getAudioContext(): AudioContext
@@ -24,7 +23,6 @@ const FFT_SIZE = 1024
 
 const SILENT_MOUTH: MouthWeights = { aa: 0, ih: 0, ou: 0, ee: 0, oh: 0 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
 
 /**
  * OCP: логика вычисления весов рта вынесена в IVisemeProvider.

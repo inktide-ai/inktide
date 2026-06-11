@@ -8,6 +8,7 @@ export const queryKeys = {
     activity: (id: string) => ['souls', id, 'activity'] as const,
     publicActivity: (slug: string) => ['souls', 'public', slug, 'activity'] as const,
     channels: (id: string) => ['souls', id, 'channels'] as const,
+    stats: (id: string) => ['souls', id, 'stats'] as const,
   },
   catalog: {
     llmModels: ['catalog', 'llm-models'] as const,
@@ -18,6 +19,10 @@ export const queryKeys = {
     all: (soulId?: string) => ['projects', { soulId }] as const,
     detail: (id: string) => ['projects', id] as const,
     plugins: (id: string) => ['projects', id, 'plugins'] as const,
+    scenes: (id: string) => ['projects', id, 'scenes'] as const,
+    channels: (id: string) => ['projects', id, 'channels'] as const,
+    runPresets: (id: string) => ['projects', id, 'run-presets'] as const,
+    sceneConfig: (id: string) => ['projects', id, 'scene-config'] as const,
   },
   billing: {
     subscription: ['billing', 'subscription'] as const,

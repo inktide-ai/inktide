@@ -1,4 +1,5 @@
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 
 namespace Inktide.API.Billing.Application.Interfaces;
 

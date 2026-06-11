@@ -1,0 +1,16 @@
+{
+  "solution": {
+    "path": "Inktide.API.sln",
+    "projects": [
+      "src/Inktide.API.Core/Inktide.API.Core.csproj",
+      "src/Inktide.API.Domain/Inktide.API.Domain.csproj",
+      "src/Inktide.API.Billing/Inktide.API.Billing.Application/Inktide.API.Billing.Application.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Domain/Inktide.API.Soul.Domain.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Application/Inktide.API.Soul.Application.csproj",
+      "src/Inktide.API.Synapse/Inktide.API.Synapse.Application/Inktide.API.Synapse.Application.csproj",
+      "src/Inktide.API.ScreenAwareness/Inktide.API.ScreenAwareness.Application/Inktide.API.ScreenAwareness.Application.csproj",
+      "src/Inktide.API.ScreenAwareness/Inktide.API.ScreenAwareness.Infrastructure/Inktide.API.ScreenAwareness.Infrastructure.csproj",
+      "src/Inktide.API.ScreenAwareness/Inktide.API.ScreenAwareness.REST/Inktide.API.ScreenAwareness.REST.csproj"
+    ]
+  }
+}

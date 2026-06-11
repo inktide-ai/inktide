@@ -40,7 +40,6 @@ internal sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
-        // ── Step 1: resolve AiCard config ────────────────────────────────────
         await _channelContext.ResolveAsync(context, cancellationToken);
         if (context.IsAborted)
         {
@@ -53,7 +52,6 @@ internal sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
         var cardCtx = context.Get<Application.Models.AiCardContext>();
         var soulId  = cardCtx?.CharacterId.ToString() ?? "unknown";
 
-        // ── Step 2: enrich via graph-driven SoulRuntime ──────────────────────
         // SoulRuntime runs plugin nodes from the soul's saved graph.
         // If no graph exists, it returns silently — we fall back to shards below.
         var graphEnriched = false;
@@ -82,7 +80,6 @@ internal sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
                 soulId, context.CorrelationId);
         }
 
-        // ── Step 2b: legacy fallback ─────────────────────────────────────────
         // Run hardcoded shards only if SoulRuntime didn't enrich the context.
         // This preserves backwards-compatibility for souls without a saved graph.
         if (!graphEnriched)
@@ -102,7 +99,6 @@ internal sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
             await Task.WhenAll(scatterTasks);
         }
 
-        // ── Step 3: aggregate and publish to LLM stream ──────────────────────
         await _aggregation.AggregateAsync(context, cancellationToken);
 
         _logger.LogDebug(

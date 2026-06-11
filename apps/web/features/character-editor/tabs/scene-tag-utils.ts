@@ -121,7 +121,7 @@ const TAG_DISPLAY_STYLES: Record<string, TagDisplayStyle> = {
   },
 }
 
-const HASH_KEYS = BUILTIN_SCENE_TAGS as unknown as readonly string[]
+const HASH_KEYS: readonly string[] = BUILTIN_SCENE_TAGS
 
 export function getHashTagKeyForScene(sceneId: string): string {
   let hash = 0
@@ -131,12 +131,14 @@ export function getHashTagKeyForScene(sceneId: string): string {
 
 /** User-facing title: saved display name, else file name without extension. */
 export function getSceneDisplayTitle(scene: {
-  original_file_name: string
+  original_name?: string
+  original_file_name?: string
   display_name?: string | null
 }): string {
   const d = scene.display_name?.trim()
   if (d) return d
-  return scene.original_file_name.replace(/\.[^/.]+$/, '')
+  const name = scene.original_name ?? scene.original_file_name ?? ''
+  return name.replace(/\.[^/.]+$/, '')
 }
 
 /** Effective filter/display label: persisted tag, else legacy hash bucket. */

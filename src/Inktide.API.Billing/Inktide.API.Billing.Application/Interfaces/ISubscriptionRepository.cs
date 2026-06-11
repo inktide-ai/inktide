@@ -11,4 +11,7 @@ public interface ISubscriptionRepository
 
     /// <summary>Bulk-expires all Active/Trialing subscriptions whose period has ended.</summary>
     Task<int> ExpireAllOverdueAsync(CancellationToken ct = default);
+
+    /// <summary>Returns active subscriptions for the given provider whose period ends on or before <paramref name="horizon"/> and have a saved payment method.</summary>
+    Task<IReadOnlyList<UserSubscription>> GetDueForRenewalAsync(string provider, DateTime horizon, CancellationToken ct = default);
 }

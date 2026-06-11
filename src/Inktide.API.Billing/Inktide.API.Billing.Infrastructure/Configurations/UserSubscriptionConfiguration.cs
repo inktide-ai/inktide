@@ -1,4 +1,5 @@
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

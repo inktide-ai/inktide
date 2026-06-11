@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 
 namespace Inktide.API.Core.DependencyInjection;
 
@@ -26,6 +27,11 @@ public sealed class AuthStartup : IStartup
         services.Configure<KeycloakSettings>(keycloakSection);
 
         var keycloak = keycloakSection.Get<KeycloakSettings>() ?? new KeycloakSettings();
+
+        if (string.IsNullOrWhiteSpace(keycloak.Audience))
+            throw new InvalidOperationException(
+                "KeycloakSettings.Audience must be configured. " +
+                "Set via environment variable: KeycloakSettings__Audience=<client-id>");
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -49,7 +55,7 @@ public sealed class AuthStartup : IStartup
                 {
                     ValidateIssuer = true,
                     ValidIssuer = keycloak.Authority,
-                    ValidateAudience = !string.IsNullOrWhiteSpace(keycloak.Audience),
+                    ValidateAudience = true,
                     ValidAudience = keycloak.Audience,
                     ValidateLifetime = true,
                     NameClaimType = "preferred_username",
@@ -64,17 +70,34 @@ public sealed class AuthStartup : IStartup
                         return Task.CompletedTask;
                     },
                     // SignalR: browsers cannot set Authorization headers on WebSocket connections.
-                    // Read the bearer token from the ?access_token= query param for hub connections.
-                    OnMessageReceived = context =>
+                    // Accepts either a full JWT or a short-lived ws-ticket (no dots) from Redis.
+                    // Ticket path: Next.js POST /api/auth/ws-ticket → Redis ws:ticket:{id} → userId.
+                    // StringGetDeleteAsync is atomic: single-use is guaranteed without a race.
+                    OnMessageReceived = async context =>
                     {
-                        var token = context.Request.Query["access_token"];
-                        if (!string.IsNullOrEmpty(token))
+                        var raw = context.Request.Query["access_token"].ToString();
+                        if (string.IsNullOrEmpty(raw)) return;
+
+                        var path = context.HttpContext.Request.Path;
+                        if (!path.StartsWithSegments("/hubs")) return;
+
+                        if (!raw.Contains('.'))
                         {
-                            var path = context.HttpContext.Request.Path;
-                            if (path.StartsWithSegments("/hubs"))
-                                context.Token = token;
+                            var db = context.HttpContext.RequestServices
+                                .GetRequiredService<IConnectionMultiplexer>()
+                                .GetDatabase();
+                            var userId = await db.StringGetDeleteAsync($"ws:ticket:{raw}");
+                            if (userId.IsNullOrEmpty) return;
+
+                            var identity = new ClaimsIdentity(
+                                [new Claim(ClaimTypes.NameIdentifier, userId.ToString())],
+                                JwtBearerDefaults.AuthenticationScheme);
+                            context.Principal = new ClaimsPrincipal(identity);
+                            context.Success();
+                            return;
                         }
-                        return Task.CompletedTask;
+
+                        context.Token = raw;
                     }
                 };
             });

@@ -22,19 +22,15 @@ public interface IAiCardChannelQueryService
 }
 
 /// <summary>
-/// Typed projection of the AI card data that Synapse needs to build a prompt context.
-/// JSON config blobs are parsed once at the Soul boundary and surfaced as value objects.
+/// Typed projection of the AI card identity + provider config that Synapse needs.
+/// Behavior config (system prompt, personality, response behavior, memory, screen awareness)
+/// has moved to the Project context and is no longer included here.
 /// </summary>
 public sealed record AiCardChannelContext(
     Guid AiCardId,
     Guid UserId,
-    string SystemPrompt,
-    string Personality,
     string? LlmProvider,
     string? LlmModelId,
     LlmConfigSettings LlmConfig,
     TtsConfigSettings TtsConfig,
-    ResponseBehaviorSettings Behavior,
-    MemoryConfigSettings Memory,
-    PersonalitySettings PersonalityConfig,
-    bool ScreenAwarenessEnabled = false);
+    bool LlmRequiresApiKey = true);

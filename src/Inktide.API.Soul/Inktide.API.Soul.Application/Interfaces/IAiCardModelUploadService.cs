@@ -25,6 +25,10 @@ public interface IAiCardModelUploadService
     Task<DeleteModelResult> DeleteAsync(Guid userId, Guid cardId, Guid modelId, CancellationToken ct = default);
 
     Task<SetActiveModelResult> SetActiveAsync(Guid userId, Guid cardId, Guid modelId, CancellationToken ct = default);
+
+    Task<PresignThumbnailResult> PresignThumbnailAsync(Guid userId, Guid cardId, Guid modelId, CancellationToken ct = default);
+
+    Task<SaveThumbnailResult> SaveThumbnailAsync(Guid userId, Guid cardId, Guid modelId, string publicUrl, CancellationToken ct = default);
 }
 
 public enum ModelUploadError
@@ -94,4 +98,28 @@ public sealed record AiCardModel(
     string ContentType,
     long SizeBytes,
     DateTime CreatedAt,
-    bool IsActive);
+    bool IsActive,
+    string? ThumbnailUrl = null);
+
+public sealed record PresignThumbnailResult(
+    bool Success,
+    ModelUploadError ErrorKind,
+    string? UploadUrl,
+    string? PublicUrl,
+    string? Error)
+{
+    public static PresignThumbnailResult Ok(string uploadUrl, string publicUrl)
+        => new(true, ModelUploadError.None, uploadUrl, publicUrl, null);
+
+    public static PresignThumbnailResult Fail(ModelUploadError kind, string error)
+        => new(false, kind, null, null, error);
+}
+
+public sealed record SaveThumbnailResult(
+    bool Success,
+    ModelUploadError ErrorKind,
+    string? Error)
+{
+    public static SaveThumbnailResult Ok() => new(true, ModelUploadError.None, null);
+    public static SaveThumbnailResult Fail(ModelUploadError kind, string error) => new(false, kind, error);
+}

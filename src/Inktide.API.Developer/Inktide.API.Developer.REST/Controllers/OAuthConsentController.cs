@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.Developer.REST.Controllers;
 
 [ApiController]
-[Route("api/oauth")]
+[Route("api/v1/oauth")]
 public sealed class OAuthConsentController(IDeveloperAppService appService) : ControllerBase
 {
     /// <summary>

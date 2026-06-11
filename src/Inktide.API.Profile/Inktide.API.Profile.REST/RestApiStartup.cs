@@ -3,26 +3,24 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Inktide.API.Profile.REST;
 
 public sealed class RestApiStartup : IStartup
 {
-
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
         services
             .AddControllers()
-            .AddNewtonsoftJson(options =>
+            .AddJsonOptions(options =>
             {
-                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             });
 
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssemblyContaining<RestApiStartup>();
     }
-
 }

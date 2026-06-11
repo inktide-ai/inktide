@@ -22,6 +22,83 @@ namespace Inktide.API.Project.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Inktide.API.Project.Domain.Entities.ProjectChannel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BotUsername")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("")
+                        .HasColumnName("bot_username");
+
+                    b.Property<string>("ChannelId")
+                        .HasColumnType("text")
+                        .HasColumnName("channel_id");
+
+                    b.Property<string>("ChannelName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("channel_name");
+
+                    b.Property<DateTime?>("ConnectedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("connected_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CustomBotTokenEnc")
+                        .HasColumnType("text")
+                        .HasColumnName("custom_bot_token_enc");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("OAuthTokenEnc")
+                        .HasColumnType("text")
+                        .HasColumnName("oauth_token_enc");
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("twitch")
+                        .HasColumnName("platform");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("RefreshTokenEnc")
+                        .HasColumnType("text")
+                        .HasColumnName("refresh_token_enc");
+
+                    b.Property<DateTime?>("TokenExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("token_expires_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("idx_project_channels_project_id");
+
+                    b.HasIndex("ProjectId", "Platform", "ChannelName")
+                        .IsUnique()
+                        .HasDatabaseName("IX_project_channels_project_id_platform_channel_name")
+                        .HasFilter("project_id IS NOT NULL");
+
+                    b.ToTable("project_channels", "project");
+                });
+
             modelBuilder.Entity("Inktide.API.Project.Domain.Entities.ProjectEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -41,6 +118,14 @@ namespace Inktide.API.Project.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("active_soul_id");
 
+                    b.Property<string>("AutoPilot")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("auto_pilot");
+
+                    b.Property<string>("BehaviorSettings")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("behavior_settings");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -49,18 +134,57 @@ namespace Inktide.API.Project.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<string>("MemorySettings")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("memory_settings");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
 
-                    b.Property<string>("PluginsJson")
+                    b.Property<string>("Personality")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("")
+                        .HasColumnName("personality");
+
+                    b.Property<string>("PersonalityConfig")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
-                        .HasDefaultValue("[]")
+                        .HasDefaultValue("{}")
+                        .HasColumnName("personality_config");
+
+                    b.Property<string>("Plugins")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
                         .HasColumnName("plugins_json");
+
+                    b.Property<string>("ResponseBehavior")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("{}")
+                        .HasColumnName("response_behavior");
+
+                    b.Property<string>("ScreenAwarenessSettings")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("{}")
+                        .HasColumnName("screen_awareness_settings");
+
+                    b.Property<string>("PreviewUrl")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("preview_url");
+
+                    b.Property<string>("SceneConfig")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("scene_config");
 
                     b.Property<string>("SortKey")
                         .IsRequired()
@@ -101,6 +225,190 @@ namespace Inktide.API.Project.Infrastructure.Migrations
                         .HasDatabaseName("idx_projects_sort");
 
                     b.ToTable("projects", "project");
+                });
+
+            modelBuilder.Entity("Inktide.API.Project.Domain.Entities.ProjectRunPreset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("text")
+                        .HasColumnName("icon");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("OverrideEmotionPresetId")
+                        .HasColumnType("text")
+                        .HasColumnName("override_emotion_preset_id");
+
+                    b.Property<string>("OverrideLlmModelId")
+                        .HasColumnType("text")
+                        .HasColumnName("override_llm_model_id");
+
+                    b.Property<float?>("OverrideTemperature")
+                        .HasColumnType("real")
+                        .HasColumnName("override_temperature");
+
+                    b.Property<string>("OverrideVoiceProfileId")
+                        .HasColumnType("text")
+                        .HasColumnName("override_voice_profile_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("SortKey")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasDefaultValue("a0")
+                        .HasColumnName("sort_key");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("idx_project_run_presets_project_id");
+
+                    b.ToTable("project_run_presets", "project");
+                });
+
+            modelBuilder.Entity("Inktide.API.Project.Domain.Entities.ProjectScene", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ContentType")
+                        .HasColumnType("text")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("text")
+                        .HasColumnName("display_name");
+
+                    b.Property<string>("OriginalName")
+                        .HasColumnType("text")
+                        .HasColumnName("original_name");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("PublicUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("public_url");
+
+                    b.Property<long?>("SizeBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size_bytes");
+
+                    b.Property<string>("SortKey")
+                        .HasColumnType("text")
+                        .HasColumnName("sort_key");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("storage_key");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("idx_project_scenes_project_id");
+
+                    b.ToTable("project_scenes", "project");
+                });
+
+            modelBuilder.Entity("Inktide.API.Project.Domain.Entities.ProjectTool", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_enabled");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("ToolConfig")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("tool_config");
+
+                    b.Property<string>("ToolName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("tool_name");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("idx_project_tools_project_id");
+
+                    b.ToTable("project_tools", "project");
+                });
+
+            modelBuilder.Entity("Inktide.API.Project.Domain.Entities.ProjectChannel", b =>
+                {
+                    b.HasOne("Inktide.API.Project.Domain.Entities.ProjectEntity", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Inktide.API.Project.Domain.Entities.ProjectRunPreset", b =>
+                {
+                    b.HasOne("Inktide.API.Project.Domain.Entities.ProjectEntity", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
                 });
 #pragma warning restore 612, 618
         }

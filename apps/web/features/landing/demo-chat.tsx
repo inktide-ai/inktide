@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { REGISTER_ROUTE } from '@/lib/routes';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -32,13 +33,14 @@ function TypewriterText({ text, onDone }: { text: string; onDone: () => void }) 
 }
 
 export default function DemoChatWidget() {
+  const { t } = useTranslation('landing');
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
       role: 'assistant',
-      content: "Hey! I'm Akane — an AI streamer powered by Inktide. Wanna chat? Ask me anything or try roasting me.",
+      content: t('demoChat.welcome'),
     },
   ]);
   const [input, setInput] = useState('');
@@ -78,7 +80,7 @@ export default function DemoChatWidget() {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? body.detail ?? 'Failed to get response');
+        throw new Error(body.error ?? body.detail ?? t('demoChat.errorResponse'));
       }
       const data = await res.json();
       const assistantMsg: Message = {
@@ -89,17 +91,17 @@ export default function DemoChatWidget() {
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : t('demoChat.errorGeneric'));
       const errorMsg: Message = {
         id: `error-${Date.now()}`,
         role: 'assistant',
-        content: 'Hmm, my brain is buffering. Is Ollama running? Try again in a sec.',
+        content: t('demoChat.errorMessage'),
       };
       setMessages((prev) => [...prev, errorMsg]);
     } finally {
       setLoading(false);
     }
-  }, [input, loading, gateShown, messages]);
+  }, [input, loading, gateShown, messages, t]);
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -127,10 +129,10 @@ export default function DemoChatWidget() {
               <img src={AKANE_AVATAR} alt="Akane" className="h-full w-full object-cover" />
               <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-[#0f0f14] bg-emerald-400" />
             </div>
-            <span className="text-white/90">Chat with Akane</span>
+            <span className="text-white/90">{t('demoChat.chatWith')}</span>
             {remaining <= 2 && remaining > 0 && (
               <span className="rounded-full bg-rose-500/15 px-1.5 py-0.5 text-2xs font-bold text-rose-400">
-                {remaining} left
+                {t('demoChat.left', { count: remaining })}
               </span>
             )}
           </motion.button>
@@ -156,19 +158,19 @@ export default function DemoChatWidget() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold leading-tight text-white/90">Akane</p>
-                  <p className="text-xs leading-tight text-emerald-400/80">Online — AI Demo</p>
+                  <p className="text-xs leading-tight text-emerald-400/80">{t('demoChat.status')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
                 {remaining > 0 && (
                   <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-2xs font-medium text-white/35">
-                    {remaining}/{MESSAGE_LIMIT} free
+                    {t('demoChat.free', { remaining, limit: MESSAGE_LIMIT })}
                   </span>
                 )}
                 <button
                   onClick={() => setOpen(false)}
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.06] hover:text-white/60"
-                  aria-label="Close"
+                  aria-label={t('demoChat.close')}
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -246,7 +248,7 @@ export default function DemoChatWidget() {
                 <input
                   ref={inputRef}
                   className="flex-1 bg-transparent py-2.5 text-body text-white/85 outline-none placeholder:text-white/20"
-                  placeholder={gateShown ? 'Sign up to continue...' : 'Type a message...'}
+                  placeholder={gateShown ? t('demoChat.signUpToContinue') : t('demoChat.typeMessage')}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={onKeyDown}
@@ -259,7 +261,7 @@ export default function DemoChatWidget() {
                   onClick={() => void submit()}
                   disabled={loading || gateShown || !input.trim()}
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.08] text-white/50 transition-all hover:bg-white/[0.14] hover:text-white/80 disabled:opacity-20"
-                  aria-label="Send"
+                  aria-label={t('demoChat.send')}
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path d="M2 7h8M7 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -290,9 +292,9 @@ export default function DemoChatWidget() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-white/90">Create your own AI</p>
+                    <p className="text-lg font-bold text-white/90">{t('demoChat.gateTitle')}</p>
                     <p className="mt-1.5 text-body leading-relaxed text-white/40">
-                      Build a custom AI streamer with its own personality, voice, and 3D avatar. It reads your chat and talks back — no scripts, no delays.
+                      {t('demoChat.gateDesc')}
                     </p>
                   </div>
                   <button
@@ -300,9 +302,9 @@ export default function DemoChatWidget() {
                     className="rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] transition-all hover:opacity-90 hover:shadow-[0_6px_24px_rgba(139,92,246,0.4)]"
                     style={{ background: 'var(--brand-gradient-hero)' }}
                   >
-                    Sign up free
+                    {t('demoChat.signUpFree')}
                   </button>
-                  <p className="text-xs text-white/20">No credit card · 2 min setup</p>
+                  <p className="text-xs text-white/20">{t('demoChat.noCreditCard')}</p>
                 </motion.div>
               )}
             </AnimatePresence>

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import {
   validateTelegramBotToken,
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function TelegramChannelManager({ soulId, channels }: Props) {
+  const { t } = useTranslation('channels')
   const [actionError, setActionError] = useState<string | null>(null)
   const [rowBusy,     setRowBusy]     = useState<string | null>(null)
   const [tgBotToken,  setTgBotToken]  = useState('')
@@ -45,11 +47,11 @@ export function TelegramChannelManager({ soulId, channels }: Props) {
         setTgStatus('verified')
       } else {
         setTgStatus('failed')
-        setTgError(result.error ?? 'Invalid bot token')
+        setTgError(result.error ?? t('telegram.mgrInvalidToken'))
       }
     } catch {
       setTgStatus('failed')
-      setTgError('Could not reach validation service')
+      setTgError(t('telegram.mgrValidationService'))
     }
   }
 
@@ -66,19 +68,19 @@ export function TelegramChannelManager({ soulId, channels }: Props) {
         },
         onError: (e) => {
           setTgStatus('failed')
-          setTgError(e instanceof Error ? e.message : 'Failed to save')
+          setTgError(e instanceof Error ? e.message : t('telegram.mgrSaveFailed'))
         },
       },
     )
   }
 
   const handleRevoke = (row: ChannelResponse) => {
-    if (!window.confirm(`Disconnect "${row.channel_name}" from Telegram? The bot will stop responding.`)) return
+    if (!window.confirm(t('telegram.mgrConfirmDisconnect', { channel: row.channel_name }))) return
     setActionError(null)
     setRowBusy(row.id)
     revokeMutation.mutate(row.id, {
       onSettled: () => setRowBusy(null),
-      onError: (e) => setActionError(e instanceof ApiError ? e.message : 'Failed to disconnect'),
+      onError: (e) => setActionError(e instanceof ApiError ? e.message : t('telegram.mgrDisconnectFailed')),
     })
   }
 
@@ -93,9 +95,9 @@ export function TelegramChannelManager({ soulId, channels }: Props) {
       {channels.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
           <div className="px-6 pt-5 pb-4">
-            <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Connected channels</h3>
+            <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('telegram.mgrConnectedTitle')}</h3>
             <p className="mt-1 text-body text-[var(--text-secondary)]">
-              Manage your connected Telegram channels.
+              {t('telegram.mgrConnectedDesc')}
             </p>
           </div>
           {actionError && <p className="px-6 pb-3 text-body text-red-400">{actionError}</p>}
@@ -119,7 +121,7 @@ export function TelegramChannelManager({ soulId, channels }: Props) {
                   disabled={rowBusy === row.id || revokeMutation.isPending}
                   onClick={() => handleRevoke(row)}
                   className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-body text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  aria-label="Disconnect"
+                  aria-label={t('telegram.mgrDisconnect')}
                 >
                   ✕
                 </button>
@@ -131,13 +133,13 @@ export function TelegramChannelManager({ soulId, channels }: Props) {
 
       <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
         <div className="px-6 pt-5 pb-4">
-          <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Connect Telegram bot</h3>
+          <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('telegram.mgrConnectTitle')}</h3>
           <p className="mt-1 text-body text-[var(--text-secondary)]">
-            Create a bot via{' '}
+            {t('telegram.mgrConnectDescBefore')}{' '}
             <a href="https://t.me/BotFather" target="_blank" rel="noreferrer" className="text-[var(--accent-primary)] hover:underline">
               @BotFather
             </a>
-            , paste the token below, then add the bot to your group and enter the chat ID.
+            {t('telegram.mgrConnectDescAfter')}
           </p>
         </div>
         <div className="px-6 pb-5 flex flex-col gap-3">
@@ -146,7 +148,7 @@ export function TelegramChannelManager({ soulId, channels }: Props) {
               type="password"
               value={tgBotToken}
               onChange={e => { setTgBotToken(e.target.value); setTgStatus('idle'); setTgBotUser(null); setTgError(null) }}
-              placeholder="Bot token from @BotFather…"
+              placeholder={t('telegram.mgrTokenPlaceholder')}
               autoComplete="off"
               className={inputCls}
             />
@@ -161,12 +163,12 @@ export function TelegramChannelManager({ soulId, channels }: Props) {
                   : 'border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-2)]',
               )}
             >
-              {tgStatus === 'saving' ? 'Saving…' : tgStatus === 'verifying' ? 'Verifying…' : tgStatus === 'verified' ? 'Next →' : 'Verify'}
+              {tgStatus === 'saving' ? t('telegram.mgrSaving') : tgStatus === 'verifying' ? t('telegram.mgrVerifying') : tgStatus === 'verified' ? t('telegram.mgrNext') : t('telegram.mgrVerify')}
             </button>
           </div>
 
           {tgStatus === 'verified' && tgBotUser && (
-            <p className="text-body text-emerald-400">@{tgBotUser} verified — enter chat details below.</p>
+            <p className="text-body text-emerald-400">{t('telegram.mgrVerified', { user: tgBotUser })}</p>
           )}
 
           {tgStatus === 'verified' && (
@@ -175,7 +177,7 @@ export function TelegramChannelManager({ soulId, channels }: Props) {
                 type="text"
                 value={tgChatId}
                 onChange={e => setTgChatId(e.target.value)}
-                placeholder="Chat ID (e.g. -1001234567890)"
+                placeholder={t('telegram.mgrChatIdPlaceholder')}
                 autoComplete="off"
                 className={inputCls}
               />
@@ -183,7 +185,7 @@ export function TelegramChannelManager({ soulId, channels }: Props) {
                 type="text"
                 value={tgChatName}
                 onChange={e => setTgChatName(e.target.value)}
-                placeholder="Display name (e.g. My Group)"
+                placeholder={t('telegram.mgrDisplayNamePlaceholder')}
                 autoComplete="off"
                 className={inputCls}
               />
@@ -193,7 +195,7 @@ export function TelegramChannelManager({ soulId, channels }: Props) {
                 onClick={handleSave}
                 className="self-end px-4 py-2 rounded-lg bg-[var(--platform-telegram)] text-white text-body font-semibold hover:bg-[#006ba3] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Connect
+                {t('telegram.mgrConnect')}
               </button>
             </>
           )}

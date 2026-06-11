@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Clock, ExternalLink, Globe, Shield, Tag, Zap } from 'lucide-react'
 import {
   getConnector,
@@ -11,8 +12,8 @@ import {
 } from '@/features/soul/channels/api/marketplace'
 import { getCard } from '@/entities/soul/api/cards'
 import type { ChannelResponse } from '@/shared/types/soul-api'
+import { handleError } from '@/shared/lib/handle-error'
 
-/* ── platform icons ─────────────────────────────────────────────────── */
 
 function IconDiscord() {
   return (
@@ -76,18 +77,20 @@ const ICON_MAP: Record<string, () => React.JSX.Element> = {
   tiktok:   IconTikTok,
 }
 
-const AUTH_TYPE_LABELS: Record<string, string> = {
-  oauth:   'OAuth 2.0',
-  apikey:  'API Key',
-  webhook: 'Webhook',
-  none:    'No auth required',
-}
-
-/* ── page ────────────────────────────────────────────────────────────── */
-
 export default function ConnectorDetailPage() {
+  const { t } = useTranslation('channels')
   const { id, slug } = useParams<{ id: string; slug: string }>()
   const router        = useRouter()
+
+  const authLabel = (a: string | null | undefined) => {
+    switch (a) {
+      case 'oauth':   return 'OAuth 2.0'
+      case 'apikey':  return t('mp.authApiKey')
+      case 'webhook': return t('mp.authWebhook')
+      case 'none':    return t('mp.authNone')
+      default:        return a ?? t('mp.authNone')
+    }
+  }
 
   const [connector,     setConnector]     = useState<ConnectorResponse | null>(null)
   const [installations, setInstallations] = useState<InstallationResponse[]>([])
@@ -106,7 +109,7 @@ export default function ConnectorDetailPage() {
       getCard(id).then(card => card.channels ?? []).catch(() => [] as ChannelResponse[]),
     ])
       .then(([c, i, ch]) => { setConnector(c); setInstallations(i); setSoulChannels(ch) })
-      .catch(console.error)
+      .catch(handleError)
       .finally(() => setLoading(false))
   }, [id, slug])
 
@@ -135,11 +138,11 @@ export default function ConnectorDetailPage() {
   }
 
   if (loading) {
-    return <div className="p-8 text-sm text-[var(--text-secondary)]">Loading…</div>
+    return <div className="p-8 text-sm text-[var(--text-secondary)]">{t('mp.loading')}</div>
   }
 
   if (!connector) {
-    return <div className="p-8 text-sm text-[var(--text-secondary)]">Connector not found.</div>
+    return <div className="p-8 text-sm text-[var(--text-secondary)]">{t('mp.notFound')}</div>
   }
 
   const Icon = ICON_MAP[connector.slug]
@@ -154,7 +157,7 @@ export default function ConnectorDetailPage() {
           className="flex items-center gap-2 text-body text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors w-fit"
         >
           <ArrowLeft size={16} />
-          Back to Marketplace
+          {t('mp.back')}
         </button>
 
         {/* main layout: content + sidebar */}
@@ -191,20 +194,20 @@ export default function ConnectorDetailPage() {
                       {connector.name}
                     </h1>
                     <p className="text-sm text-[var(--text-tertiary)]">
-                      by {connector.authorName ?? 'Inktide'}
+                      {t('mp.by')} {connector.authorName ?? 'Inktide'}
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                     {connector.isNative && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 text-xs font-medium text-blue-400">
                         <Zap size={10} />
-                        Native
+                        {t('mp.native')}
                       </span>
                     )}
                     {isInstalled && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 border border-green-500/20 px-2.5 py-0.5 text-xs font-medium text-green-500">
                         <span className="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden />
-                        Connected
+                        {t('mp.connected')}
                       </span>
                     )}
                   </div>
@@ -218,21 +221,21 @@ export default function ConnectorDetailPage() {
                   {!connector.isAvailable ? (
                     <span className="inline-flex items-center gap-2 text-body font-medium text-[var(--text-tertiary)]">
                       <Clock size={15} />
-                      Coming soon
+                      {t('mp.comingSoon')}
                     </span>
                   ) : isInstalled ? (
                     <button
                       onClick={() => router.push(`/souls/${id}/channels/${slug}`)}
                       className="inline-flex h-9 items-center justify-center rounded-md bg-[var(--text-primary)] px-5 text-body font-medium text-[var(--bg-0)] transition-opacity hover:opacity-90"
                     >
-                      Configure
+                      {t('mp.configure')}
                     </button>
                   ) : (
                     <button
                       onClick={handleAddIntegration}
                       className="inline-flex h-9 items-center justify-center rounded-md bg-[var(--text-primary)] px-5 text-body font-medium text-[var(--bg-0)] transition-opacity hover:opacity-90"
                     >
-                      Add Integration
+                      {t('mp.addIntegration')}
                     </button>
                   )}
                 </div>
@@ -243,7 +246,7 @@ export default function ConnectorDetailPage() {
             {connector.isAvailable && (
               <div className="flex flex-col gap-3 p-6 rounded-xl border border-[var(--border-subtle)]">
                 <h2 className="text-body-md font-semibold text-[var(--text-heading)]">
-                  What this connector can do
+                  {t('mp.whatItDoes')}
                 </h2>
                 <ul className="flex flex-col gap-2">
                   <li className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
@@ -276,7 +279,7 @@ export default function ConnectorDetailPage() {
                 <div className="flex items-center justify-between gap-2">
                   <dt className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
                     <Tag size={12} />
-                    Category
+                    {t('mp.category')}
                   </dt>
                   <dd className="text-xs text-[var(--text-primary)] font-medium">{connector.category}</dd>
                 </div>
@@ -285,10 +288,10 @@ export default function ConnectorDetailPage() {
                 <div className="flex items-center justify-between gap-2">
                   <dt className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
                     <Zap size={12} />
-                    Type
+                    {t('mp.type')}
                   </dt>
                   <dd className="text-xs text-[var(--text-primary)] font-medium">
-                    {connector.isNative ? 'Native' : 'Third-party'}
+                    {connector.isNative ? t('mp.native') : t('mp.thirdParty')}
                   </dd>
                 </div>
 
@@ -296,10 +299,10 @@ export default function ConnectorDetailPage() {
                 <div className="flex items-center justify-between gap-2">
                   <dt className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
                     <Shield size={12} />
-                    Auth
+                    {t('mp.auth')}
                   </dt>
                   <dd className="text-xs text-[var(--text-primary)] font-medium">
-                    {AUTH_TYPE_LABELS[connector.authType ?? 'none'] ?? connector.authType}
+                    {authLabel(connector.authType)}
                   </dd>
                 </div>
 
@@ -307,7 +310,7 @@ export default function ConnectorDetailPage() {
                 <div className="flex items-center justify-between gap-2">
                   <dt className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
                     <Globe size={12} />
-                    Developer
+                    {t('mp.developer')}
                   </dt>
                   <dd className="text-xs text-[var(--text-primary)] font-medium">
                     {connector.authorName ?? 'Inktide'}
@@ -318,7 +321,7 @@ export default function ConnectorDetailPage() {
 
             {/* resources */}
             <div className="rounded-xl border border-[var(--border-subtle)] p-4 flex flex-col gap-3">
-              <h3 className="text-sm font-semibold text-[var(--text-heading)]">Resources</h3>
+              <h3 className="text-sm font-semibold text-[var(--text-heading)]">{t('mp.resources')}</h3>
               <div className="flex flex-col gap-2">
                 {connector.websiteUrl && (
                   <a
@@ -328,11 +331,11 @@ export default function ConnectorDetailPage() {
                     className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     <ExternalLink size={12} />
-                    Website
+                    {t('mp.website')}
                   </a>
                 )}
                 {!connector.websiteUrl && (
-                  <span className="text-xs text-[var(--text-tertiary)]">No external resources</span>
+                  <span className="text-xs text-[var(--text-tertiary)]">{t('mp.noResources')}</span>
                 )}
               </div>
             </div>

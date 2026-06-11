@@ -1,4 +1,5 @@
 import { getTranslations } from '@/lib/i18n-server'
+import { getServerUser } from '@/lib/auth-server'
 import { NavigationScrollShell } from './navigation-scroll-shell'
 import NavigationActions from './navigation-actions'
 import type { NavItem } from './navigation-actions'
@@ -14,11 +15,12 @@ const menuItemClass = cn(
 
 export default async function Navigation() {
   const t = await getTranslations('landing')
+  const serverUser = await getServerUser()
 
   const navItems: NavItem[] = [
     { label: t('nav.itemPreview'), href: '#',        active: true  },
     { label: t('nav.itemPricing'), href: '#pricing', active: false },
-    { label: t('nav.itemBlog'),    href: '#blog',    active: false },
+    { label: 'Следите за нами',    href: '#follow',  active: false },
   ]
 
   return (
@@ -57,7 +59,12 @@ export default async function Navigation() {
           </div>
         </div>
 
-        <NavigationActions navItems={navItems} />
+        <NavigationActions
+          navItems={navItems}
+          isLoggedIn={!!serverUser}
+          userName={serverUser?.name ?? null}
+          userPicture={serverUser?.picture ?? null}
+        />
 
       </div>
     </NavigationScrollShell>

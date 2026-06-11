@@ -28,7 +28,7 @@ export function SoulBindingPicker({ projectId, activeSoul, onChanged, open: cont
 
   const { data: souls = [], isLoading: loading } = useQuery<AiCardListItem[]>({
     queryKey: ['soul-cards-list'],
-    queryFn: getCards,
+    queryFn: () => getCards().then((r) => r.items),
     enabled: open,
     staleTime: 60_000,
   })

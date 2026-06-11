@@ -14,7 +14,7 @@ interface SceneTabProps {
 const SceneTab = ({ cardId }: SceneTabProps) => {
   const router = useRouter()
   const [sceneRefresh, setSceneRefresh] = useState(0)
-  const { scenes, loading } = useCardScene(cardId, sceneRefresh)
+  const { scenes, loading, projectId } = useCardScene(cardId, sceneRefresh)
   const [activeSceneId, setActiveSceneId] = useState<string | null>(null)
   const activeScene = scenes.find(s => s.id === activeSceneId) ?? scenes[0] ?? null
 
@@ -23,7 +23,7 @@ const SceneTab = ({ cardId }: SceneTabProps) => {
       scenes={scenes}
       loading={loading}
       activeSceneId={activeScene?.id ?? null}
-      cardId={cardId}
+      projectId={projectId ?? undefined}
       onSelect={id => setActiveSceneId(id)}
       onConfigure={id => router.push(`/settings/scene/${id}`)}
       onActiveChanged={id => setActiveSceneId(id)}

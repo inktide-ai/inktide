@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { Settings, Trash2 } from 'lucide-react'
 import type { ApplicationDto } from '../api/developer'
 
@@ -11,6 +12,7 @@ interface AppCardProps {
 
 export function AppCard({ app, onDelete }: AppCardProps) {
   const router = useRouter()
+  const { t } = useTranslation('developer')
 
   return (
     <div className="flex items-start justify-between gap-4 rounded-xl border border-[var(--border-subtle)] p-5 hover:bg-[var(--surface-1)] transition-colors">
@@ -35,7 +37,7 @@ export function AppCard({ app, onDelete }: AppCardProps) {
         <button
           onClick={() => router.push(`/developer/apps/${app.id}`)}
           className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--surface-2)] transition-colors"
-          title="Settings"
+          title={t('apps.settings')}
         >
           <Settings size={15} />
         </button>
@@ -43,7 +45,7 @@ export function AppCard({ app, onDelete }: AppCardProps) {
           <button
             onClick={() => onDelete(app.id)}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-red-500/10 hover:text-red-500 transition-colors"
-            title="Delete"
+            title={t('apps.delete')}
           >
             <Trash2 size={15} />
           </button>

@@ -1,11 +1,11 @@
 'use client'
 
-import type { LlmProviderCatalogEntry } from '@/shared/data/llm-providers'
+import type { LlmProviderDef } from '@/shared/data/llm-provider-catalog'
 import { cn } from '@/lib/utils'
 import { CredentialStatusBadge, type CredentialStatus } from '@/features/soul/components/credential-status-badge'
 
 export interface BrainProviderCardProps {
-  provider: LlmProviderCatalogEntry
+  provider: LlmProviderDef
   selected: boolean
   onSelect: () => void
   credentialStatus?: CredentialStatus

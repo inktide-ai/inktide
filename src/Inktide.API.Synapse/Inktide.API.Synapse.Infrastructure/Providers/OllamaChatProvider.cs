@@ -41,8 +41,10 @@ internal sealed class OllamaChatProvider : IChatProvider
         ProviderOptions options,
         CancellationToken cancellationToken = default)
     {
+        var rawUrl = (options.BaseUrl ?? string.Empty).TrimEnd('/');
+        ValidateBaseUrl(rawUrl);
         var baseUrl = System.Text.RegularExpressions.Regex.Replace(
-            (options.BaseUrl ?? "http://localhost:11434").TrimEnd('/'),
+            rawUrl,
             @"/v1/?$", string.Empty, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         var response = await _http
             .GetFromJsonAsync<OllamaTagsResponse>($"{baseUrl}/api/tags", cancellationToken)
@@ -69,6 +71,18 @@ internal sealed class OllamaChatProvider : IChatProvider
         CancellationToken cancellationToken = default)
         => throw new NotSupportedException("Ollama inference runs through the Synapse pipeline, not direct provider calls.");
 
+
+    private static void ValidateBaseUrl(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            throw new ArgumentException($"Invalid Ollama base URL.");
+        if (uri.Scheme is not ("http" or "https"))
+            throw new ArgumentException("Ollama base URL must use http or https scheme.");
+        // Block link-local range used by cloud instance metadata services (e.g. AWS IMDSv1)
+        if (uri.HostNameType == UriHostNameType.IPv4
+            && uri.Host.StartsWith("169.254.", StringComparison.Ordinal))
+            throw new ArgumentException("Link-local addresses are not permitted as Ollama base URL.");
+    }
 
     private sealed class OllamaTagsResponse
     {

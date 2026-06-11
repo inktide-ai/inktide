@@ -83,8 +83,11 @@ internal sealed class RedisEmotionalStateService : IEmotionalStateService
         EmotionDynamics dynamics,
         CancellationToken ct = default)
     {
-        var currentEmotion  = await GetAsync(characterId, ct);
-        var currentPhysical = await GetPhysicalAsync(characterId, ct);
+        var emotionTask  = GetAsync(characterId, ct);
+        var physicalTask = GetPhysicalAsync(characterId, ct);
+        await Task.WhenAll(emotionTask, physicalTask);
+        var currentEmotion  = emotionTask.Result;
+        var currentPhysical = physicalTask.Result;
 
         var updatedEmotion  = BlendEmotion(characterId, currentEmotion, newEmotion, dynamics);
         var vad             = EmotionVadTable.Map(updatedEmotion.CurrentEmotion);
@@ -120,7 +123,6 @@ internal sealed class RedisEmotionalStateService : IEmotionalStateService
     }
 
 
-    // ── Emotion blending ──────────────────────────────────────────────────────
 
     private static EmotionalState BlendEmotion(
         Guid characterId,
@@ -170,7 +172,6 @@ internal sealed class RedisEmotionalStateService : IEmotionalStateService
     }
 
 
-    // ── Physical state update ─────────────────────────────────────────────────
 
     private static PhysicalState UpdatePhysical(PhysicalState prev, VadVector vad)
     {
@@ -187,7 +188,6 @@ internal sealed class RedisEmotionalStateService : IEmotionalStateService
     }
 
 
-    // ── Trajectory ────────────────────────────────────────────────────────────
 
     private static string? ComputeTrajectory(string? from, string? to, float momentum)
     {

@@ -18,18 +18,15 @@ internal sealed class ProjectExportService : IProjectExportService
 
     private readonly IProjectRepository _projectRepo;
     private readonly IProjectExportDataQuery _soulQuery;
-    private readonly IProjectGraphExportQuery _graphQuery;
     private readonly ILocalTtsProviderClassifier _ttsClassifier;
 
     public ProjectExportService(
         IProjectRepository projectRepo,
         IProjectExportDataQuery soulQuery,
-        IProjectGraphExportQuery graphQuery,
         ILocalTtsProviderClassifier ttsClassifier)
     {
         _projectRepo   = projectRepo   ?? throw new ArgumentNullException(nameof(projectRepo));
         _soulQuery     = soulQuery     ?? throw new ArgumentNullException(nameof(soulQuery));
-        _graphQuery    = graphQuery    ?? throw new ArgumentNullException(nameof(graphQuery));
         _ttsClassifier = ttsClassifier ?? throw new ArgumentNullException(nameof(ttsClassifier));
     }
 
@@ -47,8 +44,6 @@ internal sealed class ProjectExportService : IProjectExportService
             soul = await _soulQuery.GetExportSnapshotAsync(userId, project.ActiveSoulId.Value, ct)
                 .ConfigureAwait(false);
         }
-
-        var graph = await _graphQuery.FindByProjectIdAsync(projectId, ct).ConfigureAwait(false);
 
         var requiredFeatures = new List<string>();
         if (_ttsClassifier.IsLocal(soul?.TtsProvider))
@@ -93,10 +88,7 @@ internal sealed class ProjectExportService : IProjectExportService
                 AddEntry(zip, "connectors.json", connectorsJson);
             }
 
-            if (graph is not null)
-                AddRawEntry(zip, "brain.json", graph.BrainJson);
-            else
-                AddEntry(zip, "brain.json", new { nodes = Array.Empty<object>(), edges = Array.Empty<object>() });
+            AddEntry(zip, "brain.json", new { nodes = Array.Empty<object>(), edges = Array.Empty<object>() });
         }
 
         var slug = soul?.Slug ?? project.Name.ToLower().Replace(' ', '-');

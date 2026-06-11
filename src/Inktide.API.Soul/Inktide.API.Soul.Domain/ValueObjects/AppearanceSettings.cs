@@ -5,6 +5,9 @@ namespace Inktide.API.Soul.Domain.ValueObjects;
 public sealed class AppearanceSettings
 {
 
+    [JsonPropertyName("schema_version")]
+    public int SchemaVersion { get; set; } = 1;
+
     [JsonPropertyName("banner_color_index")]
     public int? BannerColorIndex { get; set; }
 

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/shared/services/auth'
 import { ROOT_ROUTE } from '@/lib/routes'
-import { keycloak } from '@/lib/keycloak'
+import { signIn } from 'next-auth/react'
 import { acceptInvite } from '@/features/organization/api/organization' // fsd:cross-feature-ok
 import { ApiError } from '@/api/client'
 
@@ -32,9 +32,7 @@ export default function AcceptInvitePage() {
     if (!isInitialized || !token) return
 
     if (!isLoggedIn) {
-      keycloak.login({
-        redirectUri: `${window.location.origin}/invite/${token}`,
-      })
+      void signIn('keycloak', { callbackUrl: `/invite/${token}` })
       return
     }
 
@@ -53,7 +51,7 @@ export default function AcceptInvitePage() {
       })
       .catch(e => {
         if (e instanceof ApiError && e.status === 401) {
-          keycloak.login({ redirectUri: `${window.location.origin}/invite/${token}` })
+          void signIn('keycloak', { callbackUrl: `/invite/${token}` })
         } else {
           setStatus('error')
         }

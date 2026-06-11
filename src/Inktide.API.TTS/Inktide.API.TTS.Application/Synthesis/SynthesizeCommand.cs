@@ -12,4 +12,5 @@ public sealed record SynthesizeCommand(
     bool Stream,
     string? AudioFormat = null,
     string? UserId = null,
-    IReadOnlyDictionary<string, object>? ProviderParams = null);
+    IReadOnlyDictionary<string, object>? ProviderParams = null,
+    string? BaseUrl = null);

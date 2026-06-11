@@ -1,3 +1,5 @@
+using Inktide.API.Developer.Domain.Enums;
+
 namespace Inktide.API.Developer.Domain.Entities;
 
 public sealed class WebhookDelivery
@@ -14,6 +16,7 @@ public sealed class WebhookDelivery
     public DateTime? DeliveredAt { get; private set; }
     public DateTime? NextRetryAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public WebhookDeliveryStatus Status { get; private set; } = WebhookDeliveryStatus.Pending;
 
     public DeveloperApplication? Application { get; private set; }
 
@@ -25,6 +28,7 @@ public sealed class WebhookDelivery
         PayloadJson   = payloadJson,
         Attempt       = 1,
         CreatedAt     = DateTime.UtcNow,
+        Status        = WebhookDeliveryStatus.Pending,
     };
 
     public void RecordSuccess(int statusCode, string? responseBody)
@@ -33,13 +37,21 @@ public sealed class WebhookDelivery
         ResponseBody = responseBody;
         DeliveredAt  = DateTime.UtcNow;
         NextRetryAt  = null;
+        Status       = WebhookDeliveryStatus.Delivered;
     }
 
-    public void RecordFailure(int? statusCode, string? responseBody, DateTime nextRetryAt)
+    public void RecordFailure(int? statusCode, string? responseBody)
     {
         StatusCode   = statusCode;
         ResponseBody = responseBody;
-        NextRetryAt  = nextRetryAt;
+        Status       = WebhookDeliveryStatus.Failed;
         Attempt++;
+    }
+
+    public void RecordExhausted(int? statusCode = null, string? responseBody = null)
+    {
+        StatusCode   = statusCode ?? StatusCode;
+        ResponseBody = responseBody ?? ResponseBody;
+        Status       = WebhookDeliveryStatus.Exhausted;
     }
 }

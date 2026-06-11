@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from '@/shared/ui/dropdown-menu'
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipPortal, TooltipContent } from '@/shared/ui/tooltip'
 import { Play, Share, Star, Upload } from '@/shared/ui/icons'
@@ -29,6 +30,7 @@ interface SoulBreadcrumbProps {
 }
 
 export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
+  const { t } = useTranslation('common')
   return (
     <TooltipProvider delayDuration={400} skipDelayDuration={200}>
       <div className="relative flex h-14 items-center border-b border-[var(--border-divider)] bg-[var(--bg-0)] px-4">
@@ -47,7 +49,7 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent side="bottom" sideOffset={6} className={tooltipClass}>
-                Add to favorites
+                {t('soulTopbar.addFavorite')}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -56,7 +58,7 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
         {/* Center — breadcrumb path (absolute) */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
           <span className="text-body font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] hover:underline cursor-pointer">
-            Souls
+            {t('soulTopbar.souls')}
           </span>
           <svg height="16" viewBox="0 0 16 16" width="16" aria-hidden className="text-[var(--text-tertiary)]">
             <path fillRule="evenodd" clipRule="evenodd" d="M4.01526 15.3939L4.3107 14.7046L10.3107 0.704556L10.6061 0.0151978L11.9849 0.606077L11.6894 1.29544L5.68942 15.2954L5.39398 15.9848L4.01526 15.3939Z" fill="currentColor" />
@@ -69,18 +71,18 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
           <span
             className={`mr-1 rounded-full px-2 py-0.5 text-xs font-medium ${online ? 'bg-[var(--success-bg)] text-[var(--success-text)]' : 'bg-[var(--surface-2)] text-[var(--text-secondary)]'}`}
           >
-            {online ? 'Online' : 'Offline'}
+            {online ? t('soulTopbar.online') : t('soulTopbar.offline')}
           </span>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button type="button" className={iconBtnClass} aria-label="Play">
+              <button type="button" className={iconBtnClass} aria-label={t('soulTopbar.play')}>
                 <Play size={13} />
               </button>
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent side="bottom" sideOffset={6} className={tooltipClass}>
-                Play / stream
+                {t('soulTopbar.playStream')}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -89,21 +91,21 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
-                  <button type="button" className={iconBtnClass} aria-label="Share">
+                  <button type="button" className={iconBtnClass} aria-label={t('soulTopbar.share')}>
                     <Share size={13} />
                   </button>
                 </DropdownMenuTrigger>
               </TooltipTrigger>
               <TooltipPortal>
                 <TooltipContent side="bottom" sideOffset={6} className={tooltipClass}>
-                  Share
+                  {t('soulTopbar.share')}
                 </TooltipContent>
               </TooltipPortal>
             </Tooltip>
             <DropdownMenuPortal>
               <DropdownMenuContent className={menuContentClass} align="end" sideOffset={6}>
                 <DropdownMenuItem disabled className={menuItemClass}>
-                  Coming soon
+                  {t('soulTopbar.comingSoon')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenuPortal>
@@ -113,21 +115,21 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
-                  <button type="button" className={iconBtnClass} aria-label="Upload">
+                  <button type="button" className={iconBtnClass} aria-label={t('soulTopbar.upload')}>
                     <Upload size={13} />
                   </button>
                 </DropdownMenuTrigger>
               </TooltipTrigger>
               <TooltipPortal>
                 <TooltipContent side="bottom" sideOffset={6} className={tooltipClass}>
-                  Upload
+                  {t('soulTopbar.upload')}
                 </TooltipContent>
               </TooltipPortal>
             </Tooltip>
             <DropdownMenuPortal>
               <DropdownMenuContent className={menuContentClass} align="end" sideOffset={6}>
                 <DropdownMenuItem disabled className={menuItemClass}>
-                  Coming soon
+                  {t('soulTopbar.comingSoon')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenuPortal>
@@ -136,7 +138,7 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
           {/* Three dots menu — like Vercel's right-side action */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <button type="button" className={iconBtnClass} aria-label="More actions">
+              <button type="button" className={iconBtnClass} aria-label={t('soulTopbar.moreActions')}>
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
                   <path fillRule="evenodd" clipRule="evenodd" d="M4 8C4 8.82843 3.32843 9.5 2.5 9.5C1.67157 9.5 1 8.82843 1 8C1 7.17157 1.67157 6.5 2.5 6.5C3.32843 6.5 4 7.17157 4 8ZM9.5 8C9.5 8.82843 8.82843 9.5 8 9.5C7.17157 9.5 6.5 8.82843 6.5 8C6.5 7.17157 7.17157 6.5 8 6.5C8.82843 6.5 9.5 7.17157 9.5 8ZM13.5 9.5C14.3284 9.5 15 8.82843 15 8C15 7.17157 14.3284 6.5 13.5 6.5C12.6716 6.5 12 7.17157 12 8C12 8.82843 12.6716 9.5 13.5 9.5Z" />
                 </svg>
@@ -144,7 +146,7 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent side="bottom" sideOffset={6} className={tooltipClass}>
-                More actions
+                {t('soulTopbar.moreActions')}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>

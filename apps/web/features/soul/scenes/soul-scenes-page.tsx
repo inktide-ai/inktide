@@ -7,11 +7,13 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type D
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useCharactersContext } from '@/entities/character'
-import { useCardScene, reorderScene, deleteCardScene, type AiCardSceneResponse } from '@/entities/soul'
+import { useCardScene } from '@/entities/soul'
+import { deleteProjectScene, reorderProjectScene, type ProjectSceneResponse } from '@/features/projects/api/scenes'
 import { PRESET_SCENES, NewSceneModal, getSceneDisplayTitle, BUILTIN_SCENE_TAGS } from '@/features/character-editor'
 import type { PresetScene } from '@/features/character-editor'
 import { getPillColors } from '@/features/character-editor/tabs/scene-tag-utils'
 import { cn } from '@/lib/utils'
+import { Slider as RadixSlider } from '@/shared/ui/slider'
 
 type TabFilter = 'All' | 'Default' | 'Custom'
 
@@ -19,10 +21,11 @@ function Slider({ label, value, onChange, unit = '%' }: { label: string; value: 
   return (
     <div className="flex items-center gap-3">
       <span className="w-20 shrink-0 text-body text-[var(--text-tertiary)]">{label}</span>
-      <input
-        type="range" min={0} max={100} value={value}
-        onChange={e => onChange(Number(e.target.value))}
-        className="flex-1 h-1 accent-[var(--accent-primary)] cursor-pointer"
+      <RadixSlider
+        value={value} onChange={onChange}
+        min={0} max={100} step={1}
+        fill="var(--text-primary)" trackHeight={3} thumbSize={12}
+        className="flex-1"
       />
       <span className="w-10 text-right text-body text-[var(--text-secondary)]">{value}{unit}</span>
     </div>
@@ -153,9 +156,9 @@ export default function SoulScenesPage() {
   const { selected } = useCharactersContext()
   const cardId = selected?.id
   const [refresh, setRefresh] = useState(0)
-  const { scenes, loading } = useCardScene(cardId, refresh)
+  const { scenes, loading, projectId } = useCardScene(cardId, refresh)
 
-  const [localCustomScenes, setLocalCustomScenes] = useState<AiCardSceneResponse[]>([])
+  const [localCustomScenes, setLocalCustomScenes] = useState<ProjectSceneResponse[]>([])
   useEffect(() => { setLocalCustomScenes(scenes) }, [scenes])
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
@@ -183,7 +186,7 @@ export default function SoulScenesPage() {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
   const filterColor = COLOR_FILTERS.find(f => f.id === colorFilter)?.color ?? 'transparent'
 
-  const allItems: Array<{ kind: 'preset'; data: PresetScene } | { kind: 'custom'; data: AiCardSceneResponse }> = [
+  const allItems: Array<{ kind: 'preset'; data: PresetScene } | { kind: 'custom'; data: ProjectSceneResponse }> = [
     ...PRESET_SCENES.map(p => ({ kind: 'preset' as const, data: p })),
     ...localCustomScenes.map(s => ({ kind: 'custom' as const, data: s })),
   ]
@@ -198,7 +201,7 @@ export default function SoulScenesPage() {
     if (item.kind !== 'custom') return false
     if (tab === 'Default') return false
     return true
-  }) as Array<{ kind: 'custom'; data: AiCardSceneResponse }>
+  }) as Array<{ kind: 'custom'; data: ProjectSceneResponse }>
 
   const resolvedActiveId = activeSceneId ?? (allItems[0]?.kind === 'preset' ? allItems[0].data.id : (localCustomScenes[0]?.id ?? null))
   const activeItem = allItems.find(i => i.data.id === resolvedActiveId) ?? allItems[0] ?? null
@@ -216,10 +219,10 @@ export default function SoulScenesPage() {
     : t('soulPage.noSceneSelected')
 
   async function handleDeleteCustom(sceneId: string) {
-    if (!cardId) return
+    if (!projectId) return
     setDeletingId(sceneId)
     try {
-      await deleteCardScene(cardId, sceneId)
+      await deleteProjectScene(projectId, sceneId)
       setLocalCustomScenes(prev => prev.filter(s => s.id !== sceneId))
       if (resolvedActiveId === sceneId) setActiveSceneId(null)
     } catch { /* silently restore — button exits deleting state */ }
@@ -228,7 +231,7 @@ export default function SoulScenesPage() {
 
   function handleSceneDragEnd(event: DragEndEvent) {
     const { active, over } = event
-    if (!over || active.id === over.id || !cardId) return
+    if (!over || active.id === over.id || !projectId) return
 
     const oldIdx = localCustomScenes.findIndex(s => s.id === active.id)
     const newIdx = localCustomScenes.findIndex(s => s.id === over.id)
@@ -241,7 +244,7 @@ export default function SoulScenesPage() {
     const previousId = reordered[neighborIdx - 1]?.id ?? null
     const nextId     = reordered[neighborIdx + 1]?.id ?? null
 
-    void reorderScene(cardId, active.id as string, { previous_id: previousId, next_id: nextId })
+    void reorderProjectScene(projectId, active.id as string, { previous_id: previousId, next_id: nextId })
       .catch(() => setLocalCustomScenes(scenes))
   }
 
@@ -252,7 +255,6 @@ export default function SoulScenesPage() {
   return (
     <div className="flex h-full overflow-hidden">
 
-      {/* ── Left: preview + controls ── */}
       <div className="flex flex-1 flex-col gap-4 overflow-auto p-5 min-w-0">
 
         {/* Preview card */}
@@ -304,7 +306,6 @@ export default function SoulScenesPage() {
         </div>
       </div>
 
-      {/* ── Right: scene library ── */}
       <div className="flex w-[280px] shrink-0 flex-col overflow-hidden border-l border-[var(--border-subtle)]">
         {/* Header */}
         <div className="shrink-0 px-4 py-4">
@@ -378,7 +379,7 @@ export default function SoulScenesPage() {
                 {/* Upload card */}
                 <button
                   type="button"
-                  disabled={!cardId}
+                  disabled={!projectId}
                   onClick={() => setShowModal(true)}
                   className="group flex aspect-[4/3] flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-[var(--border-subtle)] bg-[var(--surface-1)]/30 transition-colors hover:border-[var(--accent-primary)]/50 hover:bg-[var(--surface-1)]/60 disabled:opacity-40"
                 >
@@ -392,9 +393,9 @@ export default function SoulScenesPage() {
         </div>
       </div>
 
-      {showModal && cardId && (
+      {showModal && projectId && (
         <NewSceneModal
-          cardId={cardId}
+          projectId={projectId}
           tagOptions={[...BUILTIN_SCENE_TAGS]}
           onClose={() => setShowModal(false)}
           onCreated={(scene) => { setLocalCustomScenes(prev => [...prev, scene]); setShowModal(false); setRefresh(k => k + 1) }}

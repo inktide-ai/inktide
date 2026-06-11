@@ -4,7 +4,6 @@ export type ModelType = 'live2d' | 'vrm' | 'glb' | 'none'
 
 export type Visibility = 'private' | 'unlisted' | 'public'
 
-// ── ISP: узкие интерфейсы вместо одного монолита ─────────────────────────────
 //
 // Компоненты принимают только то, что используют:
 //   BrainTab    → CharacterLlm

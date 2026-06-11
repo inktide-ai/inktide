@@ -16,13 +16,14 @@
     <ProjectReference Include="..\Inktide.API.TTS.Domain\Inktide.API.TTS.Domain.csproj" />
     <ProjectReference Include="..\..\Inktide.API.Core\Inktide.API.Core.csproj" />
     <ProjectReference Include="..\..\Inktide.API.Domain\Inktide.API.Domain.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Soul\Inktide.API.Soul.Application\Inktide.API.Soul.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Flurl" Version="4.0.0" />
-    <PackageReference Include="Google.Cloud.TextToSpeech.V1" Version="3.18.0" />
-    <PackageReference Include="OpenAI" Version="2.10.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+    <PackageReference Include="Flurl" />
+    <PackageReference Include="Google.Cloud.TextToSpeech.V1" />
+    <PackageReference Include="OpenAI" />
+    <PackageReference Include="StackExchange.Redis" />
   </ItemGroup>
 
 </Project>

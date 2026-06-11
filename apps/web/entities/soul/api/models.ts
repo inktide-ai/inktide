@@ -8,7 +8,7 @@ export async function presignCardModelUpload(
   cardId: string,
   body: { file_name: string; content_type: string; size_bytes: number },
 ): Promise<BeginModelUploadResponse> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/models/presign`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/models/presign`, {
     method: 'POST',
     body: JSON.stringify({
       file_name: body.file_name,
@@ -28,7 +28,7 @@ export async function completeCardModelUpload(
     size_bytes: number
   },
 ): Promise<AiCardModelResponse> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/models/complete`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/models/complete`, {
     method: 'POST',
     body: JSON.stringify({
       storage_key: body.storage_key,
@@ -44,11 +44,19 @@ export async function completeCardModelUpload(
 // OCP: паттерн presign→PUT→complete написан один раз, не дублируется здесь
 
 export async function listCardModels(cardId: string): Promise<AiCardModelResponse[]> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/models`)
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/models`)
   return jsonOrThrow<AiCardModelResponse[]>(res)
 }
 
 export async function activateCardModel(cardId: string, modelId: string): Promise<void> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/models/${modelId}/activate`, { method: 'PATCH' })
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/models/${modelId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ active: true }),
+  })
   if (!res.ok) throw new Error(`Failed to activate model: ${res.status}`)
+}
+
+export async function deleteCardModel(cardId: string, modelId: string): Promise<void> {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/models/${modelId}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error(`Failed to delete model: ${res.status}`)
 }

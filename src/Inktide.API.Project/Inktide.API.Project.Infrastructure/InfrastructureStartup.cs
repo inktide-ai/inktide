@@ -1,5 +1,6 @@
 using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
+using Inktide.API.Core.Storage;
 using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.Domain.Repositories;
 using Inktide.API.Project.Infrastructure.DependencyInjection;
@@ -21,6 +22,12 @@ public sealed class InfrastructureStartup : IStartup
     {
         var connectionString = ResolveConnectionString(ctx.Configuration);
 
+        // ObjectStorageSettings is also registered by Soul.Application via DryIoc,
+        // but ProjectSceneService is resolved through MS DI and needs it available here too.
+        var storageSettings = new ObjectStorageSettings();
+        ctx.Configuration.GetSection("S3Settings").Bind(storageSettings);
+        services.AddSingleton(storageSettings);
+
         services.AddDbContext<ProjectDbContext>(options =>
         {
             options.UseNpgsql(connectionString);
@@ -36,6 +43,15 @@ public sealed class InfrastructureStartup : IStartup
         services.AddScoped<IProjectCrudService>(sp => sp.GetRequiredService<ProjectService>());
         services.AddScoped<IProjectOrderingService>(sp => sp.GetRequiredService<ProjectService>());
         services.AddScoped<IProjectPluginService>(sp => sp.GetRequiredService<ProjectService>());
+        services.AddScoped<IProjectSceneConfigService>(sp => sp.GetRequiredService<ProjectService>());
+        services.AddScoped<IProjectToolRepository, ProjectToolRepository>();
+        services.AddScoped<IProjectToolService, ProjectToolService>();
+        services.AddScoped<IProjectSceneRepository, ProjectSceneRepository>();
+        services.AddScoped<IProjectSceneService, ProjectSceneService>();
+        services.AddScoped<IProjectChannelRepository, ProjectChannelRepository>();
+        services.AddScoped<IProjectChannelService, ProjectChannelService>();
+        services.AddScoped<IProjectRunPresetRepository, ProjectRunPresetRepository>();
+        services.AddScoped<IProjectRunPresetService, ProjectRunPresetService>();
         services.AddScoped<ILocalTtsProviderClassifier, LocalTtsProviderClassifier>();
         services.AddScoped<IProjectImportService, ProjectImportService>();
         services.AddScoped<IProjectBySoulQuery, ProjectBySoulQueryService>();

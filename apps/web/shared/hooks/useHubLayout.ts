@@ -41,7 +41,7 @@ export const SOUL_DEFAULT_LAYOUT: CardLayout[] = [
 const SOUL_IDS = new Set(SOUL_DEFAULT_LAYOUT.map(d => d.i))
 
 function isValidSoulLayout(parsed: unknown): parsed is CardLayout[] {
-  if (!Array.isArray(parsed) || parsed.length !== SOUL_DEFAULT_LAYOUT.length) return false
+  if (!Array.isArray(parsed) || parsed.length === 0) return false
   return parsed.every(
     item =>
       item && typeof item === 'object' &&
@@ -64,7 +64,6 @@ function isValidLayout(parsed: unknown): parsed is CardLayout[] {
   )
 }
 
-// ── Soul hub layout (on souls/[id] pages) ────────────────────────────────────
 // Soul hub uses the workspace preferences keyed by soulId.
 
 export function useSoulHubLayout(soulId: string) {
@@ -90,7 +89,6 @@ export function useSoulHubLayout(soulId: string) {
   return { layout, updateLayout, resetLayout }
 }
 
-// ── Character settings hub layout ────────────────────────────────────────────
 
 export function useHubLayout(characterId: string) {
   const { data } = useWorkspacePreferences(characterId)

@@ -56,7 +56,8 @@
       "removeCustomBot": "Не удалось удалить своего бота",
       "saveBotToken": "Не удалось сохранить токен бота"
     },
-    "save": "Сохранить"
+    "save": "Сохранить",
+    "hint": "Нажмите «Подключить через Discord», чтобы авторизовать бота на вашем сервере. После авторизации Soul начнёт получать сообщения из выбранного сервера."
   },
   "twitch": {
     "title": "Twitch",
@@ -69,7 +70,20 @@
     "listTitle": "Привязанные Twitch-каналы",
     "emptyList": "Нет привязанных Twitch-каналов.",
     "validationError": "Используйте 1–100 символов: буквы, цифры, _ и - только.",
-    "removeLabel": "Twitch"
+    "removeLabel": "Twitch",
+    "mgrConnectedTitle": "Подключённые каналы",
+    "mgrConnectedDesc": "Управляйте подключёнными каналами Twitch.",
+    "mgrDisconnect": "Отключить",
+    "mgrReconnect": "Переподключить",
+    "mgrAddTitle": "Добавить Twitch-канал",
+    "mgrAddDesc": "Нажмите ниже, чтобы авторизовать бота Inktide на вашем Twitch-канале. Вы будете перенаправлены в Twitch для предоставления доступа.",
+    "mgrRedirecting": "Перенаправление…",
+    "mgrConnectWith": "Подключить Twitch",
+    "mgrConfirmDisconnect": "Отключить «{{channel}}» от Twitch? Бот покинет канал.",
+    "mgrErrAuthUrl": "Не удалось получить URL авторизации Twitch",
+    "mgrErrReconnect": "Не удалось переподключить",
+    "mgrErrDisconnect": "Не удалось отключить",
+    "mgrErrUpdate": "Не удалось обновить"
   },
   "kick": {
     "title": "Kick",
@@ -105,7 +119,27 @@
     "listTitle": "Привязанные аккаунты Telegram",
     "emptyList": "Нет привязанных аккаунтов Telegram.",
     "validationError": "Используйте 1–200 символов: буквы, цифры, _ и - только.",
-    "removeLabel": "Telegram"
+    "removeLabel": "Telegram",
+    "mgrConnectedTitle": "Подключённые каналы",
+    "mgrConnectedDesc": "Управляйте подключёнными каналами Telegram.",
+    "mgrDisconnect": "Отключить",
+    "mgrConnectTitle": "Подключить Telegram-бота",
+    "mgrConnectDescBefore": "Создайте бота через",
+    "mgrConnectDescAfter": ", вставьте токен ниже, затем добавьте бота в группу и укажите chat ID.",
+    "mgrTokenPlaceholder": "Токен бота от @BotFather…",
+    "mgrSaving": "Сохранение…",
+    "mgrVerifying": "Проверка…",
+    "mgrNext": "Далее →",
+    "mgrVerify": "Проверить",
+    "mgrVerified": "@{{user}} проверен — укажите данные чата ниже.",
+    "mgrChatIdPlaceholder": "Chat ID (напр. -1001234567890)",
+    "mgrDisplayNamePlaceholder": "Отображаемое имя (напр. Моя группа)",
+    "mgrConnect": "Подключить",
+    "mgrConfirmDisconnect": "Отключить «{{channel}}» от Telegram? Бот перестанет отвечать.",
+    "mgrInvalidToken": "Неверный токен бота",
+    "mgrValidationService": "Не удалось связаться с сервисом проверки",
+    "mgrSaveFailed": "Не удалось сохранить",
+    "mgrDisconnectFailed": "Не удалось отключить"
   },
   "connector": {
     "notAvailable": "Этот канал пока недоступен.",
@@ -128,5 +162,34 @@
     "success": "Успешно подключено!",
     "discordSupport": "Поддержка Discord",
     "openInDiscord": "Открыть в Discord"
+  },
+  "mp": {
+    "loading": "Загрузка…",
+    "notFound": "Коннектор не найден.",
+    "back": "Назад в маркетплейс",
+    "backAria": "Назад",
+    "browseTitle": "Маркетплейс",
+    "browseSubtitle": "Находите и устанавливайте коннекторы для вашего ИИ-персонажа.",
+    "searchPlaceholder": "Поиск коннекторов…",
+    "searchAria": "Поиск",
+    "all": "Все",
+    "native": "Нативный",
+    "connected": "Подключено",
+    "comingSoon": "Скоро",
+    "configure": "Настроить",
+    "addIntegration": "Добавить интеграцию",
+    "whatItDoes": "Что умеет этот коннектор",
+    "category": "Категория",
+    "type": "Тип",
+    "thirdParty": "Сторонний",
+    "auth": "Авторизация",
+    "developer": "Разработчик",
+    "resources": "Ресурсы",
+    "website": "Сайт",
+    "noResources": "Нет внешних ресурсов",
+    "by": "от",
+    "authApiKey": "API-ключ",
+    "authWebhook": "Webhook",
+    "authNone": "Без авторизации"
   }
 }

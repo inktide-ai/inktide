@@ -56,6 +56,7 @@
     "entities",
     "shared",
     "widgets",
+    "types",
     "next.config.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"

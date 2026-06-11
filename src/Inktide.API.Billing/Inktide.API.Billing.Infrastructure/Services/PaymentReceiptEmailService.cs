@@ -26,34 +26,27 @@ public sealed class PaymentReceiptEmailService : IPaymentReceiptEmailService
     public async Task SendReceiptAsync(string userEmail, string planName, string provider,
                                        DateTime periodEnd, CancellationToken ct = default)
     {
-        try
-        {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(_smtp.FromName, _smtp.FromAddress));
-            message.To.Add(MailboxAddress.Parse(userEmail));
-            message.Subject = "Подписка Inktide активирована";
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(_smtp.FromName, _smtp.FromAddress));
+        message.To.Add(MailboxAddress.Parse(userEmail));
+        message.Subject = "Подписка Inktide активирована";
 
-            var builder = new BodyBuilder { HtmlBody = BuildHtml(planName, provider, periodEnd, _billing.BillingPortalUrl) };
-            message.Body = builder.ToMessageBody();
+        var builder = new BodyBuilder { HtmlBody = BuildHtml(planName, provider, periodEnd, _billing.BillingPortalUrl) };
+        message.Body = builder.ToMessageBody();
 
-            using var client = new SmtpClient();
-            await client.ConnectAsync(_smtp.Host, _smtp.Port,
-                _smtp.Port == 465
-                    ? SecureSocketOptions.SslOnConnect
-                    : SecureSocketOptions.StartTlsWhenAvailable, ct).ConfigureAwait(false);
+        using var client = new SmtpClient();
+        await client.ConnectAsync(_smtp.Host, _smtp.Port,
+            _smtp.Port == 465
+                ? SecureSocketOptions.SslOnConnect
+                : SecureSocketOptions.StartTlsWhenAvailable, ct).ConfigureAwait(false);
 
-            if (!string.IsNullOrEmpty(_smtp.Username))
-                await client.AuthenticateAsync(_smtp.Username, _smtp.Password, ct).ConfigureAwait(false);
+        if (!string.IsNullOrEmpty(_smtp.Username))
+            await client.AuthenticateAsync(_smtp.Username, _smtp.Password, ct).ConfigureAwait(false);
 
-            await client.SendAsync(message, ct).ConfigureAwait(false);
-            await client.DisconnectAsync(true, ct).ConfigureAwait(false);
+        await client.SendAsync(message, ct).ConfigureAwait(false);
+        await client.DisconnectAsync(true, ct).ConfigureAwait(false);
 
-            _logger.LogInformation("Payment receipt sent to {Email} for plan {Plan}", userEmail, planName);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to send payment receipt to {Email}", userEmail);
-        }
+        _logger.LogInformation("Payment receipt sent to {Email} for plan {Plan}", userEmail, planName);
     }
 
     private static string BuildHtml(string planName, string provider, DateTime periodEnd, string billingPortalUrl) => $"""

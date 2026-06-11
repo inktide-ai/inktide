@@ -12,8 +12,7 @@ namespace Inktide.API.TTS.Infrastructure.GoogleCloud;
 public sealed class GoogleCloudTtsClient
 {
 
-    // Race: two threads may both call CreateTransient() before the first stores;
-    // at most one extra gRPC channel is created and discarded — acceptable at startup.
+    // Race: two threads may both call CreateTransient() before the first stores.
     private TextToSpeechClient? _cachedClient;
 
 

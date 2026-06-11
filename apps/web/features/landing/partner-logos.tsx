@@ -1,4 +1,5 @@
 import { getTranslations } from '@/lib/i18n-server'
+import { sectionContainer } from './section-container'
 
 const LLM_MODELS = [
   { name: 'Gemini',   url: 'https://ai.google.dev',    logo: '/images/partners/gemini.svg',   style: { marginBottom: '10px' } },
@@ -12,7 +13,7 @@ export default async function PartnerLogos() {
   return (
     <section className="w-full py-4 bg-[var(--bg-dark)]">
       <div className={[
-        'max-w-[1200px] mx-auto px-6',
+        sectionContainer,
         'grid grid-cols-1 gap-5',
         'lg:grid-cols-[160px_1fr] lg:items-center',
       ].join(' ')}>

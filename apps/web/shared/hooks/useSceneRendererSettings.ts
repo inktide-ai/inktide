@@ -1,82 +1,93 @@
 'use client'
 import { useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useDebouncedCallback } from 'use-debounce'
+import {
+  getProjectSceneConfig,
+  patchProjectSceneConfig,
+} from '@/features/projects/api/projects'
+import { queryKeys } from '@/shared/lib/query/keys'
 import type { LookAtMode } from '@/shared/types/IVrmController'
-import { useWorkspacePreferences, useDebouncedWorkspacePatch } from './useWorkspacePreferences'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface SceneRendererSettings {
-  // Model transform
-  posX: number
-  posY: number
-  posZ: number
-  rotY: number           // degrees 0–360
-  // Camera
-  fov: number            // degrees 10–120
-  cameraDistance: number // 0.5–10
-  renderScale: number    // 0.5–3.0
-  // Eye tracking
-  lookAtMode: LookAtMode
-  // Breast jiggle
-  jiggleEnabled: boolean
-  jiggleMult: number
-  // Directional light
-  dirLightIntensity: number  // 0–5
-  dirLightColor: string      // hex
-  dirLightRotX: number       // degrees 0–360
-  dirLightRotY: number       // degrees 0–360
-  // Ambient light
-  ambientIntensity: number   // 0–5
-  ambientColor: string       // hex
+  position:         { posX: number; posY: number; posZ: number; rotY: number }
+  camera:           { fov: number; cameraDistance: number; renderScale: number; lookAtMode: LookAtMode }
+  animations:       { randomAnimationsEnabled: boolean }
+  breastPhysics:    { jiggleEnabled: boolean; jiggleMult: number }
+  directionalLight: { intensity: number; color: string; rotX: number; rotY: number }
+  ambientLight:     { intensity: number; color: string }
 }
 
-// ── Defaults (must match VrmRenderer initial Three.js state) ──────────────────
 
 export const SCENE_RENDERER_DEFAULTS: SceneRendererSettings = {
-  posX: 0,
-  posY: 0,
-  posZ: 0,
-  rotY: 0,
-  fov: 30,
-  cameraDistance: 2.5,
-  renderScale: 1.0,
-  lookAtMode: 'camera',
-  jiggleEnabled: false,
-  jiggleMult: 1.0,
-  dirLightIntensity: 1.0,
-  dirLightColor: '#ffffff',
-  dirLightRotX: 30,
-  dirLightRotY: 45,
-  ambientIntensity: 1.5,
-  ambientColor: '#ffffff',
+  position:         { posX: 0, posY: 0, posZ: 0, rotY: 0 },
+  camera:           { fov: 30, cameraDistance: 2.5, renderScale: 1.0, lookAtMode: 'camera' },
+  animations:       { randomAnimationsEnabled: false },
+  breastPhysics:    { jiggleEnabled: false, jiggleMult: 1.0 },
+  directionalLight: { intensity: 1.0, color: '#ffffff', rotX: 30, rotY: 45 },
+  ambientLight:     { intensity: 1.5, color: '#ffffff' },
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
 
-export function useSceneRendererSettings(cardId: string) {
-  const { data } = useWorkspacePreferences(cardId)
-  const dispatch = useDebouncedWorkspacePatch(cardId, 200)
+export function useSceneRendererSettings(projectId: string) {
+  const queryClient = useQueryClient()
+  const qKey = queryKeys.projects.sceneConfig(projectId)
+
+  const { data } = useQuery({
+    queryKey: qKey,
+    queryFn:  () => getProjectSceneConfig(projectId),
+    enabled:  !!projectId,
+    staleTime: 30_000,
+  })
 
   const settings: SceneRendererSettings = (() => {
     try {
-      const raw = data?.sceneSettings
+      const raw = data?.scene_config
       if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-        return { ...SCENE_RENDERER_DEFAULTS, ...(raw as Partial<SceneRendererSettings>) }
+        const r = raw as Partial<SceneRendererSettings>
+        return {
+          position:         { ...SCENE_RENDERER_DEFAULTS.position,         ...(r.position         ?? {}) },
+          camera:           { ...SCENE_RENDERER_DEFAULTS.camera,           ...(r.camera           ?? {}) },
+          animations:       { ...SCENE_RENDERER_DEFAULTS.animations,       ...(r.animations       ?? {}) },
+          breastPhysics:    { ...SCENE_RENDERER_DEFAULTS.breastPhysics,    ...(r.breastPhysics    ?? {}) },
+          directionalLight: { ...SCENE_RENDERER_DEFAULTS.directionalLight, ...(r.directionalLight ?? {}) },
+          ambientLight:     { ...SCENE_RENDERER_DEFAULTS.ambientLight,     ...(r.ambientLight     ?? {}) },
+        }
       }
     } catch { /* ignore */ }
     return SCENE_RENDERER_DEFAULTS
   })()
 
+  const { mutate } = useMutation({
+    mutationFn: (patch: SceneRendererSettings) => patchProjectSceneConfig(projectId, patch),
+    onMutate: async (optimistic) => {
+      await queryClient.cancelQueries({ queryKey: qKey })
+      const prev = queryClient.getQueryData(qKey)
+      queryClient.setQueryData(qKey, (old: typeof data) => old ? { ...old, scene_config: optimistic } : old)
+      return { prev }
+    },
+    onError: (_, __, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(qKey, ctx.prev)
+    },
+  })
+
+  const debouncedMutate = useDebouncedCallback((merged: SceneRendererSettings) => mutate(merged), 200)
+
   const setSettings = useCallback(
     (patch: Partial<SceneRendererSettings>) => {
-      dispatch({ sceneSettings: { ...settings, ...patch } })
+      const merged = { ...settings }
+      for (const key of Object.keys(patch) as (keyof SceneRendererSettings)[]) {
+        merged[key] = { ...(settings[key] as object), ...(patch[key] as object) } as never
+      }
+      debouncedMutate(merged)
     },
-    [dispatch, settings],
+    [debouncedMutate, settings],
   )
 
   const resetSettings = useCallback(() => {
-    dispatch({ sceneSettings: SCENE_RENDERER_DEFAULTS })
-  }, [dispatch])
+    mutate(SCENE_RENDERER_DEFAULTS)
+  }, [mutate])
 
   return { settings, setSettings, resetSettings }
 }

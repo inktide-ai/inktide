@@ -8,7 +8,7 @@ export async function getPublicActivity(
   if (params.limit !== undefined) qs.set('limit', String(params.limit))
   if (params.cursor) qs.set('cursor', params.cursor)
 
-  const res = await fetch(`/api/soul/public/${encodeURIComponent(slug)}/activity?${qs}`)
+  const res = await fetch(`/api/v1/souls/public/${encodeURIComponent(slug)}/activity?${qs}`)
   if (!res.ok) throw new Error(`Activity feed error: ${res.status}`)
   return res.json() as Promise<SoulActivityFeedPage>
 }

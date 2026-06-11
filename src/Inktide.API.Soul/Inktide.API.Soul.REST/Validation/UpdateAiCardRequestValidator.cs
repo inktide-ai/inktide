@@ -11,12 +11,6 @@ public sealed class UpdateAiCardRequestValidator : AbstractValidator<UpdateAiCar
         When(x => x.Name is not null, () =>
             RuleFor(x => x.Name!).NotEmpty().MaximumLength(100));
 
-        When(x => x.SystemPrompt is not null, () =>
-            RuleFor(x => x.SystemPrompt!).NotEmpty().MaximumLength(10_000));
-
-        When(x => x.Personality is not null, () =>
-            RuleFor(x => x.Personality!).MaximumLength(1000));
-
         When(x => x.LlmConfig is not null, () =>
         {
             RuleFor(x => x.LlmConfig!.Temperature).InclusiveBetween(0.0, 2.0);
@@ -27,6 +21,14 @@ public sealed class UpdateAiCardRequestValidator : AbstractValidator<UpdateAiCar
         When(x => x.TtsConfig is not null, () =>
         {
             RuleFor(x => x.TtsConfig!.Speed).InclusiveBetween(0.1, 4.0);
+        });
+
+        When(x => x.Tags is not null, () =>
+        {
+            RuleFor(x => x.Tags!)
+                .Must(tags => tags.Count <= 50).WithMessage("tags must not exceed 50 entries.");
+            RuleForEach(x => x.Tags!)
+                .MaximumLength(64).WithMessage("Each tag must be at most 64 characters.");
         });
     }
 

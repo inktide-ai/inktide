@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using Inktide.API.Connector.Application.Contracts;
 using Inktide.API.Connector.Application.Interfaces;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Connector.InktideChat;
@@ -29,6 +30,7 @@ public sealed class InktideChatConnector : IChatConnector, IInktideChatInbox, IA
     private readonly IStreamMessageHandler _handler;
     private readonly IInktideChatMessageMapper _mapper;
     private readonly ILogger<InktideChatConnector> _logger;
+    private readonly IHostApplicationLifetime _lifetime;
     private readonly Channel<InboundMessage> _queue;
 
     private CancellationTokenSource? _cts;
@@ -44,11 +46,13 @@ public sealed class InktideChatConnector : IChatConnector, IInktideChatInbox, IA
     public InktideChatConnector(
         IStreamMessageHandler handler,
         IInktideChatMessageMapper mapper,
-        ILogger<InktideChatConnector> logger)
+        ILogger<InktideChatConnector> logger,
+        IHostApplicationLifetime lifetime)
     {
-        _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-        _mapper  = mapper  ?? throw new ArgumentNullException(nameof(mapper));
-        _logger  = logger  ?? throw new ArgumentNullException(nameof(logger));
+        _handler  = handler  ?? throw new ArgumentNullException(nameof(handler));
+        _mapper   = mapper   ?? throw new ArgumentNullException(nameof(mapper));
+        _logger   = logger   ?? throw new ArgumentNullException(nameof(logger));
+        _lifetime = lifetime ?? throw new ArgumentNullException(nameof(lifetime));
 
         // DropWrite: TryWrite returns false when the buffer is full, giving callers an accurate
         // backpressure signal. DropNewest/DropOldest silently evict items inside the channel and
@@ -83,8 +87,11 @@ public sealed class InktideChatConnector : IChatConnector, IInktideChatInbox, IA
             return Task.CompletedTask;
         }
 
-        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        _worker = Task.Run(() => ConsumeLoopAsync(_cts.Token), CancellationToken.None);
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _lifetime.ApplicationStopping);
+        // Capture token by value before Task.Run to prevent NullReferenceException if DisconnectAsync
+        // nulls out _cts before the thread-pool thread executes the lambda.
+        var token = _cts.Token;
+        _worker = Task.Run(() => ConsumeLoopAsync(token), CancellationToken.None);
 
         _logger.LogInformation("[InktideChat] Connector started.");
         return Task.CompletedTask;

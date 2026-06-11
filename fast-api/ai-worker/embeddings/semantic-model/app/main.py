@@ -5,7 +5,7 @@ from fastapi.routing import APIRoute
 
 from app.api.main import api_router
 from app.core.config import settings
-from app.services.embeddings import warm_up_model
+from app.services.embeddings import warm_up_model, shutdown
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -15,7 +15,10 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     warm_up_model()
-    yield
+    try:
+        yield
+    finally:
+        shutdown()
 
 
 app = FastAPI(

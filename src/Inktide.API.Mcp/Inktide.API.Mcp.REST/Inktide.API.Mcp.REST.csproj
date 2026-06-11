@@ -10,7 +10,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <!-- Brings in ModelContextProtocol transitively -->
-    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="1.3.*" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>

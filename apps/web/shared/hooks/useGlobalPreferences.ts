@@ -8,7 +8,6 @@ import {
 import { queryKeys } from '@/shared/lib/query/keys'
 import { useAuth } from '@/shared/services/auth'
 
-// ── localStorage cache keys (warm paint before React hydrates) ─────────────────
 
 const CACHE_KEY = 'inktide_global_prefs_cache'
 const MIGRATION_FLAG = 'prefs_migrated'
@@ -82,7 +81,6 @@ async function fetchWithMigration(): Promise<GlobalPreferencesDto> {
   return data
 }
 
-// ── Hooks ──────────────────────────────────────────────────────────────────────
 
 export function useGlobalPreferences() {
   const { isInitialized, isLoggedIn } = useAuth()

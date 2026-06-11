@@ -1,0 +1,196 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <!-- AWS -->
+  <ItemGroup>
+    <PackageVersion Include="AWSSDK.S3" Version="3.7.407" />
+  </ItemGroup>
+
+  <!-- DryIoc -->
+  <ItemGroup>
+    <PackageVersion Include="DryIoc.dll" Version="5.4.0" />
+    <PackageVersion Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0" />
+  </ItemGroup>
+
+  <!-- FluentValidation -->
+  <ItemGroup>
+    <PackageVersion Include="FluentValidation" Version="11.5.1" />
+    <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+  </ItemGroup>
+
+  <!-- Flurl -->
+  <ItemGroup>
+    <PackageVersion Include="Flurl" Version="4.0.0" />
+  </ItemGroup>
+
+  <!-- Google -->
+  <ItemGroup>
+    <PackageVersion Include="Google.Cloud.TextToSpeech.V1" Version="3.18.0" />
+    <PackageVersion Include="Google.Protobuf" Version="3.28.3" />
+  </ItemGroup>
+
+  <!-- gRPC -->
+  <ItemGroup>
+    <PackageVersion Include="Grpc.AspNetCore" Version="2.67.0" />
+    <PackageVersion Include="Grpc.AspNetCore.Server.Reflection" Version="2.67.0" />
+    <PackageVersion Include="Grpc.Core.Api" Version="2.67.0" />
+    <PackageVersion Include="Grpc.Tools" Version="2.67.0" />
+  </ItemGroup>
+
+  <!-- Health Checks -->
+  <ItemGroup>
+    <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
+  </ItemGroup>
+
+  <!-- Mail -->
+  <ItemGroup>
+    <PackageVersion Include="MailKit" Version="4.9.0" />
+  </ItemGroup>
+
+  <!-- MassTransit -->
+  <ItemGroup>
+    <PackageVersion Include="MassTransit" Version="8.0.16" />
+    <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="8.0.16" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="8.0.16" />
+  </ItemGroup>
+
+  <!-- MCP -->
+  <ItemGroup>
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="1.3.0" />
+  </ItemGroup>
+
+  <!-- Microsoft.AspNetCore -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.3" />
+  </ItemGroup>
+
+  <!-- Microsoft.EntityFrameworkCore -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.0" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+  </ItemGroup>
+
+  <!-- Microsoft.Extensions.AI -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.6.0" />
+  </ItemGroup>
+
+  <!-- Microsoft.Extensions.Caching -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0" />
+  </ItemGroup>
+
+  <!-- Microsoft.Extensions.Configuration -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
+  </ItemGroup>
+
+  <!-- Microsoft.Extensions.DependencyInjection -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
+  </ItemGroup>
+
+  <!-- Microsoft.Extensions.Hosting -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.4" />
+  </ItemGroup>
+
+  <!-- Microsoft.Extensions.Http -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="10.0.0" />
+  </ItemGroup>
+
+  <!-- Microsoft.Extensions.Logging -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="10.0.3" />
+  </ItemGroup>
+
+  <!-- Microsoft.Extensions.Options -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.4" />
+  </ItemGroup>
+
+  <!-- Microsoft.SemanticKernel -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.77.0" />
+  </ItemGroup>
+
+  <!-- Newtonsoft -->
+  <ItemGroup>
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <!-- OpenAI -->
+  <ItemGroup>
+    <PackageVersion Include="OpenAI" Version="2.10.0" />
+  </ItemGroup>
+
+  <!-- OpenTelemetry -->
+  <ItemGroup>
+    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.15.3-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1" />
+  </ItemGroup>
+
+  <!-- Qdrant -->
+  <ItemGroup>
+    <PackageVersion Include="Qdrant.Client" Version="1.18.1" />
+  </ItemGroup>
+
+  <!-- Redis -->
+  <ItemGroup>
+    <PackageVersion Include="StackExchange.Redis" Version="2.8.24" />
+  </ItemGroup>
+
+  <!-- Serilog -->
+  <ItemGroup>
+    <PackageVersion Include="Serilog" Version="4.2.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="8.0.4" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
+  </ItemGroup>
+
+  <!-- SixLabors -->
+  <ItemGroup>
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
+  </ItemGroup>
+
+  <!-- Connectors -->
+  <ItemGroup>
+    <PackageVersion Include="Discord.Net" Version="3.17.4" />
+    <PackageVersion Include="TwitchLib.Client" Version="4.0.1" />
+  </ItemGroup>
+
+  <!-- Testing -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+</Project>

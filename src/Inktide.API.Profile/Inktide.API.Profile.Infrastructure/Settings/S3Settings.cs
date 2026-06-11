@@ -7,7 +7,7 @@ public sealed class S3Settings
 {
 
     private bool _enabled;
-    private string _serviceUrl = "http://127.0.0.1:9000";
+    private string _serviceUrl = string.Empty;
     private string _accessKey = string.Empty;
     private string _secretKey = string.Empty;
     private string _defaultBucket = string.Empty;

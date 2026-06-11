@@ -1,7 +1,7 @@
 import { apiFetch, jsonOrThrow } from '@/api/client'
 
 export async function requestEmailChange(newEmail: string): Promise<void> {
-  const res = await apiFetch('/api/me/email/request', {
+  const res = await apiFetch('/api/v1/me/email-change/request', {
     method: 'POST',
     body: JSON.stringify({ newEmail }),
   })
@@ -12,7 +12,7 @@ export async function requestEmailChange(newEmail: string): Promise<void> {
 }
 
 export async function verifyEmailChange(code: string): Promise<{ newEmail: string }> {
-  const res = await apiFetch('/api/me/email/verify', {
+  const res = await apiFetch('/api/v1/me/email-change/verify', {
     method: 'POST',
     body: JSON.stringify({ code }),
   })

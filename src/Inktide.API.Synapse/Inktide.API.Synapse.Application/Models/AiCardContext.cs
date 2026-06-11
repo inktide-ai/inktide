@@ -40,6 +40,8 @@ public sealed record AiCardContext(
     int ResponseDelayMs = 0,
     /// <summary>Per-card base URL override — wins over global BYOK credential base URL.</summary>
     string? LlmBaseUrl = null,
+    /// <summary>False for local/self-hosted providers (Ollama, LM Studio) that need no API key.</summary>
+    bool LlmRequiresApiKey = true,
     /// <summary>Multiplier applied to raw emotion intensity (0 = no emotion, 1 = normal, 2 = amplified).</summary>
     float EmotionIntensityScale = 1.0f,
     /// <summary>Natural-language personality directive block injected into the LLM system prompt. Null = no personality configured.</summary>
@@ -57,4 +59,8 @@ public sealed record AiCardContext(
     /// <summary>Whether the Screen Awareness feature is enabled for this AI card.</summary>
     bool ScreenAwarenessEnabled = false,
     /// <summary>Per-project plugin configuration. Default ON when empty (backwards compatible).</summary>
-    IReadOnlyList<ProjectPluginDto>? Plugins = null);
+    IReadOnlyList<ProjectPluginDto>? Plugins = null,
+    /// <summary>Per-soul TTS endpoint override (e.g. self-hosted Kokoro). Null = use globally configured endpoint.</summary>
+    string? TtsBaseUrl = null,
+    /// <summary>Pre-serialized JSON of provider-specific TTS params (stability, pitch, etc.). Opaque to intermediate pipeline layers.</summary>
+    string? TtsProviderParamsJson = null);

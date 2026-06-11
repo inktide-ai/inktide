@@ -1,4 +1,4 @@
-using Inktide.API.Soul.Domain.Repositories;
+using Inktide.API.Connector.Application.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -22,9 +22,9 @@ internal sealed class TwitchChannelRegistryLoader(
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
-        var repo = scope.ServiceProvider.GetRequiredService<IAiCardChannelRepository>();
+        var channelService = scope.ServiceProvider.GetRequiredService<IConnectorChannelService>();
 
-        var channels = await repo.GetActiveByPlatformAsync(TwitchConnector.PlatformIdValue, cancellationToken)
+        var channels = await channelService.GetActivePlatformChannelsAsync(TwitchConnector.PlatformIdValue, cancellationToken)
             .ConfigureAwait(false);
 
         var logins = channels

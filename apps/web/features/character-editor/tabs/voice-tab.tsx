@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { SANDBOX_ROUTE, profileSettingsPath } from '@/lib/routes'
+import { SANDBOX_ROUTE } from '@/lib/routes'
 import type { AiCharacter } from '@/shared/lib/character'
 import VoiceSandboxTab from './voice-sandbox-tab'
 import { KokoroPanel } from './voice/panels/kokoro-panel'
@@ -66,7 +66,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
   ], [t])
 
   if (providerId === 'sandbox') {
-    return <VoiceSandboxTab character={character} onBack={() => router.push(profileSettingsPath('voice'))} />
+    return <VoiceSandboxTab character={character} onBack={() => router.back()} />
   }
 
   if (providerId) {
@@ -74,7 +74,7 @@ const VoiceTab = ({ character, onUpdate }: VoiceTabProps) => {
     return (
       <div className="flex flex-col gap-6 max-w-[840px] mx-auto w-full">
         <div className="flex items-center gap-3 mb-7 pb-4 border-b border-white/[0.06]">
-          <button type="button" className="flex items-center justify-center w-7 h-7 bg-white/[0.04] border border-[var(--panel-input-border)] rounded-[6px] text-white/45 cursor-pointer transition-all duration-[120ms] ease shrink-0 hover:border-[var(--panel-input-border-hover)] hover:text-white/85 hover:bg-white/[0.07]" onClick={() => router.push(profileSettingsPath('voice'))} aria-label={t('back')}>
+          <button type="button" className="flex items-center justify-center w-7 h-7 bg-white/[0.04] border border-[var(--panel-input-border)] rounded-[6px] text-white/45 cursor-pointer transition-all duration-[120ms] ease shrink-0 hover:border-[var(--panel-input-border-hover)] hover:text-white/85 hover:bg-white/[0.07]" onClick={() => router.back()} aria-label={t('back')}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7L9 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
           {provider && (

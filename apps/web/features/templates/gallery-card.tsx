@@ -80,7 +80,7 @@ export function GalleryCard({ template, onPreview, onEdit, onDelete }: GalleryCa
       </div>
 
       <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs text-[var(--text-tertiary)]">{template.tagline}</span>
+        <span className="text-xs text-[var(--text-tertiary)]">{t(template.tagline)}</span>
         <button
           type="button"
           onClick={onPreview}

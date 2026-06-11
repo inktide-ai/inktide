@@ -1,5 +1,4 @@
 using Inktide.API.Soul.Application.Interfaces;
-using Inktide.API.Soul.Domain.Repositories;
 using Inktide.API.Soul.REST.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,18 +10,18 @@ namespace Inktide.API.Soul.REST.Controllers;
 /// Unauthenticated public profile endpoints — no credentials or private config exposed.
 /// </summary>
 [ApiController]
-[Route("api/soul/public")]
+[Route("api/v1/souls/public")]
 [Produces("application/json")]
 [AllowAnonymous]
 public sealed class PublicAiCardsController : ControllerBase
 {
-    private readonly IAiCardRepository _repo;
+    private readonly IAiCardService _cards;
     private readonly ISoulActivityFeedService _feed;
 
-    public PublicAiCardsController(IAiCardRepository repo, ISoulActivityFeedService feed)
+    public PublicAiCardsController(IAiCardService cards, ISoulActivityFeedService feed)
     {
-        _repo = repo ?? throw new ArgumentNullException(nameof(repo));
-        _feed = feed ?? throw new ArgumentNullException(nameof(feed));
+        _cards = cards ?? throw new ArgumentNullException(nameof(cards));
+        _feed  = feed  ?? throw new ArgumentNullException(nameof(feed));
     }
 
     /// <summary>Returns public soul profile data by slug (no auth required).</summary>
@@ -31,15 +30,9 @@ public sealed class PublicAiCardsController : ControllerBase
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetBySlug(string slug, CancellationToken ct = default)
     {
-        var card = await _repo.GetPublicBySlugAsync(slug, ct);
+        var card = await _cards.GetPublicBySlugAsync(slug, ct);
         if (card is null)
             return NotFound(ApiErrorResponse.From("Soul not found.", ErrorCodes.NotFound));
-
-        var platforms = (card.Channels ?? [])
-            .Where(c => c.IsActive)
-            .Select(c => c.Platform)
-            .Distinct()
-            .ToList();
 
         return Ok(new PublicAiCardResponse
         {
@@ -49,10 +42,8 @@ public sealed class PublicAiCardsController : ControllerBase
             Description = card.Description,
             AvatarUrl   = card.AvatarUrl,
             CoverUrl    = card.CoverUrl,
-            Personality = card.Personality,
             Status      = card.Status.ToString().ToLowerInvariant(),
             IsActive    = card.IsActive,
-            Platforms   = platforms,
             CreatedAt   = card.CreatedAt,
         });
     }
@@ -67,7 +58,7 @@ public sealed class PublicAiCardsController : ControllerBase
         [FromQuery] string? cursor = null,
         CancellationToken ct = default)
     {
-        var card = await _repo.GetPublicBySlugAsync(slug, ct);
+        var card = await _cards.GetPublicBySlugAsync(slug, ct);
         if (card is null)
             return NotFound(ApiErrorResponse.From("Soul not found.", ErrorCodes.NotFound));
 

@@ -1,11 +1,16 @@
 'use client'
 
-import { Star } from 'lucide-react'
+import { useState } from 'react'
+import { Star, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/shared/ui/card'
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+  Dialog, DialogContent, DialogTitle, DialogDescription,
+} from '@/shared/ui'
 import type { SoulCardData, SoulStatus } from './soul-card'
+import { SoulAvatar } from './soul-avatar'
 
-// ── Status config ─────────────────────────────────────────────────────────────
 
 const STATUS_DOT: Record<SoulStatus, string> = {
   online:  '#22c55e',
@@ -14,7 +19,6 @@ const STATUS_DOT: Record<SoulStatus, string> = {
   offline: '#9ca3af',
 }
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const IcDots = () => (
   <svg width={14} height={14} viewBox="0 0 30 24" fill="none" aria-hidden>
@@ -24,17 +28,18 @@ const IcDots = () => (
   </svg>
 )
 
-// ── Component ─────────────────────────────────────────────────────────────────
 
 interface SoulCardVerticalProps {
   data: SoulCardData
   isFavorite: boolean
   onFavoriteToggle: () => void
   onOpen: () => void
+  onDelete?: () => void
 }
 
-export function SoulCardVertical({ data, isFavorite, onFavoriteToggle, onOpen }: SoulCardVerticalProps) {
+export function SoulCardVertical({ data, isFavorite, onFavoriteToggle, onOpen, onDelete }: SoulCardVerticalProps) {
   const { t } = useTranslation('common')
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const STATUS_LABEL: Record<SoulStatus, string> = {
     online:  t('soulCard.online'),
@@ -50,12 +55,12 @@ export function SoulCardVertical({ data, isFavorite, onFavoriteToggle, onOpen }:
     >
       {/* Image area */}
       <div className="relative h-[180px] overflow-hidden rounded-t-2xl">
-        <img
-          src={data.avatarUrl}
-          alt={data.name}
-          className="absolute inset-0 h-full w-full object-cover object-top"
+        <SoulAvatar
+          avatarUrl={data.avatarUrl}
+          name={data.name}
+          id={data.id}
+          imgClassName="absolute inset-0 h-full w-full object-cover object-top"
         />
-        {/* gradient for overlay readability */}
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/50 to-transparent" />
 
         {/* Status badge */}
@@ -94,15 +99,63 @@ export function SoulCardVertical({ data, isFavorite, onFavoriteToggle, onOpen }:
             {data.subtitle}
           </p>
         </div>
-        <button
-          type="button"
-          className="ml-2 flex-shrink-0 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-          title={t('soulCard.moreOptions')}
-        >
-          <IcDots />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              onClick={e => e.stopPropagation()}
+              className="ml-2 flex-shrink-0 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+              title={t('soulCard.moreOptions')}
+            >
+              <IcDots />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            onClick={e => e.stopPropagation()}
+            className="min-w-[140px] rounded-xl border border-[var(--border-subtle)] bg-[var(--menu-panel-bg)] p-1 shadow-[var(--menu-panel-shadow)]"
+          >
+            <DropdownMenuItem
+              onSelect={() => setConfirmOpen(true)}
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-400 outline-none hover:bg-[var(--surface-2)] focus:bg-[var(--surface-2)]"
+            >
+              <Trash2 size={13} />
+              {t('soulCard.delete', 'Delete')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
+      {/* Confirm delete — DialogContent renders via Portal outside this Card */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent
+          onClick={e => e.stopPropagation()}
+          className="fixed left-1/2 top-1/2 z-[2001] w-[min(400px,95vw)] -translate-x-1/2 -translate-y-1/2 rounded-[14px] border border-[var(--border-subtle)] bg-[var(--menu-panel-bg)] p-6 shadow-[var(--menu-panel-shadow)] outline-none"
+        >
+          <DialogTitle className="text-base font-semibold text-[var(--text-primary)]">
+            {t('soulCard.deleteConfirmTitle', 'Delete soul?')}
+          </DialogTitle>
+          <DialogDescription className="mt-2 text-sm text-[var(--text-secondary)]">
+            {t('soulCard.deleteConfirmBody', '«{{name}}» will be permanently deleted. This action cannot be undone.', { name: data.name })}
+          </DialogDescription>
+          <div className="mt-5 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmOpen(false)}
+              className="h-9 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-4 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+            >
+              {t('actions.cancel', 'Cancel')}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setConfirmOpen(false); onDelete?.() }}
+              className="h-9 rounded-lg bg-red-500 px-4 text-sm font-medium text-white hover:bg-red-600"
+            >
+              {t('actions.delete', 'Delete')}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

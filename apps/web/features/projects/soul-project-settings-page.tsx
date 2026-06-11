@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useClipboard } from '@/shared/hooks/useClipboard'
 import { useParams, useRouter } from 'next/navigation'
 import { Check, Copy, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +10,8 @@ import {
   type Project, type ProjectActiveSoul,
 } from '@/features/projects'
 import { SoulBindingPicker } from '@/features/projects'
+import { handleError } from '@/shared/lib/handle-error'
+import { PageContent } from '@/shared/ui'
 
 function SaveButton({ saving, disabled, onClick }: { saving: boolean; disabled?: boolean; onClick: () => void }) {
   const { t } = useTranslation('common')
@@ -60,7 +63,7 @@ export default function SoulProjectSettingsPage() {
   const [status, setStatus]             = useState<'active' | 'paused' | 'archived'>('active')
   const [savingStatus, setSavingStatus] = useState(false)
   const [activeSoul, setActiveSoul]     = useState<ProjectActiveSoul | null>(null)
-  const [copied, setCopied]             = useState(false)
+  const { copied, copy: copyId }        = useClipboard(1500)
   const [deleting, setDeleting]         = useState(false)
 
   useEffect(() => {
@@ -72,7 +75,7 @@ export default function SoulProjectSettingsPage() {
         setStatus(p.status)
         setActiveSoul(p.active_soul)
       })
-      .catch(console.error)
+      .catch(handleError)
       .finally(() => setLoading(false))
   }, [projectId])
 
@@ -100,9 +103,9 @@ export default function SoulProjectSettingsPage() {
     finally { setSavingStatus(false) }
   }
 
-  function copyId() {
+  function handleCopyId() {
     if (!project) return
-    navigator.clipboard.writeText(project.id).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500) })
+    copyId(project.id)
   }
 
   async function handleDelete() {
@@ -117,7 +120,7 @@ export default function SoulProjectSettingsPage() {
   if (!project) return <div className="p-8 text-body text-[var(--text-secondary)]">{t('projectDetail.projectNotFound')}</div>
 
   return (
-    <div className="mx-auto max-w-[1100px] px-6 py-8">
+    <PageContent>
       <div className="flex gap-12">
         <div className="flex-1 space-y-4" id="general">
 
@@ -136,7 +139,7 @@ export default function SoulProjectSettingsPage() {
               <div className="flex-1 overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2">
                 <span className="font-mono text-body text-[var(--text-secondary)]">{project.id}</span>
               </div>
-              <button type="button" onClick={copyId} title={t('projectDetail.copyId')}
+              <button type="button" onClick={handleCopyId} title={t('projectDetail.copyId')}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]">
                 {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
               </button>
@@ -184,6 +187,6 @@ export default function SoulProjectSettingsPage() {
 
         </div>
       </div>
-    </div>
+    </PageContent>
   )
 }

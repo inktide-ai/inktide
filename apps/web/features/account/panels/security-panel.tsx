@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/shared/services/auth'
 import { ROOT_ROUTE } from '@/lib/routes'
-import { keycloak } from '@/lib/keycloak'
+import { signIn } from 'next-auth/react'
 import {
   getKcCredentials,
   revokeAllKcSessions,
@@ -61,12 +61,11 @@ export default function SecurityPanel() {
   }, [logout, router])
 
   function handleSetupTOTP() {
-    keycloak.login({ action: 'CONFIGURE_TOTP' })
+    void signIn('keycloak', { callbackUrl: window.location.pathname }, { kc_action: 'CONFIGURE_TOTP' })
   }
 
   return (
     <>
-      {/* ── Two-Step Verification ─────────────────────────────────────────── */}
       <div className="mt-[36px]" />
       <SectionHeader>{t('security.twoStep')}</SectionHeader>
 
@@ -123,7 +122,6 @@ export default function SecurityPanel() {
         />
       </div>
 
-      {/* ── Active Devices ────────────────────────────────────────────────── */}
       <div className="mt-[48px]" />
       <SectionHeader>{t('security.activeDevices')}</SectionHeader>
 
@@ -143,7 +141,6 @@ export default function SecurityPanel() {
         />
       </div>
 
-      {/* ── Danger zone ───────────────────────────────────────────────────── */}
       <div className="mt-[48px]" />
       <SectionHeader className="text-[var(--danger-text)]">{t('security.dangerZone')}</SectionHeader>
 

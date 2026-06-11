@@ -106,7 +106,6 @@ export default function ConnectionsPanel() {
         </div>
       )}
 
-      {/* ── Connected Accounts ────────────────────────────────────────────── */}
       <div className="mt-[36px]" />
       <SectionHeader>{t('connections.connectedAccounts')}</SectionHeader>
 
@@ -140,7 +139,6 @@ export default function ConnectionsPanel() {
         })}
       </div>
 
-      {/* ── Available Integrations ────────────────────────────────────────── */}
       <div className="mt-[48px]" />
       <SectionHeader>{t('connections.availableIntegrations')}</SectionHeader>
 

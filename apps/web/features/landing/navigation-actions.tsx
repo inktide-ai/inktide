@@ -1,10 +1,11 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { signIn, signOut } from 'next-auth/react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from 'next-themes'
-import { useAuth } from '@/shared/services/auth'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { HOME_ROUTE } from '@/lib/routes'
 
@@ -36,15 +37,28 @@ export interface NavItem {
 
 interface NavigationActionsProps {
   navItems: NavItem[]
+  isLoggedIn: boolean
+  userName: string | null
+  userPicture: string | null
 }
 
-export default function NavigationActions({ navItems }: NavigationActionsProps) {
+export default function NavigationActions({
+  navItems,
+  isLoggedIn,
+  userName,
+  userPicture,
+}: NavigationActionsProps) {
   const router = useRouter()
-  const { isLoggedIn, userEmail, user, loginWithKeycloak, registerWithKeycloak, logout } = useAuth()
   const { resolvedTheme, setTheme } = useTheme()
   const theme = resolvedTheme ?? 'dark'
   const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark')
   const [mobileOpen, setMobileOpen] = useState(false)
+  // next-themes: resolvedTheme is only known after mount. Render a stable
+  // (server-matching) icon/label until mounted to avoid a hydration mismatch.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  const themeLabel = mounted ? (theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode') : 'Toggle theme'
+  const ThemeIcon = mounted && theme !== 'dark' ? MoonIcon : SunIcon
   const { t, i18n: i18nInstance } = useTranslation('landing')
 
   const currentLang = i18nInstance.language?.startsWith('ru') ? 'ru' : 'en'
@@ -67,11 +81,11 @@ export default function NavigationActions({ navItems }: NavigationActionsProps) 
   }, [closeMobile, router])
 
   const avatarInitial =
-    (user?.nickname?.trim() || user?.userName || userEmail || '?')
+    (userName || '?')
       .replace(/^\./, '')
       .charAt(0)
       .toUpperCase() || '?'
-  const profileName = user?.nickname?.trim() || user?.userName || userEmail || 'Profile'
+  const profileName = userName || 'Profile'
 
   return (
     <>
@@ -97,10 +111,10 @@ export default function NavigationActions({ navItems }: NavigationActionsProps) 
         <button
           type="button"
           onClick={toggleTheme}
-          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={themeLabel}
           className="flex items-center justify-center w-[34px] h-[34px] bg-transparent border-none rounded-lg text-[var(--nav-theme-btn-color)] cursor-pointer flex-shrink-0 transition-[color,background] duration-[180ms] hover:text-[var(--nav-theme-btn-hover)] hover:bg-[var(--nav-item-hover-bg)]"
         >
-          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+          <ThemeIcon />
         </button>
 
         {isLoggedIn ? (
@@ -108,15 +122,15 @@ export default function NavigationActions({ navItems }: NavigationActionsProps) 
             <button
               type="button"
               className="flex items-center gap-2 py-[0.4rem] px-[0.875rem] bg-white/[0.08] border border-white/10 rounded-lg text-[var(--nav-login-color)] font-[family-name:var(--font-ui)] text-sm font-medium cursor-pointer transition-[background] duration-[180ms] hover:bg-white/[0.13]"
-              title={userEmail ?? undefined}
+              title={userName ?? undefined}
               onClick={() => router.push(HOME_ROUTE)}
             >
               <span
                 className="flex items-center justify-center w-6 h-6 rounded-full bg-[var(--accent-red)] text-xs font-bold text-white overflow-hidden flex-shrink-0"
                 aria-hidden
               >
-                {user?.pictureUrl ? (
-                  <img src={user.pictureUrl} alt="" className="w-full h-full object-cover block" />
+                {userPicture ? (
+                  <img src={userPicture as string} alt="" className="w-full h-full object-cover block" />
                 ) : (
                   avatarInitial
                 )}
@@ -125,8 +139,8 @@ export default function NavigationActions({ navItems }: NavigationActionsProps) 
             </button>
             <button
               type="button"
+              onClick={() => void signOut({ callbackUrl: '/' })}
               className="py-[0.45rem] px-[1.1rem] bg-transparent border border-[var(--nav-login-border)] rounded-lg text-[var(--nav-login-color)] font-[family-name:var(--font-ui)] text-sm font-medium cursor-pointer whitespace-nowrap transition-[border-color,color] duration-[180ms]"
-              onClick={logout}
             >
               {t('nav.logOut')}
             </button>
@@ -135,15 +149,15 @@ export default function NavigationActions({ navItems }: NavigationActionsProps) 
           <>
             <button
               type="button"
+              onClick={() => void signIn('keycloak', { callbackUrl: '/home' })}
               className="py-[0.45rem] px-[1.1rem] bg-transparent border border-[var(--nav-login-border)] rounded-lg text-[var(--nav-login-color)] font-[family-name:var(--font-ui)] text-sm font-medium cursor-pointer whitespace-nowrap transition-[border-color,background,color] duration-[180ms] hover:bg-[var(--nav-login-hover-bg)]"
-              onClick={loginWithKeycloak}
             >
               {t('nav.logIn')}
             </button>
             <button
               type="button"
+              onClick={() => void signIn('keycloak', { callbackUrl: '/home' })}
               className="py-[0.45rem] px-[1.1rem] bg-[var(--nav-signup-bg)] border-none rounded-lg text-[var(--nav-signup-color)] font-[family-name:var(--font-ui)] text-sm font-semibold cursor-pointer whitespace-nowrap transition-[background] duration-[180ms] hover:bg-[var(--nav-signup-hover-bg)]"
-              onClick={registerWithKeycloak}
             >
               {t('nav.signUpFree')}
             </button>
@@ -164,134 +178,142 @@ export default function NavigationActions({ navItems }: NavigationActionsProps) 
         <span className={cn('block w-full h-0.5 bg-[var(--nav-login-color)] rounded-[1px] transition-[transform,opacity] duration-300', mobileOpen && '-translate-y-[7px] -rotate-45')} />
       </button>
 
-      {/* Mobile backdrop */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-[999] bg-black/65 [backdrop-filter:blur(4px)] [-webkit-backdrop-filter:blur(4px)] lg:hidden"
-          onClick={closeMobile}
-          aria-hidden
-        />
-      )}
+      {/* Mobile full-width dropdown */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop — closes menu on outside click */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="fixed inset-0 top-[60px] z-[999] bg-black/30 lg:hidden"
+              onClick={closeMobile}
+              aria-hidden
+            />
 
-      {/* Mobile drawer */}
-      <div
-        className={cn(
-          'fixed top-0 right-0 bottom-0 z-[1001] w-[300px] max-w-[88vw]',
-          'bg-[var(--landing-drawer-bg)] border-l border-white/[0.07]',
-          'flex flex-col overflow-y-auto overflow-x-hidden',
-          'transition-transform duration-[350ms] [transition-timing-function:cubic-bezier(0.4,0,0.2,1)]',
-          'lg:hidden',
-          mobileOpen ? 'translate-x-0' : 'translate-x-full',
-        )}
-      >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] flex-shrink-0">
-          <a href="#" onClick={closeMobile} aria-label="inktide" className="flex items-center gap-[0.55rem] no-underline">
-            <img src="/logo/icon_main_white.svg" className="logo-dark  h-[22px] w-auto object-contain" alt="" aria-hidden />
-            <img src="/logo/icon_main.svg"       className="logo-light h-[22px] w-auto object-contain" alt="" aria-hidden />
-            <span className="font-[family-name:var(--font-ui)] text-[1.1rem] font-bold text-white tracking-[-0.3px]">inktide</span>
-          </a>
-          <button
-            type="button"
-            onClick={closeMobile}
-            aria-label={t('nav.closeMenu')}
-            className="flex items-center justify-center w-8 h-8 bg-white/[0.06] border-none rounded-lg cursor-pointer text-white/55 transition-[background,color] duration-200 hover:bg-white/10 hover:text-white"
-          >
-            <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]" stroke="currentColor" strokeWidth="2" fill="none" aria-hidden>
-              <line x1="1" y1="1" x2="13" y2="13" />
-              <line x1="13" y1="1" x2="1" y2="13" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="flex flex-col p-4 flex-1">
-          <span className="font-[family-name:var(--font-ui)] text-[0.7rem] font-semibold tracking-[0.12em] uppercase text-white/[0.22] px-3 pt-2 pb-3">
-            {t('nav.navigation')}
-          </span>
-          {navItems.map((item) => (
-            <button
-              key={item.href}
-              type="button"
-              className="font-[family-name:var(--font-ui)] text-[0.95rem] font-medium text-white/65 py-3 px-[0.875rem] rounded-[10px] bg-transparent border-none text-left cursor-pointer w-full transition-[background,color] duration-[180ms] hover:bg-white/[0.06] hover:text-white"
-              onClick={() => handleNavItem(item.href)}
+            {/* Dropdown panel */}
+            <motion.div
+              key="dropdown"
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              className={cn(
+                'fixed top-[60px] left-0 right-0 z-[1001] lg:hidden',
+                'bg-[var(--nav-bg)] [backdrop-filter:blur(14px)] [-webkit-backdrop-filter:blur(14px)]',
+                'border-b border-[var(--nav-border-color)]',
+              )}
             >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-[0.625rem] p-5 border-t border-white/[0.06] flex-shrink-0">
-          {isLoggedIn ? (
-            <>
-              <div className="flex items-center gap-3 py-3 px-4 bg-white/[0.04] border border-white/[0.07] rounded-xl mb-1">
-                <span className="w-[34px] h-[34px] rounded-full bg-[var(--accent-red)] flex items-center justify-center font-[family-name:var(--font-ui)] text-[0.85rem] font-bold text-white flex-shrink-0 overflow-hidden">
-                  {user?.pictureUrl ? (
-                    <img src={user.pictureUrl} alt="" className="w-full h-full object-cover block" />
-                  ) : (
-                    avatarInitial
-                  )}
-                </span>
-                <span className="font-[family-name:var(--font-ui)] text-[0.9rem] font-semibold text-[var(--text-primary)]">
-                  {profileName}
-                </span>
+              {/* Nav links */}
+              <div className="px-3 pt-2 pb-1">
+                {navItems.map((item) => (
+                  <button
+                    key={item.href}
+                    type="button"
+                    onClick={() => handleNavItem(item.href)}
+                    className={cn(
+                      'w-full flex items-center py-3 px-3 rounded-xl text-left',
+                      'font-[family-name:var(--font-ui)] text-[0.975rem] font-medium',
+                      'transition-[background,color] duration-[150ms]',
+                      item.active
+                        ? 'text-[var(--nav-item-active-color)]'
+                        : 'text-[var(--nav-item-color)] hover:bg-[var(--nav-item-hover-bg)] hover:text-[var(--nav-item-hover-color)]',
+                    )}
+                  >
+                    {item.label}
+                  </button>
+                ))}
               </div>
-              <button
-                type="button"
-                className="w-full py-[0.8rem] px-5 bg-[var(--landing-mobile-primary-btn-bg)] border-none rounded-[10px] text-[var(--landing-mobile-primary-btn-text)] font-[family-name:var(--font-ui)] text-[0.925rem] font-semibold cursor-pointer transition-[background] duration-[180ms] hover:bg-[var(--landing-mobile-primary-btn-hover-bg)]"
-                onClick={() => { closeMobile(); router.push(HOME_ROUTE) }}
-              >
-                {t('nav.goToProfile')}
-              </button>
-              <button
-                type="button"
-                className="w-full py-[0.8rem] px-5 bg-transparent border border-white/[0.18] rounded-[10px] text-white/70 font-[family-name:var(--font-ui)] text-[0.925rem] font-medium cursor-pointer transition-[border-color,color] duration-[180ms] hover:border-white/[0.35] hover:text-white"
-                onClick={() => { closeMobile(); logout() }}
-              >
-                {t('nav.logOut')}
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                className="w-full py-[0.8rem] px-5 bg-[var(--landing-mobile-primary-btn-bg)] border-none rounded-[10px] text-[var(--landing-mobile-primary-btn-text)] font-[family-name:var(--font-ui)] text-[0.925rem] font-semibold cursor-pointer transition-[background] duration-[180ms] hover:bg-[var(--landing-mobile-primary-btn-hover-bg)]"
-                onClick={() => { closeMobile(); registerWithKeycloak() }}
-              >
-                {t('nav.signUpFree')}
-              </button>
-              <button
-                type="button"
-                className="w-full py-[0.8rem] px-5 bg-transparent border border-white/[0.18] rounded-[10px] text-white/70 font-[family-name:var(--font-ui)] text-[0.925rem] font-medium cursor-pointer transition-[border-color,color] duration-[180ms] hover:border-white/[0.35] hover:text-white"
-                onClick={() => { closeMobile(); loginWithKeycloak() }}
-              >
-                {t('nav.logIn')}
-              </button>
-            </>
-          )}
-        </div>
 
-        <div className="px-6 py-[0.875rem] border-t border-white/[0.04] flex-shrink-0 flex items-center justify-between">
-          <span className="font-[family-name:var(--font-mono)] text-[0.7rem] text-white/[0.18] tracking-[0.05em]">
-            INKTIDE © 2026
-          </span>
-          <div className="flex items-center gap-0.5">
-            {(['en', 'ru'] as const).map(lang => (
-              <button
-                key={lang}
-                type="button"
-                onClick={() => switchLang(lang)}
-                className={cn(
-                  'px-2 py-1 text-[11px] font-bold uppercase rounded-md border-none cursor-pointer transition-[color,background] duration-[180ms]',
-                  currentLang === lang
-                    ? 'bg-white/[0.10] text-white'
-                    : 'bg-transparent text-white/30 hover:text-white/60',
+              {/* Divider */}
+              <div className="mx-4 border-t border-[var(--nav-border-color)]" />
+
+              {/* Auth buttons */}
+              <div className="px-4 py-3 flex flex-col gap-2">
+                {isLoggedIn ? (
+                  <>
+                    <div className="flex items-center gap-3 px-3 py-2 mb-1">
+                      <span className="w-8 h-8 rounded-full bg-[var(--accent-red)] flex items-center justify-center text-sm font-bold text-white overflow-hidden flex-shrink-0">
+                        {userPicture ? (
+                          <img src={userPicture as string} alt="" className="w-full h-full object-cover block" />
+                        ) : (
+                          avatarInitial
+                        )}
+                      </span>
+                      <span className="font-[family-name:var(--font-ui)] text-[0.9rem] font-semibold text-[var(--text-primary)]">
+                        {profileName}
+                      </span>
+                    </div>
+                    <a
+                      href={HOME_ROUTE}
+                      onClick={closeMobile}
+                      className="w-full py-3 px-5 rounded-xl text-center no-underline font-[family-name:var(--font-ui)] text-[0.925rem] font-semibold cursor-pointer transition-[background] duration-[180ms] bg-[var(--landing-mobile-primary-btn-bg)] text-[var(--landing-mobile-primary-btn-text)] hover:bg-[var(--landing-mobile-primary-btn-hover-bg)]"
+                    >
+                      {t('nav.goToProfile')}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => { closeMobile(); void signOut({ callbackUrl: '/' }) }}
+                      className="w-full py-3 px-5 bg-transparent border border-[var(--nav-border-color)] rounded-xl text-[var(--nav-item-color)] font-[family-name:var(--font-ui)] text-[0.925rem] font-medium cursor-pointer transition-[border-color,color] duration-[180ms] hover:border-[var(--nav-item-hover-color)] hover:text-[var(--nav-item-hover-color)]"
+                    >
+                      {t('nav.logOut')}
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { closeMobile(); void signIn('keycloak', { callbackUrl: '/home' }) }}
+                      className="flex-1 py-3 px-5 bg-transparent border border-[var(--nav-border-color)] rounded-xl text-[var(--nav-item-color)] font-[family-name:var(--font-ui)] text-[0.925rem] font-medium cursor-pointer transition-[border-color,color] duration-[180ms] hover:border-[var(--nav-item-hover-color)] hover:text-[var(--nav-item-hover-color)]"
+                    >
+                      {t('nav.logIn')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { closeMobile(); void signIn('keycloak', { callbackUrl: '/home' }) }}
+                      className="flex-1 py-3 px-5 bg-[var(--nav-signup-bg)] border-none rounded-xl text-[var(--nav-signup-color)] font-[family-name:var(--font-ui)] text-[0.925rem] font-semibold cursor-pointer transition-[background] duration-[180ms] hover:bg-[var(--nav-signup-hover-bg)]"
+                    >
+                      {t('nav.signUpFree')}
+                    </button>
+                  </div>
                 )}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+              </div>
+
+              {/* Footer row: lang switcher + theme toggle */}
+              <div className="px-4 pb-3 flex items-center justify-between">
+                <div className="flex items-center gap-0.5">
+                  {(['en', 'ru'] as const).map(lang => (
+                    <button
+                      key={lang}
+                      type="button"
+                      onClick={() => switchLang(lang)}
+                      className={cn(
+                        'px-2 py-1 text-[11px] font-bold uppercase rounded-md border-none cursor-pointer transition-[color,background] duration-[180ms]',
+                        currentLang === lang
+                          ? 'bg-[var(--nav-item-hover-bg)] text-[var(--nav-item-active-color)]'
+                          : 'bg-transparent text-[var(--nav-item-color)] opacity-40 hover:opacity-80',
+                      )}
+                    >
+                      {lang}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  aria-label={themeLabel}
+                  className="flex items-center justify-center w-8 h-8 bg-transparent border-none rounded-lg text-[var(--nav-theme-btn-color)] cursor-pointer transition-[color,background] duration-[180ms] hover:text-[var(--nav-theme-btn-hover)] hover:bg-[var(--nav-item-hover-bg)]"
+                >
+                  <ThemeIcon />
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   )
 }

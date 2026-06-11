@@ -77,8 +77,8 @@ public sealed class MemoryIngestionPipeline : IMemoryIngestionPipeline
             });
         }
 
-        await _metaRepo.UpsertBatchAsync(records, ct);
         await _vectorRepo.UpsertBatchAsync(vectorRequests, ct);
+        await _metaRepo.UpsertBatchAsync(records, ct);
 
         _logger.LogDebug(
             "MemoryIngestionPipeline: stored {Count} facts for card {CardId}",

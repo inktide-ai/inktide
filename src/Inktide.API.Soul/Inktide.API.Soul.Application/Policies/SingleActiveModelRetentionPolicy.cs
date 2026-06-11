@@ -1,4 +1,4 @@
-using Inktide.API.Profile.Application.Interfaces;
+using Inktide.API.Core.Contracts;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Domain.Repositories;
 using Microsoft.Extensions.Logging;

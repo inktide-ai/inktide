@@ -1,3 +1,5 @@
+import { Slider } from './slider'
+
 interface SliderWithTicksProps {
   min: number
   max: number
@@ -10,11 +12,7 @@ interface SliderWithTicksProps {
 }
 
 const SliderWithTicks = ({
-  min,
-  max,
-  step,
-  value,
-  onChange,
+  min, max, step, value, onChange,
   formatValue = (v) => String(v),
   tickCount = 6,
   disabled = false,
@@ -27,7 +25,6 @@ const SliderWithTicks = ({
     return Math.min(Math.max(rounded, min), max)
   })
   const uniqueTicks = [...new Set(ticks)].sort((a, b) => a - b)
-  const percent = range === 0 ? 0 : ((value - min) / range) * 100
 
   return (
     <div className="pt-6 relative">
@@ -47,30 +44,17 @@ const SliderWithTicks = ({
         ))}
       </div>
 
-      {/* Track + input */}
-      <div
-        className="relative h-6 flex items-center"
-        style={{ '--fill-percent': `${percent}%` } as React.CSSProperties}
-      >
-        {/* Background track */}
-        <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-white/[0.08] rounded-full pointer-events-none" />
-        {/* Filled track */}
-        <div
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-(--accent-red) rounded-full pointer-events-none transition-[width] duration-100 ease"
-          style={{ width: `${percent}%` }}
-        />
-        {/* Range input — uses global .slider-input for pseudo-element thumb styles */}
-        <input
-          type="range"
-          className="slider-input"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(+e.target.value)}
-          disabled={disabled}
-        />
-      </div>
+      <Slider
+        value={value}
+        onChange={onChange}
+        min={min}
+        max={max}
+        step={step}
+        disabled={disabled}
+        fill="var(--accent-red)"
+        trackHeight={4}
+        thumbSize={14}
+      />
     </div>
   )
 }

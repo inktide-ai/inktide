@@ -1,19 +1,12 @@
-import type { AiCardSceneResponse } from '@/shared/types/soul-api'
-import { presignSceneUpload, completeSceneUpload } from '@/entities/soul/api'
+import type { ProjectSceneResponse } from '@/features/projects/api/scenes'
+import { presignProjectScene, completeProjectSceneUpload } from '@/features/projects/api/scenes'
 import type { IStorageUploader, PresignResult } from '@/shared/types/IStorageUploader'
 
-/**
- * OCP: аналог CardModelUploader для сцен (фоновых изображений).
- * Поддерживает опциональный `tag` для категоризации.
- */
-export class CardSceneUploader implements IStorageUploader<AiCardSceneResponse> {
-  constructor(
-    private readonly cardId: string,
-    private readonly tag?: string | null,
-  ) {}
+export class CardSceneUploader implements IStorageUploader<ProjectSceneResponse> {
+  constructor(private readonly projectId: string) {}
 
   presign(meta: { file_name: string; content_type: string; size_bytes: number }): Promise<PresignResult> {
-    return presignSceneUpload(this.cardId, meta)
+    return presignProjectScene(this.projectId, meta)
   }
 
   complete(payload: {
@@ -21,13 +14,12 @@ export class CardSceneUploader implements IStorageUploader<AiCardSceneResponse> 
     file_name: string
     content_type: string
     size_bytes: number
-  }): Promise<AiCardSceneResponse> {
-    return completeSceneUpload(this.cardId, {
+  }): Promise<ProjectSceneResponse> {
+    return completeProjectSceneUpload(this.projectId, {
       storage_key: payload.storage_key,
       file_name: payload.file_name,
       content_type: payload.content_type,
       size_bytes: payload.size_bytes,
-      tag: this.tag?.trim() ?? null,
     })
   }
 }

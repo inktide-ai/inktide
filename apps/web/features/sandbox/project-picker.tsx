@@ -7,15 +7,9 @@ import { Search, Plus } from 'lucide-react'
 import { listProjects, type ProjectListItem } from '@/entities/project/api'
 import { Badge, type BadgeVariant } from '@/shared/ui/badge'
 import { PROJECTS_ROUTE, sandboxWithProject } from '@/lib/routes'
+import { handleError } from '@/shared/lib/handle-error'
 
 type Filter = 'all' | 'active' | 'paused' | 'archived'
-
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all',      label: 'All'      },
-  { key: 'active',   label: 'Active'   },
-  { key: 'paused',   label: 'Paused'   },
-  { key: 'archived', label: 'Archived' },
-]
 
 function updatedLabel(dateStr: string): string {
   try {
@@ -88,7 +82,7 @@ function ProjectCard({ project, onClick }: { project: ProjectListItem; onClick: 
           </span>
         )}
         <span className="truncate text-body text-[var(--text-secondary)]">
-          {project.active_soul?.name ?? <span className="italic text-[var(--text-tertiary)]">No soul bound</span>}
+          {project.active_soul?.name ?? <span className="italic text-[var(--text-tertiary)]">{t('sandbox.noSoulBound')}</span>}
         </span>
         <span className="ml-auto shrink-0 text-xs text-[var(--text-tertiary)]">
           {updatedLabel(project.updated_at)}
@@ -99,7 +93,14 @@ function ProjectCard({ project, onClick }: { project: ProjectListItem; onClick: 
 }
 
 export default function ProjectPicker() {
+  const { t } = useTranslation('common')
   const router = useRouter()
+  const FILTERS: { key: Filter; label: string }[] = [
+    { key: 'all',      label: t('filter.all')      },
+    { key: 'active',   label: t('filter.active')   },
+    { key: 'paused',   label: t('filter.paused')   },
+    { key: 'archived', label: t('filter.archived') },
+  ]
   const [projects, setProjects] = useState<ProjectListItem[]>([])
   const [loading, setLoading]   = useState(true)
   const [filter, setFilter]     = useState<Filter>('all')
@@ -108,7 +109,7 @@ export default function ProjectPicker() {
   useEffect(() => {
     listProjects()
       .then(setProjects)
-      .catch(console.error)
+      .catch(handleError)
       .finally(() => setLoading(false))
   }, [])
 
@@ -124,10 +125,10 @@ export default function ProjectPicker() {
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="font-sans text-[28px] font-semibold tracking-tight text-[var(--text-primary)]">
-            Select a project
+            {t('sandbox.selectProject')}
           </h1>
           <p className="mt-2 text-body text-[var(--text-secondary)]">
-            Each project owns channels, memory and pipeline config.
+            {t('sandbox.selectProjectDesc')}
           </p>
         </div>
 
@@ -138,7 +139,7 @@ export default function ProjectPicker() {
             <Search size={14} className="shrink-0 text-[var(--text-tertiary)]" />
             <input
               type="text"
-              placeholder="Search projects…"
+              placeholder={t('sandbox.searchProjects')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full bg-transparent text-body text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
@@ -170,7 +171,7 @@ export default function ProjectPicker() {
             className="flex h-9 items-center gap-1.5 rounded-xl bg-[var(--accent-primary)] px-3.5 text-body font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
           >
             <Plus size={14} />
-            New Project
+            {t('sandbox.newProject')}
           </button>
         </div>
 
@@ -181,7 +182,7 @@ export default function ProjectPicker() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex h-[200px] items-center justify-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-body text-[var(--text-tertiary)]">
-            {search ? 'No projects match your search' : 'No projects yet — click "New Project" to create one'}
+            {search ? t('sandbox.noProjectsMatch') : t('sandbox.noProjectsYet')}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">

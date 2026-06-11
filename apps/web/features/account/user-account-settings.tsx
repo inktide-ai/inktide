@@ -141,7 +141,6 @@ export default function UserAccountSettings({ initialPage, onClose }: UserAccoun
         orientation="vertical"
         className="flex h-full min-h-0 w-full flex-row gap-0 overflow-hidden bg-(--bg-settings)"
       >
-        {/* ── Sidebar ──────────────────────────────────────────────────────── */}
         <div className="flex w-[240px] shrink-0 flex-col border-r border-[var(--border-divider)] bg-[var(--c-bacSec)] overflow-y-auto">
           <TabsList className="flex flex-col gap-3 px-2 py-2 outline-none" aria-label="Settings sections">
             {NAV_SECTIONS.map((group) => (
@@ -175,7 +174,6 @@ export default function UserAccountSettings({ initialPage, onClose }: UserAccoun
           </TabsList>
         </div>
 
-        {/* ── Content panel ────────────────────────────────────────────────── */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[var(--bg-primary)]">
           <ScrollArea className="min-h-0 min-w-0 flex-1">
             {NAV.map((nav) => (

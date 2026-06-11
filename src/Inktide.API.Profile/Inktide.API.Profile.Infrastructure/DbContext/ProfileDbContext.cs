@@ -1,5 +1,6 @@
 using Inktide.API.Profile.Application.Entities;
 using Inktide.API.Profile.Infrastructure.Configurations;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inktide.API.Profile.Infrastructure.DbContext;
@@ -15,6 +16,11 @@ public sealed class ProfileDbContext : Microsoft.EntityFrameworkCore.DbContext
     {
         modelBuilder.ApplyConfiguration(new UserProfileConfiguration());
         modelBuilder.ApplyConfiguration(new UserPreferencesConfiguration());
+
+        modelBuilder.AddInboxStateEntity();
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
+
         base.OnModelCreating(modelBuilder);
     }
 }

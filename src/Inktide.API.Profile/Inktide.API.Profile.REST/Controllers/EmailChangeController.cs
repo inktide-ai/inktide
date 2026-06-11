@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.Profile.REST.Controllers;
 
 [ApiController]
-[Route("api/me/email")]
+[Route("api/v1/me/email-change")]
 [Produces("application/json")]
 [Authorize]
 public sealed class EmailChangeController : ControllerBase

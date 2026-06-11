@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useChatChannel } from '../hooks/useChatChannel'
+import { buildChannelId } from '@/shared/lib/channel-id'
 import type { LipSyncHandle } from '@/shared/hooks/useLipSync'
 import type { EmotionState } from '@/shared/types/IVrmController'
 import type { ChatMode } from './chat-mode-menu'
@@ -17,7 +18,6 @@ interface SceneChatProps {
   onClose?: () => void
 }
 
-// ── SVG icon atoms ────────────────────────────────────────────────────────────
 
 const PlusIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
@@ -37,7 +37,6 @@ const SendIcon = () => (
   </svg>
 )
 
-// ── Panel variants by mode ────────────────────────────────────────────────────
 
 const FLOATING_VARIANTS = {
   initial: { scale: 0.5, opacity: 0 },
@@ -57,10 +56,9 @@ const FULLSCREEN_VARIANTS = {
   exit:    { opacity: 0, scale: 0.98 },
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 
 const SceneChat = ({ cardId, userId, mode = 'floating', lipSync, emotionGetterRef, onClose }: SceneChatProps) => {
-  const channelId = `${cardId}:${userId}`
+  const channelId = buildChannelId(cardId, userId)
   const { t } = useTranslation('scene')
 
   const { messages, send, retry, getEmotionState } = useChatChannel(channelId, lipSync)
@@ -91,7 +89,6 @@ const SceneChat = ({ cardId, userId, mode = 'floating', lipSync, emotionGetterRe
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void submit() }
   }
 
-  // ── Layout per mode ──────────────────────────────────────────────────────
 
   const variants =
     mode === 'sidebar'    ? SIDEBAR_VARIANTS :

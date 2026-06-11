@@ -16,21 +16,16 @@ internal static class AiCardGrpcConverter
 
         var response = new AiCardResponse
         {
-            CardId          = card.Id.ToString(),
-            UserId          = card.UserId.ToString(),
-            Name            = card.Name,
-            Slug            = card.Slug,
-            Personality     = card.Personality,
-            SystemPrompt    = card.SystemPrompt,
-            LlmCatalogId    = card.LlmCatalogId.ToString(),
-            LlmConfig       = card.LlmConfig,
-            Appearance       = card.Appearance,
-            ResponseBehavior = card.ResponseBehavior,
-            MemorySettings   = card.MemorySettings,
-            AutoPilot        = card.AutoPilot,
-            IsActive         = card.IsActive,
-            CreatedAt        = card.CreatedAt.ToString("O"),
-            UpdatedAt        = card.UpdatedAt.ToString("O"),
+            CardId       = card.Id.ToString(),
+            UserId       = card.UserId.ToString(),
+            Name         = card.Name,
+            Slug         = card.Slug,
+            LlmCatalogId = card.LlmCatalogId.ToString(),
+            LlmConfig    = card.LlmConfig,
+            Appearance   = card.Appearance,
+            IsActive     = card.IsActive,
+            CreatedAt    = card.CreatedAt.ToString("O"),
+            UpdatedAt    = card.UpdatedAt.ToString("O"),
         };
 
         if (card.TtsCatalogId.HasValue)
@@ -58,20 +53,15 @@ internal static class AiCardGrpcConverter
 
         return new AiCard
         {
-            UserId          = Guid.Parse(request.UserId),
-            Name            = request.Name,
-            Slug            = request.Slug,
-            Personality     = request.Personality,
-            SystemPrompt    = request.SystemPrompt,
-            LlmCatalogId    = Guid.Parse(request.LlmCatalogId),
-            LlmConfig       = request.LlmConfig,
-            TtsCatalogId    = request.HasTtsCatalogId ? Guid.Parse(request.TtsCatalogId) : null,
-            TtsConfig       = request.HasTtsConfig ? request.TtsConfig : null,
-            Appearance       = request.Appearance,
-            ResponseBehavior = request.ResponseBehavior,
-            MemorySettings   = request.MemorySettings,
-            AutoPilot        = request.AutoPilot,
-            AvatarUrl        = request.HasAvatarUrl ? request.AvatarUrl : null,
+            UserId       = Guid.Parse(request.UserId),
+            Name         = request.Name,
+            Slug         = request.Slug,
+            LlmCatalogId = Guid.Parse(request.LlmCatalogId),
+            LlmConfig    = request.LlmConfig,
+            TtsCatalogId = request.HasTtsCatalogId ? Guid.Parse(request.TtsCatalogId) : null,
+            TtsConfig    = request.HasTtsConfig ? request.TtsConfig : null,
+            Appearance   = request.Appearance,
+            AvatarUrl    = request.HasAvatarUrl ? request.AvatarUrl : null,
         };
     }
 
@@ -81,20 +71,15 @@ internal static class AiCardGrpcConverter
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(card);
 
-        card.Name            = request.Name;
-        card.Slug            = request.Slug;
-        card.Personality     = request.Personality;
-        card.SystemPrompt    = request.SystemPrompt;
-        card.LlmCatalogId    = Guid.Parse(request.LlmCatalogId);
-        card.LlmConfig       = request.LlmConfig;
-        card.TtsCatalogId    = request.HasTtsCatalogId ? Guid.Parse(request.TtsCatalogId) : null;
-        card.TtsConfig       = request.HasTtsConfig ? request.TtsConfig : null;
-        card.Appearance       = request.Appearance;
-        card.ResponseBehavior = request.ResponseBehavior;
-        card.MemorySettings   = request.MemorySettings;
-        card.AutoPilot        = request.AutoPilot;
-        card.IsActive         = request.IsActive;
-        card.AvatarUrl        = request.HasAvatarUrl ? request.AvatarUrl : null;
+        card.Name        = request.Name;
+        card.Slug        = request.Slug;
+        card.LlmCatalogId = Guid.Parse(request.LlmCatalogId);
+        card.LlmConfig   = request.LlmConfig;
+        card.TtsCatalogId = request.HasTtsCatalogId ? Guid.Parse(request.TtsCatalogId) : null;
+        card.TtsConfig   = request.HasTtsConfig ? request.TtsConfig : null;
+        card.Appearance  = request.Appearance;
+        card.IsActive    = request.IsActive;
+        card.AvatarUrl   = request.HasAvatarUrl ? request.AvatarUrl : null;
     }
 
 }

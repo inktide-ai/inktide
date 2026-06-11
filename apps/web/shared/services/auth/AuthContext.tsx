@@ -8,16 +8,13 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { useSession, signIn, signOut } from 'next-auth/react'
 import { useQuery } from '@tanstack/react-query'
-import Keycloak from 'keycloak-js'
-import type { IAuthTokenParser } from '@/shared/types/IAuthTokenParser'
-import type { ILocaleSync } from '@/shared/types/ILocaleSync'
 import type { IAvatarService } from '@/shared/types/IAvatarService'
-import { writeStoredNickname } from '@/shared/lib/profileStorage'
-import { HOME_ROUTE } from '@/lib/routes'
+import { writeStoredNickname, readStoredNickname } from '@/shared/lib/profileStorage'
 import { queryKeys } from '@/shared/lib/query/keys'
+import { configureApiAuth } from '@/api/client'
 
-// ── Domain types ──────────────────────────────────────────────────────────────
 
 export interface UserInfo {
   userId: string
@@ -27,21 +24,10 @@ export interface UserInfo {
   nickname?: string | null
 }
 
-/**
- * Auth state holds only identity data derived from the JWT.
- * pictureUrl lives in a separate state so JWT refreshes never wipe it.
- */
-export interface AuthState {
-  isLoggedIn: boolean
-  userEmail: string | null
-  user: Omit<UserInfo, 'pictureUrl'> | null
-  isInitialized: boolean
-}
-
 export interface AuthContextValue {
   isLoggedIn: boolean
   userEmail: string | null
-  user: UserInfo | null       // auth state + pictureUrl merged
+  user: UserInfo | null
   isInitialized: boolean
   logout: () => void
   loginWithKeycloak: () => void
@@ -52,142 +38,127 @@ export interface AuthContextValue {
   setPictureUrl: (url: string | null) => void
 }
 
+
+const IGNORED_ROLES = new Set(['offline_access', 'uma_authorization'])
+
+function computeRole(roles: string[]): string {
+  const meaningful = roles.filter(r => !IGNORED_ROLES.has(r) && !r.startsWith('default-roles-'))
+  return meaningful.includes('admin') ? 'admin' : meaningful[0] ?? 'user'
+}
+
+const KC_URL   = process.env.NEXT_PUBLIC_KEYCLOAK_URL   ?? 'http://localhost:8080'
+const KC_REALM = process.env.NEXT_PUBLIC_KEYCLOAK_REALM ?? 'chimera'
+
+
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-const LOGGED_OUT: AuthState = { isLoggedIn: false, userEmail: null, user: null, isInitialized: true }
-
-// ── Provider ──────────────────────────────────────────────────────────────────
 
 interface AuthProviderProps {
-  keycloak: Keycloak
-  tokenParser: IAuthTokenParser
-  localeSync: ILocaleSync
   avatarService: IAvatarService
   children: ReactNode
 }
 
-export function AuthProvider({
-  keycloak,
-  tokenParser,
-  localeSync,
-  avatarService,
-  children,
-}: AuthProviderProps) {
-  const [state, setState] = useState<AuthState>(() => ({
-    ...buildState(keycloak, tokenParser),
-    isInitialized: false,
-  }))
+export function AuthProvider({ avatarService, children }: AuthProviderProps) {
+  const { data: session, status, update } = useSession()
 
-  // pictureUrl is fully independent of auth state — never reset by token refreshes
+  const isInitialized = status !== 'loading'
+  const isLoggedIn    = status === 'authenticated'
+  const userId        = session?.user?.userId
+
   const [pictureUrl, setPictureUrlState] = useState<string | null>(null)
+  const [nickname, setNicknameState]     = useState<string | null>(null)
 
+  // Nickname: prefer server value, fall back to localStorage
+  useEffect(() => {
+    if (session?.user?.nickname) {
+      setNicknameState(session.user.nickname)
+    } else if (userId) {
+      const stored = readStoredNickname(userId)
+      if (stored) setNicknameState(stored)
+    }
+  }, [session?.user?.nickname, userId])
+
+  // Persist a JS-readable session hint so ProtectedRoute can render optimistically
+  // on the next page load (next-auth session cookie is HTTP-only, not readable by JS).
+  useEffect(() => {
+    if (status === 'authenticated') {
+      localStorage.setItem('inktide_session_hint', '1')
+    } else if (status === 'unauthenticated') {
+      localStorage.removeItem('inktide_session_hint')
+    }
+  }, [status])
+
+  // Wire API client auth hooks
+  useEffect(() => {
+    configureApiAuth({
+      getToken:          () => undefined,
+      isAuthenticated:   () => isLoggedIn,
+      refreshToken:      async () => { await update(); return true },
+      onUnauthenticated: () => signOut({ callbackUrl: '/login' }),
+    })
+  }, [isLoggedIn, update])
+
+  // Avatar
   const { data: fetchedAvatarUrl, refetch: refetchAvatar } = useQuery({
-    queryKey: queryKeys.me.avatar(state.user?.userId ?? ''),
-    queryFn: () => avatarService.getAvatarUrl(state.user!.userId),
-    enabled: !!state.user?.userId,
+    queryKey: queryKeys.me.avatar(userId ?? ''),
+    queryFn:  () => avatarService.getAvatarUrl(userId!),
+    enabled:  !!userId,
     staleTime: 60_000,
   })
+  useEffect(() => { if (fetchedAvatarUrl) setPictureUrlState(fetchedAvatarUrl) }, [fetchedAvatarUrl])
 
-  // Sync fetched avatar into local state (kept separate so JWT refreshes never wipe it)
-  useEffect(() => {
-    if (fetchedAvatarUrl) setPictureUrlState(fetchedAvatarUrl)
-  }, [fetchedAvatarUrl])
 
-  // ── Keycloak event handlers ───────────────────────────────────────────────
-
-  useEffect(() => {
-    // sync: only updates auth identity data, never touches pictureUrl
-    const sync = () => setState(buildState(keycloak, tokenParser))
-
-    const clear = () => {
-      setState(LOGGED_OUT)
-      setPictureUrlState(null)
+  const user = useMemo<UserInfo | null>(() => {
+    if (!session?.user) return null
+    return {
+      userId:   session.user.userId,
+      userName: session.user.name,
+      role:     computeRole(session.user.roles ?? []),
+      pictureUrl,
+      nickname,
     }
+  }, [session?.user, pictureUrl, nickname])
 
-    keycloak.onReady              = () => setState((s) => ({ ...s, isInitialized: true }))
-    keycloak.onAuthSuccess        = sync
-    keycloak.onAuthRefreshSuccess = sync
-    keycloak.onAuthLogout         = clear
-    keycloak.onAuthError          = clear
-    keycloak.onAuthRefreshError   = () => { clear(); keycloak.login() }
 
-    return () => {
-      keycloak.onReady              = undefined
-      keycloak.onAuthSuccess        = undefined
-      keycloak.onAuthRefreshSuccess = undefined
-      keycloak.onAuthLogout         = undefined
-      keycloak.onAuthError          = undefined
-      keycloak.onAuthRefreshError   = undefined
-      keycloak.onTokenExpired       = undefined
-    }
-  }, [keycloak, tokenParser])
-
-  // ── Locale sync ───────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    if (!state.isLoggedIn) return
-    localeSync.sync(keycloak.tokenParsed?.locale as string | undefined)
-  }, [state.isLoggedIn, keycloak.tokenParsed?.locale, localeSync])
-
-  // ── Merged user (auth + avatar) ───────────────────────────────────────────
-
-  const user = useMemo<UserInfo | null>(
-    () => (state.user ? { ...state.user, pictureUrl } : null),
-    [state.user, pictureUrl],
+  const logout = useCallback(
+    () => signOut({ callbackUrl: '/' }),
+    [],
   )
 
-  // ── Auth actions ──────────────────────────────────────────────────────────
+  const loginWithKeycloak = useCallback(
+    () => signIn('keycloak', { callbackUrl: '/home' }),
+    [],
+  )
 
-  const logout = useCallback(() => {
-    setState(LOGGED_OUT)
-    setPictureUrlState(null)
-    document.cookie = 'inktide_auth=; path=/; SameSite=Lax; max-age=0'
-    if (keycloak.authenticated) {
-      keycloak.logout({ redirectUri: window.location.origin })
-    }
-  }, [keycloak])
-
-  const loginWithKeycloak = useCallback(() => {
-    keycloak.login({ redirectUri: `${window.location.origin}${HOME_ROUTE}` })
-  }, [keycloak])
-
-  const registerWithKeycloak = useCallback(() => {
-    keycloak.login({ action: 'register', redirectUri: `${window.location.origin}${HOME_ROUTE}` })
-  }, [keycloak])
+  const registerWithKeycloak = useCallback(
+    () => signIn('keycloak', { callbackUrl: '/home' }, { kc_action: 'register' }),
+    [],
+  )
 
   const openAccountSettings = useCallback(() => {
-    void keycloak.accountManagement()
-  }, [keycloak])
+    window.open(`${KC_URL}/realms/${KC_REALM}/account/`, '_blank')
+  }, [])
 
   const refreshSession = useCallback(async () => {
-    if (!keycloak.authenticated) return
-    try { await keycloak.updateToken(60) } catch { /* stale is fine */ }
     await refetchAvatar()
-  }, [keycloak, refetchAvatar])
+  }, [refetchAvatar])
 
   const setPictureUrl = useCallback((url: string | null) => {
     setPictureUrlState(url)
   }, [])
 
-  const setNickname = useCallback(
-    (value: string) => {
-      const sub = keycloak.tokenParsed?.sub
-      if (!sub) return
-      const trimmed = value.trim().slice(0, 32)
-      writeStoredNickname(sub, trimmed || null)
-      setState((s) => {
-        if (!s.user) return s
-        return { ...s, user: { ...s.user, nickname: trimmed || null } }
-      })
-    },
-    [keycloak],
-  )
+  const setNickname = useCallback((value: string) => {
+    if (!userId) return
+    const trimmed = value.trim().slice(0, 32)
+    writeStoredNickname(userId, trimmed || null)
+    setNicknameState(trimmed || null)
+  }, [userId])
 
   const value = useMemo<AuthContextValue>(
     () => ({
-      isLoggedIn: state.isLoggedIn,
-      userEmail: state.userEmail,
-      isInitialized: state.isInitialized,
+      isLoggedIn,
+      isInitialized,
+      userEmail: session?.user?.email ?? null,
       user,
       logout,
       loginWithKeycloak,
@@ -197,7 +168,7 @@ export function AuthProvider({
       setNickname,
       setPictureUrl,
     }),
-    [state.isLoggedIn, state.userEmail, state.isInitialized, user,
+    [isLoggedIn, isInitialized, session?.user?.email, user,
      logout, loginWithKeycloak, registerWithKeycloak, openAccountSettings,
      refreshSession, setNickname, setPictureUrl],
   )
@@ -209,25 +180,4 @@ export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function buildState(keycloak: Keycloak, tokenParser: IAuthTokenParser): AuthState {
-  if (!keycloak.authenticated || !keycloak.tokenParsed) {
-    return LOGGED_OUT
-  }
-  const parsed = keycloak.tokenParsed
-  const base = tokenParser.parse(parsed)
-  if (!base) return LOGGED_OUT
-  const nickname = tokenParser.extractNickname(parsed, null)
-  const email = (parsed.email as string) ?? base.userName ?? null
-  // pictureUrl intentionally excluded — lives in separate state
-  const { pictureUrl: _ignored, ...baseWithoutPicture } = base
-  return {
-    isLoggedIn: true,
-    userEmail: email,
-    user: { ...baseWithoutPicture, nickname },
-    isInitialized: true,
-  }
 }

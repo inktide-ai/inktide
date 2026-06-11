@@ -13,7 +13,7 @@ namespace Inktide.API.Billing.REST.Controllers;
 /// Each processor resolves its own signing secret from its injected settings.
 /// </summary>
 [ApiController]
-[Route("api/billing/webhook")]
+[Route("api/v1/billing/webhooks")]
 [EnableRateLimiting(BillingRestApiStartup.WebhookRateLimitPolicy)]
 public sealed class WebhookController : ControllerBase
 {

@@ -13,7 +13,6 @@ export interface SoulTemplate {
 }
 
 export const SOUL_TEMPLATES: SoulTemplate[] = [
-  // ── Streamers ─────────────────────────────────────────────────────────────────
   {
     id: 'gaming',
     category: 'Streamers',
@@ -55,7 +54,6 @@ export const SOUL_TEMPLATES: SoulTemplate[] = [
     accent: '#ec4899',
     personalityPresetId: 'streamer',
   },
-  // ── Assistants ────────────────────────────────────────────────────────────────
   {
     id: 'news',
     category: 'Assistants',
@@ -86,7 +84,6 @@ export const SOUL_TEMPLATES: SoulTemplate[] = [
     accent: '#10b981',
     personalityPresetId: 'mentor',
   },
-  // ── Characters ────────────────────────────────────────────────────────────────
   {
     id: 'philosopher',
     category: 'Characters',

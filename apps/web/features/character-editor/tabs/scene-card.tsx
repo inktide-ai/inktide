@@ -1,9 +1,8 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import type { AiCardSceneResponse } from '@/shared/types/soul-api'
-import { patchCardSceneTag } from '@/entities/soul/api'
+import type { ProjectSceneResponse } from '@/features/projects/api/scenes'
 import { getEffectiveTagLabel, getSceneDisplayTitle, getTagDisplayStyleWithColor } from './scene-tag-utils'
 
 const pgCard = 'relative bg-(--bg-card) border border-(--bg-card) rounded-[0.875rem] overflow-hidden cursor-pointer flex flex-col min-h-[188px] transition-[border-color,transform,box-shadow,background,opacity] duration-[180ms] select-none outline-none opacity-0 animate-[cardIn_0.32s_cubic-bezier(0.2,0.9,0.2,1)_forwards] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(0,0,0,0.35)] focus-visible:shadow-[0_0_0_2px_rgba(237,62,62,0.5)]'
@@ -16,70 +15,34 @@ const pgDesc = 'text-caption text-(--text-muted) leading-[1.45] mt-[0.1875rem] l
 const pgFooter = 'flex items-center justify-between mt-auto pt-[0.625rem]'
 const pgRadioBase = 'w-[14px] h-[14px] rounded-full border-[1.5px] border-white/[0.16] shrink-0 transition-[border-color,background,box-shadow] duration-150'
 const pgConfigureCls = 'inline-flex items-center gap-[3px] text-caption font-medium text-(--text-muted) bg-transparent border-none p-0 cursor-pointer font-[inherit] transition-[color] duration-150 leading-none no-underline'
-const tagMenuCls = 'absolute top-[calc(100%+4px)] left-0 z-[30] min-w-[168px] max-w-[min(240px,70vw)] max-h-[220px] overflow-y-auto p-1 rounded-[10px] bg-(--bg-card) border border-white/12 shadow-[0_10px_28px_rgba(0,0,0,0.45)]'
-const tagMenuItemCls = 'block w-full text-left py-2 px-[10px] m-0 border-none rounded-[6px] bg-transparent text-white/[0.88] text-[0.72rem] font-medium font-[inherit] cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis hover:bg-white/[0.08]'
 
 interface SceneCardProps {
-  scene: AiCardSceneResponse
-  cardId?: string
-  tagOptions: string[]
+  scene: ProjectSceneResponse
   tagColorMap?: Map<string, string>
   isActive: boolean
   onSelect: () => void
   onConfigure: () => void
   onDelete: () => void
   deleting: boolean
-  onScenesChanged: () => void
   animationDelay?: number
 }
 
-export function SceneCard({ scene, cardId, tagOptions, tagColorMap, isActive, onSelect, onConfigure, onDelete, deleting, onScenesChanged, animationDelay = 0 }: SceneCardProps) {
+export function SceneCard({ scene, tagColorMap, isActive, onSelect, onConfigure, onDelete, deleting, animationDelay = 0 }: SceneCardProps) {
   const { t } = useTranslation('scene')
   const [confirming, setConfirming] = useState(false)
   const [hovered, setHovered] = useState(false)
-  const [tagMenuOpen, setTagMenuOpen] = useState(false)
-  const [tagSaving, setTagSaving] = useState(false)
-  const [tagError, setTagError] = useState<string | null>(null)
-  const anchorRef = useRef<HTMLDivElement>(null)
 
   const displayLabel = getEffectiveTagLabel(scene)
   const tagStyle = getTagDisplayStyleWithColor(displayLabel, tagColorMap?.get(displayLabel))
   const displayTitle = getSceneDisplayTitle(scene)
-  const sizeLabel = `${(scene.size_bytes / 1_048_576).toFixed(1)} MB`
-  const nameTitle = `${scene.original_file_name} · ${sizeLabel} · ${scene.content_type}`
+  const sizeBytes = scene.size_bytes ?? 0
+  const sizeLabel = `${(sizeBytes / 1_048_576).toFixed(1)} MB`
+  const nameTitle = `${scene.original_name} · ${sizeLabel} · ${scene.content_type}`
   const sceneDescription = scene.description?.trim() ?? ''
 
   const cardStyle: React.CSSProperties = isActive
     ? { borderColor: tagStyle.activeBorder, background: tagStyle.activeBg }
     : hovered ? { borderColor: tagStyle.border } : {}
-
-  useEffect(() => {
-    if (!tagMenuOpen) return
-    function onDocDown(e: MouseEvent) {
-      if (anchorRef.current?.contains(e.target as Node)) return
-      setTagMenuOpen(false)
-    }
-    document.addEventListener('mousedown', onDocDown)
-    return () => document.removeEventListener('mousedown', onDocDown)
-  }, [tagMenuOpen])
-
-  async function pickTag(next: string | null) {
-    if (!cardId) return
-    const normalizedNext = next?.trim() ? next.trim() : null
-    const currentExplicit = scene.tag?.trim() ? scene.tag.trim() : null
-    if (normalizedNext === currentExplicit) { setTagMenuOpen(false); return }
-    setTagMenuOpen(false)
-    setTagSaving(true)
-    setTagError(null)
-    try {
-      await patchCardSceneTag(cardId, scene.id, { tag: normalizedNext })
-      onScenesChanged()
-    } catch (err) {
-      setTagError(err instanceof Error ? err.message : t('card.tagError'))
-    } finally {
-      setTagSaving(false)
-    }
-  }
 
   return (
     <div
@@ -123,27 +86,10 @@ export function SceneCard({ scene, cardId, tagOptions, tagColorMap, isActive, on
       <div className={pgBody}>
         <div className={pgMeta}>
           <div className={pgName} title={nameTitle}>{displayTitle}</div>
-          <div className="relative inline-flex max-w-full" ref={anchorRef}>
-            {cardId ? (
-              <>
-                <button type="button" className={pgTag} style={{ color: tagStyle.text, background: tagStyle.bg, border: `1px solid ${tagStyle.border}` }} onClick={(e) => { e.stopPropagation(); if (!cardId || tagSaving) return; setTagMenuOpen(o => !o) }} disabled={tagSaving} aria-expanded={tagMenuOpen} aria-haspopup="listbox" aria-label={t('card.tagChangeAria', { tag: displayLabel })}>
-                  {displayLabel}
-                </button>
-                {tagMenuOpen && (
-                  <div className={tagMenuCls} role="listbox">
-                    <button type="button" className={`${tagMenuItemCls} text-white/55 italic`} onClick={e => { e.stopPropagation(); void pickTag(null) }}>{t('card.tagAuto')}</button>
-                    {tagOptions.map(opt => (
-                      <button key={opt} type="button" className={tagMenuItemCls} onClick={e => { e.stopPropagation(); void pickTag(opt) }}>{opt}</button>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <span className={pgTag} style={{ color: tagStyle.text, background: tagStyle.bg, border: `1px solid ${tagStyle.border}` }}>{displayLabel}</span>
-            )}
-          </div>
+          <span className={pgTag} style={{ color: tagStyle.text, background: tagStyle.bg, border: `1px solid ${tagStyle.border}` }}>
+            {displayLabel}
+          </span>
         </div>
-        {tagError && <div className="text-[0.65rem] text-[var(--color-error-mid)] mt-1 leading-[1.35]">{tagError}</div>}
         {sceneDescription ? <div className={pgDesc}>{sceneDescription}</div> : null}
         <div className={pgFooter}>
           <div className={cn(pgRadioBase, isActive && 'border-[var(--color-online)] bg-[var(--color-online)] shadow-[0_0_0_3px_rgba(34,197,94,0.18)]')} />

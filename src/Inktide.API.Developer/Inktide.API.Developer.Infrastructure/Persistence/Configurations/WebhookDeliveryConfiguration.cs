@@ -1,4 +1,5 @@
 using Inktide.API.Developer.Domain.Entities;
+using Inktide.API.Developer.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -21,6 +22,12 @@ public sealed class WebhookDeliveryConfiguration : IEntityTypeConfiguration<Webh
         b.Property(e => e.DeliveredAt).HasColumnName("delivered_at");
         b.Property(e => e.NextRetryAt).HasColumnName("next_retry_at");
         b.Property(e => e.CreatedAt).HasColumnName("created_at");
+        b.Property(e => e.Status)
+            .HasColumnName("status")
+            .HasConversion<string>()
+            .HasMaxLength(16)
+            .HasDefaultValue(WebhookDeliveryStatus.Pending)
+            .IsRequired();
 
         b.HasOne(e => e.Application)
             .WithMany(a => a.Deliveries)

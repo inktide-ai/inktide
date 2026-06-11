@@ -8,6 +8,8 @@ using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Enums;
 using TwitchLib.Communication.Models;
+using ClientEvents = TwitchLib.Client.Events;
+using CommEvents  = TwitchLib.Communication.Events;
 
 namespace Inktide.API.Connector.Twitch.Gateway;
 
@@ -62,11 +64,11 @@ internal sealed class TwitchConnector : IChatConnector, ITwitchConnector, IAsync
             new Capabilities(membership: true, tags: true, commands: true));
         _client.Initialize(credentials);
 
-        _client.OnConnected       += async (_, _) => { OnConnected(); await Task.CompletedTask; };
-        _client.OnDisconnected    += async (_, _) => { OnDisconnected(); await Task.CompletedTask; };
-        _client.OnReconnected     += async (_, _) => { _logger.LogInformation("TwitchConnector: reconnected (twitch.irc.connected=1)"); await Task.CompletedTask; };
-        _client.OnMessageReceived += async (_, args) => await _messageHandler.HandleAsync(args).ConfigureAwait(false);
-        _client.OnError           += async (_, args) => { _logger.LogError(args.Exception, "TwitchClient error"); await Task.CompletedTask; };
+        _client.OnConnected       += HandleConnectedAsync;
+        _client.OnDisconnected    += HandleDisconnectedAsync;
+        _client.OnReconnected     += HandleReconnectedAsync;
+        _client.OnMessageReceived += HandleMessageReceivedAsync;
+        _client.OnError           += HandleErrorAsync;
     }
 
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
@@ -123,19 +125,41 @@ internal sealed class TwitchConnector : IChatConnector, ITwitchConnector, IAsync
         return Task.CompletedTask;
     }
 
-    private void OnConnected()
+    private Task HandleConnectedAsync(object? sender, ClientEvents.OnConnectedEventArgs args)
     {
         _logger.LogInformation("TwitchConnector: connected (twitch.irc.connected=1)");
+        return Task.CompletedTask;
     }
 
-    private void OnDisconnected()
+    private Task HandleDisconnectedAsync(object? sender, ClientEvents.OnDisconnectedArgs args)
     {
         // TwitchLib.Communication handles reconnection automatically via ReconnectionPolicy
         _logger.LogWarning("TwitchConnector: disconnected (twitch.irc.connected=0)");
+        return Task.CompletedTask;
+    }
+
+    private Task HandleReconnectedAsync(object? sender, ClientEvents.OnConnectedEventArgs args)
+    {
+        _logger.LogInformation("TwitchConnector: reconnected (twitch.irc.connected=1)");
+        return Task.CompletedTask;
+    }
+
+    private Task HandleMessageReceivedAsync(object? sender, ClientEvents.OnMessageReceivedArgs args)
+        => _messageHandler.HandleAsync(args);
+
+    private Task HandleErrorAsync(object? sender, CommEvents.OnErrorEventArgs args)
+    {
+        _logger.LogError(args.Exception, "TwitchClient error");
+        return Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
     {
+        _client.OnConnected       -= HandleConnectedAsync;
+        _client.OnDisconnected    -= HandleDisconnectedAsync;
+        _client.OnReconnected     -= HandleReconnectedAsync;
+        _client.OnMessageReceived -= HandleMessageReceivedAsync;
+        _client.OnError           -= HandleErrorAsync;
         _cts?.Cancel();
         _cts?.Dispose();
         await _client.DisconnectAsync().ConfigureAwait(false);

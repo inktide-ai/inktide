@@ -7,6 +7,8 @@ namespace Inktide.API.Soul.Infrastructure.Services;
 /// <summary>
 /// Implements IProjectExportDataQuery (Core contract) so Project.Infrastructure can read
 /// Soul data for export without a compile-time dependency on Soul.Infrastructure.
+/// Behavior fields (personality, system prompt, response behavior, memory, auto pilot) have
+/// moved to the Project context and are no longer stored on AiCard.
 /// </summary>
 internal sealed class ProjectExportDataQueryService : IProjectExportDataQuery
 {
@@ -34,34 +36,25 @@ internal sealed class ProjectExportDataQueryService : IProjectExportDataQuery
             ttsConfigJson = System.Text.Json.JsonSerializer.Serialize(tts, TtsJsonOpts);
         }
 
-        var connectors = card.Channels
-            .Where(c => c.IsActive)
-            .Select((c, i) => new ConnectorExportRecord(
-                LocalId:     $"channel-{i + 1}",
-                Platform:    c.Platform,
-                ChannelName: c.ChannelName,
-                BotUsername: c.BotUsername))
-            .ToList();
-
         return new SoulExportSnapshot(
-            Name:                card.Name,
-            Slug:                card.Slug,
-            Description:         card.Description,
-            Status:              card.Status.ToString().ToLower(),
-            Personality:         card.Personality,
-            SystemPrompt:        card.SystemPrompt,
-            LlmModelId:          card.LlmCatalog?.ModelId ?? string.Empty,
-            LlmProvider:         card.LlmCatalog?.Provider ?? string.Empty,
-            LlmConfigJson:       card.LlmConfig,
-            TtsVoiceId:          card.TtsCatalog?.VoiceId,
-            TtsProvider:         card.TtsCatalog?.Provider,
-            TtsConfigJson:       ttsConfigJson,
-            AppearanceJson:      card.Appearance,
-            ResponseBehaviorJson: card.ResponseBehavior,
-            MemorySettingsJson:  card.MemorySettings,
-            AutoPilotJson:       card.AutoPilot,
-            PersonalityConfigJson: card.PersonalityConfig.ToJson(),
-            Connectors:          connectors);
+            Name:                 card.Name,
+            Slug:                 card.Slug,
+            Description:          card.Description,
+            Status:               card.Status.ToString().ToLower(),
+            Personality:          string.Empty,
+            SystemPrompt:         string.Empty,
+            LlmModelId:           card.LlmCatalog?.ModelId ?? string.Empty,
+            LlmProvider:          card.LlmCatalog?.Provider ?? string.Empty,
+            LlmConfigJson:        card.LlmConfig,
+            TtsVoiceId:           card.TtsCatalog?.VoiceId,
+            TtsProvider:          card.TtsCatalog?.Provider,
+            TtsConfigJson:        ttsConfigJson,
+            AppearanceJson:       card.Appearance,
+            ResponseBehaviorJson: "{}",
+            MemorySettingsJson:   "{}",
+            AutoPilotJson:        "{}",
+            PersonalityConfigJson: "{}",
+            Connectors:           []);
     }
 
     private static readonly System.Text.Json.JsonSerializerOptions TtsJsonOpts = new()

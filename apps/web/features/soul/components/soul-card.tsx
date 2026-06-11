@@ -3,8 +3,8 @@
 import { useTheme } from 'next-themes'
 import { useLayoutEffect, useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { SoulAvatar } from './soul-avatar'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 export type SoulStatus = 'online' | 'active' | 'idle' | 'offline'
 export type SoulPlatform = 'discord' | 'twitch' | 'browser' | 'youtube' | 'telegram'
@@ -14,7 +14,7 @@ export interface SoulCardData {
   name: string
   subtitle: string
   description?: string
-  avatarUrl: string
+  avatarUrl: string | null
   accentColor: string
   status: SoulStatus
   platforms: SoulPlatform[]
@@ -29,7 +29,6 @@ interface SoulCardProps {
   onOpen: () => void
 }
 
-// ── Layout constants (design reference at BASE_WIDTH) ─────────────────────────
 
 const BASE_WIDTH      = 420
 /** Left image column width */
@@ -59,7 +58,6 @@ const DIVIDER_LIGHT = 'var(--border-default, #e4e2df)'
 const BORDER_DARK   = 'color-mix(in srgb, var(--border-card, #1a1a1a) 68%, transparent)'
 const BORDER_DARK_H = 'color-mix(in srgb, var(--accent-base, #6c47ff) 32%, color-mix(in srgb, var(--border-card, #1a1a1a) 68%, transparent))'
 
-// ── Status ────────────────────────────────────────────────────────────────────
 
 function StatusBadge({ status, label, s }: { status: SoulStatus; label: string; s: (v: number) => number }) {
   const isActive = status === 'online' || status === 'active'
@@ -75,7 +73,6 @@ function StatusBadge({ status, label, s }: { status: SoulStatus; label: string; 
   )
 }
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const IcStarEmpty = ({ size }: { size: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -108,7 +105,6 @@ function readLightClass(): boolean {
   return document.documentElement.classList.contains('light')
 }
 
-// ── Card ──────────────────────────────────────────────────────────────────────
 
 export function SoulCard({ data, width, isFavorite, onFavoriteToggle, onOpen }: SoulCardProps) {
   const { t } = useTranslation('common')
@@ -172,15 +168,15 @@ export function SoulCard({ data, width, isFavorite, onFavoriteToggle, onOpen }: 
     >
       <div style={{ display: 'flex', flexDirection: 'column', background: CARD_SURFACE }}>
 
-        {/* ── TOP ROW: image (left) + content (right) ── */}
         <div style={{ display: 'flex', flexDirection: 'row' }}>
 
           {/* Image column */}
           <div style={{ width: s(BASE_IMG_WIDTH), flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-            <img
-              src={data.avatarUrl}
-              alt={data.name}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+            <SoulAvatar
+              avatarUrl={data.avatarUrl}
+              name={data.name}
+              id={data.id}
+              imgStyle={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
             />
           </div>
 
@@ -227,10 +223,8 @@ export function SoulCard({ data, width, isFavorite, onFavoriteToggle, onOpen }: 
           </div>
         </div>
 
-        {/* ── DIVIDER ── */}
         <div style={{ height: 1, background: isLight ? DIVIDER_LIGHT : DIVIDER_DARK, flexShrink: 0 }} />
 
-        {/* ── BOTTOM: full-width buttons ── */}
         <div style={{ display: 'flex', gap: s(GAP_BTNS), padding: `${s(BASE_BTN_PAD_V)}px ${s(BASE_PAD)}px` }}>
           <button
             type="button"

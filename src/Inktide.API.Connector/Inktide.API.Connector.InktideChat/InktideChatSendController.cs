@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Inktide.API.Core;
 using Inktide.API.Connector.Application.Contracts;
-using Inktide.API.Connector.Application.Controllers;
+using Inktide.API.Core.Controllers;
 using Inktide.API.Connector.InktideChat.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace Inktide.API.Connector.InktideChat;
 
 [ApiController]
-[Route("api/connector/chat")]
+[Route("api/v1/connectors/inktide")]
 [Authorize]
 public sealed class InktideChatSendController : ConnectorControllerBase
 {
@@ -31,15 +31,16 @@ public sealed class InktideChatSendController : ConnectorControllerBase
     /// <c>channelId</c> must be <c>"{cardId}:{userId}"</c> where <c>userId</c> matches
     /// the authenticated principal — enforced server-side to prevent channel hijacking.
     /// </summary>
-    [HttpPost("send")]
+    [HttpPost("messages")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public IActionResult Send([FromBody] InktideChatSendRequest request)
     {
         var userId = GetUserId().ToString();
+        var belongs = InktideChatChannelId.BelongsToUser(request.ChannelId, userId);
 
-        if (!InktideChatChannelId.BelongsToUser(request.ChannelId, userId))
+        if (!belongs)
             return BadRequest(ApiErrorResponse.From("channelId must be in the format '{cardId}:{userId}' where userId matches the authenticated user.", "VALIDATION_ERROR"));
 
         if (string.IsNullOrWhiteSpace(request.Text))

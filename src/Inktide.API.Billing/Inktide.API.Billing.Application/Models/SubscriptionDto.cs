@@ -1,3 +1,5 @@
+using Inktide.API.Core.Models;
+
 namespace Inktide.API.Billing.Application.Models;
 
 public sealed record SubscriptionDto(

@@ -2,7 +2,7 @@ import { apiFetch, jsonOrThrow } from '@/api/client'
 import type { TelegramValidateResponse } from '@/shared/types/soul-api'
 
 export async function validateTelegramBotToken(botToken: string): Promise<TelegramValidateResponse> {
-  const res = await apiFetch('/api/connectors/telegram/validate-token', {
+  const res = await apiFetch('/api/v1/connectors/telegram/token-validations', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ botToken }),
@@ -16,7 +16,7 @@ export async function createTelegramChannel(
   chatId: string,
   chatName: string,
 ): Promise<void> {
-  const res = await apiFetch('/api/connectors/telegram/channels', {
+  const res = await apiFetch('/api/v1/connectors/telegram/channels', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ cardId, botToken, chatId, chatName }),
@@ -25,6 +25,6 @@ export async function createTelegramChannel(
 }
 
 export async function revokeTelegramChannel(channelId: string): Promise<void> {
-  const res = await apiFetch(`/api/connectors/telegram/revoke/${channelId}`, { method: 'POST' })
+  const res = await apiFetch(`/api/v1/connectors/telegram/channels/${channelId}`, { method: 'DELETE' })
   if (!res.ok) throw new Error(`Revoke failed: ${res.status}`)
 }

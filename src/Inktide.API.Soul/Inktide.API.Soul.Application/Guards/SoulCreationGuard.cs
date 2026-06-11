@@ -38,7 +38,6 @@ public sealed class SoulCreationGuard
         Guid? ttsCatalogId,
         CancellationToken ct = default)
     {
-        // ── Plan quota ──────────────────────────────────────────────────────────
 
         var limits = await _planResolver.GetLimitsAsync(userId.ToString(), ct).ConfigureAwait(false);
         var count  = await _cardRepo.CountByUserIdAsync(userId, ct).ConfigureAwait(false);
@@ -48,7 +47,6 @@ public sealed class SoulCreationGuard
         var data = await _query.GetValidationDataAsync(userId, llmCatalogId, ttsCatalogId, ct)
                                .ConfigureAwait(false);
 
-        // ── LLM catalog entry ────────────────────────────────────────────────────
 
         if (data.LlmEntry is null)
             throw new SoulCreationException(
@@ -62,7 +60,6 @@ public sealed class SoulCreationGuard
                 $"LLM model '{data.LlmEntry.DisplayName}' is currently unavailable.",
                 "llm_catalog_id");
 
-        // ── Provider consistency ─────────────────────────────────────────────────
 
         if (llmConfigProviderId is not null
             && !string.Equals(llmConfigProviderId, data.LlmEntry.Provider, StringComparison.OrdinalIgnoreCase))
@@ -74,7 +71,6 @@ public sealed class SoulCreationGuard
                 "llm_config.provider_id");
         }
 
-        // ── LLM API key presence + validity ─────────────────────────────────────
 
         if (data.LlmEntry.RequiresApiKey)
         {
@@ -93,7 +89,6 @@ public sealed class SoulCreationGuard
                     "llm_catalog_id");
         }
 
-        // ── TTS catalog entry (optional) ─────────────────────────────────────────
 
         if (ttsCatalogId.HasValue)
         {

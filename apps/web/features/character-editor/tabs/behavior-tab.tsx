@@ -219,10 +219,8 @@ const BehaviorTab = ({ character, onUpdate }: BehaviorTabProps) => {
 
   return (
     <div className="flex flex-col gap-6 max-w-[840px] mx-auto w-full">
-      {/* ── Personality Engine ── */}
       <PersonalitySection personality={character.personalityConfig} onUpdate={updatePersonality} t={t} />
 
-      {/* ── Response ── */}
       <div className={sectionCls}>
         <div className={sectionTitle}>{t('section.response')}</div>
         <div className="py-2">
@@ -239,7 +237,6 @@ const BehaviorTab = ({ character, onUpdate }: BehaviorTabProps) => {
         </div>
       </div>
 
-      {/* ── LLM Config ── */}
       <div className={sectionCls}>
         <div className={sectionTitle}>{t('section.llmConfig')}</div>
         <div className="py-2">
@@ -251,7 +248,6 @@ const BehaviorTab = ({ character, onUpdate }: BehaviorTabProps) => {
         </div>
       </div>
 
-      {/* ── Memory ── */}
       <div className={sectionCls}>
         <div className={sectionTitle}>{t('section.memory')}</div>
         <div className="py-2">
@@ -264,7 +260,6 @@ const BehaviorTab = ({ character, onUpdate }: BehaviorTabProps) => {
         </div>
       </div>
 
-      {/* ── Auto-Pilot ── */}
       <div className={sectionCls}>
         <div className={sectionTitle}>{t('section.autoPilot')}</div>
         <div className="py-2">

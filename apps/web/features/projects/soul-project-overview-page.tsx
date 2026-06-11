@@ -14,6 +14,8 @@ import { useProjectRuntimeContext } from './ProjectRuntimeContext'
 import {
   SectionCard, NoSoulPlaceholder, ProjectMetaRow, ProjectStatusBadge,
 } from './ui/project-overview-primitives'
+import { PageContent } from '@/shared/ui'
+import { useClipboard } from '@/shared/hooks/useClipboard'
 
 export default function SoulProjectOverviewPage() {
   const { id: soulId, projectId } = useParams<{ id: string; projectId: string }>()
@@ -27,19 +29,29 @@ export default function SoulProjectOverviewPage() {
     activeModel,
     activeScene,
     activeChannels,
-    previewUrl,
     loading,
     updateProjectMeta,
     toggleStatus,
   } = useProjectRuntimeContext()
 
-  // ── Edit form state ───────────────────────────────────────────────────────
+  const obsPreviewSrc = useMemo(() => {
+    if (!activeModel || typeof window === 'undefined') return null
+    return buildObsSceneUrl(window.location.origin, {
+      projectId: projectId,
+      channelId: activeChannels[0]?.channel_id ?? null,
+      modelUrl:  activeModel.public_url,
+      modelType: inferModelType(activeModel.original_file_name),
+      sceneUrl:  activeScene?.public_url ?? null,
+      bg:        'transparent',
+    })
+  }, [projectId, activeModel, activeScene, activeChannels])
+
   const [editing, setEditing]         = useState(false)
   const [name, setName]               = useState('')
   const [description, setDescription] = useState('')
   const [saving, setSaving]           = useState(false)
   const [toggling, setToggling]       = useState(false)
-  const [copied, setCopied]           = useState(false)
+  const { copied, copy: copyObsUrl }  = useClipboard()
 
   useEffect(() => {
     if (project && !editing) {
@@ -48,7 +60,6 @@ export default function SoulProjectOverviewPage() {
     }
   }, [project, editing])
 
-  // ── Mutations ─────────────────────────────────────────────────────────────
   async function handleSave() {
     if (!project || saving) return
     setSaving(true)
@@ -74,23 +85,20 @@ export default function SoulProjectOverviewPage() {
     }
   }
 
-  // ── Derived values ────────────────────────────────────────────────────────
   const obsUrl = useMemo(() => {
     if (!activeModel || !activeChannels.length || typeof window === 'undefined') return null
     return buildObsSceneUrl(window.location.origin, {
+      projectId: projectId,
       channelId: activeChannels[0].channel_id!,
       modelUrl:  activeModel.public_url,
       modelType: inferModelType(activeModel.original_file_name),
       sceneUrl:  activeScene?.public_url,
     })
-  }, [activeModel, activeChannels, activeScene])
+  }, [projectId, activeModel, activeChannels, activeScene])
 
-  function copyObsUrl() {
+  function handleCopyObsUrl() {
     if (!obsUrl) return
-    navigator.clipboard.writeText(obsUrl).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
+    copyObsUrl(obsUrl)
   }
 
   if (loading) {
@@ -110,9 +118,8 @@ export default function SoulProjectOverviewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1000px] px-6 py-8">
+    <PageContent>
 
-      {/* ── Header ── */}
       <div className="mb-8 flex items-start justify-between gap-4">
         <div className="flex-1">
           {editing ? (
@@ -192,15 +199,14 @@ export default function SoulProjectOverviewPage() {
         )}
       </div>
 
-      {/* ── Sandbox — full-width scene preview ── */}
       <section className="mb-6 overflow-hidden rounded-xl border border-[var(--border-card)]">
         <div
           className="relative w-full overflow-hidden"
           style={{ aspectRatio: '16/9' }}
         >
-          {previewUrl ? (
+          {obsPreviewSrc ? (
             <iframe
-              src={previewUrl}
+              src={obsPreviewSrc}
               title="Scene preview"
               className="h-full w-full border-0 pointer-events-none"
             />
@@ -251,7 +257,6 @@ export default function SoulProjectOverviewPage() {
         </div>
       </section>
 
-      {/* ── 2-col grid: Character + Scene ── */}
       <div className="mb-6 grid gap-6 md:grid-cols-2">
 
         <SectionCard icon={Cpu} title={t('projectDetail.character')} href={`${base}/character`}>
@@ -312,7 +317,7 @@ export default function SoulProjectOverviewPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-body font-medium text-[var(--text-primary)]">
-                    {activeScene?.display_name ?? activeScene?.original_file_name ?? t('projectDetail.noBackgroundSelected')}
+                    {activeScene?.display_name ?? activeScene?.original_name ?? t('projectDetail.noBackgroundSelected')}
                   </p>
                   <p className="text-xs text-[var(--text-tertiary)]">{t('projectDetail.background')}</p>
                 </div>
@@ -327,7 +332,6 @@ export default function SoulProjectOverviewPage() {
         </SectionCard>
       </div>
 
-      {/* ── 2-col grid: Channels + Soul ── */}
       <div className="mb-6 grid gap-6 md:grid-cols-2">
 
         <SectionCard icon={Radio} title={t('projectDetail.channels')} href={`${base}/channels`}>
@@ -369,7 +373,6 @@ export default function SoulProjectOverviewPage() {
         </SectionCard>
       </div>
 
-      {/* ── OBS (full width) ── */}
       <section className="overflow-hidden rounded-xl border border-[var(--border-card)]">
         <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-3.5">
           <div className="flex items-center gap-2 text-body font-medium text-[var(--text-primary)]">
@@ -411,7 +414,7 @@ export default function SoulProjectOverviewPage() {
                   </code>
                   <button
                     type="button"
-                    onClick={copyObsUrl}
+                    onClick={handleCopyObsUrl}
                     className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 text-body font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
                   >
                     {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
@@ -431,6 +434,6 @@ export default function SoulProjectOverviewPage() {
         </div>
       </section>
 
-    </div>
+    </PageContent>
   )
 }

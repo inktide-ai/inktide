@@ -1,9 +1,10 @@
 using System.Data;
 using System.Data.Common;
-using System.Text.Json;
+using Inktide.API.Core.Messages;
 using Inktide.API.Core.Transactions;
-using Inktide.API.Soul.Domain.Entities;
+using Inktide.API.Soul.Domain.IntegrationEvents;
 using Inktide.API.Soul.Infrastructure.DbContext;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -27,6 +28,7 @@ internal sealed class SoulTransactionManager : ITransactionManager, IDisposable,
     private readonly SoulDbContext _db;
     private readonly IDomainEventCollector _collector;
     private readonly IDomainEventDispatcher _dispatcher;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<SoulTransactionManager> _logger;
 
     private IDbContextTransaction? _currentTransaction;
@@ -35,12 +37,14 @@ internal sealed class SoulTransactionManager : ITransactionManager, IDisposable,
         SoulDbContext db,
         IDomainEventCollector collector,
         IDomainEventDispatcher dispatcher,
+        IPublishEndpoint publishEndpoint,
         ILogger<SoulTransactionManager> logger)
     {
-        _db         = db         ?? throw new ArgumentNullException(nameof(db));
-        _collector  = collector  ?? throw new ArgumentNullException(nameof(collector));
-        _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
-        _logger     = logger     ?? throw new ArgumentNullException(nameof(logger));
+        _db              = db              ?? throw new ArgumentNullException(nameof(db));
+        _collector       = collector       ?? throw new ArgumentNullException(nameof(collector));
+        _dispatcher      = dispatcher      ?? throw new ArgumentNullException(nameof(dispatcher));
+        _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
+        _logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task BeginTransactionAsync(CancellationToken ct = default)
@@ -121,7 +125,6 @@ internal sealed class SoulTransactionManager : ITransactionManager, IDisposable,
         await DisposeTransactionAsync().ConfigureAwait(false);
     }
 
-    // ── internals ────────────────────────────────────────────────────────────
 
     private async Task FlushEventsAndSaveAsync(CancellationToken ct)
     {
@@ -129,13 +132,28 @@ internal sealed class SoulTransactionManager : ITransactionManager, IDisposable,
         var integrationEvents = _collector.IntegrationEvents.ToList();
         _collector.Clear();
 
+        // Publish integration events via MT EF outbox — messages are stored atomically
+        // in the outbox table alongside the domain changes during SaveChangesAsync below.
         foreach (var evt in integrationEvents)
         {
-            _db.OutboxEvents.Add(new OutboxEvent
+            switch (evt)
             {
-                EventType = evt.GetType().Name,
-                Payload   = JsonSerializer.Serialize(evt, evt.GetType()),
-            });
+                case AiCardStatusChangedIntegrationEvent e:
+                    await _publishEndpoint
+                        .Publish(new SoulStatusChangedMessage(e.CardId, e.IsActive, e.Status), ct)
+                        .ConfigureAwait(false);
+                    break;
+                case AiCardCreatedIntegrationEvent e:
+                    await _publishEndpoint
+                        .Publish(new AiCardCreatedMessage(e.CardId, e.UserId, e.CardName), ct)
+                        .ConfigureAwait(false);
+                    break;
+                case AiCardDeletedIntegrationEvent e:
+                    await _publishEndpoint
+                        .Publish(new AiCardDeletedMessage(e.CardId, e.UserId), ct)
+                        .ConfigureAwait(false);
+                    break;
+            }
         }
 
         await _db.SaveChangesAsync(ct).ConfigureAwait(false);

@@ -64,14 +64,14 @@ public sealed class UserPreferences
                 ? doc.RootElement.EnumerateObject().ToDictionary(p => p.Name, p => p.Value.Clone())
                 : new();
         }
-        catch { map = new(); }
-
-        try
+        catch (JsonException ex)
         {
-            using var valDoc = JsonDocument.Parse(value);
-            map[key] = valDoc.RootElement.Clone();
+            // Stored JSON is corrupt — surface this so the caller can log and decide how to proceed.
+            throw new InvalidOperationException("Workspace preference data is corrupt and cannot be updated.", ex);
         }
-        catch { /* skip invalid JSON */ }
+
+        using var valDoc = JsonDocument.Parse(value); // Throws JsonException for invalid caller input.
+        map[key] = valDoc.RootElement.Clone();
 
         return JsonSerializer.Serialize(map);
     }

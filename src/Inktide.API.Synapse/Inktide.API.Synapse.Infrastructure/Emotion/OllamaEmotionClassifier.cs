@@ -1,8 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Inktide.API.Graph.Application.Interfaces;
-using Inktide.API.Graph.Application.Models;
 using Inktide.API.Synapse.Application.Configuration;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Application.Models;
@@ -19,7 +17,7 @@ namespace Inktide.API.Synapse.Infrastructure.Emotion;
 /// SRP: only responsible for the HTTP call and response parsing.
 /// Never throws — returns <see cref="EmotionResult"/> with null emotion on any failure.
 /// </summary>
-internal sealed class OllamaEmotionClassifier : IEmotionClassificationService, IEmotionClassifier
+internal sealed class OllamaEmotionClassifier : IEmotionClassificationService
 {
 
     private static readonly string[] ValidEmotions =
@@ -138,13 +136,6 @@ internal sealed class OllamaEmotionClassifier : IEmotionClassificationService, I
         }
     }
 
-
-    async Task<EmotionClassification?> IEmotionClassifier.ClassifyAsync(
-        string message, string? personality, CancellationToken ct, float intensityScale)
-    {
-        var result = await ClassifyAsync(message, personality, ct, intensityScale);
-        return result.Emotion is not null ? new EmotionClassification(result.Emotion, result.Intensity) : null;
-    }
 
     private static EmotionResult None => new(null, 0f);
 

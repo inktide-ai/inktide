@@ -58,6 +58,8 @@ export interface VrmAnimationContext {
    * Controllers must handle null gracefully and fall back to legacy ctx fields.
    */
   soulState: SoulState | null
+  /** Если false — AnimationStateMachineController не запускает случайные idle-вариации */
+  randomAnimationsEnabled: boolean
 }
 
 export interface IVrmController {

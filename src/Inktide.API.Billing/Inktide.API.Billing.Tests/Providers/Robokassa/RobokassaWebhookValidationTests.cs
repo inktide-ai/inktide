@@ -1,8 +1,11 @@
 using System.Security.Cryptography;
 using System.Text;
 using Inktide.API.Billing.Application.Interfaces;
+using Inktide.API.Billing.Infrastructure.DbContext;
 using Inktide.API.Billing.Infrastructure.Providers.Robokassa;
 using Inktide.API.Billing.Infrastructure.Settings;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using StackExchange.Redis;
@@ -20,12 +23,14 @@ public sealed class RobokassaWebhookValidationTests
 
     private static RobokassaWebhookProcessor CreateProcessor(string password2 = Password2)
     {
-        var settings     = new RobokassaSettings { Password2 = password2 };
-        var redis        = Substitute.For<IConnectionMultiplexer>();
-        var subs         = Substitute.For<ISubscriptionRepository>();
-        var emailService = Substitute.For<IPaymentReceiptEmailService>();
-        var logger       = NullLogger<RobokassaWebhookProcessor>.Instance;
-        return new RobokassaWebhookProcessor(settings, subs, emailService, redis, TimeProvider.System, logger);
+        var settings  = new RobokassaSettings { Password2 = password2 };
+        var redis     = Substitute.For<IConnectionMultiplexer>();
+        var subs      = Substitute.For<ISubscriptionRepository>();
+        var publish   = Substitute.For<IPublishEndpoint>();
+        var db        = new BillingDbContext(new DbContextOptionsBuilder<BillingDbContext>()
+                            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
+        var logger    = NullLogger<RobokassaWebhookProcessor>.Instance;
+        return new RobokassaWebhookProcessor(settings, subs, publish, db, redis, TimeProvider.System, logger);
     }
 
     private static byte[] BuildForm(string outSum, string invId, string userId, string sig, string plan = Plan)

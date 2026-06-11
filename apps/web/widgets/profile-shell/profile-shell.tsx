@@ -72,10 +72,8 @@ export default function ProfileShell({ children }: ProfileShellProps) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-deeper)]">
-      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <aside className="flex w-72 flex-shrink-0 flex-col bg-[var(--c-bacSec)] shadow-[inset_calc(var(--direction)*-1px)_0_0_0_var(--c-borSec)]">
 
-        {/* ── User header ──────────────────────────────────────────────── */}
         <div className="relative">
           <SidebarAccountMenu
             open={userMenuOpen}
@@ -146,12 +144,10 @@ export default function ProfileShell({ children }: ProfileShellProps) {
           </div>
         </div>
 
-        {/* ── Nav ──────────────────────────────────────────────────────── */}
         <nav className="px-2 pt-1 flex flex-col gap-0.5">
           <SidebarNavItem href={HOME_ROUTE} active={isHome && !isCreating} icon={<Home size={16} />} label={t('common:sidebar.sandbox')} />
         </nav>
 
-        {/* ── Projects ─────────────────────────────────────────────────── */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t border-[var(--border-subtle)] pb-1 pt-2">
           {/* Header row — toggles between label and search input */}
           <div className="px-2 pb-1.5">
@@ -236,7 +232,6 @@ export default function ProfileShell({ children }: ProfileShellProps) {
           </ScrollArea>
         </div>
 
-        {/* ── New soul ─────────────────────────────────────────────────── */}
         <div className="px-2 py-3">
           <button
             type="button"
@@ -250,7 +245,6 @@ export default function ProfileShell({ children }: ProfileShellProps) {
 
       </aside>
 
-      {/* ── Main ─────────────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-hidden bg-[var(--bg-deeper)]">
         {isCreating ? (
           <CreateCharacterForm

@@ -1,0 +1,15 @@
+{
+  "solution": {
+    "path": "Inktide.API.sln",
+    "projects": [
+      "src/Inktide.API.Core/Inktide.API.Core.csproj",
+      "src/Inktide.API.Domain/Inktide.API.Domain.csproj",
+      "src/Inktide.API.Memory/Inktide.API.Memory.Domain/Inktide.API.Memory.Domain.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Domain/Inktide.API.Soul.Domain.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Application/Inktide.API.Soul.Application.csproj",
+      "src/Inktide.API.Synapse/Inktide.API.Synapse.Application/Inktide.API.Synapse.Application.csproj",
+      "src/Inktide.API.Synapse/Inktide.API.Synapse.Infrastructure/Inktide.API.Synapse.Infrastructure.csproj",
+      "src/Inktide.API.Synapse/Inktide.API.Synapse.REST/Inktide.API.Synapse.REST.csproj"
+    ]
+  }
+}

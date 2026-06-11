@@ -17,7 +17,6 @@ const ModelTypeSchema     = z.enum(['vrm', 'glb', 'live2d', 'none'])
 
 /** SRP: только маппинг между API-DTO (snake_case) и доменными типами (camelCase). */
 
-// ── Backend → Frontend ────────────────────────────────────────────────────────
 
 export function apiResponseToCharacter(r: AiCardResponse): AiCharacter {
   // Zod schemas parse with defaults — safe against schema drift and missing fields
@@ -124,7 +123,6 @@ export function apiResponseToCharacter(r: AiCardResponse): AiCharacter {
   }
 }
 
-// ── Frontend → Backend (полное обновление) ────────────────────────────────────
 
 export function characterToUpdateRequest(c: AiCharacter): UpdateAiCardRequest {
   return {
@@ -209,7 +207,6 @@ export function characterToUpdateRequest(c: AiCharacter): UpdateAiCardRequest {
   }
 }
 
-// ── Frontend → Backend (создание) ─────────────────────────────────────────────
 
 export function characterToCreateRequest(
   c: Omit<AiCharacter, 'id'>,
@@ -289,7 +286,6 @@ export function characterToCreateRequest(
   }
 }
 
-// ── Legacy helpers (kept for compatibility with older callers) ─────────────────
 // These were previously used to manually extract nested JSONB values.
 // They're no longer needed in the mapper but kept so call sites don't break.
 export const _deprecated = {

@@ -1,4 +1,38 @@
 {
+  "bannerCrop": {
+    "title": "Crop banner",
+    "close": "Close",
+    "hint": "Drag to pan · Scroll to zoom",
+    "cancel": "Cancel",
+    "uploading": "Uploading…",
+    "apply": "Apply"
+  },
+  "accountPanel": {
+    "back": "← Back to workshop",
+    "title": "Your profile",
+    "subtitle": "Account identity: display name and photo. Bots are configured separately — see Projects below.",
+    "updating": "Updating…",
+    "working": "Working…",
+    "uploadPhoto": "Upload new photo",
+    "photoHint": "PNG, JPG, WebP — up to ~50 MB.",
+    "displayName": "Display name",
+    "displayNameHint": "Shown in the sidebar instead of your login handle. Stored in this browser until Keycloak stores it.",
+    "nickname": "Nickname",
+    "save": "Save",
+    "saved": "Saved",
+    "storageDisabled": "File storage is not configured on the server — avatar upload is unavailable.",
+    "projects": "Projects",
+    "projectsHint": "Each project is a bot — identity, skills, voice, and model. Open one to edit in the workshop.",
+    "noProjects": "No projects yet.",
+    "noProjectsHintBefore": "Use ",
+    "createNew": "Create new",
+    "noProjectsHintAfter": " in the sidebar to add your first bot.",
+    "active": "Active",
+    "bot": "Bot",
+    "noDescription": "No description yet",
+    "errorNotImage": "Please choose an image file.",
+    "errorUpdateAvatar": "Could not update avatar"
+  },
   "tab": {
     "behavior": "Behavior",
     "voice": "Voice",

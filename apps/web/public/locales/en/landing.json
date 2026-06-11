@@ -1,4 +1,27 @@
 {
+  "demoChat": {
+    "welcome": "Hey! I'm Akane — an AI streamer powered by Inktide. Wanna chat? Ask me anything or try roasting me.",
+    "errorResponse": "Failed to get response",
+    "errorGeneric": "Something went wrong",
+    "errorMessage": "Hmm, my brain is buffering. Is Ollama running? Try again in a sec.",
+    "chatWith": "Chat with Akane",
+    "left": "{{count}} left",
+    "status": "Online — AI Demo",
+    "free": "{{remaining}}/{{limit}} free",
+    "close": "Close",
+    "send": "Send",
+    "signUpToContinue": "Sign up to continue...",
+    "typeMessage": "Type a message...",
+    "gateTitle": "Create your own AI",
+    "gateDesc": "Build a custom AI streamer with its own personality, voice, and 3D avatar. It reads your chat and talks back — no scripts, no delays.",
+    "signUpFree": "Sign up free",
+    "noCreditCard": "No credit card · 2 min setup"
+  },
+  "split": {
+    "screenshotDemo": "Screenshot / Demo",
+    "getStarted": "Get started →",
+    "learnMore": "Learn more"
+  },
   "nav": {
     "product": "Product",
     "solutions": "Solutions",

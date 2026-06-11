@@ -16,6 +16,12 @@ def warm_up_model() -> None:
     get_embeddings_service()
 
 
+def shutdown() -> None:
+    """Release the global model reference. Call from app lifespan on exit."""
+    global _model
+    _model = None
+
+
 def get_embeddings_service() -> SentenceTransformer | OllamaEmbeddings:
     global _model
     if _model is None:

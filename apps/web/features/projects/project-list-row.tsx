@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Download, ExternalLink, MessageSquare, Tv2, Send, Radio } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Badge, type BadgeVariant } from '@/shared/ui/badge'
@@ -59,6 +60,8 @@ export function ProjectListRow({
   }
   const safeStatus: ProjectStatus = ['active', 'paused', 'archived'].includes(status) ? status : 'active'
   const thumbSrc = coverUrl ?? activeSoul?.avatar_url ?? null
+  const [thumbLoaded, setThumbLoaded] = useState(false)
+  const [thumbError, setThumbError]   = useState(false)
 
   return (
     <div
@@ -70,13 +73,18 @@ export function ProjectListRow({
     >
       {/* Thumbnail */}
       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-[var(--bg-2)]">
-        {previewUrl ? (
-          <iframe
-            src={previewUrl}
-            loading="lazy"
-            className="pointer-events-none absolute inset-0 h-full w-full border-0"
-            title="Scene preview"
-          />
+        {previewUrl && !thumbError ? (
+          <>
+            {!thumbLoaded && <div className="absolute inset-0 animate-pulse bg-[var(--surface-2)]" />}
+            <img
+              src={previewUrl}
+              alt=""
+              loading="lazy"
+              className={`h-full w-full object-cover transition-opacity duration-200 ${thumbLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={() => setThumbLoaded(true)}
+              onError={() => setThumbError(true)}
+            />
+          </>
         ) : thumbSrc ? (
           <img src={thumbSrc} alt="" className="h-full w-full object-cover" />
         ) : (

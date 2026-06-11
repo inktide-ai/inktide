@@ -1,4 +1,6 @@
-import type { ReactNode } from 'react'
+'use client'
+
+import { useState, type ReactNode } from 'react'
 import { MoreHorizontal } from 'lucide-react'
 import { Card } from '@/shared/ui/card'
 
@@ -11,20 +13,27 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ title, editedLabel, coverUrl, previewUrl, icon }: ProjectCardProps) {
+  const [imgLoaded, setImgLoaded] = useState(false)
+  const [imgError, setImgError]   = useState(false)
+
   return (
     <Card className="w-[232px] flex-shrink-0 overflow-hidden">
-      {previewUrl ? (
-        <div className="relative h-[108px] w-full overflow-hidden bg-[var(--bg-2)]">
-          <iframe
+      {previewUrl && !imgError ? (
+        <div className="relative h-[128px] w-full overflow-hidden bg-[var(--card-bg)]">
+          {!imgLoaded && <div className="absolute inset-0 animate-pulse bg-[var(--surface-2)]" />}
+          <img
             src={previewUrl}
+            alt=""
             loading="lazy"
-            className="pointer-events-none absolute inset-0 h-full w-full border-0"
-            title="Scene preview"
+            className={`h-full w-full object-cover transition-opacity duration-200 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            style={{ objectPosition: 'center 35%' }}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
           />
         </div>
       ) : (
         <div
-          className="h-[108px] w-full bg-cover bg-center"
+          className="h-[128px] w-full bg-cover bg-center"
           style={{
             backgroundImage: coverUrl ? `url(${coverUrl})` : undefined,
             backgroundColor: 'var(--bg-2)',

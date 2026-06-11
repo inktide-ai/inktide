@@ -1,8 +1,6 @@
-// ── Soul API contract types ──────────────────────────────────────────────────
 // Domain DTOs shared across features/, entities/, and shared/ layers.
 // HTTP call functions live in features/soul/api/index.ts.
 
-// ── Card types ──
 
 export interface AiCardListItem {
   id: string
@@ -127,7 +125,6 @@ export interface UpdateAiCardRequest {
   tags?: string[]
 }
 
-// ── Channel types ──
 
 export type ChannelPlatform = 'discord' | 'twitch' | 'kick' | 'vk_video' | 'telegram'
 
@@ -139,7 +136,6 @@ export interface CreateChannelLinkRequest {
   bot_username: string
 }
 
-// ── Model asset types ──
 
 export interface BeginModelUploadResponse {
   upload_url: string
@@ -158,9 +154,9 @@ export interface AiCardModelResponse {
   size_bytes: number
   created_at: string
   is_active: boolean
+  thumbnail_url?: string | null
 }
 
-// ── Scene (background) types ──
 
 export interface AiCardSceneResponse {
   id: string
@@ -184,7 +180,6 @@ export interface CustomSceneTagDto {
   color: string | null
 }
 
-// ── Activity ──
 
 export interface AiCardActivityItem {
   id: string
@@ -192,7 +187,14 @@ export interface AiCardActivityItem {
   created_at: string
 }
 
-// ── Provider credentials (BYOK) ──
+
+export interface AiCardStats {
+  messages_24h: number
+  llm_calls_24h: number
+  tts_chars_24h: number
+  memory_count: number
+}
+
 
 export interface CredentialResponse {
   providerId: string
@@ -210,7 +212,6 @@ export interface CredentialTestResponse {
   testedAt: string
 }
 
-// ── Run presets ──
 
 export interface RunPreset {
   id: string
@@ -237,7 +238,6 @@ export interface CreateRunPresetRequest {
   override_voice_profile_id?: string | null
 }
 
-// ── Connector types ──
 
 export interface DiscordTokenValidationResponse {
   valid: boolean
@@ -250,7 +250,6 @@ export interface TelegramValidateResponse {
   error?: string
 }
 
-// ── Public profile (unauthenticated) ──
 
 export interface PublicAiCardResponse {
   id: string

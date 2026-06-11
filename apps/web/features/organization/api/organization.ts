@@ -24,7 +24,7 @@ export interface AcceptInviteResponse {
 }
 
 export async function listPendingInvites(): Promise<PendingInvitesResponse> {
-  const res = await apiFetch('/api/organization/invites')
+  const res = await apiFetch('/api/v1/organization/invites')
   return jsonOrThrow<PendingInvitesResponse>(res)
 }
 
@@ -32,7 +32,7 @@ export async function sendInvites(body: {
   emails: string[]
   role: OrgRole
 }): Promise<PendingInvitesResponse> {
-  const res = await apiFetch('/api/organization/invites', {
+  const res = await apiFetch('/api/v1/organization/invites', {
     method: 'POST',
     body: JSON.stringify(body),
   })
@@ -40,21 +40,21 @@ export async function sendInvites(body: {
 }
 
 export async function resendInvite(inviteId: string): Promise<void> {
-  const res = await apiFetch(`/api/organization/invites/${inviteId}/resend`, {
+  const res = await apiFetch(`/api/v1/organization/invites/${inviteId}/deliveries`, {
     method: 'POST',
   })
   return emptyOrThrow(res)
 }
 
 export async function cancelInvite(inviteId: string): Promise<void> {
-  const res = await apiFetch(`/api/organization/invites/${inviteId}`, {
+  const res = await apiFetch(`/api/v1/organization/invites/${inviteId}`, {
     method: 'DELETE',
   })
   return emptyOrThrow(res)
 }
 
 export async function acceptInvite(token: string): Promise<AcceptInviteResponse> {
-  const res = await apiFetch('/api/organization/invites/accept', {
+  const res = await apiFetch('/api/v1/organization/invites/accept', {
     method: 'POST',
     body: JSON.stringify({ token }),
   })

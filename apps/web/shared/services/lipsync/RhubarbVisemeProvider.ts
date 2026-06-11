@@ -1,6 +1,5 @@
 import type { IVisemeProvider, MouthWeights, RhubarbViseme, VisemeContext, VisemeCue } from '@/shared/types/IVisemeProvider'
 
-// ── Rhubarb → VRM blend-shape weights ────────────────────────────────────────
 //
 // Derived from crates/inktide-rendering/src/vrm_viseme.rs, adapted to the
 // five standard VRM expressions (aa / ih / ou / ee / oh).
@@ -61,7 +60,6 @@ export class RhubarbVisemeProvider implements IVisemeProvider {
     this._smoothed = { aa: 0, ih: 0, ou: 0, ee: 0, oh: 0 }
   }
 
-  // ── Private ─────────────────────────────────────────────────────────────────
 
   private _computeTarget(cues: VisemeCue[], currentTime: number, timelineStartT: number): MouthWeights {
     const elapsedMs = (currentTime - timelineStartT) * 1000 + AUDIO_OFFSET_MS

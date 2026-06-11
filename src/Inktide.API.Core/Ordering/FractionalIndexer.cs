@@ -107,7 +107,6 @@ public static class FractionalIndexer
         return !(k.Length > intLen && k[^1] == ZeroDigit);
     }
 
-    // ─── Internals ────────────────────────────────────────────────────────────
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int DigitValue(char c)
@@ -303,7 +302,6 @@ public static class FractionalIndexer
         if (key.Length > intLen && key[^1] == ZeroDigit) ThrowFracEndsZero();
     }
 
-    // ─── Core implementations ─────────────────────────────────────────────────
 
     private static int GenerateKeyBetweenCore(
         ReadOnlySpan<char> a, bool hasA,
@@ -446,7 +444,6 @@ public static class FractionalIndexer
         FillNKeysBetween(midKey, b, result[(mid + 1)..]);
     }
 
-    // ─── Throw helpers ────────────────────────────────────────────────────────
 
     [DoesNotReturn] private static void ThrowInvalidChar(char c) =>
         throw new ArgumentException($"Invalid base62 digit: '{c}'.");

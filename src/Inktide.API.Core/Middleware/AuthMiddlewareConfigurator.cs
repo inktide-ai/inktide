@@ -19,6 +19,7 @@ public sealed class AuthMiddlewareConfigurator : IMiddlewareConfigurator
     public void Configure(IApplicationBuilder app)
     {
         app.UseInktideGlobalExceptionHandler();
+        app.UseSecurityHeaders();
         app.UseCors(CorsPolicyName);
         app.UseRouting();
         app.UseAuthentication();

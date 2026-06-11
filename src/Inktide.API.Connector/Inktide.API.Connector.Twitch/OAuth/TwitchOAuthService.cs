@@ -3,30 +3,31 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Twitch.Settings;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Twitch.OAuth;
 
 public sealed class TwitchOAuthService : ITwitchOAuthService
 {
+    public const string HttpClientName = "twitch-oauth";
+
     private const string TokenUrl  = "https://id.twitch.tv/oauth2/token";
     private const string RevokeUrl = "https://id.twitch.tv/oauth2/revoke";
     private const string UsersUrl  = "https://api.twitch.tv/helix/users";
     private const string Scopes    = "chat:read chat:edit";
 
-    private readonly TwitchSettings  _settings;
-    private readonly ITokenProtector _tokenProtector;
-    private readonly HttpClient      _http;
+    private readonly TwitchSettings       _settings;
+    private readonly ITwitchTokenProtector _tokenProtector;
+    private readonly HttpClient            _http;
 
     public TwitchOAuthService(
         IOptions<TwitchSettings> settings,
-        [FromKeyedServices(TokenProtectorKeys.Twitch)] ITokenProtector tokenProtector,
-        HttpClient http)
+        ITwitchTokenProtector tokenProtector,
+        IHttpClientFactory httpClientFactory)
     {
         _settings       = settings.Value;
         _tokenProtector = tokenProtector;
-        _http           = http;
+        _http           = httpClientFactory.CreateClient(HttpClientName);
     }
 
     public string BuildInstallUrl(string state) =>

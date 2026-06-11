@@ -25,12 +25,6 @@ public sealed class AiCardResponse
     [JsonProperty("avatar_url")]
     public string? AvatarUrl { get; set; }
 
-    [JsonProperty("personality")]
-    public string Personality { get; set; } = string.Empty;
-
-    [JsonProperty("system_prompt")]
-    public string SystemPrompt { get; set; } = string.Empty;
-
     [JsonProperty("llm_catalog_id")]
     public Guid LlmCatalogId { get; set; }
 
@@ -52,29 +46,8 @@ public sealed class AiCardResponse
     [JsonProperty("appearance")]
     public AiCardAppearanceDto? Appearance { get; set; }
 
-    [JsonProperty("response_behavior")]
-    public AiCardBehaviorDto? ResponseBehavior { get; set; }
-
-    [JsonProperty("memory_settings")]
-    public AiCardMemoryDto? MemorySettings { get; set; }
-
-    [JsonProperty("auto_pilot")]
-    public AiCardAutoPilotDto? AutoPilot { get; set; }
-
-    [JsonProperty("screen_awareness")]
-    public AiCardScreenAwarenessDto? ScreenAwareness { get; set; }
-
-    [JsonProperty("personality_config")]
-    public AiCardPersonalityDto? PersonalityConfig { get; set; }
-
     [JsonProperty("visibility")]
     public string Visibility { get; set; } = "private";
-
-    [JsonProperty("channels")]
-    public IReadOnlyList<ChannelResponse>? Channels { get; set; }
-
-    [JsonProperty("tools")]
-    public IReadOnlyList<ToolResponse>? Tools { get; set; }
 
     [JsonProperty("is_active")]
     public bool IsActive { get; set; }
@@ -106,9 +79,6 @@ public sealed class AiCardListItem
     [JsonProperty("avatar_url")]
     public string? AvatarUrl { get; set; }
 
-    [JsonProperty("personality")]
-    public string Personality { get; set; } = string.Empty;
-
     [JsonProperty("llm_model")]
     public string? LlmModelName { get; set; }
 
@@ -120,9 +90,6 @@ public sealed class AiCardListItem
 
     [JsonProperty("cover_url")]
     public string? CoverUrl { get; set; }
-
-    [JsonProperty("platforms")]
-    public IReadOnlyList<string> Platforms { get; set; } = [];
 
     [JsonProperty("is_active")]
     public bool IsActive { get; set; }

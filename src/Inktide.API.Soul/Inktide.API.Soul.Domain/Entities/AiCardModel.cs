@@ -26,11 +26,20 @@ public sealed class AiCardModel
     public DateTime CreatedAt { get; private set; }
     public bool IsActive { get; private set; }
 
+    /// <summary>WebP thumbnail generated client-side and stored in MinIO. Null until first render in Avatar Editor.</summary>
+    public string? ThumbnailUrl { get; private set; }
+
     // EF Core navigation
     public AiCard? AiCard { get; private set; }
 
     public void Activate()   => IsActive = true;
     public void Deactivate() => IsActive = false;
+
+    public void SetThumbnailUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) throw new ArgumentException("url is required.", nameof(url));
+        ThumbnailUrl = url;
+    }
 
     public static AiCardModel Create(
         Guid userId,

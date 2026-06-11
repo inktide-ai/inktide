@@ -1,9 +1,18 @@
 import type { ReactNode } from 'react'
 import { AlertTriangle, Info, Lightbulb } from 'lucide-react'
+import sanitizeHtml from 'sanitize-html'
 import { codeToHtml } from 'shiki'
 import { CopyButton } from './copy-button'
 
-// ── Layout ────────────────────────────────────────────────────────────────────
+const SHIKI_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: ['pre', 'code', 'span'],
+  allowedAttributes: {
+    pre:  ['class', 'style', 'tabindex'],
+    code: ['class', 'style'],
+    span: ['class', 'style'],
+  },
+}
+
 
 export function DocPage({ children }: { children: ReactNode }) {
   return (
@@ -13,7 +22,6 @@ export function DocPage({ children }: { children: ReactNode }) {
   )
 }
 
-// ── Page header ───────────────────────────────────────────────────────────────
 
 export function PageTitle({ children, eyebrow }: { children: ReactNode; eyebrow?: string }) {
   return (
@@ -36,7 +44,6 @@ export function PageSubtitle({ children }: { children: ReactNode }) {
   )
 }
 
-// ── Section headings ──────────────────────────────────────────────────────────
 
 function slugify(node: ReactNode): string {
   return String(node)
@@ -83,7 +90,6 @@ export function SubHeading({ children }: { children: ReactNode }) {
   )
 }
 
-// ── Prose ─────────────────────────────────────────────────────────────────────
 
 export function Prose({ children }: { children: ReactNode }) {
   return (
@@ -97,7 +103,6 @@ export function SectionDivider() {
   )
 }
 
-// ── Code ──────────────────────────────────────────────────────────────────────
 
 function inferLang(label?: string): string {
   if (!label) return 'typescript'
@@ -133,8 +138,7 @@ export async function CodeBlock({ children, label, lang }: { children: string; l
       </div>
       <div
         className="overflow-x-auto bg-[var(--bg-0)] [&>pre]:px-5 [&>pre]:py-4 [&>pre]:text-[13px] [&>pre]:leading-relaxed"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: trusted developer doc content
-        dangerouslySetInnerHTML={{ __html: html }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(html, SHIKI_SANITIZE_OPTIONS) }}
       />
     </div>
   )
@@ -148,11 +152,10 @@ export function InlineCode({ children }: { children: ReactNode }) {
   )
 }
 
-// ── Tables ────────────────────────────────────────────────────────────────────
 
 export function Table({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)]">
+    <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
       <table className="w-full text-sm">{children}</table>
     </div>
   )
@@ -203,7 +206,6 @@ export function MethodBadge({ method }: { method: string }) {
   )
 }
 
-// ── InfoBox ───────────────────────────────────────────────────────────────────
 
 const INFO_VARIANTS = {
   info: {
@@ -254,7 +256,6 @@ export function InfoBox({ children, variant = 'info', title }: {
   )
 }
 
-// ── Steps ─────────────────────────────────────────────────────────────────────
 
 export function Step({ n, title, desc, children }: {
   n: number
@@ -286,7 +287,6 @@ export function SubStep({ n, children }: { n: number; children: ReactNode }) {
   )
 }
 
-// ── Next steps grid ───────────────────────────────────────────────────────────
 
 export interface NextStep {
   href: string

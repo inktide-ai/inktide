@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
+using Inktide.API.Core.Pagination;
 using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.REST.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +12,7 @@ using Newtonsoft.Json;
 namespace Inktide.API.Project.REST.Controllers;
 
 [ApiController]
-[Route("api/projects")]
+[Route("api/v1/projects")]
 [Produces("application/json")]
 [Authorize]
 public sealed class ProjectController : ControllerBase
@@ -22,6 +24,7 @@ public sealed class ProjectController : ControllerBase
     private readonly IProjectExportService _exporter;
     private readonly IInktFileImportService _inktImporter;
     private readonly ICardSummaryProvider _cardSummaries;
+    private readonly IProjectSceneConfigService _sceneConfig;
 
     public ProjectController(
         IProjectCrudService projects,
@@ -30,7 +33,8 @@ public sealed class ProjectController : ControllerBase
         IProjectImportService importer,
         IProjectExportService exporter,
         IInktFileImportService inktImporter,
-        ICardSummaryProvider cardSummaries)
+        ICardSummaryProvider cardSummaries,
+        IProjectSceneConfigService sceneConfig)
     {
         _projects      = projects      ?? throw new ArgumentNullException(nameof(projects));
         _ordering      = ordering      ?? throw new ArgumentNullException(nameof(ordering));
@@ -39,19 +43,26 @@ public sealed class ProjectController : ControllerBase
         _exporter      = exporter      ?? throw new ArgumentNullException(nameof(exporter));
         _inktImporter  = inktImporter  ?? throw new ArgumentNullException(nameof(inktImporter));
         _cardSummaries = cardSummaries ?? throw new ArgumentNullException(nameof(cardSummaries));
+        _sceneConfig   = sceneConfig   ?? throw new ArgumentNullException(nameof(sceneConfig));
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyList<ProjectResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> List([FromQuery] Guid? soulId, CancellationToken ct)
+    [ProducesResponseType(typeof(PagedResult<ProjectResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> List(
+        [FromQuery] Guid? soulId,
+        [FromQuery] int limit = 50,
+        [FromQuery] string? cursor = null,
+        CancellationToken ct = default)
     {
-        var userId   = GetUserId();
-        var projects = soulId.HasValue
-            ? await _projects.ListBySoulAsync(userId, soulId.Value, ct)
-            : await _projects.ListAsync(userId, ct);
+        if (limit is < 1 or > 200) limit = 50;
+        var userId = GetUserId();
+        var paged  = soulId.HasValue
+            ? await _projects.ListBySoulPagedAsync(userId, soulId.Value, limit, cursor, ct)
+            : await _projects.ListPagedAsync(userId, limit, cursor, ct);
         var souls = await _cardSummaries.GetSummariesAsync(
-            projects.Where(p => p.ActiveSoulId.HasValue).Select(p => p.ActiveSoulId!.Value), ct);
-        return Ok(projects.Select(p => ProjectMapper.MapToResponse(p, souls)).ToList());
+            paged.Items.Where(p => p.ActiveSoulId.HasValue).Select(p => p.ActiveSoulId!.Value), ct);
+        var items = paged.Items.Select(p => ProjectMapper.MapToResponse(p, souls)).ToList();
+        return Ok(new PagedResult<ProjectResponse>(items, paged.NextCursor, paged.HasMore));
     }
 
     [HttpPost]
@@ -63,7 +74,7 @@ public sealed class ProjectController : ControllerBase
             return BadRequest(new { error = "Name is required." });
 
         var userId  = GetUserId();
-        var project = await _projects.CreateAsync(userId, request.Name, request.Description, request.ActiveSoulId, ct);
+        var project = await _projects.CreateAsync(userId, request.Name, request.Description, request.ActiveSoulId, request.Personality, request.PersonalityConfig, request.ResponseBehavior, request.ScreenAwarenessSettings, ct);
         return Created($"/api/projects/{project.Id}", await ProjectMapper.MapToResponseWithSoulAsync(project, _cardSummaries, ct));
     }
 
@@ -86,7 +97,7 @@ public sealed class ProjectController : ControllerBase
         var userId = GetUserId();
         try
         {
-            var project = await _projects.UpdateAsync(id, userId, request.Name, request.Description, request.Status, request.ActiveModelId, request.ActiveSceneId, request.SystemPrompt, ct);
+            var project = await _projects.UpdateAsync(id, userId, request.Name, request.Description, request.Status, request.ActiveModelId, request.ActiveSceneId, request.SystemPrompt, request.Personality, request.PersonalityConfig, request.ResponseBehavior, request.ScreenAwarenessSettings, ct);
             return Ok(await ProjectMapper.MapToResponseWithSoulAsync(project, _cardSummaries, ct));
         }
         catch (KeyNotFoundException)
@@ -146,7 +157,6 @@ public sealed class ProjectController : ControllerBase
         }
     }
 
-    // ── New ZIP-based export/import ──────────────────────────────────────────
 
     [HttpPost("export")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -217,62 +227,12 @@ public sealed class ProjectController : ControllerBase
                 $"/api/projects/{result.ProjectId}",
                 new ImportProjectResponse { ProjectId = result.ProjectId, SoulId = result.SoulId });
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = "Import validation failed." });
         }
     }
 
-    // ── Legacy JSON import (kept for backwards compatibility) ────────────────
-
-    /// <remarks>Deprecated: use POST /api/projects/import/parse + /api/projects/import/finalize instead.</remarks>
-    [HttpPost("import")]
-    [ProducesResponseType(typeof(ImportProjectResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Import([FromBody] InktProjectDto? dto, CancellationToken ct)
-    {
-        if (dto is null)
-            return BadRequest(new { error = "Invalid .inkt file." });
-
-        var userId = GetUserId();
-
-        InktSoulCommand? soulCmd = null;
-        if (dto.Soul is not null)
-        {
-            var s = dto.Soul;
-            soulCmd = new InktSoulCommand(
-                s.Name,
-                s.Personality,
-                s.SystemPrompt,
-                s.AvatarUrl,
-                s.Description,
-                s.Status,
-                s.CoverUrl,
-                s.LlmCatalogId,
-                s.LlmConfig is not null ? JsonConvert.SerializeObject(s.LlmConfig) : "{}",
-                s.TtsCatalogId,
-                s.TtsConfig is not null ? JsonConvert.SerializeObject(s.TtsConfig) : null,
-                s.Appearance is not null ? JsonConvert.SerializeObject(s.Appearance) : "{}",
-                s.ResponseBehavior is not null ? JsonConvert.SerializeObject(s.ResponseBehavior) : "{}",
-                s.MemorySettings is not null ? JsonConvert.SerializeObject(s.MemorySettings) : "{}",
-                s.AutoPilot is not null ? JsonConvert.SerializeObject(s.AutoPilot) : "{}");
-        }
-
-        var graphJson = dto.Graph is not null ? JsonConvert.SerializeObject(dto.Graph) : null;
-
-        var command = new ImportProjectCommand(
-            ProjectName: dto.Name.Length > 0 ? dto.Name : "Imported Project",
-            Soul: soulCmd,
-            GraphPayloadJson: graphJson);
-
-        var result = await _importer.ImportAsync(userId, command, ct);
-
-        return Created(
-            $"/api/projects/{result.ProjectId}",
-            new ImportProjectResponse { ProjectId = result.ProjectId, SoulId = result.SoulId });
-    }
-
-    // ── Plugin management ─────────────────────────────────────────────────────
 
     [HttpGet("{id:guid}/plugins")]
     [ProducesResponseType(typeof(IReadOnlyList<ProjectPluginResponse>), StatusCodes.Status200OK)]
@@ -309,6 +269,26 @@ public sealed class ProjectController : ControllerBase
         }
     }
 
+    [HttpPatch("{id:guid}/scene-config")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateSceneConfig(Guid id, [FromBody] UpdateSceneConfigRequest request, CancellationToken ct)
+    {
+        if (request.SceneConfig is null) return BadRequest(new { error = "scene_config is required." });
+        var userId = GetUserId();
+        try
+        {
+            var json = JsonConvert.SerializeObject(request.SceneConfig);
+            await _sceneConfig.UpdateSceneConfigAsync(id, userId, json, ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+    }
+
     private Guid GetUserId()
     {
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -317,7 +297,7 @@ public sealed class ProjectController : ControllerBase
     }
 
     /// <summary>Move a project to a new position. previousId=null → beginning; nextId=null → end.</summary>
-    [HttpPut("{id:guid}/position")]
+    [HttpPatch("{id:guid}/position")]
     [ProducesResponseType(typeof(ProjectResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

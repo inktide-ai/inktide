@@ -1,4 +1,4 @@
-using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 using Inktide.API.ScreenAwareness.Application.Interfaces;
 using Inktide.API.ScreenAwareness.Application.Settings;
 using Microsoft.Extensions.Options;

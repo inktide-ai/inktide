@@ -16,6 +16,9 @@ export interface CharactersContextValue {
   isDirty: boolean
   saveStatus: SaveStatus
   saveError: string | null
+  fetchNextPage: () => void
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
   selectCard: (id: string) => Promise<void>
   reloadCard: (id: string) => Promise<void>
   updateCharacter: (id: string, patch: Partial<AiCharacter>) => void

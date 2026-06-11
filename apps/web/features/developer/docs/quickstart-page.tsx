@@ -1,22 +1,24 @@
 import { CodeBlock, DocPage, InfoBox, PageSubtitle, PageTitle, SectionDivider, SectionHeading, Step } from './shared'
+import { getTranslations } from '@/lib/i18n-server'
 
-export function QuickStartPage() {
+export async function QuickStartPage() {
+  const t = await getTranslations('developer')
   return (
     <DocPage>
-      <PageTitle eyebrow="Guides">Quick Start</PageTitle>
+      <PageTitle eyebrow={t('docs.quickstart.eyebrow')}>{t('docs.quickstart.title')}</PageTitle>
       <PageSubtitle>
-        Run the full Inktide stack locally. Requires Docker, .NET 10 SDK, and Node.js 20+.
+        {t('docs.quickstart.subtitle')}
       </PageSubtitle>
 
-      <SectionHeading>Setup</SectionHeading>
+      <SectionHeading>{t('docs.quickstart.setup')}</SectionHeading>
 
-      <Step n={1} title="Start infrastructure" desc="Spin up Postgres, Keycloak, Redis, and MinIO with a single command.">
+      <Step n={1} title={t('docs.quickstart.step1Title')} desc={t('docs.quickstart.step1Desc')}>
         <CodeBlock label="docker">
 {`docker compose up -d`}
         </CodeBlock>
       </Step>
 
-      <Step n={2} title="Configure environment" desc="Create a .env file at the project root and fill in the required secrets.">
+      <Step n={2} title={t('docs.quickstart.step2Title')} desc={t('docs.quickstart.step2Desc')}>
         <CodeBlock label=".env (root)">
 {`Keycloak__Authority=http://localhost:8080/realms/inktide-app
 Database__ConnectionString=Host=localhost;Database=inktide;Username=...;Password=...
@@ -26,7 +28,7 @@ CHANGE_ME__KEYCLOAK_ADMIN_CLIENT_SECRET=...`}
         </CodeBlock>
       </Step>
 
-      <Step n={3} title="Run the backend" desc="Build and start the .NET API host. All bounded context modules load automatically.">
+      <Step n={3} title={t('docs.quickstart.step3Title')} desc={t('docs.quickstart.step3Desc')}>
         <CodeBlock label="bash">
 {`dotnet build Inktide.API.sln
 dotnet run --project src/Inktide.API
@@ -36,7 +38,7 @@ dotnet run --project src/Inktide.API
         </CodeBlock>
       </Step>
 
-      <Step n={4} title="Run the frontend" desc="Install dependencies and start the Next.js dev server.">
+      <Step n={4} title={t('docs.quickstart.step4Title')} desc={t('docs.quickstart.step4Desc')}>
         <CodeBlock label="bash">
 {`cd apps/web
 npm install
@@ -45,7 +47,7 @@ npm run dev
         </CodeBlock>
       </Step>
 
-      <Step n={5} title="(Optional) Python AI workers" desc="Start the embeddings and fact-extraction workers if you need RAG memory.">
+      <Step n={5} title={t('docs.quickstart.step5Title')} desc={t('docs.quickstart.step5Desc')}>
         <CodeBlock label="bash">
 {`# Embeddings + classification (port 8000)
 cd fast-api/ai-worker && pip install -r requirements.txt
@@ -58,7 +60,7 @@ uvicorn main:app --port 8001`}
       </Step>
 
       <SectionDivider />
-      <SectionHeading>Run Tests</SectionHeading>
+      <SectionHeading>{t('docs.quickstart.runTests')}</SectionHeading>
 
       <CodeBlock label="bash">
 {`dotnet test Inktide.API.sln                      # all tests
@@ -69,9 +71,11 @@ cd crates && cargo test                           # Rust`}
       </CodeBlock>
 
       <InfoBox>
-        All secrets go in the root <strong className="font-semibold text-[var(--text-primary)]">.env</strong> file
-        using double-underscore notation (<code className="font-mono text-[0.8125rem] text-[var(--accent-primary)]">Section__Property=value</code>).
-        Never use dotnet user-secrets or secrets.json.
+        {t('docs.quickstart.infoA')}{' '}
+        <strong className="font-semibold text-[var(--text-primary)]">.env</strong>{' '}
+        {t('docs.quickstart.infoB')}
+        <code className="font-mono text-[0.8125rem] text-[var(--accent-primary)]">Section__Property=value</code>
+        {t('docs.quickstart.infoC')}
       </InfoBox>
     </DocPage>
   )

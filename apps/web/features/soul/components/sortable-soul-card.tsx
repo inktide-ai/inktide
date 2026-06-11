@@ -10,9 +10,10 @@ interface SortableSoulCardProps {
   isFavorite: boolean
   onFavoriteToggle: () => void
   onOpen: () => void
+  onDelete?: () => void
 }
 
-export function SortableSoulCard({ soul, isFavorite, onFavoriteToggle, onOpen }: SortableSoulCardProps) {
+export function SortableSoulCard({ soul, isFavorite, onFavoriteToggle, onOpen, onDelete }: SortableSoulCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: soul.id })
   return (
     <div
@@ -32,6 +33,7 @@ export function SortableSoulCard({ soul, isFavorite, onFavoriteToggle, onOpen }:
         isFavorite={isFavorite}
         onFavoriteToggle={onFavoriteToggle}
         onOpen={onOpen}
+        onDelete={onDelete}
       />
     </div>
   )

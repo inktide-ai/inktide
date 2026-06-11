@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { ExternalLink, Headphones } from 'lucide-react'
 import { VOICE_PROVIDER_CATALOG } from '@/shared/data/voice-providers'
@@ -16,22 +17,29 @@ import { CartesiaSettings } from './panels/cartesia-panel'
 import { GoogleCloudSettings } from './panels/google-cloud-panel'
 import { AzureSpeechSettings } from './panels/azure-panel'
 
+const PROVIDER_SETTINGS: Record<string, React.ComponentType> = {
+  'kokoro':            KokoroSettings,
+  'elevenlabs':        ElevenLabsSettings,
+  'openai':            OpenAiSettings,
+  'openai-compatible': OpenAiCompatibleSettings,
+  'fishaudio':         FishAudioSettings,
+  'cartesia':          CartesiaSettings,
+  'google-cloud-tts':  GoogleCloudSettings,
+  'azure-speech':      AzureSpeechSettings,
+}
+
 function ProviderSettings({ providerId }: { providerId: string }) {
-  switch (providerId) {
-    case 'kokoro':            return <KokoroSettings />
-    case 'elevenlabs':        return <ElevenLabsSettings />
-    case 'openai':            return <OpenAiSettings />
-    case 'openai-compatible': return <OpenAiCompatibleSettings />
-    case 'fishaudio':         return <FishAudioSettings />
-    case 'cartesia':          return <CartesiaSettings />
-    case 'google-cloud-tts':  return <GoogleCloudSettings />
-    case 'azure-speech':      return <AzureSpeechSettings />
-    default:
-      return <p className="py-8 text-center text-sm text-[var(--text-tertiary)]">No settings available for this provider.</p>
+  const { t } = useTranslation('voice')
+  const Component = PROVIDER_SETTINGS[providerId]
+  if (!Component) {
+    console.warn(`No settings component for provider: ${providerId}`)
+    return <p className="py-8 text-center text-sm text-[var(--text-tertiary)]">{t('vps.noSettings')}</p>
   }
+  return <Component />
 }
 
 export default function VoiceProviderSettings() {
+  const { t } = useTranslation('voice')
   const { selected, selectedId, updateCharacter } = useCharactersContext()
   const params = useParams<{ id: string; providerId: string }>()
 
@@ -49,7 +57,7 @@ export default function VoiceProviderSettings() {
   const isElevenLabs = params.providerId === 'elevenlabs'
 
   if (!selected || !selectedId) {
-    return <div className="p-8 text-sm text-[var(--text-secondary)]">Loading...</div>
+    return <div className="p-8 text-sm text-[var(--text-secondary)]">{t('vps.loading')}</div>
   }
 
   const handleSaveGlobal = () => {
@@ -64,12 +72,12 @@ export default function VoiceProviderSettings() {
 
         <nav className="mb-6 flex items-center gap-2 text-body text-[var(--text-secondary)]">
           <Link href={`/souls/${params.id}/voice`} className="hover:text-[var(--text-primary)] transition-colors">
-            Voice
+            {t('page.title')}
           </Link>
           <span className="text-[var(--text-tertiary)]">/</span>
           <span className="text-[var(--text-primary)]">{catalog?.name ?? params.providerId}</span>
           <span className="text-[var(--text-tertiary)]">/</span>
-          <span className="text-[var(--text-primary)]">Settings</span>
+          <span className="text-[var(--text-primary)]">{t('settings')}</span>
         </nav>
 
         <div className="flex items-start justify-between pb-6 border-b border-[var(--border-subtle)]">
@@ -84,7 +92,7 @@ export default function VoiceProviderSettings() {
                 {catalog?.name ?? params.providerId}
               </h1>
               <p className="mt-1 text-body text-[var(--text-secondary)] max-w-md">
-                {catalog?.description ?? 'Voice provider settings'}
+                {catalog?.description ?? t('vps.settingsDefault')}
               </p>
             </div>
           </div>
@@ -98,7 +106,7 @@ export default function VoiceProviderSettings() {
                   className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3.5 py-2 text-body font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
                 >
                   <Headphones size={14} className="text-[var(--text-secondary)]" />
-                  {catalog.name} Support
+                  {t('vps.support', { name: catalog.name })}
                 </a>
               )}
               {catalog.websiteUrl && (
@@ -108,7 +116,7 @@ export default function VoiceProviderSettings() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--text-primary)] px-3.5 py-2 text-body font-medium text-[var(--bg-0)] hover:opacity-90 transition-opacity"
                 >
-                  Open in {catalog.name}
+                  {t('vps.openIn', { name: catalog.name })}
                   <ExternalLink size={13} />
                 </a>
               )}
@@ -122,18 +130,18 @@ export default function VoiceProviderSettings() {
 
             <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
               <div className="px-6 pt-5 pb-4">
-                <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Global Voice Settings</h3>
-                <p className="mt-1 text-body text-[var(--text-secondary)]">Applied across all providers.</p>
+                <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('vps.globalTitle')}</h3>
+                <p className="mt-1 text-body text-[var(--text-secondary)]">{t('vps.globalDesc')}</p>
               </div>
               <div className="border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
-                <GlobalParamRow name="Speed" desc="Speech rate multiplier" min={0.5} max={2.0} step={0.01} decimals={2} value={speed} onChange={setSpeed} />
-                <GlobalParamRow name="Pitch" desc="Voice pitch adjustment in semitones" min={-50} max={50} step={1} decimals={0} value={pitch} onChange={setPitch} />
-                <GlobalParamRow name="Volume" desc="Output volume adjustment in dB" min={-50} max={50} step={1} decimals={0} value={volume} onChange={setVolume} />
+                <GlobalParamRow name={t('speed.label')} desc={t('vps.speedDesc')} min={0.5} max={2.0} step={0.01} decimals={2} value={speed} onChange={setSpeed} />
+                <GlobalParamRow name={t('pitch.label')} desc={t('vps.pitchDesc')} min={-50} max={50} step={1} decimals={0} value={pitch} onChange={setPitch} />
+                <GlobalParamRow name={t('volume.label')} desc={t('vps.volumeDesc')} min={-50} max={50} step={1} decimals={0} value={volume} onChange={setVolume} />
                 {isElevenLabs && <>
-                  <GlobalParamRow name="Stability" desc="Higher values produce more consistent, less expressive voice" min={0} max={1} step={0.01} decimals={2} value={stability} onChange={setStability} />
-                  <GlobalParamRow name="Similarity Boost" desc="How closely the voice matches the original speaker" min={0} max={1} step={0.01} decimals={2} value={similarityBoost} onChange={setSimilarityBoost} />
-                  <GlobalParamRow name="Style" desc="Style exaggeration — higher values amplify emotional expression" min={0} max={1} step={0.01} decimals={2} value={style} onChange={setStyle} />
-                  <GlobalToggleRow name="Speaker Boost" desc="Enhanced speaker similarity at the cost of slightly higher latency" value={useSpeakerBoost} onChange={setUseSpeakerBoost} />
+                  <GlobalParamRow name={t('stability.label')} desc={t('vps.stabilityDesc')} min={0} max={1} step={0.01} decimals={2} value={stability} onChange={setStability} />
+                  <GlobalParamRow name={t('similarityBoost.label')} desc={t('vps.similarityDesc')} min={0} max={1} step={0.01} decimals={2} value={similarityBoost} onChange={setSimilarityBoost} />
+                  <GlobalParamRow name={t('style.label')} desc={t('vps.styleDesc')} min={0} max={1} step={0.01} decimals={2} value={style} onChange={setStyle} />
+                  <GlobalToggleRow name={t('speakerBoost.label')} desc={t('vps.speakerBoostDesc')} value={useSpeakerBoost} onChange={setUseSpeakerBoost} />
                 </>}
               </div>
               <div className="flex items-center justify-end px-6 py-4 border-t border-[var(--border-subtle)]">
@@ -142,7 +150,7 @@ export default function VoiceProviderSettings() {
                   onClick={handleSaveGlobal}
                   className="inline-flex items-center gap-2 rounded-lg bg-[var(--text-primary)] px-4 py-2 text-body font-semibold text-[var(--bg-0)] hover:opacity-90 transition-opacity"
                 >
-                  Save changes
+                  {t('vps.saveChanges')}
                 </button>
               </div>
             </div>
@@ -150,13 +158,13 @@ export default function VoiceProviderSettings() {
 
           <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
             <div className="px-6 pt-5 pb-4">
-              <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">About</h3>
+              <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('vps.about')}</h3>
             </div>
             <div className="border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
               {catalog ? [
-                { label: 'Provider', value: catalog.name },
-                { label: 'Kind', value: catalog.kind },
-                { label: 'API Key', value: catalog.requiresApiKey ? 'Required' : 'Not required' },
+                { label: t('provider.label'), value: catalog.name },
+                { label: t('vps.kind'), value: catalog.kind },
+                { label: t('apiKey.label'), value: catalog.requiresApiKey ? t('vps.required') : t('vps.notRequired') },
               ].map((row) => (
                 <div key={row.label} className="flex items-center justify-between px-6 py-3">
                   <span className="text-body text-[var(--text-secondary)]">{row.label}</span>

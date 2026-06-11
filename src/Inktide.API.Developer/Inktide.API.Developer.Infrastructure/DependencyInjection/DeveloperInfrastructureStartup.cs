@@ -1,6 +1,8 @@
 using Inktide.API.Core;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Developer.Infrastructure.Messaging;
 using Inktide.API.Developer.Infrastructure.Persistence;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Inktide.API.Developer.Infrastructure.DependencyInjection;
 
-public sealed class DeveloperInfrastructureStartup : IStartup
+public sealed class DeveloperInfrastructureStartup : IStartup, IBusModuleConfigurator
 {
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
@@ -17,7 +19,6 @@ public sealed class DeveloperInfrastructureStartup : IStartup
 
         services.AddDbContext<DeveloperDbContext>(options => options.UseNpgsql(connectionString));
         services.AddHostedService<DeveloperDbInitializer>();
-        services.AddHostedService<WebhookDeliveryWorker>();
 
         services.AddHttpClient("DeveloperKeycloakAdmin", client =>
         {
@@ -27,6 +28,38 @@ public sealed class DeveloperInfrastructureStartup : IStartup
         services.AddHttpClient("WebhookDelivery", client =>
         {
             client.Timeout = TimeSpan.FromSeconds(10);
+        });
+    }
+
+    public void ConfigureConsumers(IBusRegistrationConfigurator x)
+    {
+        x.AddEntityFrameworkOutbox<DeveloperDbContext>(o =>
+        {
+            o.UsePostgres();
+            o.UseBusOutbox();
+        });
+
+        x.AddConsumer<WebhookDeliveryConsumer>();
+        x.AddConsumer<WebhookDeliveryFaultConsumer>();
+    }
+
+    public void ConfigureEndpoints(
+        IReceiveConfigurator<IReceiveEndpointConfigurator> cfg,
+        IBusRegistrationContext context)
+    {
+        cfg.ReceiveEndpoint("webhook-delivery", e =>
+        {
+            e.UseMessageRetry(r =>
+                r.Exponential(5,
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromMinutes(10),
+                    TimeSpan.FromSeconds(2)));
+            e.ConfigureConsumer<WebhookDeliveryConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("webhook-delivery-fault", e =>
+        {
+            e.ConfigureConsumer<WebhookDeliveryFaultConsumer>(context);
         });
     }
 

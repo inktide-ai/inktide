@@ -5,7 +5,6 @@ using Inktide.API.Connector.Discord.Gateway;
 using Inktide.API.Connector.Discord.OAuth;
 using Inktide.API.Connector.Discord.Settings;
 using Inktide.API.Core;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -27,35 +26,28 @@ public sealed class DiscordStartup : IStartup
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        // ── Guild routing registry ────────────────────────────────────────────
         services.AddSingleton<IGuildSoulRegistry, GuildSoulRegistry>();
         services.AddHostedService<GuildRegistryLoader>();
 
-        // ── Connector ─────────────────────────────────────────────────────────
         services.AddSingleton<IDiscordMessageMapper, DiscordMessageMapper>();
         services.AddSingleton<IDiscordMessageHandler, DiscordMessageHandler>();
         services.AddSingleton<IChatConnector, DiscordConnector>();
 
-        // ── OAuth2 services ───────────────────────────────────────────────────
         services.AddOptions<OAuthStateSettings>()
             .BindConfiguration("AuthSettings")
             .ValidateDataAnnotations()
             .ValidateOnStart();
         services.TryAddSingleton<IOAuthStateService, OAuthStateService>();
-        services.AddKeyedSingleton<ITokenProtector>(TokenProtectorKeys.Discord, (sp, _) =>
-            new DataProtectionTokenProtector(
-                sp.GetRequiredService<IDataProtectionProvider>(),
-                "Discord.OAuth.Tokens"));
-        services.AddHttpClient<IDiscordOAuthService, DiscordOAuthService>();
+        services.AddSingleton<IDiscordTokenProtector, DiscordTokenProtector>();
+        services.AddSingleton<IDiscordOAuthService, DiscordOAuthService>();
+        services.AddHttpClient(DiscordOAuthService.HttpClientName);
         services.AddHttpClient("discord-validate")
             .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(5));
 
-        // ── REST controller (in this assembly) ───────────────────────────────
         services.AddControllers()
             .PartManager.ApplicationParts.Add(
                 new AssemblyPart(typeof(DiscordStartup).Assembly));
 
-        // ── Health check ──────────────────────────────────────────────────────
         services.AddHealthChecks()
             .Add(new HealthCheckRegistration(
                 "discord",

@@ -21,6 +21,15 @@ public sealed class ProjectConfiguration : IEntityTypeConfiguration<ProjectEntit
         b.Property(e => e.ActiveModelId).HasColumnName("active_model_id");
         b.Property(e => e.ActiveSceneId).HasColumnName("active_scene_id");
         b.Property(e => e.SystemPrompt).HasColumnName("system_prompt");
+        b.Property(e => e.BehaviorSettings).HasColumnName("behavior_settings").HasColumnType("jsonb");
+        b.Property(e => e.MemorySettings).HasColumnName("memory_settings").HasColumnType("jsonb");
+        b.Property(e => e.AutoPilot).HasColumnName("auto_pilot").HasColumnType("jsonb");
+        b.Property(e => e.Personality).HasColumnName("personality").IsRequired().HasDefaultValue("");
+        b.Property(e => e.PersonalityConfig).HasColumnName("personality_config").HasColumnType("jsonb").IsRequired().HasDefaultValue("{}");
+        b.Property(e => e.ResponseBehavior).HasColumnName("response_behavior").HasColumnType("jsonb").IsRequired().HasDefaultValue("{}");
+        b.Property(e => e.ScreenAwarenessSettings).HasColumnName("screen_awareness_settings").HasColumnType("jsonb").IsRequired().HasDefaultValue("{}");
+        b.Property(e => e.PreviewUrl).HasColumnName("preview_url").HasMaxLength(1024);
+        b.Property(e => e.SceneConfig).HasColumnName("scene_config").HasColumnType("jsonb");
         b.Property(e => e.Status).HasColumnName("status").HasMaxLength(50).IsRequired();
         b.Property(e => e.CreatedAt).HasColumnName("created_at");
         b.Property(e => e.UpdatedAt).HasColumnName("updated_at");

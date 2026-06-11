@@ -79,7 +79,7 @@ export function FeaturedTemplateCard({ template, onPreview }: FeaturedTemplateCa
 
         {/* Footer row */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[11px] text-[var(--text-tertiary)]">{template.tagline}</span>
+          <span className="text-[11px] text-[var(--text-tertiary)]">{t(template.tagline)}</span>
           <button
             type="button"
             onClick={onPreview}

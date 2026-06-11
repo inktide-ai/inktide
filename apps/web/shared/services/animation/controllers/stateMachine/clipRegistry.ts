@@ -35,7 +35,6 @@ export class ClipRegistry {
     return [...this.entries.keys()]
   }
 
-  // ── AnimationProperty implementations ────────────────────────────────────────
 
   /** Returns the active node's action. Equivalent to AnimationProperty<THREE.AnimationAction | null>. */
   readonly activeAction: AnimationProperty<THREE.AnimationAction | null> =

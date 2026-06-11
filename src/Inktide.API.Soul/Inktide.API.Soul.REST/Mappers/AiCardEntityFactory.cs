@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Inktide.API.Soul.Domain.Entities;
 using Inktide.API.Soul.Domain.Enums;
-using Inktide.API.Soul.Domain.ValueObjects;
 using Inktide.API.Soul.REST.Models;
 
 namespace Inktide.API.Soul.REST.Mappers;
@@ -17,25 +16,19 @@ public static class AiCardEntityFactory
         PropertyNamingPolicy        = JsonNamingPolicy.SnakeCaseLower,
         PropertyNameCaseInsensitive = true,
     };
+
     public static AiCard ToEntity(CreateAiCardRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
         return new AiCard
         {
-            Name             = request.Name,
-            Personality      = request.Personality ?? string.Empty,
-            SystemPrompt     = request.SystemPrompt,
-            AvatarUrl        = request.AvatarUrl,
-            LlmCatalogId     = request.LlmCatalogId,
-            LlmConfig        = Serialize(request.LlmConfig) ?? "{}",
-            TtsCatalogId     = request.TtsCatalogId,
-            TtsConfig        = Serialize(request.TtsConfig),
-            Appearance         = Serialize(request.Appearance) ?? "{}",
-            ResponseBehavior   = Serialize(request.ResponseBehavior) ?? "{}",
-            MemorySettings          = Serialize(request.MemorySettings) ?? "{}",
-            AutoPilot               = Serialize(request.AutoPilot) ?? "{}",
-            ScreenAwarenessSettings = Serialize(request.ScreenAwareness) ?? "{}",
-            PersonalityConfig       = MapPersonality(request.PersonalityConfig),
+            Name         = request.Name,
+            AvatarUrl    = request.AvatarUrl,
+            LlmCatalogId = request.LlmCatalogId,
+            LlmConfig    = Serialize(request.LlmConfig) ?? "{}",
+            TtsCatalogId = request.TtsCatalogId,
+            TtsConfig    = Serialize(request.TtsConfig),
+            Appearance   = Serialize(request.Appearance) ?? "{}",
         };
     }
 
@@ -44,24 +37,17 @@ public static class AiCardEntityFactory
         ArgumentNullException.ThrowIfNull(existing);
         ArgumentNullException.ThrowIfNull(request);
 
-        if (request.Name             is not null) existing.Name             = request.Name;
-        if (request.Slug             is not null) existing.Slug             = request.Slug;
-        if (request.Personality      is not null) existing.Personality      = request.Personality;
-        if (request.SystemPrompt     is not null) existing.SystemPrompt     = request.SystemPrompt;
+        if (request.Name        is not null) existing.Name        = request.Name;
+        if (request.Slug        is not null) existing.Slug        = request.Slug;
         // AvatarUrl is intentionally not handled here — use POST /avatar to change it.
-        if (request.LlmCatalogId.HasValue)        existing.LlmCatalogId     = request.LlmCatalogId.Value;
-        if (request.LlmConfig        is not null) existing.LlmConfig        = Serialize(request.LlmConfig) ?? "{}";
-        if (request.TtsCatalogId.HasValue)        existing.TtsCatalogId     = request.TtsCatalogId.Value;
-        if (request.TtsConfig        is not null) existing.TtsConfig        = Serialize(request.TtsConfig);
-        if (request.Appearance       is not null) existing.Appearance       = Serialize(request.Appearance) ?? "{}";
-        if (request.ResponseBehavior is not null) existing.ResponseBehavior = Serialize(request.ResponseBehavior) ?? "{}";
-        if (request.MemorySettings   is not null) existing.MemorySettings          = Serialize(request.MemorySettings) ?? "{}";
-        if (request.AutoPilot        is not null) existing.AutoPilot               = Serialize(request.AutoPilot) ?? "{}";
-        if (request.ScreenAwareness  is not null) existing.ScreenAwarenessSettings = Serialize(request.ScreenAwareness) ?? "{}";
-        if (request.PersonalityConfig  is not null) existing.PersonalityConfig  = MapPersonality(request.PersonalityConfig);
-        if (request.Description        is not null) existing.Description        = request.Description;
-        if (request.CoverUrl         is not null) existing.CoverUrl         = request.CoverUrl;
-        if (request.IsActive.HasValue)            existing.IsActive         = request.IsActive.Value;
+        if (request.LlmCatalogId.HasValue)   existing.LlmCatalogId = request.LlmCatalogId.Value;
+        if (request.LlmConfig   is not null) existing.LlmConfig   = Serialize(request.LlmConfig) ?? "{}";
+        if (request.TtsCatalogId.HasValue)   existing.TtsCatalogId = request.TtsCatalogId.Value;
+        if (request.TtsConfig   is not null) existing.TtsConfig   = Serialize(request.TtsConfig);
+        if (request.Appearance  is not null) existing.Appearance  = Serialize(request.Appearance) ?? "{}";
+        if (request.Description is not null) existing.Description = request.Description;
+        if (request.CoverUrl    is not null) existing.CoverUrl    = request.CoverUrl;
+        if (request.IsActive.HasValue)       existing.IsActive    = request.IsActive.Value;
 
         if (request.Status is not null && Enum.TryParse<AiCardStatus>(request.Status, ignoreCase: true, out var status))
             existing.Status = status;
@@ -69,23 +55,6 @@ public static class AiCardEntityFactory
         if (request.Visibility is not null && Enum.TryParse<AiCardVisibility>(request.Visibility, ignoreCase: true, out var vis))
             existing.Visibility = vis;
     }
-
-    private static PersonalitySettings MapPersonality(AiCardPersonalityDto? dto) =>
-        dto is null ? new PersonalitySettings() : new PersonalitySettings
-        {
-            Warmth                = Math.Clamp((float)dto.Warmth,                0f, 1f),
-            Playfulness           = Math.Clamp((float)dto.Playfulness,           0f, 1f),
-            Assertiveness         = Math.Clamp((float)dto.Assertiveness,         0f, 1f),
-            Empathy               = Math.Clamp((float)dto.Empathy,               0f, 1f),
-            Formality             = Math.Clamp((float)dto.Formality,             0f, 1f),
-            Sarcasm               = Math.Clamp((float)dto.Sarcasm,               0f, 1f),
-            EmotionVolatility     = Math.Clamp((float)dto.EmotionVolatility,     0f, 1f),
-            EmotionResponsiveness = Math.Clamp((float)dto.EmotionResponsiveness, 0f, 1f),
-            EmotionMemory         = Math.Clamp((float)dto.EmotionMemory,         0f, 1f),
-            StressBehavior        = dto.StressBehavior,
-            BaselineMood          = dto.BaselineMood,
-            PresetId              = dto.PresetId,
-        };
 
     private static string? Serialize<T>(T? obj) where T : class =>
         obj is null ? null : JsonSerializer.Serialize(obj, SerializerOpts);

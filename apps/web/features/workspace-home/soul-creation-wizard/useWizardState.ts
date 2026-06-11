@@ -5,12 +5,10 @@ import type { SoulTemplate } from '@/shared/data/soul-templates'
 import { PERSONALITY_PRESETS } from '@/shared/data/personality-presets'
 import { STORAGE_KEYS } from '@/shared/lib/storage-keys'
 
-// ── Types ──────────────────────────────────────────────────────────────────
 
 export type Screen = 'templates' | 'steps' | 'llm' | 'tts' | 'channels' | 'finish'
 export type StepSelection = { id: string; name: string; config?: Record<string, string> }
 
-// ── TTL-based persistence ──────────────────────────────────────────────────
 
 const WIZARD_TTL_MS = 24 * 60 * 60 * 1000
 
@@ -31,7 +29,6 @@ function saveWithTTL(key: string, value: unknown) {
   try { localStorage.setItem(key, JSON.stringify({ value, ts: Date.now() })) } catch { /* quota */ }
 }
 
-// ── Default personality ────────────────────────────────────────────────────
 
 const DEFAULT_PERSONALITY: CharacterPersonality = {
   warmth: 0.7, playfulness: 0.5, assertiveness: 0.5, empathy: 0.7,
@@ -40,7 +37,6 @@ const DEFAULT_PERSONALITY: CharacterPersonality = {
   stressBehavior: 'deflect', baselineMood: 'neutral', presetId: null,
 }
 
-// ── Reducer ────────────────────────────────────────────────────────────────
 
 export type WizardState = {
   screen:               Screen
@@ -113,7 +109,6 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
   }
 }
 
-// ── Lazy initializer (SSR-safe) ────────────────────────────────────────────
 
 function initState(): WizardState {
   return {
@@ -129,7 +124,6 @@ function initState(): WizardState {
   }
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────
 
 export interface UseWizardStateResult {
   state:           WizardState

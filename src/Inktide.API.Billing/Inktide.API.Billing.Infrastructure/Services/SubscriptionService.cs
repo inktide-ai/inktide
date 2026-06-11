@@ -1,5 +1,6 @@
 using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 using Inktide.API.Billing.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 

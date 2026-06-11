@@ -2,17 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
+import { Slider } from '@/shared/ui/slider'
 import type { RunPreset, CreateRunPresetRequest, LlmModelResponse, TtsVoiceResponse } from '@/features/soul/api/index'
 
 const EMOTION_PRESETS = [
-  { id: 'friendly',   label: 'Friendly' },
-  { id: 'energetic',  label: 'Energetic' },
-  { id: 'tactical',   label: 'Tactical' },
-  { id: 'cozy',       label: 'Cozy' },
-  { id: 'chaotic',    label: 'Chaotic' },
-  { id: 'companion',  label: 'Companion' },
-  { id: 'therapist',  label: 'Therapist' },
+  { id: 'friendly',   labelKey: 'preset.emotionFriendly' },
+  { id: 'energetic',  labelKey: 'preset.emotionEnergetic' },
+  { id: 'tactical',   labelKey: 'preset.emotionTactical' },
+  { id: 'cozy',       labelKey: 'preset.emotionCozy' },
+  { id: 'chaotic',    labelKey: 'preset.emotionChaotic' },
+  { id: 'companion',  labelKey: 'preset.emotionCompanion' },
+  { id: 'therapist',  labelKey: 'preset.emotionTherapist' },
 ]
 
 interface CreatePresetModalProps {
@@ -53,6 +55,7 @@ function Select({
 }
 
 export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose, onSubmit }: CreatePresetModalProps) {
+  const { t } = useTranslation('scene')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [icon, setIcon] = useState('')
@@ -95,7 +98,7 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim()) { setError('Scene name is required.'); return }
+    if (!name.trim()) { setError(t('preset.errorNameRequired')); return }
     setBusy(true)
     setError(null)
     try {
@@ -110,7 +113,7 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
       })
       onClose()
     } catch {
-      setError(editing ? 'Update failed.' : 'Could not create scene.')
+      setError(editing ? t('preset.errorUpdate') : t('preset.errorCreate'))
     } finally {
       setBusy(false)
     }
@@ -140,13 +143,13 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
             {/* Title bar */}
             <div className="mb-5 flex items-center justify-between">
               <h2 className="home-heading-font text-[16px] font-semibold text-[var(--text-heading)]">
-                {editing ? 'Edit scene' : 'Create scene'}
+                {editing ? t('preset.editTitle') : t('preset.createTitle')}
               </h2>
               <button
                 type="button"
                 onClick={onClose}
                 className="grid h-7 w-7 place-items-center rounded-md text-[var(--text-tertiary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
-                aria-label="Close"
+                aria-label={t('preset.close')}
               >
                 <X size={14} />
               </button>
@@ -156,7 +159,7 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
               {/* Identity */}
               <div className="flex gap-3">
                 <div className="w-20 shrink-0">
-                  <FieldLabel>Icon</FieldLabel>
+                  <FieldLabel>{t('preset.icon')}</FieldLabel>
                   <input
                     type="text"
                     value={icon}
@@ -167,24 +170,24 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
                   />
                 </div>
                 <div className="flex-1">
-                  <FieldLabel>Name *</FieldLabel>
+                  <FieldLabel>{t('preset.nameRequired')}</FieldLabel>
                   <input
                     type="text"
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    placeholder="e.g. Streaming Mode"
+                    placeholder={t('preset.namePlaceholder')}
                     className="w-full rounded-[8px] border border-[var(--border-card)] bg-[var(--surface-0)] px-3 py-2 text-body text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none focus:border-[var(--accent-base)] transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <FieldLabel>Description</FieldLabel>
+                <FieldLabel>{t('preset.description')}</FieldLabel>
                 <input
                   type="text"
                   value={description}
                   onChange={e => setDescription(e.target.value)}
-                  placeholder="Short tagline for this scene"
+                  placeholder={t('preset.descriptionPlaceholder')}
                   className="w-full rounded-[8px] border border-[var(--border-card)] bg-[var(--surface-0)] px-3 py-2 text-body text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none focus:border-[var(--accent-base)] transition-colors"
                 />
               </div>
@@ -192,14 +195,14 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
               {/* Overrides */}
               <div className="rounded-[10px] border border-[var(--border-card)] bg-[var(--surface-0)] p-3">
                 <p className="home-ui-font mb-3 text-body font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
-                  Runtime overrides
+                  {t('preset.runtimeOverrides')}
                 </p>
                 <div className="flex flex-col gap-3">
                   {/* LLM Model */}
                   <div>
-                    <FieldLabel>LLM model</FieldLabel>
+                    <FieldLabel>{t('preset.llmModel')}</FieldLabel>
                     <Select value={llmModelId} onChange={setLlmModelId}>
-                      <option value="__default__">Soul default</option>
+                      <option value="__default__">{t('preset.soulDefault')}</option>
                       {llmModels.map(m => (
                         <option key={m.id} value={m.model_id}>{m.display_name}</option>
                       ))}
@@ -208,21 +211,18 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
 
                   {/* Temperature */}
                   <div>
-                    <FieldLabel>Temperature</FieldLabel>
+                    <FieldLabel>{t('preset.temperature')}</FieldLabel>
                     <Select value={temperature} onChange={setTemperature}>
-                      <option value="__default__">Soul default</option>
-                      <option value="custom">Custom</option>
+                      <option value="__default__">{t('preset.soulDefault')}</option>
+                      <option value="custom">{t('preset.custom')}</option>
                     </Select>
                     {temperature === 'custom' && (
                       <div className="mt-2 flex items-center gap-3">
-                        <input
-                          type="range"
-                          min="0"
-                          max="2"
-                          step="0.05"
-                          value={temperatureValue}
-                          onChange={e => setTemperatureValue(Number(e.target.value))}
-                          className="flex-1 accent-[var(--accent-base)]"
+                        <Slider
+                          value={temperatureValue} onChange={setTemperatureValue}
+                          min={0} max={2} step={0.05}
+                          fill="var(--text-primary)" trackHeight={3} thumbSize={12}
+                          className="flex-1"
                         />
                         <span className="w-8 text-right text-body font-medium text-[var(--text-primary)]">
                           {temperatureValue.toFixed(2)}
@@ -233,20 +233,20 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
 
                   {/* Emotion preset */}
                   <div>
-                    <FieldLabel>Emotion profile</FieldLabel>
+                    <FieldLabel>{t('preset.emotionProfile')}</FieldLabel>
                     <Select value={emotionPresetId} onChange={setEmotionPresetId}>
-                      <option value="__default__">Soul default</option>
+                      <option value="__default__">{t('preset.soulDefault')}</option>
                       {EMOTION_PRESETS.map(p => (
-                        <option key={p.id} value={p.id}>{p.label}</option>
+                        <option key={p.id} value={p.id}>{t(p.labelKey)}</option>
                       ))}
                     </Select>
                   </div>
 
                   {/* Voice */}
                   <div>
-                    <FieldLabel>Voice profile</FieldLabel>
+                    <FieldLabel>{t('preset.voiceProfile')}</FieldLabel>
                     <Select value={voiceProfileId} onChange={setVoiceProfileId}>
-                      <option value="__default__">Soul default</option>
+                      <option value="__default__">{t('preset.soulDefault')}</option>
                       {ttsVoices.map(v => (
                         <option key={v.id} value={v.voice_id}>{v.display_name} ({v.provider})</option>
                       ))}
@@ -265,14 +265,14 @@ export function CreatePresetModal({ open, editing, llmModels, ttsVoices, onClose
                   onClick={onClose}
                   className="rounded-md border border-[var(--border-card)] px-4 py-2 text-body text-[var(--text-secondary)] hover:border-[var(--border-divider)] hover:text-[var(--text-primary)] transition-colors"
                 >
-                  Cancel
+                  {t('preset.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={busy}
                   className="rounded-md bg-[var(--accent-base)] px-4 py-2 text-body font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                  {busy ? 'Saving…' : editing ? 'Save scene' : 'Create scene'}
+                  {busy ? t('preset.saving') : editing ? t('preset.saveScene') : t('preset.createScene')}
                 </button>
               </div>
             </form>

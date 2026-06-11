@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { LayoutGroup } from 'framer-motion'
@@ -8,7 +9,10 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/shared/services/auth'
 import { useBilling } from '@/entities/billing/context/BillingContext'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
-import { listProjects, type ProjectListItem as ProjectItem } from '@/entities/project/api'
+import { listProjects } from '@/entities/project/api'
+import { queryKeys } from '@/shared/lib/query/keys'
+import { fetchStorageUsage } from '@/api/storage'
+import { PLAN_LIMITS } from '@/shared/lib/plan-limits'
 import { ProPlanCard } from '@/features/workspace-home/pro-plan-card'
 // fsd:cross-feature-ok — widget layer composes across features
 import AccountSettingsModal from '@/features/account/account-settings-modal'
@@ -22,7 +26,7 @@ import { SidebarItem } from '@/features/workspace-home/sidebar-item'
 import { useShortcut } from '@/shared/lib/keyboard'
 import { getBannerGradient } from '@/shared/ui/banner-presets'
 import Link from 'next/link'
-import { Box, Code2, Gem, LayoutTemplate, Store } from 'lucide-react'
+import { Box, Code2, Gem, LayoutTemplate, Menu, Store, X } from 'lucide-react'
 import { DEVELOPER_ROUTE, MARKETPLACE_ROUTE, TEMPLATES_ROUTE } from '@/lib/routes'
 import {
   Agent,
@@ -110,7 +114,18 @@ export function WorkspaceSidebar() {
   const { userEmail, user } = useAuth()
   const { plan, periodEnd, openPortal } = useBilling()
   const { cardList, selected } = useCharactersContext()
-  const [projects, setProjects] = useState<ProjectItem[]>([])
+  const { data: projects = [] } = useQuery({
+    queryKey: queryKeys.projects.all(selected?.id),
+    queryFn: () => listProjects(selected?.id),
+  })
+  const { data: storageUsage } = useQuery({
+    queryKey: queryKeys.me.storage,
+    queryFn: fetchStorageUsage,
+    staleTime: 5 * 60 * 1000,
+  })
+  const storageUsedGb = storageUsage?.usedGb ?? 0
+  const storageMaxGb  = storageUsage?.maxGb  ?? (plan === 'pro' ? 10 : plan === 'starter' ? 5 : 1)
+  const soulLimit     = PLAN_LIMITS[plan]?.maxSoulCards ?? Infinity
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [accountModalOpen, setAccountModalOpen] = useState(false)
   const [accountModalPage, setAccountModalPage] = useState<PageId>('profile')
@@ -121,6 +136,24 @@ export function WorkspaceSidebar() {
   const [toolsOpen, setToolsOpen]     = useState(true)
   const [apiOpen, setApiOpen]         = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(true)
+  // Mobile off-canvas drawer (≥lg the sidebar is a static column, so this is inert there).
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  // Close the drawer on navigation.
+  useEffect(() => { setDrawerOpen(false) }, [pathname])
+
+  // Close on Escape + lock background scroll while the drawer is open.
+  useEffect(() => {
+    if (!drawerOpen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setDrawerOpen(false) }
+    window.addEventListener('keydown', onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [drawerOpen])
 
   const { exportAndDownload } = useProjectExport()
 
@@ -148,10 +181,6 @@ export function WorkspaceSidebar() {
       .charAt(0)
       .toUpperCase() || '?'
 
-  useEffect(() => {
-    listProjects(selected?.id).then(setProjects).catch(console.error)
-  }, [selected?.id])
-
   function handleOpen() {
     setImportDialogOpen(true)
   }
@@ -178,7 +207,46 @@ export function WorkspaceSidebar() {
   })
 
   return (
-    <aside className="home-ui-font flex h-screen min-h-0 w-[260px] flex-shrink-0 flex-col bg-[var(--c-bacSec)] px-3 py-3 shadow-[inset_calc(var(--direction)*-1px)_0_0_0_var(--c-borSec)]">
+    <>
+      {/* Mobile-only hamburger — opens the off-canvas drawer (hidden ≥lg). */}
+      <button
+        type="button"
+        onClick={() => setDrawerOpen(true)}
+        aria-label={t('sidebar.workspace')}
+        aria-expanded={drawerOpen}
+        className="fixed left-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-secondary)] shadow-sm transition-colors hover:bg-[var(--surface-2)] lg:hidden"
+      >
+        <Menu size={18} />
+      </button>
+
+      {/* Backdrop behind the drawer (mobile only). */}
+      {drawerOpen && (
+        <div
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+        />
+      )}
+
+    <aside
+      className={cn(
+        'home-ui-font flex h-screen min-h-0 flex-shrink-0 flex-col bg-[var(--c-bacSec)] px-3 py-3',
+        // Mobile: off-canvas drawer that slides in from the left.
+        'fixed inset-y-0 left-0 z-50 w-[280px] -translate-x-full shadow-xl transition-transform duration-300 ease-out motion-reduce:transition-none',
+        drawerOpen && 'translate-x-0',
+        // ≥lg: static column, original inset-border styling, no transform.
+        'lg:static lg:z-auto lg:w-[260px] lg:translate-x-0 lg:shadow-[inset_calc(var(--direction)*-1px)_0_0_0_var(--c-borSec)] lg:transition-none',
+      )}
+    >
+      {/* Mobile-only close button. */}
+      <button
+        type="button"
+        onClick={() => setDrawerOpen(false)}
+        aria-label="Close menu"
+        className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)] lg:hidden"
+      >
+        <X size={18} />
+      </button>
       <div className="relative mb-3 shrink-0 rounded-xl p-1.5">
         <SidebarAccountMenu
           open={accountMenuOpen}
@@ -339,10 +407,10 @@ export function WorkspaceSidebar() {
           <button type="button" onClick={() => void openPortal()} className="w-full text-left">
             <ProPlanCard
               renewalLabel={periodEnd ? `Renewal: ${periodEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : t('sidebar.proPlan')}
-              charactersUsed={12}
-              charactersMax={20}
-              storageUsedGb={7.2}
-              storageMaxGb={10}
+              charactersUsed={cardList.length}
+              charactersMax={soulLimit}
+              storageUsedGb={storageUsedGb}
+              storageMaxGb={storageMaxGb}
             />
           </button>
         ) : (
@@ -384,5 +452,6 @@ export function WorkspaceSidebar() {
         onImported={id => { setImportDialogOpen(false); router.push(`/projects/${id}`) }}
       />
     </aside>
+    </>
   )
 }

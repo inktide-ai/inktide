@@ -3,30 +3,31 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Discord.Settings;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Discord.OAuth;
 
 public sealed class DiscordOAuthService : IDiscordOAuthService
 {
+    public const string HttpClientName = "discord-oauth";
+
     private const string DiscordTokenUrl = "https://discord.com/api/oauth2/token";
     private const string DiscordRevokeUrl = "https://discord.com/api/oauth2/token/revoke";
     private const string Scopes = "bot identify guilds.join";
     private const int Permissions = 84992; // VIEW_CHANNEL + SEND_MESSAGES + READ_MESSAGE_HISTORY + EMBED_LINKS
 
     private readonly DiscordSettings _settings;
-    private readonly ITokenProtector _tokenProtector;
+    private readonly IDiscordTokenProtector _tokenProtector;
     private readonly HttpClient _http;
 
     public DiscordOAuthService(
         IOptions<DiscordSettings> settings,
-        [FromKeyedServices(TokenProtectorKeys.Discord)] ITokenProtector tokenProtector,
-        HttpClient http)
+        IDiscordTokenProtector tokenProtector,
+        IHttpClientFactory httpClientFactory)
     {
         _settings       = settings.Value;
         _tokenProtector = tokenProtector;
-        _http           = http;
+        _http           = httpClientFactory.CreateClient(HttpClientName);
     }
 
     public string BuildInstallUrl(string state) =>

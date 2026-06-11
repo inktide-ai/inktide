@@ -1,0 +1,13 @@
+{
+  "solution": {
+    "path": "Inktide.API.sln",
+    "projects": [
+      "src/Inktide.API.Core/Inktide.API.Core.csproj",
+      "src/Inktide.API.Domain/Inktide.API.Domain.csproj",
+      "src/Inktide.API.Developer/Inktide.API.Developer.Domain/Inktide.API.Developer.Domain.csproj",
+      "src/Inktide.API.Developer/Inktide.API.Developer.Application/Inktide.API.Developer.Application.csproj",
+      "src/Inktide.API.Developer/Inktide.API.Developer.Infrastructure/Inktide.API.Developer.Infrastructure.csproj",
+      "src/Inktide.API.Developer/Inktide.API.Developer.REST/Inktide.API.Developer.REST.csproj"
+    ]
+  }
+}

@@ -1,4 +1,5 @@
 using Inktide.API.Core.Contracts;
+using Inktide.API.Core.Pagination;
 using Inktide.API.Soul.Domain.Entities;
 using Inktide.API.Soul.Domain.Enums;
 
@@ -18,7 +19,13 @@ public interface IAiCardService
         CancellationToken ct = default);
     
     Task<IReadOnlyList<AiCard>> GetAllByUserAsync(
-        Guid userId, 
+        Guid userId,
+        CancellationToken ct = default);
+
+    Task<PagedResult<AiCard>> GetPagedByUserAsync(
+        Guid userId,
+        int limit,
+        string? cursor,
         CancellationToken ct = default);
     
     Task<AiCard> UpdateAsync(
@@ -45,4 +52,7 @@ public interface IAiCardService
     /// Returns null when not found or not owned by userId. Throws <see cref="ArgumentException"/> for unknown actions.
     /// </summary>
     Task<AiCard?> ChangeStatusAsync(Guid userId, Guid cardId, string action, CancellationToken ct = default);
+
+    /// <summary>Returns public-facing soul data by slug; no auth required. Returns null when not found.</summary>
+    Task<AiCard?> GetPublicBySlugAsync(string slug, CancellationToken ct = default);
 }

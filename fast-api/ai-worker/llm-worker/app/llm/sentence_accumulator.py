@@ -55,9 +55,11 @@ async def iter_sentences(
     sent_q: asyncio.Queue[str | None] = asyncio.Queue()
 
     async def _feed_tokens() -> None:
-        async for tok in token_stream:
-            tok_q.put_nowait(tok)
-        tok_q.put_nowait(None)
+        try:
+            async for tok in token_stream:
+                tok_q.put_nowait(tok)
+        finally:
+            tok_q.put_nowait(None)
 
     def _split_thread() -> None:
         def _gen():
@@ -77,9 +79,18 @@ async def iter_sentences(
     thread = threading.Thread(target=_split_thread, daemon=True)
     thread.start()
 
-    while (sentence := await sent_q.get()) is not None:
-        if sentence:
-            yield sentence
-
-    await feeder
-    await asyncio.get_event_loop().run_in_executor(None, thread.join)
+    try:
+        while (sentence := await sent_q.get()) is not None:
+            if sentence:
+                yield sentence
+    finally:
+        feeder.cancel()
+        try:
+            await feeder
+        except asyncio.CancelledError:
+            pass
+        # Unblock the split thread if it is still waiting on tok_q
+        tok_q.put_nowait(None)
+        await asyncio.get_event_loop().run_in_executor(None, lambda: thread.join(timeout=30))
+        if thread.is_alive():
+            logger.error("sentence splitter thread did not finish within 30s — possible resource leak")

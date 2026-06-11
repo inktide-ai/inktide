@@ -1,0 +1,8 @@
+{
+  "name": "pipeline-bench",
+  "version": "1.0.0",
+  "dependencies": {
+    "@microsoft/signalr": "^8",
+    "ioredis": "^5"
+  }
+}

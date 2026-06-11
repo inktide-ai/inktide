@@ -1,0 +1,12 @@
+{
+  "solution": {
+    "path": "Inktide.API.sln",
+    "projects": [
+      "src/Inktide.API.Core/Inktide.API.Core.csproj",
+      "src/Inktide.API.Domain/Inktide.API.Domain.csproj",
+      "src/Inktide.API.Memory/Inktide.API.Memory.Domain/Inktide.API.Memory.Domain.csproj",
+      "src/Inktide.API.Memory/Inktide.API.Memory.Application/Inktide.API.Memory.Application.csproj",
+      "src/Inktide.API.Memory/Inktide.API.Memory.Infrastructure/Inktide.API.Memory.Infrastructure.csproj"
+    ]
+  }
+}

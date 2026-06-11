@@ -84,7 +84,6 @@ export default function AppearancePanel() {
     <>
       <div className="mt-[36px]" />
 
-      {/* ── Preferences section ─────────────────────────────────────────────── */}
       <SectionHeader>{ta('nav.preferences')}</SectionHeader>
 
       <div className="sm-settings-group">
@@ -249,7 +248,6 @@ export default function AppearancePanel() {
 
       <div className="mt-[48px]" />
 
-      {/* ── Language & time section ────────────────────────────────────────── */}
       <SectionHeader>{t('preferences.languageAndTime.title')}</SectionHeader>
 
       <div className="sm-settings-group">
@@ -332,7 +330,6 @@ export default function AppearancePanel() {
   )
 }
 
-// ── Layout primitives ───────────────────────────────────────────────────────────
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return <div className="sm-section-header">{children}</div>

@@ -39,7 +39,7 @@ export default function HomePage() {
     queryFn: fetchDashboardStats,
   })
 
-  const { data: allProjects = [] } = useQuery({
+  const { data: allProjects = [], isLoading: projectsLoading } = useQuery({
     queryKey: queryKeys.projects.all(),
     queryFn: () => listProjects(),
   })
@@ -138,7 +138,9 @@ export default function HomePage() {
                   const id = await addCharacter(character)
                   if (id) {
                     if (discordBotToken) {
-                      await createDiscordCustomBotChannel(id, discordBotToken).catch(() => {})
+                      // Don't block soul creation if Discord setup fails, but surface the error.
+                      await createDiscordCustomBotChannel(id, discordBotToken)
+                        .catch(e => console.error('[createDiscordCustomBotChannel] failed:', e))
                     }
                     setShowWizard(false)
                     router.push(`/souls/${id}`)
@@ -162,12 +164,12 @@ export default function HomePage() {
             animate={{ x: 0 }}
             exit={{ x: '-4%' }}
             transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
-            className="absolute inset-0 overflow-auto px-6 py-6"
+            className="absolute inset-0 overflow-auto px-4 py-4 sm:px-6 sm:py-6"
           >
             <div className="mx-auto max-w-[1300px]">
               <WorkspaceTopBar onCreateSoul={() => setShowWizard(true)} />
 
-              <section className="mb-7 grid grid-cols-4 gap-3">
+              <section className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <StatCard
                   label={t('home.statsSouls')}
                   value={String(cardList.length)}
@@ -267,16 +269,21 @@ export default function HomePage() {
               <section className="mb-8">
                 <SectionHeader title={t('home.recentProjects')} />
                 <div className="flex gap-3 overflow-x-auto pb-2 py-2">
-                  {projects.map(p => (
-                    <ProjectCardConnected
-                      key={p.id}
-                      project={p}
-                      editedLabel={editedLabel(p.updated_at, t)}
-                      coverUrlFallback={cardList.find(c => c.id === p.active_soul_id)?.avatar_url ?? undefined}
-                      icon={<Folder size={14} />}
-                      onClick={() => router.push(`/projects/${p.id}`)}
-                    />
-                  ))}
+                  {projectsLoading
+                    ? [...Array(3)].map((_, i) => (
+                        <div key={i} className="h-[160px] w-[232px] flex-shrink-0 animate-pulse rounded-xl bg-[var(--surface-1)]" />
+                      ))
+                    : projects.map(p => (
+                        <ProjectCardConnected
+                          key={p.id}
+                          project={p}
+                          editedLabel={editedLabel(p.updated_at, t)}
+                          coverUrlFallback={cardList.find(c => c.id === p.active_soul_id)?.avatar_url ?? undefined}
+                          icon={<Folder size={14} />}
+                          onClick={() => router.push(`/projects/${p.id}`)}
+                        />
+                      ))
+                  }
                   <button
                     type="button"
                     onClick={() => setShowProjectWizard(true)}
@@ -290,14 +297,14 @@ export default function HomePage() {
 
               <section>
                 <SectionHeader title={t('home.fromTemplate')} withArrows={false} />
-                <div className="grid grid-cols-6 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                   {SYSTEM_TEMPLATES.filter(tpl => tpl.id !== 'blank').map(tpl => {
                     const Icon = TEMPLATE_ICONS[tpl.id]
                     return (
                       <TemplateCard
                         key={tpl.id}
                         title={tpl.name}
-                        subtitle={tpl.tagline}
+                        subtitle={t(tpl.tagline)}
                         icon={<Icon size={20} style={{ color: tpl.accentColor }} aria-hidden />}
                         onClick={() => setPreviewTemplate(tpl)}
                       />

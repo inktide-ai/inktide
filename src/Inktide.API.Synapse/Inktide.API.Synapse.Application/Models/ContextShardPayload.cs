@@ -45,9 +45,15 @@ public sealed record ContextShardPayload(
     int ResponseDelayMs = 0,
     /// <summary>Per-card base URL override — wins over global BYOK credential base URL.</summary>
     string? LlmBaseUrl = null,
+    /// <summary>False for keyless providers (Ollama, LM Studio) — worker skips credential lookup.</summary>
+    bool LlmRequiresApiKey = true,
     /// <summary>How quickly emotions adapt to messages — scales TTS speed modulation. From PersonalitySettings.</summary>
     float EmotionResponsiveness = 0.7f,
     /// <summary>Natural-language personality directive block injected into the LLM system prompt. Null = no personality configured.</summary>
     string? PersonalityDirective = null,
     /// <summary>Per-project plugin configuration. Null = all plugins default ON (backwards compatible).</summary>
-    IReadOnlyList<ProjectPluginDto>? Plugins = null);
+    IReadOnlyList<ProjectPluginDto>? Plugins = null,
+    /// <summary>Per-soul TTS endpoint override (e.g. self-hosted Kokoro). Null = use globally configured endpoint.</summary>
+    string? TtsBaseUrl = null,
+    /// <summary>Pre-serialized JSON of provider-specific TTS params (stability, pitch, etc.). Opaque string — deserialized only in LlmResponseStreamConsumer.</summary>
+    string? TtsProviderParamsJson = null);

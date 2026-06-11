@@ -1,4 +1,4 @@
-using Inktide.API.Core.Generators;
+using Inktide.API.Core.Contracts;
 using System.Security.Claims;
 using Inktide.API.Core;
 using Inktide.API.Profile.Application.Interfaces;
@@ -12,24 +12,21 @@ namespace Inktide.API.Profile.REST.Controllers;
 /// S3 / MinIO uploads for testing (objects scoped under <c>users/{userId:N}/</c>, same as avatar ownership checks).
 /// </summary>
 [ApiController]
-[Route("api/storage")]
+[Route("api/v1/storage")]
 [Produces("application/json")]
 [Authorize]
 public sealed class StorageController : ControllerBase
 {
-
     private const long MaxUploadBytes = 52_428_800;
 
     private readonly IObjectStorageService _storage;
-    private readonly IImageProcessingService _imageProcessor;
+    private readonly IFileUploadService _upload;
 
-
-    public StorageController(IObjectStorageService storage, IImageProcessingService imageProcessor)
+    public StorageController(IObjectStorageService storage, IFileUploadService upload)
     {
         _storage = storage ?? throw new ArgumentNullException(nameof(storage));
-        _imageProcessor = imageProcessor ?? throw new ArgumentNullException(nameof(imageProcessor));
+        _upload  = upload  ?? throw new ArgumentNullException(nameof(upload));
     }
-
 
     /// <summary>Whether S3 is configured and the default bucket name.</summary>
     [HttpGet("status")]
@@ -39,7 +36,7 @@ public sealed class StorageController : ControllerBase
         return Ok(new StorageStatusResponse
         {
             Enabled = _storage.IsEnabled,
-            Bucket = _storage.DefaultBucket
+            Bucket  = _storage.DefaultBucket
         });
     }
 
@@ -83,7 +80,7 @@ public sealed class StorageController : ControllerBase
         if (!key.StartsWith(prefix, StringComparison.Ordinal))
             return Forbid();
 
-        var stream = await _storage.GetObjectAsync(key, ct).ConfigureAwait(false);
+        var stream   = await _storage.GetObjectAsync(key, ct).ConfigureAwait(false);
         var fileName = key[(key.LastIndexOf('/') + 1)..];
         return File(stream, "application/octet-stream", fileName);
     }
@@ -106,52 +103,63 @@ public sealed class StorageController : ControllerBase
         if (prefix is null)
             return Unauthorized();
 
-        // Process images: resize 200×200, convert to WebP, strip EXIF
-        if (file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-        {
-            await using var inputStream = file.OpenReadStream();
-            var processed = await _imageProcessor.ResizeAvatarAsync(inputStream, ct).ConfigureAwait(false);
-            if (processed is not null)
-            {
-                using (processed)
-                {
-                    var objectKey = $"{prefix}{IdGenerator.New():N}{processed.Extension}";
-                    await _storage.PutObjectAsync(objectKey, processed.Data, processed.ContentType, ct).ConfigureAwait(false);
-                    return Ok(new UploadResponse { Key = objectKey, Size = processed.Data.Length });
-                }
-            }
-        }
+        await using var stream = file.OpenReadStream();
+        var result = await _upload.UploadAsync(prefix, stream, file.ContentType, file.FileName, file.Length, ct)
+            .ConfigureAwait(false);
 
-        // Non-image or unrecognized format: store as-is
-        var fallbackExt = FileExtensionMapper.FromContentTypeOrFileName(file.ContentType, file.FileName);
-        var fallbackKey = $"{prefix}{IdGenerator.New():N}{fallbackExt}";
-        await using (var read = file.OpenReadStream())
-        {
-            await _storage.PutObjectAsync(fallbackKey, read, file.ContentType, ct).ConfigureAwait(false);
-        }
-        return Ok(new UploadResponse { Key = fallbackKey, Size = file.Length });
+        return Ok(new UploadResponse { Key = result.Key, Size = result.Size });
     }
 
+    /// <summary>Total storage bytes used by the current user across all uploaded objects.</summary>
+    [HttpGet("usage")]
+    [ProducesResponseType(typeof(StorageUsageResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetUsage(CancellationToken ct)
+    {
+        if (!_storage.IsEnabled)
+            return Ok(new StorageUsageResponse());
+
+        var prefix = UserObjectPrefix();
+        if (prefix is null) return Unauthorized();
+
+        long totalBytes = 0;
+        await foreach (var item in _storage.ListObjectsAsync(prefix, ct).ConfigureAwait(false))
+            totalBytes += item.Size;
+
+        const long maxBytes = 10L * 1024 * 1024 * 1024;
+        return Ok(new StorageUsageResponse
+        {
+            UsedBytes = totalBytes,
+            MaxBytes  = maxBytes,
+            UsedGb    = Math.Round(totalBytes / 1_073_741_824.0, 3),
+            MaxGb     = 10.0,
+        });
+    }
 
     private string? UserObjectPrefix()
     {
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (sub is null || !Guid.TryParse(sub, out var userId))
             return null;
-        // Match IUserAvatarService ownership check: users/{userId:N}/ (no dashes).
         return $"users/{userId:N}/";
     }
 
     public sealed class StorageStatusResponse
     {
-        public bool Enabled { get; init; }
-        public string? Bucket { get; init; }
+        public bool    Enabled { get; init; }
+        public string? Bucket  { get; init; }
+    }
+
+    public sealed class StorageUsageResponse
+    {
+        public long   UsedBytes { get; init; }
+        public long   MaxBytes  { get; init; }
+        public double UsedGb    { get; init; }
+        public double MaxGb     { get; init; }
     }
 
     public sealed class UploadResponse
     {
-        public string Key { get; init; } = string.Empty;
-        public long Size { get; init; }
+        public string Key  { get; init; } = string.Empty;
+        public long   Size { get; init; }
     }
-
 }

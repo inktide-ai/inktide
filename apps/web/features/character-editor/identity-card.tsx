@@ -23,7 +23,6 @@ const IdentityCard = ({ character, onUpdate, onDelete, onNavigateTab }: Identity
 
       <ProfileHero character={character} onUpdate={onUpdate} />
 
-      {/* ── Status ── */}
       <div className="flex flex-col gap-3 border-t border-(--border) pt-4 mt-6">
         <div className="text-[1.125rem] font-bold text-(--text-primary) tracking-[-0.02em] mb-2">{t('identity.status')}</div>
         <div className="grid grid-cols-4 gap-2">

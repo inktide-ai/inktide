@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using Inktide.API.Core;
 using Inktide.API.Core.DependencyInjection;
+using Inktide.API.Memory.Application.Configuration.Validators;
 using Inktide.API.Memory.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Inktide.API.Memory.Application.Configuration;
@@ -37,18 +38,22 @@ public sealed class MemoryInfrastructureStartup : IStartup
 {
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
-        // ── MemoryDbContext (owns soul.memory_metadata table) ─────────────────
         var connectionString = ctx.Configuration.GetConnectionString("Postgres")
             ?? BuildConnectionString(ctx.Configuration);
         services.AddDbContext<MemoryDbContext>(options => options.UseNpgsql(connectionString));
 
         services.Configure<MemoryOptions>(ctx.Configuration.GetSection(nameof(MemoryOptions)));
+        services.AddSingleton<IValidateOptions<MemoryOptions>, MemoryOptionsValidator>();
         services.Configure<QdrantSettings>(ctx.Configuration.GetSection(nameof(QdrantSettings)));
 
-        // ── Qdrant (direct SDK — no SK VectorData) ───────────────────────────
         var qdrantSettings = ctx.Configuration
             .GetSection(nameof(QdrantSettings))
             .Get<QdrantSettings>() ?? new QdrantSettings();
+
+        if (string.IsNullOrWhiteSpace(qdrantSettings.Host))
+            throw new InvalidOperationException("QdrantSettings:Host is required but not configured.");
+        if (qdrantSettings.GrpcPort is <= 0 or > 65535)
+            throw new InvalidOperationException("QdrantSettings:GrpcPort must be a valid port (1–65535).");
 
         services.AddSingleton(_ => new QdrantClient(
             host: qdrantSettings.Host,
@@ -61,10 +66,14 @@ public sealed class MemoryInfrastructureStartup : IStartup
         // Ensure the Qdrant collection exists on startup.
         services.AddHostedService<VectorCollectionInitializer>();
 
-        // ── Embeddings (Ollama via OpenAI-compat + Microsoft.Extensions.AI) ──
         var ollamaSettings = ctx.Configuration
             .GetSection(nameof(OllamaSettings))
             .Get<OllamaSettings>() ?? new OllamaSettings();
+
+        if (string.IsNullOrWhiteSpace(ollamaSettings.Host))
+            throw new InvalidOperationException("OllamaSettings:Host is required but not configured.");
+        if (ollamaSettings.Port is <= 0 or > 65535)
+            throw new InvalidOperationException("OllamaSettings:Port must be a valid port (1–65535).");
 
         services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(sp =>
         {
@@ -78,7 +87,6 @@ public sealed class MemoryInfrastructureStartup : IStartup
                          .AsIEmbeddingGenerator();
         });
 
-        // ── Fact extraction (Scribe Python worker) ────────────────────────────
         services.AddHttpClient(ScribeFactExtractionClient.HttpClientName)
             .ConfigureHttpClient((sp, client) =>
             {
@@ -90,7 +98,6 @@ public sealed class MemoryInfrastructureStartup : IStartup
 
         services.AddSingleton<IFactExtractionClient, ScribeFactExtractionClient>();
 
-        // ── Ingestion channel ─────────────────────────────────────────────────
         services.AddSingleton(sp =>
         {
             var o = sp.GetRequiredService<IOptions<MemoryOptions>>().Value;

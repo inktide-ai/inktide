@@ -1,19 +1,18 @@
 'use client'
 import { type RefObject, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AiCardSceneResponse } from '@/shared/types/soul-api'
-import { listCustomSceneTags, putCardSceneMetadata, deleteCardScene } from '@/entities/soul/api'
+import type { ProjectSceneResponse } from '@/features/projects/api/scenes'
+import { deleteProjectScene } from '@/features/projects/api/scenes'
 import { CardSceneUploader } from '@/entities/soul/services/upload/CardSceneUploader'
 import { executePresignedUpload } from '@/shared/services/upload/PresignedUploadService'
 import { BUILTIN_SCENE_TAGS, mergeSceneTagPickOptions } from '../tabs/scene-tag-utils'
 
-const TAG_AUTO_VALUE = '__auto__'
 const MAX_DISPLAY = 200
 const MAX_DESC = 2000
 const ALLOWED_TYPES = 'image/jpeg,image/png,image/webp'
 const MAX_MB = 50
 
-export { TAG_AUTO_VALUE, MAX_DISPLAY, MAX_DESC, ALLOWED_TYPES }
+export { MAX_DISPLAY, MAX_DESC, ALLOWED_TYPES }
 
 export interface UseSceneSettingsResult {
   uploading:          boolean
@@ -24,8 +23,6 @@ export interface UseSceneSettingsResult {
   setMetaDisplayName: (v: string) => void
   metaDescription:    string
   setMetaDescription: (v: string) => void
-  metaTag:            string
-  setMetaTag:         (v: string) => void
   metaSaving:         boolean
   metaError:          string | null
   handleSaveMeta:     () => Promise<void>
@@ -35,21 +32,16 @@ export interface UseSceneSettingsResult {
 }
 
 interface UseSceneSettingsParams {
-  scene:            AiCardSceneResponse | null
-  cardId:           string | undefined
+  scene:            ProjectSceneResponse | null
+  projectId:        string | undefined
   fileInputRef:     RefObject<HTMLInputElement | null>
   onScenesChanged:  () => void
   onSceneReplaced?: (newSceneId: string) => void
   onSceneDeleted:   () => void
 }
 
-/**
- * Manages upload/delete lifecycle and metadata editing for a single scene card.
- * `fileInputRef` is provided by the parent so the hook can reset the input value
- * after each file selection without owning the DOM ref itself.
- */
 export function useSceneSettings({
-  scene, cardId, fileInputRef,
+  scene, projectId, fileInputRef,
   onScenesChanged, onSceneReplaced, onSceneDeleted,
 }: UseSceneSettingsParams): UseSceneSettingsResult {
   const { t } = useTranslation('scene')
@@ -58,58 +50,34 @@ export function useSceneSettings({
   const [removing, setRemoving]   = useState(false)
   const [error, setError]         = useState<string | null>(null)
 
-  const [tagPickOptions, setTagPickOptions]       = useState<string[]>([...BUILTIN_SCENE_TAGS])
-  const [metaDisplayName, setMetaDisplayName]     = useState('')
-  const [metaDescription, setMetaDescription]     = useState('')
-  const [metaTag, setMetaTag]                     = useState<string>(TAG_AUTO_VALUE)
-  const [metaSaving, setMetaSaving]               = useState(false)
-  const [metaError, setMetaError]                 = useState<string | null>(null)
+  const tagPickOptions = mergeSceneTagPickOptions([...BUILTIN_SCENE_TAGS])
 
-  // Load custom tag options for this card's tag picker
-  useEffect(() => {
-    if (!cardId) { setTagPickOptions([...BUILTIN_SCENE_TAGS]); return }
-    listCustomSceneTags(cardId)
-      .then((c) => setTagPickOptions(mergeSceneTagPickOptions(c)))
-      .catch(() => setTagPickOptions([...BUILTIN_SCENE_TAGS]))
-  }, [cardId])
+  const [metaDisplayName, setMetaDisplayName] = useState('')
+  const [metaDescription, setMetaDescription] = useState('')
+  const [metaSaving]                          = useState(false)
+  const [metaError]                           = useState<string | null>(null)
 
-  // Sync metadata fields whenever the scene changes (different scene selected)
   useEffect(() => {
-    if (!scene) { setMetaDisplayName(''); setMetaDescription(''); setMetaTag(TAG_AUTO_VALUE); return }
+    if (!scene) { setMetaDisplayName(''); setMetaDescription(''); return }
     setMetaDisplayName(scene.display_name?.trim() ?? '')
     setMetaDescription(scene.description?.trim() ?? '')
-    setMetaTag(scene.tag?.trim() ? scene.tag.trim() : TAG_AUTO_VALUE)
-  }, [scene?.id, scene?.display_name, scene?.description, scene?.tag])
+  }, [scene?.id, scene?.display_name, scene?.description])
 
   async function handleSaveMeta() {
-    if (!scene || !cardId) return
-    setMetaSaving(true)
-    setMetaError(null)
-    try {
-      await putCardSceneMetadata(cardId, scene.id, {
-        display_name: metaDisplayName.trim() ? metaDisplayName.trim() : null,
-        description:  metaDescription.trim() ? metaDescription.trim() : null,
-        tag:          metaTag === TAG_AUTO_VALUE ? null : metaTag.trim() || null,
-      })
-      onScenesChanged()
-    } catch (err) {
-      setMetaError(err instanceof Error ? err.message : t('settings.errorMetaSave'))
-    } finally {
-      setMetaSaving(false)
-    }
+    // Metadata updates not supported by project scenes API
   }
 
   async function handleReplace(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !cardId || !scene) return
+    if (!file || !projectId || !scene) return
     if (file.size > MAX_MB * 1024 * 1024) { setError(t('settings.errorTooLarge', { max: MAX_MB })); return }
     const previousId = scene.id
     setUploading(true)
     setError(null)
     try {
-      const created = await executePresignedUpload(new CardSceneUploader(cardId), file)
+      const created = await executePresignedUpload(new CardSceneUploader(projectId), file)
       try {
-        await deleteCardScene(cardId, previousId)
+        await deleteProjectScene(projectId, previousId)
       } catch (delErr) {
         setError(delErr instanceof Error ? delErr.message : t('settings.errorDelete'))
         onScenesChanged()
@@ -127,12 +95,12 @@ export function useSceneSettings({
 
   async function handleUploadNew(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !cardId) return
+    if (!file || !projectId) return
     if (file.size > MAX_MB * 1024 * 1024) { setError(t('settings.errorTooLarge', { max: MAX_MB })); return }
     setUploading(true)
     setError(null)
     try {
-      await executePresignedUpload(new CardSceneUploader(cardId), file)
+      await executePresignedUpload(new CardSceneUploader(projectId), file)
       onScenesChanged()
     } catch (err) {
       setError(err instanceof Error ? err.message : t('settings.errorUpload'))
@@ -143,11 +111,11 @@ export function useSceneSettings({
   }
 
   async function handleDelete() {
-    if (!scene || !cardId) return
+    if (!scene || !projectId) return
     setRemoving(true)
     setError(null)
     try {
-      await deleteCardScene(cardId, scene.id)
+      await deleteProjectScene(projectId, scene.id)
       onScenesChanged()
       onSceneDeleted()
     } catch (err) {
@@ -162,7 +130,6 @@ export function useSceneSettings({
     tagPickOptions,
     metaDisplayName, setMetaDisplayName,
     metaDescription, setMetaDescription,
-    metaTag, setMetaTag,
     metaSaving, metaError,
     handleSaveMeta, handleReplace, handleUploadNew, handleDelete,
   }

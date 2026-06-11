@@ -1,35 +1,37 @@
 import { DocPage, PageSubtitle, PageTitle, Table, TableHead, TableRow, Td, TdBold } from './shared'
+import { getTranslations } from '@/lib/i18n-server'
 
-export function ServicesPage() {
+export async function ServicesPage() {
+  const t = await getTranslations('developer')
   return (
     <DocPage>
-      <PageTitle eyebrow="Platform">Services</PageTitle>
-      <PageSubtitle>Default local development addresses for all Inktide services.</PageSubtitle>
+      <PageTitle eyebrow={t('docs.services.eyebrow')}>{t('docs.services.title')}</PageTitle>
+      <PageSubtitle>{t('docs.services.subtitle')}</PageSubtitle>
 
       <Table>
-        <TableHead cols={['Service', 'Address', 'Purpose']} />
+        <TableHead cols={[t('docs.services.colService'), t('docs.services.colAddress'), t('docs.services.colPurpose')]} />
         <tbody>
           {[
-            ['Inktide API',      '127.0.0.1:5001',  'Main HTTP/REST backend (Kestrel)'],
-            ['gRPC (general)',   '127.0.0.1:8081',  'General gRPC service endpoint'],
-            ['Soul gRPC',        '127.0.0.1:8084',  'AI Cards gRPC service'],
-            ['Frontend (dev)',   'localhost:3000',   'Next.js dev server'],
-            ['Keycloak',         'localhost:8080',   'OIDC identity provider — realm: inktide-app'],
-            ['Keycloak Admin',   'localhost:8080',   '/admin/realms/inktide-app'],
-            ['PostgreSQL',       'localhost:5432',   'Primary relational database'],
-            ['Redis',            'localhost:6379',   'Streams (message pipeline) + cache'],
-            ['Qdrant',           'localhost:6334',   'Vector DB (gRPC) — collection: chat_memories, vector size: 768'],
-            ['Qdrant HTTP',      'localhost:6333',   'Vector DB HTTP (dashboard at :6333/dashboard)'],
-            ['Kokoro TTS',       '127.0.0.1:8880',  'Text-to-speech server — OpenAI-compatible API at /v1'],
-            ['MinIO S3',         '127.0.0.1:9000',  'Object storage — bucket: inktide-uploads'],
-            ['MinIO Console',    '127.0.0.1:9001',  'MinIO web admin console'],
-            ['AI Worker',        'localhost:8000',   'Python — embeddings (/embeddings) + classify (/classify) via Ollama'],
-            ['Scribe Worker',    'localhost:8001',   'Python — fact extraction from text'],
-          ].map(([svc, addr, purpose]) => (
+            ['Inktide API',      '127.0.0.1:5001',  'docs.services.p.api'],
+            ['gRPC (general)',   '127.0.0.1:8081',  'docs.services.p.grpc'],
+            ['Soul gRPC',        '127.0.0.1:8084',  'docs.services.p.soulGrpc'],
+            ['Frontend (dev)',   'localhost:3000',   'docs.services.p.frontend'],
+            ['Keycloak',         'localhost:8080',   'docs.services.p.keycloak'],
+            ['Keycloak Admin',   'localhost:8080',   'docs.services.p.keycloakAdmin'],
+            ['PostgreSQL',       'localhost:5432',   'docs.services.p.postgres'],
+            ['Redis',            'localhost:6379',   'docs.services.p.redis'],
+            ['Qdrant',           'localhost:6334',   'docs.services.p.qdrant'],
+            ['Qdrant HTTP',      'localhost:6333',   'docs.services.p.qdrantHttp'],
+            ['Kokoro TTS',       '127.0.0.1:8880',  'docs.services.p.kokoro'],
+            ['MinIO S3',         '127.0.0.1:9000',  'docs.services.p.minio'],
+            ['MinIO Console',    '127.0.0.1:9001',  'docs.services.p.minioConsole'],
+            ['AI Worker',        'localhost:8000',   'docs.services.p.aiWorker'],
+            ['Scribe Worker',    'localhost:8001',   'docs.services.p.scribe'],
+          ].map(([svc, addr, purposeKey]) => (
             <TableRow key={svc}>
               <TdBold>{svc}</TdBold>
               <Td mono accent>{addr}</Td>
-              <Td>{purpose}</Td>
+              <Td>{t(purposeKey)}</Td>
             </TableRow>
           ))}
         </tbody>

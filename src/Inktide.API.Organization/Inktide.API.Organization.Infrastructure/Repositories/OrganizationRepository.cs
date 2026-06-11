@@ -1,4 +1,5 @@
 using Inktide.API.Organization.Application.Entities;
+using Inktide.API.Organization.Application.Exceptions;
 using Inktide.API.Organization.Application.Interfaces;
 using Inktide.API.Organization.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
@@ -23,5 +24,16 @@ public sealed class OrganizationRepository : IOrganizationRepository
         return Task.CompletedTask;
     }
 
-    public Task SaveChangesAsync(CancellationToken ct) => _db.SaveChangesAsync(ct);
+    public async Task SaveChangesAsync(CancellationToken ct)
+    {
+        try
+        {
+            await _db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("unique", StringComparison.OrdinalIgnoreCase) == true
+                                           || ex.InnerException?.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            throw new OrganizationConcurrentCreationException();
+        }
+    }
 }

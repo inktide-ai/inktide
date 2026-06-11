@@ -4,7 +4,7 @@ import type { DiscordTokenValidationResponse } from '@/shared/types/soul-api'
 export async function validateDiscordToken(
   botToken: string,
 ): Promise<DiscordTokenValidationResponse> {
-  const res = await apiFetch('/api/connectors/discord/validate-token', {
+  const res = await apiFetch('/api/v1/connectors/discord/token-validations', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ botToken }),
@@ -13,24 +13,24 @@ export async function validateDiscordToken(
 }
 
 export async function getDiscordInstallUrl(cardId: string): Promise<string> {
-  const res = await apiFetch(`/api/connectors/discord/install-url?cardId=${cardId}`)
+  const res = await apiFetch(`/api/v1/connectors/discord/install-url?cardId=${cardId}`)
   const data = await jsonOrThrow<{ url: string }>(res)
   return data.url
 }
 
 export async function revokeDiscordChannel(channelId: string): Promise<void> {
-  const res = await apiFetch(`/api/connectors/discord/revoke/${channelId}`, { method: 'POST' })
+  const res = await apiFetch(`/api/v1/connectors/discord/channels/${channelId}`, { method: 'DELETE' })
   if (!res.ok) throw new Error(`Revoke failed: ${res.status}`)
 }
 
 export async function reconnectDiscordChannel(channelId: string): Promise<string> {
-  const res = await apiFetch(`/api/connectors/discord/reconnect/${channelId}`, { method: 'POST' })
+  const res = await apiFetch(`/api/v1/connectors/discord/channels/${channelId}/reconnections`, { method: 'POST' })
   const data = await jsonOrThrow<{ url: string }>(res)
   return data.url
 }
 
 export async function saveDiscordCustomBot(channelId: string, botToken: string | null): Promise<void> {
-  const res = await apiFetch(`/api/connectors/discord/channels/${channelId}/custom-bot`, {
+  const res = await apiFetch(`/api/v1/connectors/discord/channels/${channelId}/custom-bot`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ botToken }),

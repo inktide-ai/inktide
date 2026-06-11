@@ -2,9 +2,9 @@
 
 import { type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
+import { Slider } from '@/shared/ui/slider'
 import { MicIcon } from './voice-icons'
 
-// ── Shared input class ────────────────────────────────────────────────────────
 
 export const inputCls = cn(
   'h-9 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3',
@@ -12,7 +12,6 @@ export const inputCls = cn(
   'transition-colors focus:border-[var(--border-default)]',
 )
 
-// ── ParamRow — provider-specific slider row ───────────────────────────────────
 
 interface ParamRowProps {
   icon: ReactNode
@@ -35,12 +34,11 @@ export function ParamRow({ icon, name, desc, min, max, step, value, onChange, de
         <p className="text-body font-medium text-[var(--text-primary)]">{name}</p>
         <p className="mt-0.5 text-xs leading-snug text-[var(--text-tertiary)]">{desc}</p>
       </div>
-      <input
-        type="range"
-        min={min} max={max} step={step} value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-[var(--border-subtle)] outline-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--text-primary)]"
-        style={{ background: `linear-gradient(to right, var(--text-primary) ${((value - min) / (max - min)) * 100}%, var(--border-subtle) ${((value - min) / (max - min)) * 100}%)` }}
+      <Slider
+        value={value} onChange={onChange}
+        min={min} max={max} step={step}
+        fill="var(--text-primary)" trackHeight={4} thumbSize={14}
+        className="flex-1"
       />
       <span className="w-[4.5rem] shrink-0 text-center text-sm text-[var(--text-primary)]">
         {format ? format(value) : value.toFixed(decimals)}
@@ -49,7 +47,6 @@ export function ParamRow({ icon, name, desc, min, max, step, value, onChange, de
   )
 }
 
-// ── SelectField — provider-specific dropdown ──────────────────────────────────
 
 export function SelectField({
   label,
@@ -90,13 +87,12 @@ export function SelectField({
   )
 }
 
-// ── GlobalParamRow — main page slider row (compact) ───────────────────────────
 
 export function GlobalParamRow({ name, desc, min, max, step, value, onChange, decimals }: {
   name: string; desc: string; min: number; max: number; step: number
   value: number; onChange: (v: number) => void; decimals: number
 }) {
-  const pct = ((value - min) / (max - min)) * 100
+
   return (
     <div className="flex items-center justify-between px-6 py-4">
       <div className="min-w-0 flex-1">
@@ -104,12 +100,11 @@ export function GlobalParamRow({ name, desc, min, max, step, value, onChange, de
         <p className="mt-0.5 text-body text-[var(--text-secondary)]">{desc}</p>
       </div>
       <div className="flex shrink-0 items-center gap-3 ml-8">
-        <input
-          type="range"
-          min={min} max={max} step={step} value={value}
-          onChange={(e) => onChange(parseFloat(e.target.value))}
-          className="w-36 cursor-pointer appearance-none rounded-full outline-none [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--text-primary)]"
-          style={{ height: '4px', background: `linear-gradient(to right, var(--text-primary) ${pct}%, var(--border-subtle) ${pct}%)` }}
+        <Slider
+          value={value} onChange={onChange}
+          min={min} max={max} step={step}
+          fill="var(--text-primary)" trackHeight={4} thumbSize={14}
+          className="w-36"
         />
         <input
           type="number"
@@ -126,7 +121,6 @@ export function GlobalParamRow({ name, desc, min, max, step, value, onChange, de
   )
 }
 
-// ── GlobalToggleRow — main page toggle row ────────────────────────────────────
 
 export function GlobalToggleRow({ name, desc, value, onChange }: {
   name: string; desc: string; value: boolean; onChange: (v: boolean) => void

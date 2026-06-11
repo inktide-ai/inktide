@@ -26,17 +26,11 @@ public sealed class PublicAiCardResponse
     [JsonProperty("cover_url")]
     public string? CoverUrl { get; set; }
 
-    [JsonProperty("personality")]
-    public string Personality { get; set; } = string.Empty;
-
     [JsonProperty("status")]
     public string Status { get; set; } = "active";
 
     [JsonProperty("is_active")]
     public bool IsActive { get; set; }
-
-    [JsonProperty("platforms")]
-    public IReadOnlyList<string> Platforms { get; set; } = [];
 
     [JsonProperty("created_at")]
     public DateTime CreatedAt { get; set; }

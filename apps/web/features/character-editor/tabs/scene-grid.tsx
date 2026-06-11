@@ -1,29 +1,26 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AiCardSceneResponse, CustomSceneTagDto } from '@/shared/types/soul-api'
-import { deleteCardScene, listCustomSceneTags } from '@/entities/soul/api'
+import type { ProjectSceneResponse } from '@/features/projects/api/scenes'
+import { deleteProjectScene } from '@/features/projects/api/scenes'
 import { SceneCard } from './scene-card'
 import { PRESET_SCENES } from './preset-scene-card'
 import { NewSceneModal } from './new-scene-modal'
-import { NewTagModal } from './new-tag-modal'
 import {
   BUILTIN_SCENE_TAGS,
   SCENE_FILTER_ALL,
-  getCustomTagsColorMap,
-  getEffectiveTagLabel,
   getPillColors,
+  getEffectiveTagLabel,
   getSceneDisplayTitle,
-  mergeSceneTagPickOptions,
 } from './scene-tag-utils'
 
 const pgGrid = 'grid grid-cols-[repeat(auto-fill,minmax(188px,1fr))] gap-[0.875rem]'
 
 interface SceneGridProps {
-  scenes: AiCardSceneResponse[]
+  scenes: ProjectSceneResponse[]
   loading: boolean
   activeSceneId: string | null
-  cardId?: string
+  projectId?: string
   onSelect: (id: string) => void
   onConfigure: (id: string) => void
   onActiveChanged: (id: string | null) => void
@@ -32,36 +29,19 @@ interface SceneGridProps {
 
 const BASE_PILLS: string[] = [SCENE_FILTER_ALL, ...BUILTIN_SCENE_TAGS]
 
-function mergeExtraCustomPills(custom: CustomSceneTagDto[]): string[] {
-  const builtinLower = new Set(BUILTIN_SCENE_TAGS.map(t => t.toLowerCase()))
-  return custom.map(c => c.label.trim()).filter(t => t.length > 0 && !builtinLower.has(t.toLowerCase()))
-}
-
-export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, onConfigure, onActiveChanged, onScenesChanged }: SceneGridProps) {
+export function SceneGrid({ scenes, loading, activeSceneId, projectId, onSelect, onConfigure, onActiveChanged, onScenesChanged }: SceneGridProps) {
   const { t } = useTranslation('scene')
   const [showModal, setShowModal] = useState(false)
-  const [showTagModal, setShowTagModal] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [activeTag, setActiveTag] = useState(SCENE_FILTER_ALL)
-  const [customTags, setCustomTags] = useState<CustomSceneTagDto[]>([])
 
   const q = search.trim().toLowerCase()
-  const tagPickOptions = useMemo(() => mergeSceneTagPickOptions(customTags), [customTags])
-  const tagColorMap = useMemo(() => getCustomTagsColorMap(customTags), [customTags])
-
-  useEffect(() => {
-    if (!cardId) { setCustomTags([]); return }
-    listCustomSceneTags(cardId).then(setCustomTags).catch(() => setCustomTags([]))
-  }, [cardId, scenes])
-
-  const extraPills = useMemo(() => mergeExtraCustomPills(customTags), [customTags])
-  const filterPills = useMemo(() => [...BASE_PILLS, ...extraPills], [extraPills])
 
   const filteredScenes = scenes.filter(s => {
     if (q) {
-      const hay = `${getSceneDisplayTitle(s)} ${s.original_file_name} ${s.description ?? ''}`.toLowerCase()
+      const hay = `${getSceneDisplayTitle(s)} ${s.original_name} ${s.description ?? ''}`.toLowerCase()
       if (!hay.includes(q)) return false
     }
     if (activeTag !== SCENE_FILTER_ALL && getEffectiveTagLabel(s) !== activeTag) return false
@@ -77,24 +57,18 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
   const totalVisible = filteredScenes.length + filteredPresets.length
   const emptyForTagOnly = !q && activeTag !== SCENE_FILTER_ALL && totalVisible === 0
 
-  function handleCreated(scene: AiCardSceneResponse) {
+  function handleCreated(scene: ProjectSceneResponse) {
     setShowModal(false)
     onScenesChanged()
     onActiveChanged(scene.id)
   }
 
-  function handleNewTagCreated(label: string) {
-    setShowTagModal(false)
-    setActiveTag(label)
-    onScenesChanged()
-  }
-
   async function handleDelete(sceneId: string) {
-    if (!cardId) return
+    if (!projectId) return
     setDeletingId(sceneId)
     setDeleteError(null)
     try {
-      await deleteCardScene(cardId, sceneId)
+      await deleteProjectScene(projectId, sceneId)
       if (activeSceneId === sceneId) onActiveChanged(null)
       onScenesChanged()
     } catch (err) {
@@ -115,7 +89,7 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
         <button
           className="inline-flex items-center gap-[6px] py-2 px-4 shrink-0 text-sm font-semibold text-(--text-secondary) bg-white/[0.05] border border-white/10 rounded-[0.625rem] cursor-pointer font-[inherit] transition-[background,color,border-color] duration-150 whitespace-nowrap hover:bg-white/[0.09] hover:border-white/[0.18] hover:text-(--text-primary) disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setShowModal(true)}
-          disabled={!cardId}
+          disabled={!projectId}
         >
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
             <path d="M6.5 2v9M2 6.5h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -143,9 +117,9 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
 
       {/* Filter pills */}
       <div className="flex gap-[6px] overflow-x-auto [scrollbar-width:none] mb-[0.875rem] pb-[2px] [-webkit-scrollbar:hidden]">
-        {filterPills.map(tag => {
+        {BASE_PILLS.map(tag => {
           const isActive = activeTag === tag
-          const colors = getPillColors(tag, tagColorMap.get(tag))
+          const colors = getPillColors(tag)
           return (
             <button
               key={tag}
@@ -158,16 +132,6 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
             </button>
           )
         })}
-        <button
-          type="button"
-          className="shrink-0 inline-flex items-center justify-center min-w-[34px] py-[5px] px-[10px] text-[1rem] font-semibold leading-none text-(--text-secondary) bg-white/[0.04] border border-dashed border-white/[0.18] rounded-full cursor-pointer font-[inherit] transition-[color,background,border-color] duration-150 hover:enabled:text-(--text-primary) hover:enabled:bg-white/[0.08] hover:enabled:border-white/[0.28] disabled:opacity-45 disabled:cursor-not-allowed"
-          onClick={() => setShowTagModal(true)}
-          disabled={!cardId}
-          aria-label={t('grid.addTagAria')}
-          title={t('grid.addTagAria')}
-        >
-          +
-        </button>
       </div>
 
       {loading ? (
@@ -177,16 +141,12 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
           {filteredScenes.map((scene, i) => (
             <SceneCard
               key={scene.id}
-              cardId={cardId}
               scene={scene}
-              tagOptions={tagPickOptions}
-              tagColorMap={tagColorMap}
               isActive={scene.id === activeSceneId}
               onSelect={() => onSelect(scene.id)}
               onConfigure={() => onConfigure(scene.id)}
               onDelete={() => handleDelete(scene.id)}
               deleting={deletingId === scene.id}
-              onScenesChanged={onScenesChanged}
               animationDelay={i * 45}
             />
           ))}
@@ -212,11 +172,8 @@ export function SceneGrid({ scenes, loading, activeSceneId, cardId, onSelect, on
 
       {deleteError && <div className="mt-3 text-xs text-[var(--color-error-mid)]">{deleteError}</div>}
 
-      {showModal && cardId && (
-        <NewSceneModal cardId={cardId} tagOptions={tagPickOptions} onClose={() => setShowModal(false)} onCreated={handleCreated} />
-      )}
-      {showTagModal && cardId && (
-        <NewTagModal cardId={cardId} onClose={() => setShowTagModal(false)} onCreated={handleNewTagCreated} />
+      {showModal && projectId && (
+        <NewSceneModal projectId={projectId} tagOptions={[...BUILTIN_SCENE_TAGS]} onClose={() => setShowModal(false)} onCreated={handleCreated} />
       )}
     </div>
   )

@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Inktide.API.Billing.Application.Interfaces;
-using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 using Inktide.API.ScreenAwareness.Application.Interfaces;
 using Inktide.API.ScreenAwareness.Application.Models;
 using Inktide.API.ScreenAwareness.Application.Settings;

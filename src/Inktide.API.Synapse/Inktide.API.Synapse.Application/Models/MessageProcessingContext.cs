@@ -21,9 +21,9 @@ public sealed class MessageProcessingContext
     public T? Get<T>() where T : class =>
         _data.TryGetValue(typeof(T), out var value) ? (T)value : null;
 
-    public bool IsAborted { get; private set; }
-
-    public void Abort() => IsAborted = true;
+    private volatile bool _isAborted;
+    public bool IsAborted => _isAborted;
+    public void Abort() => _isAborted = true;
 
     private readonly System.Collections.Concurrent.ConcurrentBag<string> _degradedShards = new();
     public bool IsDegraded => !_degradedShards.IsEmpty;
@@ -35,6 +35,7 @@ public sealed class MessageProcessingContext
     /// soul's saved graph. Checked by the orchestrator to decide whether to fall back to
     /// the legacy hardcoded scatter shards.
     /// </summary>
-    public bool SoulRuntimeExecuted { get; private set; }
-    public void MarkSoulRuntimeExecuted() => SoulRuntimeExecuted = true;
+    private volatile bool _soulRuntimeExecuted;
+    public bool SoulRuntimeExecuted => _soulRuntimeExecuted;
+    public void MarkSoulRuntimeExecuted() => _soulRuntimeExecuted = true;
 }

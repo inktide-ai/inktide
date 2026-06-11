@@ -1,5 +1,6 @@
 using Inktide.API.Core.Contracts;
 using Inktide.API.Core.Generators;
+using Inktide.API.Core.Pagination;
 using Inktide.API.Core.Ordering;
 using Inktide.API.Core.Transactions;
 using Inktide.API.Soul.Application.Exceptions;
@@ -10,7 +11,6 @@ using Inktide.API.Soul.Domain.Enums;
 using Inktide.API.Soul.Domain.Events;
 using Inktide.API.Soul.Domain.IntegrationEvents;
 using Inktide.API.Soul.Domain.Repositories;
-using Inktide.API.Soul.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Soul.Application.Services;
@@ -102,6 +102,14 @@ public sealed class AiCardService : IAiCardService
     public async Task<IReadOnlyList<AiCard>> GetAllByUserAsync(Guid userId, CancellationToken ct = default)
         => await _cardRepo.GetSummaryListByUserIdAsync(userId, ct);
 
+    public async Task<PagedResult<AiCard>> GetPagedByUserAsync(
+        Guid userId, int limit, string? cursor, CancellationToken ct = default)
+    {
+        var (items, hasMore) = await _cardRepo.GetSummaryListPagedAsync(userId, limit, cursor, ct);
+        var nextCursor = hasMore && items.Count > 0 ? items[^1].SortKey : null;
+        return new PagedResult<AiCard>(items, nextCursor, hasMore);
+    }
+
     public async Task<AiCard> UpdateAsync(Guid userId, AiCard card, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(card);
@@ -173,7 +181,7 @@ public sealed class AiCardService : IAiCardService
             "start" => (true,  AiCardStatus.Active),
             "pause" => (true,  AiCardStatus.Paused),
             "stop"  => (false, AiCardStatus.Stopped),
-            _       => throw new ArgumentException($"Unknown action '{action}'. Valid values: start, pause, stop.", nameof(action)),
+            _       => throw new ArgumentException("Unknown action. Valid values: start, pause, stop.", nameof(action)),
         };
 
         var card = await _cardRepo.GetByIdAsync(cardId, ct).ConfigureAwait(false);
@@ -182,6 +190,7 @@ public sealed class AiCardService : IAiCardService
         card.ChangeStatus(isActive, status, _time.GetUtcNow().UtcDateTime);
 
         await _cardRepo.UpdateAsync(card, ct).ConfigureAwait(false);
+        await _auditLog.LogAsync(userId, "ai_card", cardId, $"status_changed:{status.ToString().ToLowerInvariant()}", ct: ct).ConfigureAwait(false);
 
         if (isActive && status == AiCardStatus.Active)
             await _gateCache.UnblockAsync(cardId, ct).ConfigureAwait(false);
@@ -203,24 +212,21 @@ public sealed class AiCardService : IAiCardService
 
         var card = new AiCard
         {
-            Name             = cmd.Name,
-            Personality      = cmd.Personality,
-            SystemPrompt     = cmd.SystemPrompt,
-            Description      = cmd.Description,
-            Status           = Enum.TryParse<AiCardStatus>(cmd.Status, ignoreCase: true, out var st)
-                                   ? st : AiCardStatus.Active,
-            LlmCatalogId     = cmd.LlmCatalogId,
-            LlmConfig        = cmd.LlmConfig,
-            TtsCatalogId     = cmd.TtsCatalogId,
-            TtsConfig        = cmd.TtsConfig,
-            Appearance       = cmd.Appearance,
-            ResponseBehavior = cmd.ResponseBehavior,
-            MemorySettings   = cmd.MemorySettings,
-            AutoPilot        = cmd.AutoPilot,
-            PersonalityConfig = PersonalitySettings.Parse(cmd.PersonalityConfigJson),
+            Name         = cmd.Name,
+            Description  = cmd.Description,
+            Status       = Enum.TryParse<AiCardStatus>(cmd.Status, ignoreCase: true, out var st)
+                               ? st : AiCardStatus.Active,
+            LlmCatalogId = cmd.LlmCatalogId,
+            LlmConfig    = cmd.LlmConfig,
+            TtsCatalogId = cmd.TtsCatalogId,
+            TtsConfig    = cmd.TtsConfig,
+            Appearance   = cmd.Appearance,
         };
 
         var created = await CreateAsync(userId, card, ct: ct).ConfigureAwait(false);
         return created.Id;
     }
+
+    public Task<AiCard?> GetPublicBySlugAsync(string slug, CancellationToken ct = default)
+        => _cardRepo.GetPublicBySlugAsync(slug, ct);
 }

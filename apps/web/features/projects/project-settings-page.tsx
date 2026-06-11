@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useClipboard } from '@/shared/hooks/useClipboard'
 import { useParams, useRouter } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 import { Check, Copy, Download, LayoutTemplate, Trash2 } from 'lucide-react'
@@ -11,6 +12,8 @@ import type { Project, ProjectActiveSoul } from './api'
 import { PROJECTS_ROUTE } from '@/lib/routes'
 import { TemplateEditorModal } from '@/features/templates'
 import { useTemplateStore } from '@/shared/lib/templates/useTemplateStore'
+import { handleError } from '@/shared/lib/handle-error'
+import { PageContent } from '@/shared/ui'
 
 function SaveButton({ saving, disabled, onClick }: { saving: boolean; disabled?: boolean; onClick: () => void }) {
   const { t } = useTranslation('common')
@@ -82,7 +85,7 @@ export default function ProjectSettingsPage() {
   const [savingStatus, setSavingStatus] = useState(false)
 
   const [activeSoul, setActiveSoul] = useState<ProjectActiveSoul | null>(null)
-  const [copied, setCopied]         = useState(false)
+  const { copied, copy: copyId }    = useClipboard(1500)
   const [exporting, setExporting]   = useState(false)
   const [deleting, setDeleting]     = useState(false)
   const [showSaveAsTemplate, setShowSaveAsTemplate] = useState(false)
@@ -98,7 +101,7 @@ export default function ProjectSettingsPage() {
         setStatus(p.status)
         setActiveSoul(p.active_soul)
       })
-      .catch(console.error)
+      .catch(handleError)
       .finally(() => setLoading(false))
   }, [id])
 
@@ -132,12 +135,9 @@ export default function ProjectSettingsPage() {
     finally { setSavingStatus(false) }
   }
 
-  function copyId() {
+  function handleCopyId() {
     if (!project) return
-    navigator.clipboard.writeText(project.id).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    })
+    copyId(project.id)
   }
 
   async function handleExport() {
@@ -180,7 +180,7 @@ export default function ProjectSettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1100px] px-6 py-8">
+    <PageContent>
       <div className="flex gap-12">
 
         <div className="flex-1 space-y-4" id="general">
@@ -220,7 +220,7 @@ export default function ProjectSettingsPage() {
               </div>
               <button
                 type="button"
-                onClick={copyId}
+                onClick={handleCopyId}
                 title={t('projectDetail.copyId')}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
               >
@@ -379,6 +379,6 @@ export default function ProjectSettingsPage() {
           />
         )}
       </AnimatePresence>
-    </div>
+    </PageContent>
   )
 }

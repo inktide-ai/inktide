@@ -8,7 +8,7 @@ import type {
 } from '@/shared/types/soul-api'
 
 export async function listCardScenes(cardId: string): Promise<AiCardSceneResponse[]> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes`)
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/scenes`)
   return jsonOrThrow<AiCardSceneResponse[]>(res)
 }
 
@@ -16,7 +16,7 @@ export async function presignSceneUpload(
   cardId: string,
   body: { file_name: string; content_type: string; size_bytes: number },
 ): Promise<BeginModelUploadResponse> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/presign`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/scenes/presign`, {
     method: 'POST',
     body: JSON.stringify(body),
   })
@@ -33,7 +33,7 @@ export async function completeSceneUpload(
     tag?: string | null
   },
 ): Promise<AiCardSceneResponse> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/complete`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/scenes/complete`, {
     method: 'POST',
     body: JSON.stringify(body),
   })
@@ -41,12 +41,12 @@ export async function completeSceneUpload(
 }
 
 export async function listCustomSceneTags(cardId: string): Promise<CustomSceneTagDto[]> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/custom-tags`)
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/scenes/custom-tags`)
   return jsonOrThrow<CustomSceneTagDto[]>(res)
 }
 
 export async function addCustomSceneTag(cardId: string, label: string, color?: string): Promise<void> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/custom-tags`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/scenes/custom-tags`, {
     method: 'POST',
     body: JSON.stringify({ label, color: color ?? null }),
   })
@@ -58,7 +58,7 @@ export async function patchCardSceneTag(
   sceneId: string,
   body: { tag: string | null },
 ): Promise<AiCardSceneResponse> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/${sceneId}`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/scenes/${sceneId}`, {
     method: 'PATCH',
     body: JSON.stringify(body),
   })
@@ -74,7 +74,7 @@ export async function putCardSceneMetadata(
     tag?: string | null
   },
 ): Promise<AiCardSceneResponse> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/${sceneId}/metadata`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/scenes/${sceneId}/metadata`, {
     method: 'PUT',
     body: JSON.stringify(body),
   })
@@ -85,7 +85,7 @@ export async function putCardSceneMetadata(
 // OCP: паттерн presign→PUT→complete написан один раз, не дублируется здесь
 
 export async function deleteCardScene(cardId: string, sceneId: string): Promise<void> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/${sceneId}`, { method: 'DELETE' })
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/scenes/${sceneId}`, { method: 'DELETE' })
   await emptyOrThrow(res)
 }
 
@@ -94,22 +94,21 @@ export async function reorderScene(
   sceneId: string,
   body: { previous_id: string | null; next_id: string | null },
 ): Promise<void> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/scenes/${sceneId}/position`, {
-    method: 'PUT',
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/scenes/${sceneId}/position`, {
+    method: 'PATCH',
     body: JSON.stringify(body),
   })
   return emptyOrThrow(res)
 }
 
-// ── Run presets (Scenes) ── runtime configuration overlay layer ──────────────
 
 export async function listRunPresets(cardId: string): Promise<RunPreset[]> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets`)
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/run-presets`)
   return jsonOrThrow<RunPreset[]>(res)
 }
 
 export async function createRunPreset(cardId: string, body: CreateRunPresetRequest): Promise<RunPreset> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/run-presets`, {
     method: 'POST',
     body: JSON.stringify(body),
   })
@@ -121,7 +120,7 @@ export async function updateRunPreset(
   presetId: string,
   body: Partial<CreateRunPresetRequest> & { name: string },
 ): Promise<RunPreset> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets/${presetId}`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/run-presets/${presetId}`, {
     method: 'PUT',
     body: JSON.stringify(body),
   })
@@ -129,16 +128,19 @@ export async function updateRunPreset(
 }
 
 export async function deleteRunPreset(cardId: string, presetId: string): Promise<void> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets/${presetId}`, { method: 'DELETE' })
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/run-presets/${presetId}`, { method: 'DELETE' })
   await emptyOrThrow(res)
 }
 
 export async function activateRunPreset(cardId: string, presetId: string): Promise<RunPreset> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets/${presetId}/activate`, { method: 'POST' })
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/run-presets/${presetId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ active: true }),
+  })
   return jsonOrThrow<RunPreset>(res)
 }
 
 export async function deactivateRunPreset(cardId: string): Promise<void> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/run-presets/active`, { method: 'DELETE' })
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/run-presets/active`, { method: 'DELETE' })
   await emptyOrThrow(res)
 }

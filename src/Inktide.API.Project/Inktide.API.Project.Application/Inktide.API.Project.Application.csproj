@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Inktide.API.Project.Domain\Inktide.API.Project.Domain.csproj" />
     <ProjectReference Include="..\..\Inktide.API.Domain\Inktide.API.Domain.csproj" />
   </ItemGroup>

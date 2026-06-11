@@ -1,4 +1,4 @@
-using Inktide.API.Soul.Domain.Repositories;
+using Inktide.API.Connector.Application.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,9 +17,9 @@ internal sealed class GuildRegistryLoader(
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
-        var repo = scope.ServiceProvider.GetRequiredService<IAiCardChannelRepository>();
+        var channelService = scope.ServiceProvider.GetRequiredService<IConnectorChannelService>();
 
-        var channels = await repo.GetActiveDiscordChannelsAsync(cancellationToken);
+        var channels = await channelService.GetActivePlatformChannelsAsync("discord", cancellationToken);
         var entries = channels
             .Where(c => !string.IsNullOrEmpty(c.ChannelId))
             .Select(c => (GuildId: c.ChannelId!, CharacterId: c.AiCardId))

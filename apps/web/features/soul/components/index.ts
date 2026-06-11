@@ -1,4 +1,3 @@
-export * from './brain-llm-sliders'
 export * from './brain-provider-card'
 export * from './credential-status-badge'
 export * from './sortable-soul-card'

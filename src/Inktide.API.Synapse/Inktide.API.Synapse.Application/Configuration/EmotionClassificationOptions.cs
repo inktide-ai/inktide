@@ -5,7 +5,7 @@ public sealed class EmotionClassificationOptions
     public const string SectionName = nameof(EmotionClassificationOptions);
 
     /// <summary>Ollama base URL. Default: http://localhost:11434</summary>
-    public string OllamaBaseUrl { get; set; } = "http://localhost:11434";
+    public string OllamaBaseUrl { get; set; } = string.Empty;
 
     /// <summary>
     /// Model used for classification. Should be small and fast.

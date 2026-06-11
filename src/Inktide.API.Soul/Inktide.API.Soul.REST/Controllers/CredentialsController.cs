@@ -12,7 +12,7 @@ namespace Inktide.API.Soul.REST.Controllers;
 /// The actual API key is never returned in responses.
 /// </summary>
 [ApiController]
-[Route("api/soul/credentials")]
+[Route("api/v1/souls/credentials")]
 [Produces("application/json")]
 [Authorize]
 public sealed class CredentialsController : ApiController

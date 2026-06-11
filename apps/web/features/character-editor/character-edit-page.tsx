@@ -212,7 +212,6 @@ export default function CharacterEditPage() {
         className="rounded-2xl overflow-hidden bg-(--bg-surface) border border-(--border) shadow-[0_12px_40px_rgba(0,0,0,0.28)]"
         onSubmit={onSubmit}
       >
-        {/* ── Banner ── */}
         <div
           className="group relative h-[110px] bg-cover bg-center bg-no-repeat cursor-pointer"
           style={

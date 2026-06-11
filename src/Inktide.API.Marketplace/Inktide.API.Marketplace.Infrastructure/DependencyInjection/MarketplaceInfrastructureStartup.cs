@@ -22,7 +22,7 @@ public sealed class MarketplaceInfrastructureStartup : IStartup
         services.AddHttpClient(SoulOwnershipChecker.HttpClientName, c =>
         {
             var baseUrl = ctx.Configuration["MarketplaceSettings:SoulApiBaseUrl"]
-                ?? "http://127.0.0.1:5001/";
+                ?? throw new InvalidOperationException("MarketplaceSettings:SoulApiBaseUrl is required but not configured.");
             c.BaseAddress = new Uri(baseUrl.TrimEnd('/') + '/');
             c.Timeout     = TimeSpan.FromSeconds(5);
         });

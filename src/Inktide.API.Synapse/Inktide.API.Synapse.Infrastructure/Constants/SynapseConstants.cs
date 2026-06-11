@@ -9,6 +9,9 @@ internal static class SynapseConstants
     {
         internal const string ChannelContextKeyPrefix = "ctx:channel:";
         internal static readonly TimeSpan ChannelContextTtl = TimeSpan.FromMinutes(5);
+
+        internal const string RunPresetKeyPrefix = "ctx:preset:";
+        internal static readonly TimeSpan RunPresetTtl = TimeSpan.FromMilliseconds(500);
     }
 
     internal static class Providers

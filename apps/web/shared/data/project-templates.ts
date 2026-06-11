@@ -40,7 +40,7 @@ export const SYSTEM_TEMPLATES: ProjectTemplate[] = [
     id: 'twitch-bot',
     name: 'Twitch Chat Bot',
     emoji: '🎮',
-    tagline: 'Ready to use',
+    tagline: 'templates.readyToUse',
     description: 'AI that reads and responds to Twitch chat in real time',
     longDescription:
       'A chat bot that monitors your Twitch channel, responds to viewer messages with personality, reacts to events like donations and raids, and keeps the energy high during your streams.',
@@ -95,7 +95,7 @@ export const SYSTEM_TEMPLATES: ProjectTemplate[] = [
     id: 'discord-assistant',
     name: 'Discord Assistant',
     emoji: '💬',
-    tagline: 'Ready to use',
+    tagline: 'templates.readyToUse',
     description: 'Helpful AI for your Discord community',
     longDescription:
       'An intelligent assistant that answers questions, helps members find resources, and keeps your Discord community engaged and supported around the clock.',
@@ -142,7 +142,7 @@ export const SYSTEM_TEMPLATES: ProjectTemplate[] = [
     id: 'ai-vtuber',
     name: 'AI VTuber',
     emoji: '🌟',
-    tagline: 'Ready to use',
+    tagline: 'templates.readyToUse',
     description: 'A virtual streamer with personality, voice, and live avatar',
     longDescription:
       'Create your own AI VTuber — an animated virtual character that streams live, interacts with chat, shows emotions, and has a consistent unique personality that grows with your audience.',
@@ -198,7 +198,7 @@ export const SYSTEM_TEMPLATES: ProjectTemplate[] = [
     id: 'voice-assistant',
     name: 'Voice Assistant',
     emoji: '🎙️',
-    tagline: 'Ready to use',
+    tagline: 'templates.readyToUse',
     description: 'A spoken AI assistant with natural voice responses',
     longDescription:
       'A voice-first AI assistant that listens and responds with a natural synthesized voice. Perfect for hands-free interaction, ambient AI presence on stream, or as a voice-enabled chatbot.',
@@ -245,7 +245,7 @@ Rules for voice:
     id: 'alert-system',
     name: 'Alert System',
     emoji: '🔔',
-    tagline: 'Ready to use',
+    tagline: 'templates.readyToUse',
     description: 'AI that announces stream events with personality',
     longDescription:
       'An alert system that detects stream events — donations, follows, subs, raids — and responds with custom AI-generated announcements that match the mood and energy of your stream.',
@@ -296,7 +296,7 @@ Style:
     id: 'blank',
     name: 'Blank Project',
     emoji: '📄',
-    tagline: 'Start from scratch',
+    tagline: 'templates.startFromScratch',
     description: 'Empty project — configure everything yourself',
     longDescription:
       'A completely empty project. You configure the soul, system prompt, channels, and everything else from scratch. Great if you know exactly what you want.',

@@ -52,6 +52,10 @@ public sealed class AiCardModelConfiguration : IEntityTypeConfiguration<AiCardMo
             .IsRequired()
             .HasDefaultValue(false);
 
+        b.Property(e => e.ThumbnailUrl)
+            .HasColumnName("thumbnail_url")
+            .HasMaxLength(1024);
+
         b.HasIndex(e => e.StorageKey)
             .IsUnique()
             .HasDatabaseName("idx_ai_card_models_storage_key");

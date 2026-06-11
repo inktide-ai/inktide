@@ -1,9 +1,14 @@
 using System.Net;
 using System.Text.Json;
 using Inktide.API.Billing.Application.Interfaces;
+using Inktide.API.Billing.Application.Messages;
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Billing.Infrastructure.DbContext;
 using Inktide.API.Billing.Infrastructure.Idempotency;
 using Inktide.API.Billing.Infrastructure.Settings;
+using Inktide.API.Billing.Infrastructure.Telemetry;
+using Inktide.API.Core.Models;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -40,9 +45,13 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
 
     private readonly YooKassaSettings _settings;
     private readonly ISubscriptionRepository _subscriptions;
+    private readonly IBillingIncidentRepository _incidents;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly BillingDbContext _db;
     private readonly HttpClient _http;
     private readonly IConnectionMultiplexer _redis;
     private readonly TimeProvider _time;
+    private readonly BillingMetrics _metrics;
     private readonly ILogger<YooKassaWebhookProcessor> _logger;
     private readonly IPNetwork[] _allowedNetworks;
 
@@ -50,16 +59,24 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
         HttpClient http,
         YooKassaSettings settings,
         ISubscriptionRepository subscriptions,
+        IBillingIncidentRepository incidents,
+        IPublishEndpoint publishEndpoint,
+        BillingDbContext db,
         IConnectionMultiplexer redis,
         TimeProvider time,
+        BillingMetrics metrics,
         ILogger<YooKassaWebhookProcessor> logger)
     {
-        _http          = http          ?? throw new ArgumentNullException(nameof(http));
-        _settings      = settings      ?? throw new ArgumentNullException(nameof(settings));
-        _subscriptions = subscriptions ?? throw new ArgumentNullException(nameof(subscriptions));
-        _redis         = redis         ?? throw new ArgumentNullException(nameof(redis));
-        _time          = time          ?? throw new ArgumentNullException(nameof(time));
-        _logger        = logger        ?? throw new ArgumentNullException(nameof(logger));
+        _http            = http            ?? throw new ArgumentNullException(nameof(http));
+        _settings        = settings        ?? throw new ArgumentNullException(nameof(settings));
+        _subscriptions   = subscriptions   ?? throw new ArgumentNullException(nameof(subscriptions));
+        _incidents       = incidents       ?? throw new ArgumentNullException(nameof(incidents));
+        _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
+        _db              = db              ?? throw new ArgumentNullException(nameof(db));
+        _redis           = redis           ?? throw new ArgumentNullException(nameof(redis));
+        _time            = time            ?? throw new ArgumentNullException(nameof(time));
+        _metrics         = metrics         ?? throw new ArgumentNullException(nameof(metrics));
+        _logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
 
         // Parse once — settings is a singleton so CIDR strings never change at runtime.
         _allowedNetworks = settings.WebhookAllowedIps.Length > 0
@@ -154,12 +171,15 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
 
         var userId = string.Empty;
         var plan   = string.Empty;
+        var email  = string.Empty;
         if (verified.Value.TryGetProperty("metadata", out var meta))
         {
             if (meta.TryGetProperty("user_id", out var userIdEl))
                 userId = userIdEl.GetString() ?? string.Empty;
             if (meta.TryGetProperty("plan",    out var planEl))
                 plan   = planEl.GetString()   ?? string.Empty;
+            if (meta.TryGetProperty("email",   out var emailEl))
+                email  = emailEl.GetString()  ?? string.Empty;
         }
 
         if (string.IsNullOrEmpty(userId))
@@ -170,7 +190,19 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
 
         if (string.IsNullOrEmpty(userId))
         {
-            _logger.LogWarning("YooKassa {Event}: cannot resolve userId for payment {PaymentId}", eventName, paymentId);
+            _logger.LogError(
+                "YooKassa {Event}: cannot resolve userId for payment {PaymentId} — subscription not created",
+                eventName, paymentId);
+            _metrics.WebhookMetadataMissingTotal.Add(1);
+            await _incidents.RecordAsync(new BillingIncident
+            {
+                Provider   = ProviderId,
+                EventId    = paymentId,
+                EventType  = eventName,
+                Reason     = "missing_user_id",
+                RawPayload = JsonSerializer.Serialize(verified.Value),
+                OccurredAt = utcNow,
+            }, ct).ConfigureAwait(false);
             return;
         }
 
@@ -191,8 +223,19 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
             case "payment.succeeded" when verifiedStatus == "succeeded":
                 if (string.IsNullOrEmpty(plan))
                 {
-                    _logger.LogWarning(
-                        "YooKassa payment.succeeded: missing 'plan' metadata for payment {PaymentId} — skipping", paymentId);
+                    _logger.LogError(
+                        "YooKassa payment.succeeded: missing 'plan' metadata for payment {PaymentId} — subscription not created",
+                        paymentId);
+                    _metrics.WebhookMetadataMissingTotal.Add(1);
+                    await _incidents.RecordAsync(new BillingIncident
+                    {
+                        Provider   = ProviderId,
+                        EventId    = paymentId,
+                        EventType  = eventName,
+                        Reason     = "missing_plan",
+                        RawPayload = JsonSerializer.Serialize(verified.Value),
+                        OccurredAt = utcNow,
+                    }, ct).ConfigureAwait(false);
                     return;
                 }
                 sub.Plan               = ParsePlan(plan);
@@ -237,13 +280,21 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
 
         await _subscriptions.UpsertAsync(sub, ct).ConfigureAwait(false);
 
+        if (eventName == "payment.succeeded" && !string.IsNullOrEmpty(email))
+            await _publishEndpoint.Publish(
+                new PaymentReceiptEmailMessage(email, sub.Plan.ToString(), "ЮKassa",
+                    sub.CurrentPeriodEnd ?? utcNow.Add(BillingCycle.Monthly)), ct).ConfigureAwait(false);
+
+        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+
         try
         {
             await db.StringSetAsync(doneKey, "1", TimeSpan.FromHours(72)).WaitAsync(ct).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "YooKassa: failed to set done key for {PaymentId}:{Event}", paymentId, eventName);
+            _logger.LogWarning(ex, "YooKassa: failed to set done key for {PaymentId}:{Event} — webhook will be retried", paymentId, eventName);
+            throw;
         }
     }
 
@@ -254,18 +305,30 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
 
     private async Task<JsonElement?> FetchPaymentAsync(string paymentId, CancellationToken ct)
     {
+        HttpResponseMessage response;
         try
         {
-            using var response = await _http.GetAsync($"/v3/payments/{paymentId}", ct).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode) return null;
-            var json = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-            using var doc = JsonDocument.Parse(json);
-            return doc.RootElement.Clone();
+            response = await _http.GetAsync($"/v3/payments/{paymentId}", ct).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "YooKassa re-fetch failed for payment {PaymentId}", paymentId);
-            return null;
+            _logger.LogError(ex, "YooKassa re-fetch network failure for payment {PaymentId}", paymentId);
+            throw; // Transient failure — propagate so controller returns 503 and YooKassa retries.
         }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            return null; // Payment does not exist — webhook body was invalid, discard safely.
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("YooKassa re-fetch returned {Status} for payment {PaymentId}",
+                (int)response.StatusCode, paymentId);
+            throw new HttpRequestException(
+                $"YooKassa API returned {(int)response.StatusCode} for payment {paymentId}");
+        }
+
+        var json = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+        using var doc = JsonDocument.Parse(json);
+        return doc.RootElement.Clone();
     }
 }

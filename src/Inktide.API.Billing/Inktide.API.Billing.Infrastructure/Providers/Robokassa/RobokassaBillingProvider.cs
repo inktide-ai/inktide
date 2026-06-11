@@ -2,6 +2,7 @@ using System.Text;
 using System.Web;
 using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 using Inktide.API.Billing.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 
@@ -11,7 +12,7 @@ public sealed class RobokassaBillingProvider : IBillingProvider
 {
     public string ProviderId => "robokassa";
 
-    private const string CheckoutBaseUrl = "https://auth.robokassa.ru/Merchant/Index.aspx";
+    private const string CheckoutBaseUrl = "https://auth.robokassa.kz/Merchant/Index.aspx";
 
     private readonly RobokassaSettings _settings;
     private readonly ILogger<RobokassaBillingProvider> _logger;

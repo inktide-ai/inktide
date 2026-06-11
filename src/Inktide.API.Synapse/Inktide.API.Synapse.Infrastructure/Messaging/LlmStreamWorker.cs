@@ -1,4 +1,4 @@
-using Inktide.API.Core.Generators;
+using Inktide.API.Core.Messaging;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
@@ -10,7 +10,6 @@ using Inktide.API.Synapse.Infrastructure.Emotion;
 using Inktide.API.Synapse.Infrastructure.Llm;
 using Inktide.API.Synapse.Infrastructure.Providers;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
@@ -30,10 +29,8 @@ namespace Inktide.API.Synapse.Infrastructure.Messaging;
 /// Provider selection: the AiCard's <c>LlmProviderId</c> is used as the Semantic Kernel service ID.
 /// If that provider is not registered, the worker falls back to <see cref="LlmStreamSettings.FallbackProviderId"/>.
 /// </summary>
-internal sealed class LlmStreamWorker : BackgroundService
+internal sealed class LlmStreamWorker : RedisStreamConsumerBase
 {
-
-    private readonly IConnectionMultiplexer _redis;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IMemoryIngestionPort _memoryIngestion;
     private readonly IConversationHistoryRepository _history;
@@ -47,9 +44,17 @@ internal sealed class LlmStreamWorker : BackgroundService
     private const int MaxHistoryTurns = 20;
 
     // Concurrency guard — controlled by LlmStreamSettings.MaxConcurrentRequests.
-    // Initialized after settings are resolved in the constructor.
     private readonly SemaphoreSlim _llmSem;
 
+    protected override string StreamName              => _settings.StreamIn;
+    protected override string ConsumerGroup           => _settings.ConsumerGroup;
+    protected override string ConsumerName            => _consumerName;
+    protected override string PayloadFieldName        => _settings.PayloadFieldName;
+    protected override int    ReadCount               => _settings.ReadCount;
+    protected override int    ReadBlockMilliseconds   => _settings.ReadBlockMilliseconds;
+    protected override long   AutoClaimMinIdleMs      => _settings.AutoClaimMinIdleMs;
+    protected override int    AutoClaimBatchSize      => _settings.AutoClaimBatchSize;
+    protected override int    AutoClaimLoopDelaySeconds => _settings.AutoClaimLoopDelaySeconds;
 
     public LlmStreamWorker(
         IConnectionMultiplexer redis,
@@ -61,145 +66,21 @@ internal sealed class LlmStreamWorker : BackgroundService
         SynapsePromptBuilder promptBuilder,
         IOptions<LlmStreamSettings> settings,
         ILogger<LlmStreamWorker> logger)
+        : base(redis, logger)
     {
-        _redis            = redis            ?? throw new ArgumentNullException(nameof(redis));
-        _scopeFactory     = scopeFactory     ?? throw new ArgumentNullException(nameof(scopeFactory));
-        _memoryIngestion  = memoryIngestion  ?? throw new ArgumentNullException(nameof(memoryIngestion));
-        _history          = history          ?? throw new ArgumentNullException(nameof(history));
-        _kernel           = kernel           ?? throw new ArgumentNullException(nameof(kernel));
-        _factoryRegistry  = factoryRegistry  ?? throw new ArgumentNullException(nameof(factoryRegistry));
-        _promptBuilder    = promptBuilder    ?? throw new ArgumentNullException(nameof(promptBuilder));
-        _settings         = settings?.Value  ?? throw new ArgumentNullException(nameof(settings));
-        _logger           = logger           ?? throw new ArgumentNullException(nameof(logger));
+        _scopeFactory    = scopeFactory    ?? throw new ArgumentNullException(nameof(scopeFactory));
+        _memoryIngestion = memoryIngestion ?? throw new ArgumentNullException(nameof(memoryIngestion));
+        _history         = history         ?? throw new ArgumentNullException(nameof(history));
+        _kernel          = kernel          ?? throw new ArgumentNullException(nameof(kernel));
+        _factoryRegistry = factoryRegistry ?? throw new ArgumentNullException(nameof(factoryRegistry));
+        _promptBuilder   = promptBuilder   ?? throw new ArgumentNullException(nameof(promptBuilder));
+        _settings        = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+        _logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
 
         var concurrency = Math.Max(1, _settings.MaxConcurrentRequests);
         _llmSem = new SemaphoreSlim(concurrency, concurrency);
 
-        var instanceId = Environment.GetEnvironmentVariable("DOTNET_HOSTNAME")
-                         ?? Environment.GetEnvironmentVariable("HOSTNAME")
-                         ?? Environment.GetEnvironmentVariable("K8S_POD_NAME")
-                         ?? IdGenerator.New().ToString("N")[..8];
-        _consumerName = $"{_settings.ConsumerNamePrefix}-{instanceId}";
-    }
-
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        try
-        {
-            var db = _redis.GetDatabase();
-            await EnsureConsumerGroupAsync(db, stoppingToken);
-
-            _logger.LogInformation(
-                "LlmStreamWorker started. StreamIn={StreamIn} Group={Group} Consumer={Consumer}",
-                _settings.StreamIn, _settings.ConsumerGroup, _consumerName);
-
-            await Task.WhenAll(
-                ConsumeLoopAsync(db, stoppingToken),
-                AutoClaimLoopAsync(db, stoppingToken));
-        }
-        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
-
-        _logger.LogInformation("LlmStreamWorker stopped.");
-    }
-
-
-    // -------------------------------------------------------------------------
-    // Consumer group / Redis loop
-    // -------------------------------------------------------------------------
-
-    private async Task EnsureConsumerGroupAsync(IDatabase db, CancellationToken ct)
-    {
-        while (!ct.IsCancellationRequested)
-        {
-            try
-            {
-                await db.StreamCreateConsumerGroupAsync(
-                    _settings.StreamIn,
-                    _settings.ConsumerGroup,
-                    StreamPosition.Beginning,
-                    createStream: true);
-                return;
-            }
-            catch (RedisException ex) when (ex.Message.Contains("BUSYGROUP", StringComparison.OrdinalIgnoreCase))
-            {
-                _logger.LogDebug("Consumer group already exists: {Group}", _settings.ConsumerGroup);
-                return;
-            }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "LlmStreamWorker: failed to create consumer group, retrying in 2s...");
-                await Task.Delay(TimeSpan.FromSeconds(2), ct);
-            }
-        }
-    }
-
-    private async Task ConsumeLoopAsync(IDatabase db, CancellationToken ct)
-    {
-        while (!ct.IsCancellationRequested)
-        {
-            try
-            {
-                var entries = await db.StreamReadGroupAsync(
-                    _settings.StreamIn,
-                    _settings.ConsumerGroup,
-                    _consumerName,
-                    position: null,
-                    count: _settings.ReadCount,
-                    noAck: false);
-
-                if (entries.Length == 0)
-                {
-                    await Task.Delay(_settings.ReadBlockMilliseconds, ct);
-                    continue;
-                }
-
-                foreach (var entry in entries)
-                    await ProcessEntryAsync(db, entry, ct);
-            }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested) { break; }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "LlmStreamWorker: stream read error, retrying in 2s...");
-                await Task.Delay(TimeSpan.FromSeconds(2), ct);
-            }
-        }
-    }
-
-    private async Task AutoClaimLoopAsync(IDatabase db, CancellationToken ct)
-    {
-        var cursor = (RedisValue)"0-0";
-
-        while (!ct.IsCancellationRequested)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(_settings.AutoClaimLoopDelaySeconds), ct);
-            try
-            {
-                var result = await db.StreamAutoClaimAsync(
-                    _settings.StreamIn,
-                    _settings.ConsumerGroup,
-                    _consumerName,
-                    minIdleTimeInMs: _settings.AutoClaimMinIdleMs,
-                    startAtId: cursor,
-                    count: _settings.AutoClaimBatchSize);
-
-                if (result.IsNull) { cursor = "0-0"; continue; }
-
-                cursor = result.NextStartId.IsNullOrEmpty || result.NextStartId == "0-0"
-                    ? "0-0"
-                    : result.NextStartId;
-
-                foreach (var entry in result.ClaimedEntries)
-                    await ProcessEntryAsync(db, entry, ct);
-            }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested) { break; }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "LlmStreamWorker: XAUTOCLAIM iteration failed");
-                cursor = "0-0";
-            }
-        }
+        _consumerName = $"{_settings.ConsumerNamePrefix}-{ResolveInstanceId()}";
     }
 
 
@@ -207,9 +88,9 @@ internal sealed class LlmStreamWorker : BackgroundService
     // Per-message processing
     // -------------------------------------------------------------------------
 
-    private async Task ProcessEntryAsync(IDatabase db, StreamEntry entry, CancellationToken ct)
+    protected override async Task ProcessEntryAsync(IDatabase db, StreamEntry entry, CancellationToken ct)
     {
-        var payloadJson = entry.GetField(_settings.PayloadFieldName);
+        var payloadJson = ReadField(entry, _settings.PayloadFieldName);
         if (payloadJson is null)
         {
             _logger.LogWarning("LlmStreamWorker: entry {Id} missing payload — discarding", entry.Id);
@@ -272,7 +153,7 @@ internal sealed class LlmStreamWorker : BackgroundService
 
         // Resolve chat completion service.
         // Priority: BYOK (user's own key) → platform provider registered in Kernel.
-        var chatService = await ResolveChatServiceAsync(providerId, modelId, userId, ctx?.LlmBaseUrl, ct);
+        var chatService = await ResolveChatServiceAsync(providerId, modelId, userId, ctx?.LlmBaseUrl, ctx?.LlmRequiresApiKey ?? true, ct);
 
         // No BYOK — fall back to the platform provider registered in the Kernel (e.g. Ollama).
         if (chatService is null)
@@ -389,7 +270,10 @@ internal sealed class LlmStreamWorker : BackgroundService
         var userMessage  = envelope.Message.Text;
         var channelId    = envelope.Message.ChannelId;
 
-        _ = _history.AppendAsync(channelId, userMessage, botReply, MaxHistoryTurns);
+        _ = _history.AppendAsync(channelId, userMessage, botReply, MaxHistoryTurns)
+            .ContinueWith(
+                t => _logger.LogWarning(t.Exception, "History append failed. Correlation={Correlation}", envelope.CorrelationId),
+                TaskContinuationOptions.OnlyOnFaulted);
 
         if (ctx?.CharacterId is { } characterId && characterId != Guid.Empty)
         {
@@ -417,6 +301,7 @@ internal sealed class LlmStreamWorker : BackgroundService
         string? modelId,
         Guid userId,
         string? cardBaseUrl,
+        bool requiresApiKey,
         CancellationToken ct)
     {
         if (userId == Guid.Empty) return null;
@@ -425,7 +310,19 @@ internal sealed class LlmStreamWorker : BackgroundService
         var credPort    = scope.ServiceProvider.GetRequiredService<ILlmCredentialPort>();
         var cred        = await credPort.GetDecryptedAsync(userId, providerId, ct);
 
-        if (cred is null) return null;
+        if (cred is null)
+        {
+            // Keyless providers (Ollama, LM Studio, etc.) don't store credentials in the DB.
+            // If the card supplies a base URL, create the service directly with an empty key.
+            if (!requiresApiKey && !string.IsNullOrEmpty(cardBaseUrl))
+            {
+                _logger.LogDebug(
+                    "LlmStreamWorker: keyless provider '{Provider}' resolved via cardBaseUrl={Url}",
+                    providerId, cardBaseUrl);
+                return _factoryRegistry.CreateService(providerId, modelId ?? string.Empty, string.Empty, cardBaseUrl);
+            }
+            return null;
+        }
 
         // Card-level base_url wins over the global BYOK credential base URL.
         var effectiveBaseUrl = cardBaseUrl ?? cred.BaseUrl;
@@ -466,10 +363,13 @@ internal sealed class LlmStreamWorker : BackgroundService
             model,
             sequenceNumber = seq,
             isLast,
-            voiceId          = ctx?.TtsVoiceId,
-            ttsProviderId    = ctx?.TtsProviderId,
-            ttsModelId       = ctx?.TtsModelId,
-            ttsSpeed         = ctx?.TtsSpeed ?? 1.0f,
+            userId                = ctx?.UserId,
+            voiceId               = ctx?.TtsVoiceId,
+            ttsProviderId         = ctx?.TtsProviderId,
+            ttsModelId            = ctx?.TtsModelId,
+            ttsSpeed              = ctx?.TtsSpeed ?? 1.0f,
+            ttsBaseUrl            = ctx?.TtsBaseUrl,
+            ttsProviderParamsJson = ctx?.TtsProviderParamsJson,
             emotionId,
             emotionIntensity,
             ttsSpeedModifier,
@@ -502,14 +402,6 @@ internal sealed class LlmStreamWorker : BackgroundService
     }
 
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private Task AckAsync(IDatabase db, RedisValue id)
-        => db.StreamAcknowledgeAsync(_settings.StreamIn, _settings.ConsumerGroup, id);
-
-
     private async Task HandleFailedEntryAsync(IDatabase db, StreamEntry entry, Exception ex)
     {
         var pending = await db.StreamPendingMessagesAsync(
@@ -534,7 +426,7 @@ internal sealed class LlmStreamWorker : BackgroundService
                         new NameValueEntry("failedAtUtc", DateTimeOffset.UtcNow.ToString("O")),
                         new NameValueEntry("deliveries",  deliveries.ToString()),
                         new NameValueEntry("error",       ex.Message),
-                        new NameValueEntry("payload",     entry.GetField(_settings.PayloadFieldName) ?? string.Empty),
+                        new NameValueEntry("payload",     ReadField(entry, _settings.PayloadFieldName) ?? string.Empty),
                     ],
                     maxLength: 10_000,
                     useApproximateMaxLength: true);
@@ -549,6 +441,4 @@ internal sealed class LlmStreamWorker : BackgroundService
 
         await AckAsync(db, entry.Id);
     }
-
-
 }

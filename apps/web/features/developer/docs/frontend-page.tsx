@@ -1,14 +1,29 @@
 import { CodeBlock, DocPage, InfoBox, InlineCode, PageSubtitle, PageTitle, SectionHeading, SubHeading, Table, TableHead, TableRow, Td, TdBold } from './shared'
+import { getTranslations } from '@/lib/i18n-server'
 
-export function FrontendPage() {
+export async function FrontendPage() {
+  const t = await getTranslations('developer')
+  const layerRules: [string, string, string][] = [
+    ['app/',      'features, entities, shared, widgets', '—'],
+    ['features/', 'entities, shared, api',               t('docs.frontend.ruleOtherFeatures')],
+    ['entities/', 'shared, api',                         'features'],
+    ['shared/',   t('docs.frontend.ruleNothingAbove'),   'features, entities, app'],
+    ['widgets/',  'features, entities, shared',          '—'],
+  ]
+  const dataFetching: [string, string][] = [
+    [t('docs.frontend.conceptQueryClient'), 'shared/lib/query/client.ts — TanStack Query v5'],
+    [t('docs.frontend.conceptQueryKeys'),   'shared/lib/query/keys.ts — always use these, never inline strings'],
+    [t('docs.frontend.conceptApiClient'),   'api/client.ts — apiFetch() with bearer token + 401 auto-refresh'],
+    [t('docs.frontend.conceptAuthWiring'),  'configureApiAuth(provider) in components/providers.tsx'],
+  ]
   return (
     <DocPage>
-      <PageTitle eyebrow="Platform">Frontend Architecture</PageTitle>
+      <PageTitle eyebrow={t('docs.frontend.eyebrow')}>{t('docs.frontend.title')}</PageTitle>
       <PageSubtitle>
-        Next.js 16 App Router with Feature-Sliced Design (FSD). Path alias <InlineCode>@</InlineCode> resolves to <InlineCode>apps/web/</InlineCode>.
+        {t('docs.frontend.sub1')}{' '}<InlineCode>@</InlineCode>{' '}{t('docs.frontend.sub2')}{' '}<InlineCode>apps/web/</InlineCode>.
       </PageSubtitle>
 
-      <SectionHeading>FSD Layer Structure</SectionHeading>
+      <SectionHeading>{t('docs.frontend.fsdStructure')}</SectionHeading>
       <CodeBlock>
 {`apps/web/
   app/        — Next.js App Router pages (thin route shells, no business logic)
@@ -22,17 +37,11 @@ export function FrontendPage() {
   lib/        — legacy utilities (being migrated to shared/lib/)`}
       </CodeBlock>
 
-      <SubHeading>Layer rules</SubHeading>
+      <SubHeading>{t('docs.frontend.layerRules')}</SubHeading>
       <Table>
-        <TableHead cols={['Layer', 'Can import from', 'Cannot import from']} />
+        <TableHead cols={[t('docs.frontend.colLayer'), t('docs.frontend.colCanImport'), t('docs.frontend.colCannotImport')]} />
         <tbody>
-          {[
-            ['app/',      'features, entities, shared, widgets', '—'],
-            ['features/', 'entities, shared, api',              'Other features directly'],
-            ['entities/', 'shared, api',                        'features'],
-            ['shared/',   'Nothing above it',                   'features, entities, app'],
-            ['widgets/',  'features, entities, shared',         '—'],
-          ].map(([layer, can, cannot]) => (
+          {layerRules.map(([layer, can, cannot]) => (
             <TableRow key={layer}>
               <Td mono accent>{layer}</Td>
               <Td>{can}</Td>
@@ -42,16 +51,11 @@ export function FrontendPage() {
         </tbody>
       </Table>
 
-      <SectionHeading>Data Fetching</SectionHeading>
+      <SectionHeading>{t('docs.frontend.dataFetching')}</SectionHeading>
       <Table>
-        <TableHead cols={['Concept', 'Location']} />
+        <TableHead cols={[t('docs.frontend.colConcept'), t('docs.frontend.colLocation')]} />
         <tbody>
-          {[
-            ['Query client',  'shared/lib/query/client.ts — TanStack Query v5'],
-            ['Query keys',    'shared/lib/query/keys.ts — always use these, never inline strings'],
-            ['API client',    'api/client.ts — apiFetch() with bearer token + 401 auto-refresh'],
-            ['Auth wiring',   'configureApiAuth(provider) in components/providers.tsx'],
-          ].map(([k, v]) => (
+          {dataFetching.map(([k, v]) => (
             <TableRow key={k}>
               <TdBold>{k}</TdBold>
               <Td mono>{v}</Td>
@@ -60,21 +64,30 @@ export function FrontendPage() {
         </tbody>
       </Table>
 
-      <SectionHeading>Auth Flow</SectionHeading>
+      <SectionHeading>{t('docs.frontend.authFlow')}</SectionHeading>
       <CodeBlock>
-{`1. Keycloak-js initialized once in components/providers.tsx (KeycloakBootstrap)
-2. Tokens stored in localStorage:
-     inktide_kc_token   — access token
-     inktide_kc_refresh — refresh token
-3. Cookie set by middleware: inktide_auth (used for SSR route protection)
-4. JWT claims extracted in AuthContext.tsx:
-     sub               → userId
-     preferred_username → display name
-     realm_access.roles → roles array
-5. Primary role: "admin" if present, else first role, else "user"`}
+{`Next-auth v5 BFF (Backend-for-Frontend) — tokens never touch the browser.
+
+1. User clicks "Sign in" → redirected to Keycloak (Authorization Code + PKCE)
+2. Keycloak redirects back → next-auth exchanges code for tokens server-side
+3. Tokens stored in an encrypted HttpOnly session cookie (__session)
+4. All /api/* fetch calls go through app/api/[...path]/route.ts:
+     - next-auth reads the session server-side
+     - injects Authorization: Bearer <access_token>
+     - forwards the request to http://127.0.0.1:5001/api/*
+5. Middleware (middleware.ts) protects routes via next-auth session check
+6. Token refresh: next-auth refreshes automatically with a 60 s buffer
+
+// Session shape available in Server Components
+import { auth } from '@/lib/auth'
+const session = await auth()
+session.user.id        // Keycloak sub
+session.user.name      // preferred_username
+session.user.roles     // realm_access.roles[]
+session.accessToken    // raw JWT (inject as Bearer when calling .NET directly)`}
       </CodeBlock>
 
-      <SectionHeading>Character / Soul Model</SectionHeading>
+      <SectionHeading>{t('docs.frontend.characterModel')}</SectionHeading>
       <CodeBlock label="shared/lib/character/types.ts">
 {`// AiCharacter split by Interface Segregation Principle
 CharacterIdentity    — name, avatar, description, emoji
@@ -86,13 +99,13 @@ CharacterMemory      — RAG enabled, memory scope, max fact count
 CharacterAutoPilot   — autonomous response settings, idle behavior`}
       </CodeBlock>
 
-      <SectionHeading>API Proxy (Next.js rewrites)</SectionHeading>
+      <SectionHeading>{t('docs.frontend.apiProxy')}</SectionHeading>
       <CodeBlock label="next.config.ts">
 {`/api/*   →  http://127.0.0.1:5001/api/*   (backend REST)
 /hubs/*  →  http://127.0.0.1:5001/hubs/*  (SignalR — Realtime AudioHub)`}
       </CodeBlock>
 
-      <SectionHeading>VRM Animation Pipeline</SectionHeading>
+      <SectionHeading>{t('docs.frontend.vrmPipeline')}</SectionHeading>
       <CodeBlock label="shared/services/animation/registry.ts">
 {`CONTROLLER_FACTORIES — ordered list of controller factories.
 Each VrmRenderer instance gets its own controller set, running top-to-bottom
@@ -109,10 +122,10 @@ Never modify VrmRenderer.tsx directly.`}
 
       <div className="mt-6">
         <InfoBox>
-          <span className="font-semibold text-[var(--text-primary)]">OBS Browser Source: </span>
-          <InlineCode>/obs/scene</InlineCode> is unauthenticated. All config is passed via URL search params:
-          <InlineCode>channelId</InlineCode> (required), <InlineCode>modelUrl</InlineCode>, <InlineCode>modelType</InlineCode> (vrm|glb|live2d),
-          <InlineCode>sceneUrl</InlineCode> (background image), <InlineCode>bg</InlineCode> (CSS color or <InlineCode>transparent</InlineCode>).
+          <span className="font-semibold text-[var(--text-primary)]">{t('docs.frontend.obsLabel')}</span>
+          <InlineCode>/obs/scene</InlineCode>{' '}{t('docs.frontend.obs1')}{' '}
+          <InlineCode>channelId</InlineCode>{' '}{t('docs.frontend.obs2')}{' '}<InlineCode>modelUrl</InlineCode>, <InlineCode>modelType</InlineCode>{' '}{t('docs.frontend.obs3')}{' '}
+          <InlineCode>sceneUrl</InlineCode>{' '}{t('docs.frontend.obs4')}{' '}<InlineCode>bg</InlineCode>{' '}{t('docs.frontend.obs5')}{' '}<InlineCode>transparent</InlineCode>{t('docs.frontend.obs6')}
         </InfoBox>
       </div>
     </DocPage>

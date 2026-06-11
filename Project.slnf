@@ -1,0 +1,17 @@
+{
+  "solution": {
+    "path": "Inktide.API.sln",
+    "projects": [
+      "src/Inktide.API.Core/Inktide.API.Core.csproj",
+      "src/Inktide.API.Domain/Inktide.API.Domain.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Domain/Inktide.API.Soul.Domain.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Application/Inktide.API.Soul.Application.csproj",
+      "src/Inktide.API.Project/Inktide.API.Project.Domain/Inktide.API.Project.Domain.csproj",
+      "src/Inktide.API.Project/Inktide.API.Project.Application/Inktide.API.Project.Application.csproj",
+      "src/Inktide.API.Project/Inktide.API.Project.Infrastructure/Inktide.API.Project.Infrastructure.csproj",
+      "src/Inktide.API.Project/Inktide.API.Project.REST.Models/Inktide.API.Project.REST.Models.csproj",
+      "src/Inktide.API.Project/Inktide.API.Project.REST/Inktide.API.Project.REST.csproj",
+      "src/Inktide.API.Project.Tests/Inktide.API.Project.Tests.csproj"
+    ]
+  }
+}

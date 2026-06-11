@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { MessageSquare, Tv2, Send, Radio, ExternalLink, Download } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/shared/ui/card'
@@ -62,6 +63,8 @@ export function ProjectGridCard({
   }
   const safeStatus: ProjectStatus = ['active', 'paused', 'archived'].includes(status) ? status : 'active'
   const bgImage = coverUrl ?? activeSoul?.avatar_url ?? null
+  const [previewLoaded, setPreviewLoaded] = useState(false)
+  const [previewError, setPreviewError]   = useState(false)
 
   const exportBtn = onExport && (
     <button
@@ -80,19 +83,25 @@ export function ProjectGridCard({
       onClick={onOpen}
     >
       {/* Cover */}
-      {previewUrl ? (
-        <div className="relative h-[140px] w-full overflow-hidden bg-[var(--bg-2)]">
-          <iframe
+      {previewUrl && !previewError ? (
+        <div className="relative h-[160px] w-full overflow-hidden bg-[var(--card-bg)]">
+          {!previewLoaded && (
+            <div className="absolute inset-0 animate-pulse bg-[var(--surface-2)]" />
+          )}
+          <img
             src={previewUrl}
+            alt=""
             loading="lazy"
-            className="pointer-events-none absolute inset-0 h-full w-full border-0"
-            title="Scene preview"
+            className={`h-full w-full object-cover transition-opacity duration-200 ${previewLoaded ? 'opacity-100' : 'opacity-0'}`}
+            style={{ objectPosition: 'center 35%' }}
+            onLoad={() => setPreviewLoaded(true)}
+            onError={() => setPreviewError(true)}
           />
           {exportBtn}
         </div>
       ) : (
         <div
-          className="relative h-[140px] w-full bg-cover bg-center"
+          className="relative h-[160px] w-full bg-cover bg-center"
           style={{ backgroundImage: bgImage ? `url(${bgImage})` : undefined, backgroundColor: 'var(--bg-2)' }}
         >
           {bgImage && <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />}

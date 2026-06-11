@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace Inktide.API.Developer.REST.Controllers;
 
 [ApiController]
-[Route("api/developer")]
+[Route("api/v1/developer")]
 [Authorize]
 public sealed class DeveloperAppsController(
     IDeveloperAppService appService,
@@ -68,7 +68,7 @@ public sealed class DeveloperAppsController(
         return NoContent();
     }
 
-    [HttpPost("apps/{id:guid}/rotate-secret")]
+    [HttpPost("apps/{id:guid}/secret-rotations")]
     [ProducesResponseType<ApplicationDto>(200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> RotateSecret(Guid id, CancellationToken ct)

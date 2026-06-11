@@ -15,7 +15,7 @@ export interface DeleteMeResponse {
 }
 
 export async function getMe(): Promise<MeResponse> {
-  const res = await apiFetch('/api/me')
+  const res = await apiFetch('/api/v1/me')
   return jsonOrThrow<MeResponse>(res)
 }
 
@@ -25,7 +25,7 @@ export interface StorageStatusResponse {
 }
 
 export async function getStorageStatus(): Promise<StorageStatusResponse> {
-  const res = await apiFetch('/api/storage/status')
+  const res = await apiFetch('/api/v1/storage/status')
   return jsonOrThrow<StorageStatusResponse>(res)
 }
 
@@ -37,7 +37,7 @@ export interface UploadStorageResponse {
 export async function uploadProfileFile(file: File): Promise<UploadStorageResponse> {
   const body = new FormData()
   body.append('file', file)
-  const res = await apiFetch('/api/storage/upload', { method: 'POST', body })
+  const res = await apiFetch('/api/v1/storage/upload', { method: 'POST', body })
   return jsonOrThrow<UploadStorageResponse>(res)
 }
 
@@ -47,7 +47,7 @@ export interface PatchAvatarResponse {
 
 /** Sets Keycloak user attribute `picture` to the public URL of a file already uploaded to storage. */
 export async function patchAvatar(objectKey: string): Promise<PatchAvatarResponse> {
-  const res = await apiFetch('/api/me/avatar', {
+  const res = await apiFetch('/api/v1/me/avatar', {
     method: 'PATCH',
     body: JSON.stringify({ objectKey }),
   })
@@ -56,6 +56,6 @@ export async function patchAvatar(objectKey: string): Promise<PatchAvatarRespons
 
 /** Purges Soul DB data for the current user; removes Keycloak user when Admin API is configured. */
 export async function deleteAccount(): Promise<DeleteMeResponse> {
-  const res = await apiFetch('/api/me', { method: 'DELETE' })
+  const res = await apiFetch('/api/v1/me', { method: 'DELETE' })
   return jsonOrThrow<DeleteMeResponse>(res)
 }

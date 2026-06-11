@@ -1,12 +1,13 @@
 using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Soul.Infrastructure.Cache;
 using Inktide.API.Soul.Infrastructure.DbContext;
 using Inktide.API.Soul.Infrastructure.Services;
 using Inktide.API.Soul.Infrastructure.Messaging;
-using Inktide.API.Soul.Infrastructure.Outbox;
 using Inktide.API.Soul.Infrastructure.Security;
 using Inktide.API.Soul.Infrastructure.Settings;
+using MassTransit;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.XmlEncryption;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Inktide.API.Soul.Infrastructure.DependencyInjection;
 
-public sealed class InfrastructureStartup : IStartup
+public sealed class InfrastructureStartup : IStartup, IBusModuleConfigurator
 {
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
@@ -57,7 +58,6 @@ public sealed class InfrastructureStartup : IStartup
         services.AddScoped<ICardSummaryProvider, CardSummaryProviderService>();
 
         services.AddHostedService<DatabaseMigrationService>();
-        services.AddHostedService<OutboxProcessorHostedService>();
         services.AddHostedService<UserAccountDeletedConsumer>();
         services.AddHostedService<SoulStatusGateSeedWorker>();
 
@@ -66,6 +66,17 @@ public sealed class InfrastructureStartup : IStartup
             .AddNpgSql(connectionString, name: "soul-postgres", failureStatus: HealthStatus.Degraded, tags: ["ready"]);
     }
 
+
+    public void ConfigureConsumers(IBusRegistrationConfigurator x)
+    {
+        x.AddEntityFrameworkOutbox<SoulDbContext>(o =>
+        {
+            o.UsePostgres();
+            o.UseBusOutbox();
+        });
+        // Soul only publishes — no consumers here.
+        // Connector.SoulStatusChangedMTConsumer handles inbound soul status messages.
+    }
 
     private static string ResolveConnectionString(IConfiguration configuration)
     {

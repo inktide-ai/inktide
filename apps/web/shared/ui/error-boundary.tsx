@@ -1,6 +1,7 @@
 'use client'
 
 import { Component, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   children: ReactNode
@@ -12,6 +13,7 @@ interface State {
 }
 
 function DefaultFallback({ onReset }: { onReset: () => void }) {
+  const { t } = useTranslation('common')
   return (
     <div className="flex flex-col items-center justify-center gap-4 p-12 text-center">
       <div className="rounded-full bg-red-500/10 p-4">
@@ -22,15 +24,15 @@ function DefaultFallback({ onReset }: { onReset: () => void }) {
         </svg>
       </div>
       <div>
-        <p className="text-body-md font-semibold text-[var(--text-primary)]">Something went wrong</p>
-        <p className="mt-1 text-body text-[var(--text-secondary)]">An unexpected error occurred.</p>
+        <p className="text-body-md font-semibold text-[var(--text-primary)]">{t('errorBoundary.title')}</p>
+        <p className="mt-1 text-body text-[var(--text-secondary)]">{t('errorBoundary.description')}</p>
       </div>
       <button
         type="button"
         onClick={onReset}
         className="rounded-xl bg-[var(--accent-primary)] px-5 py-2 text-body font-semibold text-white hover:opacity-90"
       >
-        Try again
+        {t('errorBoundary.retry')}
       </button>
     </div>
   )

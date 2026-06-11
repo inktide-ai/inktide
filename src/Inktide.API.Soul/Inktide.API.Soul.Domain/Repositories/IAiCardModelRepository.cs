@@ -25,4 +25,7 @@ public interface IAiCardModelRepository
 
     /// <summary>Returns the currently active model for the card, or null if none is marked active.</summary>
     Task<AiCardModel?> GetActiveByCardAsync(Guid userId, Guid aiCardId, CancellationToken ct = default);
+
+    /// <summary>Persists a generated thumbnail URL for a specific model.</summary>
+    Task SetThumbnailUrlAsync(Guid userId, Guid aiCardId, Guid modelId, string thumbnailUrl, CancellationToken ct = default);
 }

@@ -2,7 +2,7 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import type { AiCardSceneResponse } from '@/shared/types/soul-api'
+import type { ProjectSceneResponse } from '@/features/projects/api/scenes'
 import type { AiCharacter } from '@/shared/lib/character'
 import { inferModelType } from '@/shared/lib/utils/model-type'
 import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok — editor embeds avatar preview
@@ -10,7 +10,7 @@ import { useCardModel } from '@/entities/soul/hooks'
 import { useSceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import { getSceneDisplayTitle } from './scene-tag-utils'
 import SceneRendererPanel from './scene-renderer-panel'
-import { useSceneSettings, TAG_AUTO_VALUE, MAX_DISPLAY, MAX_DESC, ALLOWED_TYPES } from '../hooks/useSceneSettings'
+import { useSceneSettings, MAX_DISPLAY, MAX_DESC, ALLOWED_TYPES } from '../hooks/useSceneSettings'
 
 // Shared style strings
 const backBtn = 'inline-flex items-center gap-[0.4rem] py-[0.4rem] px-[0.625rem] mb-6 -ml-[0.625rem] bg-transparent border border-transparent rounded-lg text-(--text-muted) font-[inherit] text-sm font-medium cursor-pointer transition-[color,background,border-color] duration-150 self-start hover:text-(--text-primary) hover:bg-white/[0.05] hover:border-white/[0.07]'
@@ -23,23 +23,23 @@ const modalFieldLabel = 'text-body font-medium tracking-[0.07em] uppercase text-
 const modalTextInput = 'w-full bg-white/[0.05] border border-[0.5px] border-white/12 rounded-[10px] p-[11px_14px] text-body text-(--text-primary) outline-none font-[inherit] transition-[border-color] duration-150 placeholder:text-white/25 focus:border-white/30'
 const modalCharCount = 'text-body text-white/25 text-right mt-1'
 const modalDescInput = 'w-full bg-white/[0.05] border border-[0.5px] border-white/12 rounded-[10px] p-[11px_14px] text-body text-(--text-primary) outline-none font-[inherit] resize-none h-[72px] transition-[border-color] duration-150 leading-relaxed placeholder:text-white/25 focus:border-white/30'
-const settingsSelect = 'w-full max-w-[320px] py-[10px] px-3 rounded-[10px] border border-white/[0.12] bg-black/35 text-white/[0.92] text-sm font-[inherit] cursor-pointer outline-none focus:border-white/28'
 const uploadPlaceholder = 'flex items-center justify-center flex-col gap-2 p-[22px] bg-white/[0.015] border border-dashed border-white/[0.07] rounded-[10px] cursor-pointer transition-[border-color,background] duration-150 hover:border-white/12 hover:bg-white/[0.025]'
 const toolbarBtnBase = 'absolute w-9 h-9 rounded-[10px] bg-[rgba(18,18,22,0.72)] border border-white/10 backdrop-blur-[10px] flex items-center justify-center cursor-pointer text-white/60 transition-[background,transform,color,border-color] duration-150 z-10 p-0'
 
 interface SceneSettingsProps {
   character: AiCharacter
-  scene: AiCardSceneResponse | null
-  cardId?: string
+  scene: ProjectSceneResponse | null
+  projectId?: string
   onBack: () => void
   onScenesChanged: () => void
   onSceneReplaced?: (newSceneId: string) => void
   onSceneDeleted: () => void
 }
 
-export function SceneSettings({ character, scene, cardId, onBack, onScenesChanged, onSceneReplaced, onSceneDeleted }: SceneSettingsProps) {
+export function SceneSettings({ character, scene, projectId, onBack, onScenesChanged, onSceneReplaced, onSceneDeleted }: SceneSettingsProps) {
   const { t } = useTranslation('scene')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cardId = undefined // scene settings no longer has cardId — model preview not available
   const { model, loading: modelLoading, error: modelError } = useCardModel(cardId)
   const effectiveModelType = model ? inferModelType(model.original_file_name, model.content_type) : character.appearance.modelType
   const hasAvatarModel = Boolean(model?.public_url)
@@ -48,20 +48,18 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
   const [modelVisible, setModelVisible] = useState(true)
   const [rendererPanelOpen, setRendererPanelOpen] = useState(false)
 
-  const { settings, setSettings, resetSettings } = useSceneRendererSettings(cardId ?? '')
+  const { settings, setSettings, resetSettings } = useSceneRendererSettings(projectId ?? '')
 
   const {
     uploading, removing, error,
-    tagPickOptions,
     metaDisplayName, setMetaDisplayName,
     metaDescription, setMetaDescription,
-    metaTag, setMetaTag,
     metaSaving, metaError,
     handleSaveMeta, handleReplace, handleUploadNew, handleDelete,
-  } = useSceneSettings({ scene, cardId, fileInputRef, onScenesChanged, onSceneReplaced, onSceneDeleted })
+  } = useSceneSettings({ scene, projectId, fileInputRef, onScenesChanged, onSceneReplaced, onSceneDeleted })
 
   const pageHeading = scene ? getSceneDisplayTitle(scene) : t('settings.untitled')
-  const sizeLabel = scene ? `${scene.original_file_name} · ${(scene.size_bytes / 1_048_576).toFixed(1)} MB` : ''
+  const sizeLabel = scene ? `${scene.original_name} · ${((scene.size_bytes ?? 0) / 1_048_576).toFixed(1)} MB` : ''
 
   return (
     <div className="flex flex-col animate-[pageIn_0.22s_cubic-bezier(0.2,0.9,0.2,1)]">
@@ -89,17 +87,17 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
           </>
         )}
 
-        {cardId && hasAvatarModel && !modelLoading && !modelError && (
+        {hasAvatarModel && !modelLoading && !modelError && (
           <div className="absolute inset-0 z-[2] pointer-events-auto">
             <AvatarRenderer className="absolute inset-0 w-full h-full" modelType={effectiveModelType} modelUrl={model?.public_url ?? null} background="transparent" modelVisible={modelVisible} rendererSettings={settings} />
           </div>
         )}
-        {cardId && modelLoading && (
+        {modelLoading && (
           <div className="absolute inset-0 z-[4] flex items-center justify-center bg-black/20 pointer-events-none" aria-busy="true">
             <div className="w-7 h-7 border-2 border-white/[0.12] border-t-white/65 rounded-full animate-spin" />
           </div>
         )}
-        {cardId && modelError && (
+        {modelError && (
           <div className="absolute inset-0 z-[4] flex items-center justify-center p-4 text-center text-[0.78rem] text-[var(--color-error-mid)] bg-black/35 pointer-events-none">{t('settings.modelPreviewError')}</div>
         )}
 
@@ -132,8 +130,8 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
             <div className="text-[10.5px] text-(--text-muted) whitespace-nowrap overflow-hidden text-ellipsis">{sizeLabel}</div>
           </div>
           <div className="flex gap-[6px] shrink-0">
-            <button type="button" className={btnGhost} onClick={() => fileInputRef.current?.click()} disabled={uploading || removing || !cardId}>{uploading ? t('settings.replacing') : t('settings.replace')}</button>
-            <button type="button" className={btnDanger} onClick={handleDelete} disabled={removing || uploading || !cardId}>{removing ? t('settings.removing') : t('settings.delete')}</button>
+            <button type="button" className={btnGhost} onClick={() => fileInputRef.current?.click()} disabled={uploading || removing || !projectId}>{uploading ? t('settings.replacing') : t('settings.replace')}</button>
+            <button type="button" className={btnDanger} onClick={handleDelete} disabled={removing || uploading || !projectId}>{removing ? t('settings.removing') : t('settings.delete')}</button>
           </div>
         </div>
       ) : (
@@ -148,7 +146,7 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
 
       {error && <div className="mt-3 text-xs text-[var(--color-error-mid)]">{error}</div>}
 
-      {scene && cardId && (
+      {scene && projectId && (
         <>
           <div className={cn(sectionHdr, 'mt-[1.375rem]')}>
             <span className={sectionLbl}>{t('settings.metaSection')}</span>
@@ -160,13 +158,6 @@ export function SceneSettings({ character, scene, cardId, onBack, onScenesChange
               <div className={modalFieldLabel}>{t('settings.metaName')}</div>
               <input className={modalTextInput} value={metaDisplayName} onChange={e => setMetaDisplayName(e.target.value.slice(0, MAX_DISPLAY))} maxLength={MAX_DISPLAY} placeholder={t('settings.metaNamePlaceholder')} />
               <div className={modalCharCount}>{metaDisplayName.length}/{MAX_DISPLAY}</div>
-            </div>
-            <div>
-              <div className={modalFieldLabel}>{t('settings.metaTag')}</div>
-              <select className={settingsSelect} value={metaTag} onChange={e => setMetaTag(e.target.value)}>
-                <option value={TAG_AUTO_VALUE}>{t('settings.metaTagAuto')}</option>
-                {tagPickOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-              </select>
             </div>
             <div>
               <div className={modalFieldLabel}>{t('settings.metaDesc')}</div>

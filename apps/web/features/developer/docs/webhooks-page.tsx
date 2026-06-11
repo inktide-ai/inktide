@@ -1,20 +1,21 @@
 import { CodeBlock, DocPage, InfoBox, InlineCode, PageSubtitle, PageTitle, SectionHeading, Table, TableHead, TableRow, Td } from './shared'
+import { getTranslations } from '@/lib/i18n-server'
 
-export function WebhooksPage() {
+export async function WebhooksPage() {
+  const t = await getTranslations('developer')
   return (
     <DocPage>
-      <PageTitle eyebrow="Integrations">Webhooks</PageTitle>
+      <PageTitle eyebrow={t('docs.webhooks.eyebrow')}>{t('docs.webhooks.title')}</PageTitle>
       <PageSubtitle>
-        Register a webhook URL in your app settings. Inktide POSTs a signed JSON payload
-        to your endpoint on each event. Verify the signature before processing.
+        {t('docs.webhooks.subtitle')}
       </PageSubtitle>
 
-      <SectionHeading>Setup</SectionHeading>
+      <SectionHeading>{t('docs.webhooks.setup')}</SectionHeading>
       <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {[
-          ['1', 'Create App',      'Register an OAuth app at Developer → Create App and set a webhook URL + secret.'],
-          ['2', 'Receive Events',  'Inktide POSTs JSON to your URL. Return HTTP 200 within 10 seconds.'],
-          ['3', 'Verify Signature','Check X-Inktide-Signature on each request to confirm authenticity.'],
+          ['1', t('docs.webhooks.step1Title'), t('docs.webhooks.step1Desc')],
+          ['2', t('docs.webhooks.step2Title'), t('docs.webhooks.step2Desc')],
+          ['3', t('docs.webhooks.step3Title'), t('docs.webhooks.step3Desc')],
         ].map(([step, title, desc]) => (
           <div key={step} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-5">
             <span className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent-soft)] text-sm font-bold text-[var(--accent-primary)]">
@@ -26,28 +27,28 @@ export function WebhooksPage() {
         ))}
       </div>
 
-      <SectionHeading>Event Types</SectionHeading>
+      <SectionHeading>{t('docs.webhooks.eventTypes')}</SectionHeading>
       <div className="mb-8">
         <Table>
-          <TableHead cols={['Event', 'Description']} />
+          <TableHead cols={[t('docs.webhooks.colEvent'), t('docs.webhooks.colDescription')]} />
           <tbody>
             {[
-              ['soul.message',        'A message was received and processed by a soul'],
-              ['soul.response',       'The soul generated a response (text + audio ready)'],
-              ['channel.connected',   'A platform channel was linked to a soul'],
-              ['channel.disconnected','A platform channel was unlinked from a soul'],
-              ['tts.complete',        'TTS synthesis finished; audio URL available in payload'],
-            ].map(([event, desc]) => (
+              ['soul.message',        'docs.webhooks.evMessage'],
+              ['soul.response',       'docs.webhooks.evResponse'],
+              ['channel.connected',   'docs.webhooks.evConnected'],
+              ['channel.disconnected','docs.webhooks.evDisconnected'],
+              ['tts.complete',        'docs.webhooks.evTtsComplete'],
+            ].map(([event, descKey]) => (
               <TableRow key={event}>
                 <Td mono accent>{event}</Td>
-                <Td>{desc}</Td>
+                <Td>{t(descKey)}</Td>
               </TableRow>
             ))}
           </tbody>
         </Table>
       </div>
 
-      <SectionHeading>Example Payload</SectionHeading>
+      <SectionHeading>{t('docs.webhooks.examplePayload')}</SectionHeading>
       <CodeBlock label="POST https://your-server.com/webhook">
 {`Content-Type: application/json
 X-Inktide-Signature: sha256=<hmac_hex>
@@ -55,9 +56,9 @@ X-Inktide-Event: soul.message
 X-Inktide-Delivery: <uuid>
 
 {
+  "id":        "<uuid>",
   "event":     "soul.message",
   "timestamp": "2025-06-01T12:34:56Z",
-  "soul_id":   "abc123",
   "data": {
     "channel":    "twitch",
     "author":     "viewer_username",
@@ -67,8 +68,8 @@ X-Inktide-Delivery: <uuid>
 }`}
       </CodeBlock>
 
-      <SectionHeading>Signature Verification</SectionHeading>
-      <CodeBlock label="Node.js example">
+      <SectionHeading>{t('docs.webhooks.signatureVerification')}</SectionHeading>
+      <CodeBlock label={t('docs.webhooks.labelNodeExample')}>
 {`import crypto from 'crypto'
 
 function verifySignature(body: string, secret: string, header: string): boolean {
@@ -84,11 +85,8 @@ function verifySignature(body: string, secret: string, header: string): boolean 
       </CodeBlock>
 
       <InfoBox>
-        <span className="font-semibold text-[var(--text-primary)]">Important: </span>
-        Always use <InlineCode>timingSafeEqual</InlineCode> (or equivalent) when comparing signatures.
-        String equality (<InlineCode>===</InlineCode>) is vulnerable to timing attacks.
-        Inktide retries failed deliveries up to 3 times with exponential backoff.
-        Use <InlineCode>X-Inktide-Delivery</InlineCode> for idempotency.
+        <span className="font-semibold text-[var(--text-primary)]">{t('docs.webhooks.importantLabel')}</span>
+        {t('docs.webhooks.info1')}{' '}<InlineCode>timingSafeEqual</InlineCode>{' '}{t('docs.webhooks.info2')}<InlineCode>===</InlineCode>{t('docs.webhooks.info3')}{' '}<InlineCode>X-Inktide-Delivery</InlineCode>{' '}{t('docs.webhooks.info4')}{' '}<InlineCode>POST /api/v1/developer/webhooks/test?appId={'{appId}'}</InlineCode>.
       </InfoBox>
     </DocPage>
   )

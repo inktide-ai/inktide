@@ -30,7 +30,6 @@ export function useCharacters() {
   // Always-current map of characters — read at timer fire time for entity-bound save
   const charactersRef = useRef<Map<string, AiCharacter>>(new Map())
 
-  // ── 4 фокусных хука ──────────────────────────────────────────────────────────
 
   const {
     cardList,
@@ -40,6 +39,9 @@ export function useCharacters() {
     updateListItem,
     addListItem,
     removeListItem,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useCharacterList(repo)
 
   const {
@@ -59,6 +61,7 @@ export function useCharacters() {
 
   const mountedRef = useRef(true)
   useEffect(() => () => { mountedRef.current = false }, [])
+  useEffect(() => () => { if (autoSaveTimerRef.current !== null) clearTimeout(autoSaveTimerRef.current) }, [])
 
   // Plugin registry for side-effect saves (e.g. BYOK credentials from BrainTab)
   const savePluginsRef = useRef(new Map<string, () => Promise<void>>())
@@ -99,7 +102,6 @@ export function useCharacters() {
     onListItemUpdate: (id, patch) => updateListItem(id, patch),
   })
 
-  // ── Публичные методы ─────────────────────────────────────────────────────────
 
   const selectCard = useCallback(async (id: string) => {
     if (autoSaveTimerRef.current !== null) { clearTimeout(autoSaveTimerRef.current); autoSaveTimerRef.current = null }
@@ -210,6 +212,9 @@ export function useCharacters() {
     llmModels,
     loading,
     loadError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     // selection
     characters,
     selectedId,

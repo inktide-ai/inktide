@@ -67,7 +67,7 @@ export default function PlanCard(cfg: PlanCardConfig) {
       }
 
       <ul className="space-y-3 flex-1 mb-8">
-        {features.map(f => (
+        {(Array.isArray(features) ? features : []).map(f => (
           <li key={f} className="flex items-center gap-2.5 text-[13.5px] transition-[color] duration-[250ms]" style={{ color: 'var(--pricing-feature)' }}>
             <span
               className="w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0"

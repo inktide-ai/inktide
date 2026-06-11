@@ -1,0 +1,26 @@
+{
+  "invite": {
+    "srTitle": "Teammitglieder einladen",
+    "title": "Mitglieder einladen",
+    "subtitle": "Sende E-Mail-Einladungen, um in deinem Workspace zusammenzuarbeiten.",
+    "emailLabel": "E-Mail-Adressen",
+    "roleMember": "Mitglied",
+    "roleAdmin": "Administrator",
+    "sending": "Wird gesendet…",
+    "send": "Einladungen senden",
+    "pendingInvites": "Ausstehende Einladungen",
+    "loading": "Wird geladen…",
+    "noPending": "Keine ausstehenden Einladungen.",
+    "resend": "Erneut senden",
+    "cancel": "Abbrechen",
+    "expired": "Abgelaufen",
+    "expires": "Läuft am {{date}} ab",
+    "enterValidEmail": "Gib mindestens eine gültige E-Mail-Adresse ein.",
+    "sent_one": "Einladung gesendet.",
+    "sent_other": "Einladungen gesendet.",
+    "sendFailed": "Einladungen konnten nicht gesendet werden.",
+    "resent": "Einladung erneut gesendet.",
+    "resendFailed": "Einladung konnte nicht erneut gesendet werden.",
+    "cancelFailed": "Einladung konnte nicht abgebrochen werden."
+  }
+}

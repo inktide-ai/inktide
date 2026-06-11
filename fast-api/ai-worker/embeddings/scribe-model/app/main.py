@@ -18,12 +18,14 @@ def _custom_operation_id(route: APIRoute) -> str:
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(name)s | %(message)s")
-    embeddings.warm_up_model()
-    fact_extraction.warm_up_chat()
-    yield
-    embeddings.shutdown()
-    fact_extraction.shutdown()
-    logger.info("Shutdown complete")
+    try:
+        embeddings.warm_up_model()
+        fact_extraction.warm_up_chat()
+        yield
+    finally:
+        embeddings.shutdown()
+        fact_extraction.shutdown()
+        logger.info("Shutdown complete")
 
 
 app = FastAPI(

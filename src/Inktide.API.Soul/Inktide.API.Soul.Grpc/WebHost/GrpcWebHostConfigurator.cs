@@ -34,8 +34,13 @@ public sealed class GrpcWebHostConfigurator : IWebHostConfigurator
                     "SoulGrpcServerSettings.CertPath must be configured in production. " +
                     "gRPC must use TLS. Set via SoulGrpcServerSettings__CertPath.");
 
+            if (!IPAddress.TryParse(settings.ListenAddress, out var listenAddress))
+                throw new InvalidOperationException(
+                    $"SoulGrpcServerSettings.ListenAddress '{settings.ListenAddress}' is not a valid IP address. " +
+                    "Set via SoulGrpcServerSettings__ListenAddress.");
+
             options.Listen(
-                IPAddress.Parse(settings.ListenAddress),
+                listenAddress,
                 settings.ListenPort,
                 listenOptions =>
                 {

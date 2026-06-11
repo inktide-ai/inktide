@@ -13,7 +13,6 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-# ── Shared base ─────────────────────────────────────────────────────
 
 
 class _OllamaBase:
@@ -35,7 +34,6 @@ class _OllamaBase:
         self._client.close()
 
 
-# ── Embeddings ──────────────────────────────────────────────────────
 
 
 class OllamaEmbeddings(_OllamaBase):
@@ -52,7 +50,6 @@ class OllamaEmbeddings(_OllamaBase):
         return arr[0] if single and arr.shape[0] == 1 else arr
 
 
-# ── Chat / Generate ─────────────────────────────────────────────────
 
 
 class OllamaChat(_OllamaBase):
@@ -101,5 +98,6 @@ class OllamaChat(_OllamaBase):
             resp.raise_for_status()
             models = [m.get("name", "") for m in resp.json().get("models", [])]
             return any(self.model in m for m in models)
-        except Exception:
+        except Exception as e:
+            logger.warning("Ollama health check failed: %s", e)
             return False

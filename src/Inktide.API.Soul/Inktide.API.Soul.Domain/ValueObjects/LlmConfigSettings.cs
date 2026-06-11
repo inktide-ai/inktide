@@ -5,6 +5,9 @@ namespace Inktide.API.Soul.Domain.ValueObjects;
 public sealed class LlmConfigSettings
 {
 
+    [JsonPropertyName("schema_version")]
+    public int SchemaVersion { get; set; } = 1;
+
     [JsonPropertyName("temperature")]
     public float Temperature { get; set; } = 0.7f;
 

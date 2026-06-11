@@ -10,24 +10,21 @@ import 'react-resizable/css/styles.css'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
-  IconUser, IconBrain, IconMicrophone, IconPaint, IconScene,
-  IconEmotion,
+  IconUser, IconBrain, IconMicrophone, IconPaint,
 } from '@/features/character-editor/tab-icons'
 import { Grid } from '@/shared/ui/icons'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { getBannerAccent } from '@/shared/ui/banner-presets'
 import { type HubTabId, type CardLayout, useSoulHubLayout } from '@/shared/hooks/useHubLayout'
 
-type SoulTabId = 'profile' | 'brain' | 'voice' | 'emotion' | 'avatars' | 'scene'
+type SoulTabId = 'profile' | 'brain' | 'voice' | 'avatars'
 
 function buildSoulLinks(soulId: string): { tabId: SoulTabId; href: string; icon: ReactNode }[] {
   return [
-    { tabId: 'profile',  href: `/souls/${soulId}`,          icon: <IconUser /> },
-    { tabId: 'brain',    href: `/souls/${soulId}/brain`,    icon: <IconBrain /> },
-    { tabId: 'voice',    href: `/souls/${soulId}/voice`,    icon: <IconMicrophone /> },
-    { tabId: 'emotion',  href: `/souls/${soulId}/emotion`,  icon: <IconEmotion /> },
-    { tabId: 'avatars',  href: `/souls/${soulId}/avatars`,  icon: <IconPaint /> },
-    { tabId: 'scene',    href: `/souls/${soulId}/scenes`,   icon: <IconScene /> },
+    { tabId: 'profile', href: `/souls/${soulId}`,       icon: <IconUser /> },
+    { tabId: 'brain',   href: `/souls/${soulId}/brain`, icon: <IconBrain /> },
+    { tabId: 'voice',   href: `/souls/${soulId}/voice`, icon: <IconMicrophone /> },
+    { tabId: 'avatars', href: `/souls/${soulId}/avatars`, icon: <IconPaint /> },
   ]
 }
 
@@ -72,7 +69,6 @@ function capitalize(s: string) { return s.charAt(0).toUpperCase() + s.slice(1) }
 export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
   const { t: tp } = useTranslation('profile')
   const { t: tc } = useTranslation('common')
-  const { t: te } = useTranslation('emotion')
   const { selected, loading, loadError, selectCard, selectedId } = useCharactersContext()
   const [isEditMode, setIsEditMode] = useState(false)
   const [activeMenu, setActiveMenu] = useState<HubTabId | null>(null)
@@ -83,9 +79,7 @@ export default function SoulCharacterHubPage({ soulId }: { soulId: string }) {
     profile: { label: tp('tabs.profile.label'), desc: tp('tabs.profile.desc') },
     brain:   { label: tp('tabs.brain.label'),   desc: tp('tabs.brain.desc') },
     voice:   { label: tp('tabs.voice.label'),   desc: tp('tabs.voice.desc') },
-    emotion: { label: te('title'),              desc: te('subtitle') },
     avatars: { label: tp('tabs.avatars.label'), desc: tp('tabs.avatars.desc') },
-    scene:   { label: tp('tabs.scene.label'),   desc: tp('tabs.scene.desc') },
   }
 
   useEffect(() => {

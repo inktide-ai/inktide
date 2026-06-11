@@ -1,6 +1,7 @@
 using Inktide.API.TTS.Application.Abstractions;
 using Inktide.API.TTS.Application.Synthesis;
 using Inktide.API.TTS.Domain.Speech;
+using Inktide.API.TTS.Infrastructure.Adapters;
 using Inktide.API.TTS.Infrastructure.AzureSpeech;
 using Inktide.API.TTS.Infrastructure.Cartesia;
 using Inktide.API.TTS.Infrastructure.Decorators;
@@ -25,6 +26,8 @@ public static class InktideTtsServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(configuration);
 
         services.AddHttpContextAccessor();
+        services.AddScoped<ITtsCredentialPort, SoulTtsCredentialAdapter>();
+        // TtsApiKeyResolver is Singleton; ResolveAsync creates its own scope for ITtsCredentialPort (Scoped).
         services.AddSingleton<IApiKeyResolver, TtsApiKeyResolver>();
         services.AddSingleton<ITtsUsageRecorder, LogTtsUsageRecorder>();
         services.AddSingleton<ITtsSynthesisService, TtsSynthesisService>();

@@ -34,6 +34,11 @@ public sealed class ConnectorConfiguration : IEntityTypeConfiguration<Connector>
         b.Property(e => e.ApplicationId).HasColumnName("application_id");
 
         b.HasIndex(e => e.Slug).IsUnique();
+        b.HasIndex(e => e.IsAvailable)
+            .HasDatabaseName("idx_connectors_is_available")
+            .HasFilter("is_available = true");
+        b.HasIndex(e => e.Category)
+            .HasDatabaseName("idx_connectors_category");
 
         // FK relationship is defined in ConnectorInstallationConfiguration (the owning side).
         // Defining it here too would create a hidden ordering dependency — removed.

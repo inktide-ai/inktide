@@ -1,3 +1,4 @@
+using Inktide.API.Core.Pagination;
 using Inktide.API.Marketplace.Application.Interfaces;
 using Inktide.API.Marketplace.Application.Models;
 using Inktide.API.Marketplace.Domain.Entities;
@@ -16,6 +17,13 @@ public sealed class MarketplaceService(
 {
     public Task<IReadOnlyList<Connector>> GetConnectorsAsync(CancellationToken ct)
         => connectorRepo.GetAllAsync(ct);
+
+    public async Task<PagedResult<Connector>> GetConnectorsPagedAsync(int limit, int offset, CancellationToken ct)
+    {
+        var (items, total) = await connectorRepo.GetPagedAsync(limit, offset, ct);
+        var hasMore = offset + items.Count < total;
+        return new PagedResult<Connector>(items, hasMore ? (offset + limit).ToString() : null, hasMore);
+    }
 
     public Task<Connector?> GetConnectorAsync(string slug, CancellationToken ct)
         => connectorRepo.GetBySlugAsync(slug, ct);

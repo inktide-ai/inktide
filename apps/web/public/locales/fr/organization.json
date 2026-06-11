@@ -1,0 +1,26 @@
+{
+  "invite": {
+    "srTitle": "Inviter des membres de l'équipe",
+    "title": "Inviter des membres",
+    "subtitle": "Envoyez des invitations par e-mail pour collaborer dans votre espace de travail.",
+    "emailLabel": "Adresses e-mail",
+    "roleMember": "Membre",
+    "roleAdmin": "Administrateur",
+    "sending": "Envoi…",
+    "send": "Envoyer les invitations",
+    "pendingInvites": "Invitations en attente",
+    "loading": "Chargement…",
+    "noPending": "Aucune invitation en attente.",
+    "resend": "Renvoyer",
+    "cancel": "Annuler",
+    "expired": "Expirée",
+    "expires": "Expire le {{date}}",
+    "enterValidEmail": "Saisissez au moins une adresse e-mail valide.",
+    "sent_one": "Invitation envoyée.",
+    "sent_other": "Invitations envoyées.",
+    "sendFailed": "Échec de l'envoi des invitations.",
+    "resent": "Invitation renvoyée.",
+    "resendFailed": "Échec du renvoi de l'invitation.",
+    "cancelFailed": "Échec de l'annulation de l'invitation."
+  }
+}

@@ -33,17 +33,17 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("application_id");
 
-                    b.Property<string>("AuthorName")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("author_name");
-
                     b.Property<string>("AuthType")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("auth_type");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("author_name");
 
                     b.Property<string>("Category")
                         .IsRequired()
@@ -100,6 +100,13 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Category")
+                        .HasDatabaseName("idx_connectors_category");
+
+                    b.HasIndex("IsAvailable")
+                        .HasDatabaseName("idx_connectors_is_available")
+                        .HasFilter("is_available = true");
+
                     b.HasIndex("Slug")
                         .IsUnique();
 
@@ -109,8 +116,8 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                            AuthorName = "Inktide",
                             AuthType = "oauth",
+                            AuthorName = "Inktide",
                             Category = "Chat",
                             Description = "Route guild messages to your AI character in real-time.",
                             IconUrl = "/icons/connectors/discord.svg",
@@ -124,8 +131,8 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
-                            AuthorName = "Inktide",
                             AuthType = "oauth",
+                            AuthorName = "Inktide",
                             Category = "Stream",
                             Description = "Let your character react to live chat and stream events.",
                             IconUrl = "/icons/connectors/twitch.svg",
@@ -139,8 +146,8 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000003"),
-                            AuthorName = "Inktide",
                             AuthType = "apikey",
+                            AuthorName = "Inktide",
                             Category = "Chat",
                             Description = "Connect a Telegram bot to relay chat messages to your AI.",
                             IconUrl = "/icons/connectors/telegram.svg",
@@ -154,8 +161,8 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000004"),
-                            AuthorName = "Inktide",
                             AuthType = "oauth",
+                            AuthorName = "Inktide",
                             Category = "Stream",
                             Description = "Connect live stream chat to drive AI responses.",
                             IconUrl = "/icons/connectors/youtube.svg",
@@ -170,8 +177,8 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000005"),
-                            AuthorName = "Inktide",
                             AuthType = "webhook",
+                            AuthorName = "Inktide",
                             Category = "Stream",
                             Description = "Engage your TikTok live audience with AI replies.",
                             IconUrl = "/icons/connectors/tiktok.svg",

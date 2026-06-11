@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
 export const SECTION_TITLE_SIZE = 12
 export const C = {
   sectionTitle:    '#9AA4B2',
@@ -33,7 +32,6 @@ export const INJECTED_CSS = `
 .sk-sel option { background:#111110; color:#DCDBD8; }
 `
 
-// ── Section ───────────────────────────────────────────────────────────────────
 export function Section({ title, right, children }: {
   title: string
   right?: React.ReactNode
@@ -76,7 +74,6 @@ export function Section({ title, right, children }: {
   )
 }
 
-// ── Collapsible section — Figma "Layout guide / Export" style ────────────────
 // children is a render-prop receiving the collapse callback
 export function CollapsibleSection({ title, children }: {
   title: string
@@ -130,7 +127,6 @@ export function CollapsibleSection({ title, children }: {
   )
 }
 
-// ── Text input cell ───────────────────────────────────────────────────────────
 export function TextCell({ label, value, onChange, readOnly, accent, dark }: {
   label: string; value: string; onChange?: (v: string) => void
   readOnly?: boolean; accent?: string; dark?: boolean
@@ -166,7 +162,6 @@ export function TextCell({ label, value, onChange, readOnly, accent, dark }: {
   )
 }
 
-// ── Figma-style input cell ────────────────────────────────────────────────────
 export function InputCell({ label, value, onChange, min, max, step = 1, unit, disabled }: {
   label: string; value: number; onChange: (v: number) => void
   min?: number; max?: number; step?: number; unit?: string; disabled?: boolean
@@ -205,7 +200,6 @@ export function InputCell({ label, value, onChange, min, max, step = 1, unit, di
   )
 }
 
-// ── Select cell ───────────────────────────────────────────────────────────────
 export function SelectCell({ value, options, onChange, disabled }: {
   value: string
   options: { value: string; label: string }[]
@@ -234,7 +228,6 @@ export function SelectCell({ value, options, onChange, disabled }: {
   )
 }
 
-// ── Figma-style square checkbox ───────────────────────────────────────────────
 function Checkbox({ checked, onChange, disabled }: {
   checked: boolean; onChange: (v: boolean) => void; disabled?: boolean
 }) {
@@ -269,7 +262,6 @@ function Checkbox({ checked, onChange, disabled }: {
   )
 }
 
-// ── Checkbox row ──────────────────────────────────────────────────────────────
 export function CheckboxRow({ label, checked, onChange, disabled }: {
   label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean
 }) {
@@ -286,7 +278,6 @@ export function CheckboxRow({ label, checked, onChange, disabled }: {
   )
 }
 
-// ── Grid wrapper ──────────────────────────────────────────────────────────────
 const SR_ONLY: React.CSSProperties = {
   position: 'absolute', width: 1, height: 1, overflow: 'hidden',
   clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap',
@@ -305,12 +296,10 @@ export function InputGrid({ legend, children }: {
   )
 }
 
-// ── Spacer ────────────────────────────────────────────────────────────────────
 export function Gap() {
   return <div style={{ height: 4 }} />
 }
 
-// ── Options ───────────────────────────────────────────────────────────────────
 export const LANGUAGE_OPTIONS = [
   { value: 'en', label: 'English' },
   { value: 'ru', label: 'Русский' },

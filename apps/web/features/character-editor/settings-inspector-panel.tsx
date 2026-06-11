@@ -71,7 +71,6 @@ export default function SettingsInspectorPanel({ tabId, onClose }: Props) {
         animation: 'inspectorIn 0.2s cubic-bezier(0.22,1,0.36,1) both',
       }}
     >
-      {/* ── Resize handle — left edge ───────────────────────────────────── */}
       <div
         onMouseDown={startResize}
         style={{
@@ -81,7 +80,6 @@ export default function SettingsInspectorPanel({ tabId, onClose }: Props) {
         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)' }}
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
       />
-      {/* ── Header ──────────────────────────────────────────────────────── */}
       <div
         className="flex items-center gap-2 flex-shrink-0"
         style={{ height: 40, paddingLeft: 12, paddingRight: 8, borderBottom: `1px solid ${BORDER}` }}
@@ -129,7 +127,6 @@ export default function SettingsInspectorPanel({ tabId, onClose }: Props) {
         </button>
       </div>
 
-      {/* ── Content ─────────────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto">
         <Component />
       </div>

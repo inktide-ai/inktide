@@ -39,18 +39,19 @@ public sealed class ProjectControllerTests
         IInktFileImportService? inkt    = null,
         ICardSummaryProvider? summaries = null)
     {
-        crud      ??= Substitute.For<IProjectCrudService>();
-        order     ??= Substitute.For<IProjectOrderingService>();
-        plugins   ??= Substitute.For<IProjectPluginService>();
-        importer  ??= Substitute.For<IProjectImportService>();
-        exporter  ??= Substitute.For<IProjectExportService>();
-        inkt      ??= Substitute.For<IInktFileImportService>();
-        summaries ??= Substitute.For<ICardSummaryProvider>();
+        crud        ??= Substitute.For<IProjectCrudService>();
+        order       ??= Substitute.For<IProjectOrderingService>();
+        plugins     ??= Substitute.For<IProjectPluginService>();
+        importer    ??= Substitute.For<IProjectImportService>();
+        exporter    ??= Substitute.For<IProjectExportService>();
+        inkt        ??= Substitute.For<IInktFileImportService>();
+        summaries   ??= Substitute.For<ICardSummaryProvider>();
+        var scene   = Substitute.For<IProjectSceneConfigService>();
 
         summaries.GetSummariesAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
             .Returns(new Dictionary<Guid, CardSummary>());
 
-        var controller = new ProjectController(crud, order, plugins, importer, exporter, inkt, summaries);
+        var controller = new ProjectController(crud, order, plugins, importer, exporter, inkt, summaries, scene);
         controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext
@@ -72,7 +73,7 @@ public sealed class ProjectControllerTests
             .Returns(new List<ProjectEntity> { MakeProject() }.AsReadOnly());
 
         var ctrl   = BuildController(crud: crud);
-        var result = await ctrl.List(soulId: null, CancellationToken.None);
+        var result = await ctrl.List(soulId: null, ct: CancellationToken.None);
 
         Assert.IsType<OkObjectResult>(result);
     }
@@ -82,7 +83,9 @@ public sealed class ProjectControllerTests
     {
         var project = MakeProject();
         var crud    = Substitute.For<IProjectCrudService>();
-        crud.CreateAsync(UserId, Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+        crud.CreateAsync(UserId, Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(),
+                Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(),
+                Arg.Any<CancellationToken>())
             .Returns(project);
 
         var ctrl   = BuildController(crud: crud);
@@ -124,7 +127,8 @@ public sealed class ProjectControllerTests
         var crud = Substitute.For<IProjectCrudService>();
         crud.UpdateAsync(ProjectId, UserId,
                 Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>(),
-                Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+                Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<string?>(), Arg.Any<string?>(),
+                Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
             .Returns(MakeProject());
 
         var ctrl   = BuildController(crud: crud);
@@ -139,7 +143,8 @@ public sealed class ProjectControllerTests
         var crud = Substitute.For<IProjectCrudService>();
         crud.UpdateAsync(ProjectId, UserId,
                 Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>(),
-                Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+                Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<string?>(), Arg.Any<string?>(),
+                Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
             .Throws(new KeyNotFoundException());
 
         var ctrl   = BuildController(crud: crud);

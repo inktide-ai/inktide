@@ -2,14 +2,18 @@ using System.Net.Http.Headers;
 using System.Text;
 using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Infrastructure.DbContext;
+using Inktide.API.Billing.Infrastructure.Messaging;
 using Inktide.API.Billing.Infrastructure.Providers.Robokassa;
 using Inktide.API.Billing.Infrastructure.Providers.Stripe;
 using Inktide.API.Billing.Infrastructure.Providers.YooKassa;
 using Inktide.API.Billing.Infrastructure.Repositories;
 using Inktide.API.Billing.Infrastructure.Services;
 using Inktide.API.Billing.Infrastructure.Settings;
+using Inktide.API.Billing.Infrastructure.Telemetry;
 using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
+using Inktide.API.Core.MassTransit;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +22,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Inktide.API.Billing.Infrastructure.DependencyInjection;
 
-public sealed class BillingInfrastructureStartup : IStartup
+public sealed class BillingInfrastructureStartup : IStartup, IBusModuleConfigurator
 {
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {
@@ -76,6 +80,7 @@ public sealed class BillingInfrastructureStartup : IStartup
 
         services.AddHttpClient<YooKassaBillingProvider>(ConfigureYooKassaClient);
         services.AddHttpClient<YooKassaWebhookProcessor>(ConfigureYooKassaClient);
+        services.AddHttpClient("yookassa-renewal", ConfigureYooKassaClient);
 
         // AddHttpClient<YooKassaBillingProvider> already registers YooKassaBillingProvider as a
         // transient with its configured HttpClient — adding AddTransient<YooKassaBillingProvider>()
@@ -114,12 +119,58 @@ public sealed class BillingInfrastructureStartup : IStartup
         services.AddTransient<IPaymentReceiptEmailService, PaymentReceiptEmailService>();
 
         services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<BillingMetrics>();
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+        services.AddScoped<IBillingIncidentRepository, BillingIncidentRepository>();
         services.AddScoped<ISubscriptionService, SubscriptionService>();
         services.AddScoped<IUserPlanResolver, PlanLimitResolver>();
 
         services.AddHostedService<Messaging.UserAccountDeletedConsumer>();
         services.AddHostedService<Services.SubscriptionExpiryJob>();
+        services.AddHostedService<Providers.YooKassa.YooKassaRenewalJob>();
+    }
+
+    public void ConfigureConsumers(IBusRegistrationConfigurator x)
+    {
+        x.AddEntityFrameworkOutbox<BillingDbContext>(o =>
+        {
+            o.UsePostgres();
+            o.UseBusOutbox();
+        });
+
+        x.AddConsumer<ReceiptEmailConsumer>();
+        x.AddConsumer<YooKassaRenewalConsumer>();
+        x.AddConsumer<YooKassaRenewalFaultConsumer>();
+    }
+
+    public void ConfigureEndpoints(
+        IReceiveConfigurator<IReceiveEndpointConfigurator> cfg,
+        IBusRegistrationContext context)
+    {
+        cfg.ReceiveEndpoint("billing-receipt-email", e =>
+        {
+            e.UseMessageRetry(r =>
+                r.Exponential(5,
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromMinutes(5),
+                    TimeSpan.FromSeconds(15)));
+            e.ConfigureConsumer<ReceiptEmailConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("billing-yookassa-renewal", e =>
+        {
+            e.UseMessageRetry(r =>
+                r.Exponential(3,
+                    TimeSpan.FromMinutes(5),
+                    TimeSpan.FromMinutes(30),
+                    TimeSpan.FromMinutes(5)));
+            e.ConfigureConsumer<YooKassaRenewalConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("billing-yookassa-renewal-fault", e =>
+        {
+            e.ConfigureConsumer<YooKassaRenewalFaultConsumer>(context);
+        });
     }
 
     private static string BuildConnectionString(IConfiguration config)

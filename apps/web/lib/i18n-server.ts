@@ -19,17 +19,19 @@ function loadLocale(locale: string, ns: string): Record<string, unknown> {
   }
 }
 
+const SUPPORTED_LNGS = ['en', 'ru', 'zh', 'ja', 'ko', 'de', 'fr', 'es']
+
 export async function getTranslations(ns: string) {
   const jar = await cookies()
   const fromCookie = jar.get('inktide_lang')?.value
 
   let locale: string
-  if (fromCookie && ['en', 'ru'].includes(fromCookie)) {
+  if (fromCookie && SUPPORTED_LNGS.includes(fromCookie)) {
     locale = fromCookie
   } else {
     const h = await headers()
-    const al = h.get('accept-language') ?? ''
-    locale = /\bru\b/.test(al) ? 'ru' : 'en'
+    const al = (h.get('accept-language') ?? '').toLowerCase()
+    locale = SUPPORTED_LNGS.find(l => new RegExp(`\\b${l}\\b`).test(al)) ?? 'en'
   }
 
   const data = loadLocale(locale, ns)

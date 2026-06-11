@@ -108,7 +108,6 @@ export default function ProfilePanel() {
 
   return (
     <>
-      {/* ── Account ─────────────────────────────────────────────────────────── */}
       <div className="mt-[36px]" />
       <SectionHeader>{t('nav.account')}</SectionHeader>
 
@@ -164,7 +163,6 @@ export default function ProfilePanel() {
         )}
       </div>
 
-      {/* ── Account security ────────────────────────────────────────────────── */}
       <div className="mt-[48px]" />
       <SectionHeader>{t('profile.accountSecurity')}</SectionHeader>
 
@@ -204,7 +202,6 @@ export default function ProfilePanel() {
         <SecurityRow label={t('profile.memberSince')} value="May 18, 2026" />
       </div>
 
-      {/* ── User ID ──────────────────────────────────────────────────────────── */}
       <div className="mt-[48px]" />
       <SectionHeader>{t('profile.userId')}</SectionHeader>
 
@@ -252,7 +249,6 @@ export default function ProfilePanel() {
   )
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function SectionHeader({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (

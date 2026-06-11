@@ -6,7 +6,6 @@ namespace Inktide.API.Soul.Domain.ValueObjects;
 public sealed class PersonalitySettings
 {
 
-    // ── Core Traits (0 = low, 1 = high) ──────────────────────────────────────
 
     [JsonPropertyName("warmth")]
     public float Warmth { get; set; } = 0.7f;
@@ -26,7 +25,6 @@ public sealed class PersonalitySettings
     [JsonPropertyName("sarcasm")]
     public float Sarcasm { get; set; } = 0.2f;
 
-    // ── Emotional Dynamics ────────────────────────────────────────────────────
 
     /// <summary>How widely mood swings per message (0 = flat, 1 = very volatile).</summary>
     [JsonPropertyName("emotion_volatility")]
@@ -40,7 +38,6 @@ public sealed class PersonalitySettings
     [JsonPropertyName("emotion_memory")]
     public float EmotionMemory { get; set; } = 0.5f;
 
-    // ── Behavioral ────────────────────────────────────────────────────────────
 
     /// <summary>deflect | humor | withdraw | confront</summary>
     [JsonPropertyName("stress_behavior")]

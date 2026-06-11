@@ -8,7 +8,7 @@ public sealed class KeycloakAdminSettings
 {
 
     private bool _enabled;
-    private string _baseUrl = "http://localhost:8080";
+    private string _baseUrl = string.Empty;
     private string _realm = string.Empty;
     private string _clientId = string.Empty;
     private string _clientSecret = string.Empty;

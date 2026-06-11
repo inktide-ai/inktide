@@ -113,7 +113,6 @@ export default function SessionsPanel() {
         </div>
       )}
 
-      {/* ── Current session ───────────────────────────────────────────────── */}
       <div className="mt-[36px]" />
       <SectionHeader>{t('sessions.currentSession')}</SectionHeader>
 
@@ -138,7 +137,6 @@ export default function SessionsPanel() {
         </div>
       )}
 
-      {/* ── Other sessions ────────────────────────────────────────────────── */}
       <div className="mt-[48px]" />
       <SectionHeader>
         <span className="flex items-center justify-between">

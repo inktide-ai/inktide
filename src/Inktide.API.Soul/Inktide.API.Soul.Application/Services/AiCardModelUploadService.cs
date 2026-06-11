@@ -1,6 +1,6 @@
 using Inktide.API.Core.Generators;
 using Inktide.API.Core.Transactions;
-using Inktide.API.Profile.Application.Interfaces;
+using Inktide.API.Core.Contracts;
 using Inktide.API.Soul.Application.Constants;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Storage;
@@ -216,6 +216,48 @@ public sealed class AiCardModelUploadService : IAiCardModelUploadService
         return SetActiveModelResult.Ok();
     }
 
+    public async Task<PresignThumbnailResult> PresignThumbnailAsync(
+        Guid userId, Guid cardId, Guid modelId, CancellationToken ct = default)
+    {
+        if (!_storage.IsEnabled)
+            return PresignThumbnailResult.Fail(ModelUploadError.StorageDisabled, "Object storage is not configured.");
+
+        var model = await _models.GetByIdAsync(userId, cardId, modelId, ct).ConfigureAwait(false);
+        if (model is null)
+            return PresignThumbnailResult.Fail(ModelUploadError.ModelNotFound, "Model not found.");
+
+        var objectKey = $"thumbnails/{userId:N}/{cardId:N}/{modelId:N}.webp";
+        var uploadUrl = _storage.GetPreSignedPutUrl(objectKey, "image/webp", SoulConstants.Upload.PresignTtl);
+        if (string.IsNullOrEmpty(uploadUrl))
+            return PresignThumbnailResult.Fail(ModelUploadError.StorageDisabled, "Could not create upload URL.");
+
+        var publicUrl = ObjectStoragePublicUrl.Build(_s3.ServiceUrl, _s3.PublicBaseUrl, _s3.DefaultBucket, objectKey);
+        return PresignThumbnailResult.Ok(uploadUrl, publicUrl);
+    }
+
+    public async Task<SaveThumbnailResult> SaveThumbnailAsync(
+        Guid userId, Guid cardId, Guid modelId, string publicUrl, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(publicUrl))
+            return SaveThumbnailResult.Fail(ModelUploadError.Validation, "public_url is required.");
+
+        var model = await _models.GetByIdAsync(userId, cardId, modelId, ct).ConfigureAwait(false);
+        if (model is null)
+            return SaveThumbnailResult.Fail(ModelUploadError.ModelNotFound, "Model not found.");
+
+        var expectedKey = $"thumbnails/{userId:N}/{cardId:N}/{modelId:N}.webp";
+        var expectedUrl = ObjectStoragePublicUrl.Build(_s3.ServiceUrl, _s3.PublicBaseUrl, _s3.DefaultBucket, expectedKey);
+        if (!string.Equals(publicUrl.TrimEnd('/'), expectedUrl.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogWarning("SaveThumbnail: URL mismatch expected={Expected} got={Got}", expectedUrl, publicUrl);
+            return SaveThumbnailResult.Fail(ModelUploadError.Validation, "Invalid thumbnail URL.");
+        }
+
+        await _models.SetThumbnailUrlAsync(userId, cardId, modelId, publicUrl, ct).ConfigureAwait(false);
+        _logger.LogInformation("Saved thumbnail for model={ModelId} card={CardId}", modelId, cardId);
+        return SaveThumbnailResult.Ok();
+    }
+
     private static AiCardModel ToDto(AiCardModelEntity m) =>
-        new(m.Id, m.AiCardId, m.StorageKey, m.PublicUrl, m.OriginalFileName, m.ContentType, m.SizeBytes, m.CreatedAt, m.IsActive);
+        new(m.Id, m.AiCardId, m.StorageKey, m.PublicUrl, m.OriginalFileName, m.ContentType, m.SizeBytes, m.CreatedAt, m.IsActive, m.ThumbnailUrl);
 }

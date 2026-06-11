@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -21,9 +21,8 @@ import { PLANS, type PlanKey } from '@/shared/data/plans'
 const rawKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''
 const stripePromise = rawKey && !rawKey.includes('REPLACE') ? loadStripe(rawKey) : null
 
-type Method = 'robokassa' | 'card'
+type Method = 'yookassa' | 'card'
 
-// ── Card payment panel (must be inside Elements) ─────────────────────────────
 
 interface CardPaymentPanelProps {
   loading: boolean
@@ -71,32 +70,30 @@ function CardPaymentPanel({ loading, setLoading }: CardPaymentPanelProps) {
   )
 }
 
-// ── Main checkout content ─────────────────────────────────────────────────────
 
 function CheckoutContent() {
   const { t } = useTranslation('checkout')
   const router = useRouter()
   const params = useSearchParams()
   const planKey = (params.get('plan') ?? 'starter') as PlanKey
-  const yearly = params.get('period') === 'yearly'
   const plan = PLANS[planKey] ?? PLANS.starter
-  const price = yearly ? plan.yearlyPrice : plan.monthlyPrice
+  const price = plan.monthlyPrice
 
-  const [method, setMethod] = useState<Method>('robokassa')
+  const [method, setMethod] = useState<Method>('yookassa')
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [fetchingSecret, setFetchingSecret] = useState(false)
   const [fetchError, setFetchError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [roboError, setRoboError] = useState('')
+  const [yooError, setYooError] = useState('')
   const { openCheckout } = useBilling()
 
-  // Static — checkout has no theme switching. If dark/light toggle is added,
-  // pass current theme value as a dep so Stripe appearance re-reads CSS vars.
-  const stripeAppearance = useMemo((): Appearance => {
+  const [stripeAppearance, setStripeAppearance] = useState<Appearance>({ theme: 'night' })
+
+  useEffect(() => {
     const style = getComputedStyle(document.documentElement)
     const v = (prop: string, fallback: string) =>
       style.getPropertyValue(prop).trim() || fallback
-    return {
+    setStripeAppearance({
       theme: 'night',
       variables: {
         colorBackground: v('--checkout-stripe-bg',      ''),
@@ -106,7 +103,7 @@ function CheckoutContent() {
         borderRadius:    '12px',
         fontFamily:      'Inter, ui-sans-serif, sans-serif',
       },
-    }
+    })
   }, [])
 
   // Fetch clientSecret as soon as user selects card tab
@@ -121,22 +118,22 @@ function CheckoutContent() {
     setFetchError('')
     apiFetch('/api/billing/stripe/payment-intent', {
       method: 'POST',
-      body: JSON.stringify({ plan: planKey, period: yearly ? 'yearly' : 'monthly' }),
+      body: JSON.stringify({ plan: planKey, period: 'monthly' }),
     })
       .then(r => jsonOrThrow<{ clientSecret: string }>(r))
       .then(d => { if (!cancelled) setClientSecret(d.clientSecret) })
       .catch(e => { if (!cancelled) setFetchError(e instanceof Error ? e.message : t('error.loading')) })
       .finally(() => { if (!cancelled) setFetchingSecret(false) })
     return () => { cancelled = true }
-  }, [method, planKey, yearly, t])
+  }, [method, planKey, t])
 
-  async function handleRoboNext() {
+  async function handleYooKassaNext() {
     setLoading(true)
-    setRoboError('')
+    setYooError('')
     try {
       await openCheckout(planKey)
     } catch (e) {
-      setRoboError(e instanceof Error ? e.message : t('error.payment'))
+      setYooError(e instanceof Error ? e.message : t('error.payment'))
     } finally {
       setLoading(false)
     }
@@ -146,7 +143,6 @@ function CheckoutContent() {
     <div className="min-h-screen text-white bg-[var(--checkout-page-bg)]">
       <div className="mx-auto max-w-[1080px] px-8 pt-16 pb-12 flex flex-col lg:flex-row gap-16 items-start">
 
-        {/* ── Left column ── */}
         <div className="flex-1 min-w-0 w-full lg:max-w-[580px]">
 
           {/* Back arrow + Title */}
@@ -168,16 +164,16 @@ function CheckoutContent() {
           <div className="flex gap-2.5 mb-3">
             <button
               type="button"
-              onClick={() => setMethod('robokassa')}
+              onClick={() => setMethod('yookassa')}
               className={cn(
                 'flex-1 flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 border transition-colors bg-[var(--checkout-surface)]',
-                method === 'robokassa' ? 'border-white' : 'border-[var(--checkout-border)]',
+                method === 'yookassa' ? 'border-white' : 'border-[var(--checkout-border)]',
               )}
             >
               <img
-                src="/images/robokassa.svg"
-                alt="Robokassa"
-                style={{ height: 14, filter: 'invert(1) brightness(10)' }}
+                src="/images/yookassa.svg"
+                alt="ЮKassa"
+                style={{ height: 20 }}
               />
             </button>
 
@@ -194,37 +190,37 @@ function CheckoutContent() {
           </div>
 
           {/* Payment panel */}
-          {method === 'robokassa' ? (
+          {method === 'yookassa' ? (
             <>
               <div className="rounded-xl border border-[var(--checkout-border)] bg-[var(--checkout-surface)] mb-4 p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <img src="/images/robokassa.svg" alt="" style={{ height: 18, filter: 'invert(1) brightness(10)' }} />
-                  <span className="text-body text-white">{t('robokassa.selected')}</span>
+                  <img src="/images/yookassa.svg" alt="" style={{ height: 20 }} />
+                  <span className="text-body text-white">{t('yookassa.selected')}</span>
                 </div>
                 <div className="mb-3 border-t border-[var(--checkout-border)]" />
                 <div className="flex items-start gap-3">
                   <ExternalLink size={14} className="text-gray-500 mt-0.5 shrink-0" />
                   <p className="text-[13px] leading-relaxed text-gray-400">
-                    {t('robokassa.redirect')}
+                    {t('yookassa.redirect')}
                   </p>
                 </div>
               </div>
 
               <p className="text-xs leading-relaxed mb-5 text-gray-500">
-                {t('robokassa.consent')}
+                {t('yookassa.consent')}
               </p>
 
               <button
                 type="button"
-                onClick={handleRoboNext}
+                onClick={handleYooKassaNext}
                 disabled={loading}
                 className="w-full rounded-full py-3 text-[15px] font-semibold transition-colors disabled:opacity-50 bg-white text-black"
               >
                 {loading ? t('loading') : t('next')}
               </button>
 
-              {roboError && (
-                <p className="mt-2 text-xs text-red-500">{roboError}</p>
+              {yooError && (
+                <p className="mt-2 text-xs text-red-500">{yooError}</p>
               )}
             </>
           ) : (
@@ -258,7 +254,6 @@ function CheckoutContent() {
           </div>
         </div>
 
-        {/* ── Right column ── */}
         <div className="lg:w-[360px] w-full shrink-0">
           <div className="sticky top-8 rounded-3xl border border-[var(--checkout-border)] bg-[var(--checkout-surface)] p-7">
             <h2 className="font-serif text-[28px] font-medium mb-0.5 text-white">
@@ -281,12 +276,12 @@ function CheckoutContent() {
               <div>
                 <div className="flex justify-between text-[13px]">
                   <span className="text-gray-300">
-                    {t('plan.features')} {t(yearly ? 'plan.periodYearly' : 'plan.periodMonthly')}
+                    {t('plan.features')} {t('plan.periodMonthly')}
                   </span>
                   <span className="text-white">{price} €</span>
                 </div>
                 <p className="text-[11px] mt-0.5 text-gray-500">
-                  {t(yearly ? 'plan.billingYearly' : 'plan.billingMonthly')}
+                  {t('plan.billingMonthly')}
                 </p>
               </div>
               <div className="flex justify-between text-[13px]">
@@ -308,7 +303,11 @@ function CheckoutContent() {
             </button>
 
             <p className="mt-3 text-center text-[11px] text-gray-500">
-              {t(yearly ? 'plan.renewsYearly' : 'plan.renewsMonthly', { price })}
+              {t('plan.renewsMonthly', { price })}
+            </p>
+
+            <p className="mt-2 text-center text-[11px] text-gray-500">
+              Annual billing coming soon
             </p>
           </div>
         </div>

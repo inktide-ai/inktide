@@ -10,6 +10,12 @@ import {
   type UpdateProjectRequest,
 } from '@/features/projects/api/projects'
 import type { ProjectListItem } from '@/entities/project/api'
+import type { AiCardResponse, AiCardModelResponse } from '@/shared/types/soul-api'
+import { getCard, listCardModels } from '@/entities/soul/api'
+import { listProjectScenes, type ProjectSceneResponse } from '@/features/projects/api/scenes'
+import { listProjectChannels, type ProjectChannelResponse } from '@/features/projects/api/channels'
+import { queryKeys } from '@/shared/lib/query/keys'
+import { buildProjectPreviewUrl } from '@/features/projects/lib/project-preview'
 
 function buildUpdate(project: Project | null, overrides: Partial<UpdateProjectRequest>): UpdateProjectRequest {
   return {
@@ -22,19 +28,15 @@ function buildUpdate(project: Project | null, overrides: Partial<UpdateProjectRe
     ...overrides,
   }
 }
-import type { AiCardResponse, AiCardModelResponse, AiCardSceneResponse, ChannelResponse } from '@/shared/types/soul-api'
-import { getCard, listCardModels, listCardScenes } from '@/entities/soul/api'
-import { queryKeys } from '@/shared/lib/query/keys'
-import { buildProjectPreviewUrl } from '@/features/projects/lib/project-preview'
 
 export interface ProjectRuntime {
   project: Project | null
   soul: AiCardResponse | null
   models: AiCardModelResponse[]
-  scenes: AiCardSceneResponse[]
+  scenes: ProjectSceneResponse[]
   activeModel: AiCardModelResponse | null
-  activeScene: AiCardSceneResponse | null
-  activeChannels: ChannelResponse[]
+  activeScene: ProjectSceneResponse | null
+  activeChannels: ProjectChannelResponse[]
   previewUrl: string | null
   loading: boolean
   bindSoul(soulId: string): Promise<void>
@@ -59,9 +61,6 @@ export function useProjectRuntime(projectId: string): ProjectRuntime {
   const soulId = project?.active_soul_id ?? null
 
   const soulQuery = useQuery({
-    // Use a project-runtime-scoped key to avoid colliding with the CharactersContext
-    // loadFullCard cache (queryKeys.souls.detail), which stores a mapped AiCharacter.
-    // This query stores the raw AiCardResponse; mixing them corrupts avatarUrl.
     queryKey: ['project-runtime', 'soul', soulId ?? ''],
     queryFn: () => getCard(soulId!),
     staleTime: 60_000,
@@ -76,10 +75,17 @@ export function useProjectRuntime(projectId: string): ProjectRuntime {
   })
 
   const scenesQuery = useQuery({
-    queryKey: queryKeys.souls.scenes(soulId ?? ''),
-    queryFn: () => listCardScenes(soulId!),
+    queryKey: queryKeys.projects.scenes(projectId),
+    queryFn: () => listProjectScenes(projectId),
     staleTime: 60_000,
-    enabled: !!soulId,
+    enabled: !!projectId,
+  })
+
+  const channelsQuery = useQuery({
+    queryKey: queryKeys.projects.channels(projectId),
+    queryFn: () => listProjectChannels(projectId),
+    staleTime: 60_000,
+    enabled: !!projectId,
   })
 
   const models = modelsQuery.data ?? []
@@ -104,8 +110,8 @@ export function useProjectRuntime(projectId: string): ProjectRuntime {
   )
 
   const activeChannels = useMemo(
-    () => (soul?.channels ?? []).filter(c => c.is_active && c.channel_id),
-    [soul?.channels],
+    () => (channelsQuery.data ?? []).filter(c => c.is_active && c.channel_id),
+    [channelsQuery.data],
   )
 
   const previewUrl = useMemo(
@@ -116,14 +122,15 @@ export function useProjectRuntime(projectId: string): ProjectRuntime {
     [activeModel, activeScene, activeChannels],
   )
 
-  const loading = projectQuery.isLoading || (!!soulId && soulQuery.isLoading)
+  const loading = projectQuery.isLoading || (!!soulId && (soulQuery.isLoading || modelsQuery.isLoading))
 
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: queryKeys.projects.detail(projectId) })
     qc.invalidateQueries({ predicate: q => q.queryKey[0] === 'projects' && typeof q.queryKey[1] === 'object' })
+    qc.invalidateQueries({ queryKey: queryKeys.projects.scenes(projectId) })
+    qc.invalidateQueries({ queryKey: queryKeys.projects.channels(projectId) })
     if (soulId) {
       qc.invalidateQueries({ queryKey: queryKeys.souls.models(soulId) })
-      qc.invalidateQueries({ queryKey: queryKeys.souls.scenes(soulId) })
     }
   }
 
@@ -188,11 +195,11 @@ export function useProjectRuntime(projectId: string): ProjectRuntime {
     activeChannels,
     previewUrl,
     loading,
-    bindSoul: (id) => bindSoulMutation.mutateAsync(id).then(() => {}),
-    unbindSoul: () => unbindSoulMutation.mutateAsync().then(() => {}),
-    setActiveModel: (id) => setActiveModelMutation.mutateAsync(id).then(() => {}),
-    setActiveScene: (id) => setActiveSceneMutation.mutateAsync(id).then(() => {}),
-    updateProjectMeta: (data) => updateProjectMetaMutation.mutateAsync(data).then(() => {}),
-    toggleStatus: () => toggleStatusMutation.mutateAsync().then(() => {}),
+    bindSoul: async (id) => { await bindSoulMutation.mutateAsync(id) },
+    unbindSoul: async () => { await unbindSoulMutation.mutateAsync() },
+    setActiveModel: async (id) => { await setActiveModelMutation.mutateAsync(id) },
+    setActiveScene: async (id) => { await setActiveSceneMutation.mutateAsync(id) },
+    updateProjectMeta: async (data) => { await updateProjectMetaMutation.mutateAsync(data) },
+    toggleStatus: async () => { await toggleStatusMutation.mutateAsync() },
   }
 }

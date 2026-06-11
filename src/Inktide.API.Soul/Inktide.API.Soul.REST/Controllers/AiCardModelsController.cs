@@ -11,7 +11,7 @@ namespace Inktide.API.Soul.REST.Controllers;
 /// Direct-to-MinIO uploads via presigned PUT, then persistence in PostgreSQL.
 /// </summary>
 [ApiController]
-[Route("api/soul/cards/{cardId:guid}/models")]
+[Route("api/v1/souls/cards/{cardId:guid}/models")]
 [Produces("application/json")]
 [Authorize]
 public sealed class AiCardModelsController : ApiController
@@ -115,15 +115,55 @@ public sealed class AiCardModelsController : ApiController
         return NoContent();
     }
 
-    [HttpPatch("{modelId:guid}/activate")]
+    [HttpPatch("{modelId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Activate(Guid cardId, Guid modelId, CancellationToken ct)
+    public async Task<IActionResult> Patch(Guid cardId, Guid modelId, [FromBody] PatchModelRequest request, CancellationToken ct)
     {
         if (!TryGetUserId(out var userId))
             return Unauthorized();
 
-        var result = await _uploads.SetActiveAsync(userId, cardId, modelId, ct).ConfigureAwait(false);
+        if (request.Active == true)
+        {
+            var result = await _uploads.SetActiveAsync(userId, cardId, modelId, ct);
+            if (!result.Success)
+                return MapError(result.ErrorKind, result.Error!);
+        }
+
+        return NoContent();
+    }
+
+
+    [HttpPost("{modelId:guid}/thumbnail/presign")]
+    [ProducesResponseType(typeof(PresignThumbnailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> PresignThumbnail(Guid cardId, Guid modelId, CancellationToken ct)
+    {
+        if (!TryGetUserId(out var userId))
+            return Unauthorized();
+
+        var result = await _uploads.PresignThumbnailAsync(userId, cardId, modelId, ct).ConfigureAwait(false);
+
+        if (!result.Success)
+            return MapError(result.ErrorKind, result.Error!);
+
+        return Ok(new PresignThumbnailResponse(result.UploadUrl!, result.PublicUrl!));
+    }
+
+    [HttpPost("{modelId:guid}/thumbnail/complete")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CompleteThumbnail(Guid cardId, Guid modelId, [FromBody] CompleteThumbnailRequest? body, CancellationToken ct)
+    {
+        if (body is null)
+            return BadRequest(ApiErrorResponse.From("Request body is required.", ErrorCodes.ValidationError));
+
+        if (!TryGetUserId(out var userId))
+            return Unauthorized();
+
+        var result = await _uploads.SaveThumbnailAsync(userId, cardId, modelId, body.PublicUrl, ct).ConfigureAwait(false);
 
         if (!result.Success)
             return MapError(result.ErrorKind, result.Error!);

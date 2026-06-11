@@ -1,8 +1,12 @@
 using System.Reflection;
 using Inktide.API.Core;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Settings;
+// Alias to disambiguate from MassTransit.IEndpointConfigurator
+using IEndpointConfigurator = Inktide.API.Core.IEndpointConfigurator;
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -143,6 +147,33 @@ public static class Startup
                 foreach (var startup in startups)
                 {
                     startup.ConfigureServices(ctx, services);
+                }
+
+                // Single MassTransit bus — aggregates all module consumer + outbox registrations.
+                var busConfigurators = startups.OfType<IBusModuleConfigurator>().ToList();
+                if (busConfigurators.Count > 0)
+                {
+                    services.AddMassTransit(x =>
+                    {
+                        foreach (var cfg in busConfigurators)
+                            cfg.ConfigureConsumers(x);
+
+                        x.UsingRabbitMq((context, cfg) =>
+                        {
+                            var host = ctx.Configuration["RabbitMQSettings:Host"]     ?? "localhost";
+                            var user = ctx.Configuration["RabbitMQSettings:Username"] ?? "guest";
+                            var pass = ctx.Configuration["RabbitMQSettings:Password"] ?? "guest";
+
+                            cfg.Host(host, "/", h =>
+                            {
+                                h.Username(user);
+                                h.Password(pass);
+                            });
+
+                            foreach (var configurator in busConfigurators)
+                                configurator.ConfigureEndpoints(cfg, context);
+                        });
+                    });
                 }
 
                 ctx.Properties["DryIocContainer"] = container;

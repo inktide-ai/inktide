@@ -1,10 +1,9 @@
-using Inktide.API.Core.Generators;
+using Inktide.API.Core.Messaging;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Inktide.API.TTS.Application.Abstractions;
 using Inktide.API.TTS.Application.Configuration;
 using Inktide.API.TTS.Application.Synthesis;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
@@ -19,9 +18,8 @@ namespace Inktide.API.TTS.Infrastructure.Messaging;
 /// it independently reads from the stream, calls Kokoro, and publishes the result.
 /// No other module needs to orchestrate this step.
 /// </summary>
-public sealed class LlmResponseStreamConsumer : BackgroundService
+public sealed class LlmResponseStreamConsumer : RedisStreamConsumerBase
 {
-
     /// <summary>
     /// JSON shape published by the Python llm-worker to <c>synapse.llm.response</c>.
     /// The worker emits one message per sentence chunk; <see cref="SequenceNumber"/> is zero-based
@@ -37,6 +35,8 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         [property: JsonPropertyName("isLast")]         bool    IsLast,
         /// <summary>Voice id resolved by the Python worker from the ContextShardPayload. Null = use default.</summary>
         [property: JsonPropertyName("voiceId")]        string? VoiceId,
+        /// <summary>UserId (Guid) of the card owner — used for per-user TTS credential lookup.</summary>
+        [property: JsonPropertyName("userId")]         Guid?   UserId,
         /// <summary>TTS provider id. Null = use configured default provider.</summary>
         [property: JsonPropertyName("ttsProviderId")]  string? TtsProviderId,
         /// <summary>TTS model override. Null = provider default.</summary>
@@ -47,6 +47,10 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         [property: JsonPropertyName("emotionId")]        string? EmotionId        = null,
         /// <summary>Emotion intensity 0.0–1.0.</summary>
         [property: JsonPropertyName("emotionIntensity")] float   EmotionIntensity = 0f,
+        /// <summary>Per-soul TTS endpoint override. Null = use globally configured endpoint.</summary>
+        [property: JsonPropertyName("ttsBaseUrl")]           string? TtsBaseUrl           = null,
+        /// <summary>Pre-serialized JSON of provider-specific params (stability, pitch, etc.). Deserialized here before synthesis.</summary>
+        [property: JsonPropertyName("ttsProviderParamsJson")] string? TtsProviderParamsJson = null,
         /// <summary>Speed multiplier from VAD arousal formula. Applied on top of TtsSpeed. Default 1.0 = no change.</summary>
         [property: JsonPropertyName("ttsSpeedModifier")]  float  TtsSpeedModifier  = 1.0f,
         /// <summary>Energy/style modifier from VAD formula. Default 1.0 = no change.</summary>
@@ -60,13 +64,21 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         [property: JsonPropertyName("comfort")]   float Comfort   = 0.5f);
 
 
-    private readonly IConnectionMultiplexer _redis;
     private readonly ITtsSynthesisService _tts;
     private readonly ITtsAudioPublisher _publisher;
     private readonly LlmResponseStreamSettings _inSettings;
     private readonly ILogger<LlmResponseStreamConsumer> _logger;
     private readonly string _consumerName;
 
+    protected override string StreamName              => _inSettings.StreamName;
+    protected override string ConsumerGroup           => _inSettings.ConsumerGroup;
+    protected override string ConsumerName            => _consumerName;
+    protected override string PayloadFieldName        => _inSettings.PayloadFieldName;
+    protected override int    ReadCount               => _inSettings.ReadCount;
+    protected override int    ReadBlockMilliseconds   => _inSettings.ReadBlockMilliseconds;
+    protected override long   AutoClaimMinIdleMs      => _inSettings.AutoClaimMinIdleMs;
+    protected override int    AutoClaimBatchSize      => _inSettings.AutoClaimBatchSize;
+    protected override int    AutoClaimLoopDelaySeconds => _inSettings.AutoClaimLoopDelaySeconds;
 
     public LlmResponseStreamConsumer(
         IConnectionMultiplexer redis,
@@ -74,8 +86,8 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         ITtsAudioPublisher publisher,
         IOptions<LlmResponseStreamSettings> inSettings,
         ILogger<LlmResponseStreamConsumer> logger)
+        : base(redis, logger)
     {
-        _redis      = redis      ?? throw new ArgumentNullException(nameof(redis));
         _tts        = tts        ?? throw new ArgumentNullException(nameof(tts));
         _publisher  = publisher  ?? throw new ArgumentNullException(nameof(publisher));
         _inSettings = inSettings?.Value ?? throw new ArgumentNullException(nameof(inSettings));
@@ -85,139 +97,7 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
     }
 
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        try
-        {
-            var db = _redis.GetDatabase();
-            await EnsureConsumerGroupAsync(db, stoppingToken);
-
-            _logger.LogInformation(
-                "LlmResponseStreamConsumer started. Stream={Stream} Group={Group} Consumer={Consumer}",
-                _inSettings.StreamName, _inSettings.ConsumerGroup, _consumerName);
-
-            await Task.WhenAll(
-                ConsumeLoopAsync(db, stoppingToken),
-                AutoClaimLoopAsync(db, stoppingToken));
-        }
-        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-        {
-            // normal shutdown
-        }
-
-        _logger.LogInformation("LlmResponseStreamConsumer stopped.");
-    }
-
-
-    private async Task EnsureConsumerGroupAsync(IDatabase db, CancellationToken ct)
-    {
-        while (!ct.IsCancellationRequested)
-        {
-            try
-            {
-                // SE.Redis does not support CancellationToken on StreamCreateConsumerGroupAsync.
-                // Configure syncTimeout/connectTimeout on ConnectionMultiplexer to bound hang time.
-                await db.StreamCreateConsumerGroupAsync(
-                    _inSettings.StreamName,
-                    _inSettings.ConsumerGroup,
-                    StreamPosition.Beginning,
-                    createStream: true);
-                return;
-            }
-            catch (RedisException ex) when (ex.Message.Contains("BUSYGROUP", StringComparison.OrdinalIgnoreCase))
-            {
-                _logger.LogDebug("Consumer group already exists: {Group}", _inSettings.ConsumerGroup);
-                return;
-            }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to create consumer group, retrying in 2s...");
-                await Task.Delay(TimeSpan.FromSeconds(2), ct);
-            }
-        }
-    }
-
-
-    private async Task ConsumeLoopAsync(IDatabase db, CancellationToken ct)
-    {
-        while (!ct.IsCancellationRequested)
-        {
-            try
-            {
-                var entries = await db.StreamReadGroupAsync(
-                    _inSettings.StreamName,
-                    _inSettings.ConsumerGroup,
-                    _consumerName,
-                    position: null,
-                    count: _inSettings.ReadCount,
-                    noAck: false);
-
-                if (entries.Length == 0)
-                {
-                    await Task.Delay(_inSettings.ReadBlockMilliseconds, ct);
-                    continue;
-                }
-
-                foreach (var entry in entries)
-                    await ProcessEntryAsync(db, entry, ct);
-            }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Stream read error, retrying in 2s...");
-                await Task.Delay(TimeSpan.FromSeconds(2), ct);
-            }
-        }
-    }
-
-    private async Task AutoClaimLoopAsync(IDatabase db, CancellationToken ct)
-    {
-        var cursor = (RedisValue)"0-0";
-
-        while (!ct.IsCancellationRequested)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(_inSettings.AutoClaimLoopDelaySeconds), ct);
-
-            try
-            {
-                var result = await db.StreamAutoClaimAsync(
-                    _inSettings.StreamName,
-                    _inSettings.ConsumerGroup,
-                    _consumerName,
-                    minIdleTimeInMs: _inSettings.AutoClaimMinIdleMs,
-                    startAtId: cursor,
-                    count: _inSettings.AutoClaimBatchSize);
-
-                if (result.IsNull) { cursor = "0-0"; continue; }
-
-                cursor = result.NextStartId.IsNullOrEmpty || result.NextStartId == "0-0"
-                    ? "0-0"
-                    : result.NextStartId;
-
-                foreach (var entry in result.ClaimedEntries)
-                    await ProcessEntryAsync(db, entry, ct);
-            }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "XAUTOCLAIM iteration failed");
-                cursor = "0-0";
-            }
-        }
-    }
-
-
-    private async Task ProcessEntryAsync(IDatabase db, StreamEntry entry, CancellationToken ct)
+    protected override async Task ProcessEntryAsync(IDatabase db, StreamEntry entry, CancellationToken ct)
     {
         var payloadJson = ReadField(entry, _inSettings.PayloadFieldName);
 
@@ -249,7 +129,7 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
 
         try
         {
-            await SynthesizeAndPublishAsync(db, response, ct);
+            await SynthesizeAndPublishAsync(response, ct);
         }
         catch (Exception ex)
         {
@@ -265,7 +145,7 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
         }
     }
 
-    private async Task SynthesizeAndPublishAsync(IDatabase db, LlmResponse response, CancellationToken ct)
+    private async Task SynthesizeAndPublishAsync(LlmResponse response, CancellationToken ct)
     {
         // Voice and provider are resolved upstream by the Python llm-worker from ContextShardPayload.
         // Fall back to the configured default voice only when the worker sends no voice info
@@ -279,14 +159,33 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
             ? response.TtsSpeed * response.TtsSpeedModifier
             : (float?)null;
 
+        // Deserialize provider params here — the only place in the pipeline that needs them.
+        IReadOnlyDictionary<string, object>? providerParams = null;
+        if (response.TtsProviderParamsJson is not null)
+        {
+            try
+            {
+                providerParams = JsonSerializer.Deserialize<Dictionary<string, object>>(response.TtsProviderParamsJson);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogWarning(ex,
+                    "Failed to deserialize ttsProviderParamsJson. Correlation={Correlation} — using provider defaults",
+                    response.CorrelationId);
+            }
+        }
+
         var command = new SynthesizeCommand(
-            ProviderId:  response.TtsProviderId,
-            Text:        response.Text,
-            VoiceId:     voiceId,
-            ModelId:     response.TtsModelId,
-            Speed:       effectiveSpeed,
-            Stream:      false,
-            AudioFormat: "wav");
+            ProviderId:    response.TtsProviderId,
+            Text:          response.Text,
+            VoiceId:       voiceId,
+            ModelId:       response.TtsModelId,
+            Speed:         effectiveSpeed,
+            Stream:        false,
+            AudioFormat:   "wav",
+            UserId:        response.UserId?.ToString(),
+            ProviderParams: providerParams,
+            BaseUrl:        response.TtsBaseUrl);
 
         var result = await _tts.SynthesizeAsync(command, ct);
 
@@ -329,28 +228,4 @@ public sealed class LlmResponseStreamConsumer : BackgroundService
                 break;
         }
     }
-
-
-    private Task AckAsync(IDatabase db, RedisValue entryId)
-        // SE.Redis does not support CancellationToken on StreamAcknowledgeAsync.
-        // Configure syncTimeout/connectTimeout on ConnectionMultiplexer to bound hang time.
-        => db.StreamAcknowledgeAsync(_inSettings.StreamName, _inSettings.ConsumerGroup, entryId);
-
-    private static string? ReadField(StreamEntry entry, string field)
-    {
-        foreach (var v in entry.Values)
-            if (v.Name.ToString() == field) return v.Value.ToString();
-        return null;
-    }
-
-    /// <summary>
-    /// Resolves a stable instance identifier for the consumer name (hostname, pod name, or short GUID).
-    /// Keeps consumer names meaningful in Redis XPENDING output.
-    /// </summary>
-    private static string ResolveInstanceId()
-        => Environment.GetEnvironmentVariable("DOTNET_HOSTNAME")
-           ?? Environment.GetEnvironmentVariable("HOSTNAME")
-           ?? Environment.GetEnvironmentVariable("K8S_POD_NAME")
-           ?? IdGenerator.New().ToString("N")[..8];
-
 }

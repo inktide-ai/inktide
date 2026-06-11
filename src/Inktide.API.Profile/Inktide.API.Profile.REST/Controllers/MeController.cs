@@ -2,10 +2,11 @@ using System.Security.Claims;
 using Inktide.API.Core;
 using Inktide.API.Profile.Application.Entities;
 using Inktide.API.Profile.Application.Interfaces;
+using Inktide.API.Profile.REST.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace Inktide.API.Profile.REST.Controllers;
 
@@ -13,11 +14,12 @@ namespace Inktide.API.Profile.REST.Controllers;
 /// Current user identity and account lifecycle (session validation, data purge, Keycloak delete).
 /// </summary>
 [ApiController]
-[Route("api/me")]
+[Route("api/v1/me")]
 [Produces("application/json")]
 [Authorize]
 public sealed class MeController : ControllerBase
 {
+    private static readonly JsonSerializerOptions _camelCase = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
     private readonly IUserAccountDeletionService _accountDeletion;
     private readonly IUserAvatarService _avatar;
@@ -135,7 +137,6 @@ public sealed class MeController : ControllerBase
         public string? Warning { get; init; }
     }
 
-    // ── Preferences ──────────────────────────────────────────────────────────────
 
     [HttpGet("preferences")]
     [ProducesResponseType(typeof(GlobalPreferencesResponse), StatusCodes.Status200OK)]
@@ -157,29 +158,15 @@ public sealed class MeController : ControllerBase
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (sub is null) return Unauthorized();
 
-        var appearance = body.Appearance is null ? null : new AppearancePrefs(
-            body.Appearance.Theme ?? AppearancePrefs.Default.Theme,
-            body.Appearance.AccentColor ?? AppearancePrefs.Default.AccentColor,
-            body.Appearance.FontSize ?? AppearancePrefs.Default.FontSize,
-            body.Appearance.Compact ?? AppearancePrefs.Default.Compact,
-            body.Appearance.ReduceMotion ?? AppearancePrefs.Default.ReduceMotion);
-
-        var notifications = body.Notifications is null ? null : new NotifPrefs(
-            body.Notifications.Enabled ?? NotifPrefs.Default.Enabled,
-            body.Notifications.EmailMentions ?? NotifPrefs.Default.EmailMentions,
-            body.Notifications.EmailMessages ?? NotifPrefs.Default.EmailMessages,
-            body.Notifications.EmailProjectUpdates ?? NotifPrefs.Default.EmailProjectUpdates,
-            body.Notifications.EmailSystem ?? NotifPrefs.Default.EmailSystem,
-            body.Notifications.PushMentions ?? NotifPrefs.Default.PushMentions,
-            body.Notifications.PushMessages ?? NotifPrefs.Default.PushMessages,
-            body.Notifications.PushReminders ?? NotifPrefs.Default.PushReminders);
+        var appearance    = GlobalPreferencesMapper.ToAppearancePrefs(body.Appearance);
+        var notifications = GlobalPreferencesMapper.ToNotifPrefs(body.Notifications);
 
         var result = await _preferences.PatchGlobalAsync(sub, appearance, body.Language, notifications, body.Favorites, ct).ConfigureAwait(false);
         return Ok(ToGlobalResponse(result));
     }
 
     [HttpGet("preferences/workspace/{characterId}")]
-    [ProducesResponseType(typeof(WorkspacePreferencesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetWorkspacePreferences(string characterId, CancellationToken ct)
     {
@@ -187,23 +174,32 @@ public sealed class MeController : ControllerBase
         if (sub is null) return Unauthorized();
 
         var result = await _preferences.GetWorkspaceAsync(sub, characterId, ct).ConfigureAwait(false);
-        return Ok(ToWorkspaceResponse(result));
+        return WorkspaceJson(result);
     }
 
     [HttpPatch("preferences/workspace/{characterId}")]
-    [ProducesResponseType(typeof(WorkspacePreferencesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> PatchWorkspacePreferences(string characterId, [FromBody] PatchWorkspacePreferencesRequest body, CancellationToken ct)
     {
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (sub is null) return Unauthorized();
 
-        var hubLayout = body.HubLayout?.ToString(Newtonsoft.Json.Formatting.None);
-        var sceneSettings = body.SceneSettings?.ToString(Newtonsoft.Json.Formatting.None);
+        var hubLayout     = body.HubLayout?.ToString(Newtonsoft.Json.Formatting.None);
+        var sceneSettings = body.SceneSettings is null ? null : JsonSerializer.Serialize(body.SceneSettings, _camelCase);
 
         var result = await _preferences.PatchWorkspaceAsync(sub, characterId, hubLayout, sceneSettings, ct).ConfigureAwait(false);
-        return Ok(ToWorkspaceResponse(result));
+        return WorkspaceJson(result);
     }
+
+    // Raw JSON strings from the DB are valid JSON — embed them directly to avoid
+    // Newtonsoft circular-reference issues with System.Text.Json.Nodes.JsonNode.
+    private static ContentResult WorkspaceJson(UserPreferencesWorkspace w) => new()
+    {
+        Content     = $$"""{"hubLayout":{{w.HubLayout ?? "null"}},"sceneSettings":{{w.SceneSettings ?? "null"}}}""",
+        ContentType = "application/json",
+        StatusCode  = 200,
+    };
 
     private static GlobalPreferencesResponse ToGlobalResponse(UserPreferencesGlobal g) => new()
     {
@@ -230,13 +226,6 @@ public sealed class MeController : ControllerBase
         Favorites = g.Favorites,
     };
 
-    private static WorkspacePreferencesResponse ToWorkspaceResponse(UserPreferencesWorkspace w) => new()
-    {
-        HubLayout = w.HubLayout is null ? null : JToken.Parse(w.HubLayout),
-        SceneSettings = w.SceneSettings is null ? null : JToken.Parse(w.SceneSettings),
-    };
-
-    // ── DTOs ─────────────────────────────────────────────────────────────────────
 
     public sealed class GlobalPreferencesResponse
     {
@@ -244,12 +233,6 @@ public sealed class MeController : ControllerBase
         public string Language { get; init; } = "en";
         public NotifPrefDto Notifications { get; init; } = new();
         public string[] Favorites { get; init; } = [];
-    }
-
-    public sealed class WorkspacePreferencesResponse
-    {
-        public JToken? HubLayout { get; init; }
-        public JToken? SceneSettings { get; init; }
     }
 
     public sealed class PatchGlobalPreferencesRequest
@@ -262,8 +245,8 @@ public sealed class MeController : ControllerBase
 
     public sealed class PatchWorkspacePreferencesRequest
     {
-        public JToken? HubLayout { get; init; }
-        public JToken? SceneSettings { get; init; }
+        public Newtonsoft.Json.Linq.JToken? HubLayout { get; init; }
+        public SceneSettingsDto? SceneSettings { get; init; }
     }
 
     public sealed class AppearancePrefDto
@@ -286,5 +269,22 @@ public sealed class MeController : ControllerBase
         public bool? PushMessages { get; init; }
         public bool? PushReminders { get; init; }
     }
+
+    public sealed class SceneSettingsDto
+    {
+        public ModelPositionDto?      Position         { get; init; }
+        public CameraSettingsDto?     Camera           { get; init; }
+        public AnimationsSettingsDto? Animations       { get; init; }
+        public BreastPhysicsDto?      BreastPhysics    { get; init; }
+        public DirectionalLightDto?   DirectionalLight { get; init; }
+        public AmbientLightDto?       AmbientLight     { get; init; }
+    }
+
+    public sealed record ModelPositionDto(float PosX, float PosY, float PosZ, float RotY);
+    public sealed record CameraSettingsDto(float Fov, float CameraDistance, float RenderScale, string LookAtMode);
+    public sealed record AnimationsSettingsDto(bool RandomAnimationsEnabled);
+    public sealed record BreastPhysicsDto(bool JiggleEnabled, float JiggleMult);
+    public sealed record DirectionalLightDto(float Intensity, string Color, float RotX, float RotY);
+    public sealed record AmbientLightDto(float Intensity, string Color);
 
 }

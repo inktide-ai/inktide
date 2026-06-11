@@ -92,4 +92,12 @@ public sealed class AiCardModelRepository : IAiCardModelRepository
             .ConfigureAwait(false);
     }
 
+    public async Task SetThumbnailUrlAsync(Guid userId, Guid aiCardId, Guid modelId, string thumbnailUrl, CancellationToken ct = default)
+    {
+        await _db.AiCardModels
+            .Where(m => m.Id == modelId && m.UserId == userId && m.AiCardId == aiCardId)
+            .ExecuteUpdateAsync(s => s.SetProperty(m => m.ThumbnailUrl, thumbnailUrl), ct)
+            .ConfigureAwait(false);
+    }
+
 }

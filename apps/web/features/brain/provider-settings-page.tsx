@@ -1,15 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { LlmSliderGroup } from '@/shared/ui/llm-slider-group'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ExternalLink, Headphones } from 'lucide-react'
-import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-providers'
-import { PROVIDER_DEFS } from '@/shared/data/providers'
+import { Slider } from '@/shared/ui/slider'
+import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-provider-catalog'
+import type { CharacterLlm } from '@/shared/lib/character'
 import { useCharactersContext } from '@/entities/character'
 import { getChatModels, type ChatModelInfo } from '@/features/brain/api/chat'
-import { getCredentials, upsertCredential, testCredential } from '@/features/soul'
-import { CredentialStatusBadge, statusFromCredential, type CredentialStatus } from '@/features/soul'
+import { getCredentials } from '@/features/soul'
+import { CredentialStatusBadge, statusFromCredential } from '@/features/soul'
+import { useCredentialTest } from '@/shared/lib/hooks/useCredentialTest'
 import { cn } from '@/lib/utils'
 
 const DEFAULT_OLLAMA_URL = process.env.NEXT_PUBLIC_DEFAULT_OLLAMA_URL ?? 'http://localhost:11434'
@@ -20,7 +24,6 @@ const inputCls = cn(
   'transition-colors focus:border-[var(--border-default)]',
 )
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const GlobeIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-[var(--text-tertiary)]" xmlns="http://www.w3.org/2000/svg">
@@ -46,45 +49,9 @@ const MemoryIcon = () => (
   </svg>
 )
 
-// ── ParamRow ─────────────────────────────────────────────────────────────────
-
-function ParamRow({ name, desc, min, max, step, value, onChange, decimals }: {
-  name: string; desc: string; min: number; max: number; step: number
-  value: number; onChange: (v: number) => void; decimals: number
-}) {
-  const pct = ((value - min) / (max - min)) * 100
-  return (
-    <div className="flex items-center justify-between px-6 py-4">
-      <div className="min-w-0 flex-1">
-        <p className="text-body font-medium text-[var(--text-primary)]">{name}</p>
-        <p className="mt-0.5 text-body text-[var(--text-secondary)]">{desc}</p>
-      </div>
-      <div className="flex shrink-0 items-center gap-3 ml-8">
-        <input
-          type="range"
-          min={min} max={max} step={step} value={value}
-          onChange={(e) => onChange(parseFloat(e.target.value))}
-          className="w-36 cursor-pointer appearance-none rounded-full outline-none [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--text-primary)]"
-          style={{ height: '4px', background: `linear-gradient(to right, var(--text-primary) ${pct}%, var(--border-subtle) ${pct}%)` }}
-        />
-        <input
-          type="number"
-          min={min} max={max} step={step}
-          value={value.toFixed(decimals)}
-          onChange={(e) => {
-            const v = parseFloat(e.target.value)
-            if (!isNaN(v)) onChange(Math.min(max, Math.max(min, v)))
-          }}
-          className="w-16 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] py-1 text-center text-body text-[var(--text-primary)] outline-none transition-colors focus:border-[var(--border-default)] [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-        />
-      </div>
-    </div>
-  )
-}
-
-// ── Ollama connection panel ───────────────────────────────────────────────────
 
 function OllamaConnectionPanel() {
+  const { t } = useTranslation('brain')
   const { selected, selectedId, updateCharacter } = useCharactersContext()
   const [models, setModels] = useState<ChatModelInfo[]>([])
   const [loading, setLoading] = useState(false)
@@ -116,9 +83,9 @@ function OllamaConnectionPanel() {
       <div className="p-5">
         <div className="mb-2 flex items-center gap-2 text-body font-medium text-[var(--text-primary)]">
           <ComputerIcon />
-          Server URL
+          {t('ps.serverUrl')}
         </div>
-        <p className="mb-3 text-body text-[var(--text-tertiary)]">URL of your local Ollama instance.</p>
+        <p className="mb-3 text-body text-[var(--text-tertiary)]">{t('ps.serverUrlDesc')}</p>
         <input
           className={inputCls}
           type="text"
@@ -130,10 +97,10 @@ function OllamaConnectionPanel() {
       <div className="p-5">
         <div className="mb-2 flex items-center gap-2 text-body font-medium text-[var(--text-primary)]">
           <MemoryIcon />
-          Model
+          {t('model.label')}
         </div>
         <p className="mb-3 text-body text-[var(--text-tertiary)]">
-          {loading ? 'Loading models…' : error ? 'Could not reach Ollama.' : 'Select a local model.'}
+          {loading ? t('model.loading') : error ? t('ps.ollamaUnreachable') : t('ps.selectLocalModel')}
         </p>
         <div className="relative">
           <select
@@ -142,7 +109,7 @@ function OllamaConnectionPanel() {
             disabled={loading || models.length === 0}
             onChange={(e) => patch({ modelId: e.target.value || null })}
           >
-            <option value="">— Select a model —</option>
+            <option value="">{t('model.selectPlaceholder')}</option>
             {models.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
           </select>
           <svg className="pointer-events-none absolute right-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[var(--text-tertiary)]" viewBox="0 0 12 12" fill="none" aria-hidden>
@@ -154,42 +121,29 @@ function OllamaConnectionPanel() {
   )
 }
 
-// ── Remote provider connection panel ─────────────────────────────────────────
 
 function RemoteConnectionPanel({ providerId }: { providerId: string }) {
-  const def = PROVIDER_DEFS.find((p) => p.id === providerId)
-  const [apiKey, setApiKey]         = useState('')
-  const [saving, setSaving]         = useState(false)
-  const [testStatus, setTestStatus] = useState<CredentialStatus>('untested')
-  const [testError, setTestError]   = useState<string | null>(null)
+  const { t } = useTranslation('brain')
+  const def = LLM_PROVIDER_CATALOG.find((p) => p.id === providerId)
+  const [apiKey, setApiKey] = useState('')
+  const credTest = useCredentialTest(providerId)
 
   useEffect(() => {
     getCredentials()
       .then((creds) => {
         const cred = creds.find((c) => c.providerId === providerId)
-        if (cred?.hasKey) setTestStatus(statusFromCredential(cred.verifiedAt, cred.lastError))
+        if (cred?.hasKey) credTest.setStatus(statusFromCredential(cred.verifiedAt, cred.lastError))
       })
       .catch(() => {})
+    // credTest.setStatus is a stable useState setter — intentionally omitted
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [providerId])
 
   if (!def) return null
 
   const handleSave = async () => {
     if (!apiKey.trim()) return
-    setSaving(true)
-    setTestStatus('testing')
-    setTestError(null)
-    try {
-      await upsertCredential(providerId, apiKey, def.fixedBaseUrl ?? null)
-      const result = await testCredential(providerId)
-      setTestStatus(result.success ? 'verified' : 'failed')
-      setTestError(result.error)
-    } catch (err) {
-      setTestStatus('failed')
-      setTestError(err instanceof Error ? err.message : 'Unexpected error')
-    } finally {
-      setSaving(false)
-    }
+    await credTest.test(apiKey, def.fixedBaseUrl ?? null)
   }
 
   return (
@@ -197,35 +151,35 @@ function RemoteConnectionPanel({ providerId }: { providerId: string }) {
       <div className="p-5">
         <div className="mb-2 flex items-center gap-2 text-body font-medium text-[var(--text-primary)]">
           <GlobeIcon />
-          Endpoint
+          {t('ps.endpoint')}
         </div>
-        <p className="text-body text-[var(--text-secondary)]">{def.fixedBaseUrl ?? 'Custom endpoint'}</p>
+        <p className="text-body text-[var(--text-secondary)]">{def.fixedBaseUrl ?? t('ps.customEndpoint')}</p>
       </div>
       <div className="p-5">
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-2 text-body font-medium text-[var(--text-primary)]">
             <LockIcon />
-            API Key
+            {t('ps.apiKey')}
           </div>
-          <CredentialStatusBadge status={testStatus} error={testError} />
+          <CredentialStatusBadge status={credTest.status} error={credTest.error} />
         </div>
-        <p className="mb-3 text-body text-[var(--text-tertiary)]">Enter your {def.name} API key to connect.</p>
+        <p className="mb-3 text-body text-[var(--text-tertiary)]">{t('ps.apiKeyDesc', { name: def.name })}</p>
         <div className="flex gap-2">
           <input
             type="password"
             value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
+            onChange={(e) => { setApiKey(e.target.value); credTest.reset() }}
             onKeyDown={(e) => { if (e.key === 'Enter') void handleSave() }}
             placeholder="sk-..."
             className={cn(inputCls, 'flex-1')}
           />
           <button
             type="button"
-            disabled={saving || !apiKey.trim()}
+            disabled={credTest.testing || !apiKey.trim()}
             onClick={() => void handleSave()}
             className="h-9 shrink-0 rounded-lg bg-[var(--accent-primary)] px-4 text-body font-semibold text-[var(--text-on-accent)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Saving…' : 'Save'}
+            {credTest.testing ? t('ps.saving') : t('ps.save')}
           </button>
         </div>
       </div>
@@ -233,45 +187,44 @@ function RemoteConnectionPanel({ providerId }: { providerId: string }) {
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function ProviderSettingsPage() {
+  const { t } = useTranslation('brain')
   const { selected, selectedId, updateCharacter } = useCharactersContext()
   const params = useParams<{ id: string; providerId: string }>()
 
   const catalog = LLM_PROVIDER_CATALOG.find((p) => p.id === params.providerId)
 
-  const llm = selected?.llm
-  const [temperature, setTemperature]         = useState(llm?.temperature ?? 0.75)
-  const [maxTokens, setMaxTokens]             = useState(llm?.maxTokens ?? 300)
-  const [topP, setTopP]                       = useState(llm?.topP ?? 0.75)
-  const [frequencyPenalty, setFrequencyPenalty] = useState(llm?.frequencyPenalty ?? 0.1)
-  const [presencePenalty, setPresencePenalty] = useState(llm?.presencePenalty ?? 0.0)
+  const [llmDraft, setLlmDraft] = useState<CharacterLlm | null>(selected?.llm ?? null)
 
-  if (!selected || !selectedId) {
-    return <div className="p-8 text-sm text-[var(--text-secondary)]">Loading...</div>
+  useEffect(() => {
+    if (selected?.llm) setLlmDraft(selected.llm)
+  }, [selected?.llm])
+
+  if (!selected || !selectedId || !llmDraft) {
+    return <div className="p-8 text-sm text-[var(--text-secondary)]">{t('ps.loading')}</div>
   }
 
+  const patchDraft = (p: Partial<CharacterLlm>) => setLlmDraft((prev) => prev ? { ...prev, ...p } : prev)
+
   const handleSaveBehavior = () => {
-    updateCharacter(selectedId, { llm: { ...selected.llm, temperature, maxTokens, topP, frequencyPenalty, presencePenalty } })
+    updateCharacter(selectedId, { llm: llmDraft })
   }
 
   return (
     <div className="min-h-screen px-6 py-8">
       <div className="mx-auto max-w-[1200px]">
 
-        {/* ── Breadcrumb ───────────────────────────────────────────────────── */}
         <nav className="mb-6 flex items-center gap-2 text-body text-[var(--text-secondary)]">
           <Link href={`/souls/${params.id}/brain`} className="hover:text-[var(--text-primary)] transition-colors">
-            Brain
+            {t('ps.brain')}
           </Link>
           <span className="text-[var(--text-tertiary)]">/</span>
           <span className="text-[var(--text-primary)]">{catalog?.name ?? params.providerId}</span>
           <span className="text-[var(--text-tertiary)]">/</span>
-          <span className="text-[var(--text-primary)]">Settings</span>
+          <span className="text-[var(--text-primary)]">{t('settings')}</span>
         </nav>
 
-        {/* ── Header ───────────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between pb-6 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-4">
             {catalog && (
@@ -284,7 +237,7 @@ export default function ProviderSettingsPage() {
                 {catalog?.name ?? params.providerId}
               </h1>
               <p className="mt-1 text-body text-[var(--text-secondary)]">
-                {catalog?.description ?? 'Language model provider settings'}
+                {catalog?.description ?? t('ps.settingsDefault')}
               </p>
             </div>
           </div>
@@ -298,7 +251,7 @@ export default function ProviderSettingsPage() {
                   className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3.5 py-2 text-body font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
                 >
                   <Headphones size={14} className="text-[var(--text-secondary)]" />
-                  {catalog.name} Support
+                  {t('ps.support', { name: catalog.name })}
                 </a>
               )}
               {catalog.websiteUrl && (
@@ -308,7 +261,7 @@ export default function ProviderSettingsPage() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--text-primary)] px-3.5 py-2 text-body font-medium text-[var(--bg-0)] hover:opacity-90 transition-opacity"
                 >
-                  Open in {catalog.name}
+                  {t('ps.openIn', { name: catalog.name })}
                   <ExternalLink size={13} />
                 </a>
               )}
@@ -316,20 +269,18 @@ export default function ProviderSettingsPage() {
           )}
         </div>
 
-        {/* ── Two-column grid ───────────────────────────────────────────────── */}
         <div className="mt-8 grid grid-cols-[1fr_300px] gap-8 items-start">
 
-          {/* ── LEFT ─────────────────────────────────────────────────────────── */}
           <div className="flex flex-col gap-5">
 
             {/* Connection card */}
             <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
               <div className="px-6 pt-5 pb-4">
-                <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Connection</h3>
+                <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('ps.connection')}</h3>
                 <p className="mt-1 text-body text-[var(--text-secondary)]">
                   {params.providerId === 'ollama'
-                    ? 'Configure your local Ollama server and model.'
-                    : 'Provide your API credentials to connect.'}
+                    ? t('ps.connectionOllama')
+                    : t('ps.connectionRemote')}
                 </p>
               </div>
               <div className="border-t border-[var(--border-subtle)]">
@@ -343,15 +294,34 @@ export default function ProviderSettingsPage() {
             {/* Model Behavior card */}
             <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
               <div className="px-6 pt-5 pb-4">
-                <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Model Behavior</h3>
-                <p className="mt-1 text-body text-[var(--text-secondary)]">These parameters apply to all providers.</p>
+                <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('ps.modelBehavior')}</h3>
+                <p className="mt-1 text-body text-[var(--text-secondary)]">{t('ps.modelBehaviorDesc')}</p>
               </div>
-              <div className="border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
-                <ParamRow name="Temperature" desc="Higher values make output more random and creative" min={0} max={2} step={0.01} decimals={2} value={temperature} onChange={setTemperature} />
-                <ParamRow name="Max tokens" desc="Maximum length of the generated response" min={1} max={4096} step={1} decimals={0} value={maxTokens} onChange={setMaxTokens} />
-                <ParamRow name="Top P" desc="Nucleus sampling — controls diversity of output" min={0} max={1} step={0.01} decimals={2} value={topP} onChange={setTopP} />
-                <ParamRow name="Frequency penalty" desc="Reduces repetition of the same phrases" min={0} max={2} step={0.01} decimals={2} value={frequencyPenalty} onChange={setFrequencyPenalty} />
-                <ParamRow name="Presence penalty" desc="Encourages talking about new topics" min={0} max={2} step={0.01} decimals={2} value={presencePenalty} onChange={setPresencePenalty} />
+              <div className="px-6 py-5">
+                <LlmSliderGroup
+                  llm={llmDraft}
+                  onPatch={patchDraft}
+                  renderSlider={({ value, onChange, min, max, step }) => (
+                    <div className="flex items-center gap-3">
+                      <Slider
+                        value={value} onChange={onChange}
+                        min={min} max={max} step={step}
+                        fill="var(--text-primary)" trackHeight={4} thumbSize={14}
+                        className="flex-1"
+                      />
+                      <input
+                        type="number"
+                        min={min} max={max} step={step}
+                        value={value}
+                        onChange={(e) => {
+                          const v = parseFloat(e.target.value)
+                          if (!isNaN(v)) onChange(Math.min(max, Math.max(min, v)))
+                        }}
+                        className="w-16 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] py-1 text-center text-body text-[var(--text-primary)] outline-none transition-colors focus:border-[var(--border-default)] [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      />
+                    </div>
+                  )}
+                />
               </div>
               <div className="flex items-center justify-end px-6 py-4 border-t border-[var(--border-subtle)]">
                 <button
@@ -359,23 +329,22 @@ export default function ProviderSettingsPage() {
                   onClick={handleSaveBehavior}
                   className="inline-flex items-center gap-2 rounded-lg bg-[var(--text-primary)] px-4 py-2 text-body font-semibold text-[var(--bg-0)] hover:opacity-90 transition-opacity"
                 >
-                  Save changes
+                  {t('ps.saveChanges')}
                 </button>
               </div>
             </div>
 
           </div>
 
-          {/* ── RIGHT sidebar ─────────────────────────────────────────────────── */}
           <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
             <div className="px-6 pt-5 pb-4">
-              <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">About</h3>
+              <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('ps.about')}</h3>
             </div>
             <div className="border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
               {catalog ? [
-                { label: 'Provider', value: catalog.name },
-                { label: 'Kind', value: catalog.kind },
-                { label: 'Model', value: catalog.model },
+                { label: t('ps.provider'), value: catalog.name },
+                { label: t('ps.kind'), value: catalog.kind },
+                { label: t('model.label'), value: catalog.model },
               ].map((row) => (
                 <div key={row.label} className="flex items-center justify-between px-6 py-3">
                   <span className="text-body text-[var(--text-secondary)]">{row.label}</span>
@@ -383,7 +352,7 @@ export default function ProviderSettingsPage() {
                 </div>
               )) : (
                 <div className="px-6 py-3">
-                  <p className="text-body text-[var(--text-tertiary)]">No additional information available.</p>
+                  <p className="text-body text-[var(--text-tertiary)]">{t('ps.noInfo')}</p>
                 </div>
               )}
             </div>

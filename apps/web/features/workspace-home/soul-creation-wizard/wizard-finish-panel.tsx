@@ -1,5 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
+import { z } from 'zod'
 import { cn } from '@/lib/utils'
 import { Atom } from '@/shared/ui/icons'
 
@@ -10,22 +12,25 @@ export interface WizardFinishPanelProps {
   onConfirm: (name: string) => Promise<void>
 }
 
+const schema = z.object({ soulName: z.string().min(1, 'Введите название души.') })
+type FormValues = z.infer<typeof schema>
+
 export function WizardFinishPanel({ llmName, ttsName, hasDiscord, onConfirm }: WizardFinishPanelProps) {
-  const [soulName, setSoulName] = useState('')
-  const [creating, setCreating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: standardSchemaResolver(schema),
+    defaultValues: { soulName: '' },
+  })
 
-  const canCreate = soulName.trim().length > 0 && !!llmName
-
-  const handleCreate = async () => {
-    if (!canCreate || creating) return
-    setCreating(true)
-    setError(null)
+  const onSubmit = async (data: FormValues) => {
     try {
-      await onConfirm(soulName.trim())
+      await onConfirm(data.soulName.trim())
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось создать душу')
-      setCreating(false)
+      setError('root', { message: err instanceof Error ? err.message : 'Не удалось создать душу' })
     }
   }
 
@@ -68,21 +73,20 @@ export function WizardFinishPanel({ llmName, ttsName, hasDiscord, onConfirm }: W
         </p>
       </div>
 
-      <div className="px-6 pb-5 space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-5 space-y-4">
         <div>
           <span className="home-ui-font mb-1.5 block text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">
             Название души
           </span>
           <input
+            {...register('soulName')}
             type="text"
-            value={soulName}
-            onChange={e => setSoulName(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleCreate() }}
             placeholder="Моя душа…"
             className={inputCls}
             autoFocus
             autoComplete="off"
           />
+          {errors.soulName && <p className="mt-1 text-2xs text-[var(--color-error-mid)]">{errors.soulName.message}</p>}
         </div>
 
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)]/40 divide-y divide-[var(--border-subtle)]">
@@ -104,22 +108,21 @@ export function WizardFinishPanel({ llmName, ttsName, hasDiscord, onConfirm }: W
           ))}
         </div>
 
-        {error && (
-          <p className="home-ui-font text-body text-[var(--color-error-mid)] text-center">{error}</p>
+        {errors.root && (
+          <p className="home-ui-font text-body text-[var(--color-error-mid)] text-center">{errors.root.message}</p>
         )}
-      </div>
 
-      <div className="flex-shrink-0 border-t border-[var(--border-subtle)] px-6 py-4">
-        <button
-          type="button"
-          onClick={handleCreate}
-          disabled={!canCreate || creating}
-          className="home-ui-font flex h-9 w-full items-center justify-center rounded-xl text-body font-semibold text-white transition-colors hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: 'var(--accent-base)' }}
-        >
-          {creating ? 'Создание…' : 'Создать душу'}
-        </button>
-      </div>
+        <div className="border-t border-[var(--border-subtle)] -mx-6 px-6 pt-4">
+          <button
+            type="submit"
+            disabled={!llmName || isSubmitting}
+            className="home-ui-font flex h-9 w-full items-center justify-center rounded-xl text-body font-semibold text-white transition-colors hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ background: 'var(--accent-base)' }}
+          >
+            {isSubmitting ? 'Создание…' : 'Создать душу'}
+          </button>
+        </div>
+      </form>
     </div>
   )
 }

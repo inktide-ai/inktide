@@ -1,5 +1,6 @@
 using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 using Inktide.API.Billing.Infrastructure.DbContext;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,6 +55,20 @@ public sealed class SubscriptionRepository : ISubscriptionRepository
         await _db.UserSubscriptions
             .Where(s => s.UserId == userId)
             .ExecuteDeleteAsync(ct)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyList<UserSubscription>> GetDueForRenewalAsync(
+        string provider, DateTime horizon, CancellationToken ct = default)
+    {
+        return await _db.UserSubscriptions
+            .AsNoTracking()
+            .Where(s => s.Provider == provider
+                     && s.Status == SubStatus.Active
+                     && s.CurrentPeriodEnd.HasValue
+                     && s.CurrentPeriodEnd <= horizon
+                     && s.ProviderSubId != null)
+            .ToListAsync(ct)
             .ConfigureAwait(false);
     }
 

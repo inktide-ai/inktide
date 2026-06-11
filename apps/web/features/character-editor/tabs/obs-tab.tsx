@@ -1,4 +1,5 @@
 'use client'
+import { useClipboard } from '@/shared/hooks/useClipboard'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
@@ -37,7 +38,7 @@ export default function ObsTab({ character, cardId }: ObsTabProps) {
 
   const [channels, setChannels] = useState<ChannelResponse[] | null>(null)
   const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
+  const { copied, copy: copyUrl } = useClipboard()
 
   useEffect(() => {
     let cancelled = false
@@ -66,12 +67,9 @@ export default function ObsTab({ character, cardId }: ObsTabProps) {
     })
   }, [hasModel, hasChannel, selectedChannelId, model, scene, character.appearance.modelType])
 
-  const copyUrl = () => {
+  function handleCopyUrl() {
     if (!obsUrl) return
-    navigator.clipboard.writeText(obsUrl).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
+    copyUrl(obsUrl)
   }
 
   return (
@@ -117,7 +115,7 @@ export default function ObsTab({ character, cardId }: ObsTabProps) {
                 <code className="font-mono text-[0.78rem] text-[#a5f3fc] whitespace-nowrap select-all">{obsUrl}</code>
               </div>
               <div className="flex items-center gap-[10px] p-[11px_16px]">
-                <button type="button" className={cn('py-[6px] px-4 bg-white/[0.08] border border-white/[0.13] rounded-[7px] text-(--text-primary) text-[0.82rem] font-medium cursor-pointer transition-[background,border-color,color] duration-[120ms] hover:bg-white/[0.14] hover:border-white/22', copied && 'bg-[var(--color-online)]/12 border-[var(--color-online)]/28 text-[var(--color-online)]')} onClick={copyUrl}>
+                <button type="button" className={cn('py-[6px] px-4 bg-white/[0.08] border border-white/[0.13] rounded-[7px] text-(--text-primary) text-[0.82rem] font-medium cursor-pointer transition-[background,border-color,color] duration-[120ms] hover:bg-white/[0.14] hover:border-white/22', copied && 'bg-[var(--color-online)]/12 border-[var(--color-online)]/28 text-[var(--color-online)]')} onClick={handleCopyUrl}>
                   {copied ? t('url.copied') : t('url.copy')}
                 </button>
                 <a className="text-[0.82rem] text-[rgba(165,243,252,0.7)] no-underline py-[6px] px-[14px] rounded-[7px] border border-[rgba(165,243,252,0.13)] transition-[color,border-color] duration-[120ms] hover:text-[#a5f3fc] hover:border-[rgba(165,243,252,0.28)]" href={obsUrl} target="_blank" rel="noreferrer">

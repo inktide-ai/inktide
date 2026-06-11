@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { REGISTER_ROUTE } from '@/lib/routes'
 import { cn } from '@/lib/utils'
+import { sectionContainer } from './section-container'
 
 const WindowsIcon = () => (
   <svg width="28" height="28" viewBox="0 0 42 43" fill="none">
@@ -44,24 +45,23 @@ export default function HeroInktide() {
   return (
     <section className="pt-[60px] bg-[var(--bg-dark)] flex flex-col overflow-x-hidden transition-[background] duration-[250ms]">
       <div className={cn(
-        'max-w-[1300px] mx-auto mt-16 px-8 pt-16 pb-8',
-        'grid grid-cols-[1fr_1.2fr] gap-16 items-center flex-shrink-0',
+        sectionContainer,
+        'grid grid-cols-1 gap-6 items-center flex-shrink-0',
+        'pt-4 pb-4 mt-2 text-center',
+        'sm:pt-6 sm:gap-8 sm:mt-4',
+        'lg:grid-cols-[1fr_1.2fr] lg:gap-16 lg:pt-16 lg:pb-8 lg:mt-16 lg:text-left',
         '[@media(max-height:950px)]:mt-6',
-        'max-lg:grid-cols-1 max-lg:text-center max-lg:px-6 max-lg:py-8 max-lg:mt-8 max-lg:gap-10',
-        'max-md:px-4 max-md:py-6 max-md:mt-4 max-md:gap-8',
-        'max-[480px]:px-4 max-[480px]:py-4 max-[480px]:mt-2 max-[480px]:gap-6',
       )}>
         {/* Left column */}
-        <div className="max-w-[540px] max-lg:max-w-full">
+        <div className="max-w-full lg:max-w-[540px]">
           <h1
             style={{ fontFamily: 'Georgia, serif' }}
             className={cn(
-            'text-[3.5rem] font-bold leading-[1.1]',
-            'text-[var(--text-primary)] mb-6 tracking-[-0.02em]',
-            'max-lg:text-[2.75rem]',
-            'max-md:text-[2rem]',
-            'max-[480px]:text-[1.75rem]',
-          )}>
+              'text-[1.75rem] sm:text-[2rem] md:text-[2.75rem] lg:text-[3.5rem]',
+              'font-bold leading-[1.1] tracking-[-0.02em]',
+              'text-[var(--text-primary)] mb-6',
+            )}
+          >
             {t('hero.titleStart')}{' '}
             <span className="relative inline-block whitespace-nowrap">
               <span className="relative z-[1]">{t('hero.titleHighlight')}</span>
@@ -76,10 +76,8 @@ export default function HeroInktide() {
           </h1>
 
           <p className={cn(
-            'font-[family-name:var(--font-ui)] text-[1.05rem] leading-[1.65]',
+            'font-[family-name:var(--font-ui)] text-[0.95rem] sm:text-base lg:text-[1.05rem] leading-[1.65]',
             'text-[var(--hero-subtitle-color)] mb-8 transition-[color] duration-[250ms]',
-            'max-md:text-base',
-            'max-[480px]:text-[0.95rem]',
           )}>
             {t('hero.subtitle')}
           </p>
@@ -88,11 +86,11 @@ export default function HeroInktide() {
             type="button"
             onClick={() => router.push(REGISTER_ROUTE)}
             className={cn(
-              'inline-block py-[0.875rem] px-[1.875rem] bg-[var(--hero-cta-bg)] border-none rounded-lg',
+              'w-full sm:w-auto inline-block py-[0.875rem] px-[1.875rem]',
+              'bg-[var(--hero-cta-bg)] border-none rounded-lg',
               'text-white font-[family-name:var(--font-ui)] text-base font-semibold cursor-pointer mb-8',
               'transition-[background,transform] duration-[200ms]',
               'hover:bg-[var(--hero-cta-hover-bg)] hover:-translate-y-px',
-              'max-[480px]:w-full max-[480px]:text-center',
             )}
           >
             {t('hero.ctaPrimary')}
@@ -102,7 +100,7 @@ export default function HeroInktide() {
             <p className="font-[family-name:var(--font-ui)] text-base font-medium text-[var(--support-color)] mb-[0.875rem]">
               {t('hero.downloadLabel')}
             </p>
-            <div className="flex items-center gap-2 max-lg:justify-center">
+            <div className="flex items-center gap-2 justify-center lg:justify-start">
               {sorted.map(({ os, label, Icon }, i) => (
                 <a
                   key={os}
@@ -129,11 +127,9 @@ export default function HeroInktide() {
         {/* Right column */}
         <div className="flex justify-center items-center min-w-0">
           <div className={cn(
-            'w-full max-w-[560px] rounded-[20px] overflow-hidden bg-black',
-            'shadow-[var(--hero-video-shadow)]',
-            'max-lg:max-w-[480px] max-lg:rounded-2xl',
-            'max-md:max-w-[360px] max-md:rounded-[14px]',
-            'max-[480px]:max-w-full max-[480px]:rounded-xl',
+            'w-full max-w-full sm:max-w-[360px] md:max-w-[480px] lg:max-w-[560px]',
+            'rounded-xl sm:rounded-[14px] md:rounded-2xl lg:rounded-[20px]',
+            'overflow-hidden bg-black shadow-[var(--hero-video-shadow)]',
           )}>
             <video
               src="/videos/hero.mp4"

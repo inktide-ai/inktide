@@ -1,7 +1,7 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
 import { getChatModels, type ChatModelInfo } from '@/features/brain/api/chat'
-import { useDebounce } from '@/shared/hooks'
+import { useDebounce } from 'use-debounce'
 
 export interface UseOllamaModelsResult {
   models: ChatModelInfo[]
@@ -13,7 +13,7 @@ export function useOllamaModels(
   effectiveBaseUrl: string,
   credLoading: boolean,
 ): UseOllamaModelsResult {
-  const debouncedUrl = useDebounce(effectiveBaseUrl, 500)
+  const [debouncedUrl] = useDebounce(effectiveBaseUrl, 500)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['ollama-models', debouncedUrl],

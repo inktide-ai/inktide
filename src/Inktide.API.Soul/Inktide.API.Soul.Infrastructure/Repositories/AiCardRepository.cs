@@ -23,19 +23,16 @@ public sealed class AiCardRepository : IAiCardRepository
     {
         return await _db.AiCards
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null, ct);
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
     }
 
     public async Task<AiCard?> GetByIdWithRelationsAsync(Guid id, CancellationToken ct = default)
     {
         return await _db.AiCards
             .AsNoTracking()
-            .AsSplitQuery()
             .Include(c => c.LlmCatalog)
             .Include(c => c.TtsCatalog)
-            .Include(c => c.Channels)
-            .Include(c => c.Tools)
-            .FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null, ct);
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
     }
 
     public async Task<IReadOnlyList<AiCard>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
@@ -43,28 +40,47 @@ public sealed class AiCardRepository : IAiCardRepository
         return await _db.AiCards
             .AsNoTracking()
             .Include(c => c.LlmCatalog)
-            .Where(c => c.UserId == userId && c.DeletedAt == null)
+            .Where(c => c.UserId == userId)
             .OrderBy(c => c.SortKey)
             .ToListAsync(ct);
     }
 
     public async Task<IReadOnlyList<AiCard>> GetSummaryListByUserIdAsync(Guid userId, CancellationToken ct = default)
     {
-        // AsSplitQuery prevents a Cartesian explosion when joining LlmCatalog + Channels in one query.
-        // Global query filter (DeletedAt == null) is applied automatically.
         return await _db.AiCards
             .AsNoTracking()
-            .AsSplitQuery()
             .Include(c => c.LlmCatalog)
-            .Include(c => c.Channels.Where(ch => ch.IsActive))
             .Where(c => c.UserId == userId)
             .OrderBy(c => c.SortKey)
             .ToListAsync(ct);
     }
 
+    public async Task<(IReadOnlyList<AiCard> Items, bool HasMore)> GetSummaryListPagedAsync(
+        Guid userId, int limit, string? cursor, CancellationToken ct = default)
+    {
+        var q = _db.AiCards
+            .AsNoTracking()
+            .Include(c => c.LlmCatalog)
+            .Where(c => c.UserId == userId);
+
+        if (cursor is not null)
+        {
+            var cur = cursor;
+            q = q.Where(c => c.SortKey.CompareTo(cur) > 0);
+        }
+
+        var rows = await q
+            .OrderBy(c => c.SortKey)
+            .Take(limit + 1)
+            .ToListAsync(ct);
+
+        var hasMore = rows.Count > limit;
+        return (rows.Take(limit).ToList(), hasMore);
+    }
+
     public async Task<int> CountByUserIdAsync(Guid userId, CancellationToken ct = default)
     {
-        return await _db.AiCards.CountAsync(c => c.UserId == userId && c.DeletedAt == null, ct);
+        return await _db.AiCards.CountAsync(c => c.UserId == userId, ct);
     }
 
     public Task<AiCard> CreateAsync(AiCard card, CancellationToken ct = default)
@@ -86,7 +102,7 @@ public sealed class AiCardRepository : IAiCardRepository
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
     {
-        var card = await _db.AiCards.FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null, ct);
+        var card = await _db.AiCards.FirstOrDefaultAsync(c => c.Id == id, ct);
         if (card is null) return;
 
         card.SoftDelete(_time.GetUtcNow().UtcDateTime);
@@ -94,7 +110,7 @@ public sealed class AiCardRepository : IAiCardRepository
 
     public async Task<bool> SlugExistsAsync(Guid userId, string slug, Guid? excludeCardId = null, CancellationToken ct = default)
     {
-        var query = _db.AiCards.Where(c => c.UserId == userId && c.Slug == slug && c.DeletedAt == null);
+        var query = _db.AiCards.Where(c => c.UserId == userId && c.Slug == slug);
         if (excludeCardId.HasValue)
             query = query.Where(c => c.Id != excludeCardId.Value);
         return await query.AnyAsync(ct);
@@ -104,16 +120,14 @@ public sealed class AiCardRepository : IAiCardRepository
     {
         return await _db.AiCards
             .AsNoTracking()
-            .AsSplitQuery()
-            .Include(c => c.Channels.Where(ch => ch.IsActive))
-            .FirstOrDefaultAsync(c => c.Slug == slug && c.DeletedAt == null, ct);
+            .FirstOrDefaultAsync(c => c.Slug == slug, ct);
     }
 
     public async Task<IReadOnlyList<(Guid Id, string SortKey)>> GetSortKeysAsync(Guid userId, CancellationToken ct = default)
     {
         var rows = await _db.AiCards
             .AsNoTracking()
-            .Where(c => c.UserId == userId && c.DeletedAt == null)
+            .Where(c => c.UserId == userId)
             .OrderBy(c => c.SortKey)
             .Select(c => new { c.Id, c.SortKey })
             .ToListAsync(ct)
@@ -124,14 +138,14 @@ public sealed class AiCardRepository : IAiCardRepository
 
     public Task SetAvatarUrlAsync(Guid cardId, string? avatarUrl, DateTime updatedAt, CancellationToken ct = default)
         => _db.AiCards
-              .Where(c => c.Id == cardId && c.DeletedAt == null)
+              .Where(c => c.Id == cardId)
               .ExecuteUpdateAsync(s => s
                   .SetProperty(c => c.AvatarUrl, avatarUrl)
                   .SetProperty(c => c.UpdatedAt, updatedAt), ct);
 
     public Task SetBannerUrlAsync(Guid cardId, string? bannerUrl, DateTime updatedAt, CancellationToken ct = default)
         => _db.AiCards
-              .Where(c => c.Id == cardId && c.DeletedAt == null)
+              .Where(c => c.Id == cardId)
               .ExecuteUpdateAsync(s => s
                   .SetProperty(c => c.BannerUrl, bannerUrl)
                   .SetProperty(c => c.UpdatedAt, updatedAt), ct);

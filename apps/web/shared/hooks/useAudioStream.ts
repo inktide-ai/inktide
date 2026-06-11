@@ -1,13 +1,13 @@
 'use client'
 import { useCallback, useEffect, useRef } from 'react'
-import { HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr'
 import type { IAudioPlayer } from '@/shared/types/IAudioPlayer'
 import type { VisemeCue } from '@/shared/types/IVisemeProvider'
 import { WebAudioPlayer } from '../services/audio/WebAudioPlayer'
 import type { LipSyncHandle } from './useLipSync'
 import type { EmotionState, SoulState } from '@/shared/types/IVrmController'
 import { useAuth } from '@/shared/services/auth'
-import { getFreshAuthToken } from '@/api/client'
+import { getSignalRToken } from '@/shared/lib/getSignalRToken'
+import { useRealtimeStore } from '@/shared/services/realtime/useRealtimeStore'
 
 interface AudioPayload {
   correlationId: string
@@ -31,10 +31,6 @@ export interface UseAudioStreamResult {
   getSoulState: () => SoulState | null
 }
 
-/**
- * LSP: использует IAudioPlayer вместо конкретного AudioPlayer.
- * SRP: только SignalR-соединение + диспетчеризация аудио на IAudioPlayer.
- */
 export function useAudioStream(
   channelId: string | null | undefined,
   options: UseAudioStreamOptions = {},
@@ -42,13 +38,13 @@ export function useAudioStream(
   const { lipSync } = options
   const { isLoggedIn, isInitialized } = useAuth()
 
-  const lipSyncRef = useRef<LipSyncHandle | undefined>(lipSync)
-  useEffect(() => { lipSyncRef.current = lipSync }, [lipSync])
-
+  const lipSyncRef    = useRef<LipSyncHandle | undefined>(lipSync)
   const emotionRef    = useRef<EmotionState>({ emotion: null, intensity: 0 })
   const emotionReset  = useRef<ReturnType<typeof setTimeout> | null>(null)
   const soulStateRef  = useRef<SoulState | null>(null)
   const generationRef = useRef(0)
+
+  useEffect(() => { lipSyncRef.current = lipSync }, [lipSync])
 
   useEffect(() => {
     if (!channelId || !isInitialized || !isLoggedIn) return
@@ -60,52 +56,47 @@ export function useAudioStream(
 
     const player: IAudioPlayer = new WebAudioPlayer(() => lipSyncRef.current)
 
-    const connection = new HubConnectionBuilder()
-      .withUrl('/hubs/audio', { accessTokenFactory: getFreshAuthToken })
-      .withAutomaticReconnect()
-      .configureLogging(LogLevel.Warning)
-      .build()
+    let active = true
+    let unsubs: (() => void)[] = []
 
-    connection.on('audioReceived', (payload: AudioPayload) => {
-      player.enqueue(payload.correlationId, payload.audioBase64, payload.visemeTimeline ?? null)
-
-      if (generation !== generationRef.current) return
-
-      if (payload.emotion) {
-        if (emotionReset.current) clearTimeout(emotionReset.current)
-        emotionRef.current = { emotion: payload.emotion, intensity: payload.emotionIntensity ?? 0.8 }
-        emotionReset.current = setTimeout(() => {
-          emotionRef.current = { emotion: null, intensity: 0 }
-        }, 5_000)
-      }
-
-      // Update SoulState whenever we have VAD data
-      if (payload.vad) {
-        soulStateRef.current = {
-          vad: payload.vad,
-          physical: payload.physical ?? { energy: 1, attention: 0, comfort: 0.5 },
-        }
-      }
-    })
-
-    let stopped = false
-
-    connection
-      .start()
+    void useRealtimeStore.getState()
+      .connect(channelId, getSignalRToken)
       .then(() => {
-        if (!stopped) return connection.invoke('JoinChannel', channelId)
+        if (!active) return
+        const store = useRealtimeStore.getState()
+        unsubs = [
+          store.on('audioReceived', (payload: AudioPayload) => {
+            player.enqueue(payload.correlationId, payload.audioBase64, payload.visemeTimeline ?? null)
+
+            if (generation !== generationRef.current) return
+
+            if (payload.emotion) {
+              if (emotionReset.current) clearTimeout(emotionReset.current)
+              emotionRef.current = { emotion: payload.emotion, intensity: payload.emotionIntensity ?? 0.8 }
+              emotionReset.current = setTimeout(() => {
+                emotionRef.current = { emotion: null, intensity: 0 }
+              }, 5_000)
+            }
+
+            if (payload.vad) {
+              soulStateRef.current = {
+                vad: payload.vad,
+                physical: payload.physical ?? { energy: 1, attention: 0, comfort: 0.5 },
+              }
+            }
+          }),
+        ]
       })
       .catch((err: unknown) => {
-        console.error('[useAudioStream] SignalR connect failed', err)
+        if (active) console.error('[useAudioStream] connect failed', err)
       })
 
     return () => {
-      stopped = true
+      active = false
+      unsubs.forEach(u => u())
       player.destroy()
       if (emotionReset.current) clearTimeout(emotionReset.current)
-      if (connection.state !== HubConnectionState.Disconnected) {
-        connection.stop()
-      }
+      void useRealtimeStore.getState().disconnect()
     }
   }, [channelId, isLoggedIn, isInitialized])
 

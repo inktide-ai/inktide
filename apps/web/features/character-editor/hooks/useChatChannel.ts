@@ -1,6 +1,5 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr'
 import { apiFetch } from '@/api/client'
 import type { IAudioPlayer } from '@/shared/types/IAudioPlayer'
 import type { VisemeCue } from '@/shared/types/IVisemeProvider'
@@ -8,9 +7,10 @@ import { WebAudioPlayer } from '@/shared/services/audio/WebAudioPlayer'
 import type { LipSyncHandle } from '@/shared/hooks/useLipSync'
 import type { EmotionState } from '@/shared/types/IVrmController'
 import { useAuth } from '@/shared/services/auth'
-import { getFreshAuthToken } from '@/api/client'
+import { getSignalRToken } from '@/shared/lib/getSignalRToken'
+import { isValidChannelId } from '@/shared/lib/channel-id'
+import { useRealtimeStore } from '@/shared/services/realtime/useRealtimeStore'
 
-// ── Public types ──────────────────────────────────────────────────────────────
 
 export type MessageStatus = 'sending' | 'sent' | 'failed'
 
@@ -35,7 +35,6 @@ export interface UseChatChannelResult {
   getEmotionState: () => EmotionState
 }
 
-// ── Internal types ─────────────────────────────────────────────────────────────
 
 interface TextChunkEvent {
   correlationId: string
@@ -58,146 +57,120 @@ interface ChunkBuffer {
   lastSeq: number
 }
 
-// ── Hook ───────────────────────────────────────────────────────────────────────
 
-/**
- * LSP: использует IAudioPlayer вместо конкретного MiniAudioPlayer.
- * SRP: только SignalR-соединение + накопление текста + диспетчеризация аудио.
- *      Аудиовоспроизведение делегировано WebAudioPlayer через IAudioPlayer.
- */
 export function useChatChannel(
   channelId: string | null,
   lipSync?: LipSyncHandle,
 ): UseChatChannelResult {
   const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [connected, setConnected] = useState(false)
+  const connected = useRealtimeStore(s => s.connected)
   const { isLoggedIn, isInitialized } = useAuth()
 
   const chunkBuffers = useRef<Map<string, ChunkBuffer>>(new Map())
+  const emotionRef   = useRef<EmotionState>({ emotion: null, intensity: 0 })
+  const emotionReset = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const playerRef    = useRef<IAudioPlayer | null>(null)
+  const messagesRef  = useRef<ChatMessage[]>(messages)
+  const lipSyncRef   = useRef<LipSyncHandle | undefined>(lipSync)
 
-  const emotionRef     = useRef<EmotionState>({ emotion: null, intensity: 0 })
-  const emotionReset   = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // LSP: тип IAudioPlayer — конкретный класс можно заменить без изменения хука
-  const playerRef = useRef<IAudioPlayer | null>(null)
-
-  const messagesRef = useRef<ChatMessage[]>(messages)
   useEffect(() => { messagesRef.current = messages }, [messages])
-
-  // Getter-функция позволяет WebAudioPlayer читать актуальный lipSync через ref
-  const lipSyncRef = useRef<LipSyncHandle | undefined>(lipSync)
   useEffect(() => { lipSyncRef.current = lipSync }, [lipSync])
 
   useEffect(() => {
     if (!channelId || !isInitialized || !isLoggedIn) return
 
-    // DIP: создаём через интерфейс — можно подменить реализацию
     const player: IAudioPlayer = new WebAudioPlayer(() => lipSyncRef.current)
     playerRef.current = player
 
-    const connection = new HubConnectionBuilder()
-      .withUrl('/hubs/audio', { accessTokenFactory: getFreshAuthToken })
-      .withAutomaticReconnect()
-      .configureLogging(LogLevel.Warning)
-      .build()
+    let active = true
+    let unsubs: (() => void)[] = []
 
-    connection.on('textChunk', (event: TextChunkEvent) => {
-      const buffers = chunkBuffers.current
-      let buf = buffers.get(event.correlationId)
-
-      if (!buf) {
-        const target = messagesRef.current.find(
-          (m) => m.role === 'assistant' && m.pending && !m.correlationId,
-        )
-
-        if (!target) {
-          const newId = crypto.randomUUID()
-          setMessages((prev) => [
-            ...prev,
-            { id: newId, role: 'assistant', content: '', pending: true, correlationId: event.correlationId },
-          ])
-          buf = { messageId: newId, lastSeq: -1 }
-        } else {
-          setMessages((prev) =>
-            prev.map((m) => m.id === target.id ? { ...m, correlationId: event.correlationId } : m),
-          )
-          buf = { messageId: target.id, lastSeq: -1 }
-        }
-        buffers.set(event.correlationId, buf)
-      }
-
-      // Dedup: Redis XAUTOCLAIM может повторно доставить уже обработанные записи
-      if (event.sequenceNumber <= buf.lastSeq) return
-      buf.lastSeq = event.sequenceNumber
-
-      setMessages((prev) =>
-        prev.map((m) => {
-          if (m.id !== buf!.messageId) return m
-          const next = { ...m, content: m.content + event.text }
-          if (event.isLast) {
-            next.pending = false
-            next.correlationId = undefined
-          }
-          return next
-        }),
-      )
-
-      if (event.isLast) buffers.delete(event.correlationId)
-    })
-
-    connection.on('audioReceived', (event: AudioReceivedEvent) => {
-      // LSP: player — IAudioPlayer, конкретный класс прозрачно заменяем
-      player.enqueue(event.correlationId, event.audioBase64, event.visemeTimeline ?? null)
-
-      console.debug('[audioReceived] emotion=%s intensity=%s', event.emotion ?? 'null', event.emotionIntensity ?? 'null')
-
-      if (event.emotion) {
-        if (emotionReset.current) clearTimeout(emotionReset.current)
-        emotionRef.current = { emotion: event.emotion, intensity: event.emotionIntensity ?? 0.8 }
-        emotionReset.current = setTimeout(() => {
-          emotionRef.current = { emotion: null, intensity: 0 }
-        }, 5_000)
-      }
-    })
-
-    connection.onreconnected(() => {
-      connection.invoke('JoinChannel', channelId).catch(() => {})
-      setConnected(true)
-    })
-
-    connection.onclose(() => setConnected(false))
-
-    let stopped = false
-    connection
-      .start()
+    void useRealtimeStore.getState()
+      .connect(channelId, getSignalRToken)
       .then(() => {
-        if (stopped) { connection.stop().catch(() => {}); return }
-        setConnected(true)
-        return connection.invoke('JoinChannel', channelId)
+        if (!active) return
+        const store = useRealtimeStore.getState()
+        unsubs = [
+          store.on('textChunk', (event: TextChunkEvent) => {
+            const buffers = chunkBuffers.current
+            let buf = buffers.get(event.correlationId)
+
+            if (!buf) {
+              const target = messagesRef.current.find(
+                (m) => m.role === 'assistant' && m.pending && !m.correlationId,
+              )
+              if (!target) {
+                const newId = crypto.randomUUID()
+                setMessages((prev) => [
+                  ...prev,
+                  { id: newId, role: 'assistant', content: '', pending: true, correlationId: event.correlationId },
+                ])
+                buf = { messageId: newId, lastSeq: -1 }
+              } else {
+                setMessages((prev) =>
+                  prev.map((m) => m.id === target.id ? { ...m, correlationId: event.correlationId } : m),
+                )
+                buf = { messageId: target.id, lastSeq: -1 }
+              }
+              buffers.set(event.correlationId, buf)
+            }
+
+            // Dedup: Redis XAUTOCLAIM может повторно доставить уже обработанные записи
+            if (event.sequenceNumber <= buf.lastSeq) return
+            buf.lastSeq = event.sequenceNumber
+
+            setMessages((prev) =>
+              prev.map((m) => {
+                if (m.id !== buf!.messageId) return m
+                const next = { ...m, content: m.content + event.text }
+                if (event.isLast) {
+                  next.pending = false
+                  next.correlationId = undefined
+                }
+                return next
+              }),
+            )
+            if (event.isLast) buffers.delete(event.correlationId)
+          }),
+
+          store.on('audioReceived', (event: AudioReceivedEvent) => {
+            player.enqueue(event.correlationId, event.audioBase64, event.visemeTimeline ?? null)
+
+            console.debug('[audioReceived] emotion=%s intensity=%s', event.emotion ?? 'null', event.emotionIntensity ?? 'null')
+
+            if (event.emotion) {
+              if (emotionReset.current) clearTimeout(emotionReset.current)
+              emotionRef.current = { emotion: event.emotion, intensity: event.emotionIntensity ?? 0.8 }
+              emotionReset.current = setTimeout(() => {
+                emotionRef.current = { emotion: null, intensity: 0 }
+              }, 5_000)
+            }
+          }),
+        ]
       })
       .catch((err: unknown) => {
-        if (!stopped) console.error('[useChatChannel] SignalR connect failed', err)
+        if (active) console.error('[useChatChannel] connect failed', err)
       })
 
     return () => {
-      stopped = true
+      active = false
+      unsubs.forEach(u => u())
       player.destroy()
       playerRef.current = null
       chunkBuffers.current.clear()
       if (emotionReset.current) clearTimeout(emotionReset.current)
-      // Don't stop while still connecting — causes "stopped during negotiation" in StrictMode
-      if (
-        connection.state === HubConnectionState.Connected ||
-        connection.state === HubConnectionState.Reconnecting
-      ) {
-        connection.stop().catch(() => {})
-      }
+      void useRealtimeStore.getState().disconnect()
     }
   }, [channelId, isLoggedIn, isInitialized])
 
   const send = useCallback(
     async (text: string) => {
       if (!channelId || !text.trim()) return
+
+      if (!isValidChannelId(channelId)) {
+        console.error('[useChatChannel] invalid channelId — aborting send:', channelId)
+        return
+      }
 
       const userMsgId      = crypto.randomUUID()
       const assistantMsgId = crypto.randomUUID()
@@ -208,12 +181,14 @@ export function useChatChannel(
       ])
 
       try {
-        const res = await apiFetch('/api/connector/chat/send', {
+        console.log('[send] channelId=%s userId-part=%s', channelId, channelId.split(':')[1])
+        const res = await apiFetch('/api/v1/connectors/inktide/messages', {
           method: 'POST',
           body: JSON.stringify({ channelId, text }),
         })
 
         if (!res.ok) {
+          res.clone().json().then((b) => console.error('[send] %d:', res.status, b)).catch(() => {})
           setMessages((prev) =>
             prev.map((m): ChatMessage => m.id === userMsgId ? { ...m, status: 'failed' } : m),
           )
@@ -243,7 +218,6 @@ export function useChatChannel(
     [send],
   )
 
-  // Stable getter — reads from ref, safe to call every animation frame
   const getEmotionState = useCallback((): EmotionState => emotionRef.current, [])
 
   return { messages, send, retry, connected, getEmotionState }

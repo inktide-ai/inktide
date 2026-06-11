@@ -13,7 +13,6 @@ public sealed class HttpCredentialTester : ICredentialTester
 {
     private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(5);
 
-    // ── Cloud provider registry ──────────────────────────────────────────────
     // label: shown in error messages. addAuth: null means key-less (local).
     private sealed record ProviderDescriptor(
         string Label,
@@ -37,7 +36,6 @@ public sealed class HttpCredentialTester : ICredentialTester
             ["vertex"]       = new("Google",        string.Empty, null),
         };
 
-    // ── Local provider registry ──────────────────────────────────────────────
     // Maps provider id → (defaultBaseUrl, healthPath).
     private static readonly Dictionary<string, (string DefaultBase, string Path)> _localProviders =
         new(StringComparer.OrdinalIgnoreCase)
@@ -92,7 +90,6 @@ public sealed class HttpCredentialTester : ICredentialTester
         cts.CancelAfter(TestTimeout);
         using var client = _httpClientFactory.CreateClient("credential-tester");
 
-        // ── Cloud providers ──────────────────────────────────────────────────
         if (_cloudProviders.TryGetValue(providerId, out var desc))
         {
             if (desc.AddAuth is not null && string.IsNullOrWhiteSpace(apiKey))
@@ -114,7 +111,6 @@ public sealed class HttpCredentialTester : ICredentialTester
             return MapHttpResult(response, desc.Label);
         }
 
-        // ── Azure variants (require dynamic URL from baseUrl) ────────────────
         if (providerId.Equals("azure-openai", StringComparison.OrdinalIgnoreCase) ||
             providerId.Equals("azure", StringComparison.OrdinalIgnoreCase))
             return await TestAzureAsync(client, apiKey, baseUrl, cts.Token).ConfigureAwait(false);
@@ -122,18 +118,15 @@ public sealed class HttpCredentialTester : ICredentialTester
         if (providerId.Equals("azure-speech", StringComparison.OrdinalIgnoreCase))
             return await TestAzureSpeechAsync(client, apiKey, baseUrl, cts.Token).ConfigureAwait(false);
 
-        // ── Local providers ──────────────────────────────────────────────────
         if (_localProviders.TryGetValue(providerId, out var local))
         {
             var effectiveBase = string.IsNullOrWhiteSpace(baseUrl) ? local.DefaultBase : baseUrl;
             return await TestLocalAsync(client, effectiveBase, local.Path, cts.Token).ConfigureAwait(false);
         }
 
-        // ── OpenAI-compatible fallback ───────────────────────────────────────
         return await TestOpenAiCompatibleAsync(client, apiKey, baseUrl, cts.Token).ConfigureAwait(false);
     }
 
-    // ── Azure helpers ────────────────────────────────────────────────────────
 
     private static async Task<CredentialTestResult> TestAzureAsync(
         HttpClient client, string apiKey, string? baseUrl, CancellationToken ct)
@@ -166,7 +159,6 @@ public sealed class HttpCredentialTester : ICredentialTester
             : new CredentialTestResult(false, $"Azure Speech returned {(int)res.StatusCode}. Check key and region.");
     }
 
-    // ── Local / OpenAI-compatible helpers ────────────────────────────────────
 
     private static async Task<CredentialTestResult> TestLocalAsync(
         HttpClient client, string baseUrl, string path, CancellationToken ct)
@@ -200,7 +192,6 @@ public sealed class HttpCredentialTester : ICredentialTester
         return new CredentialTestResult(false, $"Provider returned {(int)res.StatusCode}: {res.ReasonPhrase}");
     }
 
-    // ── Shared result builder ────────────────────────────────────────────────
 
     private static CredentialTestResult MapHttpResult(HttpResponseMessage res, string label) =>
         res.IsSuccessStatusCode

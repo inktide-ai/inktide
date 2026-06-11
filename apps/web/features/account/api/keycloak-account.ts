@@ -1,7 +1,3 @@
-import { keycloakEnvConfig } from '@/lib/keycloak'
-import { getFreshAuthToken } from '@/api/client'
-
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface KcAccountProfile {
   id?: string
@@ -44,22 +40,16 @@ export interface KcLinkedAccount {
   linkedUsername?: string
 }
 
-// ── Internal helpers ──────────────────────────────────────────────────────────
-
-function kcAccountBase(): string {
-  return `${keycloakEnvConfig.url}/realms/${keycloakEnvConfig.realm}/account`
-}
+//
+// All calls go through the BFF proxy at /api/kc-account/[[...path]] —
+// the token is injected server-side; the browser never sees it.
 
 async function kcFetch(path: string, init?: RequestInit): Promise<Response> {
-  const token = await getFreshAuthToken()
-  if (!token) throw new Error('Not authenticated')
-  const base = kcAccountBase()
-  const res = await fetch(`${base}${path}`, {
+  const res = await fetch(`/api/kc-account${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      Authorization: `Bearer ${token}`,
       ...init?.headers,
     },
   })
@@ -74,7 +64,6 @@ async function kcFetch(path: string, init?: RequestInit): Promise<Response> {
   return res
 }
 
-// ── Profile ───────────────────────────────────────────────────────────────────
 
 export async function getKcProfile(): Promise<KcAccountProfile> {
   const res = await kcFetch('')
@@ -88,7 +77,6 @@ export async function updateKcProfile(data: KcAccountProfile): Promise<void> {
   })
 }
 
-// ── Password ──────────────────────────────────────────────────────────────────
 
 export async function changeKcPassword(
   currentPassword: string,
@@ -104,14 +92,12 @@ export async function changeKcPassword(
   })
 }
 
-// ── Credentials (2FA) ─────────────────────────────────────────────────────────
 
 export async function getKcCredentials(): Promise<KcCredential[]> {
   const res = await kcFetch('/credentials')
   return res.json() as Promise<KcCredential[]>
 }
 
-// ── Sessions ──────────────────────────────────────────────────────────────────
 
 export async function getKcSessions(): Promise<KcSession[]> {
   const res = await kcFetch('/sessions')
@@ -126,7 +112,6 @@ export async function revokeAllKcSessions(): Promise<void> {
   await kcFetch('/sessions', { method: 'DELETE' })
 }
 
-// ── Linked accounts ───────────────────────────────────────────────────────────
 
 export async function getKcLinkedAccounts(): Promise<KcLinkedAccount[]> {
   const res = await kcFetch('/linked-accounts')

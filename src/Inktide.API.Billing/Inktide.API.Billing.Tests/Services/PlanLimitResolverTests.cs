@@ -1,5 +1,6 @@
 using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 using Inktide.API.Billing.Infrastructure.Services;
 using Inktide.API.Core.Contracts;
 using NSubstitute;
@@ -47,7 +48,7 @@ public sealed class PlanLimitResolverTests
         var resolver = new PlanLimitResolver(BuildService(PlanType.Free));
         var limits = await resolver.GetLimitsAsync("user-1");
 
-        Assert.Equal(1, limits.MaxSoulCards);
+        Assert.Equal(3, limits.MaxSoulCards);
         Assert.Equal(1, limits.MaxChannelsPerCard);
     }
 }

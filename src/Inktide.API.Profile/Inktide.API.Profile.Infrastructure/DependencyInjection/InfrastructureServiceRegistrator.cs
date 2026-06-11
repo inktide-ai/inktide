@@ -1,5 +1,6 @@
 using Amazon.S3;
 using Inktide.API.Core;
+using Inktide.API.Core.Contracts;
 using Inktide.API.Profile.Application.Interfaces;
 using Inktide.API.Profile.Infrastructure.Keycloak;
 using Inktide.API.Profile.Infrastructure.Repositories;
@@ -28,6 +29,7 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
         registrator.Register<IUserPreferencesService, UserPreferencesService>(Reuse.Scoped);
         registrator.Register<IUserAvatarService, UserAvatarService>(Reuse.Scoped);
         registrator.Register<IImageProcessingService, ImageProcessingService>(Reuse.Singleton);
+        registrator.Register<IFileUploadService, FileUploadService>(Reuse.Scoped);
 
         var smtpSettings = new SmtpSettings();
         configuration.GetSection(nameof(SmtpSettings)).Bind(smtpSettings);

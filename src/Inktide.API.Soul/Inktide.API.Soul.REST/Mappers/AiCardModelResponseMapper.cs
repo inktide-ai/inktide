@@ -16,5 +16,6 @@ public static class AiCardModelResponseMapper
         SizeBytes        = dto.SizeBytes,
         CreatedAt        = dto.CreatedAt,
         IsActive         = dto.IsActive,
+        ThumbnailUrl     = dto.ThumbnailUrl,
     };
 }

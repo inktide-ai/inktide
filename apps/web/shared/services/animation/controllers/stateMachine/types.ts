@@ -1,6 +1,5 @@
 import type * as THREE from 'three'
 
-// ── Zira-Games concepts ported to TypeScript/VRM ─────────────────────────────
 
 /** Named node in the animation graph. Equivalent to Zira's Idle('angry'). */
 export interface AnimationNode {
@@ -54,7 +53,6 @@ export interface SelfTransition {
  */
 export type TransitionConcurrencyBehavior = 'ignore' | 'replace' | 'sequence'
 
-// ── XState machine types ──────────────────────────────────────────────────────
 
 export interface AnimationMachineContext {
   activeNodeId: string
@@ -89,7 +87,6 @@ export type AnimationMachineEvent =
   | { type: 'PAUSE_TRANSITION' }
   | { type: 'RESUME_TRANSITION' }
 
-// ── AnimationProperty — Zira concept ─────────────────────────────────────────
 
 /**
  * Evaluates a typed value T from the current machine snapshot.
@@ -97,7 +94,6 @@ export type AnimationMachineEvent =
  */
 export type AnimationProperty<T> = (context: AnimationMachineContext) => T
 
-// ── Graph config ──────────────────────────────────────────────────────────────
 
 export interface AnimationGraphConfig {
   nodes: AnimationNode[]
@@ -106,7 +102,6 @@ export interface AnimationGraphConfig {
   clipUrls: Record<string, string>
 }
 
-// ── ClipRegistry entry ────────────────────────────────────────────────────────
 
 export interface ClipEntry {
   nodeId: string

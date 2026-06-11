@@ -2,6 +2,8 @@ using Newtonsoft.Json;
 
 namespace Inktide.API.Soul.REST.Models;
 
+public sealed record PatchModelRequest(bool? Active);
+
 public sealed class BeginModelUploadRequest
 {
 
@@ -112,6 +114,13 @@ public sealed class BeginModelUploadResponse
 
 }
 
+public sealed record PresignThumbnailResponse(
+    [property: JsonProperty("upload_url")]  string UploadUrl,
+    [property: JsonProperty("public_url")]  string PublicUrl);
+
+public sealed record CompleteThumbnailRequest(
+    [property: JsonProperty("public_url")]  string PublicUrl);
+
 public sealed class AiCardModelResponse
 {
 
@@ -183,5 +192,8 @@ public sealed class AiCardModelResponse
 
     [JsonProperty("is_active")]
     public bool IsActive { get; set; }
+
+    [JsonProperty("thumbnail_url")]
+    public string? ThumbnailUrl { get; set; }
 
 }

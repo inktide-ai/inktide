@@ -1,0 +1,19 @@
+{
+  "solution": {
+    "path": "Inktide.API.sln",
+    "projects": [
+      "src/Inktide.API.Core/Inktide.API.Core.csproj",
+      "src/Inktide.API.Domain/Inktide.API.Domain.csproj",
+      "src/Inktide.API.Connector/Inktide.API.Connector.Application/Inktide.API.Connector.Application.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Domain/Inktide.API.Soul.Domain.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Application/Inktide.API.Soul.Application.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Application.Tests/Inktide.API.Soul.Application.Tests.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Grpc.Contracts/Inktide.API.Soul.Grpc.Contracts.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Grpc/Inktide.API.Soul.Grpc.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Grpc.AiCards.Service/Inktide.API.Soul.Grpc.AiCards.Service.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.Infrastructure/Inktide.API.Soul.Infrastructure.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.REST.Models/Inktide.API.Soul.REST.Models.csproj",
+      "src/Inktide.API.Soul/Inktide.API.Soul.REST/Inktide.API.Soul.REST.csproj"
+    ]
+  }
+}

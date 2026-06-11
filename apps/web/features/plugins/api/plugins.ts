@@ -7,7 +7,7 @@ export interface ProjectPlugin {
 }
 
 export async function getProjectPlugins(projectId: string): Promise<ProjectPlugin[]> {
-  const res = await apiFetch(`/api/projects/${projectId}/plugins`)
+  const res = await apiFetch(`/api/v1/projects/${projectId}/plugins`)
   return jsonOrThrow<ProjectPlugin[]>(res)
 }
 
@@ -16,7 +16,7 @@ export async function upsertProjectPlugin(
   pluginId: string,
   body: { is_enabled: boolean; config?: Record<string, string> },
 ): Promise<ProjectPlugin> {
-  const res = await apiFetch(`/api/projects/${projectId}/plugins/${pluginId}`, {
+  const res = await apiFetch(`/api/v1/projects/${projectId}/plugins/${pluginId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

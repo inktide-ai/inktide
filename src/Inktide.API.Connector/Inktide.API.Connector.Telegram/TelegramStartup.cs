@@ -2,7 +2,6 @@ using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Telegram.Services;
 using Inktide.API.Connector.Telegram.Settings;
 using Inktide.API.Core;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,10 +19,7 @@ public sealed class TelegramStartup : IStartup
 
         services.AddHttpClient<ITelegramBotApiClient, TelegramBotApiClient>();
 
-        services.AddKeyedSingleton<ITokenProtector>(TokenProtectorKeys.Telegram, (sp, _) =>
-            new DataProtectionTokenProtector(
-                sp.GetRequiredService<IDataProtectionProvider>(),
-                "Telegram.BotTokens"));
+        services.AddSingleton<ITelegramTokenProtector, TelegramTokenProtector>();
 
         services.AddControllers()
             .PartManager.ApplicationParts.Add(

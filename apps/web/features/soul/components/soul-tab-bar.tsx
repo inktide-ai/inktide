@@ -14,7 +14,6 @@ const TABS = [
   { key: 'deployments',  label: 'Deployments',  href: (id: string) => `/souls/${id}/brain` },
 ] as const
 
-// ── Pill styles ───────────────────────────────────────────────────────────────
 
 const activeCls = cn(
   'inline-flex items-center rounded-md border px-3 py-1.5',
@@ -34,7 +33,6 @@ const disabledCls = cn(
   'cursor-not-allowed opacity-40 text-[var(--text-secondary)]',
 )
 
-// ── Active-tab resolver ───────────────────────────────────────────────────────
 
 function tabValueFromPath(pathname: string | null, soulId: string): string {
   if (!pathname) return 'overview'
@@ -43,7 +41,6 @@ function tabValueFromPath(pathname: string | null, soulId: string): string {
   return 'deployments'
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 
 export function SoulTabBar({ soulId }: SoulTabBarProps) {
   const pathname  = usePathname()

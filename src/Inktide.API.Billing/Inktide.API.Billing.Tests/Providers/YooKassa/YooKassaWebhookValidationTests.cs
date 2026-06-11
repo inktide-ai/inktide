@@ -1,6 +1,10 @@
 using Inktide.API.Billing.Application.Interfaces;
+using Inktide.API.Billing.Infrastructure.DbContext;
 using Inktide.API.Billing.Infrastructure.Providers.YooKassa;
 using Inktide.API.Billing.Infrastructure.Settings;
+using Inktide.API.Billing.Infrastructure.Telemetry;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using StackExchange.Redis;
@@ -12,17 +16,20 @@ public sealed class YooKassaWebhookValidationTests
 {
     private static YooKassaWebhookProcessor CreateProcessor(string[] allowedIps)
     {
-        var settings = new YooKassaSettings { WebhookAllowedIps = allowedIps };
-        var redis    = Substitute.For<IConnectionMultiplexer>();
-        var subs     = Substitute.For<ISubscriptionRepository>();
-        var logger   = NullLogger<YooKassaWebhookProcessor>.Instance;
-        return new YooKassaWebhookProcessor(new HttpClient(), settings, subs, redis, TimeProvider.System, logger);
+        var settings  = new YooKassaSettings { WebhookAllowedIps = allowedIps };
+        var redis     = Substitute.For<IConnectionMultiplexer>();
+        var subs      = Substitute.For<ISubscriptionRepository>();
+        var publish   = Substitute.For<IPublishEndpoint>();
+        var db        = new BillingDbContext(new DbContextOptionsBuilder<BillingDbContext>()
+                            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
+        var logger    = NullLogger<YooKassaWebhookProcessor>.Instance;
+        var incidents = Substitute.For<IBillingIncidentRepository>();
+        return new YooKassaWebhookProcessor(new HttpClient(), settings, subs, incidents, publish, db, redis, TimeProvider.System, new BillingMetrics(), logger);
     }
 
     private static bool Validate(YooKassaWebhookProcessor p, string ip) =>
         p.ValidateSignature(new Dictionary<string, IReadOnlyList<string>>(), [], ip);
 
-    // ── Default CIDR behaviour (WebhookAllowedIps = []) ──────────────────────
 
     [Theory]
     [InlineData("185.71.76.5",   true)]   // inside 185.71.76.0/27
@@ -37,7 +44,6 @@ public sealed class YooKassaWebhookValidationTests
         Assert.Equal(expected, Validate(p, ip));
     }
 
-    // ── RFC1918/loopback always blocked regardless of allowlist ───────────────
 
     [Theory]
     [InlineData("127.0.0.1")]
@@ -51,7 +57,6 @@ public sealed class YooKassaWebhookValidationTests
         Assert.False(Validate(p, ip));
     }
 
-    // ── Null IP ───────────────────────────────────────────────────────────────
 
     [Fact]
     public void NullClientIp_Rejected()
@@ -61,7 +66,6 @@ public sealed class YooKassaWebhookValidationTests
         Assert.False(result);
     }
 
-    // ── Custom allowlist overrides defaults ───────────────────────────────────
 
     [Fact]
     public void CustomAllowedIps_OverridesDefaults_YooKassaIpRejected()

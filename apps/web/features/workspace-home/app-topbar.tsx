@@ -79,7 +79,7 @@ export function AppTopBar({
 }: AppTopBarProps) {
   return (
     <TooltipProvider delayDuration={400} skipDelayDuration={200}>
-      <div className="relative flex h-14 shrink-0 items-center border-b border-[var(--border-divider)] px-4 bg-[var(--bg-0)]">
+      <div className="relative flex h-14 shrink-0 items-center border-b border-[var(--border-divider)] pl-12 pr-4 bg-[var(--bg-0)] lg:px-4">
 
         {/* Left */}
         {variant === 'page' ? (

@@ -9,9 +9,9 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.3" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="FluentValidation.AspNetCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
+    <PackageReference Include="Serilog.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Inktide.API.TTS.Domain\Inktide.API.TTS.Domain.csproj" />
     <ProjectReference Include="..\Inktide.API.TTS.Infrastructure\Inktide.API.TTS.Infrastructure.csproj" />
     <ProjectReference Include="..\Inktide.API.TTS.REST.Models\Inktide.API.TTS.REST.Models.csproj" />
+    <ProjectReference Include="..\..\Inktide.API.Soul\Inktide.API.Soul.Application\Inktide.API.Soul.Application.csproj" />
   </ItemGroup>
 
 </Project>

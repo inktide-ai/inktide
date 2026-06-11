@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
 import { useRevealOnScroll } from '@/shared/hooks/useRevealOnScroll'
 import { cn } from '@/lib/utils'
 import { Button } from '@/shared/ui/button'
@@ -13,6 +14,7 @@ interface SplitSectionProps {
 }
 
 function SplitSection({ heading, description, reverse = false, imageDark, imageAlt = '' }: SplitSectionProps) {
+  const { t } = useTranslation('landing')
   const { ref: refLeft, isVisible: leftVisible } = useRevealOnScroll()
   const { ref: refRight, isVisible: rightVisible } = useRevealOnScroll()
 
@@ -27,7 +29,7 @@ function SplitSection({ heading, description, reverse = false, imageDark, imageA
       {imageDark ? (
         <img src={imageDark} alt={imageAlt} className="w-full h-auto object-cover" />
       ) : (
-        <span className="text-sm text-[var(--text-muted)]">Screenshot / Demo</span>
+        <span className="text-sm text-[var(--text-muted)]">{t('split.screenshotDemo')}</span>
       )}
     </div>
   )
@@ -43,8 +45,8 @@ function SplitSection({ heading, description, reverse = false, imageDark, imageA
       <h2 className="text-3xl lg:text-4xl font-bold text-[var(--text-primary)] leading-tight">{heading}</h2>
       <p className="text-[var(--text-muted)] leading-relaxed">{description}</p>
       <div className="flex items-center gap-3">
-        <Button onClick={() => (window.location.href = '/register')}>Get started →</Button>
-        <Button variant="ghost">Learn more</Button>
+        <Button onClick={() => (window.location.href = '/register')}>{t('split.getStarted')}</Button>
+        <Button variant="ghost">{t('split.learnMore')}</Button>
       </div>
     </div>
   )

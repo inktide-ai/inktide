@@ -56,7 +56,8 @@
       "removeCustomBot": "Failed to remove custom bot",
       "saveBotToken": "Failed to save bot token"
     },
-    "save": "Save"
+    "save": "Save",
+    "hint": "Click \"Connect with Discord\" to authorize the bot on your server. Once authorized, Soul will start receiving messages from the selected server."
   },
   "twitch": {
     "title": "Twitch",
@@ -69,7 +70,20 @@
     "listTitle": "Linked Twitch channels",
     "emptyList": "No Twitch channels linked yet.",
     "validationError": "Use 1–100 characters: letters, digits, _ and - only.",
-    "removeLabel": "Twitch"
+    "removeLabel": "Twitch",
+    "mgrConnectedTitle": "Connected channels",
+    "mgrConnectedDesc": "Manage your connected Twitch channels.",
+    "mgrDisconnect": "Disconnect",
+    "mgrReconnect": "Reconnect",
+    "mgrAddTitle": "Add Twitch channel",
+    "mgrAddDesc": "Click below to authorize Inktide bot on your Twitch channel. You'll be redirected to Twitch to grant access.",
+    "mgrRedirecting": "Redirecting…",
+    "mgrConnectWith": "Connect with Twitch",
+    "mgrConfirmDisconnect": "Disconnect \"{{channel}}\" from Twitch? The bot will leave the channel.",
+    "mgrErrAuthUrl": "Failed to get Twitch authorization URL",
+    "mgrErrReconnect": "Failed to reconnect",
+    "mgrErrDisconnect": "Failed to disconnect",
+    "mgrErrUpdate": "Failed to update"
   },
   "kick": {
     "title": "Kick",
@@ -105,7 +119,27 @@
     "listTitle": "Linked Telegram accounts",
     "emptyList": "No Telegram accounts linked yet.",
     "validationError": "Use 1–200 characters: letters, digits, _ and - only.",
-    "removeLabel": "Telegram"
+    "removeLabel": "Telegram",
+    "mgrConnectedTitle": "Connected channels",
+    "mgrConnectedDesc": "Manage your connected Telegram channels.",
+    "mgrDisconnect": "Disconnect",
+    "mgrConnectTitle": "Connect Telegram bot",
+    "mgrConnectDescBefore": "Create a bot via",
+    "mgrConnectDescAfter": ", paste the token below, then add the bot to your group and enter the chat ID.",
+    "mgrTokenPlaceholder": "Bot token from @BotFather…",
+    "mgrSaving": "Saving…",
+    "mgrVerifying": "Verifying…",
+    "mgrNext": "Next →",
+    "mgrVerify": "Verify",
+    "mgrVerified": "@{{user}} verified — enter chat details below.",
+    "mgrChatIdPlaceholder": "Chat ID (e.g. -1001234567890)",
+    "mgrDisplayNamePlaceholder": "Display name (e.g. My Group)",
+    "mgrConnect": "Connect",
+    "mgrConfirmDisconnect": "Disconnect \"{{channel}}\" from Telegram? The bot will stop responding.",
+    "mgrInvalidToken": "Invalid bot token",
+    "mgrValidationService": "Could not reach validation service",
+    "mgrSaveFailed": "Failed to save",
+    "mgrDisconnectFailed": "Failed to disconnect"
   },
   "connector": {
     "notAvailable": "This channel is not available yet.",
@@ -128,5 +162,34 @@
     "success": "Connected successfully!",
     "discordSupport": "Discord Support",
     "openInDiscord": "Open in Discord"
+  },
+  "mp": {
+    "loading": "Loading…",
+    "notFound": "Connector not found.",
+    "back": "Back to Marketplace",
+    "backAria": "Back",
+    "browseTitle": "Browse Marketplace",
+    "browseSubtitle": "Discover and install connectors for your AI character.",
+    "searchPlaceholder": "Search connectors…",
+    "searchAria": "Search",
+    "all": "All",
+    "native": "Native",
+    "connected": "Connected",
+    "comingSoon": "Coming soon",
+    "configure": "Configure",
+    "addIntegration": "Add Integration",
+    "whatItDoes": "What this connector can do",
+    "category": "Category",
+    "type": "Type",
+    "thirdParty": "Third-party",
+    "auth": "Auth",
+    "developer": "Developer",
+    "resources": "Resources",
+    "website": "Website",
+    "noResources": "No external resources",
+    "by": "by",
+    "authApiKey": "API Key",
+    "authWebhook": "Webhook",
+    "authNone": "No auth required"
   }
 }

@@ -44,7 +44,7 @@ export function useVoiceSandbox(initialProviderId: string): UseVoiceSandboxResul
         if (list.length > 0 && !list.find((p) => p.id === selectedProviderId))
           setSelectedProviderId(list[0].id)
       })
-      .catch(() => {})
+      .catch((err) => { console.error('[useVoiceSandbox] failed to load TTS providers', err) })
       .finally(() => { if (!cancelled) setProvidersLoading(false) })
     return () => { cancelled = true }
   }, []) // intentional: selectedProviderId excluded — refetch on navigation would reset selection

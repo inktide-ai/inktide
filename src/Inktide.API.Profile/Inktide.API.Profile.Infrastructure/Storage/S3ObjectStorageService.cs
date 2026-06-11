@@ -2,7 +2,7 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Inktide.API.Profile.Application.Interfaces;
+using Inktide.API.Core.Contracts;
 using Inktide.API.Profile.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 
@@ -54,9 +54,17 @@ public sealed class S3ObjectStorageService : IObjectStorageService
             .GetObjectAsync(_settings.DefaultBucket, objectKey, ct)
             .ConfigureAwait(false);
         var ms = new MemoryStream();
-        await response.ResponseStream.CopyToAsync(ms, ct).ConfigureAwait(false);
-        ms.Position = 0;
-        return ms;
+        try
+        {
+            await response.ResponseStream.CopyToAsync(ms, ct).ConfigureAwait(false);
+            ms.Position = 0;
+            return ms;
+        }
+        catch
+        {
+            await ms.DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
     }
 
     public async Task DeleteObjectAsync(string objectKey, CancellationToken ct = default)

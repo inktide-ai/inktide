@@ -35,10 +35,16 @@ class StreamConsumer:
             settings.redis_consumer_group,
             settings.redis_consumer_name,
         )
-        await asyncio.gather(
-            self._consume_loop(),
-            self._autoclaim_loop(),
-        )
+        tasks = [
+            asyncio.create_task(self._consume_loop()),
+            asyncio.create_task(self._autoclaim_loop()),
+        ]
+        try:
+            await asyncio.gather(*tasks)
+        finally:
+            for t in tasks:
+                t.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
 
     # ------------------------------------------------------------------
     # Consumer group bootstrap
@@ -62,20 +68,28 @@ class StreamConsumer:
     # ------------------------------------------------------------------
 
     async def _consume_loop(self) -> None:
+        _backoff = 1
         while True:
-            entries = await self._redis.xreadgroup(
-                groupname=settings.redis_consumer_group,
-                consumername=settings.redis_consumer_name,
-                streams={settings.redis_stream_in: ">"},
-                count=settings.redis_read_count,
-                block=settings.redis_block_ms,
-            )
-            if not entries:
-                continue
-
-            for _stream, messages in entries:
-                for message_id, fields in messages:
-                    await self._process(message_id, fields)
+            try:
+                entries = await self._redis.xreadgroup(
+                    groupname=settings.redis_consumer_group,
+                    consumername=settings.redis_consumer_name,
+                    streams={settings.redis_stream_in: ">"},
+                    count=settings.redis_read_count,
+                    block=settings.redis_block_ms,
+                )
+                _backoff = 1
+                if not entries:
+                    continue
+                for _stream, messages in entries:
+                    for message_id, fields in messages:
+                        await self._process(message_id, fields)
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                logger.error("XREADGROUP failed, retrying in %ds", _backoff, exc_info=True)
+                await asyncio.sleep(_backoff)
+                _backoff = min(_backoff * 2, 60)
 
     # ------------------------------------------------------------------
     # Autoclaim abandoned messages
@@ -223,29 +237,33 @@ class StreamConsumer:
         pending: tuple[str, int] | None = None
         first_publish = True
 
-        async for sentence in iter_sentences(_token_stream(), mode=mode):
-            if pending is not None:
-                if first_publish and response_delay_s > 0:
-                    logger.debug(
-                        "Response delay %.1fs applied. correlation=%s",
-                        response_delay_s,
-                        envelope.correlation_id,
+        token_gen = _token_stream()
+        try:
+            async for sentence in iter_sentences(token_gen, mode=mode):
+                if pending is not None:
+                    if first_publish and response_delay_s > 0:
+                        logger.debug(
+                            "Response delay %.1fs applied. correlation=%s",
+                            response_delay_s,
+                            envelope.correlation_id,
+                        )
+                        await asyncio.sleep(response_delay_s)
+                        first_publish = False
+                    await self._publish_chunk(
+                        envelope=envelope,
+                        text=pending[0],
+                        model=model,
+                        seq=pending[1],
+                        is_last=False,
+                        tts_provider_id=tts_provider_id,
+                        tts_voice_id=tts_voice_id,
+                        tts_model_id=tts_model_id,
+                        tts_speed=tts_speed,
                     )
-                    await asyncio.sleep(response_delay_s)
-                    first_publish = False
-                await self._publish_chunk(
-                    envelope=envelope,
-                    text=pending[0],
-                    model=model,
-                    seq=pending[1],
-                    is_last=False,
-                    tts_provider_id=tts_provider_id,
-                    tts_voice_id=tts_voice_id,
-                    tts_model_id=tts_model_id,
-                    tts_speed=tts_speed,
-                )
-            pending = (sentence, seq)
-            seq += 1
+                pending = (sentence, seq)
+                seq += 1
+        finally:
+            await token_gen.aclose()
 
         if pending is not None:
             if first_publish and response_delay_s > 0:

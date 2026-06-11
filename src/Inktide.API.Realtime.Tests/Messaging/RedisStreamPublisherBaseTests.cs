@@ -14,7 +14,6 @@ namespace Inktide.API.Realtime.Tests.Messaging;
 
 public sealed class RedisStreamPublisherBaseTests
 {
-    // ── Test doubles ──────────────────────────────────────────────────
 
     private sealed record Payload(
         [property: JsonPropertyName("channelId")] string ChannelId,
@@ -73,7 +72,6 @@ public sealed class RedisStreamPublisherBaseTests
             => throw new InvalidOperationException("push failed");
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────
 
     private static (FakePublisher publisher, IDatabase db) BuildFake()
     {
@@ -96,7 +94,6 @@ public sealed class RedisStreamPublisherBaseTests
     private static StreamEntry EntryWithoutPayload()
         => new("1-0", [new NameValueEntry("other-field", "x")]);
 
-    // ── ProcessEntryAsync tests ───────────────────────────────────────
 
     [Fact]
     public async Task ProcessEntry_MissingPayloadField_AcksWithoutPushing()
@@ -172,7 +169,6 @@ public sealed class RedisStreamPublisherBaseTests
             Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<RedisValue>(), Arg.Any<CommandFlags>());
     }
 
-    // ── ResolveInstanceId tests ───────────────────────────────────────
 
     [Fact]
     public void ResolveInstanceId_DotnetHostnameEnvSet_ReturnsThatValue()

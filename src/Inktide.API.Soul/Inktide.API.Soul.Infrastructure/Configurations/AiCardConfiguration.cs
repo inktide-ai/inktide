@@ -1,7 +1,5 @@
-using System.Text.Json;
 using Inktide.API.Soul.Domain.Entities;
 using Inktide.API.Soul.Domain.Enums;
-using Inktide.API.Soul.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -10,11 +8,6 @@ namespace Inktide.API.Soul.Infrastructure.Configurations;
 
 public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
 {
-
-    private static readonly JsonSerializerOptions PersonalityJsonOpts = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
 
     public void Configure(EntityTypeBuilder<AiCard> b)
     {
@@ -42,15 +35,6 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
         b.Property(e => e.BannerUrl)
             .HasColumnName("banner_url");
 
-        b.Property(e => e.Personality)
-            .HasColumnName("personality")
-            .IsRequired()
-            .HasDefaultValue("");
-
-        b.Property(e => e.SystemPrompt)
-            .HasColumnName("system_prompt")
-            .IsRequired();
-
         b.Property(e => e.LlmCatalogId)
             .HasColumnName("llm_catalog_id")
             .IsRequired();
@@ -71,38 +55,6 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
             .HasColumnName("appearance")
             .HasColumnType("jsonb")
             .IsRequired();
-
-        b.Property(e => e.ResponseBehavior)
-            .HasColumnName("response_behavior")
-            .HasColumnType("jsonb")
-            .IsRequired();
-
-        b.Property(e => e.MemorySettings)
-            .HasColumnName("memory_settings")
-            .HasColumnType("jsonb")
-            .IsRequired();
-
-        b.Property(e => e.AutoPilot)
-            .HasColumnName("auto_pilot")
-            .HasColumnType("jsonb")
-            .IsRequired();
-
-        b.Property(e => e.ScreenAwarenessSettings)
-            .HasColumnName("screen_awareness_settings")
-            .HasColumnType("jsonb")
-            .IsRequired()
-            .HasDefaultValueSql("'{}'");
-
-        b.Property(e => e.PersonalityConfig)
-            .HasColumnName("personality_config")
-            .HasColumnType("jsonb")
-            .IsRequired()
-            .HasDefaultValueSql("'{}'")
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, PersonalityJsonOpts),
-                v => string.IsNullOrWhiteSpace(v)
-                    ? new PersonalitySettings()
-                    : JsonSerializer.Deserialize<PersonalitySettings>(v, PersonalityJsonOpts) ?? new PersonalitySettings());
 
         b.Property(e => e.Description)
             .HasColumnName("description")
@@ -187,16 +139,6 @@ public sealed class AiCardConfiguration : IEntityTypeConfiguration<AiCard>
         b.HasOne(e => e.TtsCatalog)
             .WithMany()
             .HasForeignKey(e => e.TtsCatalogId);
-
-        b.HasMany(e => e.Channels)
-            .WithOne(c => c.AiCard)
-            .HasForeignKey(c => c.AiCardId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        b.HasMany(e => e.Tools)
-            .WithOne(t => t.AiCard)
-            .HasForeignKey(t => t.AiCardId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 
 }

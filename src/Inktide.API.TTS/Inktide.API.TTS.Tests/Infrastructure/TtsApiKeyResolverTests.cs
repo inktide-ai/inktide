@@ -4,6 +4,7 @@ using Inktide.API.TTS.Domain.Speech;
 using Inktide.API.TTS.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using NSubstitute;
 
@@ -55,13 +56,16 @@ public sealed class TtsApiKeyResolverTests
         return config;
     }
 
+    private static IServiceScopeFactory BuildScopeFactory()
+        => Substitute.For<IServiceScopeFactory>();
+
 
     [Fact]
     public void Resolve_ProviderDoesNotRequireKey_ReturnsNull()
     {
         var provider = BuildProvider("kokoro", requiresApiKey: false);
         var registry = BuildRegistry(provider);
-        var resolver = new TtsApiKeyResolver(registry, BuildAccessor(), BuildConfig());
+        var resolver = new TtsApiKeyResolver(registry, BuildAccessor(), BuildConfig(), BuildScopeFactory());
 
         var result = resolver.Resolve("kokoro");
 
@@ -73,7 +77,7 @@ public sealed class TtsApiKeyResolverTests
     {
         var provider = BuildProvider("elevenlabs", requiresApiKey: true);
         var registry = BuildRegistry(provider);
-        var resolver = new TtsApiKeyResolver(registry, BuildAccessor("header-key-123"), BuildConfig());
+        var resolver = new TtsApiKeyResolver(registry, BuildAccessor("header-key-123"), BuildConfig(), BuildScopeFactory());
 
         var result = resolver.Resolve("elevenlabs");
 
@@ -86,7 +90,7 @@ public sealed class TtsApiKeyResolverTests
         var provider = BuildProvider("elevenlabs", requiresApiKey: true);
         var registry = BuildRegistry(provider);
         var config = BuildConfig("TtsProviders:elevenlabs:ApiKey", "config-key-456");
-        var resolver = new TtsApiKeyResolver(registry, BuildAccessor(), config);
+        var resolver = new TtsApiKeyResolver(registry, BuildAccessor(), config, BuildScopeFactory());
 
         var result = resolver.Resolve("elevenlabs");
 
@@ -98,7 +102,7 @@ public sealed class TtsApiKeyResolverTests
     {
         var provider = BuildProvider("elevenlabs", requiresApiKey: true);
         var registry = BuildRegistry(provider);
-        var resolver = new TtsApiKeyResolver(registry, BuildAccessor(), BuildConfig());
+        var resolver = new TtsApiKeyResolver(registry, BuildAccessor(), BuildConfig(), BuildScopeFactory());
 
         Assert.Throws<ApiKeyMissingException>(() => resolver.Resolve("elevenlabs"));
     }
@@ -108,7 +112,7 @@ public sealed class TtsApiKeyResolverTests
     {
         var provider = BuildProvider("elevenlabs", requiresApiKey: true);
         var registry = BuildRegistry(provider);
-        var resolver = new TtsApiKeyResolver(registry, BuildAccessor("some-key"), BuildConfig());
+        var resolver = new TtsApiKeyResolver(registry, BuildAccessor("some-key"), BuildConfig(), BuildScopeFactory());
 
         Assert.True(resolver.IsHeaderKey("elevenlabs"));
     }
@@ -118,7 +122,7 @@ public sealed class TtsApiKeyResolverTests
     {
         var provider = BuildProvider("elevenlabs", requiresApiKey: true);
         var registry = BuildRegistry(provider);
-        var resolver = new TtsApiKeyResolver(registry, BuildAccessor(), BuildConfig());
+        var resolver = new TtsApiKeyResolver(registry, BuildAccessor(), BuildConfig(), BuildScopeFactory());
 
         Assert.False(resolver.IsHeaderKey("elevenlabs"));
     }

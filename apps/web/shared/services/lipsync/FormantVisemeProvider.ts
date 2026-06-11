@@ -1,6 +1,5 @@
 import type { IVisemeProvider, MouthWeights, VisemeContext } from '@/shared/types/IVisemeProvider'
 
-// ── Formant bands (Hz) ────────────────────────────────────────────────────────
 const FUND_LO = 80;    const FUND_HI = 300
 const F1_LO   = 300;   const F1_HI   = 900
 const F2_LO   = 900;   const F2_HI   = 2500
@@ -82,7 +81,6 @@ export class FormantVisemeProvider implements IVisemeProvider {
     this._smoothed = { aa: 0, ih: 0, ou: 0, ee: 0, oh: 0 }
   }
 
-  // ── Private ─────────────────────────────────────────────────────────────────
 
   private _smooth(target: MouthWeights): MouthWeights {
     const s = this._smoothed

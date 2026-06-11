@@ -55,7 +55,7 @@ public sealed class ProjectTools(IProjectCrudService projectService, IHttpContex
     {
         try
         {
-            var project = await projectService.CreateAsync(GetUserId(), name, description, soulId, ct);
+            var project = await projectService.CreateAsync(GetUserId(), name, description, soulId, ct: ct);
             return project.Id;
         }
         catch (UnauthorizedAccessException) { throw; }
@@ -86,7 +86,7 @@ public sealed class ProjectTools(IProjectCrudService projectService, IHttpContex
                 activeModelId: null,
                 activeSceneId: null,
                 systemPrompt ?? current.SystemPrompt,
-                ct);
+                ct: ct);
             return OperationResult.Ok();
         }
         catch (UnauthorizedAccessException) { throw; }

@@ -4,7 +4,7 @@ import { useShortcut } from '@/shared/lib/keyboard'
 import { useTranslation } from 'react-i18next'
 import { X, Upload } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { AiCardSceneResponse } from '@/shared/types/soul-api'
+import type { ProjectSceneResponse } from '@/features/projects/api/scenes'
 import { CardSceneUploader } from '@/entities/soul/services/upload/CardSceneUploader'
 import { executePresignedUpload } from '@/shared/services/upload/PresignedUploadService'
 
@@ -12,13 +12,13 @@ const MAX_MB = 50
 const ALLOWED_TYPES = 'image/jpeg,image/png,image/webp'
 
 interface NewSceneModalProps {
-  cardId: string
+  projectId: string
   tagOptions: string[]
   onClose: () => void
-  onCreated: (scene: AiCardSceneResponse) => void
+  onCreated: (scene: ProjectSceneResponse) => void
 }
 
-export function NewSceneModal({ cardId, tagOptions, onClose, onCreated }: NewSceneModalProps) {
+export function NewSceneModal({ projectId, tagOptions, onClose, onCreated }: NewSceneModalProps) {
   const { t } = useTranslation('scene')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [name, setName] = useState('')
@@ -52,7 +52,7 @@ export function NewSceneModal({ cardId, tagOptions, onClose, onCreated }: NewSce
     try {
       const ext = file.name.match(/\.[^.]+$/)?.[0] ?? '.jpg'
       const renamedFile = new File([file], `${name.trim()}${ext}`, { type: file.type })
-      const scene = await executePresignedUpload(new CardSceneUploader(cardId, selectedTag ?? null), renamedFile)
+      const scene = await executePresignedUpload(new CardSceneUploader(projectId), renamedFile)
       onCreated(scene)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('settings.errorUpload'))

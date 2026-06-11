@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
 import type { AiCharacter } from '@/shared/lib/character'
 import {
   C, INJECTED_CSS,
@@ -14,30 +15,30 @@ interface SkillsTabProps {
 }
 
 const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => {
+  const { t } = useTranslation('behavior')
   const { behavior: bh, autoPilot: ap } = character
 
   return (
     <div style={{ fontSize: 11, color: C.valueText }}>
       <style>{INJECTED_CSS}</style>
 
-      {/* ── Basic ──────────────────────────────────────── */}
-      <Section title="Basic">
+      <Section title={t('skillsTab.basic')}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <InputGrid legend="Name and ID">
+          <InputGrid legend={t('skillsTab.nameAndId')}>
             <TextCell
-              label="Name"
+              label={t('skillsTab.name')}
               value={character.name}
               onChange={v => onUpdate({ name: v })}
             />
             <TextCell
-              label="ID"
+              label={t('skillsTab.id')}
               value={character.slug}
               readOnly
             />
           </InputGrid>
           <TextCell
-            label="Type"
-            value="AI Soul"
+            label={t('skillsTab.type')}
+            value={t('skillsTab.aiSoul')}
             accent={C.accent}
             dark
             readOnly
@@ -45,12 +46,11 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => {
         </div>
       </Section>
 
-      {/* ── Prompt ─────────────────────────────────────── */}
-      <Section title="Prompt">
+      <Section title={t('skillsTab.prompt')}>
         <textarea
           value={character.systemPrompt}
           onChange={e => onUpdate({ systemPrompt: e.target.value })}
-          placeholder="Core instructions for the character…"
+          placeholder={t('skillsTab.promptPlaceholder')}
           style={{
             width: '100%', minHeight: 108, resize: 'vertical',
             background: C.inputBg,
@@ -68,22 +68,21 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => {
           marginTop: 5, textAlign: 'right',
           fontSize: 10, fontFamily: 'var(--font-mono)', color: C.sectionIcon,
         }}>
-          {character.systemPrompt.length} chars
+          {t('skillsTab.chars', { count: character.systemPrompt.length })}
         </div>
       </Section>
 
-      {/* ── Response ───────────────────────────────────── */}
-      <Section title="Response">
-        <InputGrid legend="Delay and max length">
+      <Section title={t('skillsTab.response')}>
+        <InputGrid legend={t('skillsTab.delayMaxLength')}>
           <InputCell
-            label="Delay"
+            label={t('skillsTab.delay')}
             value={bh.responseDelayMs}
             unit="ms"
             min={0} max={5000} step={100}
             onChange={v => onUpdate({ behavior: { ...bh, responseDelayMs: Math.min(5000, Math.max(0, v)) } })}
           />
           <InputCell
-            label="Max"
+            label={t('skillsTab.max')}
             value={bh.maxResponseLength}
             unit="ch"
             min={50} max={2000} step={50}
@@ -96,7 +95,7 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => {
             onChange={v => onUpdate({ behavior: { ...bh, language: v } })}
           />
           <InputCell
-            label="Emotion"
+            label={t('skillsTab.emotion')}
             value={parseFloat(bh.emotionIntensityScale.toFixed(2))}
             min={0} max={1} step={0.01}
             onChange={v => onUpdate({ behavior: { ...bh, emotionIntensityScale: Math.min(1, Math.max(0, v)) } })}
@@ -106,19 +105,18 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => {
         <Gap />
 
         <CheckboxRow
-          label="Auto-moderate"
+          label={t('skillsTab.autoModerate')}
           checked={bh.autoModerate}
           onChange={v => onUpdate({ behavior: { ...bh, autoModerate: v } })}
         />
         <CheckboxRow
-          label="Typing simulation"
+          label={t('skillsTab.typingSimulation')}
           checked={bh.typingSimulation}
           onChange={v => onUpdate({ behavior: { ...bh, typingSimulation: v } })}
         />
       </Section>
 
-      {/* ── Live mode (collapsed by default) ──────────── */}
-      <CollapsibleSection title="Live mode">
+      <CollapsibleSection title={t('skillsTab.liveMode')}>
         {(collapse) => (
           /* Single 3-column grid: [1fr] [1fr] [24px]
              All rows share the same column widths → perfect alignment */
@@ -132,14 +130,14 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => {
           }}>
             {/* Row 1: Idle | Interval | − */}
             <InputCell
-              label="Idle"
+              label={t('skillsTab.idle')}
               value={ap.idleTimeoutSeconds}
               unit="s"
               min={30} max={600} step={10}
               onChange={v => onUpdate({ autoPilot: { ...ap, idleTimeoutSeconds: Math.min(600, Math.max(30, v)) } })}
             />
             <InputCell
-              label="Interval"
+              label={t('skillsTab.interval')}
               value={ap.minIntervalSeconds}
               unit="s"
               min={10} max={300} step={10}

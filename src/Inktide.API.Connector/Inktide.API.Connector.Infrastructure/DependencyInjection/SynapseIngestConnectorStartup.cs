@@ -3,9 +3,11 @@ using Inktide.API.Connector.Application.Interfaces;
 using Inktide.API.Connector.Infrastructure.Hosting;
 using Inktide.API.Connector.Infrastructure.Messaging;
 using Inktide.API.Core;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Core.Settings;
 using Inktide.API.Core.Settings.Validators;
 using HealthChecks.Redis;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,7 +16,7 @@ using Microsoft.Extensions.Options;
 namespace Inktide.API.Connector.Infrastructure.DependencyInjection;
 
 /// <summary>Infrastructure startup — messaging pipeline (Redis Streams ingest) and health checks.</summary>
-public sealed class SynapseIngestConnectorStartup : IStartup
+public sealed class SynapseIngestConnectorStartup : IStartup, IBusModuleConfigurator
 {
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
@@ -36,7 +38,6 @@ public sealed class SynapseIngestConnectorStartup : IStartup
         services.AddSingleton<IStreamMessageHandler, SynapseIngestMessageHandler>();
         services.AddHostedService<RedisStreamPublisherWorker>();
         services.AddHostedService<ChatConnectorHostedService>();
-        services.AddHostedService<SoulStatusChangedConsumer>();
 
         services.AddControllers();
 
@@ -46,6 +47,21 @@ public sealed class SynapseIngestConnectorStartup : IStartup
         services
             .AddHealthChecks()
             .AddRedis(redisSettings.ToConnectionString(), name: "redis", tags: ["ready", "synapse-ingest", "cache"]);
+    }
+
+    public void ConfigureConsumers(IBusRegistrationConfigurator x)
+    {
+        x.AddConsumer<SoulStatusChangedMTConsumer>();
+    }
+
+    public void ConfigureEndpoints(
+        IReceiveConfigurator<IReceiveEndpointConfigurator> cfg,
+        IBusRegistrationContext context)
+    {
+        cfg.ReceiveEndpoint("connector-soul-status", e =>
+        {
+            e.ConfigureConsumer<SoulStatusChangedMTConsumer>(context);
+        });
     }
 
 }

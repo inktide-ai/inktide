@@ -1,5 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/shared/services/auth'
 import { getStorageStatus, patchAvatar, uploadProfileFile } from '../../api/me'
 import type { AiCardListItem } from '@/shared/types/soul-api'
@@ -33,6 +34,7 @@ export default function AccountAvatarPanel({
   characters,
   onSelectProject,
 }: AccountAvatarPanelProps) {
+  const { t } = useTranslation('profile')
   const { user, refreshSession, setNickname } = useAuth()
   const [storageEnabled, setStorageEnabled] = useState<boolean | null>(null)
   const [busy, setBusy] = useState(false)
@@ -82,7 +84,7 @@ export default function AccountAvatarPanel({
       if (!file) return
       setError(null)
       if (!file.type.startsWith('image/')) {
-        setError('Please choose an image file.')
+        setError(t('accountPanel.errorNotImage'))
         return
       }
       const blobUrl = URL.createObjectURL(file)
@@ -95,13 +97,13 @@ export default function AccountAvatarPanel({
         setLocalPreview(null)
       } catch (err) {
         setLocalPreview(null)
-        setError(err instanceof Error ? err.message : 'Could not update avatar')
+        setError(err instanceof Error ? err.message : t('accountPanel.errorUpdateAvatar'))
       } finally {
         URL.revokeObjectURL(blobUrl)
         setBusy(false)
       }
     },
-    [refreshSession],
+    [refreshSession, t],
   )
 
   return (
@@ -111,7 +113,7 @@ export default function AccountAvatarPanel({
         className="inline-flex items-center gap-[0.35rem] mb-5 py-[0.35rem] px-2 -ml-2 border-none bg-transparent text-(--text-muted) font-[var(--font-ui)] text-body font-medium cursor-pointer rounded-[0.375rem] transition-[color,background] duration-150 ease hover:text-(--text-primary) hover:bg-white/[0.05]"
         onClick={onBack}
       >
-        ← Back to workshop
+        {t('accountPanel.back')}
       </button>
 
       <section
@@ -123,11 +125,10 @@ export default function AccountAvatarPanel({
             id="account-profile-title"
             className="text-[1.375rem] font-bold tracking-[-0.02em] mt-0 mb-[0.375rem] text-(--text-primary)"
           >
-            Your profile
+            {t('accountPanel.title')}
           </h1>
           <p className="m-0 text-body leading-relaxed text-(--text-muted) max-w-[52ch]">
-            Account identity: display name and photo. Bots are configured separately — see Projects
-            below.
+            {t('accountPanel.subtitle')}
           </p>
         </header>
 
@@ -146,7 +147,7 @@ export default function AccountAvatarPanel({
               )}
               {busy && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-white text-sm font-semibold tracking-[0.02em]">
-                  Updating…
+                  {t('accountPanel.updating')}
                 </div>
               )}
             </div>
@@ -166,10 +167,10 @@ export default function AccountAvatarPanel({
               disabled={busy || storageEnabled === false}
               onClick={() => inputRef.current?.click()}
             >
-              {busy ? 'Working…' : 'Upload new photo'}
+              {busy ? t('accountPanel.working') : t('accountPanel.uploadPhoto')}
             </button>
             <p className="m-0 text-xs text-(--text-muted) leading-[1.4] text-center max-w-[220px]">
-              PNG, JPG, WebP — up to ~50 MB.
+              {t('accountPanel.photoHint')}
             </p>
           </div>
 
@@ -179,11 +180,10 @@ export default function AccountAvatarPanel({
                 className="block text-body-md font-semibold text-(--text-primary) mb-[0.35rem]"
                 htmlFor="profile-display-name-input"
               >
-                Display name
+                {t('accountPanel.displayName')}
               </label>
               <p className="m-0 mb-3 text-sm leading-[1.45] text-(--text-muted)">
-                Shown in the sidebar instead of your login handle. Stored in this browser until
-                Keycloak stores it.
+                {t('accountPanel.displayNameHint')}
               </p>
               <div className="flex flex-wrap gap-2 items-center max-sm:flex-col max-sm:items-stretch">
                 <input
@@ -193,7 +193,7 @@ export default function AccountAvatarPanel({
                   maxLength={MAX_NICKNAME_LEN}
                   value={nickDraft}
                   onChange={(e) => setNickDraft(e.target.value)}
-                  placeholder={user?.userName ?? 'Nickname'}
+                  placeholder={user?.userName ?? t('accountPanel.nickname')}
                   disabled={busy}
                   autoComplete="nickname"
                 />
@@ -203,12 +203,12 @@ export default function AccountAvatarPanel({
                   onClick={saveNickname}
                   disabled={busy}
                 >
-                  Save
+                  {t('accountPanel.save')}
                 </button>
               </div>
               {nickSaved && (
                 <p className="mt-2 mb-0 text-sm text-[#34d399]" role="status">
-                  Saved
+                  {t('accountPanel.saved')}
                 </p>
               )}
             </div>
@@ -218,7 +218,7 @@ export default function AccountAvatarPanel({
                 className="mt-3 py-3 px-4 rounded-lg bg-[rgba(251,191,36,0.1)] border border-[rgba(251,191,36,0.32)] text-[#fcd34d] text-sm leading-[1.4]"
                 role="status"
               >
-                File storage is not configured on the server — avatar upload is unavailable.
+                {t('accountPanel.storageDisabled')}
               </div>
             )}
 
@@ -255,20 +255,19 @@ export default function AccountAvatarPanel({
               id="projects-heading"
               className="m-0 mb-1 text-[1.125rem] font-bold tracking-[-0.02em] text-(--text-primary)"
             >
-              Projects
+              {t('accountPanel.projects')}
             </h2>
             <p className="m-0 text-sm leading-[1.45] text-(--text-muted) max-w-[60ch]">
-              Each project is a bot — identity, skills, voice, and model. Open one to edit in the
-              workshop.
+              {t('accountPanel.projectsHint')}
             </p>
           </div>
         </div>
 
         {projects.length === 0 ? (
           <div className="py-8 px-6 rounded-[14px] border border-dashed border-white/[0.12] bg-black/20 text-center">
-            <p className="m-0 text-(--text-muted) text-body-md">No projects yet.</p>
+            <p className="m-0 text-(--text-muted) text-body-md">{t('accountPanel.noProjects')}</p>
             <p className="mt-2 text-sm m-0 text-(--text-muted)">
-              Use <strong>Create new</strong> in the sidebar to add your first bot.
+              {t('accountPanel.noProjectsHintBefore')}<strong>{t('accountPanel.createNew')}</strong>{t('accountPanel.noProjectsHintAfter')}
             </p>
           </div>
         ) : (
@@ -301,7 +300,7 @@ export default function AccountAvatarPanel({
                       {c.is_active && (
                         <span
                           className="absolute -right-px -bottom-px w-[10px] h-[10px] rounded-full bg-[var(--color-online)] shadow-[0_0_0_2px_rgba(22,24,30,0.95)] z-[1] pointer-events-none"
-                          title="Active"
+                          title={t('accountPanel.active')}
                           aria-hidden
                         />
                       )}
@@ -318,7 +317,7 @@ export default function AccountAvatarPanel({
                             color: accent,
                           }}
                         >
-                          Bot
+                          {t('accountPanel.bot')}
                         </span>
                       </div>
                       <p className="m-0 mb-[0.35rem] text-xs text-(--text-muted) font-mono">
@@ -330,7 +329,7 @@ export default function AccountAvatarPanel({
                         </p>
                       ) : (
                         <p className="m-0 text-sm italic text-(--text-muted) opacity-85">
-                          No description yet
+                          {t('accountPanel.noDescription')}
                         </p>
                       )}
                     </div>

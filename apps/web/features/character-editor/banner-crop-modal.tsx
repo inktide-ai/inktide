@@ -1,5 +1,6 @@
 'use client'
 import { useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import Cropper from 'react-easy-crop'
 import type { Area } from 'react-easy-crop'
 
@@ -45,6 +46,7 @@ interface Props {
 }
 
 export default function BannerCropModal({ imageSrc, onApply, onCancel }: Props) {
+  const { t } = useTranslation('profile')
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
@@ -81,12 +83,12 @@ export default function BannerCropModal({ imageSrc, onApply, onCancel }: Props) 
 
         {/* Header */}
         <div className="flex items-center justify-between px-[1.125rem] py-[0.875rem] border-b border-white/[0.07] shrink-0">
-          <span className="text-body-md font-semibold text-[#f1f5f9] tracking-[-0.01em]">Crop banner</span>
+          <span className="text-body-md font-semibold text-[#f1f5f9] tracking-[-0.01em]">{t('bannerCrop.title')}</span>
           <button
             type="button"
             className="flex items-center justify-center w-[30px] h-[30px] border-none bg-transparent text-white/40 rounded-[6px] cursor-pointer transition-[background,color] duration-150 hover:bg-white/[0.08] hover:text-white/85"
             onClick={onCancel}
-            aria-label="Close"
+            aria-label={t('bannerCrop.close')}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
               <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -120,14 +122,14 @@ export default function BannerCropModal({ imageSrc, onApply, onCancel }: Props) 
 
         {/* Footer */}
         <div className="flex items-center justify-between gap-4 px-[1.125rem] py-3 border-t border-white/[0.07] shrink-0">
-          <span className="text-xs text-white/35 whitespace-nowrap">Drag to pan · Scroll to zoom</span>
+          <span className="text-xs text-white/35 whitespace-nowrap">{t('bannerCrop.hint')}</span>
           <div className="flex gap-2 shrink-0">
             <button
               type="button"
               className="px-[0.875rem] py-[0.45rem] rounded-[7px] border border-white/10 bg-transparent text-white/55 text-body font-medium cursor-pointer transition-[background,color] duration-150 hover:bg-white/[0.06] hover:text-white/85"
               onClick={onCancel}
             >
-              Cancel
+              {t('bannerCrop.cancel')}
             </button>
             <button
               type="button"
@@ -135,7 +137,7 @@ export default function BannerCropModal({ imageSrc, onApply, onCancel }: Props) 
               onClick={() => void handleApply()}
               disabled={applying || !croppedAreaPixels}
             >
-              {applying ? 'Uploading…' : 'Apply'}
+              {applying ? t('bannerCrop.uploading') : t('bannerCrop.apply')}
             </button>
           </div>
         </div>

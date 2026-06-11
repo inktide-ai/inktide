@@ -32,12 +32,12 @@ export interface WorkspacePreferencesDto {
 }
 
 export async function getGlobalPreferences(): Promise<GlobalPreferencesDto> {
-  const res = await apiFetch('/api/me/preferences')
+  const res = await apiFetch('/api/v1/me/preferences')
   return jsonOrThrow<GlobalPreferencesDto>(res)
 }
 
 export async function patchGlobalPreferences(patch: Partial<GlobalPreferencesDto>): Promise<GlobalPreferencesDto> {
-  const res = await apiFetch('/api/me/preferences', {
+  const res = await apiFetch('/api/v1/me/preferences', {
     method: 'PATCH',
     body: JSON.stringify(patch),
   })
@@ -45,7 +45,7 @@ export async function patchGlobalPreferences(patch: Partial<GlobalPreferencesDto
 }
 
 export async function getWorkspacePreferences(characterId: string): Promise<WorkspacePreferencesDto> {
-  const res = await apiFetch(`/api/me/preferences/workspace/${encodeURIComponent(characterId)}`)
+  const res = await apiFetch(`/api/v1/me/preferences/workspace/${encodeURIComponent(characterId)}`)
   return jsonOrThrow<WorkspacePreferencesDto>(res)
 }
 
@@ -54,7 +54,7 @@ export async function patchWorkspacePreferences(
   patch: Partial<WorkspacePreferencesDto>,
 ): Promise<WorkspacePreferencesDto> {
   const res = await apiFetch(
-    `/api/me/preferences/workspace/${encodeURIComponent(characterId)}`,
+    `/api/v1/me/preferences/workspace/${encodeURIComponent(characterId)}`,
     { method: 'PATCH', body: JSON.stringify(patch) },
   )
   return jsonOrThrow<WorkspacePreferencesDto>(res)

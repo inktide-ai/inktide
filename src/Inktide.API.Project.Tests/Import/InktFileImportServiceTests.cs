@@ -20,7 +20,6 @@ public sealed class InktFileImportServiceTests
 {
     private static readonly Guid UserId = IdGenerator.New();
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
 
     private static Stream MakeValidInkt(
         string projectName    = "My Project",
@@ -116,7 +115,6 @@ public sealed class InktFileImportServiceTests
         return (svc, store);
     }
 
-    // ── ParseAsync tests ─────────────────────────────────────────────────────
 
     [Fact]
     public async Task ParseAsync_ReturnsError_WhenStreamIsCorrupted()
@@ -198,7 +196,6 @@ public sealed class InktFileImportServiceTests
         Assert.Equal("Aria", result.SoulName);
     }
 
-    // ── FinalizeAsync tests ───────────────────────────────────────────────────
 
     [Fact]
     public async Task FinalizeAsync_Throws_WhenTokenExpired()

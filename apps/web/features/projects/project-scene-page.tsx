@@ -9,6 +9,7 @@ import type { PresetScene } from '@/features/character-editor'
 import { getPillColors } from '@/features/character-editor/tabs/scene-tag-utils'
 import { CardSceneUploader } from '@/entities/soul/services/upload/CardSceneUploader'
 import { executePresignedUpload } from '@/shared/services/upload/PresignedUploadService'
+import { PageContent } from '@/shared/ui'
 
 function inferModelLabel(fileName: string): string {
   if (fileName.endsWith('.vrm')) return 'VRM'
@@ -82,8 +83,6 @@ export default function ProjectScenePage() {
   const [modelSearch, setModelSearch] = useState('')
   const { t } = useTranslation('common')
 
-  const soulId = project?.active_soul_id ?? null
-
   const importedPresetNames = new Set(scenes.map(s => getSceneDisplayTitle(s)))
 
   const sq = sceneSearch.toLowerCase()
@@ -92,7 +91,7 @@ export default function ProjectScenePage() {
       (!sq || p.name.toLowerCase().includes(sq) || p.tagName.toLowerCase().includes(sq)),
   )
   const filteredScenes = scenes.filter(
-    s => !sq || getSceneDisplayTitle(s).toLowerCase().includes(sq) || (s.tag ?? '').toLowerCase().includes(sq),
+    s => !sq || getSceneDisplayTitle(s).toLowerCase().includes(sq),
   )
 
   const mq = modelSearch.toLowerCase()
@@ -117,7 +116,7 @@ export default function ProjectScenePage() {
   }
 
   async function importPreset(preset: PresetScene) {
-    if (!soulId || importingId || !preset.imagePath) return
+    if (!project || importingId || !preset.imagePath) return
 
     // Defence in depth: if already imported, just activate the existing scene
     const existing = scenes.find(s => getSceneDisplayTitle(s) === preset.name)
@@ -131,7 +130,7 @@ export default function ProjectScenePage() {
       const res = await fetch(preset.imagePath)
       const blob = await res.blob()
       const file = new File([blob], `${preset.name}.jpg`, { type: blob.type || 'image/jpeg' })
-      const uploader = new CardSceneUploader(soulId, preset.tagName)
+      const uploader = new CardSceneUploader(project.id)
       const scene = await executePresignedUpload(uploader, file)
       // setActiveScene → onSettled → invalidateAll → scenes query refetches
       await setActiveScene(scene.id)
@@ -150,7 +149,7 @@ export default function ProjectScenePage() {
     )
   }
 
-  if (!project?.active_soul_id) {
+  if (!project) {
     return (
       <div className="flex h-full items-center justify-center text-body text-[var(--text-tertiary)]">
         {t('projectDetail.bindSoulFirst')}
@@ -162,14 +161,10 @@ export default function ProjectScenePage() {
   const noModelResults = filteredModels.length === 0
 
   return (
-    <div className="mx-auto max-w-[860px] px-6 py-8">
-      <header className="mb-7">
-        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
-          {t('projectDetail.scene')}
-        </h1>
-        <p className="mt-1 text-body text-[var(--text-secondary)]">
-          {t('projectDetail.sceneSubtitle')}
-        </p>
+    <PageContent>
+      <header className="mb-7 flex flex-col gap-2">
+        <h2 className="text-[1.5rem] font-semibold leading-[1.2] text-[var(--text-heading)]">{t('projectDetail.scene')}</h2>
+        <span className="text-body text-balance text-[var(--text-secondary)]">{t('projectDetail.sceneSubtitle')}</span>
       </header>
 
       {/* 3D Model picker */}
@@ -306,7 +301,6 @@ export default function ProjectScenePage() {
             {/* Custom (user-uploaded) scenes */}
             {filteredScenes.map(scene => {
               const active = project.active_scene_id === scene.id
-              const pillColors = scene.tag ? getPillColors(scene.tag) : null
               return (
                 <button
                   key={scene.id}
@@ -338,19 +332,9 @@ export default function ProjectScenePage() {
                     )}
                   </div>
                   <div className="bg-[var(--surface-1)] px-3 py-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="truncate text-body font-medium text-[var(--text-primary)]">
-                        {getSceneDisplayTitle(scene)}
-                      </p>
-                      {pillColors && scene.tag && (
-                        <span
-                          className="shrink-0 rounded border px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide"
-                          style={{ color: pillColors.text, background: pillColors.bg, borderColor: pillColors.border }}
-                        >
-                          {scene.tag}
-                        </span>
-                      )}
-                    </div>
+                    <p className="truncate text-body font-medium text-[var(--text-primary)]">
+                      {getSceneDisplayTitle(scene)}
+                    </p>
                   </div>
                 </button>
               )
@@ -358,6 +342,6 @@ export default function ProjectScenePage() {
           </div>
         )}
       </section>
-    </div>
+    </PageContent>
   )
 }

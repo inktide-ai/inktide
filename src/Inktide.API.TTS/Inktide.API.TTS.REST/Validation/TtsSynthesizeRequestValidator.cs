@@ -28,7 +28,10 @@ public sealed class TtsSynthesizeRequestValidator : AbstractValidator<TtsSynthes
         RuleFor(x => x.ProviderId)
             .MaximumLength(64)
             .When(x => !string.IsNullOrEmpty(x.ProviderId));
-        
+
+        When(x => x.ProviderParams is not null, () =>
+            RuleFor(x => x.ProviderParams!)
+                .Must(p => p.Count <= 20).WithMessage("provider_params must not exceed 20 entries."));
     }
 
 }

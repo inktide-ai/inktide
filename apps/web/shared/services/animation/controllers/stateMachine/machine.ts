@@ -6,7 +6,6 @@ import type {
   InTransitionState,
 } from './types'
 
-// ── Pure helpers (no imports) ─────────────────────────────────────────────────
 
 function computeTotalDuration(t: AnimationTransition): number {
   const kfTotal = (t.keyframes ?? []).reduce((sum, kf) => sum + kf.duration, 0)
@@ -70,7 +69,6 @@ function reverseTransition(t: InTransitionState): InTransitionState {
   }
 }
 
-// ── Machine factory ───────────────────────────────────────────────────────────
 
 export function buildAnimationMachine(transitions: AnimationTransition[]) {
   return setup({
@@ -174,7 +172,6 @@ export function buildAnimationMachine(transitions: AnimationTransition[]) {
     }),
 
     states: {
-      // ── Waiting for idle clip to be ready ────────────────────────────────────
       loading: {
         on: {
           CLIP_READY: {
@@ -186,7 +183,6 @@ export function buildAnimationMachine(transitions: AnimationTransition[]) {
         },
       },
 
-      // ── Base looping state ────────────────────────────────────────────────────
       idle: {
         on: {
           EMOTION_SET: {
@@ -202,7 +198,6 @@ export function buildAnimationMachine(transitions: AnimationTransition[]) {
         },
       },
 
-      // ── Cross-fading between two clips ────────────────────────────────────────
       transitioning: {
         on: {
           EMOTION_SET: [
@@ -267,7 +262,6 @@ export function buildAnimationMachine(transitions: AnimationTransition[]) {
         },
       },
 
-      // ── Holding an emote clip until it finishes ───────────────────────────────
       emoting: {
         on: {
           EMOTION_SET: [
@@ -305,7 +299,6 @@ export function buildAnimationMachine(transitions: AnimationTransition[]) {
   })
 }
 
-// ── Actor factory ─────────────────────────────────────────────────────────────
 
 export function createAnimationActor(
   transitions: AnimationTransition[],

@@ -1,11 +1,11 @@
 using Inktide.API.Soul.Domain.Enums;
-using Inktide.API.Soul.Domain.ValueObjects;
 
 namespace Inktide.API.Soul.Domain.Entities;
 
 /// <summary>
-/// Core aggregate root — one AI companion configuration owned by a user.
-/// Contains identity, prompts, and JSONB config blobs for LLM/TTS/behavior/memory/autonomy.
+/// Core aggregate root — thin soul identity: name, LLM/TTS provider selection, and 3D models.
+/// Behavior config (system prompt, personality, response behavior, memory, autopilot, screen awareness)
+/// has moved to the Project context.
 /// </summary>
 public sealed class AiCard
 {
@@ -16,18 +16,11 @@ public sealed class AiCard
     private string _slug = string.Empty;
     private string? _avatarUrl;
     private string? _bannerUrl;
-    private string _personality = string.Empty;
-    private string _systemPrompt = string.Empty;
     private Guid _llmCatalogId;
     private string _llmConfig = "{}";
     private Guid? _ttsCatalogId;
     private string? _ttsConfig;
     private string _appearance = "{}";
-    private string _responseBehavior = "{}";
-    private string _memorySettings = "{}";
-    private string _autoPilot = "{}";
-    private string _screenAwarenessSettings = "{}";
-    private PersonalitySettings _personalityConfig = new();
     private string _description = string.Empty;
     private AiCardStatus _status = AiCardStatus.Active;
     private string? _coverUrl;
@@ -41,8 +34,6 @@ public sealed class AiCard
     private TtsCatalogEntry? _ttsCatalog;
     private string? _category;
     private string _tags = "[]";
-    private ICollection<AiCardChannel> _channels = [];
-    private ICollection<AiCardTool> _tools = [];
 
 
     public Guid Id
@@ -81,18 +72,6 @@ public sealed class AiCard
         set => _bannerUrl = value;
     }
 
-    public string Personality
-    {
-        get => _personality;
-        set => _personality = value;
-    }
-
-    public string SystemPrompt
-    {
-        get => _systemPrompt;
-        set => _systemPrompt = value;
-    }
-
     /// <summary>FK to <see cref="LlmCatalogEntry"/>.</summary>
     public Guid LlmCatalogId
     {
@@ -126,41 +105,6 @@ public sealed class AiCard
     {
         get => _appearance;
         set => _appearance = value;
-    }
-
-    /// <summary>Runtime response knobs: response_delay_ms, max_response_length, language, key_phrases, etc.</summary>
-    public string ResponseBehavior
-    {
-        get => _responseBehavior;
-        set => _responseBehavior = value;
-    }
-
-    /// <summary>Memory settings: enabled, max_memories, retention_days, importance_threshold.</summary>
-    public string MemorySettings
-    {
-        get => _memorySettings;
-        set => _memorySettings = value;
-    }
-
-    /// <summary>Auto-pilot config: idle_timeout, min_interval, mood defaults.</summary>
-    public string AutoPilot
-    {
-        get => _autoPilot;
-        set => _autoPilot = value;
-    }
-
-    /// <summary>Screen awareness config: enabled, hourly_budget_override, phash_threshold.</summary>
-    public string ScreenAwarenessSettings
-    {
-        get => _screenAwarenessSettings;
-        set => _screenAwarenessSettings = value;
-    }
-
-    /// <summary>Structured personality traits and emotional dynamics (warmth, playfulness, volatility, etc.).</summary>
-    public PersonalitySettings PersonalityConfig
-    {
-        get => _personalityConfig;
-        set => _personalityConfig = value;
     }
 
     /// <summary>Short project description shown on the project card.</summary>
@@ -277,18 +221,6 @@ public sealed class AiCard
     {
         get => _ttsCatalog;
         set => _ttsCatalog = value;
-    }
-
-    public ICollection<AiCardChannel> Channels
-    {
-        get => _channels;
-        set => _channels = value;
-    }
-
-    public ICollection<AiCardTool> Tools
-    {
-        get => _tools;
-        set => _tools = value;
     }
 
 }

@@ -3,17 +3,37 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { getCardActivity } from '@/entities/soul/api/cards'
+import { queryKeys } from '@/shared/lib/query/keys'
+import { formatRelativeTime } from '@/features/soul/activity/lib/relative-time'
 
-const ACTIVITY = [
-  ['Twitch Chat', 'Responded to message', '2m ago'],
-  ['Discord',     'Replied in #general',  '5m ago'],
-  ['Memory',      'Stored new memory',    '15m ago'],
-  ['OBS',         'Scene changed',        '1h ago'],
-  ['Voice',       'Spoke for 2m 34s',     '2h ago'],
-]
+const ACTION_LABELS: Record<string, string> = {
+  created:                  'Soul created',
+  updated:                  'Settings updated',
+  'status_changed:active':  'Soul started',
+  'status_changed:paused':  'Soul paused',
+  'status_changed:stopped': 'Soul stopped',
+}
 
-export function SoulActivityList() {
+export function SoulActivityList({ soulId }: { soulId: string }) {
   const [open, setOpen] = useState(false)
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: queryKeys.souls.activity(soulId),
+    queryFn:  () => getCardActivity(soulId),
+    refetchInterval: 30_000,
+  })
+
+  const events = data ?? []
+  const latest = events[0]
+  const headerRight = isLoading
+    ? 'Loading…'
+    : isError
+      ? 'Unavailable'
+      : events.length === 0
+        ? 'No activity yet'
+        : `${events.length} events · ${formatRelativeTime(new Date(latest.created_at))}`
 
   return (
     <div>
@@ -29,14 +49,7 @@ export function SoulActivityList() {
           className={`mr-3 shrink-0 text-[var(--text-tertiary)] transition-transform duration-150 ${open ? 'rotate-90' : ''}`}
         />
         <span className="text-body font-medium text-[var(--text-heading)]">Recent Activity</span>
-        <span className="ml-auto mr-3 text-body text-[var(--text-secondary)]">5 events · last 2m ago</span>
-        <button
-          type="button"
-          className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-          onClick={e => e.stopPropagation()}
-        >
-          View all
-        </button>
+        <span className="ml-auto text-body text-[var(--text-secondary)]">{headerRight}</span>
       </div>
 
       <AnimatePresence>
@@ -49,20 +62,34 @@ export function SoulActivityList() {
             style={{ overflow: 'hidden' }}
           >
             <div className="border-t border-[var(--border-divider)] px-5 pb-4 pt-3">
-          <div className="space-y-1.5">
-            {ACTIVITY.map(([title, subtitle, time]) => (
-              <div
-                key={title}
-                className="flex items-center justify-between rounded-md border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2"
-              >
-                <div>
-                  <p className="text-body text-[var(--text-primary)]">{title}</p>
-                  <p className="text-xs text-[var(--text-tertiary)]">{subtitle}</p>
-                </div>
-                <span className="text-xs text-[var(--text-tertiary)]">{time}</span>
+              <div className="space-y-1.5">
+                {isLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-[52px] animate-pulse rounded-md border border-[var(--border-subtle)] bg-[var(--surface-1)]"
+                    />
+                  ))
+                ) : isError || events.length === 0 ? (
+                  <p className="py-2 text-body text-[var(--text-tertiary)]">No activity yet</p>
+                ) : (
+                  events.map(item => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between rounded-md border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 py-2"
+                    >
+                      <div>
+                        <p className="text-body text-[var(--text-primary)]">
+                          {ACTION_LABELS[item.action] ?? item.action}
+                        </p>
+                      </div>
+                      <span className="text-xs text-[var(--text-tertiary)]">
+                        {formatRelativeTime(new Date(item.created_at))}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
-            ))}
-          </div>
             </div>
           </motion.div>
         )}

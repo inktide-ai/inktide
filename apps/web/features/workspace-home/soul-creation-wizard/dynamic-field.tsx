@@ -1,6 +1,6 @@
 'use client'
 import { cn } from '@/lib/utils'
-import type { ProviderFieldDef } from '@/shared/data/providers'
+import type { ProviderFieldDef } from '@/shared/data/llm-provider-catalog'
 
 const inputCls = cn(
   'h-9 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)]/60 px-3',

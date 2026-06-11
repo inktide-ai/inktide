@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Clock, Zap } from 'lucide-react'
 import {
   getConnectors,
@@ -13,10 +14,11 @@ import { getCard } from '@/entities/soul/api/cards'
 import type { ChannelResponse } from '@/shared/types/soul-api'
 
 import { ICON_MAP } from '@/features/marketplace/icons'
+import { handleError } from '@/shared/lib/handle-error'
 
-/* ── page ────────────────────────────────────────────────────────────── */
 
 export default function MarketplacePage() {
+  const { t } = useTranslation('channels')
   const { id } = useParams<{ id: string }>()
   const router  = useRouter()
 
@@ -33,8 +35,8 @@ export default function MarketplacePage() {
       getSoulInstallations(id).catch(() => [] as InstallationResponse[]),
       getCard(id).then(card => card.channels ?? []).catch(() => [] as ChannelResponse[]),
     ])
-      .then(([c, i, ch]) => { setConnectors(c); setInstallations(i); setSoulChannels(ch) })
-      .catch(console.error)
+      .then(([c, i, ch]) => { setConnectors(c.items); setInstallations(i); setSoulChannels(ch) })
+      .catch(handleError)
       .finally(() => setLoading(false))
   }, [id])
 
@@ -87,7 +89,7 @@ export default function MarketplacePage() {
   }, [connectors, search, categoryFilter])
 
   if (loading) {
-    return <div className="p-8 text-sm text-[var(--text-secondary)]">Loading…</div>
+    return <div className="p-8 text-sm text-[var(--text-secondary)]">{t('mp.loading')}</div>
   }
 
   return (
@@ -102,16 +104,16 @@ export default function MarketplacePage() {
                 <button
                   onClick={() => router.back()}
                   className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--surface-1)] transition-colors"
-                  aria-label="Back"
+                  aria-label={t('mp.backAria')}
                 >
                   <ArrowLeft size={16} />
                 </button>
                 <h2 className="text-[1.5rem] font-semibold leading-[1.2] text-[var(--text-heading)]">
-                  Browse Marketplace
+                  {t('mp.browseTitle')}
                 </h2>
               </div>
               <span className="text-body text-[var(--text-secondary)] pl-9">
-                Discover and install connectors for your AI character.
+                {t('mp.browseSubtitle')}
               </span>
             </div>
           </div>
@@ -127,8 +129,8 @@ export default function MarketplacePage() {
               </svg>
               <input
                 type="search"
-                placeholder="Search connectors…"
-                aria-label="Search"
+                placeholder={t('mp.searchPlaceholder')}
+                aria-label={t('mp.searchAria')}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="w-full h-9 pl-9 pr-3 text-sm border border-[var(--border-subtle)] rounded-lg bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--border-subtle)]"
@@ -145,7 +147,7 @@ export default function MarketplacePage() {
                       : 'border-[var(--border-subtle)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-1)]'
                   }`}
                 >
-                  {cat}
+                  {cat === 'All' ? t('mp.all') : cat}
                 </button>
               ))}
             </div>
@@ -179,7 +181,7 @@ export default function MarketplacePage() {
                       {connector.isNative && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-caption font-medium text-blue-400">
                           <Zap size={10} />
-                          Native
+                          {t('mp.native')}
                         </span>
                       )}
                       <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border-subtle)] px-2 py-0.5 text-caption font-medium text-[var(--text-tertiary)]">
@@ -200,19 +202,19 @@ export default function MarketplacePage() {
                     {!connector.isAvailable ? (
                       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-tertiary)]">
                         <Clock size={14} />
-                        Coming soon
+                        {t('mp.comingSoon')}
                       </span>
                     ) : installed ? (
                       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-500">
                         <Check size={14} />
-                        Connected
+                        {t('mp.connected')}
                       </span>
                     ) : (
                       <button
                         onClick={() => handleAction(connector)}
                         className="inline-flex h-8 items-center justify-center rounded-md bg-[var(--text-primary)] px-4 text-sm font-medium text-[var(--bg-0)] transition-opacity hover:opacity-90"
                       >
-                        Add Integration
+                        {t('mp.addIntegration')}
                       </button>
                     )}
                   </div>

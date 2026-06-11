@@ -1,5 +1,9 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
+import { z } from 'zod'
 import { Dialog, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import { requestEmailChange, verifyEmailChange } from '@/features/account/api/email-change'
 
@@ -13,62 +17,66 @@ interface Props {
 type Step = 'email' | 'code'
 
 export default function ChangeEmailModal({ open, onClose, currentEmail, onSaved }: Props) {
+  const { t } = useTranslation('account')
   const [step, setStep] = useState<Step>('email')
-  const [emailDraft, setEmailDraft] = useState('')
   const [pendingEmail, setPendingEmail] = useState('')
-  const [code, setCode] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const emailRef = useRef<HTMLInputElement>(null)
-  const codeRef = useRef<HTMLInputElement>(null)
 
-  // Reset on open
+  const emailSchema = useMemo(() => z.object({
+    email: z.string()
+      .min(1, t('emailChange.errors.emailRequired'))
+      .email(t('emailChange.errors.emailInvalid'))
+      .refine((v) => v.trim().toLowerCase() !== currentEmail.trim().toLowerCase(), t('emailChange.errors.sameEmail')),
+  }), [currentEmail, t])
+
+  const codeSchema = z.object({ code: z.string().min(1, t('emailChange.errors.codeRequired')) })
+
+  const emailForm = useForm<{ email: string }>({
+    resolver: standardSchemaResolver(emailSchema),
+    defaultValues: { email: '' },
+  })
+
+  const codeForm = useForm<{ code: string }>({
+    resolver: standardSchemaResolver(codeSchema),
+    defaultValues: { code: '' },
+  })
+
   useEffect(() => {
     if (!open) return
     setStep('email')
-    setEmailDraft('')
-    setCode('')
-    setError(null)
-  }, [open])
+    setPendingEmail('')
+    emailForm.reset()
+    codeForm.reset()
+    setTimeout(() => emailForm.setFocus('email'), 60)
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Focus correct input after step change
-  useEffect(() => {
-    const el = step === 'email' ? emailRef.current : codeRef.current
-    if (open && el) setTimeout(() => el.focus(), 60)
-  }, [step, open])
-
-  async function handleSendCode() {
-    const email = emailDraft.trim().toLowerCase()
-    if (!email) { setError('Email is required.'); return }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('Enter a valid email address.'); return }
-    if (email === currentEmail.trim().toLowerCase()) { setError('This is already your current email.'); return }
-    setBusy(true)
-    setError(null)
+  const onEmailSubmit = async (data: { email: string }) => {
     try {
-      await requestEmailChange(email)
-      setPendingEmail(email)
+      await requestEmailChange(data.email)
+      setPendingEmail(data.email)
       setStep('code')
+      setTimeout(() => codeForm.setFocus('code'), 60)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to send code. Please try again.')
-    } finally {
-      setBusy(false)
+      emailForm.setError('root', { message: e instanceof Error ? e.message : t('emailChange.errors.sendFailed') })
     }
   }
 
-  async function handleVerify() {
-    if (!code.trim()) { setError('Enter the verification code.'); return }
-    setBusy(true)
-    setError(null)
+  const onCodeSubmit = async (data: { code: string }) => {
     try {
-      const { newEmail } = await verifyEmailChange(code.trim())
+      const { newEmail } = await verifyEmailChange(data.code.trim())
       onSaved(newEmail)
       onClose()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Verification failed. Please try again.')
-    } finally {
-      setBusy(false)
+      codeForm.setError('root', { message: e instanceof Error ? e.message : t('emailChange.errors.verifyFailed') })
     }
   }
+
+  const goBack = () => {
+    setStep('email')
+    codeForm.reset()
+    setTimeout(() => emailForm.setFocus('email'), 60)
+  }
+
+  const inputCls = 'w-full rounded-[8px] border border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] px-[11px] py-[9px] text-body text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-disabled)] focus:border-[var(--accent-primary)]'
 
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) onClose() }}>
@@ -79,10 +87,9 @@ export default function ChangeEmailModal({ open, onClose, currentEmail, onSaved 
           onInteractOutside={() => onClose()}
         >
           <DialogTitle className="sr-only">
-            {step === 'email' ? 'Change email address' : 'Verify email address'}
+            {step === 'email' ? t('emailChange.changeTitle') : t('emailChange.verifyTitle')}
           </DialogTitle>
 
-          {/* Icon + title */}
           <div className="mb-4 flex flex-col items-center gap-2 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-2)] text-[var(--text-secondary)]">
               {step === 'email' ? (
@@ -98,69 +105,73 @@ export default function ChangeEmailModal({ open, onClose, currentEmail, onSaved 
               )}
             </div>
             <div className="text-[15px] font-semibold text-[var(--text-heading)]">
-              {step === 'email' ? 'Change email address' : 'Verify email address'}
+              {step === 'email' ? t('emailChange.changeTitle') : t('emailChange.verifyTitle')}
             </div>
             <div className="text-body text-[var(--text-tertiary)]">
               {step === 'email'
-                ? "We'll send a verification code to your new email."
-                : <><span className="text-[var(--text-primary)]">{pendingEmail}</span> — check your inbox and enter the code below.</>}
+                ? t('emailChange.sendDesc')
+                : <><span className="text-[var(--text-primary)]">{pendingEmail}</span> {t('emailChange.checkInbox')}</>}
             </div>
           </div>
 
-          {error && (
-            <div className="mb-3 rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-body text-[var(--danger-text)]">
-              {error}
-            </div>
-          )}
-
           {step === 'email' ? (
-            <>
+            <form onSubmit={emailForm.handleSubmit(onEmailSubmit)}>
+              {emailForm.formState.errors.root && (
+                <div className="mb-3 rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-body text-[var(--danger-text)]">
+                  {emailForm.formState.errors.root.message}
+                </div>
+              )}
               <div className="mb-5">
-                <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">Email address</label>
+                <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">{t('emailChange.emailLabel')}</label>
                 <input
-                  ref={emailRef}
+                  {...emailForm.register('email')}
                   type="email"
-                  value={emailDraft}
-                  onChange={(e) => setEmailDraft(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && void handleSendCode()}
-                  placeholder="example@company.com"
-                  className="w-full rounded-[8px] border border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] px-[11px] py-[9px] text-body text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-disabled)] focus:border-[var(--accent-primary)]"
+                  placeholder={t('emailChange.emailPlaceholder')}
+                  className={inputCls}
                 />
+                {emailForm.formState.errors.email && (
+                  <p className="mt-1 text-2xs text-[var(--danger-text)]">{emailForm.formState.errors.email.message}</p>
+                )}
               </div>
               <div className="flex justify-end gap-2">
-                <button type="button" onClick={onClose} disabled={busy} className="rounded-[7px] border border-[var(--border-default)] bg-transparent px-4 py-[7px] text-body text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] disabled:opacity-40">
-                  Cancel
+                <button type="button" onClick={onClose} disabled={emailForm.formState.isSubmitting} className="rounded-[7px] border border-[var(--border-default)] bg-transparent px-4 py-[7px] text-body text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] disabled:opacity-40">
+                  {t('emailChange.cancel')}
                 </button>
-                <button type="button" onClick={() => void handleSendCode()} disabled={busy} className="rounded-[7px] bg-[var(--accent-primary)] px-4 py-[7px] text-body font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40">
-                  {busy ? 'Sending…' : 'Send code →'}
+                <button type="submit" disabled={emailForm.formState.isSubmitting} className="rounded-[7px] bg-[var(--accent-primary)] px-4 py-[7px] text-body font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40">
+                  {emailForm.formState.isSubmitting ? t('emailChange.sending') : t('emailChange.sendCode')}
                 </button>
               </div>
-            </>
+            </form>
           ) : (
-            <>
+            <form onSubmit={codeForm.handleSubmit(onCodeSubmit)}>
+              {codeForm.formState.errors.root && (
+                <div className="mb-3 rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-body text-[var(--danger-text)]">
+                  {codeForm.formState.errors.root.message}
+                </div>
+              )}
               <div className="mb-5">
-                <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">Verification code</label>
+                <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">{t('emailChange.codeLabel')}</label>
                 <input
-                  ref={codeRef}
+                  {...codeForm.register('code')}
                   type="text"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && void handleVerify()}
-                  placeholder="e.g. sDqu7U"
+                  placeholder={t('emailChange.codePlaceholder')}
                   autoComplete="one-time-code"
                   maxLength={6}
                   className="w-full rounded-[8px] border border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] px-[11px] py-[9px] font-mono text-body tracking-[0.15em] text-[var(--text-primary)] outline-none transition-colors placeholder:font-sans placeholder:tracking-normal placeholder:text-[var(--text-disabled)] focus:border-[var(--accent-primary)]"
                 />
+                {codeForm.formState.errors.code && (
+                  <p className="mt-1 text-2xs text-[var(--danger-text)]">{codeForm.formState.errors.code.message}</p>
+                )}
               </div>
               <div className="flex justify-between gap-2">
-                <button type="button" onClick={() => { setStep('email'); setCode(''); setError(null) }} disabled={busy} className="rounded-[7px] border border-[var(--border-default)] bg-transparent px-4 py-[7px] text-body text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] disabled:opacity-40">
-                  ← Back
+                <button type="button" onClick={goBack} disabled={codeForm.formState.isSubmitting} className="rounded-[7px] border border-[var(--border-default)] bg-transparent px-4 py-[7px] text-body text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] disabled:opacity-40">
+                  {t('emailChange.back')}
                 </button>
-                <button type="button" onClick={() => void handleVerify()} disabled={busy} className="rounded-[7px] bg-[var(--accent-primary)] px-4 py-[7px] text-body font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40">
-                  {busy ? 'Verifying…' : 'Verify email'}
+                <button type="submit" disabled={codeForm.formState.isSubmitting} className="rounded-[7px] bg-[var(--accent-primary)] px-4 py-[7px] text-body font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40">
+                  {codeForm.formState.isSubmitting ? t('emailChange.verifying') : t('emailChange.verify')}
                 </button>
               </div>
-            </>
+            </form>
           )}
         </DialogContent>
       </DialogPortal>

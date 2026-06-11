@@ -28,5 +28,7 @@ public sealed class OrganizationMemberConfiguration : IEntityTypeConfiguration<O
         b.HasIndex(e => new { e.OrganizationId, e.UserId })
             .HasDatabaseName("idx_org_member_org_user")
             .IsUnique();
+        b.HasIndex(e => e.UserId)
+            .HasDatabaseName("idx_org_member_user_id");
     }
 }

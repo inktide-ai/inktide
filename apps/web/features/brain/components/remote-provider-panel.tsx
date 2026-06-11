@@ -5,9 +5,10 @@ import { useTranslation } from 'react-i18next'
 import type { AiCharacter } from '@/shared/lib/character'
 import type { LlmModelResponse } from '@/shared/types/soul-api'
 import { getCatalogLlmModels, getCredentials, upsertCredential } from '@/entities/soul/api'
-import { PROVIDER_DEFS } from '@/shared/data/providers'
-import { pingRemote } from '@/features/brain/lib/provider-validation'
+import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-provider-catalog'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import { useValidationState } from '../hooks/useValidationState'
+import { useCredentialTest } from '@/shared/lib/hooks/useCredentialTest'
 import {
   infoContent, formGroup, label, labelHint, inputCls,
   validationOk, validationFailed, btnContinueAnyway,
@@ -19,9 +20,6 @@ export interface PanelProps {
   onUpdate: (patch: Partial<AiCharacter>) => void
 }
 
-type AutoState   = 'idle' | 'ok' | 'failed'
-type ManualState = 'idle' | 'testing' | 'ok' | 'failed'
-
 interface RemoteProviderPanelProps extends PanelProps {
   providerId: string
 }
@@ -31,24 +29,26 @@ export function RemoteProviderPanel({ providerId, character, onUpdate }: RemoteP
   const { registerSavePlugin, unregisterSavePlugin, markCredentialDirty } = useCharactersContext()
 
   const llm   = character.llm
-  const def   = PROVIDER_DEFS.find((p) => p.id === providerId)
+  const def   = LLM_PROVIDER_CATALOG.find((p) => p.id === providerId)
   const patch = (p: Partial<typeof llm>) => onUpdate({ llm: { ...llm, ...p } })
 
   const [cred, setCred]   = useState<Awaited<ReturnType<typeof getCredentials>>[number] | null>(null)
   const [apiKey, setApiKey] = useState('')
-
-  const [autoState, setAutoState]     = useState<AutoState>('idle')
-  const [autoError, setAutoError]     = useState<string | null>(null)
-  const [manualState, setManualState] = useState<ManualState>('idle')
-  const [manualError, setManualError] = useState<string | null>(null)
-  const [bypassed, setBypassed]       = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [models, setModels]               = useState<LlmModelResponse[]>([])
   const [modelsLoading, setModelsLoading] = useState(true)
 
   const apiKeyRef   = useRef(apiKey)
   apiKeyRef.current = apiKey
+
+  const { autoState, autoError, triggerAutoValidation } =
+    useValidationState(
+      (key) => def ? def.autoValidate({ apiKey: key, baseUrl: def.fixedBaseUrl ?? '' }) : null,
+      async () => null,
+    )
+
+  const credTest = useCredentialTest(providerId)
+  const [bypassed, setBypassed] = useState(false)
 
   useEffect(() => {
     const key = `${providerId}-credential`
@@ -74,25 +74,7 @@ export function RemoteProviderPanel({ providerId, character, onUpdate }: RemoteP
       .finally(() => setModelsLoading(false))
   }, [providerId])
 
-  const triggerAutoValidation = (key: string) => {
-    setBypassed(false); setManualState('idle'); setManualError(null)
-    setAutoState('idle'); setAutoError(null)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (!def) return
-    debounceRef.current = setTimeout(() => {
-      const err = def.autoValidate({ apiKey: key, baseUrl: def.fixedBaseUrl ?? '' })
-      setAutoState(err ? 'failed' : 'ok'); setAutoError(err)
-    }, 300)
-  }
-
-  const handleApiKeyChange = (v: string) => { setApiKey(v); markCredentialDirty(); triggerAutoValidation(v) }
-
-  const handleTest = async () => {
-    if (!def?.fixedBaseUrl) return
-    setManualState('testing'); setManualError(null); setBypassed(false)
-    const err = await pingRemote(def.fixedBaseUrl, apiKey)
-    setManualState(err ? 'failed' : 'ok'); setManualError(err)
-  }
+  const handleApiKeyChange = (v: string) => { setApiKey(v); markCredentialDirty(); triggerAutoValidation(v); credTest.reset(); setBypassed(false) }
 
   return (
     <div className={infoContent}>
@@ -120,16 +102,16 @@ export function RemoteProviderPanel({ providerId, character, onUpdate }: RemoteP
       )}
 
       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.75rem' }}>
-        <button type="button" className={btnTest} disabled={manualState === 'testing' || !apiKey.trim()} onClick={handleTest}>
-          {manualState === 'testing' ? t('providers:validation.checking') : t('providers:validation.testConnection')}
+        <button type="button" className={btnTest} disabled={credTest.testing || !apiKey.trim()} onClick={() => void credTest.test(apiKey, def?.fixedBaseUrl ?? null)}>
+          {credTest.testing ? t('providers:validation.checking') : t('providers:validation.testConnection')}
         </button>
       </div>
 
-      {manualState === 'ok' && <div className={validationOk}>✓ {t('providers:validation.ok')}</div>}
-      {manualState === 'failed' && !bypassed && (
+      {credTest.status === 'verified' && <div className={validationOk}>✓ {t('providers:validation.ok')}</div>}
+      {credTest.status === 'failed' && !bypassed && (
         <div className={validationFailed}>
           <div className="font-semibold text-[var(--color-error-strong)]">{t('providers:validation.failed')}</div>
-          {manualError && <pre className="font-[inherit] text-xs text-(--text-muted) whitespace-pre-wrap break-words m-0 p-0">{manualError}</pre>}
+          {credTest.error && <pre className="font-[inherit] text-xs text-(--text-muted) whitespace-pre-wrap break-words m-0 p-0">{credTest.error}</pre>}
           <button type="button" className={btnContinueAnyway} onClick={() => setBypassed(true)}>
             {t('providers:validation.continueAnyway')}
           </button>

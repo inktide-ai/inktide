@@ -1,4 +1,4 @@
-using Inktide.API.Profile.Application.Interfaces;
+using Inktide.API.Core.Contracts;
 
 namespace Inktide.API.Profile.Infrastructure.Storage;
 

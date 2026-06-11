@@ -94,21 +94,25 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
             ProviderId = provider.Id,
         };
 
-        string? apiKey;
-        try
-        {
-            apiKey = _apiKeyResolver.Resolve(provider.Id);
-        }
-        catch (ApiKeyMissingException)
-        {
+        Guid? parsedUserId = Guid.TryParse(command.UserId, out var g) ? g : null;
+
+        // Use async resolver: header → per-user credential (Soul DB) → global config → null
+        var apiKey = await _apiKeyResolver.ResolveAsync(parsedUserId, provider.Id, cancellationToken);
+
+        if (provider.Capabilities.RequiresApiKey && string.IsNullOrWhiteSpace(apiKey))
             return new SpeechResult.ApiKeyMissing(provider.Id);
-        }
 
         if (!string.IsNullOrWhiteSpace(apiKey))
         {
             providerOptions.ApiKey = apiKey;
             providerOptions.ApiKeyIsTransient = _apiKeyResolver.IsHeaderKey(provider.Id);
         }
+
+        // Base URL: per-soul override (command) wins over per-user BYOK credential base URL.
+        var credBaseUrl = await _apiKeyResolver.ResolveBaseUrlAsync(parsedUserId, provider.Id, cancellationToken);
+        var resolvedBaseUrl = string.IsNullOrWhiteSpace(command.BaseUrl) ? credBaseUrl : command.BaseUrl;
+        if (!string.IsNullOrWhiteSpace(resolvedBaseUrl))
+            providerOptions.BaseUrl = resolvedBaseUrl;
 
         var validation = provider.Validate(providerOptions);
         if (!validation.IsValid)

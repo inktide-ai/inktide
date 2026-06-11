@@ -12,7 +12,6 @@ from app.services.fact_extraction import (
 )
 
 
-# ── parse_facts ─────────────────────────────────────────────────────
 
 
 class TestParseFacts:
@@ -47,7 +46,6 @@ class TestParseFacts:
         assert parse_facts('{"result": "ok"}') == []
 
 
-# ── coerce_fact ─────────────────────────────────────────────────────
 
 
 class TestCoerceFact:
@@ -89,7 +87,6 @@ class TestCoerceFact:
             assert f.type == t
 
 
-# ── build_user_prompt ───────────────────────────────────────────────
 
 
 class TestBuildUserPrompt:

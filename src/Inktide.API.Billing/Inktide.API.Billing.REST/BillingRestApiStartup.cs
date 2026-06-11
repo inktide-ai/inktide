@@ -1,12 +1,12 @@
 using System.Net;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Inktide.API.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Inktide.API.Billing.REST;
 
@@ -24,10 +24,10 @@ public sealed class BillingRestApiStartup : IStartup, IMiddlewareConfigurator, I
     {
         services
             .AddControllers()
-            .AddNewtonsoftJson(options =>
+            .AddJsonOptions(options =>
             {
-                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             });
 
         services.Configure<ForwardedHeadersOptions>(options =>

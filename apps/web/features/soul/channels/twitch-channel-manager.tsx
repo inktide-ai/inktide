@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import {
   getTwitchInstallUrl,
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function TwitchChannelManager({ soulId, channels }: Props) {
+  const { t } = useTranslation('channels')
   const [actionError, setActionError] = useState<string | null>(null)
   const [busy,        setBusy]        = useState(false)
   const [rowBusy,     setRowBusy]     = useState<string | null>(null)
@@ -47,7 +49,7 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
       saveOAuthPending({ soulId, connectorId: 'twitch', initiatedAt: Date.now() })
       window.location.href = url
     } catch (e) {
-      setActionError(e instanceof ApiError ? e.message : 'Failed to get Twitch authorization URL')
+      setActionError(e instanceof ApiError ? e.message : t('twitch.mgrErrAuthUrl'))
       setBusy(false)
     }
   }
@@ -60,24 +62,24 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
       saveOAuthPending({ soulId, connectorId: 'twitch', initiatedAt: Date.now() })
       window.location.href = url
     } catch (e) {
-      setActionError(e instanceof ApiError ? e.message : 'Failed to reconnect')
+      setActionError(e instanceof ApiError ? e.message : t('twitch.mgrErrReconnect'))
     } finally {
       setRowBusy(null)
     }
   }
 
   const handleRevoke = (row: ChannelResponse) => {
-    if (!window.confirm(`Disconnect "${row.channel_name}" from Twitch? The bot will leave the channel.`)) return
+    if (!window.confirm(t('twitch.mgrConfirmDisconnect', { channel: row.channel_name }))) return
     setActionError(null)
     revokeMutation.mutate(row.id, {
-      onError: (e) => setActionError(e instanceof ApiError ? e.message : 'Failed to disconnect'),
+      onError: (e) => setActionError(e instanceof ApiError ? e.message : t('twitch.mgrErrDisconnect')),
     })
   }
 
   const handleToggle = (row: ChannelResponse, next: boolean) => {
     setActionError(null)
     toggleMutation.mutate({ id: row.id, isActive: next }, {
-      onError: (e) => setActionError(e instanceof ApiError ? e.message : 'Failed to update'),
+      onError: (e) => setActionError(e instanceof ApiError ? e.message : t('twitch.mgrErrUpdate')),
     })
   }
 
@@ -86,9 +88,9 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
       {channels.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
           <div className="px-6 pt-5 pb-4">
-            <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Connected channels</h3>
+            <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('twitch.mgrConnectedTitle')}</h3>
             <p className="mt-1 text-body text-[var(--text-secondary)]">
-              Manage your connected Twitch channels.
+              {t('twitch.mgrConnectedDesc')}
             </p>
           </div>
           <div className="border-t border-[var(--border-subtle)]">
@@ -128,7 +130,7 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
                         onClick={() => void handleReconnect(row)}
                         className="px-2.5 py-1 rounded-lg text-body font-medium text-[var(--platform-twitch)] border border-[var(--platform-twitch)]/40 hover:bg-[var(--platform-twitch)]/10 transition-colors disabled:opacity-40"
                       >
-                        Reconnect
+                        {t('twitch.mgrReconnect')}
                       </button>
                     )}
                     <button
@@ -136,7 +138,7 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
                       disabled={isRowBusy}
                       onClick={() => handleRevoke(row)}
                       className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-body text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      aria-label="Disconnect"
+                      aria-label={t('twitch.mgrDisconnect')}
                     >
                       ✕
                     </button>
@@ -150,9 +152,9 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
 
       <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
         <div className="px-6 pt-5 pb-5">
-          <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">Add Twitch channel</h3>
+          <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">{t('twitch.mgrAddTitle')}</h3>
           <p className="mt-1 text-body text-[var(--text-secondary)]">
-            Click below to authorize Inktide bot on your Twitch channel. You&apos;ll be redirected to Twitch to grant access.
+            {t('twitch.mgrAddDesc')}
           </p>
           {actionError && <p className="mt-3 text-body text-red-400">{actionError}</p>}
         </div>
@@ -164,7 +166,7 @@ export function TwitchChannelManager({ soulId, channels }: Props) {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-body bg-[var(--platform-twitch)] hover:bg-[#7d34e6] text-white transition-[filter,opacity] duration-150 hover:brightness-110 disabled:opacity-45 disabled:cursor-not-allowed"
           >
             <IconTwitchMono />
-            {busy ? 'Redirecting…' : 'Connect with Twitch'}
+            {busy ? t('twitch.mgrRedirecting') : t('twitch.mgrConnectWith')}
           </button>
         </div>
       </div>

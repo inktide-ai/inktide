@@ -29,7 +29,13 @@ interface VrmRendererProps {
   /** Full renderer settings (camera, lights, model transform, look-at mode). */
   rendererSettings?: SceneRendererSettings
   baselineMood?: string
+  /** Called once after the first rendered frame — canvas contains the composited image. */
+  onFirstRender?: (canvas: HTMLCanvasElement) => void
+  /** When set, a secondary render pass uses this portrait camera before onFirstRender fires. */
+  captureCamera?: { heightRatio: number; distance: number; fov: number }
 }
+
+const SNAPSHOT_INTERVAL_MS = 30_000
 
 function isImageUrl(bg: string): boolean {
   return bg.startsWith('http://') || bg.startsWith('https://') || bg.startsWith('blob:') || bg.startsWith('/')
@@ -40,7 +46,6 @@ function isTalkingFromWeights(weights: MouthWeights | null): boolean {
   return Math.max(weights.aa, weights.ih, weights.ou, weights.ee, weights.oh) > 0.1
 }
 
-// ── Jaw bone (tight coupling to lipsync — lives here intentionally) ───────────
 
 const MAX_JAW_ANGLE = 0.32
 const JAW_DEAD_ZONE = 0.10
@@ -54,7 +59,6 @@ function applyJaw(vrm: VRM, weights: MouthWeights | null): void {
   jawNode.rotation.x = t * MAX_JAW_ANGLE
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function VrmRenderer({
   url,
@@ -66,6 +70,8 @@ export default function VrmRenderer({
   modelVisible = true,
   rendererSettings,
   baselineMood,
+  onFirstRender,
+  captureCamera,
 }: VrmRendererProps) {
   const wrapRef               = useRef<HTMLDivElement>(null)
   const modelVisibleRef       = useRef(modelVisible)
@@ -83,11 +89,21 @@ export default function VrmRenderer({
   rendererSettingsRef.current = rendererSettings
   baselineMoodRef.current     = baselineMood
 
-  const cameraRef   = useRef<THREE.PerspectiveCamera | null>(null)
-  const controlsRef = useRef<OrbitControls | null>(null)
-  const dirLightRef = useRef<THREE.DirectionalLight | null>(null)
-  const ambientRef  = useRef<THREE.AmbientLight | null>(null)
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
+  const cameraRef         = useRef<THREE.PerspectiveCamera | null>(null)
+  const controlsRef       = useRef<OrbitControls | null>(null)
+  const dirLightRef       = useRef<THREE.DirectionalLight | null>(null)
+  const ambientRef        = useRef<THREE.AmbientLight | null>(null)
+  const rendererRef       = useRef<THREE.WebGLRenderer | null>(null)
+  const onFirstRenderRef  = useRef(onFirstRender)
+  const firstRenderFired  = useRef(false)
+  const modelHeightRef    = useRef(0)
+  const captureCameraRef  = useRef(captureCamera)
+  onFirstRenderRef.current = onFirstRender
+  captureCameraRef.current = captureCamera
+
+  useEffect(() => {
+    firstRenderFired.current = false
+  }, [url])
 
   useEffect(() => {
     const wrap = wrapRef.current
@@ -95,8 +111,9 @@ export default function VrmRenderer({
 
     let camera: THREE.PerspectiveCamera | null = null
     let controls: OrbitControls | null = null
-    let animationId: number
+    let animationId = 0
     let initialized = false
+    let disposed = false
     let startLoopFn: (() => void) | null = null  // set once VRM is ready
 
     const timer       = new THREE.Timer()
@@ -137,8 +154,12 @@ export default function VrmRenderer({
         const box    = new THREE.Box3().setFromObject(vrm.scene)
         const height = box.max.y - box.min.y
         const center = box.getCenter(new THREE.Vector3())
-        vrm.scene.position.y = -box.min.y - height * 0.1
-        vrm.scene.visible    = modelVisibleRef.current
+        modelHeightRef.current = height
+
+        const pivotGroup = new THREE.Group()
+        pivotGroup.position.y = -box.min.y - height * 0.1
+        vrm.scene.visible = modelVisibleRef.current
+        pivotGroup.add(vrm.scene)
 
         if (camera) {
           camera.position.set(0, height * 0.55, 2.5)
@@ -146,11 +167,12 @@ export default function VrmRenderer({
           controls?.update()
         }
 
-        scene.add(vrm.scene)
+        scene.add(pivotGroup)
 
         const mixer = new THREE.AnimationMixer(vrm.scene)
         await Promise.all(controllers.map((c) => c.init({ vrm, mixer, loader })))
 
+        if (disposed) return
         startLoopFn = () => runLoop(vrm)
         if (initialized) startLoopFn()
       },
@@ -159,24 +181,24 @@ export default function VrmRenderer({
     )
 
     function applyRendererSettings(rs: SceneRendererSettings, vrmScene: THREE.Group) {
-      vrmScene.position.set(rs.posX, rs.posY, rs.posZ)
-      vrmScene.rotation.y = (rs.rotY * Math.PI) / 180
+      vrmScene.position.set(rs.position.posX, rs.position.posY, rs.position.posZ)
+      vrmScene.rotation.y = (rs.position.rotY * Math.PI) / 180
 
-      if (cameraRef.current && cameraRef.current.fov !== rs.fov) {
-        cameraRef.current.fov = rs.fov
+      if (cameraRef.current && cameraRef.current.fov !== rs.camera.fov) {
+        cameraRef.current.fov = rs.camera.fov
         cameraRef.current.updateProjectionMatrix()
       }
 
       if (controlsRef.current) {
-        controlsRef.current.maxDistance = rs.cameraDistance
-        controlsRef.current.minDistance = rs.cameraDistance * 0.2
+        controlsRef.current.maxDistance = rs.camera.cameraDistance
+        controlsRef.current.minDistance = rs.camera.cameraDistance * 0.2
       }
 
       if (dirLightRef.current) {
-        dirLightRef.current.intensity = rs.dirLightIntensity
-        dirLightRef.current.color.set(rs.dirLightColor)
-        const rx = (rs.dirLightRotX * Math.PI) / 180
-        const ry = (rs.dirLightRotY * Math.PI) / 180
+        dirLightRef.current.intensity = rs.directionalLight.intensity
+        dirLightRef.current.color.set(rs.directionalLight.color)
+        const rx = (rs.directionalLight.rotX * Math.PI) / 180
+        const ry = (rs.directionalLight.rotY * Math.PI) / 180
         dirLightRef.current.position
           .set(Math.sin(ry) * Math.cos(rx), Math.sin(rx), Math.cos(ry) * Math.cos(rx))
           .normalize()
@@ -184,16 +206,18 @@ export default function VrmRenderer({
       }
 
       if (ambientRef.current) {
-        ambientRef.current.intensity = rs.ambientIntensity
-        ambientRef.current.color.set(rs.ambientColor)
+        ambientRef.current.intensity = rs.ambientLight.intensity
+        ambientRef.current.color.set(rs.ambientLight.color)
       }
 
       if (rendererRef.current) {
-        rendererRef.current.setPixelRatio(window.devicePixelRatio * rs.renderScale)
+        rendererRef.current.setPixelRatio(window.devicePixelRatio * rs.camera.renderScale)
       }
     }
 
     function runLoop(vrm: VRM) {
+      let lastSnapshotTime = -Infinity
+      let settingsEverApplied = false
       const animate = () => {
         animationId = requestAnimationFrame(animate)
         timer.update()
@@ -223,17 +247,72 @@ export default function VrmRenderer({
           emotion:    emotionState,
           camera:     camera!,
           mouse:      mousePosRef.current,
-          lookAtMode:    rs?.lookAtMode    ?? 'camera',
-          jiggleEnabled: rs?.jiggleEnabled ?? false,
-          jiggleMult:    rs?.jiggleMult    ?? 1.0,
+          lookAtMode:              rs?.camera?.lookAtMode               ?? 'camera',
+          jiggleEnabled:           rs?.breastPhysics?.jiggleEnabled     ?? false,
+          jiggleMult:              rs?.breastPhysics?.jiggleMult        ?? 1.0,
           soulState,
+          randomAnimationsEnabled: rs?.animations?.randomAnimationsEnabled ?? true,
         }
 
         controllers.forEach((c) => c.update(delta, ctx))
         vrm.update(delta)
 
-        if (rs) applyRendererSettings(rs, vrm.scene)
-        if (rendererRef.current && camera) rendererRef.current.render(scene, camera)
+        if (rs) { applyRendererSettings(rs, vrm.scene); settingsEverApplied = true }
+        if (rendererRef.current && camera) {
+          rendererRef.current.render(scene, camera)
+
+          const now = performance.now()
+          if (now - lastSnapshotTime >= SNAPSHOT_INTERVAL_MS) {
+            if (!firstRenderFired.current) {
+              const cc = captureCameraRef.current
+              if (cc && onFirstRenderRef.current && modelHeightRef.current > 0) {
+                lastSnapshotTime = now
+                firstRenderFired.current = true
+                const savedPos    = camera.position.clone()
+                const savedTarget = controls?.target.clone() ?? new THREE.Vector3()
+                const savedFov    = camera.fov
+                const savedRotY   = vrm.scene.rotation.y
+                const headBone    = vrm.humanoid.getNormalizedBoneNode('head')
+                const neckBone    = vrm.humanoid.getNormalizedBoneNode('neck')
+                const savedHead   = headBone?.quaternion.clone()
+                const savedNeck   = neckBone?.quaternion.clone()
+
+                const h = modelHeightRef.current
+                camera.position.set(0, h * cc.heightRatio, cc.distance)
+                controls?.target.set(0, h * cc.heightRatio, 0)
+                controls?.update()
+                camera.fov = cc.fov
+                camera.updateProjectionMatrix()
+                // Face camera: zero body rotation and neutralize head/neck look-at
+                vrm.scene.rotation.y = 0
+                headBone?.quaternion.identity()
+                neckBone?.quaternion.identity()
+                vrm.update(0)
+
+                rendererRef.current.render(scene, camera)
+                onFirstRenderRef.current(rendererRef.current.domElement)
+
+                camera.position.copy(savedPos)
+                controls?.target.copy(savedTarget)
+                controls?.update()
+                camera.fov = savedFov
+                camera.updateProjectionMatrix()
+                vrm.scene.rotation.y = savedRotY
+                if (headBone && savedHead) headBone.quaternion.copy(savedHead)
+                if (neckBone && savedNeck) neckBone.quaternion.copy(savedNeck)
+              } else if (settingsEverApplied) {
+                lastSnapshotTime = now
+                firstRenderFired.current = true
+                onFirstRenderRef.current?.(rendererRef.current.domElement)
+              }
+              // else: renderer settings not yet applied — skip, retry next frame
+            } else {
+              lastSnapshotTime = now
+              // Periodic update: current camera view, no portrait pass
+              onFirstRenderRef.current?.(rendererRef.current.domElement)
+            }
+          }
+        }
       }
       animate()
     }
@@ -283,6 +362,7 @@ export default function VrmRenderer({
     ro.observe(wrap)
 
     return () => {
+      disposed = true
       cancelAnimationFrame(animationId)
       ro.disconnect()
       document.removeEventListener('mousemove', onMouseMove)

@@ -1,20 +1,19 @@
-using Inktide.API.Connector.Application.Controllers;
+using Inktide.API.Core.Controllers;
+using Inktide.API.Connector.Application.Interfaces;
+using Inktide.API.Connector.Application.Models;
 using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Telegram.Services;
 using Inktide.API.Connector.Telegram.Settings;
-using Inktide.API.Soul.Application.Interfaces;
-using Inktide.API.Soul.Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Telegram.Controllers;
 
 [ApiController]
-[Route("api/connectors/telegram")]
+[Route("api/v1/connectors/telegram")]
 [Produces("application/json")]
 public sealed class TelegramController : ConnectorControllerBase
 {
@@ -22,30 +21,27 @@ public sealed class TelegramController : ConnectorControllerBase
     private const string PlatformId = "telegram";
 
     private readonly ITelegramBotApiClient _telegram;
-    private readonly IAiCardChannelConnectService _connect;
-    private readonly IAiCardChannelLifecycleService _lifecycle;
-    private readonly ITokenProtector _tokenProtector;
+    private readonly IConnectorChannelService _channels;
+    private readonly ITelegramTokenProtector _tokenProtector;
     private readonly ILogger<TelegramController> _log;
     private readonly string _botUsername;
 
     public TelegramController(
         ITelegramBotApiClient telegram,
-        IAiCardChannelConnectService connect,
-        IAiCardChannelLifecycleService lifecycle,
-        [FromKeyedServices(TokenProtectorKeys.Telegram)] ITokenProtector tokenProtector,
+        IConnectorChannelService channels,
+        ITelegramTokenProtector tokenProtector,
         ILogger<TelegramController> log,
         IOptions<TelegramSettings> settings)
     {
         _telegram       = telegram;
-        _connect        = connect;
-        _lifecycle      = lifecycle;
+        _channels       = channels;
         _tokenProtector = tokenProtector;
         _log            = log;
         _botUsername    = settings.Value.BotUsername;
     }
 
     /// <summary>Validates a Telegram bot token by calling /getMe.</summary>
-    [HttpPost("validate-token")]
+    [HttpPost("token-validations")]
     [Authorize]
     [ProducesResponseType(typeof(ValidateTokenResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> ValidateToken(
@@ -86,8 +82,8 @@ public sealed class TelegramController : ConnectorControllerBase
         var userId         = GetUserId();
         var encryptedToken = _tokenProtector.Protect(req.BotToken.Trim());
 
-        var channelId = await _connect.UpsertAsync(
-            new OAuthChannelUpsertCommand(
+        var channelId = await _channels.UpsertAsync(
+            new ConnectorChannelUpsertCommand(
                 UserId:       userId,
                 CardId:       req.CardId,
                 Platform:     PlatformId,
@@ -105,14 +101,14 @@ public sealed class TelegramController : ConnectorControllerBase
     }
 
     /// <summary>Deactivates a Telegram channel connection.</summary>
-    [HttpPost("revoke/{channelId:guid}")]
+    [HttpDelete("channels/{channelId:guid}")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Revoke(Guid channelId, CancellationToken ct)
     {
         var userId = GetUserId();
-        if (!await _lifecycle.DeactivateAsync(userId, channelId, ct))
+        if (!await _channels.DeactivateAsync(userId, channelId, ct))
             return NotFound();
         return NoContent();
     }

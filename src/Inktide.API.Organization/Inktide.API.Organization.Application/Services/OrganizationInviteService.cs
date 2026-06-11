@@ -4,7 +4,6 @@ using Inktide.API.Organization.Application.Enums;
 using Inktide.API.Organization.Application.Exceptions;
 using Inktide.API.Organization.Application.Interfaces;
 using Inktide.API.Organization.Application.Options;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Organization.Application.Services;
@@ -53,13 +52,15 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         var results = new List<InviteResult>();
         var invitesToEmail = new List<(string email, OrganizationInvite invite)>();
 
+        var allPending   = await _inviteRepo.GetPendingByOrganizationTrackedAsync(org.Id, ct);
+        var pendingByEmail = allPending.ToDictionary(i => i.Email, StringComparer.OrdinalIgnoreCase);
+
         foreach (var raw in emails)
         {
             var email = raw.Trim().ToLowerInvariant();
             if (string.IsNullOrEmpty(email)) continue;
 
-            var existing = await _inviteRepo.GetPendingByEmailAsync(org.Id, email, ct);
-            if (existing is not null)
+            if (pendingByEmail.TryGetValue(email, out var existing))
             {
                 RefreshInviteToken(existing, utcNow);
                 existing.Role = role;
@@ -223,9 +224,9 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
             }, ct);
             await _orgRepo.SaveChangesAsync(ct);
         }
-        catch (DbUpdateException)
+        catch (OrganizationConcurrentCreationException)
         {
-            // Concurrent creation — another request may have won the race; retry the fetch.
+            // Another request won the race — retry the fetch to get the created org.
             org = await _orgRepo.GetByOwnerIdAsync(ownerId, ct);
             if (org is null) throw;
         }

@@ -1,6 +1,6 @@
 import { apiFetch, jsonOrThrow, emptyOrThrow } from '@/api/client'
+import type { PagedResult } from '@/shared/types/paged-result'
 
-// ── Response types ──
 
 export interface ConnectorResponse {
   id: string
@@ -30,20 +30,23 @@ export interface InstallationResponse {
   installedAt: string
 }
 
-// ── API calls ──
 
-export async function getConnectors(): Promise<ConnectorResponse[]> {
-  const res = await apiFetch('/api/marketplace/connectors')
+export async function getConnectors(params?: { limit?: number; offset?: number }): Promise<PagedResult<ConnectorResponse>> {
+  const qs = new URLSearchParams()
+  if (params?.limit) qs.set('limit', String(params.limit))
+  if (params?.offset) qs.set('offset', String(params.offset))
+  const url = qs.size > 0 ? `/api/v1/marketplace/connectors?${qs}` : '/api/v1/marketplace/connectors'
+  const res = await apiFetch(url)
   return jsonOrThrow(res)
 }
 
 export async function getConnector(slug: string): Promise<ConnectorResponse> {
-  const res = await apiFetch(`/api/marketplace/connectors/${slug}`)
+  const res = await apiFetch(`/api/v1/marketplace/connectors/${slug}`)
   return jsonOrThrow(res)
 }
 
 export async function getSoulInstallations(soulId: string): Promise<InstallationResponse[]> {
-  const res = await apiFetch(`/api/marketplace/souls/${soulId}/installs`)
+  const res = await apiFetch(`/api/v1/marketplace/souls/${soulId}/installs`)
   return jsonOrThrow(res)
 }
 
@@ -51,7 +54,7 @@ export async function installConnector(
   soulId: string,
   connectorSlug: string,
 ): Promise<InstallationResponse> {
-  const res = await apiFetch(`/api/marketplace/souls/${soulId}/installs`, {
+  const res = await apiFetch(`/api/v1/marketplace/souls/${soulId}/installs`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ connectorSlug }),
@@ -60,7 +63,7 @@ export async function installConnector(
 }
 
 export async function uninstallConnector(installationId: string): Promise<void> {
-  const res = await apiFetch(`/api/marketplace/installs/${installationId}`, {
+  const res = await apiFetch(`/api/v1/marketplace/installs/${installationId}`, {
     method: 'DELETE',
   })
   return emptyOrThrow(res)

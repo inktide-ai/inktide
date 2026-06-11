@@ -1,10 +1,10 @@
-import type { AiCardModelResponse, AiCardSceneResponse } from '@/features/soul'
+import type { AiCardModelResponse } from '@/features/soul'
 import { inferModelType } from '@/shared/lib/utils/model-type'
 import { buildObsSceneUrl } from '@/shared/lib/utils/obs-url'
 
 export function buildProjectPreviewUrl(
   model: AiCardModelResponse,
-  scene: AiCardSceneResponse | null,
+  scene: { public_url: string | null } | null,
   channelId?: string | null,
 ): string {
   return buildObsSceneUrl('', {

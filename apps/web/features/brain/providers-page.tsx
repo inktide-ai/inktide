@@ -4,7 +4,7 @@ import { useMemo, useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { BrainProviderCard, getCredentials, statusFromCredential, type CredentialResponse } from '@/features/soul'
-import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-providers'
+import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-provider-catalog'
 import { useCharactersContext } from '@/entities/character'
 import { cn } from '@/lib/utils'
 import { FeaturedIntegrations } from '@/features/character-editor'
@@ -22,7 +22,6 @@ const TYPE_ICONS: Record<string, ({ className }: { className?: string }) => JSX.
   'enterprise':  TrustIcon,
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function ProvidersPage() {
   const { t } = useTranslation('providers')
@@ -53,18 +52,21 @@ export default function ProvidersPage() {
   useEffect(() => {
     getCredentials().then((creds) => {
       setCredMap(new Map(creds.map((c) => [c.providerId, c])))
-    }).catch(() => {})
+    }).catch((err) => { console.error('[providers-page] failed to load credentials', err) })
   }, [])
 
-  // counts per type across full catalog
+  // counts per type across full catalog — dep is [] because LLM_PROVIDER_CATALOG is a
+  // module-level const and the type IDs never change at runtime
   const typeCounts = useMemo(() => {
-    const counts: Record<string, number> = {}
-    for (const typeDef of TYPE_DEFS) counts[typeDef.id] = 0
-    for (const p of LLM_PROVIDER_CATALOG) {
-      for (const typeId of p.types) if (typeId in counts) counts[typeId]++
+    const counts: Record<string, number> = {
+      'local': 0, 'api-key': 0, 'openai-v1': 0,
+      'open-source': 0, 'recommended': 0, 'enterprise': 0,
     }
+    for (const p of LLM_PROVIDER_CATALOG)
+      for (const typeId of p.types)
+        if (typeId in counts) counts[typeId]++
     return counts
-  }, [TYPE_DEFS])
+  }, [])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -151,7 +153,6 @@ export default function ProvidersPage() {
       </header>
       <FeaturedIntegrations baseHref={`/souls/${params.id}/brain`} type="brain" />
       <div>
-      {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
       <div className="mb-6">
         <h2 className="text-[1.0625rem] font-semibold text-[var(--text-heading)]">{t('brain.section.title')}</h2>
         <p className="mt-0.5 text-body text-[var(--text-secondary)]">{t('brain.section.subtitle')}</p>
@@ -277,7 +278,6 @@ export default function ProvidersPage() {
         </div>
       </div>
 
-      {/* ── Active filter chips ──────────────────────────────────────────────── */}
       {hasActiveFilters && (
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {Array.from(activeTypes).map((id) => {
@@ -310,7 +310,6 @@ export default function ProvidersPage() {
         </div>
       )}
 
-      {/* ── Grid ────────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-4">
         {filtered.map((provider) => {
           const cred = credMap.get(provider.id)

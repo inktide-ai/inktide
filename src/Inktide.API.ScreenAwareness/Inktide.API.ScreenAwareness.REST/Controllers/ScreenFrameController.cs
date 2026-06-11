@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace Inktide.API.ScreenAwareness.REST.Controllers;
 
 [ApiController]
-[Route("api/screen")]
+[Route("api/v1/screen")]
 [Authorize]
 public sealed class ScreenFrameController : ControllerBase
 {
@@ -30,7 +30,7 @@ public sealed class ScreenFrameController : ControllerBase
     /// Ingests a single screen frame for vision processing.
     /// Returns 202 Accepted when the frame is queued, 204 No Content when deduplicated or feature disabled.
     /// </summary>
-    [HttpPost("frame")]
+    [HttpPost("frames")]
     [EnableRateLimiting(ScreenAwarenessRestStartup.FrameIngestRateLimitPolicy)]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

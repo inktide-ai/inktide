@@ -4,10 +4,10 @@
   "billingAddress": "2. Billing address",
   "fillStep1": "Complete step 1 to continue.",
   "card": "Card",
-  "robokassa": {
-    "selected": "Robokassa selected.",
-    "redirect": "You will be redirected to a secure page to complete the next steps.",
-    "consent": "By confirming payment via Robokassa, you authorize future charges per the subscription terms. Cancel anytime."
+  "yookassa": {
+    "selected": "ЮKassa selected.",
+    "redirect": "You will be redirected to a secure ЮKassa payment page to complete your purchase.",
+    "consent": "By confirming payment via ЮKassa, you authorize future charges per the subscription terms. Cancel anytime."
   },
   "cardConsent": "By confirming card payment, you authorize future charges per the subscription terms. Cancel anytime.",
   "loadingForm": "Loading payment form...",

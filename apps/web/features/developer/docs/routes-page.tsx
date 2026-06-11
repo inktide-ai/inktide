@@ -1,84 +1,82 @@
 import { DocPage, PageSubtitle, PageTitle, SectionHeading, Table, TableHead, TableRow, Td } from './shared'
+import { getTranslations } from '@/lib/i18n-server'
 
-export function RoutesPage() {
+export async function RoutesPage() {
+  const t = await getTranslations('developer')
   return (
     <DocPage>
-      <PageTitle eyebrow="Platform">Frontend Routes</PageTitle>
+      <PageTitle eyebrow={t('docs.routes.eyebrow')}>{t('docs.routes.title')}</PageTitle>
       <PageSubtitle>
-        Next.js App Router. Workspace routes require Keycloak authentication. Public routes do not.
+        {t('docs.routes.subtitle')}
       </PageSubtitle>
 
-      <SectionHeading>Authenticated (workspace)</SectionHeading>
+      <SectionHeading>{t('docs.routes.authSection')}</SectionHeading>
       <div className="mb-8">
         <Table>
-          <TableHead cols={['Route', 'Description']} />
+          <TableHead cols={[t('docs.routes.colRoute'), t('docs.routes.colDescription')]} />
           <tbody>
             {[
-              ['/home',                      'Workspace dashboard — stats, souls, recent projects, templates'],
-              ['/souls',                     'AI soul list with search, filters, drag-to-reorder'],
-              ['/souls/[id]/brain',          'LLM provider + model configuration (30+ providers)'],
-              ['/souls/[id]/voice',          'TTS provider + voice configuration (30+ providers)'],
-              ['/souls/[id]/channels',       'Connected platform channels (Discord, Twitch, Telegram)'],
-              ['/souls/[id]/scene',          'VRM/GLB avatar, background, OBS scene settings'],
-              ['/souls/[id]/memory',         'RAG memory settings + ingested facts viewer'],
-              ['/projects',                  'Project list + detail — projects bind souls to graph configs'],
-              ['/projects/[id]/character',   'Soul binding for the project'],
-              ['/projects/[id]/graph',       'Visual node graph for the project pipeline'],
-              ['/projects/[id]/channels',    'Project-level channel configuration'],
-              ['/projects/[id]/memory',      'Project memory settings'],
-              ['/projects/[id]/plugins',     'Installed plugins for the project'],
-              ['/projects/[id]/scene',       'Scene / OBS settings for the project'],
-              ['/edit/sandbox',              'Main workspace — Dockview panel layout, live VRM preview'],
-              ['/edit/graph',                'Standalone node graph builder (XYFlow/React)'],
-              ['/edit/settings/[segment]',   'Soul settings tabs: identity, brain, voice, model, scene, memory, skills, channels, obs, backup'],
-              ['/marketplace',               'Connector marketplace — install channels and plugins'],
-              ['/templates',                 'Project template gallery — system + user templates'],
-              ['/developer',                 'Developer portal — docs, OAuth apps, webhooks'],
-              ['/billing',                   'Billing and subscription management'],
-              ['/invite/[token]',            'Organization invite acceptance'],
-            ].map(([route, desc]) => (
+              ['/home',                      'docs.routes.a.home'],
+              ['/souls',                     'docs.routes.a.souls'],
+              ['/souls/[id]/brain',          'docs.routes.a.brain'],
+              ['/souls/[id]/voice',          'docs.routes.a.voice'],
+              ['/souls/[id]/channels',       'docs.routes.a.channels'],
+              ['/souls/[id]/scene',          'docs.routes.a.scene'],
+              ['/souls/[id]/memory',         'docs.routes.a.memory'],
+              ['/projects',                  'docs.routes.a.projects'],
+              ['/projects/[id]/character',   'docs.routes.a.projectCharacter'],
+              ['/projects/[id]/graph',       'docs.routes.a.projectGraph'],
+              ['/projects/[id]/channels',    'docs.routes.a.projectChannels'],
+              ['/projects/[id]/memory',      'docs.routes.a.projectMemory'],
+              ['/projects/[id]/plugins',     'docs.routes.a.projectPlugins'],
+              ['/projects/[id]/scene',       'docs.routes.a.projectScene'],
+              ['/edit/sandbox',              'docs.routes.a.sandbox'],
+              ['/marketplace',               'docs.routes.a.marketplace'],
+              ['/templates',                 'docs.routes.a.templates'],
+              ['/developer',                 'docs.routes.a.developer'],
+              ['/billing',                   'docs.routes.a.billing'],
+              ['/invite/[token]',            'docs.routes.a.invite'],
+            ].map(([route, descKey]) => (
               <TableRow key={route}>
                 <Td mono accent>{route}</Td>
-                <Td>{desc}</Td>
+                <Td>{t(descKey)}</Td>
               </TableRow>
             ))}
           </tbody>
         </Table>
       </div>
 
-      <SectionHeading>Public (unauthenticated)</SectionHeading>
+      <SectionHeading>{t('docs.routes.publicSection')}</SectionHeading>
       <Table>
-        <TableHead cols={['Route', 'Description']} />
+        <TableHead cols={[t('docs.routes.colRoute'), t('docs.routes.colDescription')]} />
         <tbody>
           {[
-            ['/obs/scene',     'OBS browser source — configured entirely via URL params: channelId, modelUrl, modelType, sceneUrl, bg'],
-            ['/pricing',       'Pricing and plan comparison page'],
-            ['/p/[id]',        'Public soul/project share page'],
-            ['/home',          'Marketing home page (before login)'],
-            ['/login',         'Keycloak login redirect'],
-            ['/register',      'Keycloak register redirect'],
-          ].map(([route, desc]) => (
+            ['/obs/scene',     'docs.routes.pub.obs'],
+            ['/pricing',       'docs.routes.pub.pricing'],
+            ['/p/[id]',        'docs.routes.pub.share'],
+            ['/home',          'docs.routes.pub.home'],
+            ['/login',         'docs.routes.pub.login'],
+            ['/register',      'docs.routes.pub.register'],
+          ].map(([route, descKey]) => (
             <TableRow key={route}>
               <Td mono accent>{route}</Td>
-              <Td>{desc}</Td>
+              <Td>{t(descKey)}</Td>
             </TableRow>
           ))}
         </tbody>
       </Table>
 
-      <SectionHeading>Route Constants</SectionHeading>
+      <SectionHeading>{t('docs.routes.constantsSection')}</SectionHeading>
       <div className="mt-4 overflow-hidden rounded-xl border border-[var(--border-subtle)]">
         <pre className="overflow-x-auto bg-[var(--surface-1)] px-5 py-4 text-sm font-mono leading-relaxed text-[var(--text-secondary)]">
 {`// apps/web/lib/routes.ts
-export const HOME_ROUTE              = '/home'
-export const SOULS_ROUTE             = '/souls'
-export const PROJECTS_ROUTE          = '/projects'
-export const TEMPLATES_ROUTE         = '/templates'
-export const MARKETPLACE_ROUTE       = '/marketplace'
-export const SANDBOX_ROUTE           = '/edit/sandbox'
-export const GRAPH_ROUTE             = '/edit/graph'
-export const PROFILE_SETTINGS_BASE   = '/edit/settings'
-export const DEVELOPER_ROUTE         = '/developer'`}
+export const HOME_ROUTE         = '/home'
+export const SOULS_ROUTE        = '/souls'
+export const PROJECTS_ROUTE     = '/projects'
+export const TEMPLATES_ROUTE    = '/templates'
+export const MARKETPLACE_ROUTE  = '/marketplace'
+export const SANDBOX_ROUTE      = '/edit/sandbox'
+export const DEVELOPER_ROUTE    = '/developer'`}
         </pre>
       </div>
     </DocPage>

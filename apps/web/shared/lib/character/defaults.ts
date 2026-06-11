@@ -2,8 +2,9 @@ import type { AiCharacter } from './types'
 
 /** SRP: только дефолтные значения и фабричная функция. */
 export const DEFAULTS = {
+  // UX pre-fill for new soul creation form. Keep in sync with SynapseSettings.DefaultSystemPrompt (backend).
   systemPrompt:
-    'You are a friendly AI companion on a live stream. You interact with chat, react to events, and entertain viewers. Keep responses concise and engaging.',
+    'You are Nova, an AI companion on this live stream.\n\nKeep every reply to 1-3 sentences — chat moves fast, be snappy.\nAddress viewers by their username whenever you reply to them directly.\nReact to stream events (raids, new subs, bits, follows) with genuine enthusiasm.\nStay focused on whatever game or topic is happening on stream right now.\nAvoid politics, religion, and NSFW content entirely.',
   responseDelayMs: 1500,
   maxResponseLength: 400,
   autoModerate: true,

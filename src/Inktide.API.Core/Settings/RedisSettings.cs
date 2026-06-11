@@ -5,8 +5,8 @@ namespace Inktide.API.Core.Settings;
 /// </summary>
 public sealed class RedisSettings
 {
-    private string _baseAddress = "127.0.0.1";
-    private int _basePort = 6379;
+    private string _baseAddress = string.Empty;
+    private int _basePort = 0;
     private int _syncTimeout = 10000;
     private int _connectTimeout = 5000;
     private int _asyncTimeout = 10000;

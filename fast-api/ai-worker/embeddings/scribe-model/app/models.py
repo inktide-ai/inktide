@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 FactType = Literal["fact", "preference", "event", "relationship", "opinion", "skill"]
 
 
-# ── Embeddings ──────────────────────────────────────────────────────
 
 
 class EmbedRequest(BaseModel):
@@ -29,7 +28,6 @@ class EmbedBatchResponse(BaseModel):
     dim: int
 
 
-# ── Classification ──────────────────────────────────────────────────
 
 
 class ClassifyRequest(BaseModel):
@@ -43,7 +41,6 @@ class ClassifyResponse(BaseModel):
     scores: dict[str, float]
 
 
-# ── Fact extraction ─────────────────────────────────────────────────
 
 
 class UserMessage(BaseModel):

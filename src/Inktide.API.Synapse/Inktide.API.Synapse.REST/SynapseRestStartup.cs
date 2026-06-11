@@ -11,6 +11,7 @@ namespace Inktide.API.Synapse.REST;
 /// </summary>
 public sealed class SynapseRestStartup : IStartup
 {
+    public const string DemoChatRateLimitPolicy = "demo-chat";
 
     public void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
     {

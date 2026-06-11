@@ -9,8 +9,8 @@ import { getProject, type Project } from '@/features/projects'
 import { getCard } from '@/features/soul'
 import { apiResponseToCharacter } from '@/shared/lib/character/mappers'
 import type { AiCharacter } from '@/shared/lib/character'
+import { handleError } from '@/shared/lib/handle-error'
 
-/* ── icons ─────────────────────────────────────────────────────────── */
 
 function IconDiscord() {
   return (
@@ -56,7 +56,6 @@ function IconTelegram() {
   )
 }
 
-/* ── right-panel platform data ──────────────────────────────────────── */
 
 const BROWSE_PLATFORMS = [
   { id: 'discord',  name: 'Discord',  description: 'Route guild messages to your AI character in real-time.',    icon: IconDiscord  },
@@ -65,7 +64,6 @@ const BROWSE_PLATFORMS = [
   { id: 'telegram', name: 'Telegram', description: 'Connect a Telegram bot to relay chat messages to your AI.', icon: IconTelegram },
 ] as const
 
-/* ── shared button class ────────────────────────────────────────────── */
 
 const btnSecondary =
   'inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md border border-[var(--border-subtle)] bg-transparent px-4 text-body font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-subtle)]'
@@ -73,7 +71,6 @@ const btnSecondary =
 const btnPrimary =
   'inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md bg-[var(--text-primary)] px-4 text-body font-medium text-[var(--bg-0)] transition-opacity hover:opacity-90 focus-visible:outline-none'
 
-/* ── page ───────────────────────────────────────────────────────────── */
 
 export default function SoulProjectChannelsPage() {
   const { projectId } = useParams<{ id: string; projectId: string }>()
@@ -92,7 +89,7 @@ export default function SoulProjectChannelsPage() {
           setCharacter(apiResponseToCharacter(card))
         }
       })
-      .catch(console.error)
+      .catch(handleError)
       .finally(() => setLoading(false))
   }, [projectId])
 
@@ -108,7 +105,6 @@ export default function SoulProjectChannelsPage() {
       <div className="my-6 flex flex-1 flex-col min-w-0">
         <section className="flex flex-col gap-6">
 
-          {/* ── header row: title + buttons ── */}
           <div className="flex flex-col items-stretch justify-between gap-4 md:flex-row md:items-center md:gap-2">
             <div className="flex flex-col gap-2">
               <h2 className="text-[1.5rem] font-semibold leading-[1.2] text-[var(--text-heading)]">
@@ -127,7 +123,6 @@ export default function SoulProjectChannelsPage() {
             </div>
           </div>
 
-          {/* ── content row: installed channels + recommendations ── */}
           <div className="flex flex-col lg:flex-row gap-8">
 
             {/* left: installed channels */}

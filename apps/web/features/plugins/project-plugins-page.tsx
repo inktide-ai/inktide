@@ -41,7 +41,7 @@ export default function ProjectPluginsPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const { data: plugins = [], isLoading } = useQuery({
+  const { data: plugins = [], isLoading, isError } = useQuery({
     queryKey: queryKeys.projects.plugins(id),
     queryFn: () => getProjectPlugins(id),
   })
@@ -54,6 +54,7 @@ export default function ProjectPluginsPage() {
       upsertProjectPlugin(id, pluginId, { is_enabled: isEnabled, config }),
     onMutate: ({ pluginId }) => setSavingId(pluginId),
     onSettled: () => setSavingId(null),
+    onError: (err) => { console.error('[ProjectPlugins] upsert failed', err) },
     onSuccess: updated => {
       queryClient.setQueryData<ProjectPlugin[]>(queryKeys.projects.plugins(id), prev =>
         prev
@@ -113,6 +114,8 @@ export default function ProjectPluginsPage() {
                 [...Array(3)].map((_, i) => (
                   <div key={i} className="h-16 animate-pulse rounded-xl bg-[var(--surface-1)]" />
                 ))
+              ) : isError ? (
+                <p className="text-sm text-red-500">Failed to load plugins. Please refresh.</p>
               ) : (
                 BUILTIN_PLUGINS.map(def => {
                   const plugin = getPlugin(plugins, def.id)

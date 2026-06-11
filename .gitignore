@@ -14,6 +14,8 @@ Cargo.lock
 # C#
 bin/
 obj/
+publish/
+**/publish/
 *.user
 *.suo
 *.dll
@@ -91,3 +93,7 @@ keycloak/
 diploma_screens/
 generate_diploma_section.py
 result.docx
+
+# Recording scripts (may contain credentials)
+scripts/record-app-demo.spec.mjs
+scripts/recording-output/

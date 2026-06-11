@@ -7,6 +7,9 @@ namespace Inktide.API.Developer.Infrastructure.Repositories;
 
 internal sealed class EfWebhookDeliveryRepository(DeveloperDbContext db) : IWebhookDeliveryRepository
 {
+    public async Task<WebhookDelivery?> FindByIdAsync(Guid id, CancellationToken ct) =>
+        await db.WebhookDeliveries.FindAsync([id], ct);
+
     public async Task<IReadOnlyList<WebhookDelivery>> GetByApplicationAsync(
         Guid applicationId, int page, int pageSize, CancellationToken ct) =>
         await db.WebhookDeliveries

@@ -8,8 +8,8 @@ namespace Inktide.API.Soul.Grpc.Settings;
 public sealed class SoulGrpcServerSettings
 {
 
-    private string _listenAddress = "127.0.0.1";
-    private ushort _listenPort = 8084;
+    private string _listenAddress = string.Empty;
+    private ushort _listenPort = 0;
     private string? _certPath;
     private string? _certPassword;
 
@@ -20,7 +20,7 @@ public sealed class SoulGrpcServerSettings
     public string ListenAddress
     {
         get => _listenAddress;
-        set => _listenAddress = value ?? "127.0.0.1";
+        set => _listenAddress = value ?? string.Empty;
     }
 
     /// <summary>

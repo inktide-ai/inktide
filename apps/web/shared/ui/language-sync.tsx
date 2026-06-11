@@ -15,7 +15,7 @@ export function LanguageSync() {
 
   useEffect(() => {
     const lang = data?.language
-    if (!lang) return
+    if (!lang || !i18n.isInitialized) return
     void i18n.changeLanguage(lang)
   }, [data?.language])
 

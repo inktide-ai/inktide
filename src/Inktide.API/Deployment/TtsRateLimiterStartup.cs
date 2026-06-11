@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Inktide.API.Billing.REST;
+using Inktide.API.Synapse.REST;
 using Inktide.API.TTS.REST;
 using IStartup = Inktide.API.Core.IStartup;
 using Microsoft.AspNetCore.Http;
@@ -30,7 +31,6 @@ public sealed class TtsRateLimiterStartup : IStartup
 
         services.AddRateLimiter(options =>
         {
-            // ── Billing webhooks: 100 req/min per IP ─────────────────────────────
             // Operational abuse protection only. Webhook authenticity enforced via HMAC
             // signature validation. Idempotency handles duplicate delivery.
             options.AddPolicy(BillingRestApiStartup.WebhookRateLimitPolicy, ctx =>
@@ -45,11 +45,21 @@ public sealed class TtsRateLimiterStartup : IStartup
                 });
             });
 
-            // ── TTS synthesize: 20 req/min per user ──────────────────────────────
             options.AddPolicy(TtsRestApiStartup.SynthesizeRateLimitPolicy, ctx =>
                 PerUserFixedWindow(ctx, permitLimit: 20, windowSeconds: 60));
 
-            // ── Auth endpoints: configurable, default 100 req/min per IP ─────────
+            options.AddPolicy(SynapseRestStartup.DemoChatRateLimitPolicy, ctx =>
+            {
+                var key = ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 5,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0,
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                });
+            });
+
             options.AddPolicy(AuthRateLimitPolicy, ctx =>
             {
                 // Auth endpoints are hit before a valid token exists — partition by IP.
@@ -63,7 +73,6 @@ public sealed class TtsRateLimiterStartup : IStartup
                 });
             });
 
-            // ── Global API: 300 req/min per authenticated user, 60/min per IP ────
             // Applied as the default policy — protects all routes without explicit policy.
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
             {

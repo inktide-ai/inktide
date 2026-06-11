@@ -1,207 +1,146 @@
 # Inktide
 
-**Inktide** — AI-стример. Слушает Discord и Twitch чат, думает, отвечает голосом — в реальном времени, пока идёт стрим.
+AI-powered live-streaming companion. Inktide listens to Discord / Twitch / Telegram chat and an
+in-app chat, then responds in voice inside the stream in ~1.3s. The whole design is built around one
+constraint — **latency**: TTS starts synthesizing the first sentence while the LLM is still
+generating the rest, shaving ~800ms off perceived response time.
 
-Не чат-бот. Не скрипт. Персонаж с памятью, голосом и реакцией на аудиторию.
+**Latency budget — message received → voice in stream: < 4s**
 
----
-
-## Как это работает
-
-Пользователь пишет в чат. Через 1–4 секунды стример отвечает голосом.
-
-```
-Discord / Twitch
-      │
-      ▼
-  Ingest          — активен ли канал? rate limit? sampling?
-      │
-      ▼
-  Redis Stream    — очередь synapse.ingest
-      │
-      ▼
-  Pipeline        — контекст (история + RAG + AiCard конфиг)
-                  — vLLM генерирует ответ (streaming)
-                  — TTS синтезирует первые слова ПАРАЛЛЕЛЬНО с LLM
-      │
-      ▼
-  Publisher       — Twitch / Discord WebSocket
-```
-
-**Latency budget:**
-
-```
-  0 –   50ms   Ingest: проверки, фильтрация
- 50 –  200ms   Pipeline: сборка контекста (Redis + Qdrant + DB параллельно)
-200 – 3000ms   vLLM: генерация (75% бюджета — GPU bottleneck)
-500 – 1300ms   TTS: синтез первого предложения (параллельно с хвостом LLM)
-
-Голос звучит через ~1300ms после сообщения.
-```
-
-Ключевое решение: TTS стартует на первом предложении от LLM, пока LLM ещё генерирует остаток. Это даёт ~800ms выигрыша без каких-либо трюков.
+| Stage | Budget |
+|-------|--------|
+| Ingest, rate limit, sampling | 0–50ms |
+| Context assembly (Redis + Qdrant + DB, in parallel) | 50–200ms |
+| vLLM generation (GPU bottleneck, ~75% of budget) | 200–3000ms |
+| TTS synthesis of first sentence (parallel with LLM tail) | 500–1300ms |
 
 ---
 
-## Структура репозитория
+## Repository layout
 
-```
-inktide/
-├── src/                        .NET 10 — API host + bounded contexts
-│   ├── Inktide.API/            — host, module system, DI
-│   ├── Inktide.API.Connector/  — Discord / Twitch ingest → Redis Stream
-│   ├── Inktide.API.Synapse/    — pipeline orchestration (scatter-gather)
-│   ├── Inktide.API.Soul/       — AiCard управление, gRPC, S3 модели
-│   ├── Inktide.API.Memory/     — RAG: Qdrant + Ollama embeddings + Scribe
-│   ├── Inktide.API.TTS/        — Kokoro TTS, streaming synthesis
-│   ├── Inktide.API.Realtime/   — SignalR AudioHub (браузерный микрофон)
-│   ├── Inktide.API.Profile/    — пользователи, Keycloak Admin API, MinIO
-│   └── Inktide.API.Core/       — shared kernel
-│
-├── apps/
-│   ├── web/                    React 18 / Vite / TypeScript
-│   └── desktop/                Tauri desktop app
-│
-├── fast-api/
-│   ├── ai-worker/              Python — Ollama embeddings + classify
-│   └── ai-worker/scribe/       факт-экстракция для Memory (port 8001)
-│
-├── crates/                     Rust — медиа, аудио, анимация, lipsync
-├── assets/models/              прототипные VRM / GLB модели
-└── docs/                       архитектурные решения
-```
+| Path | Stack | Description |
+|------|-------|-------------|
+| `src/` | .NET 10 | API host + bounded-context modules (`Inktide.API.sln`) |
+| `apps/web/` | Next.js 16 / React / TS | Web frontend (Feature-Sliced Design) |
+| `apps/desktop/` | Tauri | Desktop app |
+| `crates/` | Rust | Media rendering, audio, animation, lipsync |
+| `keycloak/` | Keycloakify / Java | Custom login/email theme + Twitch identity provider |
+| `fast-api/` | Python / FastAPI | AI/embedding workers (ai-worker, scribe) |
+| `docs/` | — | DB schema (`schema.sql`, `schema.dbml`) |
 
 ---
 
-## Технологический стек
+## Prerequisites
 
-| Слой | Технология | Зачем |
-|------|-----------|-------|
-| Transport | Redis Streams | Consumer groups, ACK, XCLAIM, retention — всё что нужно, без Kafka |
-| LLM | vLLM + Mistral / любая OpenAI-совместимая | Continuous batching, горизонтальный скейлинг = +GPU |
-| TTS | Kokoro | Streaming synthesis, низкая latency |
-| Embeddings | Ollama (nomic-embed-text) | Локально, без внешних API |
-| Векторный поиск | Qdrant | RAG — релевантные воспоминания из истории |
-| База данных | PostgreSQL | AiCards, конфиг, аналитика |
-| Кэш / rate limit | Redis 7 | Token bucket (Lua, атомарно), session history, backpressure |
-| Auth | Keycloak | OIDC, Twitch provider, кастомная тема |
-| Storage | MinIO (S3) | VRM модели, аватары |
-| Observability | OpenTelemetry + Prometheus + Grafana | traceId от Ingest до Publisher |
+- **.NET 10 SDK**
+- **Node.js** (LTS) + npm
+- **Docker** + Docker Compose
+- **Rust** toolchain (for `crates/`, optional unless touching media)
+- **Java 17 + Maven** (only for the Keycloak Twitch provider)
+- **Python 3.11+** (only for `fast-api/` workers)
+
+A local GPU running vLLM/Ollama is required for actual LLM responses; the rest of the stack runs
+without it.
 
 ---
 
-## Bounded Contexts (.NET)
+## Quick start
 
-Архитектура следует DDD / Hexagonal. Каждый контекст — отдельный набор проектов:
-
-```
-Inktide.API.{Context}.Domain         — сущности, репозитории (порты)
-Inktide.API.{Context}.Application    — use cases, интерфейсы сервисов
-Inktide.API.{Context}.Infrastructure — адаптеры (HTTP, DB, Redis, внешние API)
-Inktide.API.{Context}.REST           — контроллеры, валидация, DI wiring
-```
-
-Главный хост загружает модули через reflection по списку в `appsettings.json`. Контейнер — DryIoc, с бриджом к MS DI для ASP.NET Core.
-
----
-
-## Быстрый старт
-
-### Инфраструктура
+### 1. Configure environment
 
 ```bash
-docker compose up -d
-# Postgres, Keycloak (8080), Redis (6379), MinIO (9000/9001)
+cp .env.example .env
+# Fill in every CHANGE_ME__* value. Secrets live ONLY in .env — this project does
+# NOT use dotnet user-secrets. Section__Property maps to ASP.NET config (Section:Property).
 ```
 
-### .NET Backend
+The API validates required secrets at startup and refuses to boot while any `CHANGE_ME` value
+remains (see `src/Inktide.API/Program.cs`).
+
+### 2. Start infrastructure (Postgres, Keycloak, Redis, MinIO)
+
+```bash
+docker compose --profile core up -d
+```
+
+> Services are grouped by Compose profile — a bare `docker compose up` starts nothing.
+> - `--profile core` → postgres, postgres-keycloak, keycloak (`:8080`), redis (`:6379`), minio (`:9000`, console `:9001`)
+> - `--profile dev` → MailHog mail catcher (`http://localhost:8025`)
+> - `--profile workers` → Python AI workers
+
+### 3. Run the backend
 
 ```bash
 dotnet build Inktide.API.sln
-dotnet run --project src/Inktide.API
+dotnet run --project src/Inktide.API        # Kestrel on http://127.0.0.1:5001
 ```
 
-### Web
+### 4. Run the frontend
 
 ```bash
 cd apps/web
 npm install
-npm run dev   # http://localhost:5173
-```
-
-### Python Workers
-
-```bash
-cd fast-api/ai-worker
-pip install -r requirements.txt
-uvicorn main:app --port 8000
-
-cd fast-api/ai-worker/scribe
-uvicorn main:app --port 8001
+npm run dev                                  # http://localhost:3000  (proxies /api → :5001)
 ```
 
 ---
 
-## Конфигурация
-
-Секреты помечены `CHANGE_ME__*` в `appsettings.json`. Поставить через user secrets:
+## Other components
 
 ```bash
-dotnet user-secrets --id f50fcecb-9d6a-45bd-91ea-b8e4886bebf2 set "Postgres:Password" "..."
+# Python AI workers
+cd fast-api/ai-worker        && uvicorn main:app --port 8000   # embeddings + classify
+cd fast-api/ai-worker/scribe && uvicorn main:app --port 8001   # fact extraction
+
+# Rust crates
+cd crates && cargo build && cargo test
+
+# Keycloak theme  → copy built jar into keycloak-extensions/ and restart Keycloak
+cd keycloak/theme && npm install && npm run build-keycloak-theme
+
+# Keycloak Twitch provider
+cd keycloak/twitch-provider && mvn clean package -DskipTests
 ```
 
-Основные сервисы и их дефолты:
+---
 
-| Сервис | Адрес |
-|--------|-------|
-| API (Kestrel) | `127.0.0.1:5000` |
-| Keycloak | `localhost:8080` |
+## Testing
+
+```bash
+dotnet test Inktide.API.sln                  # backend
+cd apps/web && npm run test                   # frontend (vitest)
+cd crates  && cargo test                      # rust
+```
+
+---
+
+## Beta status
+
+Inktide is approaching beta. Honest snapshot of maturity:
+
+**Working**
+- Modular .NET backend across 18 bounded contexts (Soul, Synapse, Memory, Connector, TTS,
+  Profile, Billing, Organization, Marketplace, …)
+- Chat ingestion → Synapse orchestration → LLM → TTS → realtime playback pipeline (Redis Streams)
+- Keycloak auth, BFF token proxy, billing webhooks (Stripe / YooKassa)
+- Web frontend with the workspace, soul/character editor, graph builder, and developer portal
+
+**In progress / not yet complete**
+- Frontend developer portal and route restructuring (large in-flight change)
+- SLO observability: the three Synapse SLO meters are **defined but not yet instrumented**
+  in the pipeline — no live data is recorded yet
+- Memory / Realtime / Graph contexts are functional but less mature than the core path
+
+---
+
+## Key local endpoints
+
+| Service | Address |
+|---------|---------|
+| Backend API (Kestrel) | `http://127.0.0.1:5001` |
+| Web frontend | `http://localhost:3000` |
+| Keycloak | `http://localhost:8080/realms/inktide-app` |
+| Postgres | `localhost:5432` |
 | Redis | `localhost:6379` |
-| PostgreSQL | `localhost:5432` |
-| vLLM / Ollama | `localhost:11434` |
-| Qdrant | `localhost:6334` (gRPC) |
-| Kokoro TTS | `localhost:8880` |
-| MinIO | `localhost:9000` |
-
----
-
-## Масштабирование
-
-Единственный реальный bottleneck — GPU.
-
-```
-+1 GPU = +1 vLLM инстанс = +1 Pipeline Worker = +throughput
-
-Ingest / Publisher — stateless, скейлятся тривиально.
-Redis / PostgreSQL / Qdrant — не bottleneck при типичной нагрузке.
-```
-
-Подробнее о принципах и решениях: [docs/SYNAPSE_ARCHITECTURE_RETHINK.md](docs/SYNAPSE_ARCHITECTURE_RETHINK.md)
-
----
-
-## AiCard
-
-Центральная сущность. Описывает AI-персонажа:
-- system prompt — личность, стиль речи, тематика
-- LLM модель
-- TTS голос
-- VRM / GLB аватар
-- привязка к каналу (Twitch / Discord)
-- лимит воспоминаний (RAG)
-
-Управляется через Soul API (REST + gRPC на порту 8084).
-
----
-
-## Observability
-
-Три ключевые метрики:
-
-```
-synapse_e2e_latency_ms         — от сообщения до голоса. SLO: p95 < 4000ms
-synapse_context_degraded_rate  — % без истории или RAG. Алерт: > 5%
-synapse_gpu_queue_depth        — очередь к vLLM. Алерт: > 200 за 2 минуты → нужен GPU
-```
-
-traceId живёт от Connector (Ingest) до Publisher. W3C TraceContext через Redis Stream headers.
+| MinIO (S3) | `http://127.0.0.1:9000` (console `:9001`) |
+| Soul gRPC | `:8084` |

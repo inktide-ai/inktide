@@ -10,7 +10,7 @@ public sealed class ScreenAwarenessSettings
     /// <summary>"ollama" or "anthropic".</summary>
     public string VisionProvider { get; set; } = "ollama";
 
-    public string OllamaBaseUrl { get; set; } = "http://localhost:11434";
+    public string OllamaBaseUrl { get; set; } = string.Empty;
     public string OllamaVisionModel { get; set; } = "llava:7b";
 
     public string? AnthropicApiKey { get; set; }

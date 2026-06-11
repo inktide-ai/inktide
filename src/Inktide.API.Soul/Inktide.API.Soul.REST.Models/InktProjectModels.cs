@@ -44,12 +44,6 @@ public sealed class InktSoulDto
     [JsonProperty("avatar_url")]
     public string? AvatarUrl { get; set; }
 
-    [JsonProperty("personality")]
-    public string Personality { get; set; } = string.Empty;
-
-    [JsonProperty("system_prompt")]
-    public string SystemPrompt { get; set; } = string.Empty;
-
     [JsonProperty("llm_catalog_id")]
     public Guid LlmCatalogId { get; set; }
 
@@ -64,15 +58,6 @@ public sealed class InktSoulDto
 
     [JsonProperty("appearance")]
     public AiCardAppearanceDto? Appearance { get; set; }
-
-    [JsonProperty("response_behavior")]
-    public AiCardBehaviorDto? ResponseBehavior { get; set; }
-
-    [JsonProperty("memory_settings")]
-    public AiCardMemoryDto? MemorySettings { get; set; }
-
-    [JsonProperty("auto_pilot")]
-    public AiCardAutoPilotDto? AutoPilot { get; set; }
 }
 
 public sealed class InktGraphDto

@@ -70,7 +70,6 @@ export function TemplatesPage() {
   return (
     <div className="min-h-full">
 
-      {/* ── Hero ───────────────────────────────────────────────────────── */}
       <section className="border-b border-[var(--border-subtle)] px-6 py-14 text-center">
         <h1 className="home-heading-font text-[2.75rem] font-bold tracking-[-0.035em] text-[var(--text-primary)]">
           {t('templates.discover')}
@@ -100,10 +99,8 @@ export function TemplatesPage() {
         </div>
       </section>
 
-      {/* ── Content ────────────────────────────────────────────────────── */}
       <div className="mx-auto max-w-[1300px] px-6">
 
-        {/* ── Promo Banner ─────────────────────────────────────────────── */}
         <section className="py-8">
           <div className="relative flex overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--surface-1)] to-[var(--surface-2)]">
             {/* Left: text + CTA */}
@@ -143,7 +140,6 @@ export function TemplatesPage() {
           </div>
         </section>
 
-        {/* ── Category Grid ─────────────────────────────────────────────── */}
         <section className="pb-8">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
             {CATEGORIES.map(cat => {
@@ -183,7 +179,6 @@ export function TemplatesPage() {
           </div>
         </section>
 
-        {/* ── Featured Templates ────────────────────────────────────────── */}
         <section id="featured-section" className="pb-10">
           {/* Section header + platform pills */}
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
@@ -232,7 +227,6 @@ export function TemplatesPage() {
           )}
         </section>
 
-        {/* ── Developer footer CTA ─────────────────────────────────────── */}
         <section className="border-t border-[var(--border-subtle)] py-16">
           <div className="flex items-center gap-12">
             <div className="shrink-0">
@@ -264,7 +258,6 @@ export function TemplatesPage() {
 
       </div>
 
-      {/* ── Modals / Drawers / Wizard ─────────────────────────────────── */}
       <AnimatePresence>
         {previewTemplate && (
           <TemplatePreviewDrawer

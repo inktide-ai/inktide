@@ -1,9 +1,12 @@
+'use client'
+
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
+import { Slider } from '@/shared/ui/slider'
 import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import { SCENE_RENDERER_DEFAULTS } from '@/shared/hooks/useSceneRendererSettings'
 import type { LookAtMode } from '@/features/avatar' // fsd:cross-feature-ok — editor embeds avatar preview
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 interface SliderFieldProps {
   label: string
@@ -22,14 +25,10 @@ function SliderField({ label, value, min, max, step, format = (v) => String(v), 
         <span className="text-xs text-[rgba(255,255,255,0.45)]">{label}</span>
         <span className="text-xs font-medium text-[rgba(255,255,255,0.85)] tabular-nums">{format(value)}</span>
       </div>
-      <input
-        type="range"
-        className="scene-slider"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(+e.target.value)}
+      <Slider
+        value={value} onChange={onChange}
+        min={min} max={max} step={step}
+        fill="var(--text-primary)" trackHeight={3} thumbSize={12}
       />
     </div>
   )
@@ -58,13 +57,12 @@ function ColorField({ label, value, onChange }: ColorFieldProps) {
   )
 }
 
-const LOOK_AT_MODES: { mode: LookAtMode; label: string }[] = [
-  { mode: 'camera',   label: 'Camera'   },
-  { mode: 'mouse',    label: 'Mouse'    },
-  { mode: 'disabled', label: 'Off'      },
+const LOOK_AT_MODES: { mode: LookAtMode; labelKey: string }[] = [
+  { mode: 'camera',   labelKey: 'renderer.lookCamera' },
+  { mode: 'mouse',    labelKey: 'renderer.lookMouse'  },
+  { mode: 'disabled', labelKey: 'renderer.lookOff'    },
 ]
 
-// ── Panel ─────────────────────────────────────────────────────────────────────
 
 interface SceneRendererPanelProps {
   settings: SceneRendererSettings
@@ -80,68 +78,90 @@ const sectionCls = 'flex flex-col gap-3 pt-3 mt-3 border-t border-[rgba(255,255,
 const sectionHeadCls = 'text-2xs font-medium uppercase tracking-[0.08em] text-[rgba(255,255,255,0.28)] m-0'
 
 export default function SceneRendererPanel({ settings, onSet, onReset }: SceneRendererPanelProps) {
-  const set = <K extends keyof SceneRendererSettings>(key: K, value: SceneRendererSettings[K]) =>
-    onSet({ [key]: value } as Partial<SceneRendererSettings>)
+  const { t } = useTranslation('scene')
+  const pos  = (p: Partial<typeof settings.position>)         => onSet({ position:         { ...settings.position,         ...p } })
+  const cam  = (p: Partial<typeof settings.camera>)           => onSet({ camera:           { ...settings.camera,           ...p } })
+  const anim = (p: Partial<typeof settings.animations>)       => onSet({ animations:       { ...settings.animations,       ...p } })
+  const phys = (p: Partial<typeof settings.breastPhysics>)    => onSet({ breastPhysics:    { ...settings.breastPhysics,    ...p } })
+  const dir  = (p: Partial<typeof settings.directionalLight>) => onSet({ directionalLight: { ...settings.directionalLight, ...p } })
+  const amb  = (p: Partial<typeof settings.ambientLight>)     => onSet({ ambientLight:     { ...settings.ambientLight,     ...p } })
 
   return (
     <div className="absolute bottom-[13px] left-[13px] w-[272px] max-h-[calc(100%-27px)] flex flex-col bg-[rgba(9,9,11,0.92)] backdrop-blur-2xl border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden z-10 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_8px_40px_rgba(0,0,0,0.6)]">
       {/* Header */}
       <div className="flex items-center justify-between px-3.5 py-3 border-b border-[rgba(255,255,255,0.06)] shrink-0">
-        <span className="text-body font-semibold text-[rgba(255,255,255,0.88)] tracking-[-0.01em]">Renderer</span>
+        <span className="text-body font-semibold text-[rgba(255,255,255,0.88)] tracking-[-0.01em]">{t('renderer.title')}</span>
         <button
           type="button"
           className="py-0.5 px-2.5 border border-[rgba(255,255,255,0.1)] rounded-md bg-transparent text-[rgba(255,255,255,0.35)] text-xs font-medium cursor-pointer transition-all duration-150 font-[inherit] leading-[1.6] hover:border-red-500/30 hover:text-red-400/80"
           onClick={onReset}
         >
-          Reset
+          {t('renderer.reset')}
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-3.5 py-3.5 flex flex-col gap-0">
-        {/* ── Model transform ── */}
         <div className={sectionCls}>
-          <h3 className={sectionHeadCls}>Model Position</h3>
+          <h3 className={sectionHeadCls}>{t('renderer.modelPosition')}</h3>
           <div className="grid grid-cols-3 gap-2">
-            <SliderField label="X" value={settings.posX} min={-3} max={3} step={0.01} format={f2} onChange={(v) => set('posX', v)} />
-            <SliderField label="Y" value={settings.posY} min={-3} max={3} step={0.01} format={f2} onChange={(v) => set('posY', v)} />
-            <SliderField label="Z" value={settings.posZ} min={-3} max={3} step={0.01} format={f2} onChange={(v) => set('posZ', v)} />
+            <SliderField label="X" value={settings.position.posX} min={-3} max={3} step={0.01} format={f2} onChange={(v) => pos({ posX: v })} />
+            <SliderField label="Y" value={settings.position.posY} min={-3} max={3} step={0.01} format={f2} onChange={(v) => pos({ posY: v })} />
+            <SliderField label="Z" value={settings.position.posZ} min={-3} max={3} step={0.01} format={f2} onChange={(v) => pos({ posZ: v })} />
           </div>
-          <SliderField label="Rotation Y" value={settings.rotY} min={0} max={360} step={1} format={deg} onChange={(v) => set('rotY', v)} />
+          <SliderField label={t('renderer.rotationY')} value={settings.position.rotY} min={0} max={360} step={1} format={deg} onChange={(v) => pos({ rotY: v })} />
         </div>
 
-        {/* ── Camera ── */}
         <div className={sectionCls}>
-          <h3 className={sectionHeadCls}>Camera</h3>
-          <SliderField label="FOV" value={settings.fov} min={10} max={120} step={1} format={deg} onChange={(v) => set('fov', v)} />
-          <SliderField label="Distance" value={settings.cameraDistance} min={0.5} max={10} step={0.1} format={f1} onChange={(v) => set('cameraDistance', v)} />
-          <SliderField label="Render Scale" value={settings.renderScale} min={0.5} max={3} step={0.1} format={f1} onChange={(v) => set('renderScale', v)} />
+          <h3 className={sectionHeadCls}>{t('renderer.camera')}</h3>
+          <SliderField label={t('renderer.fov')} value={settings.camera.fov} min={10} max={120} step={1} format={deg} onChange={(v) => cam({ fov: v })} />
+          <SliderField label={t('renderer.distance')} value={settings.camera.cameraDistance} min={0.5} max={10} step={0.1} format={f1} onChange={(v) => cam({ cameraDistance: v })} />
+          <SliderField label={t('renderer.renderScale')} value={settings.camera.renderScale} min={0.5} max={3} step={0.1} format={f1} onChange={(v) => cam({ renderScale: v })} />
         </div>
 
-        {/* ── Look-at ── */}
         <div className={sectionCls}>
-          <h3 className={sectionHeadCls}>Look At</h3>
+          <h3 className={sectionHeadCls}>{t('renderer.lookAt')}</h3>
           <div className="flex gap-[3px] bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] rounded-lg p-[3px]">
-            {LOOK_AT_MODES.map(({ mode, label }) => (
+            {LOOK_AT_MODES.map(({ mode, labelKey }) => (
               <button
                 key={mode}
                 type="button"
                 className={cn(
                   'flex-1 py-[5px] px-1 border-none rounded-md bg-transparent text-xs font-medium cursor-pointer transition-all duration-150 whitespace-nowrap font-[inherit] leading-none text-center',
-                  settings.lookAtMode === mode
+                  settings.camera.lookAtMode === mode
                     ? 'bg-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.9)] shadow-[0_1px_3px_rgba(0,0,0,0.3)]'
                     : 'text-[rgba(255,255,255,0.35)] hover:text-[rgba(255,255,255,0.65)]'
                 )}
-                onClick={() => set('lookAtMode', mode)}
+                onClick={() => cam({ lookAtMode: mode })}
               >
-                {label}
+                {t(labelKey)}
               </button>
             ))}
           </div>
         </div>
 
-        {/* ── Breast physics ── */}
         <div className={sectionCls}>
-          <h3 className={sectionHeadCls}>Breast Physics</h3>
+          <h3 className={sectionHeadCls}>{t('renderer.animations')}</h3>
+          <div className="flex gap-[3px] bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] rounded-lg p-[3px]">
+            {([true, false] as const).map(v => (
+              <button
+                key={String(v)}
+                type="button"
+                className={cn(
+                  'flex-1 py-[5px] px-1 border-none rounded-md bg-transparent text-xs font-medium cursor-pointer transition-all duration-150 font-[inherit] leading-none text-center',
+                  settings.animations.randomAnimationsEnabled === v
+                    ? 'bg-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.9)] shadow-[0_1px_3px_rgba(0,0,0,0.3)]'
+                    : 'text-[rgba(255,255,255,0.35)] hover:text-[rgba(255,255,255,0.65)]'
+                )}
+                onClick={() => anim({ randomAnimationsEnabled: v })}
+              >
+                {v ? t('renderer.on') : t('renderer.off')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={sectionCls}>
+          <h3 className={sectionHeadCls}>{t('renderer.breastPhysics')}</h3>
           <div className="flex gap-[3px] bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] rounded-lg p-[3px]">
             {([false, true] as const).map(v => (
               <button
@@ -149,43 +169,41 @@ export default function SceneRendererPanel({ settings, onSet, onReset }: SceneRe
                 type="button"
                 className={cn(
                   'flex-1 py-[5px] px-1 border-none rounded-md bg-transparent text-xs font-medium cursor-pointer transition-all duration-150 font-[inherit] leading-none text-center',
-                  settings.jiggleEnabled === v
+                  settings.breastPhysics.jiggleEnabled === v
                     ? 'bg-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.9)] shadow-[0_1px_3px_rgba(0,0,0,0.3)]'
                     : 'text-[rgba(255,255,255,0.35)] hover:text-[rgba(255,255,255,0.65)]'
                 )}
-                onClick={() => set('jiggleEnabled', v)}
+                onClick={() => phys({ jiggleEnabled: v })}
               >
-                {v ? 'On' : 'Off'}
+                {v ? t('renderer.on') : t('renderer.off')}
               </button>
             ))}
           </div>
-          {settings.jiggleEnabled && (
+          {settings.breastPhysics.jiggleEnabled && (
             <SliderField
-              label="Intensity"
-              value={settings.jiggleMult}
+              label={t('renderer.intensity')}
+              value={settings.breastPhysics.jiggleMult}
               min={0.5} max={3} step={0.1}
               format={f1}
-              onChange={v => set('jiggleMult', v)}
+              onChange={v => phys({ jiggleMult: v })}
             />
           )}
         </div>
 
-        {/* ── Directional light ── */}
         <div className={sectionCls}>
-          <h3 className={sectionHeadCls}>Directional Light</h3>
+          <h3 className={sectionHeadCls}>{t('renderer.directionalLight')}</h3>
           <div className="grid grid-cols-2 gap-2">
-            <SliderField label="Rot X" value={settings.dirLightRotX} min={0} max={360} step={1} format={deg} onChange={(v) => set('dirLightRotX', v)} />
-            <SliderField label="Rot Y" value={settings.dirLightRotY} min={0} max={360} step={1} format={deg} onChange={(v) => set('dirLightRotY', v)} />
+            <SliderField label={t('renderer.rotX')} value={settings.directionalLight.rotX} min={0} max={360} step={1} format={deg} onChange={(v) => dir({ rotX: v })} />
+            <SliderField label={t('renderer.rotY')} value={settings.directionalLight.rotY} min={0} max={360} step={1} format={deg} onChange={(v) => dir({ rotY: v })} />
           </div>
-          <SliderField label="Intensity" value={settings.dirLightIntensity} min={0} max={5} step={0.05} format={f2} onChange={(v) => set('dirLightIntensity', v)} />
-          <ColorField label="Color" value={settings.dirLightColor} onChange={(v) => set('dirLightColor', v)} />
+          <SliderField label={t('renderer.intensity')} value={settings.directionalLight.intensity} min={0} max={5} step={0.05} format={f2} onChange={(v) => dir({ intensity: v })} />
+          <ColorField label={t('renderer.color')} value={settings.directionalLight.color} onChange={(v) => dir({ color: v })} />
         </div>
 
-        {/* ── Ambient light ── */}
         <div className={sectionCls}>
-          <h3 className={sectionHeadCls}>Ambient Light</h3>
-          <SliderField label="Intensity" value={settings.ambientIntensity} min={0} max={5} step={0.05} format={f2} onChange={(v) => set('ambientIntensity', v)} />
-          <ColorField label="Color" value={settings.ambientColor} onChange={(v) => set('ambientColor', v)} />
+          <h3 className={sectionHeadCls}>{t('renderer.ambientLight')}</h3>
+          <SliderField label={t('renderer.intensity')} value={settings.ambientLight.intensity} min={0} max={5} step={0.05} format={f2} onChange={(v) => amb({ intensity: v })} />
+          <ColorField label={t('renderer.color')} value={settings.ambientLight.color} onChange={(v) => amb({ color: v })} />
         </div>
       </div>
     </div>

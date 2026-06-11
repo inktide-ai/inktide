@@ -10,6 +10,19 @@ import { createAnimationActor, type AnimationActor } from './machine'
 import { DEFAULT_GRAPH_CONFIG } from './defaultGraph'
 import type { AnimationGraphConfig } from './types'
 
+function silenceVrmAnimationWarnings<T>(fn: () => Promise<T>): Promise<T> {
+  const orig = console.warn
+  console.warn = (...args: unknown[]) => {
+    const msg = String(args[0] ?? '')
+    if (
+      msg.includes('VRMAnimationLoaderPlugin') ||
+      (msg.includes('translation track') && msg.includes('not permitted'))
+    ) return
+    orig.apply(console, args as Parameters<typeof console.warn>)
+  }
+  return fn().finally(() => { console.warn = orig })
+}
+
 export class AnimationStateMachineController implements IVrmController {
   readonly id = 'animation-state-machine'
 
@@ -32,7 +45,6 @@ export class AnimationStateMachineController implements IVrmController {
     this.actor = createAnimationActor(config.transitions)
   }
 
-  // ── IVrmController ────────────────────────────────────────────────────────────
 
   async init({ vrm, mixer, loader }: VrmControllerSetup): Promise<void> {
     // Cancel any in-flight preload from a previous init (avatar swap).
@@ -121,7 +133,7 @@ export class AnimationStateMachineController implements IVrmController {
 
     switch (snap.value) {
       case 'idle':
-        this._driveIdle(delta)
+        this._driveIdle(delta, ctx.randomAnimationsEnabled)
         break
 
       case 'transitioning':
@@ -148,9 +160,8 @@ export class AnimationStateMachineController implements IVrmController {
     this.activeVariation = null
   }
 
-  // ── State drivers ─────────────────────────────────────────────────────────────
 
-  private _driveIdle(delta: number): void {
+  private _driveIdle(delta: number, randomEnabled: boolean): void {
     const idleAction = this.registry.getAction('idle')
     if (!idleAction) return
 
@@ -166,6 +177,8 @@ export class AnimationStateMachineController implements IVrmController {
     }
 
     // Roll for a self-transition near the end of each idle loop.
+    if (!randomEnabled) return
+
     const nearEnd = idleAction.time >= idleAction.getClip().duration - delta * 2
     if (!nearEnd) return
 
@@ -191,7 +204,6 @@ export class AnimationStateMachineController implements IVrmController {
     if (!t || t.paused) return
 
     if (t.remainingKeyframes.length > 0) {
-      // ── Drive intermediate keyframe (Zira AnimationKeyframe concept) ──────────
       const kf = t.remainingKeyframes[0]
       const kfAction = this.registry.getAction(kf.clipId)
       if (kfAction && this.lastFadedTo !== kf.clipId) {
@@ -203,7 +215,6 @@ export class AnimationStateMachineController implements IVrmController {
         this.actor.send({ type: 'KEYFRAME_COMPLETE' })
       }
     } else {
-      // ── Final cross-fade to target node ───────────────────────────────────────
       const toAction = this.registry.getAction(t.toNodeId)
       if (!toAction) return  // clip not loaded yet — wait
 
@@ -243,13 +254,12 @@ export class AnimationStateMachineController implements IVrmController {
     }
   }
 
-  // ── Clip loading ──────────────────────────────────────────────────────────────
 
   private async _loadClip(nodeId: string, signal?: AbortSignal): Promise<THREE.AnimationClip> {
     const url = this.registry.getUrl(nodeId)
     if (!url) throw new Error(`[AnimSM] no URL registered for node '${nodeId}'`)
 
-    const gltf = await this.loader!.loadAsync(url)
+    const gltf = await silenceVrmAnimationWarnings(() => this.loader!.loadAsync(url))
     try {
       // Primary abort path: signal was aborted while load was in flight.
       signal?.throwIfAborted()

@@ -1,5 +1,6 @@
 'use client'
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
+import { useDebouncedCallback } from 'use-debounce'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getWorkspacePreferences,
@@ -8,7 +9,6 @@ import {
 } from '@/api/preferences'
 import { queryKeys } from '@/shared/lib/query/keys'
 
-// ── Per-character localStorage warm cache ──────────────────────────────────────
 
 function cacheKey(characterId: string) {
   return `inktide_workspace_prefs_cache_${characterId}`
@@ -27,7 +27,6 @@ function writeCache(characterId: string, data: WorkspacePreferencesDto) {
   try { localStorage.setItem(cacheKey(characterId), JSON.stringify(data)) } catch { /* quota */ }
 }
 
-// ── Hooks ──────────────────────────────────────────────────────────────────────
 
 export function useWorkspacePreferences(characterId: string) {
   return useQuery({
@@ -81,17 +80,27 @@ export function usePatchWorkspacePreferences(characterId: string) {
  */
 export function useDebouncedWorkspacePatch(characterId: string, delayMs: number) {
   const { mutate } = usePatchWorkspacePreferences(characterId)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingRef = useRef<Partial<WorkspacePreferencesDto> | null>(null)
+
+  const flush = useDebouncedCallback(() => {
+    if (pendingRef.current) {
+      mutate(pendingRef.current)
+      pendingRef.current = null
+    }
+  }, delayMs)
+
+  // When characterId changes: flush any pending data for the OLD character before discarding
+  useEffect(() => {
+    return () => {
+      if (pendingRef.current) mutate(pendingRef.current)
+      flush.cancel()
+      pendingRef.current = null
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [characterId])
 
   return useCallback((patch: Partial<WorkspacePreferencesDto>) => {
     pendingRef.current = { ...pendingRef.current, ...patch }
-    if (timerRef.current) clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(() => {
-      if (pendingRef.current) {
-        mutate(pendingRef.current)
-        pendingRef.current = null
-      }
-    }, delayMs)
-  }, [mutate, delayMs])
+    flush()
+  }, [flush])
 }

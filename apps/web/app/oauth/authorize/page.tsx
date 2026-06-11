@@ -9,6 +9,19 @@ import { apiFetch } from '@/api/client'
 
 const STORAGE_KEY = 'oauth_pending'
 
+/** Hostname for display, or a safe fallback if the URI is malformed. */
+function safeHostname(uri: string): string {
+  try { return new URL(uri).hostname } catch { return uri }
+}
+
+/** Only http(s) targets may be used for navigation — blocks javascript:/data: schemes. */
+function isSafeHttpUrl(uri: string): boolean {
+  try {
+    const u = new URL(uri)
+    return u.protocol === 'http:' || u.protocol === 'https:'
+  } catch { return false }
+}
+
 function OAuthAuthorizeContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -68,7 +81,11 @@ function OAuthAuthorizeContent() {
       })
       if (res.ok) {
         const data = await res.json().catch(() => null)
-        if (data?.redirectUrl) window.location.href = data.redirectUrl
+        if (data?.redirectUrl && isSafeHttpUrl(data.redirectUrl)) {
+          window.location.href = data.redirectUrl
+        } else {
+          setError('Authorization failed: invalid redirect target.')
+        }
       } else {
         setError('Authorization failed. Please try again.')
       }
@@ -80,6 +97,10 @@ function OAuthAuthorizeContent() {
   }
 
   function handleCancel() {
+    if (!isSafeHttpUrl(redirectUri)) {
+      setError('Invalid redirect_uri.')
+      return
+    }
     const cancelUrl = `${redirectUri}?error=access_denied&state=${encodeURIComponent(state)}`
     window.location.href = cancelUrl
   }
@@ -145,7 +166,7 @@ function OAuthAuthorizeContent() {
         <p className="text-xs text-[var(--text-tertiary)] text-center">
           After authorization you will be redirected to{' '}
           <span className="font-medium text-[var(--text-secondary)]">
-            {new URL(redirectUri).hostname}
+            {safeHostname(redirectUri)}
           </span>
         </p>
 

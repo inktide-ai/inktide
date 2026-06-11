@@ -27,5 +27,32 @@
   "remoteProvider": {
     "keyHint":    "API-ключ управляется глобально в",
     "manageLink": "Настройки → Провайдеры"
+  },
+  "ps": {
+    "brain": "Мозг",
+    "settingsDefault": "Настройки провайдера языковой модели",
+    "support": "Поддержка {{name}}",
+    "openIn": "Открыть в {{name}}",
+    "connection": "Подключение",
+    "connectionOllama": "Настройте локальный сервер Ollama и модель.",
+    "connectionRemote": "Укажите учётные данные API для подключения.",
+    "serverUrl": "URL сервера",
+    "serverUrlDesc": "URL вашего локального Ollama.",
+    "ollamaUnreachable": "Не удалось подключиться к Ollama.",
+    "selectLocalModel": "Выберите локальную модель.",
+    "endpoint": "Endpoint",
+    "customEndpoint": "Произвольный endpoint",
+    "apiKey": "API-ключ",
+    "apiKeyDesc": "Введите API-ключ {{name}} для подключения.",
+    "saving": "Сохранение…",
+    "save": "Сохранить",
+    "modelBehavior": "Поведение модели",
+    "modelBehaviorDesc": "Эти параметры применяются ко всем провайдерам.",
+    "saveChanges": "Сохранить изменения",
+    "about": "О провайдере",
+    "provider": "Провайдер",
+    "kind": "Тип",
+    "noInfo": "Нет дополнительной информации.",
+    "loading": "Загрузка..."
   }
 }

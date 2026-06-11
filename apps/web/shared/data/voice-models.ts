@@ -1,3 +1,16 @@
+/**
+ * Strips provider prefix from a namespaced model ID (e.g. "elevenlabs/eleven_multilingual_v2").
+ * Returns the plain model ID if the prefix matches, null if the prefix is for a different
+ * provider (contamination from a previous provider selection), or the original value if
+ * there is no prefix (un-prefixed IDs are treated as valid for any provider).
+ */
+export function stripModelPrefix(modelId: string | null | undefined, providerId: string): string | null {
+  if (!modelId) return null
+  const slash = modelId.indexOf('/')
+  if (slash < 0) return modelId
+  return modelId.slice(0, slash) === providerId ? modelId.slice(slash + 1) : null
+}
+
 export const ELEVENLABS_MODELS = [
   { id: 'eleven_multilingual_v2', label: 'Multilingual v2 (recommended)' },
   { id: 'eleven_turbo_v2_5',      label: 'Turbo v2.5 (low-latency)' },

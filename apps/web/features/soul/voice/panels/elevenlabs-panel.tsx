@@ -1,13 +1,15 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { useVoiceProvider } from '@/features/soul/hooks/useVoiceProvider'
-import { ELEVENLABS_MODELS } from '@/shared/data/voice-models'
+import { ELEVENLABS_MODELS, stripModelPrefix } from '@/shared/data/voice-models'
 import { SpeedIcon, SliderIcon } from '../voice-icons'
 import { SelectField, ParamRow } from '../param-row'
 import { ApiKeyConnectionPanel } from './api-key-panel'
 
 export function ElevenLabsSettings() {
+  const { t } = useTranslation('voice')
   const { selected, selectedId, updateCharacter } = useCharactersContext()
   if (!selected || !selectedId) return null
   const tts = selected.tts
@@ -18,39 +20,39 @@ export function ElevenLabsSettings() {
   return (
     <>
       <section className="mb-6">
-        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">Connection</h2>
+        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">{t('panels.connection')}</h2>
         <ApiKeyConnectionPanel providerName="ElevenLabs" providerId="elevenlabs" />
       </section>
       <section className="mb-6">
-        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">Voice & Model</h2>
+        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">{t('panels.voiceModel')}</h2>
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] divide-y divide-[var(--border-subtle)]">
           <SelectField
-            label="Voice"
-            hint={!apiKey.trim() ? 'Enter your API key to load voices.' : voicesLoading ? 'Loading voices...' : 'Select from your ElevenLabs voices.'}
+            label={t('panels.voice')}
+            hint={!apiKey.trim() ? t('panels.hintEnterKey') : voicesLoading ? t('panels.loadingVoices') : t('panels.hintElevenVoices')}
             value={tts.voiceId ?? ''}
             disabled={!apiKey.trim() || voicesLoading}
             onChange={(v) => patch({ voiceId: v || null })}
           >
-            <option value="">— Select a voice —</option>
+            <option value="">{t('panels.selectVoice')}</option>
             {voices.map((v) => <option key={v.id} value={v.id}>{v.name ?? v.id}</option>)}
           </SelectField>
-          <SelectField label="Model" value={tts.modelId ?? 'eleven_multilingual_v2'} onChange={(v) => patch({ modelId: v })}>
+          <SelectField label={t('panels.model')} value={stripModelPrefix(tts.modelId, 'elevenlabs') ?? 'eleven_multilingual_v2'} onChange={(v) => patch({ modelId: v ? `elevenlabs/${v}` : null })}>
             {ELEVENLABS_MODELS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
           </SelectField>
         </div>
       </section>
       <section>
-        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">Parameters</h2>
+        <h2 className="mb-3 text-body-md font-semibold text-[var(--text-heading)]">{t('panels.parameters')}</h2>
         <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] divide-y divide-[var(--border-subtle)]">
-          <ParamRow icon={<SliderIcon />} name="Stability" desc="Higher = more consistent, lower = more expressive" min={0} max={1} step={0.01} decimals={2} value={tts.stability} onChange={(v) => patch({ stability: v })} />
-          <ParamRow icon={<SliderIcon />} name="Similarity Boost" desc="How closely the voice matches the original speaker" min={0} max={1} step={0.01} decimals={2} value={tts.similarityBoost} onChange={(v) => patch({ similarityBoost: v })} />
-          <ParamRow icon={<SliderIcon />} name="Style" desc="Style exaggeration (0 recommended for most models)" min={0} max={1} step={0.01} decimals={2} value={tts.style} onChange={(v) => patch({ style: v })} />
-          <ParamRow icon={<SpeedIcon />} name="Speed" desc="Speech rate (0.7 - 1.2)" min={0.7} max={1.2} step={0.01} decimals={2} value={Math.min(1.2, Math.max(0.7, tts.speed))} onChange={(v) => patch({ speed: v })} format={(v) => `${v.toFixed(2)}×`} />
+          <ParamRow icon={<SliderIcon />} name={t('panels.stability')} desc={t('panels.stabilityDesc')} min={0} max={1} step={0.01} decimals={2} value={tts.stability} onChange={(v) => patch({ stability: v })} />
+          <ParamRow icon={<SliderIcon />} name={t('panels.similarity')} desc={t('panels.similarityDesc')} min={0} max={1} step={0.01} decimals={2} value={tts.similarityBoost} onChange={(v) => patch({ similarityBoost: v })} />
+          <ParamRow icon={<SliderIcon />} name={t('panels.style')} desc={t('panels.styleDesc')} min={0} max={1} step={0.01} decimals={2} value={tts.style} onChange={(v) => patch({ style: v })} />
+          <ParamRow icon={<SpeedIcon />} name={t('panels.speed')} desc={t('panels.speedEleven')} min={0.7} max={1.2} step={0.01} decimals={2} value={Math.min(1.2, Math.max(0.7, tts.speed))} onChange={(v) => patch({ speed: v })} format={(v) => `${v.toFixed(2)}×`} />
           <div className="flex items-center gap-4 px-5 py-4">
             <span className="w-5 shrink-0"><SliderIcon /></span>
             <div className="w-52 shrink-0">
-              <p className="text-body font-medium text-[var(--text-primary)]">Speaker Boost</p>
-              <p className="mt-0.5 text-xs leading-snug text-[var(--text-tertiary)]">Enhances speaker similarity</p>
+              <p className="text-body font-medium text-[var(--text-primary)]">{t('panels.speakerBoost')}</p>
+              <p className="mt-0.5 text-xs leading-snug text-[var(--text-tertiary)]">{t('panels.speakerBoostDesc')}</p>
             </div>
             <div className="flex-1" />
             <label className="relative inline-flex cursor-pointer items-center">

@@ -1,20 +1,21 @@
 import { CodeBlock, DocPage, InlineCode, PageSubtitle, PageTitle, SectionHeading, TableRow, Td } from './shared'
+import { getTranslations } from '@/lib/i18n-server'
 
-export function OAuthPage() {
+export async function OAuthPage() {
+  const t = await getTranslations('developer')
   return (
     <DocPage>
-      <PageTitle eyebrow="Auth">OAuth 2.0</PageTitle>
+      <PageTitle eyebrow={t('docs.oauth.eyebrow')}>{t('docs.oauth.title')}</PageTitle>
       <PageSubtitle>
-        Inktide uses Keycloak as the identity provider. Third-party apps authenticate users
-        via the standard Authorization Code flow with PKCE.
+        {t('docs.oauth.subtitle')}
       </PageSubtitle>
 
-      <SectionHeading>Flow Overview</SectionHeading>
+      <SectionHeading>{t('docs.oauth.flowOverview')}</SectionHeading>
       <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {[
-          ['1', 'Register App',   "Go to Developer → Create App. You'll receive a client_id and client_secret."],
-          ['2', 'Authorize User', 'Redirect the user to the Keycloak authorization URL with PKCE challenge.'],
-          ['3', 'Exchange Code',  'POST the authorization code to the token endpoint to receive access + refresh tokens.'],
+          ['1', t('docs.oauth.step1Title'), t('docs.oauth.step1Desc')],
+          ['2', t('docs.oauth.step2Title'), t('docs.oauth.step2Desc')],
+          ['3', t('docs.oauth.step3Title'), t('docs.oauth.step3Desc')],
         ].map(([step, title, desc]) => (
           <div key={step} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-5">
             <span className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent-soft)] text-sm font-bold text-[var(--accent-primary)]">
@@ -26,8 +27,8 @@ export function OAuthPage() {
         ))}
       </div>
 
-      <SectionHeading>Authorization URL</SectionHeading>
-      <CodeBlock label="GET — redirect the user here">
+      <SectionHeading>{t('docs.oauth.authUrl')}</SectionHeading>
+      <CodeBlock label={t('docs.oauth.labelAuthUrl')}>
 {`{keycloak_base_url}/realms/inktide-app/protocol/openid-connect/auth
   ?client_id=<your_client_id>
   &redirect_uri=<your_redirect_uri>           # must match registered URIs
@@ -38,8 +39,8 @@ export function OAuthPage() {
   &state=<random_opaque_value>`}
       </CodeBlock>
 
-      <SectionHeading>Token Exchange</SectionHeading>
-      <CodeBlock label="POST — exchange code for tokens">
+      <SectionHeading>{t('docs.oauth.tokenExchange')}</SectionHeading>
+      <CodeBlock label={t('docs.oauth.labelTokenExchange')}>
 {`POST {keycloak_base_url}/realms/inktide-app/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
@@ -51,7 +52,7 @@ grant_type=authorization_code
 &code_verifier=<pkce_verifier>`}
       </CodeBlock>
 
-      <CodeBlock label="Response">
+      <CodeBlock label={t('docs.oauth.labelResponse')}>
 {`{
   "access_token":  "eyJ...",       // use as Bearer token for API calls
   "refresh_token": "eyJ...",       // use to obtain new access tokens
@@ -60,8 +61,8 @@ grant_type=authorization_code
 }`}
       </CodeBlock>
 
-      <SectionHeading>Token Refresh</SectionHeading>
-      <CodeBlock label="POST — refresh the access token">
+      <SectionHeading>{t('docs.oauth.tokenRefresh')}</SectionHeading>
+      <CodeBlock label={t('docs.oauth.labelTokenRefresh')}>
 {`POST {keycloak_base_url}/realms/inktide-app/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
@@ -71,19 +72,19 @@ grant_type=refresh_token
 &refresh_token=<your_refresh_token>`}
       </CodeBlock>
 
-      <SectionHeading>Available Scopes</SectionHeading>
+      <SectionHeading>{t('docs.oauth.availableScopes')}</SectionHeading>
       <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)]">
         <table className="w-full text-sm">
           <tbody className="divide-y divide-[var(--border-subtle)]">
             {[
-              ['channelsRead',    'Read the list of connected channels for a soul'],
-              ['channelsWrite',   'Connect and disconnect platform channels'],
-              ['messagesReceive', 'Receive real-time message notifications via webhook'],
-              ['soulRead',        'Read public soul card info (name, avatar, description)'],
-            ].map(([scope, desc]) => (
+              ['channels:read',    'docs.oauth.scopeChannelsRead'],
+              ['channels:write',   'docs.oauth.scopeChannelsWrite'],
+              ['messages:receive', 'docs.oauth.scopeMessagesReceive'],
+              ['soul:read',        'docs.oauth.scopeSoulRead'],
+            ].map(([scope, descKey]) => (
               <TableRow key={scope}>
                 <Td mono accent>{scope}</Td>
-                <Td>{desc}</Td>
+                <Td>{t(descKey)}</Td>
               </TableRow>
             ))}
           </tbody>
@@ -91,9 +92,9 @@ grant_type=refresh_token
       </div>
 
       <div className="mt-6 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] px-5 py-4 text-sm text-[var(--text-secondary)]">
-        <span className="font-semibold text-[var(--text-primary)]">Keycloak base URL (local): </span>
+        <span className="font-semibold text-[var(--text-primary)]">{t('docs.oauth.baseUrlLabel')}</span>
         <InlineCode>http://localhost:8080</InlineCode>
-        {' '}— realm: <InlineCode>inktide-app</InlineCode>
+        {' '}{t('docs.oauth.realmLabel')} <InlineCode>inktide-app</InlineCode>
       </div>
     </DocPage>
   )

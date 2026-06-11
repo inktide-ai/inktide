@@ -5,27 +5,23 @@ import { useRouter, useParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import type { AiCharacter } from '@/shared/lib/character'
-import { PROVIDER_DEFS } from '@/shared/data/providers'
-import { profileSettingsPath } from '@/lib/routes'
+import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-provider-catalog'
 import { OllamaPanel } from './ollama-panel'
 import { RemoteProviderPanel } from './remote-provider-panel'
 import { LlmParametersPanel } from './llm-parameters-panel'
 
-// ── Section layout styles (local to BrainTab) ─────────────────────────────────
 
 const sectionCls = 'flex flex-col gap-3 border-t border-(--border) pt-4 mt-6 [&:first-child]:border-t-0 [&:first-child]:pt-0 [&:first-child]:mt-0'
 const sectionTitle = 'text-[1.125rem] font-bold text-(--text-primary) tracking-[-0.02em] mb-2'
 
-// ── Provider card type ────────────────────────────────────────────────────────
 
-interface LlmProviderDef {
+interface ProviderCardItem {
   id: string
   name: string
   description: string
   icon: string
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
 
 interface BrainTabProps {
   character: AiCharacter
@@ -44,8 +40,8 @@ const BrainTab = ({ character, onUpdate }: BrainTabProps) => {
     deepseek:  t('brain:providers.deepseek'),
   }
 
-  const PROVIDERS = useMemo((): LlmProviderDef[] =>
-    PROVIDER_DEFS.map((p) => ({
+  const PROVIDERS = useMemo((): ProviderCardItem[] =>
+    LLM_PROVIDER_CATALOG.map((p) => ({
       id: p.id, name: p.name, icon: p.icon,
       description: providerDescriptions[p.id] ?? p.description,
     }))
@@ -60,7 +56,7 @@ const BrainTab = ({ character, onUpdate }: BrainTabProps) => {
           <button
             type="button"
             className="flex items-center justify-center w-7 h-7 bg-white/[0.04] border border-[#2d2f33] rounded-[6px] text-white/45 cursor-pointer transition-all duration-[120ms] ease shrink-0 hover:border-[#42454d] hover:text-white/85 hover:bg-white/[0.07]"
-            onClick={() => router.push(profileSettingsPath('brain'))}
+            onClick={() => router.back()}
             aria-label="Back"
           >←</button>
           <span className="text-[1rem] font-semibold text-(--text-primary) tracking-[-0.01em]">

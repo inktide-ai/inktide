@@ -165,5 +165,29 @@
     "cancel": "Отмена",
     "delete": "Удалить мой аккаунт",
     "deleting": "Удаление…"
+  },
+  "emailChange": {
+    "changeTitle": "Изменить email",
+    "verifyTitle": "Подтвердить email",
+    "sendDesc": "Мы отправим код подтверждения на новый email.",
+    "checkInbox": "— проверьте почту и введите код ниже.",
+    "emailLabel": "Адрес email",
+    "emailPlaceholder": "example@company.com",
+    "cancel": "Отмена",
+    "sending": "Отправка…",
+    "sendCode": "Отправить код →",
+    "codeLabel": "Код подтверждения",
+    "codePlaceholder": "напр. sDqu7U",
+    "back": "← Назад",
+    "verifying": "Проверка…",
+    "verify": "Подтвердить email",
+    "errors": {
+      "emailRequired": "Введите email.",
+      "emailInvalid": "Введите корректный адрес email.",
+      "sameEmail": "Это уже ваш текущий email.",
+      "codeRequired": "Введите код подтверждения.",
+      "sendFailed": "Не удалось отправить код. Попробуйте ещё раз.",
+      "verifyFailed": "Не удалось подтвердить. Попробуйте ещё раз."
+    }
   }
 }

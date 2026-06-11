@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace Inktide.API.Billing.REST.Controllers;
 
 [ApiController]
-[Route("api/billing")]
+[Route("api/v1/billing")]
 [Produces("application/json")]
 [Authorize]
 public sealed class BillingController : ControllerBase

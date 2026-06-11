@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.Soul.REST.Controllers;
 
 [ApiController]
-[Route("api/soul/cards")]
+[Route("api/v1/souls/cards")]
 [Produces("application/json")]
 [Authorize]
 public sealed class AiCardAssetsController : ApiController

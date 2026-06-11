@@ -62,7 +62,6 @@ public sealed class IdleEventDispatcher : BackgroundService, IIdleActivityTracke
     }
 
 
-    // ── IIdleActivityTracker ──────────────────────────────────────────────────
 
     /// <inheritdoc/>
     public void NotifyActivity(Guid characterId, string channelId, string platformId, float arousal, float energy)
@@ -72,7 +71,6 @@ public sealed class IdleEventDispatcher : BackgroundService, IIdleActivityTracke
     }
 
 
-    // ── BackgroundService ─────────────────────────────────────────────────────
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -155,7 +153,6 @@ public sealed class IdleEventDispatcher : BackgroundService, IIdleActivityTracke
     }
 
 
-    // ── Threshold table ───────────────────────────────────────────────────────
 
     private TimeSpan GetIdleThreshold(float arousal, float energy)
     {

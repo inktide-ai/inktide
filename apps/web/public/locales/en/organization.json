@@ -1,0 +1,26 @@
+{
+  "invite": {
+    "srTitle": "Invite team members",
+    "title": "Invite Members",
+    "subtitle": "Send email invitations to collaborate in your workspace.",
+    "emailLabel": "Email addresses",
+    "roleMember": "Member",
+    "roleAdmin": "Admin",
+    "sending": "Sending…",
+    "send": "Send Invites",
+    "pendingInvites": "Pending Invites",
+    "loading": "Loading…",
+    "noPending": "No pending invitations.",
+    "resend": "Resend",
+    "cancel": "Cancel",
+    "expired": "Expired",
+    "expires": "Expires {{date}}",
+    "enterValidEmail": "Enter at least one valid email address.",
+    "sent_one": "Invitation sent.",
+    "sent_other": "Invitations sent.",
+    "sendFailed": "Failed to send invites.",
+    "resent": "Invite resent.",
+    "resendFailed": "Failed to resend invite.",
+    "cancelFailed": "Failed to cancel invite."
+  }
+}

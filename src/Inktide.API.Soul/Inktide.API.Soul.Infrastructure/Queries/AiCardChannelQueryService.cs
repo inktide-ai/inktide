@@ -6,6 +6,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Soul.Infrastructure.Queries;
 
+/// <summary>
+/// Resolves AI card identity + provider config for Synapse channel routing.
+/// AiCardChannel has moved to the Project context — channel-by-ID resolution always returns null
+/// until Synapse is updated to query the Project context directly.
+/// Card-by-ID resolution still works for the inktide-chat fallback path.
+/// </summary>
 public sealed class AiCardChannelQueryService : IAiCardChannelQueryService
 {
 
@@ -19,26 +25,16 @@ public sealed class AiCardChannelQueryService : IAiCardChannelQueryService
     }
 
 
-    public async Task<AiCardChannelContext?> ResolveByChannelIdAsync(
+    public Task<AiCardChannelContext?> ResolveByChannelIdAsync(
         string channelId,
         CancellationToken ct = default)
     {
-        var channel = await _db.AiCardChannels
-            .AsNoTracking()
-            .Include(c => c.AiCard)
-                .ThenInclude(a => a!.LlmCatalog)
-            .Include(c => c.AiCard)
-                .ThenInclude(a => a!.TtsCatalog)
-            .FirstOrDefaultAsync(c => c.ChannelId == channelId && c.IsActive, ct);
-
-        var card = channel?.AiCard;
-        if (card is null)
-        {
-            _logger.LogDebug("[AiCardChannelQueryService] No active channel mapping for {Channel}", channelId);
-            return null;
-        }
-
-        return ToContext(card);
+        // AiCardChannel has moved to the Project context.
+        // Synapse will need to query the Project context for channel routing.
+        _logger.LogDebug(
+            "[AiCardChannelQueryService] ResolveByChannelId is a no-op — channels moved to Project context. Channel={Channel}",
+            channelId);
+        return Task.FromResult<AiCardChannelContext?>(null);
     }
 
     public async Task<AiCardChannelContext?> ResolveByCardIdAsync(
@@ -57,23 +53,14 @@ public sealed class AiCardChannelQueryService : IAiCardChannelQueryService
             return null;
         }
 
-        return ToContext(card);
+        return new AiCardChannelContext(
+            AiCardId:           card.Id,
+            UserId:             card.UserId,
+            LlmProvider:        card.LlmCatalog?.Provider,
+            LlmModelId:         card.LlmCatalog?.ModelId,
+            LlmConfig:          LlmConfigSettings.Parse(card.LlmConfig),
+            TtsConfig:          TtsConfigSettings.Parse(card.TtsConfig),
+            LlmRequiresApiKey:  card.LlmCatalog?.RequiresApiKey ?? true);
     }
-
-
-    private static AiCardChannelContext ToContext(Domain.Entities.AiCard card) =>
-        new(
-            AiCardId:                card.Id,
-            UserId:                  card.UserId,
-            SystemPrompt:            card.SystemPrompt,
-            Personality:             card.Personality,
-            LlmProvider:             card.LlmCatalog?.Provider,
-            LlmModelId:              card.LlmCatalog?.ModelId,
-            LlmConfig:               LlmConfigSettings.Parse(card.LlmConfig),
-            TtsConfig:               TtsConfigSettings.Parse(card.TtsConfig),
-            Behavior:                ResponseBehaviorSettings.Parse(card.ResponseBehavior),
-            Memory:                  MemoryConfigSettings.Parse(card.MemorySettings),
-            PersonalityConfig:       card.PersonalityConfig,
-            ScreenAwarenessEnabled:  ScreenAwarenessCardSettings.Parse(card.ScreenAwarenessSettings).Enabled);
 
 }

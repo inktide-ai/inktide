@@ -101,6 +101,7 @@ internal sealed class SynapseAggregationService : ISynapseAggregationService
             LlmPresencePenalty:  cardCtx.LlmPresencePenalty,
             ResponseDelayMs:        cardCtx.ResponseDelayMs,
             LlmBaseUrl:             cardCtx.LlmBaseUrl,
+            LlmRequiresApiKey:      cardCtx.LlmRequiresApiKey,
             EmotionResponsiveness:  cardCtx.EmotionResponsiveness,
             PersonalityDirective:   cardCtx.PersonalityDirective,
             Plugins:                cardCtx.Plugins);

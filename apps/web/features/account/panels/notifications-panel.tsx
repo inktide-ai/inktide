@@ -11,7 +11,6 @@ export default function NotificationsPanel() {
 
   return (
     <>
-      {/* ── Enable Notifications ──────────────────────────────────────────── */}
       <div className="mt-[36px]" />
       <SectionHeader>{t('notifications.enable')}</SectionHeader>
 
@@ -23,7 +22,6 @@ export default function NotificationsPanel() {
         />
       </div>
 
-      {/* ── Email Notifications ───────────────────────────────────────────── */}
       <div className="mt-[48px]" />
       <SectionHeader>{t('notifications.email')}</SectionHeader>
 
@@ -56,7 +54,6 @@ export default function NotificationsPanel() {
         />
       </div>
 
-      {/* ── Push Notifications ────────────────────────────────────────────── */}
       <div className="mt-[48px]" />
       <SectionHeader>{t('notifications.push')}</SectionHeader>
 

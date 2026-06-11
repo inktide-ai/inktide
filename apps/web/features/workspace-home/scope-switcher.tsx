@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from '@/shared/ui/dropdown-menu'
 import { listProjects, type ProjectListItem } from '@/entities/project/api'
 import { cn } from '@/lib/utils'
 import { useOptionalCharactersContext } from '@/entities/character/context/CharactersContext'
 import { projectPath, PROJECTS_ROUTE } from '@/lib/routes'
+import { handleError } from '@/shared/lib/handle-error'
 
 const panelClass = cn(
   'z-[3000] w-[280px] overflow-hidden rounded-md border border-[var(--border-default)]',
@@ -44,6 +46,7 @@ function ProjectInitial({ project }: { project: ProjectListItem }) {
 }
 
 export function ScopeSwitcher() {
+  const { t } = useTranslation('common')
   const router = useRouter()
   const chars  = useOptionalCharactersContext()
   const [open, setOpen]           = useState(false)
@@ -57,7 +60,7 @@ export function ScopeSwitcher() {
       setLoading(true)
       listProjects()
         .then(setProjects)
-        .catch(console.error)
+        .catch(handleError)
         .finally(() => setLoading(false))
     }
     if (!next) setSearch('')
@@ -74,7 +77,7 @@ export function ScopeSwitcher() {
           type="button"
           className="flex items-center gap-1 rounded-lg bg-[var(--bg-0)] px-2.5 py-1 text-body font-medium text-[var(--text-primary)] outline-none transition-colors hover:bg-[var(--surface-1)] focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
         >
-          <span className="max-w-[160px] truncate">All Projects</span>
+          <span className="max-w-[160px] truncate">{t('scopeSwitcher.allProjects')}</span>
           {/* double-chevron ⇅ */}
           <svg height="16" viewBox="0 0 16 16" width="16" aria-hidden className="shrink-0 text-[var(--text-secondary)]" style={{ color: 'currentColor' }}>
             <path fillRule="evenodd" clipRule="evenodd" d="M8.7071 2.39644C8.31658 2.00592 7.68341 2.00592 7.29289 2.39644L4.46966 5.21966L3.93933 5.74999L4.99999 6.81065L5.53032 6.28032L7.99999 3.81065L10.4697 6.28032L11 6.81065L12.0607 5.74999L11.5303 5.21966L8.7071 2.39644ZM5.53032 9.71966L4.99999 9.18933L3.93933 10.25L4.46966 10.7803L7.29289 13.6035C7.68341 13.9941 8.31658 13.9941 8.7071 13.6035L11.5303 10.7803L12.0607 10.25L11 9.18933L10.4697 9.71966L7.99999 12.1893L5.53032 9.71966Z" fill="currentColor" />
@@ -91,7 +94,7 @@ export function ScopeSwitcher() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Find Project…"
+              placeholder={t('scopeSwitcher.findProject')}
               className="flex-1 bg-transparent text-body text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
             />
             <kbd className="rounded border border-[var(--border-default)] px-1.5 py-0.5 text-2xs text-[var(--text-tertiary)]">
@@ -112,7 +115,7 @@ export function ScopeSwitcher() {
               </>
             ) : filtered.length === 0 ? (
               <p className="px-2 py-3 text-center text-xs text-[var(--text-tertiary)]">
-                {search ? 'No projects match' : 'No projects yet'}
+                {search ? t('scopeSwitcher.noProjectsMatch') : t('scopeSwitcher.noProjectsYet')}
               </p>
             ) : (
               filtered.map(p => (
@@ -145,7 +148,7 @@ export function ScopeSwitcher() {
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border border-dashed border-[var(--border-default)] text-body leading-none">
                 +
               </span>
-              <span className="text-body">Create Project</span>
+              <span className="text-body">{t('scopeSwitcher.createProject')}</span>
             </DropdownMenuItem>
           </div>
         </DropdownMenuContent>

@@ -26,6 +26,7 @@ export function useCreateApp() {
   return useMutation({
     mutationFn: (req: CreateApplicationRequest) => createApp(req),
     onSuccess: () => { qc.invalidateQueries({ queryKey: queryKeys.developer.apps() }) },
+    onError: (err) => { console.error('[useCreateApp]', err) },
   })
 }
 
@@ -37,6 +38,7 @@ export function useUpdateApp(id: string) {
       qc.invalidateQueries({ queryKey: queryKeys.developer.app(id) })
       qc.invalidateQueries({ queryKey: queryKeys.developer.apps() })
     },
+    onError: (err) => { console.error('[useUpdateApp]', err) },
   })
 }
 
@@ -45,6 +47,7 @@ export function useDeleteApp() {
   return useMutation({
     mutationFn: (id: string) => deleteApp(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: queryKeys.developer.apps() }) },
+    onError: (err) => { console.error('[useDeleteApp]', err) },
   })
 }
 
@@ -53,6 +56,7 @@ export function useRotateSecret(id: string) {
   return useMutation({
     mutationFn: () => rotateSecret(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: queryKeys.developer.app(id) }) },
+    onError: (err) => { console.error('[useRotateSecret]', err) },
   })
 }
 
@@ -69,5 +73,6 @@ export function useTestWebhook(appId: string) {
   return useMutation({
     mutationFn: () => testWebhook(appId),
     onSuccess: () => { qc.invalidateQueries({ queryKey: queryKeys.developer.deliveries(appId) }) },
+    onError: (err) => { console.error('[useTestWebhook]', err) },
   })
 }

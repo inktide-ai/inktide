@@ -19,6 +19,7 @@ import { queryKeys } from '@/shared/lib/query/keys'
 import { buildSpark } from '@/shared/lib/spark'
 import { useCharactersContext } from '@/entities/character'
 import { PageMotion } from '@/shared/ui'
+import { toast } from 'sonner'
 
 const listVariants: Variants = {
   initial: {},
@@ -145,7 +146,10 @@ export default function ProjectsListPage() {
     const nextId     = reordered[neighborIdx + 1]?.id ?? null
 
     void reorderProject(active.id as string, { previous_id: previousId, next_id: nextId })
-      .catch(() => queryClient.invalidateQueries({ queryKey: queryKeys.projects.all(undefined) }))
+      .catch(() => {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projects.all(undefined) })
+        toast.error(t('errors.reorderFailed', 'Failed to save order'))
+      })
   }
 
   async function handleExport(project: ProjectListItem) {
@@ -206,7 +210,7 @@ export default function ProjectsListPage() {
   )
 
   const projectGrid = loading ? (
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,280px))] gap-3">
       {[...Array(4)].map((_, i) => (
         <div key={i} className="h-[230px] animate-pulse rounded-2xl bg-[hsla(var(--bg-1),_1)]" />
       ))}
@@ -218,7 +222,7 @@ export default function ProjectsListPage() {
   ) : isDndEnabled ? (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={filtered.map(p => p.id)} strategy={rectSortingStrategy}>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,280px))] gap-3">
           {filtered.map(project => (
             <SortableProjectCard
               key={project.id}
@@ -233,7 +237,7 @@ export default function ProjectsListPage() {
     </DndContext>
   ) : (
     <motion.div
-      className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3"
+      className="grid grid-cols-[repeat(auto-fill,minmax(280px,280px))] gap-3"
       variants={listVariants}
       initial="initial"
       animate="animate"
@@ -278,19 +282,19 @@ export default function ProjectsListPage() {
         />
       )}
     </AnimatePresence>
-    <div className="min-h-screen bg-[var(--bg-0)] px-6 py-6">
+    <div className="min-h-screen bg-[var(--bg-0)] px-4 py-4 sm:px-6 sm:py-6">
 
       <div className="mx-auto max-w-[1300px]">
-        <header className="mb-3 flex items-start justify-between gap-4">
+        <header className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div>
-            <h1 className="font-sans text-[36px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">{t('projects.title')}</h1>
+            <h1 className="font-sans text-[26px] font-semibold tracking-[-0.03em] text-[var(--text-primary)] sm:text-[36px]">{t('projects.title')}</h1>
             <p className="mt-1 text-body text-[var(--text-secondary)]">
               {t('projects.subtitle')}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-[240px] items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+            <div className="flex h-10 w-full min-w-0 flex-1 basis-full items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 sm:w-[240px] sm:flex-none sm:basis-auto">
               <Search size={15} className="text-[var(--text-tertiary)]" />
               <input
                 type="text"
@@ -321,7 +325,7 @@ export default function ProjectsListPage() {
             <button
               type="button"
               onClick={() => setShowWizard(true)}
-              className="flex h-10 items-center gap-1 rounded-xl bg-[var(--accent-primary)] px-3 text-body font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-60"
+              className="flex h-10 shrink-0 items-center gap-1 whitespace-nowrap rounded-xl bg-[var(--accent-primary)] px-3 text-body font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-60"
             >
               {t('projects.newProject')}
               <ChevronDown size={14} />
@@ -339,7 +343,7 @@ export default function ProjectsListPage() {
         <section className="mb-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <h2 className="font-sans text-[30px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{t('projects.yourProjects')}</h2>
+              <h2 className="font-sans text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)] sm:text-[30px]">{t('projects.yourProjects')}</h2>
               <div className="flex items-center gap-2">
                 {FILTER_TABS.map(tab => (
                   <button

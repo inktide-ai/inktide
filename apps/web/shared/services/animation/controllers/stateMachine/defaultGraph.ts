@@ -1,9 +1,11 @@
 import type { AnimationGraphConfig, AnimationNode, AnimationTransition, SelfTransition } from './types'
 
 
-// ── Nodes ─────────────────────────────────────────────────────────────────────
 
-const EMOTE_IDS = ['angry', 'blush', 'happy', 'sad', 'surprised', 'relax', 'sleepy', 'thinking'] as const
+const EMOTE_IDS = [
+  'angry', 'blush', 'happy', 'sad', 'surprised', 'relax', 'sleepy', 'thinking',
+  'greeting', 'greeting2', 'hello', 'pose', 'motion_pose', 'peace_sign', 'shoot', 'show_body', 'spin',
+] as const
 type EmoteId = typeof EMOTE_IDS[number]
 
 export const DEFAULT_NODES: AnimationNode[] = [
@@ -12,26 +14,34 @@ export const DEFAULT_NODES: AnimationNode[] = [
 ]
 
 export const DEFAULT_CLIP_URLS: Record<string, string> = {
-  idle:      '/idle/idle_loop.vrma',
-  angry:     '/animations/Angry.vrma',
-  blush:     '/animations/Blush.vrma',
-  happy:     '/animations/Clapping.vrma',
-  sad:       '/animations/Sad.vrma',
-  surprised: '/animations/Surprised.vrma',
-  relax:     '/animations/Relax.vrma',
-  sleepy:    '/animations/Sleepy.vrma',
-  thinking:  '/animations/Thinking.vrma',
+  idle:        '/idle/idle_loop.vrma',
+  angry:       '/animations/Angry.vrma',
+  blush:       '/animations/Blush.vrma',
+  happy:       '/animations/Clapping.vrma',
+  sad:         '/animations/Sad.vrma',
+  surprised:   '/animations/Surprised.vrma',
+  relax:       '/animations/Relax.vrma',
+  sleepy:      '/animations/Sleepy.vrma',
+  thinking:    '/animations/Thinking.vrma',
+  greeting:    '/animations/greeting.vrma',
+  greeting2:   '/animations/greeting2.vrma',
+  hello:       '/animations/hello.vrma',
+  pose:        '/animations/model-pose.vrma',
+  motion_pose: '/animations/motion_pose.vrma',
+  peace_sign:  '/animations/peace-sign.vrma',
+  shoot:       '/animations/shoot.vrma',
+  show_body:   '/animations/show-full-body.vrma',
+  spin:        '/animations/spin.vrma',
 }
 
-// ── Transitions ───────────────────────────────────────────────────────────────
 
 const idleToEmote = (id: EmoteId): AnimationTransition => ({
   from: 'idle',
   to: id,
   crossFadeDuration: 0.3,
   concurrency: 'replace',
-  reversible: id === 'angry',  // angry can be reversed mid-flight
-  keyframes: [],               // populate with wind-up clip when available
+  reversible: id === 'angry',
+  keyframes: [],
 })
 
 const emoteToIdle = (id: EmoteId): AnimationTransition => ({
@@ -48,14 +58,12 @@ export const DEFAULT_TRANSITIONS: AnimationTransition[] = [
   ...EMOTE_IDS.map(emoteToIdle),
 ]
 
-// ── Self-transitions (idle variations) ───────────────────────────────────────
 
 export const DEFAULT_SELF_TRANSITIONS: SelfTransition[] = [
   // Example — uncomment and supply a clip URL when breathing_idle.vrma is ready:
   // { nodeId: 'idle', variationClipId: 'breathing_idle', probability: 0.15, crossFadeDuration: 0.3 },
 ]
 
-// ── Assembled config ──────────────────────────────────────────────────────────
 
 export const DEFAULT_GRAPH_CONFIG: AnimationGraphConfig = {
   nodes:           DEFAULT_NODES,

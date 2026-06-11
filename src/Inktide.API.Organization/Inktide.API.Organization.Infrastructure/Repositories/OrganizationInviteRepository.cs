@@ -33,6 +33,11 @@ public sealed class OrganizationInviteRepository : IOrganizationInviteRepository
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync(ct);
 
+    public async Task<IReadOnlyList<OrganizationInvite>> GetPendingByOrganizationTrackedAsync(Guid organizationId, CancellationToken ct) =>
+        await _db.OrganizationInvites
+            .Where(i => i.OrganizationId == organizationId && i.Status == InviteStatus.Pending)
+            .ToListAsync(ct);
+
     public Task AddAsync(OrganizationInvite invite, CancellationToken ct)
     {
         _db.OrganizationInvites.Add(invite);

@@ -1,11 +1,4 @@
-// @ts-nocheck — vitest is not installed yet; see setup instructions below.
-// NOTE: No frontend test framework is configured in this project yet.
-// These tests require vitest (or jest with jsdom environment).
-// Setup: npm install -D vitest @vitest/coverage-v8 jsdom
-// Add to apps/web/package.json: "test": "vitest"
-// Add vitest.config.ts with environment: 'jsdom'
-
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { resolveOAuthReturn, saveOAuthPending } from '../resolve-oauth-return'
 
 describe('resolveOAuthReturn', () => {

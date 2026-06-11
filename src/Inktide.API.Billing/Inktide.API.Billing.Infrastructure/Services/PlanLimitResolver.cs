@@ -1,5 +1,6 @@
 using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 using Inktide.API.Core.Contracts;
 
 namespace Inktide.API.Billing.Infrastructure.Services;

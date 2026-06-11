@@ -164,5 +164,29 @@
     "cancel": "Cancel",
     "delete": "Delete my account",
     "deleting": "Deleting…"
+  },
+  "emailChange": {
+    "changeTitle": "Change email address",
+    "verifyTitle": "Verify email address",
+    "sendDesc": "We'll send a verification code to your new email.",
+    "checkInbox": "— check your inbox and enter the code below.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "example@company.com",
+    "cancel": "Cancel",
+    "sending": "Sending…",
+    "sendCode": "Send code →",
+    "codeLabel": "Verification code",
+    "codePlaceholder": "e.g. sDqu7U",
+    "back": "← Back",
+    "verifying": "Verifying…",
+    "verify": "Verify email",
+    "errors": {
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Enter a valid email address.",
+      "sameEmail": "This is already your current email.",
+      "codeRequired": "Enter the verification code.",
+      "sendFailed": "Failed to send code. Please try again.",
+      "verifyFailed": "Verification failed. Please try again."
+    }
   }
 }

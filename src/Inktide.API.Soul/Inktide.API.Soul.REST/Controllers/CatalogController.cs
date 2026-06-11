@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.Soul.REST.Controllers;
 
 [ApiController]
-[Route("api/soul/catalog")]
+[Route("api/v1/soul/catalog")]
 [Produces("application/json")]
 [Authorize]
 public sealed class CatalogController : ApiController
@@ -38,6 +38,15 @@ public sealed class CatalogController : ApiController
         var voices = await _catalogService.GetAvailableTtsVoicesAsync(ct);
         return Ok(voices.Select(CatalogResponseMapper.ToTtsResponse).ToList());
     }
+
+    // Deprecated aliases — 301 Permanent Redirect
+    [HttpGet("/api/soul/catalog/llm-models")]
+    public IActionResult GetLlmModelsLegacy() =>
+        RedirectPermanent("/api/v1/soul/catalog/llm-models");
+
+    [HttpGet("/api/soul/catalog/tts-voices")]
+    public IActionResult GetTtsVoicesLegacy() =>
+        RedirectPermanent("/api/v1/soul/catalog/tts-voices");
 
 
 }

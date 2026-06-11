@@ -2,9 +2,14 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Inktide.API.Billing.Application.Interfaces;
+using Inktide.API.Billing.Application.Messages;
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Billing.Infrastructure.DbContext;
 using Inktide.API.Billing.Infrastructure.Idempotency;
 using Inktide.API.Billing.Infrastructure.Settings;
+using Inktide.API.Billing.Infrastructure.Telemetry;
+using Inktide.API.Core.Models;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -19,25 +24,34 @@ public sealed class StripeWebhookProcessor : IWebhookProcessor
 
     private readonly StripeSettings _settings;
     private readonly ISubscriptionRepository _subscriptions;
-    private readonly IPaymentReceiptEmailService _emailService;
+    private readonly IBillingIncidentRepository _incidents;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly BillingDbContext _db;
     private readonly IConnectionMultiplexer _redis;
     private readonly TimeProvider _time;
+    private readonly BillingMetrics _metrics;
     private readonly ILogger<StripeWebhookProcessor> _logger;
 
     public StripeWebhookProcessor(
         StripeSettings settings,
         ISubscriptionRepository subscriptions,
-        IPaymentReceiptEmailService emailService,
+        IBillingIncidentRepository incidents,
+        IPublishEndpoint publishEndpoint,
+        BillingDbContext db,
         IConnectionMultiplexer redis,
         TimeProvider time,
+        BillingMetrics metrics,
         ILogger<StripeWebhookProcessor> logger)
     {
-        _settings      = settings      ?? throw new ArgumentNullException(nameof(settings));
-        _subscriptions = subscriptions ?? throw new ArgumentNullException(nameof(subscriptions));
-        _emailService  = emailService  ?? throw new ArgumentNullException(nameof(emailService));
-        _redis         = redis         ?? throw new ArgumentNullException(nameof(redis));
-        _time          = time          ?? throw new ArgumentNullException(nameof(time));
-        _logger        = logger        ?? throw new ArgumentNullException(nameof(logger));
+        _settings        = settings        ?? throw new ArgumentNullException(nameof(settings));
+        _subscriptions   = subscriptions   ?? throw new ArgumentNullException(nameof(subscriptions));
+        _incidents       = incidents       ?? throw new ArgumentNullException(nameof(incidents));
+        _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
+        _db              = db              ?? throw new ArgumentNullException(nameof(db));
+        _redis           = redis           ?? throw new ArgumentNullException(nameof(redis));
+        _time            = time            ?? throw new ArgumentNullException(nameof(time));
+        _metrics         = metrics         ?? throw new ArgumentNullException(nameof(metrics));
+        _logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -141,8 +155,19 @@ public sealed class StripeWebhookProcessor : IWebhookProcessor
 
         if (string.IsNullOrEmpty(plan))
         {
-            _logger.LogWarning(
-                "Stripe {Event}: missing 'plan' metadata for event {EventId} — skipping", eventType, eventId);
+            _logger.LogError(
+                "Stripe {Event}: missing 'plan' metadata for event {EventId} — subscription not created",
+                eventType, eventId);
+            _metrics.WebhookMetadataMissingTotal.Add(1);
+            await _incidents.RecordAsync(new BillingIncident
+            {
+                Provider   = ProviderId,
+                EventId    = eventId,
+                EventType  = eventType,
+                Reason     = "missing_plan",
+                RawPayload = JsonSerializer.Serialize(obj),
+                OccurredAt = utcNow,
+            }, ct).ConfigureAwait(false);
             return;
         }
 
@@ -154,7 +179,19 @@ public sealed class StripeWebhookProcessor : IWebhookProcessor
 
         if (string.IsNullOrEmpty(userId))
         {
-            _logger.LogWarning("Stripe {Event}: cannot resolve userId for event {EventId}", eventType, eventId);
+            _logger.LogError(
+                "Stripe {Event}: cannot resolve userId for event {EventId} — subscription not created",
+                eventType, eventId);
+            _metrics.WebhookMetadataMissingTotal.Add(1);
+            await _incidents.RecordAsync(new BillingIncident
+            {
+                Provider   = ProviderId,
+                EventId    = eventId,
+                EventType  = eventType,
+                Reason     = "missing_user_id",
+                RawPayload = JsonSerializer.Serialize(obj),
+                OccurredAt = utcNow,
+            }, ct).ConfigureAwait(false);
             return;
         }
 
@@ -194,14 +231,16 @@ public sealed class StripeWebhookProcessor : IWebhookProcessor
 
         await _subscriptions.UpsertAsync(sub, ct).ConfigureAwait(false);
 
-        // Receipt only for succeeded payments
         if (eventType == "payment_intent.succeeded")
         {
             var receiptEmail = obj.TryGetProperty("receipt_email", out var re) ? re.GetString() : null;
             if (!string.IsNullOrEmpty(receiptEmail))
-                await _emailService.SendReceiptAsync(receiptEmail, sub.Plan.ToString(), "Stripe",
-                    sub.CurrentPeriodEnd ?? utcNow.Add(BillingCycle.Monthly), ct).ConfigureAwait(false);
+                await _publishEndpoint.Publish(
+                    new PaymentReceiptEmailMessage(receiptEmail, sub.Plan.ToString(), "Stripe",
+                        sub.CurrentPeriodEnd ?? utcNow.Add(BillingCycle.Monthly)), ct).ConfigureAwait(false);
         }
+
+        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
 
         try
         {
@@ -209,7 +248,8 @@ public sealed class StripeWebhookProcessor : IWebhookProcessor
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Stripe: failed to set done key for {EventId}", eventId);
+            _logger.LogWarning(ex, "Stripe: failed to set done key for {EventId} — webhook will be retried", eventId);
+            throw;
         }
     }
 

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CredentialResponse } from '@/shared/types/soul-api'
 import { getCredentials, upsertCredential } from '@/entities/soul/api'
-import type { ProviderDefinition } from '@/shared/data/providers'
+import type { LlmProviderDef } from '@/shared/data/llm-provider-catalog'
 
 export interface UseOllamaCredentialsResult {
   cred:           CredentialResponse | null
@@ -21,7 +21,7 @@ export interface UseOllamaCredentialsResult {
  * registers a save plugin so the parent panel's save action persists changes.
  */
 export function useOllamaCredentials(
-  def: ProviderDefinition,
+  def: LlmProviderDef,
   registerSavePlugin:   (key: string, fn: () => Promise<void>) => void,
   unregisterSavePlugin: (key: string) => void,
 ): UseOllamaCredentialsResult {
@@ -96,7 +96,7 @@ export function useOllamaCredentials(
           setExtraConfig(defaults)
         }
       })
-      .catch(() => {})
+      .catch((err) => { console.error('[useOllamaCredentials] failed to load credentials', err) })
       .finally(() => setCredLoading(false))
   }, [def])
 

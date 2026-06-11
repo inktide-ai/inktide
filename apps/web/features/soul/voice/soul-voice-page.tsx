@@ -2,13 +2,13 @@
 
 import { useMemo, useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { VoiceProviderCard, getCredentials, statusFromCredential, type CredentialResponse } from '@/features/soul'
 import { VOICE_PROVIDER_CATALOG } from '@/shared/data/voice-providers'
 import { useCharactersContext } from '@/entities/character'
 import { cn } from '@/lib/utils'
 import { FeaturedIntegrations } from '@/features/character-editor'
 
-// ── Toolbar icons ─────────────────────────────────────────────────────────────
 
 const GridIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
@@ -54,21 +54,19 @@ const CloningFilterIcon = ({ className }: { className?: string }) => (
   <img src="/images/icons/copy.svg" alt="" className={cn('ui-icon', className)} />
 )
 
-// ── Settings components ───────────────────────────────────────────────────────
 
-// ── Type filter definitions ────────────────────────────────────────────────────
 
 const TYPE_DEFS = [
-  { id: 'local',       label: 'Local',          Icon: ({ className }: { className?: string }) => <ComputerIcon className={className} /> },
-  { id: 'api-key',     label: 'API Key',         Icon: ({ className }: { className?: string }) => <LockIcon className={className} /> },
-  { id: 'streaming',   label: 'Streaming',       Icon: VoiceFilterIcon },
-  { id: 'cloning',     label: 'Voice Cloning',   Icon: CloningFilterIcon },
-  { id: 'open-source', label: 'Open Source',     Icon: ({ className }: { className?: string }) => <GithubIcon className={className} /> },
+  { id: 'local',       labelKey: 'types.local',      Icon: ({ className }: { className?: string }) => <ComputerIcon className={className} /> },
+  { id: 'api-key',     labelKey: 'types.apiKey',     Icon: ({ className }: { className?: string }) => <LockIcon className={className} /> },
+  { id: 'streaming',   labelKey: 'types.streaming',  Icon: VoiceFilterIcon },
+  { id: 'cloning',     labelKey: 'types.cloning',    Icon: CloningFilterIcon },
+  { id: 'open-source', labelKey: 'types.openSource', Icon: ({ className }: { className?: string }) => <GithubIcon className={className} /> },
 ] as const
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function SoulVoicePage() {
+  const { t } = useTranslation('voice')
   const { selected, selectedId, updateCharacter } = useCharactersContext()
   const router = useRouter()
   const params = useParams<{ id: string }>()
@@ -158,18 +156,16 @@ export default function SoulVoicePage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-24 pb-14 pt-9 xl:max-w-[90rem]">
       <header className="mb-9">
-        <h1 className="text-[1.625rem] font-semibold leading-8 text-[var(--text-heading)]">Voice</h1>
-        <p className="mt-1 text-[1rem] leading-6 text-[var(--text-secondary)]">Choose a TTS provider and configure your soul&apos;s voice.</p>
+        <h1 className="text-[1.625rem] font-semibold leading-8 text-[var(--text-heading)]">{t('page.title')}</h1>
+        <p className="mt-1 text-[1rem] leading-6 text-[var(--text-secondary)]">{t('page.subtitle')}</p>
       </header>
       <FeaturedIntegrations baseHref={`/souls/${params.id}/voice`} type="voice" />
       <div>
-      {/* ── Providers section ───────────────────────────────────────────────── */}
       <div className="mb-6">
-        <h2 className="text-[1.0625rem] font-semibold text-[var(--text-heading)]">Voice Providers</h2>
-        <p className="mt-0.5 text-body text-[var(--text-secondary)]">Select a text-to-speech engine to power your soul&apos;s voice.</p>
+        <h2 className="text-[1.0625rem] font-semibold text-[var(--text-heading)]">{t('page.providersTitle')}</h2>
+        <p className="mt-0.5 text-body text-[var(--text-secondary)]">{t('page.providersSubtitle')}</p>
       </div>
 
-      {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
       <div className="mb-4 flex items-center justify-between gap-2 py-1.5">
         {/* Type filter */}
         <div className="relative" ref={dropdownRef}>
@@ -185,7 +181,7 @@ export default function SoulVoicePage() {
             )}
           >
             <GridIcon className="h-4 w-4 text-[var(--text-tertiary)]" />
-            Type
+            {t('page.type')}
             {isTypeActive && (
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--color-blue-primary)] text-2xs font-bold text-white leading-none">
                 {activeTypes.size}
@@ -197,13 +193,13 @@ export default function SoulVoicePage() {
           {typeOpen && (
             <div className="absolute left-0 top-full z-50 mt-1 w-52 overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
               <div className="py-1">
-                {TYPE_DEFS.map((t) => {
-                  const checked = pendingTypes.has(t.id)
+                {TYPE_DEFS.map((td) => {
+                  const checked = pendingTypes.has(td.id)
                   return (
                     <button
-                      key={t.id}
+                      key={td.id}
                       type="button"
-                      onClick={() => toggleType(t.id)}
+                      onClick={() => toggleType(td.id)}
                       className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-[var(--surface-card-hover)]"
                     >
                       <span className={cn(
@@ -216,21 +212,21 @@ export default function SoulVoicePage() {
                           </svg>
                         )}
                       </span>
-                      <t.Icon className="h-4 w-4 shrink-0 text-[var(--text-secondary)]" />
-                      <span className="flex-1 text-sm text-[var(--text-primary)]">{t.label}</span>
-                      <span className="text-xs text-[var(--text-tertiary)]">{typeCounts[t.id]}</span>
+                      <td.Icon className="h-4 w-4 shrink-0 text-[var(--text-secondary)]" />
+                      <span className="flex-1 text-sm text-[var(--text-primary)]">{t(td.labelKey)}</span>
+                      <span className="text-xs text-[var(--text-tertiary)]">{typeCounts[td.id]}</span>
                     </button>
                   )
                 })}
               </div>
               <div className="flex items-center justify-between border-t border-[var(--border-subtle)] px-3 py-2">
                 <div className="flex gap-2">
-                  <button type="button" onClick={selectAllTypes} className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Select all</button>
+                  <button type="button" onClick={selectAllTypes} className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">{t('page.selectAll')}</button>
                   <span className="text-[var(--text-tertiary)]">·</span>
-                  <button type="button" onClick={clearTypes} className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Clear</button>
+                  <button type="button" onClick={clearTypes} className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">{t('page.clear')}</button>
                 </div>
                 <button type="button" onClick={applyTypes} className="rounded-md bg-[var(--color-blue-primary)] px-3 py-1 text-xs font-semibold text-white hover:bg-blue-500 transition-colors">
-                  Apply
+                  {t('page.apply')}
                 </button>
               </div>
             </div>
@@ -243,7 +239,7 @@ export default function SoulVoicePage() {
             <input
               ref={searchInputRef}
               type="search"
-              placeholder="Search providers..."
+              placeholder={t('page.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={cn(
@@ -268,16 +264,15 @@ export default function SoulVoicePage() {
         </div>
       </div>
 
-      {/* ── Active filter chips ──────────────────────────────────────────────── */}
       {hasActiveFilters && (
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {Array.from(activeTypes).map((id) => {
-            const def = TYPE_DEFS.find((t) => t.id === id)
+            const def = TYPE_DEFS.find((td) => td.id === id)
             if (!def) return null
             return (
               <span key={id} className="flex items-center gap-1.5 rounded-full border border-[var(--border-default)] bg-[var(--surface-card)] px-2.5 py-1 text-xs font-medium text-[var(--text-primary)]">
                 <def.Icon className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                {def.label}
+                {t(def.labelKey)}
                 <button type="button" onClick={() => removeActiveType(id)} className="ml-0.5 opacity-50 hover:opacity-100 transition-opacity">
                   <XSmallIcon className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
                 </button>
@@ -289,12 +284,11 @@ export default function SoulVoicePage() {
             onClick={() => { setActiveTypes(new Set()); setPendingTypes(new Set()) }}
             className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
           >
-            Clear all
+            {t('page.clearAll')}
           </button>
         </div>
       )}
 
-      {/* ── Grid ────────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-4">
         {filtered.map((provider) => {
           const cred = credMap.get(provider.id)
@@ -312,7 +306,7 @@ export default function SoulVoicePage() {
       </div>
 
       {filtered.length === 0 && (
-        <p className="mt-8 text-center text-body text-[var(--text-tertiary)]">No providers match your filters.</p>
+        <p className="mt-8 text-center text-body text-[var(--text-tertiary)]">{t('page.noMatch')}</p>
       )}
       </div>
     </div>

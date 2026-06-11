@@ -1,3 +1,4 @@
+using Inktide.API.Core.Pagination;
 using Inktide.API.Marketplace.Application.Interfaces;
 using Inktide.API.Marketplace.REST.Filters;
 using Inktide.API.Marketplace.REST.Models;
@@ -8,17 +9,23 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.Marketplace.REST.Controllers;
 
 [ApiController]
-[Route("api/marketplace")]
+[Route("api/v1/marketplace")]
 [Produces("application/json")]
 [TypeFilter(typeof(MarketplaceExceptionFilter))]
 public sealed class MarketplaceController(IMarketplaceService svc) : ControllerBase
 {
     [HttpGet("connectors")]
-    [ProducesResponseType(typeof(IReadOnlyList<ConnectorDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetConnectors(CancellationToken ct)
+    [ProducesResponseType(typeof(PagedResult<ConnectorDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetConnectors(
+        [FromQuery] int limit = 50,
+        [FromQuery] int offset = 0,
+        CancellationToken ct = default)
     {
-        var connectors = await svc.GetConnectorsAsync(ct);
-        return Ok(connectors.Select(ConnectorDto.From).ToList());
+        if (limit is < 1 or > 200) limit = 50;
+        if (offset < 0) offset = 0;
+        var paged = await svc.GetConnectorsPagedAsync(limit, offset, ct);
+        var items = paged.Items.Select(ConnectorDto.From).ToList();
+        return Ok(new PagedResult<ConnectorDto>(items, paged.NextCursor, paged.HasMore));
     }
 
     [HttpGet("connectors/{slug}")]

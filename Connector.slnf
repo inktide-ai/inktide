@@ -1,0 +1,16 @@
+{
+  "solution": {
+    "path": "Inktide.API.sln",
+    "projects": [
+      "src/Inktide.API.Core/Inktide.API.Core.csproj",
+      "src/Inktide.API.Domain/Inktide.API.Domain.csproj",
+      "src/Inktide.API.Connector/Inktide.API.Connector.Application/Inktide.API.Connector.Application.csproj",
+      "src/Inktide.API.Connector/Inktide.API.Connector.Application.Tests/Inktide.API.Connector.Application.Tests.csproj",
+      "src/Inktide.API.Connector/Inktide.API.Connector.Discord/Inktide.API.Connector.Discord.csproj",
+      "src/Inktide.API.Connector/Inktide.API.Connector.Infrastructure/Inktide.API.Connector.Infrastructure.csproj",
+      "src/Inktide.API.Connector/Inktide.API.Connector.InktideChat/Inktide.API.Connector.InktideChat.csproj",
+      "src/Inktide.API.Connector/Inktide.API.Connector.Telegram/Inktide.API.Connector.Telegram.csproj",
+      "src/Inktide.API.Connector/Inktide.API.Connector.Twitch/Inktide.API.Connector.Twitch.csproj"
+    ]
+  }
+}

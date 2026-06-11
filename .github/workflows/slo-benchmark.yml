@@ -1,0 +1,54 @@
+name: SLO Benchmark
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      iterations:
+        description: 'Number of iterations'
+        default: '10'
+        required: false
+
+jobs:
+  benchmark:
+    name: Pipeline latency SLO check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: tools/pipeline-bench/package.json
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: tools/pipeline-bench
+
+      - name: Run benchmark
+        run: ITERATIONS=${{ github.event.inputs.iterations || '10' }} bash run.sh
+        working-directory: tools/pipeline-bench
+        env:
+          CHANNEL_ID: ${{ secrets.BENCH_CHANNEL_ID }}
+          JWT_TOKEN:  ${{ secrets.BENCH_JWT_TOKEN }}
+          API_URL:    ${{ secrets.BENCH_API_URL }}
+          REDIS_URL:  ${{ secrets.BENCH_REDIS_URL }}
+
+      - name: Report results
+        run: |
+          LATEST=$(ls -t results/*.jsonl | head -1)
+          node report.js "$LATEST" --ci
+        working-directory: tools/pipeline-bench
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-results-${{ github.run_id }}
+          path: tools/pipeline-bench/results/*.jsonl
+          retention-days: 30

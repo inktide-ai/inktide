@@ -37,8 +37,8 @@ public sealed class SoulCreationValidationQueryService
 
         await Task.WhenAll(llmTask, ttsTask).ConfigureAwait(false);
 
-        var llmEntry = llmTask.Result;
-        var ttsEntry = ttsTask.Result;
+        var llmEntry = await llmTask;
+        var ttsEntry = await ttsTask;
 
         // Round 2: credential lookups in parallel (only for providers that need an API key).
         var llmCredTask       = llmEntry?.RequiresApiKey == true
@@ -63,9 +63,9 @@ public sealed class SoulCreationValidationQueryService
         return new SoulCreationValidationData(
             LlmEntry:        llmEntry,
             TtsEntry:        ttsEntry,
-            LlmDecryptedCred: llmCredTask.Result,
-            LlmCredEntity:   llmCredEntityTask.Result,
-            TtsDecryptedCred: ttsCredTask.Result,
-            TtsCredEntity:   ttsCredEntityTask.Result);
+            LlmDecryptedCred: await llmCredTask,
+            LlmCredEntity:   await llmCredEntityTask,
+            TtsDecryptedCred: await ttsCredTask,
+            TtsCredEntity:   await ttsCredEntityTask);
     }
 }

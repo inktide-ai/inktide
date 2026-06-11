@@ -22,4 +22,18 @@ public interface IApiKeyResolver
     /// </summary>
     bool IsHeaderKey(string providerId);
 
+    /// <summary>
+    /// Async variant for background pipeline consumers (no HTTP context guaranteed).
+    /// Resolution order: X-TTS-Api-Key header → per-user credential (Soul DB) → global config → null.
+    /// Returns null when provider does not require a key or no key is configured for this user/provider.
+    /// </summary>
+    Task<string?> ResolveAsync(Guid? userId, string providerId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Resolves the base URL override for a provider from per-user BYOK credentials.
+    /// Returns null when the user has no stored credential or the credential has no base URL override.
+    /// Callers should prefer <c>command.BaseUrl</c> (per-soul config) over this credential value.
+    /// </summary>
+    Task<string?> ResolveBaseUrlAsync(Guid? userId, string providerId, CancellationToken ct = default);
+
 }

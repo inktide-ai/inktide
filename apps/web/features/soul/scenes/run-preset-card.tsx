@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { MoreHorizontal, Zap, ZapOff } from 'lucide-react'
 import type { RunPreset } from '@/features/soul/api/index'
 
@@ -13,26 +14,27 @@ interface RunPresetCardProps {
   onDelete: (preset: RunPreset) => void
 }
 
-function OverrideRow({ label, value }: { label: string; value: string | null | undefined }) {
+function OverrideRow({ label, value, emptyLabel }: { label: string; value: string | null | undefined; emptyLabel: string }) {
   return (
     <div className="flex items-center justify-between gap-2 py-0.5">
       <span className="text-body text-[var(--text-tertiary)]">{label}</span>
       <span className="text-body font-medium text-[var(--text-secondary)]">
-        {value ?? <span className="text-[var(--text-tertiary)] italic">Soul default</span>}
+        {value ?? <span className="text-[var(--text-tertiary)] italic">{emptyLabel}</span>}
       </span>
     </div>
   )
 }
 
-function temperatureLabel(t: number | null): string | null {
-  if (t === null) return null
-  if (t <= 0.3) return `${t} · Precise`
-  if (t <= 0.7) return `${t} · Balanced`
-  if (t <= 1.2) return `${t} · Creative`
-  return `${t} · Wild`
+function temperatureLabel(temp: number | null, tr: (k: string) => string): string | null {
+  if (temp === null) return null
+  if (temp <= 0.3) return `${temp} · ${tr('preset.tempPrecise')}`
+  if (temp <= 0.7) return `${temp} · ${tr('preset.tempBalanced')}`
+  if (temp <= 1.2) return `${temp} · ${tr('preset.tempCreative')}`
+  return `${temp} · ${tr('preset.tempWild')}`
 }
 
 export function RunPresetCard({ preset, onActivate, onDeactivate, onEdit, onDelete }: RunPresetCardProps) {
+  const { t } = useTranslation('scene')
   const [busy, setBusy] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -90,7 +92,7 @@ export function RunPresetCard({ preset, onActivate, onDeactivate, onEdit, onDele
                 className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-base)] px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white"
               >
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
-                LIVE
+                {t('preset.live')}
               </motion.span>
             </AnimatePresence>
           )}
@@ -101,7 +103,7 @@ export function RunPresetCard({ preset, onActivate, onDeactivate, onEdit, onDele
               type="button"
               onClick={() => setMenuOpen(v => !v)}
               className="grid h-7 w-7 place-items-center rounded-md text-[var(--text-tertiary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] transition-colors"
-              aria-label="More options"
+              aria-label={t('preset.moreOptions')}
             >
               <MoreHorizontal size={14} />
             </button>
@@ -122,14 +124,14 @@ export function RunPresetCard({ preset, onActivate, onDeactivate, onEdit, onDele
                       onClick={() => { setMenuOpen(false); onEdit(preset) }}
                       className="w-full px-3 py-1.5 text-left text-body text-[var(--text-primary)] hover:bg-[var(--surface-1)]"
                     >
-                      Edit
+                      {t('preset.edit')}
                     </button>
                     <button
                       type="button"
                       onClick={() => { setMenuOpen(false); onDelete(preset) }}
                       className="w-full px-3 py-1.5 text-left text-body text-red-400 hover:bg-[var(--surface-1)]"
                     >
-                      Delete
+                      {t('preset.delete')}
                     </button>
                   </motion.div>
                 </>
@@ -141,10 +143,10 @@ export function RunPresetCard({ preset, onActivate, onDeactivate, onEdit, onDele
 
       {/* Overrides */}
       <div className="rounded-[8px] bg-[var(--surface-0)] px-3 py-2">
-        <OverrideRow label="Model" value={preset.override_llm_model_id} />
-        <OverrideRow label="Temperature" value={temperatureLabel(preset.override_temperature)} />
-        <OverrideRow label="Emotion" value={preset.override_emotion_preset_id} />
-        <OverrideRow label="Voice" value={preset.override_voice_profile_id} />
+        <OverrideRow label={t('preset.model')} value={preset.override_llm_model_id} emptyLabel={t('preset.soulDefault')} />
+        <OverrideRow label={t('preset.temperature')} value={temperatureLabel(preset.override_temperature, t)} emptyLabel={t('preset.soulDefault')} />
+        <OverrideRow label={t('preset.emotion')} value={preset.override_emotion_preset_id} emptyLabel={t('preset.soulDefault')} />
+        <OverrideRow label={t('preset.voice')} value={preset.override_voice_profile_id} emptyLabel={t('preset.soulDefault')} />
       </div>
 
       {/* Action */}
@@ -157,7 +159,7 @@ export function RunPresetCard({ preset, onActivate, onDeactivate, onEdit, onDele
             className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border-divider)] px-3 py-1.5 text-body font-medium text-[var(--text-secondary)] transition-colors hover:border-[var(--border-card)] hover:text-[var(--text-primary)] disabled:opacity-50"
           >
             <ZapOff size={12} />
-            Deactivate
+            {t('preset.deactivate')}
           </button>
         ) : (
           <button
@@ -167,7 +169,7 @@ export function RunPresetCard({ preset, onActivate, onDeactivate, onEdit, onDele
             className="inline-flex items-center gap-1.5 rounded-md bg-[var(--accent-base)] px-3 py-1.5 text-body font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             <Zap size={12} />
-            {busy ? 'Switching…' : 'Activate'}
+            {busy ? t('preset.switching') : t('preset.activate')}
           </button>
         )}
       </div>

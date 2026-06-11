@@ -144,6 +144,9 @@ namespace Inktide.API.Organization.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("idx_org_member_user_id");
+
                     b.HasIndex("OrganizationId", "UserId")
                         .IsUnique()
                         .HasDatabaseName("idx_org_member_org_user");

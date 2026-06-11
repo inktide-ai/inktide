@@ -1,3 +1,4 @@
+using Inktide.API.Core.Pagination;
 using Inktide.API.Soul.Application.Exceptions;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.REST.Mappers;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.Soul.REST.Controllers;
 
 [ApiController]
-[Route("api/soul/cards")]
+[Route("api/v1/souls/cards")]
 [Produces("application/json")]
 [Authorize]
 public sealed class AiCardsController : ApiController
@@ -17,24 +18,32 @@ public sealed class AiCardsController : ApiController
     private readonly IAiCardService _cardService;
     private readonly IAiCardActivityService _activity;
     private readonly IAiCardExportService _exportService;
+    private readonly IAiCardStatsService _statsService;
 
     public AiCardsController(
         IAiCardService cardService,
         IAiCardActivityService activity,
-        IAiCardExportService exportService)
+        IAiCardExportService exportService,
+        IAiCardStatsService statsService)
     {
         _cardService   = cardService   ?? throw new ArgumentNullException(nameof(cardService));
         _activity      = activity      ?? throw new ArgumentNullException(nameof(activity));
         _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
+        _statsService  = statsService  ?? throw new ArgumentNullException(nameof(statsService));
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyList<AiCardListItem>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAll(CancellationToken ct = default)
+    [ProducesResponseType(typeof(PagedResult<AiCardListItem>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int limit = 50,
+        [FromQuery] string? cursor = null,
+        CancellationToken ct = default)
     {
+        if (limit is < 1 or > 200) limit = 50;
         var userId = GetUserId();
-        var cards  = await _cardService.GetAllByUserAsync(userId, ct);
-        return Ok(cards.Select(AiCardResponseMapper.ToListItem).ToList());
+        var paged  = await _cardService.GetPagedByUserAsync(userId, limit, cursor, ct);
+        var items  = paged.Items.Select(AiCardResponseMapper.ToListItem).ToList();
+        return Ok(new PagedResult<AiCardListItem>(items, paged.NextCursor, paged.HasMore));
     }
 
     [HttpGet("{cardId:guid}")]
@@ -163,7 +172,7 @@ public sealed class AiCardsController : ApiController
 
     /// <summary>Change the run status of a soul card: start, pause, or stop.</summary>
     [HttpPatch("{cardId:guid}/status")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(AiCardResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ChangeStatus(
@@ -179,7 +188,7 @@ public sealed class AiCardsController : ApiController
             if (card is null)
                 return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
 
-            return NoContent();
+            return Ok(AiCardResponseMapper.ToResponse(card));
         }
         catch (ArgumentException ex)
         {
@@ -187,8 +196,20 @@ public sealed class AiCardsController : ApiController
         }
     }
 
+    [HttpGet("{cardId:guid}/stats")]
+    [ProducesResponseType(typeof(AiCardStatsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetStats(Guid cardId, CancellationToken ct = default)
+    {
+        var stats = await _statsService.GetStatsAsync(GetUserId(), cardId, ct);
+        if (stats is null)
+            return NotFound(ApiErrorResponse.From("AI card not found.", ErrorCodes.NotFound));
+
+        return Ok(new AiCardStatsResponse(stats.Messages24h, stats.LlmCalls24h, stats.TtsChars24h, stats.MemoryCount));
+    }
+
     /// <summary>Move a soul to a new position. previousId=null → beginning; nextId=null → end.</summary>
-    [HttpPut("{cardId:guid}/position")]
+    [HttpPatch("{cardId:guid}/position")]
     [ProducesResponseType(typeof(AiCardListItem), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]

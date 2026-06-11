@@ -1,6 +1,5 @@
 import { apiFetch, jsonOrThrow } from '@/api/client'
 
-// ── Response types ──
 
 export interface ChatProviderCapabilities {
   supports_streaming: boolean
@@ -19,7 +18,6 @@ export interface ChatModelInfo {
   name: string
 }
 
-// ── API functions ──
 
 export function getChatProviders(): Promise<ChatProviderDescriptor[]> {
   return apiFetch('/api/v1/chat/providers').then((r) => jsonOrThrow<ChatProviderDescriptor[]>(r))

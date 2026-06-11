@@ -1,11 +1,11 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { PROVIDER_DEFS } from '@/shared/data/providers'
+import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-provider-catalog'
 import { VOICE_PROVIDER_CATALOG } from '@/shared/data/voice-providers'
-import { upsertCredential, testCredential } from '@/entities/soul/api'
-import { CredentialStatusBadge, type CredentialStatus } from '@/shared/ui/credential-status-badge'
+import { CredentialStatusBadge } from '@/shared/ui/credential-status-badge'
+import { useCredentialTest } from '@/shared/lib/hooks/useCredentialTest'
 import { DynamicField } from './dynamic-field'
 import type { WizardProviderItem } from './wizard-provider-card'
 
@@ -28,7 +28,7 @@ export interface WizardProviderConfigProps {
 
 export function WizardProviderConfig({ panelType, item, config, onChange, onConfirm }: WizardProviderConfigProps) {
   const { t } = useTranslation('common')
-  const llmDef = panelType === 'llm' ? PROVIDER_DEFS.find(d => d.id === item.id) : null
+  const llmDef = panelType === 'llm' ? LLM_PROVIDER_CATALOG.find(d => d.id === item.id) : null
   const ttsDef = panelType === 'tts' ? VOICE_PROVIDER_CATALOG.find(e => e.id === item.id) : null
 
   const needsApiKey = llmDef?.requiresKey || ttsDef?.requiresApiKey
@@ -39,40 +39,27 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
 
   const hasFields = needsApiKey || editableEndpoint || extraFields.length > 0
 
-  const [testStatus, setTestStatus] = useState<CredentialStatus>('untested')
-  const [testError, setTestError] = useState<string | null>(null)
-  const [hasTested, setHasTested] = useState(false)
+  const credTest = useCredentialTest(item.id)
 
   useEffect(() => {
-    setTestStatus('untested')
-    setTestError(null)
-    setHasTested(false)
+    credTest.reset()
+    // credTest.reset is stable — intentionally omitted from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.apiKey])
 
   const handleClick = async () => {
-    if (needsApiKey && config.apiKey && !hasTested) {
-      setTestStatus('testing')
-      try {
-        await upsertCredential(item.id, config.apiKey, config.baseUrl ?? undefined)
-        const result = await testCredential(item.id)
-        setTestStatus(result.success ? 'verified' : 'failed')
-        setTestError(result.error)
-      } catch {
-        setTestStatus('failed')
-        setTestError('Could not reach validation service')
-      }
-      setHasTested(true)
+    if (needsApiKey && config.apiKey && credTest.status === 'untested') {
+      await credTest.test(config.apiKey, config.baseUrl ?? null)
       return
     }
     onConfirm()
   }
 
-  const isTesting = testStatus === 'testing'
-  const buttonLabel = isTesting
+  const buttonLabel = credTest.testing
     ? t('wizard.testing')
-    : hasTested && testStatus === 'verified'
+    : credTest.status === 'verified'
       ? t('wizard.continueCheck')
-      : hasTested && testStatus === 'failed'
+      : credTest.status === 'failed'
         ? t('wizard.continueAnyway')
         : t('wizard.select', { name: item.name })
 
@@ -130,8 +117,8 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
           <div className="mb-4">
             <div className="mb-1.5 flex items-center gap-2">
               <span className={labelCls.replace('mb-1.5 ', '')}>{t('wizard.apiKey')}</span>
-              {testStatus !== 'untested' && (
-                <CredentialStatusBadge status={testStatus} error={testError} />
+              {credTest.status !== 'untested' && (
+                <CredentialStatusBadge status={credTest.status} error={credTest.error} />
               )}
             </div>
             <input
@@ -184,7 +171,7 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
         <button
           type="button"
           onClick={handleClick}
-          disabled={isTesting}
+          disabled={credTest.testing}
           className="home-ui-font flex h-9 w-full items-center justify-center rounded-xl text-body font-semibold text-white transition-colors hover:opacity-90 active:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ background: 'var(--accent-base)' }}
         >

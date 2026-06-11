@@ -1,23 +1,22 @@
 using System.Net.Http;
-using Inktide.API.Connector.Application.Controllers;
+using Inktide.API.Core.Controllers;
+using Inktide.API.Connector.Application.Exceptions;
+using Inktide.API.Connector.Application.Interfaces;
+using Inktide.API.Connector.Application.Models;
 using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Discord.Gateway;
 using Inktide.API.Connector.Discord.OAuth;
 using Inktide.API.Connector.Discord.Settings;
-using Inktide.API.Soul.Application.Exceptions;
-using Inktide.API.Soul.Application.Interfaces;
-using Inktide.API.Soul.Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Discord.Controllers;
 
 [ApiController]
-[Route("api/connectors/discord")]
+[Route("api/v1/connectors/discord")]
 [Produces("application/json")]
 public sealed class DiscordOAuthController : ConnectorControllerBase
 {
@@ -25,9 +24,8 @@ public sealed class DiscordOAuthController : ConnectorControllerBase
 
     private readonly IDiscordOAuthService _oauth;
     private readonly IOAuthStateService _state;
-    private readonly ITokenProtector _tokenProtector;
-    private readonly IAiCardChannelConnectService _connect;
-    private readonly IAiCardChannelLifecycleService _lifecycle;
+    private readonly IDiscordTokenProtector _tokenProtector;
+    private readonly IConnectorChannelService _channels;
     private readonly IGuildSoulRegistry _registry;
     private readonly ILogger<DiscordOAuthController> _log;
     private readonly IHttpClientFactory _http;
@@ -37,9 +35,8 @@ public sealed class DiscordOAuthController : ConnectorControllerBase
     public DiscordOAuthController(
         IDiscordOAuthService oauth,
         IOAuthStateService state,
-        [FromKeyedServices(TokenProtectorKeys.Discord)] ITokenProtector tokenProtector,
-        IAiCardChannelConnectService connect,
-        IAiCardChannelLifecycleService lifecycle,
+        IDiscordTokenProtector tokenProtector,
+        IConnectorChannelService channels,
         IGuildSoulRegistry registry,
         ILogger<DiscordOAuthController> log,
         IHttpClientFactory http,
@@ -48,8 +45,7 @@ public sealed class DiscordOAuthController : ConnectorControllerBase
         _oauth           = oauth;
         _state           = state;
         _tokenProtector  = tokenProtector;
-        _connect         = connect;
-        _lifecycle       = lifecycle;
+        _channels        = channels;
         _registry        = registry;
         _log             = log;
         _http            = http;
@@ -76,11 +72,24 @@ public sealed class DiscordOAuthController : ConnectorControllerBase
     [HttpGet("callback")]
     [AllowAnonymous]
     public async Task<IActionResult> Callback(
-        [FromQuery] string code,
+        [FromQuery] string? code,
+        [FromQuery] string? error,
         [FromQuery(Name = "guild_id")] string? guildId,
-        [FromQuery] string state,
-        CancellationToken ct)
+        [FromQuery] string  state,
+        CancellationToken   ct)
     {
+        if (!string.IsNullOrEmpty(error))
+        {
+            _log.LogInformation("Discord OAuth denied by user: {Error}", error);
+            return Redirect($"{_frontendBaseUrl}/souls?discord_error={Uri.EscapeDataString(error)}");
+        }
+
+        if (string.IsNullOrEmpty(code))
+        {
+            _log.LogWarning("Discord OAuth callback: missing code and no error parameter");
+            return Redirect($"{_frontendBaseUrl}/souls?discord_error=invalid_request");
+        }
+
         if (!_state.TryVerify(state, out var ctx))
         {
             _log.LogWarning("Discord OAuth callback: invalid or expired state");
@@ -94,8 +103,8 @@ public sealed class DiscordOAuthController : ConnectorControllerBase
             var resolvedGuildId = guildId ?? tokens.GuildId;
             var guildName       = tokens.GuildName;
 
-            await _connect.UpsertAsync(
-                new OAuthChannelUpsertCommand(
+            await _channels.UpsertAsync(
+                new ConnectorChannelUpsertCommand(
                     UserId:          ctx.UserId,
                     CardId:          ctx.CardId,
                     Platform:        DiscordConnector.PlatformIdValue,
@@ -115,7 +124,7 @@ public sealed class DiscordOAuthController : ConnectorControllerBase
 
             return Redirect($"{_frontendBaseUrl}/souls/{ctx.CardId}/channels/discord?connected=true&guild={Uri.EscapeDataString(guildName)}");
         }
-        catch (PlanLimitExceededException ex)
+        catch (ConnectorPlanLimitException ex)
         {
             _log.LogInformation("Discord OAuth callback blocked by plan limit for card {CardId}: {Msg}", ctx.CardId, ex.Message);
             return Redirect($"{_frontendBaseUrl}/souls/{ctx.CardId}/channels/discord?discord_error=plan_limit");
@@ -128,14 +137,14 @@ public sealed class DiscordOAuthController : ConnectorControllerBase
     }
 
     /// <summary>Revokes a Discord connection.</summary>
-    [HttpPost("revoke/{channelId:guid}")]
+    [HttpDelete("channels/{channelId:guid}")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Revoke(Guid channelId, CancellationToken ct)
+    public async Task<IActionResult> DeleteChannel(Guid channelId, CancellationToken ct)
     {
         var userId = GetUserId();
-        var channel = await _lifecycle.GetByIdAsync(userId, channelId, ct);
+        var channel = await _channels.GetByIdAsync(userId, channelId, ct);
         if (channel is null) return NotFound();
 
         if (channel.OAuthTokenEnc is not null)
@@ -147,20 +156,20 @@ public sealed class DiscordOAuthController : ConnectorControllerBase
         if (channel.ChannelId is not null)
             _registry.Unregister(channel.ChannelId);
 
-        if (!await _lifecycle.DeactivateAsync(userId, channelId, ct))
+        if (!await _channels.DeactivateAsync(userId, channelId, ct))
             return NotFound();
         return NoContent();
     }
 
     /// <summary>Returns a new install URL to reconnect a previously connected guild.</summary>
-    [HttpPost("reconnect/{channelId:guid}")]
+    [HttpPost("channels/{channelId:guid}/reconnections")]
     [Authorize]
     [ProducesResponseType(typeof(InstallUrlResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Reconnect(Guid channelId, CancellationToken ct)
     {
         var userId = GetUserId();
-        var channel = await _lifecycle.GetByIdAsync(userId, channelId, ct);
+        var channel = await _channels.GetByIdAsync(userId, channelId, ct);
         if (channel is null) return NotFound();
 
         var stateToken = _state.CreateState(userId, channel.AiCardId);
@@ -176,20 +185,20 @@ public sealed class DiscordOAuthController : ConnectorControllerBase
     public async Task<IActionResult> SetCustomBot(Guid channelId, [FromBody] SetCustomBotRequest req, CancellationToken ct)
     {
         var userId = GetUserId();
-        var channel = await _lifecycle.GetByIdAsync(userId, channelId, ct);
+        var channel = await _channels.GetByIdAsync(userId, channelId, ct);
         if (channel is null) return NotFound();
 
         var encryptedToken = string.IsNullOrWhiteSpace(req.BotToken)
             ? null
             : _tokenProtector.Protect(req.BotToken);
 
-        if (!await _lifecycle.SetCustomBotTokenAsync(userId, channelId, encryptedToken, ct))
+        if (!await _channels.SetCustomBotTokenAsync(userId, channelId, encryptedToken, ct))
             return NotFound();
         return NoContent();
     }
 
     /// <summary>Validates a Discord bot token by probing the Discord API.</summary>
-    [HttpPost("validate-token")]
+    [HttpPost("token-validations")]
     [Authorize]
     [ProducesResponseType(typeof(ValidateTokenResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> ValidateToken(

@@ -1,0 +1,26 @@
+{
+  "invite": {
+    "srTitle": "チームメンバーを招待",
+    "title": "メンバーを招待",
+    "subtitle": "メールで招待を送り、ワークスペースで共同作業しましょう。",
+    "emailLabel": "メールアドレス",
+    "roleMember": "メンバー",
+    "roleAdmin": "管理者",
+    "sending": "送信中…",
+    "send": "招待を送信",
+    "pendingInvites": "保留中の招待",
+    "loading": "読み込み中…",
+    "noPending": "保留中の招待はありません。",
+    "resend": "再送信",
+    "cancel": "キャンセル",
+    "expired": "期限切れ",
+    "expires": "{{date}} に期限切れ",
+    "enterValidEmail": "有効なメールアドレスを 1 つ以上入力してください。",
+    "sent_one": "招待を送信しました。",
+    "sent_other": "招待を送信しました。",
+    "sendFailed": "招待の送信に失敗しました。",
+    "resent": "招待を再送信しました。",
+    "resendFailed": "招待の再送信に失敗しました。",
+    "cancelFailed": "招待のキャンセルに失敗しました。"
+  }
+}

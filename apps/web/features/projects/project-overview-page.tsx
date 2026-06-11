@@ -2,29 +2,27 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import {
   Box, Check, ChevronRight, Copy, Cpu, FlaskConical,
   ImageIcon, Layers, Monitor, Pause, Pencil, Play, Radio,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { queryKeys } from '@/shared/lib/query/keys'
 import { SOULS_ROUTE } from '@/lib/routes'
 import { inferModelType } from '@/shared/lib/utils/model-type'
 import { buildObsSceneUrl } from '@/shared/lib/utils/obs-url'
 import { useProjectRuntimeContext } from './ProjectRuntimeContext'
 import { SoulBindingPicker } from './soul-binding-picker'
-import type { ProjectActiveSoul } from './api'
 import {
   SectionCard, NoSoulPlaceholder, ProjectMetaRow, ProjectStatusBadge,
 } from './ui/project-overview-primitives'
 import { SetupChecklist } from './setup-checklist'
+import { PageContent } from '@/shared/ui'
+import { useProjectOverviewActions } from './hooks/useProjectOverviewActions'
 
 export function ProjectOverviewPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
-  const qc = useQueryClient()
   const base = `/projects/${id}`
   const { t } = useTranslation('common')
 
@@ -34,19 +32,26 @@ export function ProjectOverviewPage() {
     activeModel,
     activeScene,
     activeChannels,
-    previewUrl,
     loading,
     updateProjectMeta,
     toggleStatus,
   } = useProjectRuntimeContext()
 
-  // ── Edit form state ───────────────────────────────────────────────────────
-  const [editing, setEditing]         = useState(false)
-  const [name, setName]               = useState('')
-  const [description, setDescription] = useState('')
-  const [saving, setSaving]           = useState(false)
-  const [toggling, setToggling]       = useState(false)
-  const [copied, setCopied]           = useState(false)
+  const obsPreviewSrc = useMemo(() => {
+    if (!activeModel || typeof window === 'undefined') return null
+    return buildObsSceneUrl(window.location.origin, {
+      projectId: id,
+      channelId: activeChannels[0]?.channel_id ?? null,
+      modelUrl:  activeModel.public_url,
+      modelType: inferModelType(activeModel.original_file_name),
+      sceneUrl:  activeScene?.public_url ?? null,
+      bg:        'transparent',
+    })
+  }, [id, activeModel, activeScene, activeChannels])
+
+  const [editing, setEditing]               = useState(false)
+  const [name, setName]                     = useState('')
+  const [description, setDescription]       = useState('')
   const [soulPickerOpen, setSoulPickerOpen] = useState(false)
 
   useEffect(() => {
@@ -56,54 +61,19 @@ export function ProjectOverviewPage() {
     }
   }, [project, editing])
 
-  // ── Mutations ─────────────────────────────────────────────────────────────
-  async function handleSave() {
-    if (!project || saving) return
-    setSaving(true)
-    try {
-      await updateProjectMeta({ name, description: description || null })
-      setEditing(false)
-    } catch (err) {
-      console.error('Update failed:', err)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  async function handleTogglePause() {
-    if (!project || toggling) return
-    setToggling(true)
-    try {
-      await toggleStatus()
-    } catch (err) {
-      console.error('Status toggle failed:', err)
-    } finally {
-      setToggling(false)
-    }
-  }
-
-  function handleSoulChanged(_soul: ProjectActiveSoul | null) {
-    qc.invalidateQueries({ queryKey: queryKeys.projects.detail(id) })
-  }
-
-  // ── Derived values ────────────────────────────────────────────────────────
   const obsUrl = useMemo(() => {
     if (!activeModel || !activeChannels.length || typeof window === 'undefined') return null
     return buildObsSceneUrl(window.location.origin, {
+      projectId: id,
       channelId: activeChannels[0].channel_id!,
       modelUrl:  activeModel.public_url,
       modelType: inferModelType(activeModel.original_file_name),
       sceneUrl:  activeScene?.public_url,
     })
-  }, [activeModel, activeChannels, activeScene])
+  }, [id, activeModel, activeChannels, activeScene])
 
-  function copyObsUrl() {
-    if (!obsUrl) return
-    navigator.clipboard.writeText(obsUrl).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }
+  const { saving, toggling, copied, handleSave, handleTogglePause, handleSoulChanged, handleCopyObsUrl } =
+    useProjectOverviewActions({ projectId: id, project, obsUrl, updateProjectMeta, toggleStatus, setEditing })
 
   if (loading) {
     return (
@@ -122,11 +92,10 @@ export function ProjectOverviewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1000px] px-6 py-8">
+    <PageContent>
 
       <SetupChecklist project={project} channelCount={activeChannels.length} />
 
-      {/* ── Header ── */}
       <div className="mb-8 flex items-start justify-between gap-4">
         <div className="flex-1">
           {editing ? (
@@ -148,7 +117,7 @@ export function ProjectOverviewPage() {
                 <button
                   type="button"
                   disabled={saving || !name.trim()}
-                  onClick={handleSave}
+                  onClick={() => handleSave(name, description)}
                   className="h-8 rounded-lg bg-[var(--accent-primary)] px-4 text-body font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-50"
                 >
                   {saving ? t('projectDetail.saving') : t('projectDetail.save')}
@@ -206,15 +175,14 @@ export function ProjectOverviewPage() {
         )}
       </div>
 
-      {/* ── Sandbox — full-width scene preview ── */}
       <section className="mb-6 overflow-hidden rounded-xl border border-[var(--border-card)]">
         <div
           className="relative w-full overflow-hidden"
           style={{ aspectRatio: '16/9' }}
         >
-          {previewUrl ? (
+          {obsPreviewSrc ? (
             <iframe
-              src={previewUrl}
+              src={obsPreviewSrc}
               title="Scene preview"
               className="h-full w-full border-0 pointer-events-none"
             />
@@ -265,7 +233,6 @@ export function ProjectOverviewPage() {
         </div>
       </section>
 
-      {/* ── 2-col grid: Character + Scene ── */}
       <div className="mb-6 grid gap-6 md:grid-cols-2">
 
         <SectionCard icon={Cpu} title={t('projectDetail.character')} href={`${base}/character`}>
@@ -326,7 +293,7 @@ export function ProjectOverviewPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-body font-medium text-[var(--text-primary)]">
-                    {activeScene?.display_name ?? activeScene?.original_file_name ?? t('projectDetail.noBackgroundSelected')}
+                    {activeScene?.display_name ?? activeScene?.original_name ?? t('projectDetail.noBackgroundSelected')}
                   </p>
                   <p className="text-xs text-[var(--text-tertiary)]">{t('projectDetail.background')}</p>
                 </div>
@@ -341,7 +308,6 @@ export function ProjectOverviewPage() {
         </SectionCard>
       </div>
 
-      {/* ── 2-col grid: Channels + Soul ── */}
       <div className="mb-6 grid gap-6 md:grid-cols-2">
 
         <SectionCard icon={Radio} title={t('projectDetail.channels')} href={`${base}/channels`}>
@@ -411,7 +377,6 @@ export function ProjectOverviewPage() {
         </SectionCard>
       </div>
 
-      {/* ── OBS (full width) ── */}
       <section className="mb-6 overflow-hidden rounded-xl border border-[var(--border-card)]">
         <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-3.5">
           <div className="flex items-center gap-2 text-body font-medium text-[var(--text-primary)]">
@@ -453,7 +418,7 @@ export function ProjectOverviewPage() {
                   </code>
                   <button
                     type="button"
-                    onClick={copyObsUrl}
+                    onClick={handleCopyObsUrl}
                     className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 text-body font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
                   >
                     {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
@@ -481,6 +446,6 @@ export function ProjectOverviewPage() {
         onOpenChange={setSoulPickerOpen}
       />
 
-    </div>
+    </PageContent>
   )
 }

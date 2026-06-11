@@ -33,7 +33,6 @@ Rules:
 """
 
 
-# ── lifecycle ───────────────────────────────────────────────────────
 
 
 def get_chat_client() -> OllamaChat:
@@ -59,6 +58,7 @@ def warm_up_chat() -> None:
         logger.info("Chat model ready (%s)", settings.OLLAMA_CHAT_MODEL)
     except Exception:
         logger.exception("Failed to warm up chat model — Ollama may be unavailable")
+        raise
 
 
 def shutdown() -> None:
@@ -68,7 +68,6 @@ def shutdown() -> None:
         _chat_client = None
 
 
-# ── prompt building ─────────────────────────────────────────────────
 
 
 def build_user_prompt(turn: ConversationTurn) -> str:
@@ -97,7 +96,6 @@ def build_user_prompt(turn: ConversationTurn) -> str:
     return "\n".join(lines)
 
 
-# ── LLM response parsing ───────────────────────────────────────────
 
 
 def parse_facts(raw: str) -> list[dict[str, Any]]:
@@ -153,7 +151,6 @@ def coerce_fact(item: dict[str, Any]) -> ExtractedFact | None:
         return None
 
 
-# ── main entry point ────────────────────────────────────────────────
 
 
 def extract_facts(turn: ConversationTurn) -> list[ExtractedFact]:

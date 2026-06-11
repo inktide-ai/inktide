@@ -43,6 +43,9 @@ internal sealed class SoulOwnershipChecker(
         }
 
         // 401, 403, 404 — not owned or token issue; treat as ownership denied
+        logger.LogWarning(
+            "Soul API returned {StatusCode} during ownership check of soul {SoulId}. Treating as access denied.",
+            (int)response.StatusCode, soulId);
         return false;
     }
 }

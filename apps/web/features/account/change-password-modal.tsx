@@ -1,6 +1,9 @@
 'use client'
+import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useEffect, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
+import { z } from 'zod'
 import { Dialog, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import { changeKcPassword } from '@/features/account/api/keycloak-account'
 import { cn } from '@/lib/utils'
@@ -25,50 +28,61 @@ function scorePassword(p: string): number {
 
 const STRENGTH_CLASSES = ['', 'bg-[#E24B4A]', 'bg-[#EF9F27]', 'bg-[#1D9E75]', 'bg-[#1D9E75]']
 
+type FormValues = { currentPw: string; newPw: string; confirmPw: string }
+
 export default function ChangePasswordModal({ open, onClose, hasExistingPassword, onSaved }: Props) {
   const { t } = useTranslation('account')
-  const [currentPw, setCurrentPw] = useState('')
-  const [newPw, setNewPw] = useState('')
-  const [confirmPw, setConfirmPw] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const firstRef = useRef<HTMLInputElement>(null)
+
+  const schema = useMemo(() => z.object({
+    currentPw: z.string(),
+    newPw: z.string().min(8, t('changePassword.errors.tooShort')),
+    confirmPw: z.string(),
+  }).superRefine((data, ctx) => {
+    if (hasExistingPassword && !data.currentPw) {
+      ctx.addIssue({ code: 'custom', message: t('changePassword.errors.enterCurrent'), path: ['currentPw'] })
+    }
+    if (data.newPw !== data.confirmPw) {
+      ctx.addIssue({ code: 'custom', message: t('changePassword.errors.mismatch'), path: ['confirmPw'] })
+    }
+  }), [t, hasExistingPassword])
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setError,
+    setFocus,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: standardSchemaResolver(schema),
+    defaultValues: { currentPw: '', newPw: '', confirmPw: '' },
+  })
 
   useEffect(() => {
     if (!open) return
-    setCurrentPw('')
-    setNewPw('')
-    setConfirmPw('')
-    setError(null)
-  }, [open])
+    reset()
+    setTimeout(() => setFocus(hasExistingPassword ? 'currentPw' : 'newPw'), 60)
+  }, [open, reset, setFocus, hasExistingPassword])
 
-  useEffect(() => {
-    if (open && firstRef.current) setTimeout(() => firstRef.current?.focus(), 60)
-  }, [open])
-
-  async function handleSubmit() {
-    setError(null)
-    if (hasExistingPassword && !currentPw) { setError(t('changePassword.errors.enterCurrent')); return }
-    if (!newPw) { setError(t('changePassword.errors.enterNew')); return }
-    if (newPw.length < 8) { setError(t('changePassword.errors.tooShort')); return }
-    if (newPw !== confirmPw) { setError(t('changePassword.errors.mismatch')); return }
-    setBusy(true)
-    try {
-      await changeKcPassword(currentPw, newPw)
-      onSaved()
-      onClose()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : t('changePassword.errors.failed'))
-    } finally {
-      setBusy(false)
-    }
-  }
-
+  const newPw = watch('newPw')
   const score = scorePassword(newPw)
   const STRENGTH_LABELS = ['', t('changePassword.strength.weak'), t('changePassword.strength.fair'), t('changePassword.strength.good'), t('changePassword.strength.strong')]
   const title = hasExistingPassword ? t('changePassword.title') : t('changePassword.setTitle')
+
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await changeKcPassword(data.currentPw, data.newPw)
+      onSaved()
+      onClose()
+    } catch (e) {
+      setError('root', { message: e instanceof Error ? e.message : t('changePassword.errors.failed') })
+    }
+  }
+
   const inputCls =
     'w-full rounded-[8px] border border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] px-[11px] py-[9px] text-body text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-disabled)] focus:border-[var(--accent-primary)]'
+  const fieldErrorCls = 'mt-1 text-2xs text-[var(--danger-text)]'
 
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) onClose() }}>
@@ -93,25 +107,24 @@ export default function ChangePasswordModal({ open, onClose, hasExistingPassword
             </div>
           </div>
 
-          {error && (
+          {errors.root && (
             <div className="mb-3 rounded-[8px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-body text-[var(--danger-text)]">
-              {error}
+              {errors.root.message}
             </div>
           )}
 
-          <div className="flex flex-col gap-3">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
             {hasExistingPassword && (
               <div>
                 <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">{t('changePassword.currentPassword')}</label>
                 <input
-                  ref={firstRef}
+                  {...register('currentPw')}
                   type="password"
-                  value={currentPw}
-                  onChange={(e) => setCurrentPw(e.target.value)}
                   placeholder={t('changePassword.currentPassword')}
                   autoComplete="current-password"
                   className={inputCls}
                 />
+                {errors.currentPw && <p className={fieldErrorCls}>{errors.currentPw.message}</p>}
               </div>
             )}
             <div>
@@ -119,26 +132,24 @@ export default function ChangePasswordModal({ open, onClose, hasExistingPassword
                 {hasExistingPassword ? t('changePassword.enterNewPassword') : t('changePassword.newPassword')}
               </label>
               <input
-                ref={hasExistingPassword ? undefined : firstRef}
+                {...register('newPw')}
                 type="password"
-                value={newPw}
-                onChange={(e) => setNewPw(e.target.value)}
                 placeholder={t('changePassword.newPassword')}
                 autoComplete="new-password"
                 className={inputCls}
               />
+              {errors.newPw && <p className={fieldErrorCls}>{errors.newPw.message}</p>}
             </div>
             <div>
               <label className="mb-[5px] block text-body text-[var(--text-tertiary)]">{t('changePassword.confirmPassword')}</label>
               <input
+                {...register('confirmPw')}
                 type="password"
-                value={confirmPw}
-                onChange={(e) => setConfirmPw(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && void handleSubmit()}
                 placeholder={t('changePassword.confirmPlaceholder')}
                 autoComplete="new-password"
                 className={inputCls}
               />
+              {errors.confirmPw && <p className={fieldErrorCls}>{errors.confirmPw.message}</p>}
             </div>
 
             {newPw && (
@@ -161,14 +172,13 @@ export default function ChangePasswordModal({ open, onClose, hasExistingPassword
             )}
 
             <button
-              type="button"
-              onClick={() => void handleSubmit()}
-              disabled={busy}
+              type="submit"
+              disabled={isSubmitting}
               className="mt-1 w-full rounded-[7px] bg-[var(--accent-primary)] py-[9px] text-body font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40"
             >
-              {busy ? t('changePassword.saving') : title}
+              {isSubmitting ? t('changePassword.saving') : title}
             </button>
-          </div>
+          </form>
         </DialogContent>
       </DialogPortal>
     </Dialog>

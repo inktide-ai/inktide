@@ -2,17 +2,19 @@
 import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { Settings2, User } from 'lucide-react'
+import { Settings2, User, Smile } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AvatarRenderer } from '@/features/avatar'
 import { useCardModel, useCardScene, useCardChannelId } from '@/entities/soul/hooks'
 import { useAudioStream } from '@/shared/hooks/useAudioStream'
 import { useLipSync } from '@/shared/hooks/useLipSync'
 import { useSceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
+import { useEmotionOverride } from '@/shared/hooks/useEmotionOverride'
 import { useAuth } from '@/shared/services/auth'
 import type { AiCharacter, ModelType } from '@/shared/lib/character'
 import { inferModelType } from '@/shared/lib/utils/model-type'
 import SceneRendererPanel from '@/features/character-editor/tabs/scene-renderer-panel'
+import { EmotionPanel } from '@/features/character-editor/tabs/emotion-panel'
 import SceneChat from '@/features/character-editor/tabs/scene-chat'
 import { ChatButton } from '@/features/character-editor/tabs/chat-button'
 import { ChatModeMenu, type ChatMode } from '@/features/character-editor/tabs/chat-mode-menu'
@@ -20,19 +22,21 @@ import { ChatModeMenu, type ChatMode } from '@/features/character-editor/tabs/ch
 interface SceneFullscreenProps {
   character: AiCharacter
   cardId: string
-  onOpenSettings?: () => void
+  projectId?: string
   showToolbar?: boolean
   showChat?: boolean
   overrideModelUrl?: string | null
   overrideSceneUrl?: string | null
+  onFirstRender?: (canvas: HTMLCanvasElement) => void
 }
 
 
-const SceneFullscreen = ({ character, cardId, showToolbar = true, showChat = true, overrideModelUrl, overrideSceneUrl }: SceneFullscreenProps) => {
+const SceneFullscreen = ({ character, cardId, projectId, showToolbar = true, showChat = true, overrideModelUrl, overrideSceneUrl, onFirstRender }: SceneFullscreenProps) => {
   const { t } = useTranslation('scene')
   const { user } = useAuth()
   const [modelVisible, setModelVisible] = useState(true)
   const [rendererPanelOpen, setRendererPanelOpen] = useState(false)
+  const [emotionPanelOpen, setEmotionPanelOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
   const [chatMode, setChatMode] = useState<ChatMode>('floating')
   const [modeMenuOpen, setModeMenuOpen] = useState(false)
@@ -41,9 +45,10 @@ const SceneFullscreen = ({ character, cardId, showToolbar = true, showChat = tru
   const { scene } = useCardScene(overrideSceneUrl != null ? undefined : cardId)
   const channelId = useCardChannelId(cardId)
   const lipSync = useLipSync()
-  const { settings, setSettings, resetSettings } = useSceneRendererSettings(cardId)
+  const { settings, setSettings, resetSettings } = useSceneRendererSettings(projectId ?? '')
 
-  const { getEmotionState, getSoulState } = useAudioStream(channelId, { lipSync })
+  const { getEmotionState: getAutoEmotionState, getSoulState } = useAudioStream(channelId, { lipSync })
+  const { activeEmotion, triggerEmotion, clearEmotion, getEmotionState } = useEmotionOverride(getAutoEmotionState)
 
   const effectiveModelUrl = overrideModelUrl ?? model?.public_url ?? null
   const effectiveModelType = overrideModelUrl
@@ -96,6 +101,7 @@ const SceneFullscreen = ({ character, cardId, showToolbar = true, showChat = tru
               getEmotionState={getEmotionState}
               getSoulState={getSoulState}
               baselineMood={character.personalityConfig?.baselineMood ?? 'neutral'}
+              onFirstRender={onFirstRender}
             />
           </div>
         )}
@@ -103,6 +109,16 @@ const SceneFullscreen = ({ character, cardId, showToolbar = true, showChat = tru
         {rendererPanelOpen && (
           <SceneRendererPanel settings={settings} onSet={setSettings} onReset={resetSettings} />
         )}
+
+        <AnimatePresence>
+          {emotionPanelOpen && (
+            <EmotionPanel
+              activeEmotion={activeEmotion}
+              onTrigger={triggerEmotion}
+              onClear={clearEmotion}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Fullscreen chat mode — overlays the scene */}
         <AnimatePresence>
@@ -130,6 +146,15 @@ const SceneFullscreen = ({ character, cardId, showToolbar = true, showChat = tru
               onClick={() => setRendererPanelOpen(v => !v)}
             >
               <Settings2 size={14} />
+            </button>
+            <button
+              type="button"
+              className={cn(toolbarBtnBase, emotionPanelOpen && 'border-[rgba(99,102,241,0.5)] bg-[rgba(99,102,241,0.12)] text-indigo-300 hover:bg-[rgba(99,102,241,0.18)] hover:border-[rgba(99,102,241,0.6)] hover:text-indigo-300')}
+              aria-label="Emotions"
+              aria-pressed={emotionPanelOpen}
+              onClick={() => setEmotionPanelOpen(v => !v)}
+            >
+              <Smile size={14} />
             </button>
             <button
               type="button"

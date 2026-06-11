@@ -3,6 +3,7 @@
 import { Check, ImageIcon, Box } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useProjectRuntimeContext } from '@/features/projects'
+import { PageContent } from '@/shared/ui'
 
 function inferModelLabel(fileName: string): string {
   if (fileName.endsWith('.vrm')) return 'VRM'
@@ -31,12 +32,10 @@ export default function SoulProjectScenePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[860px] px-6 py-8">
-      <header className="mb-7">
-        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{t('projectDetail.scene')}</h1>
-        <p className="mt-1 text-body text-[var(--text-secondary)]">
-          {t('projectDetail.sceneSubtitle')}
-        </p>
+    <PageContent>
+      <header className="mb-7 flex flex-col gap-2">
+        <h2 className="text-[1.5rem] font-semibold leading-[1.2] text-[var(--text-heading)]">{t('projectDetail.scene')}</h2>
+        <span className="text-body text-balance text-[var(--text-secondary)]">{t('projectDetail.sceneSubtitle')}</span>
       </header>
 
       <section className="mb-8">
@@ -127,7 +126,7 @@ export default function SoulProjectScenePage() {
                     {scene.public_url ? (
                       <img
                         src={scene.public_url}
-                        alt={scene.display_name ?? scene.original_file_name}
+                        alt={scene.display_name ?? scene.original_name}
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -138,7 +137,7 @@ export default function SoulProjectScenePage() {
                   </div>
                   <div className="bg-[hsla(var(--bg-1),_1)] px-3 py-2">
                     <p className="truncate text-body font-medium text-[var(--text-primary)]">
-                      {scene.display_name ?? scene.original_file_name}
+                      {scene.display_name ?? scene.original_name}
                     </p>
                   </div>
                 </button>
@@ -147,6 +146,6 @@ export default function SoulProjectScenePage() {
           </div>
         )}
       </section>
-    </div>
+    </PageContent>
   )
 }

@@ -1,4 +1,4 @@
-using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 
 namespace Inktide.API.ScreenAwareness.Application.Interfaces;
 

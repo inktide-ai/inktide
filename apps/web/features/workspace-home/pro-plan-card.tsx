@@ -1,3 +1,6 @@
+'use client'
+
+import { useTranslation } from 'react-i18next'
 import { Card } from '@/shared/ui/card'
 
 interface ProPlanCardProps {
@@ -24,22 +27,24 @@ export function ProPlanCard({
   storageUsedGb,
   storageMaxGb,
 }: ProPlanCardProps) {
+  const { t } = useTranslation('common')
   const storagePercent = Math.round((storageUsedGb / storageMaxGb) * 100)
+  const unlimitedChars = !isFinite(charactersMax)
   return (
     <Card variant="inset" className="p-3">
-      <p className="text-body font-medium text-[var(--text-primary)]">Pro Plan</p>
+      <p className="text-body font-medium text-[var(--text-primary)]">{t('proPlan.title')}</p>
       <p className="mt-0.5 text-body text-[var(--text-secondary)]">{renewalLabel}</p>
       <div className="mt-3 space-y-2.5">
         <div>
           <div className="mb-1 flex items-center justify-between text-body text-[var(--text-secondary)]">
-            <span>Characters</span>
-            <span>{charactersUsed} / {charactersMax}</span>
+            <span>{t('proPlan.characters')}</span>
+            <span>{unlimitedChars ? `${charactersUsed} / ∞` : `${charactersUsed} / ${charactersMax}`}</span>
           </div>
-          <Meter value={charactersUsed} max={charactersMax} />
+          {!unlimitedChars && <Meter value={charactersUsed} max={charactersMax} />}
         </div>
         <div>
           <div className="mb-1 flex items-center justify-between text-body text-[var(--text-secondary)]">
-            <span>Storage</span>
+            <span>{t('proPlan.storage')}</span>
             <span>{storageUsedGb} / {storageMaxGb} GB</span>
           </div>
           <div className="flex items-center gap-2">

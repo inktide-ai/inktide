@@ -27,5 +27,32 @@
   "remoteProvider": {
     "keyHint":    "API key is managed globally in",
     "manageLink": "Settings → Providers"
+  },
+  "ps": {
+    "brain": "Brain",
+    "settingsDefault": "Language model provider settings",
+    "support": "{{name}} Support",
+    "openIn": "Open in {{name}}",
+    "connection": "Connection",
+    "connectionOllama": "Configure your local Ollama server and model.",
+    "connectionRemote": "Provide your API credentials to connect.",
+    "serverUrl": "Server URL",
+    "serverUrlDesc": "URL of your local Ollama instance.",
+    "ollamaUnreachable": "Could not reach Ollama.",
+    "selectLocalModel": "Select a local model.",
+    "endpoint": "Endpoint",
+    "customEndpoint": "Custom endpoint",
+    "apiKey": "API Key",
+    "apiKeyDesc": "Enter your {{name}} API key to connect.",
+    "saving": "Saving…",
+    "save": "Save",
+    "modelBehavior": "Model Behavior",
+    "modelBehaviorDesc": "These parameters apply to all providers.",
+    "saveChanges": "Save changes",
+    "about": "About",
+    "provider": "Provider",
+    "kind": "Kind",
+    "noInfo": "No additional information available.",
+    "loading": "Loading..."
   }
 }

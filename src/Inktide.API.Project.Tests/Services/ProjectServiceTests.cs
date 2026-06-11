@@ -28,7 +28,6 @@ public sealed class ProjectServiceTests
     private static ProjectService BuildService(IProjectRepository repo) =>
         new(repo, Substitute.For<ITransactionManager>(), TimeProvider.System);
 
-    // ── ReorderAsync ─────────────────────────────────────────────────────────
 
     [Fact]
     public async Task ReorderAsync_PlacesAtBeginning_WhenPreviousIdIsNull()
@@ -85,7 +84,6 @@ public sealed class ProjectServiceTests
         Assert.Null(result);
     }
 
-    // ── CreateAsync ──────────────────────────────────────────────────────────
 
     [Fact]
     public async Task CreateAsync_AssignsSortKeyAfterLast()
@@ -103,7 +101,6 @@ public sealed class ProjectServiceTests
         Assert.True(string.Compare(result.SortKey, lastKey, StringComparison.Ordinal) > 0);
     }
 
-    // ── UpsertPluginAsync ─────────────────────────────────────────────────────
 
     [Fact]
     public async Task UpsertPluginAsync_AddsNewPlugin_WhenNotExists()

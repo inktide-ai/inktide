@@ -1,4 +1,5 @@
 import type { AiCardListItem, AiCardResponse, CreateAiCardRequest, LlmModelResponse, UpdateAiCardRequest } from '@/shared/types/soul-api'
+import type { PagedResult } from '@/shared/types/paged-result'
 import { getCards, getCard, createCard, updateCard, deleteCard, getCatalogLlmModels } from '@/entities/soul/api'
 import type { ICardRepository } from '@/shared/types/ICardRepository'
 
@@ -11,8 +12,8 @@ import type { ICardRepository } from '@/shared/types/ICardRepository'
  * useDirtyState, useCharacterMutations) не меняются.
  */
 export class SoulCardRepository implements ICardRepository {
-  listCards(): Promise<AiCardListItem[]> {
-    return getCards()
+  listCards(params?: { cursor?: string; limit?: number }): Promise<PagedResult<AiCardListItem>> {
+    return getCards(params)
   }
 
   getCard(id: string): Promise<AiCardResponse> {

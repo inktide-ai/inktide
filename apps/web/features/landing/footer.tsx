@@ -1,4 +1,5 @@
 import { getTranslations } from '@/lib/i18n-server';
+import { sectionContainer } from './section-container'
 import { ReactNode } from 'react';
 
 interface SocialLink {
@@ -59,8 +60,8 @@ export default async function Footer() {
   ];
 
   return (
-    <footer className="px-8 pt-12 pb-8 border-t border-[var(--border)] transition-[background] duration-[250ms]" style={{ backgroundColor: 'var(--bg-dark)' }}>
-      <div className="max-w-[1200px] mx-auto">
+    <footer className="pt-12 pb-8 border-t border-[var(--border)] transition-[background] duration-[250ms]" style={{ backgroundColor: 'var(--bg-dark)' }}>
+      <div className={sectionContainer}>
         <div className="flex flex-wrap items-center justify-between gap-8 pb-8 border-b border-[var(--border)] max-sm:flex-col max-sm:items-start max-sm:gap-6">
           <div className="flex flex-col gap-5">
             <a
@@ -85,7 +86,7 @@ export default async function Footer() {
           </div>
 
           <div className="flex flex-col items-center gap-3 max-sm:items-start">
-            <span className="font-bold text-[0.95rem] text-[var(--text-primary)] transition-[color] duration-[250ms]">{t('footer.followUs')}</span>
+            <span id="follow" className="font-bold text-[0.95rem] text-[var(--text-primary)] transition-[color] duration-[250ms]">{t('footer.followUs')}</span>
             <div className="flex items-center gap-4">
               {SOCIAL_LINKS.map(({ label, href, icon }) => (
                 <a

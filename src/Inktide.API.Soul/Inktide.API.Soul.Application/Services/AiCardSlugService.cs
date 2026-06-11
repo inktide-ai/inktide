@@ -1,4 +1,3 @@
-using Inktide.API.Core.Generators;
 using Inktide.API.Soul.Application.Constants;
 using Inktide.API.Soul.Application.Interfaces;
 
@@ -23,7 +22,7 @@ public sealed class AiCardSlugService : IAiCardSlugService
         while (await existsAsync(slug).ConfigureAwait(false))
         {
             slug = _slugGenerator.Generate(name) + "-" +
-                   IdGenerator.New().ToString("N")[..SoulConstants.Slug.UniqueSuffixLength];
+                   Guid.NewGuid().ToString("N")[..SoulConstants.Slug.UniqueSuffixLength];
         }
 
         return slug;

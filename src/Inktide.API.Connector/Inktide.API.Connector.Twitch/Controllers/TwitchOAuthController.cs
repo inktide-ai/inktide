@@ -1,30 +1,28 @@
-using Inktide.API.Connector.Application.Controllers;
+using Inktide.API.Core.Controllers;
+using Inktide.API.Connector.Application.Exceptions;
+using Inktide.API.Connector.Application.Interfaces;
+using Inktide.API.Connector.Application.Models;
 using Inktide.API.Connector.Application.OAuth;
 using Inktide.API.Connector.Twitch.Gateway;
 using Inktide.API.Connector.Twitch.OAuth;
 using Inktide.API.Connector.Twitch.Settings;
-using Inktide.API.Soul.Application.Exceptions;
-using Inktide.API.Soul.Application.Interfaces;
-using Inktide.API.Soul.Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Twitch.Controllers;
 
 [ApiController]
-[Route("api/connectors/twitch")]
+[Route("api/v1/connectors/twitch")]
 [Produces("application/json")]
 public sealed class TwitchOAuthController : ConnectorControllerBase
 {
     private readonly ITwitchOAuthService _oauth;
     private readonly IOAuthStateService _state;
-    private readonly ITokenProtector _tokenProtector;
-    private readonly IAiCardChannelConnectService _connect;
-    private readonly IAiCardChannelLifecycleService _lifecycle;
+    private readonly ITwitchTokenProtector _tokenProtector;
+    private readonly IConnectorChannelService _channels;
     private readonly ITwitchChannelRegistry _registry;
     private readonly ITwitchConnector _connector;
     private readonly ILogger<TwitchOAuthController> _log;
@@ -34,9 +32,8 @@ public sealed class TwitchOAuthController : ConnectorControllerBase
     public TwitchOAuthController(
         ITwitchOAuthService oauth,
         IOAuthStateService state,
-        [FromKeyedServices(TokenProtectorKeys.Twitch)] ITokenProtector tokenProtector,
-        IAiCardChannelConnectService connect,
-        IAiCardChannelLifecycleService lifecycle,
+        ITwitchTokenProtector tokenProtector,
+        IConnectorChannelService channels,
         ITwitchChannelRegistry registry,
         ITwitchConnector connector,
         ILogger<TwitchOAuthController> log,
@@ -45,8 +42,7 @@ public sealed class TwitchOAuthController : ConnectorControllerBase
         _oauth           = oauth           ?? throw new ArgumentNullException(nameof(oauth));
         _state           = state           ?? throw new ArgumentNullException(nameof(state));
         _tokenProtector  = tokenProtector  ?? throw new ArgumentNullException(nameof(tokenProtector));
-        _connect         = connect         ?? throw new ArgumentNullException(nameof(connect));
-        _lifecycle       = lifecycle       ?? throw new ArgumentNullException(nameof(lifecycle));
+        _channels        = channels        ?? throw new ArgumentNullException(nameof(channels));
         _registry        = registry        ?? throw new ArgumentNullException(nameof(registry));
         _connector       = connector       ?? throw new ArgumentNullException(nameof(connector));
         _log             = log             ?? throw new ArgumentNullException(nameof(log));
@@ -73,10 +69,23 @@ public sealed class TwitchOAuthController : ConnectorControllerBase
     [HttpGet("callback")]
     [AllowAnonymous]
     public async Task<IActionResult> Callback(
-        [FromQuery] string code,
-        [FromQuery] string state,
-        CancellationToken ct)
+        [FromQuery] string? code,
+        [FromQuery] string? error,
+        [FromQuery] string  state,
+        CancellationToken   ct)
     {
+        if (!string.IsNullOrEmpty(error))
+        {
+            _log.LogInformation("Twitch OAuth denied by user: {Error}", error);
+            return Redirect($"{_frontendBaseUrl}/souls?twitch_error={Uri.EscapeDataString(error)}");
+        }
+
+        if (string.IsNullOrEmpty(code))
+        {
+            _log.LogWarning("Twitch OAuth callback: missing code and no error parameter");
+            return Redirect($"{_frontendBaseUrl}/souls?twitch_error=invalid_request");
+        }
+
         if (!_state.TryVerify(state, out var ctx))
         {
             _log.LogWarning("Twitch OAuth callback: invalid or expired state");
@@ -85,19 +94,15 @@ public sealed class TwitchOAuthController : ConnectorControllerBase
 
         try
         {
-            // Exchange authorization code for tokens
             var tokens = await _oauth.ExchangeCodeAsync(code, ct).ConfigureAwait(false);
 
-            // Encrypt before storing — never persist raw tokens
             var accessTokenEnc  = _tokenProtector.Protect(tokens.AccessToken);
             var refreshTokenEnc = _tokenProtector.Protect(tokens.RefreshToken);
 
-            // Resolve broadcaster login from Helix API using the plain access token
             var channelLogin = await _oauth.GetBroadcasterLoginAsync(tokens.AccessToken, ct).ConfigureAwait(false);
 
-            // Persist connection
-            await _connect.UpsertAsync(
-                new OAuthChannelUpsertCommand(
+            await _channels.UpsertAsync(
+                new ConnectorChannelUpsertCommand(
                     UserId:          ctx.UserId,
                     CardId:          ctx.CardId,
                     Platform:        TwitchConnector.PlatformIdValue,
@@ -109,7 +114,6 @@ public sealed class TwitchOAuthController : ConnectorControllerBase
                     TokenExpiresAt:  DateTime.UtcNow.AddSeconds(tokens.ExpiresIn)),
                 ct).ConfigureAwait(false);
 
-            // Register in-memory routing and join IRC channel (fire-and-forget: v1 known limitation)
             _registry.Register(channelLogin, ctx.CardId);
             _connector.JoinChannel(channelLogin);
 
@@ -119,7 +123,7 @@ public sealed class TwitchOAuthController : ConnectorControllerBase
 
             return Redirect($"{_frontendBaseUrl}/souls/{ctx.CardId}/channels/twitch?connected=true");
         }
-        catch (PlanLimitExceededException ex)
+        catch (ConnectorPlanLimitException ex)
         {
             _log.LogInformation("Twitch OAuth callback blocked by plan limit for card {CardId}: {Msg}", ctx.CardId, ex.Message);
             return Redirect($"{_frontendBaseUrl}/souls/{ctx.CardId}/channels/twitch?twitch_error=plan_limit");
@@ -132,27 +136,25 @@ public sealed class TwitchOAuthController : ConnectorControllerBase
     }
 
     /// <summary>Revokes a Twitch connection — deactivates in DB, leaves IRC channel, revokes token.</summary>
-    [HttpPost("revoke/{channelId:guid}")]
+    [HttpDelete("channels/{channelId:guid}")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Revoke(Guid channelId, CancellationToken ct)
     {
         var userId  = GetUserId();
-        var channel = await _lifecycle.GetByIdAsync(userId, channelId, ct).ConfigureAwait(false);
+        var channel = await _channels.GetByIdAsync(userId, channelId, ct).ConfigureAwait(false);
         if (channel is null) return NotFound();
 
-        // Leave IRC and unregister before DB deactivation
         if (channel.ChannelId is not null)
         {
             _connector.LeaveChannel(channel.ChannelId);
             _registry.Unregister(channel.ChannelId);
         }
 
-        if (!await _lifecycle.DeactivateAsync(userId, channelId, ct).ConfigureAwait(false))
+        if (!await _channels.DeactivateAsync(userId, channelId, ct).ConfigureAwait(false))
             return NotFound();
 
-        // Best-effort token revocation — failure is logged but does not block the response
         if (channel.OAuthTokenEnc is not null)
         {
             try { await _oauth.RevokeAsync(channel.OAuthTokenEnc, ct).ConfigureAwait(false); }
@@ -166,14 +168,14 @@ public sealed class TwitchOAuthController : ConnectorControllerBase
     }
 
     /// <summary>Returns a new OAuth URL to reconnect a previously connected channel.</summary>
-    [HttpPost("reconnect/{channelId:guid}")]
+    [HttpPost("channels/{channelId:guid}/reconnections")]
     [Authorize]
     [ProducesResponseType(typeof(InstallUrlResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Reconnect(Guid channelId, CancellationToken ct)
     {
         var userId  = GetUserId();
-        var channel = await _lifecycle.GetByIdAsync(userId, channelId, ct).ConfigureAwait(false);
+        var channel = await _channels.GetByIdAsync(userId, channelId, ct).ConfigureAwait(false);
         if (channel is null) return NotFound();
 
         var stateToken = _state.CreateState(userId, channel.AiCardId);

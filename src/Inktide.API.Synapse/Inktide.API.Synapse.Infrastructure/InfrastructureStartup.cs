@@ -2,7 +2,6 @@ using Inktide.API.Core;
 using Inktide.API.Core.DependencyInjection;
 using Inktide.API.Core.Settings;
 using Inktide.API.Core.Settings.Validators;
-using Inktide.API.Graph.Application.Interfaces;
 using Inktide.API.Synapse.Application.Configuration;
 using Inktide.API.Synapse.Application.Interfaces;
 using Inktide.API.Synapse.Infrastructure.Adapters;
@@ -50,6 +49,9 @@ public sealed class InfrastructureStartup : IStartup
         services.AddSingleton<RedisStreamAutoClaimer>();
         services.AddHostedService<ChatMessageStreamConsumer>();
 
+        services.AddOptions<SynapseSettings>()
+            .BindConfiguration(SynapseSettings.SectionName);
+
         services.AddOptions<SynapseAggregationOptions>()
             .BindConfiguration(SynapseAggregationOptions.SectionName);
 
@@ -57,7 +59,6 @@ public sealed class InfrastructureStartup : IStartup
 
         services.AddSingleton<IConversationHistoryRepository, RedisConversationHistoryRepository>();
 
-        // ── ACL adapters — port contracts owned by Synapse, implemented here ─────
         services.AddScoped<IRagQueryPort, MemoryRagAdapter>();
         services.AddScoped<IMemoryIngestionPort, MemoryIngestionAdapter>();
         services.AddScoped<IGraphPluginEnrichmentPort, GraphPluginEnrichmentAdapter>();
@@ -75,6 +76,7 @@ public sealed class InfrastructureStartup : IStartup
         services.AddScoped<ISynapseAggregationService, SynapseAggregationService>();
         services.AddScoped<ISoulRuntime, SoulRuntimeImpl>();
         services.AddScoped<ISynapseIngestOrchestrator, SynapseIngestOrchestrator>();
+        services.AddScoped<IDemoChatService, DemoChatService>();
 
         // ---------------------------------------------------------------
         // Emotion classification (OCP: remove EmotionScatterShard above to disable)
@@ -84,10 +86,6 @@ public sealed class InfrastructureStartup : IStartup
 
         services.AddHttpClient<OllamaEmotionClassifier>();
         services.AddSingleton<IEmotionClassificationService, OllamaEmotionClassifier>();
-        services.AddSingleton<IEmotionClassifier>(sp =>
-            sp.GetRequiredService<IEmotionClassificationService>() as IEmotionClassifier
-                ?? throw new InvalidOperationException(
-                    "IEmotionClassificationService implementation must also implement IEmotionClassifier."));
         services.AddSingleton<IEmotionalStateService, RedisEmotionalStateService>();
 
         // ---------------------------------------------------------------
@@ -178,6 +176,7 @@ public sealed class InfrastructureStartup : IStartup
         // add another AddSingleton line below. Nothing else changes.
         // ---------------------------------------------------------------
         services.AddSingleton<IChatServiceFactory, OpenAiCompatChatServiceFactory>();
+        services.AddSingleton<IChatServiceFactory, OllamaChatServiceFactory>();
         services.AddSingleton<ChatServiceFactoryRegistry>();
 
         services.AddHostedService<ScatterShardValidator>();

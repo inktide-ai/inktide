@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 _model: OllamaEmbeddings | None = None
 
 
-# ── lifecycle ───────────────────────────────────────────────────────
 
 
 def is_model_ready() -> bool:
@@ -29,6 +28,7 @@ def warm_up_model() -> None:
         logger.info("Embedding model ready (%s)", settings.OLLAMA_EMBED_MODEL)
     except Exception:
         logger.exception("Failed to warm up embedding model — Ollama may be unavailable")
+        raise
 
 
 def shutdown() -> None:
@@ -37,6 +37,7 @@ def shutdown() -> None:
         _model.close()
         _model = None
     _cached_encode.cache_clear()
+    _cached_encode_normalized.cache_clear()
 
 
 def get_embeddings_service() -> OllamaEmbeddings:
@@ -50,7 +51,6 @@ def get_embeddings_service() -> OllamaEmbeddings:
     return _model
 
 
-# ── public API ──────────────────────────────────────────────────────
 
 
 def embed_single(text: str) -> np.ndarray:
@@ -72,23 +72,20 @@ def classify_by_similarity(
     Returns ``(best_category, best_score, all_scores)``.
     """
     text_emb = embed_single(text)
+    text_norm = np.linalg.norm(text_emb) + 1e-9
 
     scores: dict[str, float] = {}
     for category, examples in categories.items():
         if not examples:
             scores[category] = 0.0
             continue
-        ex_embs = _cached_encode(tuple(examples))
-        sims = np.dot(ex_embs, text_emb) / (
-            np.linalg.norm(ex_embs, axis=1) * np.linalg.norm(text_emb) + 1e-9
-        )
-        scores[category] = float(np.mean(sims))
+        ex_embs_n = _cached_encode_normalized(tuple(examples))
+        scores[category] = float(np.mean(ex_embs_n @ text_emb) / text_norm)
 
     best = max(scores.items(), key=lambda x: x[1])
     return best[0], best[1], scores
 
 
-# ── internal ────────────────────────────────────────────────────────
 
 
 @lru_cache(maxsize=64)
@@ -96,3 +93,12 @@ def _cached_encode(texts: tuple[str, ...]) -> np.ndarray:
     """Encode a tuple of texts, caching by content to avoid re-encoding
     the same category examples on every classify request."""
     return get_embeddings_service().encode(list(texts))
+
+
+@lru_cache(maxsize=64)
+def _cached_encode_normalized(texts: tuple[str, ...]) -> np.ndarray:
+    """Like _cached_encode but returns row-normalized embeddings so per-category
+    norms are not recomputed on every classify call."""
+    embs = get_embeddings_service().encode(list(texts))
+    norms = np.linalg.norm(embs, axis=1, keepdims=True)
+    return embs / (norms + 1e-9)

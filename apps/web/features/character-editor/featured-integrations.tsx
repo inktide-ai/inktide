@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
-// ── Data ──────────────────────────────────────────────────────────────────────
 
 interface FeaturedItem {
   benefit: string
@@ -74,7 +73,6 @@ const VOICE_FEATURED: FeaturedItem[] = [
   },
 ]
 
-// ── Card ──────────────────────────────────────────────────────────────────────
 
 function IntegrationCard({ benefit, name, description, iconSrc, darkIcon, href }: FeaturedItem & { href: string }) {
   return (
@@ -106,7 +104,6 @@ function IntegrationCard({ benefit, name, description, iconSrc, darkIcon, href }
   )
 }
 
-// ── Section ───────────────────────────────────────────────────────────────────
 
 export function FeaturedIntegrations({ baseHref, type }: { baseHref: string; type: 'brain' | 'voice' }) {
   const integrations = type === 'brain' ? BRAIN_FEATURED : VOICE_FEATURED

@@ -2,9 +2,13 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using Inktide.API.Billing.Application.Interfaces;
+using Inktide.API.Billing.Application.Messages;
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Billing.Infrastructure.DbContext;
 using Inktide.API.Billing.Infrastructure.Idempotency;
 using Inktide.API.Billing.Infrastructure.Settings;
+using Inktide.API.Core.Models;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -16,7 +20,8 @@ public sealed class RobokassaWebhookProcessor : IWebhookProcessor
 
     private readonly RobokassaSettings _settings;
     private readonly ISubscriptionRepository _subscriptions;
-    private readonly IPaymentReceiptEmailService _emailService;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly BillingDbContext _db;
     private readonly IConnectionMultiplexer _redis;
     private readonly TimeProvider _time;
     private readonly ILogger<RobokassaWebhookProcessor> _logger;
@@ -24,17 +29,19 @@ public sealed class RobokassaWebhookProcessor : IWebhookProcessor
     public RobokassaWebhookProcessor(
         RobokassaSettings settings,
         ISubscriptionRepository subscriptions,
-        IPaymentReceiptEmailService emailService,
+        IPublishEndpoint publishEndpoint,
+        BillingDbContext db,
         IConnectionMultiplexer redis,
         TimeProvider time,
         ILogger<RobokassaWebhookProcessor> logger)
     {
-        _settings      = settings      ?? throw new ArgumentNullException(nameof(settings));
-        _subscriptions = subscriptions ?? throw new ArgumentNullException(nameof(subscriptions));
-        _emailService  = emailService  ?? throw new ArgumentNullException(nameof(emailService));
-        _redis         = redis         ?? throw new ArgumentNullException(nameof(redis));
-        _time          = time          ?? throw new ArgumentNullException(nameof(time));
-        _logger        = logger        ?? throw new ArgumentNullException(nameof(logger));
+        _settings        = settings        ?? throw new ArgumentNullException(nameof(settings));
+        _subscriptions   = subscriptions   ?? throw new ArgumentNullException(nameof(subscriptions));
+        _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
+        _db              = db              ?? throw new ArgumentNullException(nameof(db));
+        _redis           = redis           ?? throw new ArgumentNullException(nameof(redis));
+        _time            = time            ?? throw new ArgumentNullException(nameof(time));
+        _logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -133,8 +140,11 @@ public sealed class RobokassaWebhookProcessor : IWebhookProcessor
             sub.Plan, userId, invId, sub.CurrentPeriodEnd);
 
         if (!string.IsNullOrEmpty(email))
-            await _emailService.SendReceiptAsync(email, sub.Plan.ToString(), "Robokassa",
-                sub.CurrentPeriodEnd ?? utcNow.Add(BillingCycle.Monthly), ct).ConfigureAwait(false);
+            await _publishEndpoint.Publish(
+                new PaymentReceiptEmailMessage(email, sub.Plan.ToString(), "Robokassa",
+                    sub.CurrentPeriodEnd ?? utcNow.Add(BillingCycle.Monthly)), ct).ConfigureAwait(false);
+
+        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
 
         try
         {
@@ -142,7 +152,8 @@ public sealed class RobokassaWebhookProcessor : IWebhookProcessor
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Robokassa: failed to set done key for InvId={InvId}", invId);
+            _logger.LogWarning(ex, "Robokassa: failed to set done key for InvId={InvId} — webhook will be retried", invId);
+            throw;
         }
     }
 

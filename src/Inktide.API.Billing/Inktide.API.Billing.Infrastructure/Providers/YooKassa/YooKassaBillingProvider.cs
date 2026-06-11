@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Application.Models;
+using Inktide.API.Core.Models;
 using Inktide.API.Billing.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 
@@ -45,7 +46,6 @@ public sealed class YooKassaBillingProvider : IBillingProvider
                 ["currency"] = _settings.PriceCurrency,
             },
             ["capture"] = true,
-            ["payment_method_data"] = new JsonObject { ["type"] = "bank_card" },
             ["confirmation"] = new JsonObject
             {
                 ["type"]       = "redirect",
@@ -53,7 +53,12 @@ public sealed class YooKassaBillingProvider : IBillingProvider
             },
             ["save_payment_method"] = true,
             ["description"] = description,
-            ["metadata"] = new JsonObject { ["user_id"] = request.UserId, ["plan"] = request.Plan.ToString().ToLowerInvariant() },
+            ["metadata"] = new JsonObject
+            {
+                ["user_id"] = request.UserId,
+                ["plan"]    = request.Plan.ToString().ToLowerInvariant(),
+                ["email"]   = request.UserEmail,
+            },
         };
 
         using var content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json");

@@ -2,6 +2,56 @@ using Newtonsoft.Json;
 
 namespace Inktide.API.Project.REST.Models;
 
+public sealed class ProjectSceneResponse
+{
+    [JsonProperty("id")]           public Guid            Id           { get; set; }
+    [JsonProperty("project_id")]   public Guid            ProjectId    { get; set; }
+    [JsonProperty("storage_key")]  public string          StorageKey   { get; set; } = string.Empty;
+    [JsonProperty("public_url")]   public string?         PublicUrl    { get; set; }
+    [JsonProperty("original_name")]public string          OriginalName { get; set; } = string.Empty;
+    [JsonProperty("content_type")] public string          ContentType  { get; set; } = string.Empty;
+    [JsonProperty("size_bytes")]   public long?           SizeBytes    { get; set; }
+    [JsonProperty("display_name")] public string?         DisplayName  { get; set; }
+    [JsonProperty("description")]  public string?         Description  { get; set; }
+    [JsonProperty("sort_key")]     public string?         SortKey      { get; set; }
+    [JsonProperty("created_at")]   public DateTimeOffset  CreatedAt    { get; set; }
+    [JsonProperty("is_active")]    public bool            IsActive     { get; set; }
+}
+
+public sealed class ProjectToolResponse
+{
+    [JsonProperty("id")]          public Guid     Id        { get; set; }
+    [JsonProperty("project_id")]  public Guid     ProjectId { get; set; }
+    [JsonProperty("tool_name")]   public string   ToolName  { get; set; } = string.Empty;
+    [JsonProperty("tool_config")] public object?  ToolConfig{ get; set; }
+    [JsonProperty("is_enabled")]  public bool     IsEnabled { get; set; }
+    [JsonProperty("created_at")]  public DateTimeOffset CreatedAt { get; set; }
+}
+
+public sealed class UpsertToolRequest
+{
+    [JsonProperty("tool_name")]   public string  ToolName  { get; set; } = string.Empty;
+    [JsonProperty("tool_config")] public object? ToolConfig{ get; set; }
+    [JsonProperty("is_enabled")]  public bool    IsEnabled { get; set; }
+}
+
+public sealed class ProjectSkillsResponse
+{
+    [JsonProperty("system_prompt")]      public string?              SystemPrompt     { get; set; }
+    [JsonProperty("behavior_settings")]  public object?              BehaviorSettings { get; set; }
+    [JsonProperty("memory_settings")]    public object?              MemorySettings   { get; set; }
+    [JsonProperty("auto_pilot")]         public object?              AutoPilot        { get; set; }
+    [JsonProperty("tools")]              public List<ProjectToolResponse> Tools        { get; set; } = [];
+}
+
+public sealed class UpdateSkillsRequest
+{
+    [JsonProperty("system_prompt")]      public string?  SystemPrompt     { get; set; }
+    [JsonProperty("behavior_settings")]  public object?  BehaviorSettings { get; set; }
+    [JsonProperty("memory_settings")]    public object?  MemorySettings   { get; set; }
+    [JsonProperty("auto_pilot")]         public object?  AutoPilot        { get; set; }
+}
+
 public sealed class ActiveSoulSummaryDto
 {
     [JsonProperty("id")]         public Guid    Id        { get; set; }
@@ -38,6 +88,18 @@ public sealed class ProjectResponse
     [JsonProperty("system_prompt")]
     public string? SystemPrompt { get; set; }
 
+    [JsonProperty("personality")]
+    public string Personality { get; set; } = string.Empty;
+
+    [JsonProperty("personality_config")]
+    public string PersonalityConfig { get; set; } = "{}";
+
+    [JsonProperty("response_behavior")]
+    public string ResponseBehavior { get; set; } = "{}";
+
+    [JsonProperty("screen_awareness_settings")]
+    public string ScreenAwarenessSettings { get; set; } = "{}";
+
     [JsonProperty("status")]
     public string Status { get; set; } = "active";
 
@@ -49,6 +111,9 @@ public sealed class ProjectResponse
 
     [JsonProperty("sort_key")]
     public string SortKey { get; set; } = "a0";
+
+    [JsonProperty("preview_url")]
+    public string? PreviewUrl { get; set; }
 }
 
 public sealed class ReorderProjectRequest
@@ -80,6 +145,18 @@ public sealed class CreateProjectRequest
 
     [JsonProperty("active_soul_id")]
     public Guid? ActiveSoulId { get; set; }
+
+    [JsonProperty("personality")]
+    public string? Personality { get; set; }
+
+    [JsonProperty("personality_config")]
+    public string? PersonalityConfig { get; set; }
+
+    [JsonProperty("response_behavior")]
+    public string? ResponseBehavior { get; set; }
+
+    [JsonProperty("screen_awareness_settings")]
+    public string? ScreenAwarenessSettings { get; set; }
 }
 
 public sealed class UpdateProjectRequest
@@ -101,6 +178,18 @@ public sealed class UpdateProjectRequest
 
     [JsonProperty("system_prompt")]
     public string? SystemPrompt { get; set; }
+
+    [JsonProperty("personality")]
+    public string? Personality { get; set; }
+
+    [JsonProperty("personality_config")]
+    public string? PersonalityConfig { get; set; }
+
+    [JsonProperty("response_behavior")]
+    public string? ResponseBehavior { get; set; }
+
+    [JsonProperty("screen_awareness_settings")]
+    public string? ScreenAwarenessSettings { get; set; }
 }
 
 public sealed class BindSoulRequest
@@ -118,7 +207,6 @@ public sealed class ImportProjectResponse
     public Guid? SoulId { get; set; }
 }
 
-// ── ZIP-based export / two-phase import ──────────────────────────────────────
 
 public sealed class ExportProjectRequest
 {
@@ -173,7 +261,84 @@ public sealed class FinalizeImportRequest
     public bool? ImportConnectorsDisabled { get; set; }
 }
 
-// ── Legacy JSON-based .inkt DTOs (kept for backwards compatibility) ──────────
+
+public sealed class UpdateSceneConfigRequest
+{
+    [JsonProperty("scene_config")] public object? SceneConfig { get; set; }
+}
+
+public sealed class ProjectSceneConfigResponse
+{
+    [JsonProperty("scene_config")]   public object? SceneConfig   { get; set; }
+    [JsonProperty("baseline_mood")]  public string  BaselineMood  { get; set; } = "neutral";
+}
+
+
+public sealed class ProjectPreviewPresignResponse
+{
+    [JsonProperty("upload_url")] public string UploadUrl  { get; set; } = string.Empty;
+    [JsonProperty("public_url")] public string PublicUrl  { get; set; } = string.Empty;
+}
+
+public sealed class CompleteProjectPreviewRequest
+{
+    [JsonProperty("public_url")] public string PublicUrl { get; set; } = string.Empty;
+}
+
+
+public sealed class ProjectChannelResponse
+{
+    [JsonProperty("id")]          public Guid     Id          { get; set; }
+    [JsonProperty("project_id")]  public Guid     ProjectId   { get; set; }
+    [JsonProperty("platform")]    public string   Platform    { get; set; } = string.Empty;
+    [JsonProperty("channel_name")]public string   ChannelName { get; set; } = string.Empty;
+    [JsonProperty("channel_id")]  public string?  ChannelId   { get; set; }
+    [JsonProperty("bot_username")]public string   BotUsername { get; set; } = string.Empty;
+    [JsonProperty("is_active")]   public bool     IsActive    { get; set; }
+    [JsonProperty("connected_at")]public DateTime? ConnectedAt { get; set; }
+    [JsonProperty("created_at")]  public DateTime CreatedAt   { get; set; }
+}
+
+public sealed class CreateChannelRequest
+{
+    [JsonProperty("platform")]     public string Platform    { get; set; } = string.Empty;
+    [JsonProperty("channel_name")] public string ChannelName { get; set; } = string.Empty;
+}
+
+public sealed class PatchChannelRequest
+{
+    [JsonProperty("is_active")] public bool? IsActive { get; set; }
+}
+
+
+public sealed class ProjectRunPresetResponse
+{
+    [JsonProperty("id")]                        public Guid    Id                      { get; set; }
+    [JsonProperty("project_id")]                public Guid    ProjectId               { get; set; }
+    [JsonProperty("name")]                      public string  Name                    { get; set; } = string.Empty;
+    [JsonProperty("description")]               public string? Description             { get; set; }
+    [JsonProperty("icon")]                      public string? Icon                    { get; set; }
+    [JsonProperty("is_active")]                 public bool    IsActive                { get; set; }
+    [JsonProperty("override_llm_model_id")]     public string? OverrideLlmModelId      { get; set; }
+    [JsonProperty("override_temperature")]      public float?  OverrideTemperature     { get; set; }
+    [JsonProperty("override_emotion_preset_id")]public string? OverrideEmotionPresetId { get; set; }
+    [JsonProperty("override_voice_profile_id")] public string? OverrideVoiceProfileId  { get; set; }
+    [JsonProperty("sort_key")]                  public string  SortKey                 { get; set; } = "a0";
+    [JsonProperty("created_at")]                public DateTime CreatedAt              { get; set; }
+    [JsonProperty("updated_at")]                public DateTime UpdatedAt              { get; set; }
+}
+
+public sealed class UpsertRunPresetRequest
+{
+    [JsonProperty("name")]                      public string  Name                    { get; set; } = string.Empty;
+    [JsonProperty("description")]               public string? Description             { get; set; }
+    [JsonProperty("icon")]                      public string? Icon                    { get; set; }
+    [JsonProperty("override_llm_model_id")]     public string? OverrideLlmModelId      { get; set; }
+    [JsonProperty("override_temperature")]      public float?  OverrideTemperature     { get; set; }
+    [JsonProperty("override_emotion_preset_id")]public string? OverrideEmotionPresetId { get; set; }
+    [JsonProperty("override_voice_profile_id")] public string? OverrideVoiceProfileId  { get; set; }
+}
+
 
 public sealed class InktProjectDto
 {

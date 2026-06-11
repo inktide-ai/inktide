@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { HOME_ROUTE, PRICING_ROUTE, checkoutPath } from '@/lib/routes'
@@ -8,14 +9,16 @@ import { motion } from 'framer-motion'
 import { Shield, RefreshCw, Sparkles, Crown, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { fadeUp } from '@/shared/lib/motion'
-import { useAuth } from '@/shared/services/auth'
-import { useBilling } from '@/entities/billing/context/BillingContext'
 import PlanCard, { type PlanCardConfig } from './plan-card'
+import { sectionContainer } from './section-container'
 
 type PlanKey = 'free' | 'starter' | 'pro'
 
 interface PricingSectionProps {
   plans?: PlanKey[]
+  isLoggedIn?: boolean
+  registerUrl?: string  // unused, kept for backwards compat
+  currentPlan?: string | null
 }
 
 const trustItems = [
@@ -25,28 +28,32 @@ const trustItems = [
   { icon: Sparkles,  titleKey: 'pricing.trust.improvingTitle', descKey: 'pricing.trust.improvingDesc', bgVar: 'var(--pricing-icon-orange-bg)', borderVar: 'var(--pricing-icon-orange-border)', iconColor: 'text-[var(--color-brand-orange)]' },
 ]
 
-export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: PricingSectionProps) {
-  const [yearly, setYearly] = useState(false)
+export default function PricingSection({
+  plans = ['free', 'starter', 'pro'],
+  isLoggedIn = false,
+  registerUrl: _registerUrl = '',
+  currentPlan = null,
+}: PricingSectionProps) {
   const router = useRouter()
   const { t } = useTranslation('landing')
-  const { isLoggedIn, registerWithKeycloak } = useAuth()
-  const { plan } = useBilling()
 
-  const period = yearly ? '&period=yearly' : ''
+  const period = ''
+
+  const goRegister = () => { void signIn('keycloak', { callbackUrl: '/home' }) }
 
   const handleUpgradeFree = () => {
     if (isLoggedIn) router.push(PRICING_ROUTE)
-    else registerWithKeycloak()
+    else goRegister()
   }
 
   const handleUpgradeStarter = () => {
-    if (!isLoggedIn) { registerWithKeycloak(); return }
+    if (!isLoggedIn) { goRegister(); return }
     router.push(checkoutPath('starter', period))
   }
 
   const handleUpgradePro = () => {
-    if (!isLoggedIn) { registerWithKeycloak(); return }
-    if (plan === 'pro') { router.push(HOME_ROUTE); return }
+    if (!isLoggedIn) { goRegister(); return }
+    if (currentPlan === 'pro') { router.push(HOME_ROUTE); return }
     router.push(checkoutPath('pro', period))
   }
 
@@ -75,9 +82,9 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
       iconColor: '#FF6A2B',
       name: t('pricing.starter.name'),
       tagline: t('pricing.starter.tagline'),
-      price: `$${yearly ? 12 : 16}`,
+      price: '$16',
       perMonthLabel: t('pricing.perMonth'),
-      billedLabel: yearly ? t('pricing.billedYearlyStarter') : t('pricing.billedMonthly'),
+      billedLabel: t('pricing.billedMonthly'),
       features: t('pricing.starter.features', { returnObjects: true }) as string[],
       checkBg: '#FF6A2B',
       cta: {
@@ -94,9 +101,9 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
       iconColor: '#7B61FF',
       name: t('pricing.pro.name'),
       tagline: t('pricing.pro.tagline'),
-      price: `$${yearly ? 24 : 30}`,
+      price: '$30',
       perMonthLabel: t('pricing.perMonth'),
-      billedLabel: yearly ? t('pricing.billedYearlyPro') : t('pricing.billedMonthly'),
+      billedLabel: t('pricing.billedMonthly'),
       features: t('pricing.pro.features', { returnObjects: true }) as string[],
       checkBg: '#6B5CE7',
       cta: {
@@ -108,7 +115,7 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
       highlighted: true,
       popularLabel: t('pricing.mostPopular'),
     },
-  }), [yearly, t, isLoggedIn, plan]) // eslint-disable-line react-hooks/exhaustive-deps
+  }), [t, isLoggedIn, currentPlan]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeCards = plans.map(key => configs[key])
   const gridClass = plans.length === 2
@@ -118,10 +125,10 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
   return (
     <section
       id="pricing"
-      className="relative overflow-hidden py-24 px-6 transition-[background] duration-[250ms]"
+      className="relative overflow-hidden py-12 sm:py-16 md:py-24 transition-[background] duration-[250ms]"
       style={{ backgroundColor: 'var(--bg-dark)' }}
     >
-      <div className="relative z-10 mx-auto max-w-6xl">
+      <div className={cn(sectionContainer, 'relative z-10')}>
 
         {/* Badge */}
         <motion.div
@@ -186,54 +193,14 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
           {t('pricing.subtitle')}
         </motion.p>
 
-        {/* Toggle */}
+        {/* Billing cycle */}
         <motion.div
-          className="relative flex justify-center mb-14"
+          className="flex justify-center mb-14"
           initial="hidden" whileInView="visible" viewport={{ once: true }} custom={3} variants={fadeUp}
         >
-          <img
-            src="/images/arrow-down-right.svg"
-            alt=""
-            aria-hidden
-            className="absolute -bottom-8 left-[calc(50%-230px)] hidden md:block"
-            width={50}
-            height={44}
-          />
-          <div
-            className="relative inline-flex items-center rounded-full p-1 gap-0.5 transition-[background,border-color] duration-[250ms]"
-            style={{
-              border: '1px solid var(--pricing-toggle-border)',
-              background: 'var(--pricing-toggle-bg)',
-            }}
-          >
-            <button
-              type="button"
-              aria-pressed={!yearly}
-              onClick={() => setYearly(false)}
-              className="rounded-full px-5 py-2 text-[13.5px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
-              style={{
-                background: !yearly ? 'var(--pricing-toggle-active-bg)' : 'transparent',
-                color: !yearly ? 'var(--pricing-toggle-active-color)' : 'var(--pricing-toggle-inactive)',
-              }}
-            >
-              {t('pricing.monthly')}
-            </button>
-            <button
-              type="button"
-              aria-pressed={yearly}
-              onClick={() => setYearly(true)}
-              className="flex items-center gap-2 rounded-full px-5 py-2 text-[13.5px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]"
-              style={{
-                background: yearly ? 'var(--pricing-toggle-active-bg)' : 'transparent',
-                color: yearly ? 'var(--pricing-toggle-active-color)' : 'var(--pricing-toggle-inactive)',
-              }}
-            >
-              {t('pricing.yearly')}
-              <span className="rounded-full bg-[var(--color-brand-accent)]/25 border border-[var(--color-brand-accent)]/35 px-2 py-[2px] text-[11px] font-semibold text-[#A896FF]">
-                {t('pricing.savePercent')}
-              </span>
-            </button>
-          </div>
+          <p className="text-[13px]" style={{ color: 'var(--pricing-toggle-inactive)' }}>
+            Monthly billing · Annual billing coming soon
+          </p>
         </motion.div>
 
         {/* Cards */}
@@ -245,7 +212,7 @@ export default function PricingSection({ plans = ['free', 'starter', 'pro'] }: P
 
         {/* Bottom trust row */}
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-[72px]"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mt-10 md:mt-[72px]"
           initial="hidden" whileInView="visible" viewport={{ once: true }} custom={8} variants={fadeUp}
         >
           {trustItems.map(({ icon: Icon, titleKey, descKey, bgVar, borderVar, iconColor }) => (

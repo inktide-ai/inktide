@@ -13,7 +13,7 @@ export async function createCardChannel(
   cardId: string,
   body: CreateChannelLinkRequest,
 ): Promise<ChannelResponse> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/channels`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/channels`, {
     method: 'POST',
     body: JSON.stringify(body),
   })
@@ -25,7 +25,7 @@ export async function patchCardChannel(
   linkId: string,
   body: { is_active: boolean },
 ): Promise<ChannelResponse> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/channels/${linkId}`, {
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/channels/${linkId}`, {
     method: 'PATCH',
     body: JSON.stringify({ is_active: body.is_active }),
   })
@@ -33,7 +33,7 @@ export async function patchCardChannel(
 }
 
 export async function deleteCardChannel(cardId: string, linkId: string): Promise<void> {
-  const res = await apiFetch(`/api/soul/cards/${cardId}/channels/${linkId}`, { method: 'DELETE' })
+  const res = await apiFetch(`/api/v1/souls/cards/${cardId}/channels/${linkId}`, { method: 'DELETE' })
   await emptyOrThrow(res)
 }
 

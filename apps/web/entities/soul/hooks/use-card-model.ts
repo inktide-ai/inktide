@@ -13,7 +13,10 @@ export function useCardModel(cardId: string | undefined, refreshKey = 0): ModelS
   const [state, setState] = useState<ModelState>({ model: null, loading: false, error: null })
 
   useEffect(() => {
-    if (!cardId) return
+    if (!cardId) {
+      setState({ model: null, loading: false, error: null })
+      return
+    }
     let cancelled = false
     setState({ model: null, loading: true, error: null })
     ;(async () => {

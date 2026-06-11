@@ -40,6 +40,10 @@ export interface AvatarRendererProps {
   /** Full renderer settings (camera, lights, model transform, look-at mode). VRM only. */
   rendererSettings?: SceneRendererSettings
   baselineMood?: string
+  /** Called once after the first rendered frame. VRM only. */
+  onFirstRender?: (canvas: HTMLCanvasElement) => void
+  /** Portrait camera override for thumbnail capture. VRM only. */
+  captureCamera?: { heightRatio: number; distance: number; fov: number }
 }
 
 export default function AvatarRenderer({
@@ -53,6 +57,8 @@ export default function AvatarRenderer({
   modelVisible = true,
   rendererSettings,
   baselineMood,
+  onFirstRender,
+  captureCamera,
 }: AvatarRendererProps) {
   if (!modelUrl || modelType === 'none') {
     return <NoModel className={className} />
@@ -72,6 +78,8 @@ export default function AvatarRenderer({
             modelVisible={modelVisible}
             rendererSettings={rendererSettings}
             baselineMood={baselineMood}
+            onFirstRender={onFirstRender}
+            captureCamera={captureCamera}
           />
         )}
         {modelType === 'glb' && (

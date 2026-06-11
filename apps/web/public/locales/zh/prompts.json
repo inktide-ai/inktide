@@ -4,8 +4,8 @@
   },
   "coreInstructions": {
     "label": "核心指令",
-    "hint": "定义AI的个性、行为和背景。",
-    "placeholder": "例：你是一个友好的AI伴侣。",
+    "hint": "定义角色是谁以及如何行事。性格特征、记忆和情绪会自动注入 — 请勿在此重复。",
+    "placeholder": "例：你是Nova，一个机智的AI伴侣。每次回复1-3句话，避免政治和NSFW内容。",
     "counter": "{{count}}个字符"
   }
 }

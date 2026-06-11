@@ -1,5 +1,5 @@
 using Inktide.API.Core.Generators;
-using Inktide.API.Profile.Application.Interfaces;
+using Inktide.API.Core.Contracts;
 using Inktide.API.Soul.Application.Interfaces;
 using Inktide.API.Soul.Application.Storage;
 using Inktide.API.Soul.Domain.Repositories;

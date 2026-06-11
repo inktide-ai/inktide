@@ -20,13 +20,18 @@ internal static class ProjectMapper
         ActiveSoul    = soulOverride ?? (p.ActiveSoulId.HasValue && souls?.TryGetValue(p.ActiveSoulId.Value, out var s) == true
             ? new ActiveSoulSummaryDto { Id = s!.Id, Name = s.Name, AvatarUrl = s.AvatarUrl }
             : null),
-        ActiveModelId = p.ActiveModelId,
-        ActiveSceneId = p.ActiveSceneId,
-        SystemPrompt  = p.SystemPrompt,
-        Status        = p.Status,
-        CreatedAt     = p.CreatedAt,
-        UpdatedAt     = p.UpdatedAt,
-        SortKey       = p.SortKey,
+        ActiveModelId            = p.ActiveModelId,
+        ActiveSceneId            = p.ActiveSceneId,
+        SystemPrompt             = p.SystemPrompt,
+        Personality              = p.Personality,
+        PersonalityConfig        = p.PersonalityConfig,
+        ResponseBehavior         = p.ResponseBehavior,
+        ScreenAwarenessSettings  = p.ScreenAwarenessSettings,
+        Status                   = p.Status,
+        CreatedAt                = p.CreatedAt,
+        UpdatedAt                = p.UpdatedAt,
+        SortKey                  = p.SortKey,
+        PreviewUrl               = p.PreviewUrl,
     };
 
     public static async Task<ProjectResponse> MapToResponseWithSoulAsync(

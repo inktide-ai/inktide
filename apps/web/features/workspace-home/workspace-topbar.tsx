@@ -14,17 +14,17 @@ export function WorkspaceTopBar({ onCreateSoul }: WorkspaceTopBarProps = {}) {
   const { t } = useTranslation('common')
 
   return (
-    <header className="mb-5 flex items-start justify-between gap-4">
-      <div>
-        <h1 className="font-sans text-[34px] font-bold tracking-[-0.03em] text-[var(--text-primary)]">{t('home.title')}</h1>
+    <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      <div className="pl-12 lg:pl-0">
+        <h1 className="font-sans text-[26px] font-bold tracking-[-0.03em] text-[var(--text-primary)] sm:text-[34px]">{t('home.title')}</h1>
         <p className="home-ui-font mt-1 text-[15px] font-medium text-[var(--text-secondary)]">
           {t('home.subtitle')}
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div className="relative" data-search-root>
-          <div className="flex h-10 w-[280px] items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3">
+      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+        <div className="relative min-w-0 flex-1 basis-full sm:basis-auto sm:flex-none" data-search-root>
+          <div className="flex h-10 w-full items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 sm:w-[240px] md:w-[280px]">
             <Search size={15} className="text-[var(--text-tertiary)]" />
             <input
               ref={inputRef}
@@ -54,7 +54,7 @@ export function WorkspaceTopBar({ onCreateSoul }: WorkspaceTopBarProps = {}) {
 
         <button
           type="button"
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
         >
           <Notification size={15} />
         </button>
@@ -62,7 +62,7 @@ export function WorkspaceTopBar({ onCreateSoul }: WorkspaceTopBarProps = {}) {
         <button
           type="button"
           onClick={onCreateSoul}
-          className="home-ui-font flex h-10 items-center gap-1 rounded-xl bg-[var(--accent-primary)] px-3 text-body font-semibold text-white hover:bg-[var(--accent-hover)]"
+          className="home-ui-font flex h-10 shrink-0 items-center gap-1 whitespace-nowrap rounded-xl bg-[var(--accent-primary)] px-3 text-body font-semibold text-white hover:bg-[var(--accent-hover)]"
         >
           <Add size={15} />
           {t('home.newSoul')}

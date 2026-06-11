@@ -54,14 +54,12 @@ public sealed class ProjectExportServiceTests
 
     private static IProjectExportService BuildService(
         IProjectRepository? projectRepo = null,
-        IProjectExportDataQuery? soulQuery = null,
-        IProjectGraphExportQuery? graphQuery = null)
+        IProjectExportDataQuery? soulQuery = null)
     {
         projectRepo ??= Substitute.For<IProjectRepository>();
         soulQuery   ??= Substitute.For<IProjectExportDataQuery>();
-        graphQuery  ??= Substitute.For<IProjectGraphExportQuery>();
 
-        return new ProjectExportService(projectRepo, soulQuery, graphQuery, new LocalTtsProviderClassifier());
+        return new ProjectExportService(projectRepo, soulQuery, new LocalTtsProviderClassifier());
     }
 
     private static Dictionary<string, string> ReadZip(byte[] zipBytes)
@@ -101,11 +99,7 @@ public sealed class ProjectExportServiceTests
         soulQuery.GetExportSnapshotAsync(UserId, SoulId, Arg.Any<CancellationToken>())
             .Returns(MakeSoulSnapshot());
 
-        var graphQuery = Substitute.For<IProjectGraphExportQuery>();
-        graphQuery.FindByProjectIdAsync(ProjectId, Arg.Any<CancellationToken>())
-            .Returns(new GraphExportSnapshot("{\"nodes\":[],\"edges\":[]}"));
-
-        var svc    = BuildService(projectRepo: repo, soulQuery: soulQuery, graphQuery: graphQuery);
+        var svc    = BuildService(projectRepo: repo, soulQuery: soulQuery);
         var result = await svc.ExportAsync(UserId, ProjectId);
 
         Assert.NotNull(result);
@@ -124,11 +118,7 @@ public sealed class ProjectExportServiceTests
         repo.FindByIdAndUserAsync(ProjectId, UserId, Arg.Any<CancellationToken>())
             .Returns(MakeProject(activeSoulId: null));
 
-        var graphQuery = Substitute.For<IProjectGraphExportQuery>();
-        graphQuery.FindByProjectIdAsync(ProjectId, Arg.Any<CancellationToken>())
-            .Returns((GraphExportSnapshot?)null);
-
-        var svc    = BuildService(projectRepo: repo, graphQuery: graphQuery);
+        var svc    = BuildService(projectRepo: repo);
         var result = await svc.ExportAsync(UserId, ProjectId);
 
         Assert.NotNull(result);
@@ -150,11 +140,7 @@ public sealed class ProjectExportServiceTests
         soulQuery.GetExportSnapshotAsync(UserId, SoulId, Arg.Any<CancellationToken>())
             .Returns(MakeSoulSnapshot(ttsProvider: "kokoro"));
 
-        var graphQuery = Substitute.For<IProjectGraphExportQuery>();
-        graphQuery.FindByProjectIdAsync(ProjectId, Arg.Any<CancellationToken>())
-            .Returns((GraphExportSnapshot?)null);
-
-        var svc    = BuildService(projectRepo: repo, soulQuery: soulQuery, graphQuery: graphQuery);
+        var svc    = BuildService(projectRepo: repo, soulQuery: soulQuery);
         var result = await svc.ExportAsync(UserId, ProjectId);
 
         Assert.NotNull(result);
@@ -185,11 +171,7 @@ public sealed class ProjectExportServiceTests
         soulQuery.GetExportSnapshotAsync(UserId, SoulId, Arg.Any<CancellationToken>())
             .Returns(snapshot);
 
-        var graphQuery = Substitute.For<IProjectGraphExportQuery>();
-        graphQuery.FindByProjectIdAsync(ProjectId, Arg.Any<CancellationToken>())
-            .Returns((GraphExportSnapshot?)null);
-
-        var svc    = BuildService(projectRepo: repo, soulQuery: soulQuery, graphQuery: graphQuery);
+        var svc    = BuildService(projectRepo: repo, soulQuery: soulQuery);
         var result = await svc.ExportAsync(UserId, ProjectId);
 
         Assert.NotNull(result);

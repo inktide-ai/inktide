@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useClipboard } from '@/shared/hooks/useClipboard'
 import { useParams, useRouter } from 'next/navigation'
 import { Check, ChevronRight, Copy, ExternalLink, Monitor } from 'lucide-react'
 import { getProject } from '@/features/projects'
@@ -10,6 +12,7 @@ import { useCardModel, useCardScene } from '@/entities/soul'
 import type { AiCharacter } from '@/shared/lib/character'
 import { buildObsSceneUrl } from '@/shared/lib/utils/obs-url'
 import { cn } from '@/lib/utils'
+import { handleError } from '@/shared/lib/handle-error'
 
 function AccordionSection({
   title, badge, badgeColor = 'default', statusIcon, children, defaultOpen = false,
@@ -64,12 +67,13 @@ function Meta({ label, children }: { label: string; children: React.ReactNode })
 }
 
 function ObsContent({ character, cardId }: { character: AiCharacter; cardId: string }) {
+  const { t } = useTranslation('obs')
   const { model } = useCardModel(cardId)
   const { scene }  = useCardScene(cardId)
 
   const [channels, setChannels]                   = useState<ChannelResponse[] | null>(null)
   const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null)
-  const [copied, setCopied]                       = useState(false)
+  const { copied, copy: copyUrl }                 = useClipboard()
 
   useEffect(() => {
     let cancelled = false
@@ -96,12 +100,9 @@ function ObsContent({ character, cardId }: { character: AiCharacter; cardId: str
     })
   }, [isReady, selectedChannelId, model, scene, character.appearance.modelType])
 
-  function copyUrl() {
+  function handleCopyUrl() {
     if (!obsUrl) return
-    navigator.clipboard.writeText(obsUrl).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
+    copyUrl(obsUrl)
   }
 
   const requirementsMet = [hasModel, hasChannel].filter(Boolean).length
@@ -112,19 +113,19 @@ function ObsContent({ character, cardId }: { character: AiCharacter; cardId: str
     <div className="mx-auto max-w-[1000px] px-6 py-8">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">OBS Integration</h1>
-          <p className="mt-0.5 text-body text-[var(--text-secondary)]">Add your soul as a browser source in OBS Studio.</p>
+          <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{t('page.title')}</h1>
+          <p className="mt-0.5 text-body text-[var(--text-secondary)]">{t('page.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" disabled={!obsUrl} onClick={copyUrl}
+          <button type="button" disabled={!obsUrl} onClick={handleCopyUrl}
             className="flex h-9 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 text-body font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-2)] disabled:opacity-40">
             {copied ? <Check size={13} className="text-green-400" /> : <Copy size={13} />}
-            {copied ? 'Copied' : 'Copy URL'}
+            {copied ? t('page.copied') : t('page.copyUrl')}
           </button>
           {obsUrl && (
             <a href={obsUrl} target="_blank" rel="noreferrer"
               className="flex h-9 items-center gap-1.5 rounded-lg bg-[var(--accent-primary)] px-3 text-body font-medium text-white transition-colors hover:bg-[var(--accent-hover)]">
-              <ExternalLink size={13} />Open Preview
+              <ExternalLink size={13} />{t('page.openPreview')}
             </a>
           )}
         </div>
@@ -135,30 +136,30 @@ function ObsContent({ character, cardId }: { character: AiCharacter; cardId: str
           <div className="flex w-[280px] shrink-0 items-center justify-center border-r border-[var(--border-subtle)] bg-[var(--surface-1)]/30 py-10">
             <div className="flex flex-col items-center gap-2 text-[var(--text-tertiary)]">
               <Monitor size={32} strokeWidth={1.25} />
-              <span className="text-body">{isReady ? 'Browser Source Ready' : 'Not Configured'}</span>
+              <span className="text-body">{isReady ? t('page.browserSourceReady') : t('page.notConfiguredShort')}</span>
             </div>
           </div>
           <div className="flex-1 p-6">
             <div className="mb-5 grid grid-cols-3 gap-x-8 gap-y-5">
-              <Meta label="Status">
+              <Meta label={t('page.status')}>
                 <span className="flex items-center gap-1.5">
                   <span className={cn('h-2 w-2 rounded-full', isReady ? 'bg-green-400' : 'bg-[var(--text-tertiary)]/40')} />
-                  {isReady ? 'Ready' : 'Not configured'}
+                  {isReady ? t('page.ready') : t('page.notConfigured')}
                 </span>
               </Meta>
-              <Meta label="Soul">{character.name}</Meta>
-              <Meta label="Model">
+              <Meta label={t('page.soul')}>{character.name}</Meta>
+              <Meta label={t('page.model')}>
                 {hasModel
                   ? `${character.appearance.modelType.toUpperCase()} · ${model?.original_file_name ?? '—'}`
-                  : <span className="text-yellow-400/80">No model</span>}
+                  : <span className="text-yellow-400/80">{t('page.noModel')}</span>}
               </Meta>
             </div>
             <div>
-              <p className="mb-1.5 text-body text-[var(--text-tertiary)]">Channel</p>
+              <p className="mb-1.5 text-body text-[var(--text-tertiary)]">{t('page.channel')}</p>
               {channels === null ? (
-                <span className="text-body text-[var(--text-tertiary)]">Loading…</span>
+                <span className="text-body text-[var(--text-tertiary)]">{t('page.loading')}</span>
               ) : channels.length === 0 ? (
-                <span className="text-body text-yellow-400/80">No active channels</span>
+                <span className="text-body text-yellow-400/80">{t('page.noActiveChannels')}</span>
               ) : channels.length === 1 ? (
                 <span className="text-body font-medium text-[var(--text-primary)]">
                   {channels[0].platform} · {channels[0].channel_name}
@@ -177,17 +178,17 @@ function ObsContent({ character, cardId }: { character: AiCharacter; cardId: str
 
         <div className="border-t border-[var(--border-subtle)]">
           <div className="flex items-center justify-between px-5 py-4">
-            <p className="text-body font-medium text-[var(--text-primary)]">Browser Source URL</p>
+            <p className="text-body font-medium text-[var(--text-primary)]">{t('page.browserSourceUrl')}</p>
             <div className="flex items-center gap-2">
-              <button type="button" disabled={!obsUrl} onClick={copyUrl}
+              <button type="button" disabled={!obsUrl} onClick={handleCopyUrl}
                 className="flex h-7 items-center gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-1)] px-2.5 text-body text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)] disabled:opacity-40">
                 {copied ? <Check size={11} className="text-green-400" /> : <Copy size={11} />}
-                {copied ? 'Copied' : 'Copy'}
+                {copied ? t('page.copied') : t('page.copy')}
               </button>
               {obsUrl && (
                 <a href={obsUrl} target="_blank" rel="noreferrer"
                   className="flex h-7 items-center gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-1)] px-2.5 text-body text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)]">
-                  <ExternalLink size={11} />Preview
+                  <ExternalLink size={11} />{t('page.preview')}
                 </a>
               )}
             </div>
@@ -195,26 +196,26 @@ function ObsContent({ character, cardId }: { character: AiCharacter; cardId: str
           <div className="border-t border-[var(--border-subtle)] bg-black/30 px-5 py-3">
             {obsUrl
               ? <code className="select-all font-mono text-body text-cyan-300/90 break-all">{obsUrl}</code>
-              : <span className="text-body text-[var(--text-tertiary)]">Configure a model and active channel to generate the URL</span>
+              : <span className="text-body text-[var(--text-tertiary)]">{t('page.urlIncomplete')}</span>
             }
           </div>
         </div>
 
-        <AccordionSection title="Requirements" badge={reqBadge} badgeColor={reqColor as 'green' | 'yellow'} defaultOpen={!isReady}>
+        <AccordionSection title={t('page.requirements')} badge={reqBadge} badgeColor={reqColor as 'green' | 'yellow'} defaultOpen={!isReady}>
           <div className="flex flex-col gap-2">
-            <CheckItem ok={hasModel} label="Avatar / Model"
-              sub={hasModel ? `${character.appearance.modelType.toUpperCase()} · ${model?.original_file_name ?? ''}` : 'Upload a VRM, GLB, or Live2D model in the Avatars tab'} />
-            <CheckItem ok={hasChannel} label="Active Channel"
-              sub={hasChannel ? `${channels?.length} active channel${(channels?.length ?? 0) !== 1 ? 's' : ''}` : 'Add and activate a Discord channel in the Channels tab'} />
+            <CheckItem ok={hasModel} label={t('page.avatarModel')}
+              sub={hasModel ? `${character.appearance.modelType.toUpperCase()} · ${model?.original_file_name ?? ''}` : t('page.modelWarn')} />
+            <CheckItem ok={hasChannel} label={t('page.activeChannel')}
+              sub={hasChannel ? t('page.activeChannelCount', { count: channels?.length ?? 0 }) : t('page.channelWarn')} />
           </div>
         </AccordionSection>
 
-        <AccordionSection title="Setup Guide" defaultOpen>
+        <AccordionSection title={t('page.setupGuide')} defaultOpen>
           <div className="flex flex-col gap-1">
             {[
-              { n: 1, title: 'Open OBS Studio', desc: 'Go to Sources → click "+" → select "Browser".' },
-              { n: 2, title: 'Paste the URL', desc: 'Set width to 1920 and height to 1080 (or match your canvas). Paste the Browser Source URL above.' },
-              { n: 3, title: 'Set custom CSS', desc: 'In the Custom CSS field, paste the snippet below to remove the white background:', code: 'body { margin: 0; background: transparent; }' },
+              { n: 1, title: t('page.step1Title'), desc: t('page.step1Desc') },
+              { n: 2, title: t('page.step2Title'), desc: t('page.step2Desc') },
+              { n: 3, title: t('page.step3Title'), desc: t('page.step3Desc'), code: 'body { margin: 0; background: transparent; }' },
             ].map(({ n, title, desc, code }) => (
               <div key={n} className="flex items-start gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-[var(--surface-1)]/50">
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-2)] text-xs font-semibold text-[var(--text-secondary)]">{n}</span>
@@ -233,6 +234,7 @@ function ObsContent({ character, cardId }: { character: AiCharacter; cardId: str
 }
 
 export default function SoulProjectObsPage() {
+  const { t } = useTranslation('obs')
   const { id: soulId, projectId } = useParams<{ id: string; projectId: string }>()
   const router = useRouter()
 
@@ -249,7 +251,7 @@ export default function SoulProjectObsPage() {
         const card = await getCard(p.active_soul_id)
         setCharacter(apiResponseToCharacter(card))
       })
-      .catch(console.error)
+      .catch(handleError)
       .finally(() => setLoading(false))
   }, [projectId])
 
@@ -269,13 +271,13 @@ export default function SoulProjectObsPage() {
             <Monitor size={22} strokeWidth={1.5} />
           </div>
         </div>
-        <p className="mb-1 text-[15px] font-medium text-[var(--text-primary)]">No soul linked</p>
+        <p className="mb-1 text-[15px] font-medium text-[var(--text-primary)]">{t('page.noSoulLinked')}</p>
         <p className="mb-5 text-body text-[var(--text-secondary)]">
-          Link a soul to this project first to configure the OBS integration.
+          {t('page.noSoulDesc')}
         </p>
         <button type="button" onClick={() => router.push(`/souls/${soulId}/projects/${projectId}/settings`)}
           className="h-9 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-4 text-body font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)]">
-          Go to Settings → Link Soul
+          {t('page.goToSettings')}
         </button>
       </div>
     )

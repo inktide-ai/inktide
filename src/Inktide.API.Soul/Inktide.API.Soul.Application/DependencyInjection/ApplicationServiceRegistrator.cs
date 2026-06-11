@@ -49,23 +49,10 @@ public sealed class ApplicationServiceRegistrator : IServiceRegistrator
         registrator.Register<IModelRetentionPolicy, NoOpModelRetentionPolicy>(Reuse.Scoped);
         registrator.Register<IAiCardModelUploadService, AiCardModelUploadService>(Reuse.Scoped);
 
-        // --- Scene upload + tag management (ISP: two focused interfaces) ---
-        registrator.Register<IAiCardSceneService, AiCardSceneUploadService>(Reuse.Scoped);
-        registrator.Register<IAiCardSceneTagService, AiCardSceneTagService>(Reuse.Scoped);
-
         // --- Catalog ---
         registrator.Register<ICatalogService, CatalogService>(Reuse.Scoped);
 
-        // --- Channel links (ISP: three focused interfaces, one scoped instance via RegisterMapping) ---
-        registrator.Register<AiCardChannelLinkService>(Reuse.Scoped);
-        registrator.RegisterMapping<IAiCardChannelCrudService, AiCardChannelLinkService>();
-        registrator.RegisterMapping<IAiCardChannelLifecycleService, AiCardChannelLinkService>();
-        registrator.RegisterMapping<IAiCardChannelConnectService, AiCardChannelLinkService>();
-
         // --- BYOK provider credentials ---
         registrator.Register<IUserProviderCredentialService, UserProviderCredentialService>(Reuse.Scoped);
-
-        // --- Runtime presets (Scenes) ---
-        registrator.Register<IAiCardRunPresetService, AiCardRunPresetService>(Reuse.Scoped);
     }
 }

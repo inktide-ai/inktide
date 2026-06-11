@@ -35,11 +35,6 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("appearance");
 
-                    b.Property<string>("AutoPilot")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("auto_pilot");
-
                     b.Property<string>("AvatarUrl")
                         .HasColumnType("text")
                         .HasColumnName("avatar_url");
@@ -86,41 +81,10 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("llm_config");
 
-                    b.Property<string>("MemorySettings")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("memory_settings");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
-
-                    b.Property<string>("Personality")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("")
-                        .HasColumnName("personality");
-
-                    b.Property<string>("PersonalityConfig")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("personality_config")
-                        .HasDefaultValueSql("'{}'");
-
-                    b.Property<string>("ResponseBehavior")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("response_behavior");
-
-                    b.Property<string>("ScreenAwarenessSettings")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("screen_awareness_settings")
-                        .HasDefaultValueSql("'{}'");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -141,11 +105,6 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasDefaultValue("active")
                         .HasColumnName("status");
-
-                    b.Property<string>("SystemPrompt")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("system_prompt");
 
                     b.Property<string>("Tags")
                         .IsRequired()
@@ -205,131 +164,6 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                     b.ToTable("ai_cards", "soul");
                 });
 
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardChannel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("AiCardId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("ai_card_id");
-
-                    b.Property<string>("BotUsername")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("bot_username");
-
-                    b.Property<string>("ChannelId")
-                        .HasColumnType("text")
-                        .HasColumnName("channel_id");
-
-                    b.Property<string>("ChannelName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("channel_name");
-
-                    b.Property<DateTime?>("ConnectedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("connected_at");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CustomBotTokenEnc")
-                        .HasColumnType("text")
-                        .HasColumnName("custom_bot_token_enc");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("OAuthTokenEnc")
-                        .HasColumnType("text")
-                        .HasColumnName("oauth_token_enc");
-
-                    b.Property<string>("Platform")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("twitch")
-                        .HasColumnName("platform");
-
-                    b.Property<string>("RefreshTokenEnc")
-                        .HasColumnType("text")
-                        .HasColumnName("refresh_token_enc");
-
-                    b.Property<DateTime?>("TokenExpiresAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("token_expires_at");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AiCardId")
-                        .HasDatabaseName("idx_ai_card_channels_card");
-
-                    b.HasIndex("Platform", "IsActive")
-                        .HasDatabaseName("idx_ai_card_channels_active")
-                        .HasFilter("is_active = true");
-
-                    b.HasIndex("AiCardId", "Platform", "ChannelName")
-                        .IsUnique();
-
-                    b.ToTable("ai_card_channels", "soul");
-                });
-
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardCustomSceneTag", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("AiCardId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("ai_card_id");
-
-                    b.Property<string>("Color")
-                        .HasMaxLength(7)
-                        .HasColumnType("character varying(7)")
-                        .HasColumnName("color");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("label");
-
-                    b.Property<string>("LabelNormalized")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("label_normalized");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AiCardId")
-                        .HasDatabaseName("idx_ai_card_custom_scene_tags_card");
-
-                    b.HasIndex("AiCardId", "LabelNormalized")
-                        .IsUnique()
-                        .HasDatabaseName("idx_ai_card_custom_scene_tags_card_label_norm");
-
-                    b.ToTable("ai_card_custom_scene_tags", "soul");
-                });
-
             modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -375,6 +209,11 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("storage_key");
 
+                    b.Property<string>("ThumbnailUrl")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("thumbnail_url");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
@@ -395,225 +234,6 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .HasDatabaseName("idx_ai_card_models_user_card");
 
                     b.ToTable("ai_card_models", "soul");
-                });
-
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardRunPreset", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("AiCardId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("ai_card_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Icon")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("icon");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
-
-                    b.Property<string>("OverrideEmotionPresetId")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("override_emotion_preset_id");
-
-                    b.Property<string>("OverrideLlmModelId")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("override_llm_model_id");
-
-                    b.Property<float?>("OverrideTemperature")
-                        .HasColumnType("real")
-                        .HasColumnName("override_temperature");
-
-                    b.Property<string>("OverrideVoiceProfileId")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("override_voice_profile_id");
-
-                    b.Property<string>("SortKey")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasDefaultValue("a0")
-                        .HasColumnName("sort_key");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AiCardId")
-                        .HasDatabaseName("idx_ai_card_run_presets_card");
-
-                    b.HasIndex("AiCardId", "IsActive")
-                        .IsUnique()
-                        .HasDatabaseName("idx_ai_card_run_presets_active")
-                        .HasFilter("is_active = true");
-
-                    b.HasIndex("AiCardId", "SortKey")
-                        .IsUnique()
-                        .HasDatabaseName("idx_ai_card_run_presets_sort");
-
-                    b.HasIndex("UserId", "AiCardId")
-                        .HasDatabaseName("idx_ai_card_run_presets_user_card");
-
-                    b.ToTable("ai_card_run_presets", "soul");
-                });
-
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardScene", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("AiCardId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("ai_card_id");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("content_type");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("DisplayName")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("display_name");
-
-                    b.Property<string>("OriginalFileName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("original_file_name");
-
-                    b.Property<string>("PublicUrl")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("public_url");
-
-                    b.Property<long>("SizeBytes")
-                        .HasColumnType("bigint")
-                        .HasColumnName("size_bytes");
-
-                    b.Property<string>("SortKey")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasDefaultValue("a0")
-                        .HasColumnName("sort_key");
-
-                    b.Property<string>("StorageKey")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("storage_key");
-
-                    b.Property<string>("Tag")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("tag");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AiCardId")
-                        .HasDatabaseName("idx_ai_card_scenes_card");
-
-                    b.HasIndex("StorageKey")
-                        .IsUnique()
-                        .HasDatabaseName("idx_ai_card_scenes_storage_key");
-
-                    b.HasIndex("AiCardId", "SortKey")
-                        .IsUnique()
-                        .HasDatabaseName("idx_ai_card_scenes_sort");
-
-                    b.HasIndex("UserId", "AiCardId")
-                        .HasDatabaseName("idx_ai_card_scenes_user_card");
-
-                    b.ToTable("ai_card_scenes", "soul");
-                });
-
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardTool", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("AiCardId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("ai_card_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("IsEnabled")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_enabled");
-
-                    b.Property<string>("ToolConfig")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("tool_config");
-
-                    b.Property<string>("ToolName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("tool_name");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AiCardId")
-                        .HasDatabaseName("idx_ai_card_tools_card");
-
-                    b.HasIndex("AiCardId", "ToolName")
-                        .IsUnique();
-
-                    b.ToTable("ai_card_tools", "soul");
                 });
 
             modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AuditLog", b =>
@@ -717,51 +337,6 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("llm_catalog", "soul");
-                });
-
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.OutboxEvent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Error")
-                        .HasColumnType("text")
-                        .HasColumnName("error");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("event_type");
-
-                    b.Property<string>("Payload")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("payload");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("processed_at");
-
-                    b.Property<int>("RetryCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("retry_count");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProcessedAt")
-                        .HasDatabaseName("idx_outbox_unprocessed")
-                        .HasFilter("processed_at IS NULL");
-
-                    b.ToTable("outbox_events", "soul");
                 });
 
             modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.SoulActivityFeedEvent", b =>
@@ -1034,6 +609,172 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                     b.ToTable("user_provider_credentials", "soul");
                 });
 
+            modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.InboxState", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime?>("Consumed")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ConsumerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("Delivered")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ExpirationTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("LastSequenceNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("LockId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ReceiveCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Received")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("MessageId", "ConsumerId");
+
+                    b.HasIndex("Delivered");
+
+                    b.ToTable("InboxState");
+                });
+
+            modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxMessage", b =>
+                {
+                    b.Property<long>("SequenceNumber")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("SequenceNumber"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<Guid?>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DestinationAddress")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("EnqueueTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ExpirationTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FaultAddress")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Headers")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("InboxConsumerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("InboxMessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("InitiatorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("OutboxId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("RequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ResponseAddress")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime>("SentTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SourceAddress")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("SequenceNumber");
+
+                    b.HasIndex("EnqueueTime");
+
+                    b.HasIndex("ExpirationTime");
+
+                    b.HasIndex("OutboxId", "SequenceNumber")
+                        .IsUnique();
+
+                    b.HasIndex("InboxMessageId", "InboxConsumerId", "SequenceNumber")
+                        .IsUnique();
+
+                    b.ToTable("OutboxMessage");
+                });
+
+            modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxState", b =>
+                {
+                    b.Property<Guid>("OutboxId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("Delivered")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("LastSequenceNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("LockId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.HasKey("OutboxId");
+
+                    b.HasIndex("Created");
+
+                    b.ToTable("OutboxState");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
                 {
                     b.Property<int>("Id")
@@ -1068,65 +809,10 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                     b.Navigation("TtsCatalog");
                 });
 
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardChannel", b =>
-                {
-                    b.HasOne("Inktide.API.Soul.Domain.Entities.AiCard", "AiCard")
-                        .WithMany("Channels")
-                        .HasForeignKey("AiCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AiCard");
-                });
-
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardCustomSceneTag", b =>
-                {
-                    b.HasOne("Inktide.API.Soul.Domain.Entities.AiCard", "AiCard")
-                        .WithMany()
-                        .HasForeignKey("AiCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AiCard");
-                });
-
             modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardModel", b =>
                 {
                     b.HasOne("Inktide.API.Soul.Domain.Entities.AiCard", "AiCard")
                         .WithMany()
-                        .HasForeignKey("AiCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AiCard");
-                });
-
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardRunPreset", b =>
-                {
-                    b.HasOne("Inktide.API.Soul.Domain.Entities.AiCard", "AiCard")
-                        .WithMany()
-                        .HasForeignKey("AiCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AiCard");
-                });
-
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardScene", b =>
-                {
-                    b.HasOne("Inktide.API.Soul.Domain.Entities.AiCard", "AiCard")
-                        .WithMany()
-                        .HasForeignKey("AiCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AiCard");
-                });
-
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCardTool", b =>
-                {
-                    b.HasOne("Inktide.API.Soul.Domain.Entities.AiCard", "AiCard")
-                        .WithMany("Tools")
                         .HasForeignKey("AiCardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1152,13 +838,6 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("AiCard");
-                });
-
-            modelBuilder.Entity("Inktide.API.Soul.Domain.Entities.AiCard", b =>
-                {
-                    b.Navigation("Channels");
-
-                    b.Navigation("Tools");
                 });
 #pragma warning restore 612, 618
         }

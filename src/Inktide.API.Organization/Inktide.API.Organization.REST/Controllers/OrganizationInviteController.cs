@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.Organization.REST.Controllers;
 
 [ApiController]
-[Route("api/organization/invites")]
+[Route("api/v1/organization/invites")]
 [Produces("application/json")]
 [Authorize]
 public sealed class OrganizationInviteController : ControllerBase
@@ -49,7 +49,7 @@ public sealed class OrganizationInviteController : ControllerBase
         });
     }
 
-    [HttpPost("{inviteId:guid}/resend")]
+    [HttpPost("{inviteId:guid}/deliveries")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

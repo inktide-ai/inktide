@@ -2,7 +2,6 @@
 from unittest.mock import patch
 
 
-# ── health ──────────────────────────────────────────────────────────
 
 
 def test_health_ok(client):
@@ -21,7 +20,6 @@ def test_health_503_when_not_ready(client):
     assert r.json()["ready"] is False
 
 
-# ── embeddings ──────────────────────────────────────────────────────
 
 
 def test_embed_single(client):
@@ -45,7 +43,6 @@ def test_embed_batch_rejects_empty(client):
     assert client.post("/api/v1/embed/batch", json={"texts": []}).status_code == 400
 
 
-# ── classification ──────────────────────────────────────────────────
 
 
 def test_classify(client):
@@ -75,7 +72,6 @@ def test_classify_rejects_empty_categories(client):
     assert r.status_code == 400
 
 
-# ── fact extraction ─────────────────────────────────────────────────
 
 
 def test_extract_facts(client):

@@ -1,10 +1,10 @@
 using System.Text.Json;
 using Inktide.API.Developer.Application.Interfaces;
+using Inktide.API.Developer.Application.Messages;
 using Inktide.API.Developer.Domain.Entities;
 using Inktide.API.Developer.Domain.Repositories;
-using Inktide.API.Developer.Infrastructure.Settings;
+using MassTransit;
 using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
 
 namespace Inktide.API.Developer.Infrastructure.Services;
 
@@ -12,22 +12,19 @@ internal sealed class WebhookDispatchService : IWebhookDispatchService
 {
     private readonly IDeveloperApplicationRepository _appRepo;
     private readonly IWebhookDeliveryRepository _deliveryRepo;
-    private readonly IConnectionMultiplexer _redis;
-    private readonly DeveloperSettings _settings;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<WebhookDispatchService> _logger;
 
     public WebhookDispatchService(
         IDeveloperApplicationRepository appRepo,
         IWebhookDeliveryRepository deliveryRepo,
-        IConnectionMultiplexer redis,
-        DeveloperSettings settings,
+        IPublishEndpoint publishEndpoint,
         ILogger<WebhookDispatchService> logger)
     {
-        _appRepo      = appRepo      ?? throw new ArgumentNullException(nameof(appRepo));
-        _deliveryRepo = deliveryRepo ?? throw new ArgumentNullException(nameof(deliveryRepo));
-        _redis        = redis        ?? throw new ArgumentNullException(nameof(redis));
-        _settings     = settings     ?? throw new ArgumentNullException(nameof(settings));
-        _logger       = logger       ?? throw new ArgumentNullException(nameof(logger));
+        _appRepo         = appRepo         ?? throw new ArgumentNullException(nameof(appRepo));
+        _deliveryRepo    = deliveryRepo    ?? throw new ArgumentNullException(nameof(deliveryRepo));
+        _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
+        _logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task DispatchAsync(string eventType, object payload, string? connectorSlug, CancellationToken ct)
@@ -46,21 +43,23 @@ internal sealed class WebhookDispatchService : IWebhookDispatchService
             data      = payload,
         });
 
-        var db = _redis.GetDatabase();
         foreach (var app in apps)
         {
             if (string.IsNullOrWhiteSpace(app.WebhookUrl)) continue;
 
-            await db.StreamAddAsync(_settings.StreamName,
-            [
-                new NameValueEntry("application_id",      app.Id.ToString()),
-                new NameValueEntry("event_type",           eventType),
-                new NameValueEntry("payload_json",         payloadJson),
-                new NameValueEntry("webhook_url",          app.WebhookUrl),
-                new NameValueEntry("webhook_secret_hash",  app.WebhookSecretHash ?? string.Empty),
-            ]);
+            var delivery = WebhookDelivery.Create(app.Id, eventType, payloadJson);
+            await _deliveryRepo.AddAsync(delivery, ct);
 
-            _logger.LogDebug("Dispatched {EventType} for app {AppId}", eventType, app.Id);
+            await _publishEndpoint.Publish(new WebhookDeliveryRequested(
+                delivery.Id,
+                app.Id,
+                eventType,
+                payloadJson,
+                app.WebhookUrl!,
+                app.WebhookSecretHash ?? string.Empty), ct);
+
+            _logger.LogDebug("Dispatched {EventType} for app {AppId} delivery {DeliveryId}",
+                eventType, app.Id, delivery.Id);
         }
     }
 

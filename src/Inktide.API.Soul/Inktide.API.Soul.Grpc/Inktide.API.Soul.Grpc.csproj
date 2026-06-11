@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
-    <PackageReference Include="DryIoc.dll" Version="5.4.0" />
+    <PackageReference Include="Grpc.AspNetCore" />
+    <PackageReference Include="DryIoc.dll" />
   </ItemGroup>
 
   <ItemGroup>

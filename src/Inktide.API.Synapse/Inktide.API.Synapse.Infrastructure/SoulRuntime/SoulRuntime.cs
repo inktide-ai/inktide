@@ -53,7 +53,6 @@ internal sealed class SoulRuntime : ISoulRuntime
         context.MarkSoulRuntimeExecuted();
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────────
 
     private static Dictionary<string, object> BuildInitialInput(
         MessageProcessingContext ctx,

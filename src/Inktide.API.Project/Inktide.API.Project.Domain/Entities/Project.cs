@@ -43,9 +43,18 @@ public sealed class ProjectEntity
         set => _activeSoulId = value;
     }
 
-    public Guid? ActiveModelId { get; set; }
-    public Guid? ActiveSceneId { get; set; }
-    public string? SystemPrompt { get; set; }
+    public Guid? ActiveModelId      { get; set; }
+    public Guid? ActiveSceneId      { get; set; }
+    public string? SystemPrompt     { get; set; }
+    public string? BehaviorSettings { get; set; }
+    public string? MemorySettings   { get; set; }
+    public string? AutoPilot        { get; set; }
+    public string Personality              { get; set; } = string.Empty;
+    public string PersonalityConfig        { get; set; } = "{}";
+    public string ResponseBehavior         { get; set; } = "{}";
+    public string ScreenAwarenessSettings  { get; set; } = "{}";
+    public string? PreviewUrl              { get; set; }
+    public string? SceneConfig             { get; set; }
 
     public string Status
     {

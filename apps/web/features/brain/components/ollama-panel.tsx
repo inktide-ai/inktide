@@ -1,13 +1,13 @@
 'use client'
 
-import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AiCharacter } from '@/shared/lib/character'
-import { PROVIDER_DEFS } from '@/shared/data/providers'
+import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-provider-catalog'
 import { pingOllama } from '@/features/brain/lib/provider-validation'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { useOllamaCredentials } from '../hooks/useOllamaCredentials'
 import { useOllamaModels } from '../hooks/useOllamaModels'
+import { useValidationState } from '../hooks/useValidationState'
 import {
   infoContent, formGroup, label, labelHint, inputCls,
   validationOk, validationFailed, btnContinueAnyway,
@@ -20,15 +20,12 @@ export interface PanelProps {
   onUpdate: (patch: Partial<AiCharacter>) => void
 }
 
-type AutoState   = 'idle' | 'ok' | 'failed'
-type ManualState = 'idle' | 'testing' | 'ok' | 'failed'
-
 export function OllamaPanel({ character, onUpdate }: PanelProps) {
   const { t } = useTranslation(['brain', 'providers'])
   const { registerSavePlugin, unregisterSavePlugin, markCredentialDirty } = useCharactersContext()
 
   const llm = character.llm
-  const def = PROVIDER_DEFS.find((p) => p.id === 'ollama')!
+  const def = LLM_PROVIDER_CATALOG.find((p) => p.id === 'ollama')!
   const patch = (p: Partial<typeof llm>) => onUpdate({ llm: { ...llm, ...p } })
 
   const creds = useOllamaCredentials(def, registerSavePlugin, unregisterSavePlugin)
@@ -37,22 +34,11 @@ export function OllamaPanel({ character, onUpdate }: PanelProps) {
   const effectiveBaseUrl = baseUrl || def.defaultBaseUrl || 'http://localhost:11434'
   const { models, modelsLoading, modelsError } = useOllamaModels(effectiveBaseUrl, credLoading)
 
-  const [autoState, setAutoState]     = useState<AutoState>('idle')
-  const [autoError, setAutoError]     = useState<string | null>(null)
-  const [manualState, setManualState] = useState<ManualState>('idle')
-  const [manualError, setManualError] = useState<string | null>(null)
-  const [bypassed, setBypassed]       = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const triggerAutoValidation = (url: string) => {
-    setBypassed(false); setManualState('idle'); setManualError(null)
-    setAutoState('idle'); setAutoError(null)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      const err = def.autoValidate({ apiKey: '', baseUrl: url })
-      setAutoState(err ? 'failed' : 'ok'); setAutoError(err)
-    }, 300)
-  }
+  const { autoState, autoError, manualState, manualError, bypassed, setBypassed, triggerAutoValidation, runTest } =
+    useValidationState(
+      (url) => def.autoValidate({ apiKey: '', baseUrl: url }),
+      () => pingOllama(effectiveBaseUrl),
+    )
 
   const handleBaseUrlChange = (v: string) => {
     setBaseUrl(v); markCredentialDirty(); triggerAutoValidation(v)
@@ -60,12 +46,6 @@ export function OllamaPanel({ character, onUpdate }: PanelProps) {
 
   const handleExtraChange = (key: string, value: unknown) => {
     setExtraConfig((p) => ({ ...p, [key]: value })); markCredentialDirty()
-  }
-
-  const handleTest = async () => {
-    setManualState('testing'); setManualError(null); setBypassed(false)
-    const err = await pingOllama(effectiveBaseUrl)
-    setManualState(err ? 'failed' : 'ok'); setManualError(err)
   }
 
   return (
@@ -94,7 +74,7 @@ export function OllamaPanel({ character, onUpdate }: PanelProps) {
       )}
 
       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.75rem' }}>
-        <button type="button" className={btnTest} disabled={manualState === 'testing' || autoState === 'failed'} onClick={handleTest}>
+        <button type="button" className={btnTest} disabled={manualState === 'testing' || autoState === 'failed'} onClick={runTest}>
           {manualState === 'testing' ? t('providers:validation.checking') : t('providers:validation.testConnection')}
         </button>
       </div>

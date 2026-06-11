@@ -74,7 +74,7 @@ function EmotionalStateSection({ p, onChange }: { p: CharacterPersonality; onCha
         <MetricBar label={t('baseline.metrics.emotionalIntensity')} value={p.emotionVolatility} />
         <MetricBar label={t('baseline.metrics.responsiveness')}     value={p.emotionResponsiveness} />
         <MetricBar label={t('baseline.metrics.memoryPersistence')}  value={p.emotionMemory} />
-        <MetricBar label={t('baseline.metrics.stability')}          value={stability} positive />
+        <MetricBar label={t('baseline.metrics.stability')}          value={stability} />
       </div>
     </SectionCard>
   )

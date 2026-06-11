@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, type InfiniteData } from '@tanstack/react-query'
+import type { PagedResult } from '@/shared/types/paged-result'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy, arrayMove } from '@dnd-kit/sortable'
@@ -13,6 +14,7 @@ import { SoulCardVertical, SoulListRow, SortableSoulCard, useFavorites, reorderC
 import { useCharactersContext } from '@/entities/character'
 import { queryKeys } from '@/shared/lib/query/keys'
 import { PageContent } from '@/shared/ui'
+import { toast } from 'sonner'
 
 const listVariants: Variants = {
   initial: {},
@@ -24,14 +26,14 @@ const cardVariant: Variants = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
 }
 
-type SoulsFilter = 'all' | 'active' | 'idle' | 'archived'
+type SoulsFilter = 'all' | 'active' | 'idle'
 type SoulsView = 'grid' | 'list'
 
 export default function SoulsListPage() {
   const { t } = useTranslation('common')
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { cardList, loading } = useCharactersContext()
+  const { cardList, loading, fetchNextPage, hasNextPage, isFetchingNextPage, removeCharacter } = useCharactersContext()
   const { favs, toggle } = useFavorites()
   const [filter, setFilter] = useState<SoulsFilter>('all')
   const [view, setView] = useState<SoulsView>('grid')
@@ -41,7 +43,6 @@ export default function SoulsListPage() {
     { id: 'all', label: t('filter.all') },
     { id: 'active', label: t('filter.active') },
     { id: 'idle', label: t('filter.idle') },
-    { id: 'archived', label: t('filter.archived') },
   ]
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
@@ -69,20 +70,37 @@ export default function SoulsListPage() {
     const { active, over } = event
     if (!over || active.id === over.id) return
 
-    const current = queryClient.getQueryData<AiCardListItem[]>(queryKeys.souls.all) ?? []
+    const current = cardList
     const oldIdx = current.findIndex(c => c.id === active.id)
     const newIdx = current.findIndex(c => c.id === over.id)
     if (oldIdx === -1 || newIdx === -1) return
 
     const reordered = arrayMove(current, oldIdx, newIdx)
-    queryClient.setQueryData(queryKeys.souls.all, reordered)
+    // Distribute reordered items back into pages preserving page sizes
+    queryClient.setQueryData<InfiniteData<PagedResult<AiCardListItem>>>(
+      queryKeys.souls.all,
+      (old) => {
+        if (!old) return old
+        let remaining = [...reordered]
+        return {
+          ...old,
+          pages: old.pages.map((page) => {
+            const items = remaining.splice(0, page.items?.length ?? 0)
+            return { ...page, items }
+          }),
+        }
+      },
+    )
 
     const neighborIdx = reordered.findIndex(c => c.id === active.id)
     const previousId = reordered[neighborIdx - 1]?.id ?? null
     const nextId     = reordered[neighborIdx + 1]?.id ?? null
 
     void reorderCard(active.id as string, { previous_id: previousId, next_id: nextId })
-      .catch(() => queryClient.invalidateQueries({ queryKey: queryKeys.souls.all }))
+      .catch(() => {
+        queryClient.invalidateQueries({ queryKey: queryKeys.souls.all })
+        toast.error(t('errors.reorderFailed', 'Failed to save order'))
+      })
   }
 
   const dndCards = filtered.map(soul => (
@@ -92,19 +110,20 @@ export default function SoulsListPage() {
       isFavorite={favs.has(soul.id)}
       onFavoriteToggle={() => toggle(soul.id)}
       onOpen={() => router.push(`/souls/${soul.id}`)}
+      onDelete={() => void removeCharacter(soul.id)}
     />
   ))
 
   return (
     <PageContent>
-        <header className="mb-3 flex items-start justify-between gap-4">
+        <header className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div>
-            <h1 className="font-sans text-[36px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">{t('souls.title')}</h1>
+            <h1 className="font-sans text-[26px] font-semibold tracking-[-0.03em] text-[var(--text-primary)] sm:text-[36px]">{t('souls.title')}</h1>
             <p className="mt-1 text-body text-[var(--text-secondary)]">{t('souls.subtitle')}</p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-[240px] items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+            <div className="flex h-10 w-full min-w-0 flex-1 basis-full items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[hsla(var(--bg-1),_1)] px-3 sm:w-[240px] sm:flex-none sm:basis-auto">
               <Search size={15} className="text-[var(--text-tertiary)]" />
               <input
                 type="text"
@@ -127,7 +146,7 @@ export default function SoulsListPage() {
 
             <button
               type="button"
-              className="flex h-10 items-center gap-1 rounded-xl bg-[var(--accent-primary)] px-3 text-body font-medium text-white hover:bg-[var(--accent-hover)]"
+              className="flex h-10 shrink-0 items-center gap-1 whitespace-nowrap rounded-xl bg-[var(--accent-primary)] px-3 text-body font-medium text-white hover:bg-[var(--accent-hover)]"
             >
               {t('souls.newSoul')}
               <ChevronDown size={14} />
@@ -210,6 +229,7 @@ export default function SoulsListPage() {
                 isFavorite={favs.has(soul.id)}
                 onFavoriteToggle={() => toggle(soul.id)}
                 onOpen={() => router.push(`/souls/${soul.id}`)}
+                onDelete={() => void removeCharacter(soul.id)}
               />
             ))}
           </div>
@@ -242,11 +262,23 @@ export default function SoulsListPage() {
                     isFavorite={favs.has(soul.id)}
                     onFavoriteToggle={() => toggle(soul.id)}
                     onOpen={() => router.push(`/souls/${soul.id}`)}
+                    onDelete={() => void removeCharacter(soul.id)}
                   />
                 </motion.div>
               ))}
             </AnimatePresence>
           </motion.div>
+        )}
+        {hasNextPage && (
+          <div className="flex justify-center pt-4 pb-2">
+            <button
+              onClick={() => void fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="px-4 py-2 text-sm font-medium text-(--text-muted) bg-(--bg-card) border border-white/10 rounded-lg hover:bg-white/[0.06] disabled:opacity-50 transition-colors"
+            >
+              {isFetchingNextPage ? 'Loading…' : 'Load More'}
+            </button>
+          </div>
         )}
     </PageContent>
   )

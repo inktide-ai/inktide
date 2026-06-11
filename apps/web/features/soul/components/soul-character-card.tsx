@@ -1,11 +1,16 @@
 'use client'
 
 import { useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react'
-import { MoreHorizontal, Share2, X } from 'lucide-react'
+import { MoreHorizontal, Share2, Trash2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { AiCharacter } from '@/shared/lib/character'
 import { uploadCardAvatar } from '@/features/soul/api/index'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+  Dialog, DialogContent, DialogTitle, DialogDescription,
+} from '@/shared/ui'
+import { SoulAvatar } from './soul-avatar'
 
 const SOUL_CATEGORIES = [
   'Assistant', 'Character', 'Streamer', 'Companion',
@@ -40,7 +45,8 @@ function Tag({ label, onRemove }: { label: string; onRemove: () => void }) {
 
 export function SoulCharacterCard({ character }: SoulCharacterCardProps) {
   const { t } = useTranslation(['profile', 'common'])
-  const { updateCharacter } = useCharactersContext()
+  const { updateCharacter, removeCharacter } = useCharactersContext()
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const [avatarBusy, setAvatarBusy] = useState(false)
   const [nameDraft, setNameDraft] = useState(character.name)
@@ -134,12 +140,28 @@ export function SoulCharacterCard({ character }: SoulCharacterCardProps) {
             <Share2 size={13} />
             {copied ? t('profile:characterCard.copied') : t('profile:characterCard.share')}
           </button>
-          <button
-            type="button"
-            className="grid h-[34px] w-[34px] place-items-center rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-1)] hover:text-[var(--text-primary)]"
-          >
-            <MoreHorizontal size={14} />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="grid h-[34px] w-[34px] place-items-center rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-1)] hover:text-[var(--text-primary)]"
+              >
+                <MoreHorizontal size={14} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="min-w-[140px] rounded-xl border border-[var(--border-subtle)] bg-[var(--menu-panel-bg)] p-1 shadow-[var(--menu-panel-shadow)]"
+            >
+              <DropdownMenuItem
+                onSelect={() => setConfirmOpen(true)}
+                className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-400 outline-none hover:bg-[var(--surface-2)] focus:bg-[var(--surface-2)]"
+              >
+                <Trash2 size={13} />
+                {t('common:soulCard.delete', 'Delete')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -147,10 +169,11 @@ export function SoulCharacterCard({ character }: SoulCharacterCardProps) {
       <div className="flex gap-6 p-5">
         {/* Avatar */}
         <div className="relative h-[148px] w-[190px] shrink-0 overflow-hidden rounded-md border border-[var(--border-default)]">
-          <img
-            src={character.appearance?.avatarUrl ?? '/avatars/miko.png'}
-            alt={character.name}
-            className="h-full w-full object-cover"
+          <SoulAvatar
+            avatarUrl={character.appearance?.avatarUrl ?? null}
+            name={character.name}
+            id={character.id}
+            imgClassName="h-full w-full object-cover"
           />
           <button
             type="button"
@@ -236,6 +259,34 @@ export function SoulCharacterCard({ character }: SoulCharacterCardProps) {
           </div>
         </div>
       </div>
+
+      {/* Confirm delete — DialogContent renders via Portal outside this article */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="fixed left-1/2 top-1/2 z-[2001] w-[min(400px,95vw)] -translate-x-1/2 -translate-y-1/2 rounded-[14px] border border-[var(--border-subtle)] bg-[var(--menu-panel-bg)] p-6 shadow-[var(--menu-panel-shadow)] outline-none">
+          <DialogTitle className="text-base font-semibold text-[var(--text-primary)]">
+            {t('common:soulCard.deleteConfirmTitle', 'Delete soul?')}
+          </DialogTitle>
+          <DialogDescription className="mt-2 text-sm text-[var(--text-secondary)]">
+            {t('common:soulCard.deleteConfirmBody', '«{{name}}» will be permanently deleted. This action cannot be undone.', { name: character.name })}
+          </DialogDescription>
+          <div className="mt-5 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmOpen(false)}
+              className="h-9 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-4 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+            >
+              {t('common:actions.cancel', 'Cancel')}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setConfirmOpen(false); void removeCharacter(character.id) }}
+              className="h-9 rounded-lg bg-red-500 px-4 text-sm font-medium text-white hover:bg-red-600"
+            >
+              {t('common:actions.delete', 'Delete')}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </article>
   )
 }

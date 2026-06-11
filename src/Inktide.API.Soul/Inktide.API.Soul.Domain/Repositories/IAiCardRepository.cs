@@ -16,6 +16,14 @@ public interface IAiCardRepository
     /// </summary>
     Task<IReadOnlyList<AiCard>> GetSummaryListByUserIdAsync(Guid userId, CancellationToken ct = default);
 
+    /// <summary>
+    /// Cursor-based paged variant of <see cref="GetSummaryListByUserIdAsync"/>.
+    /// <paramref name="cursor"/> is the <c>SortKey</c> of the last item on the previous page.
+    /// Returns <paramref name="limit"/>+1 detection row; caller checks HasMore.
+    /// </summary>
+    Task<(IReadOnlyList<AiCard> Items, bool HasMore)> GetSummaryListPagedAsync(
+        Guid userId, int limit, string? cursor, CancellationToken ct = default);
+
     Task<int> CountByUserIdAsync(Guid userId, CancellationToken ct = default);
     Task<AiCard> CreateAsync(AiCard card, CancellationToken ct = default);
     Task UpdateAsync(AiCard card, CancellationToken ct = default);
