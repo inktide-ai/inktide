@@ -99,6 +99,13 @@ jobs:
       - name: Lint
         run: npm run lint -- --prune-suppressions
 
+      # The other direction: --prune-suppressions cannot tell that someone
+      # re-ran --suppress-rule to bury a new violation. This fails if the
+      # baseline total moved away from eslint-suppressions.max in either
+      # direction. Both files disappear when REACT_COMPILER_EPIC.md closes.
+      - name: Suppressions ratchet
+        run: node scripts/check-suppressions-ratchet.mjs
+
       - name: Typecheck
         run: npm run typecheck
 
