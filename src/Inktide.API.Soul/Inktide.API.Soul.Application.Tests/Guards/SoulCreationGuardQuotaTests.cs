@@ -33,22 +33,28 @@ public sealed class SoulCreationGuardQuotaTests
         return new SoulCreationGuard(query, planResolver, cardRepo);
     }
 
+    // Counts are derived from the plan rather than written out, so raising a
+    // tier's allowance cannot silently invalidate these tests. Free once
+    // allowed a single card; when it moved to three, the hard-coded 1 here
+    // stopped meeting the guard's threshold and the case tested nothing.
     [Fact]
     public async Task Throws_PlanLimitExceededException_when_count_equals_limit()
     {
-        var guard = BuildGuard(currentCount: 1, limits: PlanLimits.Free);
+        var limits = PlanLimits.Free;
+        var guard  = BuildGuard(currentCount: limits.MaxSoulCards, limits: limits);
 
         var ex = await Assert.ThrowsAsync<PlanLimitExceededException>(
             () => guard.EnsureCanCreateAsync(UserId, CatalogId, null, null));
 
         Assert.Equal("soul_cards", ex.LimitType);
-        Assert.Equal(1, ex.Limit);
+        Assert.Equal(limits.MaxSoulCards, ex.Limit);
     }
 
     [Fact]
     public async Task Throws_PlanLimitExceededException_when_count_exceeds_limit()
     {
-        var guard = BuildGuard(currentCount: 5, limits: PlanLimits.Starter);
+        var limits = PlanLimits.Starter;
+        var guard  = BuildGuard(currentCount: limits.MaxSoulCards + 1, limits: limits);
 
         await Assert.ThrowsAsync<PlanLimitExceededException>(
             () => guard.EnsureCanCreateAsync(UserId, CatalogId, null, null));
@@ -57,8 +63,8 @@ public sealed class SoulCreationGuardQuotaTests
     [Fact]
     public async Task Does_not_throw_PlanLimitExceededException_when_count_below_limit()
     {
-        // count = 0, limit = 1 -> quota not exceeded.
-        // Guard proceeds to catalog check (returns SoulCreationException, not PlanLimitExceededException).
+        // Zero cards is below every plan's allowance, so the guard moves past
+        // the quota check and fails later on the catalog lookup instead.
         var guard = BuildGuard(currentCount: 0, limits: PlanLimits.Free);
 
         var ex = await Assert.ThrowsAsync<SoulCreationException>(

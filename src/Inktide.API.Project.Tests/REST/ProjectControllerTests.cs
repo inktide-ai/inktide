@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Inktide.API.Core.Contracts;
 using Inktide.API.Core.Generators;
+using Inktide.API.Core.Pagination;
 using Inktide.API.Project.Application.Interfaces;
 using Inktide.API.Project.Domain.Entities;
 using Inktide.API.Project.Domain.ValueObjects;
@@ -69,13 +70,21 @@ public sealed class ProjectControllerTests
     public async Task List_Returns200_WithProjectList()
     {
         var crud = Substitute.For<IProjectCrudService>();
-        crud.ListAsync(UserId, Arg.Any<CancellationToken>())
-            .Returns(new List<ProjectEntity> { MakeProject() }.AsReadOnly());
+        // The action pages its results; stubbing the older ListAsync left
+        // ListPagedAsync returning null and the assertion never got that far.
+        crud.ListPagedAsync(UserId, Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns(new PagedResult<ProjectEntity>(
+                new List<ProjectEntity> { MakeProject() },
+                NextCursor: null,
+                HasMore: false));
 
         var ctrl   = BuildController(crud: crud);
         var result = await ctrl.List(soulId: null, ct: CancellationToken.None);
 
-        Assert.IsType<OkObjectResult>(result);
+        var ok   = Assert.IsType<OkObjectResult>(result);
+        var page = Assert.IsType<PagedResult<ProjectResponse>>(ok.Value);
+        Assert.Single(page.Items);
+        Assert.False(page.HasMore);
     }
 
     [Fact]
