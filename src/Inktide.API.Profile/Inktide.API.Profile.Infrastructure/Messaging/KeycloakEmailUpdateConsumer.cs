@@ -81,7 +81,8 @@ public sealed class KeycloakEmailUpdateFaultConsumer(
         using var client = new SmtpClient();
         await client.ConnectAsync(smtp.Host, smtp.Port, SecureSocketOptions.Auto, ct).ConfigureAwait(false);
         if (!string.IsNullOrWhiteSpace(smtp.Username))
-            await client.AuthenticateAsync(smtp.Username, smtp.Password, ct).ConfigureAwait(false);
+            await client.AuthenticateAsync(smtp.Username, smtp.Password ?? string.Empty, ct)
+                .ConfigureAwait(false);
         await client.SendAsync(mimeMsg, ct).ConfigureAwait(false);
         await client.DisconnectAsync(true, ct).ConfigureAwait(false);
     }

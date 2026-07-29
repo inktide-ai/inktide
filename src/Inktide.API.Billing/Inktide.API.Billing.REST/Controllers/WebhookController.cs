@@ -50,7 +50,7 @@ public sealed class WebhookController : ControllerBase
 
         var headers = Request.Headers.ToDictionary(
             h => h.Key,
-            h => (IReadOnlyList<string>)h.Value.ToArray(),
+            h => (IReadOnlyList<string>)h.Value.Where(v => v is not null).Select(v => v!).ToArray(),
             StringComparer.OrdinalIgnoreCase);
         var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString();
         if (!processor.ValidateSignature(headers, rawBody, clientIp))

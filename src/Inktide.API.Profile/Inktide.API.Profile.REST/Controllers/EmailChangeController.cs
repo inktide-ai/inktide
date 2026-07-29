@@ -25,7 +25,9 @@ public sealed class EmailChangeController : ControllerBase
     [HttpPost("request")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Request([FromBody] RequestEmailChangeDto dto, CancellationToken ct)
+    public async Task<IActionResult> RequestEmailChange(
+        [FromBody] RequestEmailChangeDto dto,
+        CancellationToken ct)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null)

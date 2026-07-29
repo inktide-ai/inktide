@@ -87,7 +87,7 @@ public sealed class EmailChangeService : IEmailChangeService
         {
             await client.ConnectAsync(_smtp.Host, _smtp.Port, SecureSocketOptions.Auto, ct).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(_smtp.Username))
-                await client.AuthenticateAsync(_smtp.Username, _smtp.Password, ct).ConfigureAwait(false);
+                await client.AuthenticateAsync(_smtp.Username, _smtp.Password ?? string.Empty, ct).ConfigureAwait(false);
             await client.SendAsync(msg, ct).ConfigureAwait(false);
             await client.DisconnectAsync(true, ct).ConfigureAwait(false);
         }

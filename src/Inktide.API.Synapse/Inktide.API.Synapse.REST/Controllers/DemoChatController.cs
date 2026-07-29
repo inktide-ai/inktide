@@ -45,7 +45,11 @@ public sealed class DemoChatController : ControllerBase
                     detail: "Default chat provider is not registered or the LLM service is not running.",
                     statusCode: StatusCodes.Status503ServiceUnavailable);
 
-            return Ok(new DemoChatResponse { Text = result.Text, Model = result.Model });
+            return Ok(new DemoChatResponse
+            {
+                Text = result.Text ?? string.Empty,
+                Model = result.Model ?? string.Empty,
+            });
         }
         catch (HttpRequestException)
         {

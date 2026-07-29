@@ -11,9 +11,7 @@ namespace Inktide.API.Mcp.REST.Tools;
 /// These tools are stubs until the Project context exposes channel CRUD.
 /// </summary>
 [McpServerToolType]
-public sealed class ChannelLinkTools(
-    IAiCardService cardService,
-    IHttpContextAccessor http)
+public sealed class ChannelLinkTools(IHttpContextAccessor http)
 {
     private Guid GetUserId()
     {

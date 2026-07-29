@@ -78,7 +78,9 @@ namespace Inktide.API
 
         private static IConfiguration BuildConfiguration()
         {
-            var rootPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            // AppContext.BaseDirectory is never null and, unlike Assembly.Location,
+            // still resolves correctly under single-file publish.
+            var rootPath = AppContext.BaseDirectory;
 
             Environment.SetEnvironmentVariable("BASEDIR", rootPath);
 

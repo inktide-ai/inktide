@@ -36,7 +36,7 @@ public sealed class BillingRestApiStartup : IStartup, IMiddlewareConfigurator, I
             // Trust only the reverse proxy on the same host (nginx/caddy -> loopback -> Kestrel).
             // Clear defaults first - ASP.NET Core adds loopback to KnownNetworks by default, but
             // that would trust ANY source on loopback, not just a configured proxy.
-            options.KnownNetworks.Clear();
+            options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
             options.KnownProxies.Add(IPAddress.Loopback);
             options.KnownProxies.Add(IPAddress.IPv6Loopback);
