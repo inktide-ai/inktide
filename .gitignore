@@ -84,9 +84,12 @@ Thumbs.db
 *.db
 *.sqlite
 
-# Keycloak
-keycloakify/
-keycloak/
+# Keycloak — anchored to the repo root on purpose. Unanchored, `keycloak/`
+# matches at any depth, and because git is case-insensitive on macOS it also
+# matched src/**/Infrastructure/Keycloak/, silently keeping two source files
+# out of the repository and breaking the build on a clean checkout.
+/keycloakify/
+/keycloak/
 *.textClipping
 
 # Local scratch files
