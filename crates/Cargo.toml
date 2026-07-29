@@ -7,3 +7,33 @@ members = [
     "inktide-audio",
     "inktide-rendering",
 ]
+
+# Shared metadata. Crates inherit via `field.workspace = true`, so version and
+# MSRV cannot drift apart between crates.
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+# is_none_or stabilized in 1.82.0; bump when adopting newer APIs.
+rust-version = "1.82"
+license = "MIT"
+
+# Single source of truth for dependency versions across the workspace.
+[workspace.dependencies]
+hound = "3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+thiserror = "2"
+tracing = "0.1"
+wait-timeout = "0.2"
+which = "7"
+criterion = "0.5"
+inktide-lipsync = { path = "inktide-lipsync" }
+
+# Lint policy lives in the manifest rather than in a CI flag, so `cargo clippy`
+# behaves identically on a developer machine and in the pipeline.
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }

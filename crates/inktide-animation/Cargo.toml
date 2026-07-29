@@ -1,10 +1,15 @@
 [package]
 name = "inktide-animation"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
 
 [lib]
 name = "inktide_animation"
 path = "src/lib.rs"
 
 [dependencies]
+
+[lints]
+workspace = true

@@ -21,7 +21,11 @@ pub struct AmplitudeConfig {
 
 impl Default for AmplitudeConfig {
     fn default() -> Self {
-        Self { frame_ms: 20.0, silence_rms: 0.01, rms_thresholds: [0.04, 0.10, 0.20] }
+        Self {
+            frame_ms: 20.0,
+            silence_rms: 0.01,
+            rms_thresholds: [0.04, 0.10, 0.20],
+        }
     }
 }
 
@@ -35,13 +39,21 @@ pub struct AmplitudeAnalyzer {
 }
 
 impl AmplitudeAnalyzer {
-    pub fn new(config: AmplitudeConfig) -> Self { Self { config } }
-    pub fn with_defaults() -> Self { Self::new(AmplitudeConfig::default()) }
-    pub fn config(&self) -> &AmplitudeConfig { &self.config }
+    pub fn new(config: AmplitudeConfig) -> Self {
+        Self { config }
+    }
+    pub fn with_defaults() -> Self {
+        Self::new(AmplitudeConfig::default())
+    }
+    pub fn config(&self) -> &AmplitudeConfig {
+        &self.config
+    }
 }
 
 impl LipSyncBackend for AmplitudeAnalyzer {
-    fn name(&self) -> &str { "amplitude" }
+    fn name(&self) -> &str {
+        "amplitude"
+    }
 
     fn analyze(&self, wav_bytes: &[u8]) -> Result<VisemeTimeline, LipSyncError> {
         let cursor = Cursor::new(wav_bytes);
@@ -57,7 +69,14 @@ impl LipSyncBackend for AmplitudeAnalyzer {
         let frame_size = mono_frame * channels;
         let samples = decode_samples(&mut reader, spec)?;
 
-        debug!(sample_rate, channels, mono_frame, frame_size, total = samples.len(), "amplitude analysis");
+        debug!(
+            sample_rate,
+            channels,
+            mono_frame,
+            frame_size,
+            total = samples.len(),
+            "amplitude analysis"
+        );
 
         let mut cues: Vec<VisemeCue> = Vec::new();
         for (i, chunk) in samples.chunks(frame_size).enumerate() {
@@ -82,11 +101,17 @@ impl LipSyncBackend for AmplitudeAnalyzer {
 impl AmplitudeAnalyzer {
     fn rms_to_viseme(&self, rms: f32) -> Viseme {
         let [t0, t1, t2] = self.config.rms_thresholds;
-        if rms < self.config.silence_rms { Viseme::X }
-        else if rms < t0 { Viseme::A }
-        else if rms < t1 { Viseme::D }
-        else if rms < t2 { Viseme::B }
-        else              { Viseme::E }
+        if rms < self.config.silence_rms {
+            Viseme::X
+        } else if rms < t0 {
+            Viseme::A
+        } else if rms < t1 {
+            Viseme::D
+        } else if rms < t2 {
+            Viseme::B
+        } else {
+            Viseme::E
+        }
     }
 }
 

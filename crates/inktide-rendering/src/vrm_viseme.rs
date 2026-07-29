@@ -24,19 +24,27 @@ pub mod shape {
 pub struct BlendShapeWeights(HashMap<&'static str, f32>);
 
 impl BlendShapeWeights {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     /// Inserts `weight` clamped to [0, 1]. Values below 1e-4 are dropped.
     pub fn set(&mut self, key: &'static str, weight: f32) {
         let v = weight.clamp(0.0, 1.0);
-        if v > 1e-4 { self.0.insert(key, v); } else { self.0.remove(key); }
+        if v > 1e-4 {
+            self.0.insert(key, v);
+        } else {
+            self.0.remove(key);
+        }
     }
 
     pub fn get(&self, key: &'static str) -> f32 {
         self.0.get(key).copied().unwrap_or(0.0)
     }
 
-    pub fn is_empty(&self) -> bool { self.0.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 
     pub fn iter(&self) -> impl Iterator<Item = (&'static str, f32)> + '_ {
         self.0.iter().map(|(&k, &v)| (k, v))
@@ -65,14 +73,34 @@ pub(crate) fn viseme_to_weights(viseme: Viseme) -> BlendShapeWeights {
     let mut w = BlendShapeWeights::new();
     match viseme {
         Viseme::X => {}
-        Viseme::A => { w.set(shape::PP, 1.0); }
-        Viseme::B => { w.set(shape::KK, 1.0); }
-        Viseme::C => { w.set(shape::CH, 0.8); w.set(shape::EE, 0.2); }
-        Viseme::D => { w.set(shape::EE, 0.9); w.set(shape::IH, 0.1); }
-        Viseme::E => { w.set(shape::AA, 0.7); w.set(shape::OH, 0.3); }
-        Viseme::F => { w.set(shape::FF, 1.0); }
-        Viseme::G => { w.set(shape::TH, 1.0); }
-        Viseme::H => { w.set(shape::DD, 0.65); w.set(shape::NN, 0.35); }
+        Viseme::A => {
+            w.set(shape::PP, 1.0);
+        }
+        Viseme::B => {
+            w.set(shape::KK, 1.0);
+        }
+        Viseme::C => {
+            w.set(shape::CH, 0.8);
+            w.set(shape::EE, 0.2);
+        }
+        Viseme::D => {
+            w.set(shape::EE, 0.9);
+            w.set(shape::IH, 0.1);
+        }
+        Viseme::E => {
+            w.set(shape::AA, 0.7);
+            w.set(shape::OH, 0.3);
+        }
+        Viseme::F => {
+            w.set(shape::FF, 1.0);
+        }
+        Viseme::G => {
+            w.set(shape::TH, 1.0);
+        }
+        Viseme::H => {
+            w.set(shape::DD, 0.65);
+            w.set(shape::NN, 0.35);
+        }
     }
     w
 }
@@ -103,10 +131,18 @@ mod tests {
     #[test]
     fn all_shape_constants_are_lowercase() {
         for (name, val) in [
-            ("AA", shape::AA), ("IH", shape::IH), ("OU", shape::OU),
-            ("EE", shape::EE), ("OH", shape::OH), ("PP", shape::PP),
-            ("FF", shape::FF), ("TH", shape::TH), ("DD", shape::DD),
-            ("KK", shape::KK), ("CH", shape::CH), ("SS", shape::SS),
+            ("AA", shape::AA),
+            ("IH", shape::IH),
+            ("OU", shape::OU),
+            ("EE", shape::EE),
+            ("OH", shape::OH),
+            ("PP", shape::PP),
+            ("FF", shape::FF),
+            ("TH", shape::TH),
+            ("DD", shape::DD),
+            ("KK", shape::KK),
+            ("CH", shape::CH),
+            ("SS", shape::SS),
             ("NN", shape::NN),
         ] {
             assert!(

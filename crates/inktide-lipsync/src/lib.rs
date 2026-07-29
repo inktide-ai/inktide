@@ -22,9 +22,9 @@ mod error;
 mod rhubarb;
 mod viseme;
 
+pub use amplitude::{AmplitudeAnalyzer, AmplitudeConfig};
 pub use analyzer::LipSyncAnalyzer;
 pub use backend::LipSyncBackend;
 pub use error::LipSyncError;
-pub use viseme::{Viseme, VisemeCue, VisemeTimeline};
-pub use amplitude::{AmplitudeAnalyzer, AmplitudeConfig};
 pub use rhubarb::{RhubarbAnalyzer, RhubarbConfig};
+pub use viseme::{Viseme, VisemeCue, VisemeTimeline};

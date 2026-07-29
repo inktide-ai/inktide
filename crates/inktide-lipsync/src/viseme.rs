@@ -1,5 +1,5 @@
-use std::time::Duration;
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 
 use crate::error::LipSyncError;
 
@@ -10,16 +10,32 @@ use crate::error::LipSyncError;
 /// D - E/I     E - A/O      F - F/V      G - TH/DH    H - L/D/N
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum Viseme { X, A, B, C, D, E, F, G, H }
+pub enum Viseme {
+    X,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+}
 
 impl TryFrom<&str> for Viseme {
     type Error = LipSyncError;
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         match s {
-            "X" => Ok(Self::X), "A" => Ok(Self::A), "B" => Ok(Self::B),
-            "C" => Ok(Self::C), "D" => Ok(Self::D), "E" => Ok(Self::E),
-            "F" => Ok(Self::F), "G" => Ok(Self::G), "H" => Ok(Self::H),
+            "X" => Ok(Self::X),
+            "A" => Ok(Self::A),
+            "B" => Ok(Self::B),
+            "C" => Ok(Self::C),
+            "D" => Ok(Self::D),
+            "E" => Ok(Self::E),
+            "F" => Ok(Self::F),
+            "G" => Ok(Self::G),
+            "H" => Ok(Self::H),
             other => Err(LipSyncError::UnknownViseme(other.to_owned())),
         }
     }
@@ -27,7 +43,9 @@ impl TryFrom<&str> for Viseme {
 
 impl Viseme {
     #[deprecated(since = "0.2.0", note = "use `Viseme::try_from(s)` instead")]
-    pub fn from_rhubarb(s: &str) -> Option<Self> { Self::try_from(s).ok() }
+    pub fn from_rhubarb(s: &str) -> Option<Self> {
+        Self::try_from(s).ok()
+    }
 }
 
 // Serde uses { secs, nanos } for Duration by default - useless on the wire.
@@ -43,9 +61,9 @@ mod duration_ms {
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Duration, D::Error> {
         let ms = <f64 as serde::Deserialize>::deserialize(d)?;
         if ms < 0.0 || !ms.is_finite() {
-            return Err(serde::de::Error::custom(
-                format!("duration must be a non-negative finite number of ms, got {ms}")
-            ));
+            return Err(serde::de::Error::custom(format!(
+                "duration must be a non-negative finite number of ms, got {ms}"
+            )));
         }
         Ok(Duration::from_secs_f64(ms / 1_000.0))
     }
@@ -101,8 +119,12 @@ impl VisemeTimeline {
         Self { cues, duration }
     }
 
-    pub fn cues(&self) -> &[VisemeCue] { &self.cues }
-    pub fn duration(&self) -> Duration { self.duration }
+    pub fn cues(&self) -> &[VisemeCue] {
+        &self.cues
+    }
+    pub fn duration(&self) -> Duration {
+        self.duration
+    }
 
     /// Returns `(current, next, progress)` at `time`, where `progress` in [0, 1]
     /// is how far through the current cue we are. Used by the renderer to blend.
@@ -111,7 +133,10 @@ impl VisemeTimeline {
             return (Viseme::X, Viseme::X, 0.0);
         }
 
-        let idx = self.cues.partition_point(|c| c.start <= time).saturating_sub(1);
+        let idx = self
+            .cues
+            .partition_point(|c| c.start <= time)
+            .saturating_sub(1);
         let current = self.cues[idx].viseme;
         let next_cue = self.cues.get(idx + 1);
         let next = next_cue.map_or(Viseme::X, |c| c.viseme);
@@ -140,9 +165,18 @@ mod tests {
     fn timeline() -> VisemeTimeline {
         VisemeTimeline::new(
             vec![
-                VisemeCue { start: Duration::ZERO, viseme: Viseme::X },
-                VisemeCue { start: Duration::from_millis(100), viseme: Viseme::E },
-                VisemeCue { start: Duration::from_millis(300), viseme: Viseme::X },
+                VisemeCue {
+                    start: Duration::ZERO,
+                    viseme: Viseme::X,
+                },
+                VisemeCue {
+                    start: Duration::from_millis(100),
+                    viseme: Viseme::E,
+                },
+                VisemeCue {
+                    start: Duration::from_millis(300),
+                    viseme: Viseme::X,
+                },
             ],
             Duration::from_millis(500),
         )
@@ -184,24 +218,24 @@ mod tests {
 
     #[test]
     fn viseme_cue_serialises_to_start_ms() {
-        let cue = VisemeCue { start: Duration::from_millis(120), viseme: Viseme::E };
+        let cue = VisemeCue {
+            start: Duration::from_millis(120),
+            viseme: Viseme::E,
+        };
         let json = serde_json::to_string(&cue).unwrap();
         assert!(json.contains("startMs") && json.contains("120"));
     }
 
     #[test]
     fn deserialize_rejects_negative_duration() {
-        let result = serde_json::from_str::<VisemeTimeline>(
-            r#"{"durationMs": -100.0, "cues": []}"#
-        );
+        let result =
+            serde_json::from_str::<VisemeTimeline>(r#"{"durationMs": -100.0, "cues": []}"#);
         assert!(result.is_err());
     }
 
     #[test]
     fn deserialize_rejects_negative_cue_start() {
-        let result = serde_json::from_str::<VisemeCue>(
-            r#"{"startMs": -50.0, "viseme": "X"}"#
-        );
+        let result = serde_json::from_str::<VisemeCue>(r#"{"startMs": -50.0, "viseme": "X"}"#);
         assert!(result.is_err());
     }
 

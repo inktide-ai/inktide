@@ -14,7 +14,9 @@ pub struct ControllerConfig {
 }
 
 impl Default for ControllerConfig {
-    fn default() -> Self { Self { blend_start: 0.70 } }
+    fn default() -> Self {
+        Self { blend_start: 0.70 }
+    }
 }
 
 /// Drives avatar lip blend shapes from a [`VisemeTimeline`].
@@ -36,7 +38,11 @@ impl LipSyncController<VrmVisemeMapper> {
 
 impl<M: VisemeMapper> LipSyncController<M> {
     pub fn with_config(timeline: VisemeTimeline, config: ControllerConfig, mapper: M) -> Self {
-        Self { timeline, config, mapper }
+        Self {
+            timeline,
+            config,
+            mapper,
+        }
     }
 
     /// Returns blend weights for `playback_time`. Call once per render frame.
@@ -60,27 +66,40 @@ impl<M: VisemeMapper> LipSyncController<M> {
         current_weights.lerp(&self.mapper.viseme_to_weights(next), t)
     }
 
-    pub fn duration(&self) -> Duration { self.timeline.duration() }
+    pub fn duration(&self) -> Duration {
+        self.timeline.duration()
+    }
 
     pub fn is_finished(&self, playback_time: Duration) -> bool {
         playback_time >= self.timeline.duration()
     }
 }
 
-pub(crate) fn ease_in_out(t: f32) -> f32 { t * t * (3.0 - 2.0 * t) }
+pub(crate) fn ease_in_out(t: f32) -> f32 {
+    t * t * (3.0 - 2.0 * t)
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use inktide_lipsync::{Viseme, VisemeCue, VisemeTimeline};
     use crate::vrm_viseme::shape;
+    use inktide_lipsync::{Viseme, VisemeCue, VisemeTimeline};
 
     fn make_controller() -> LipSyncController {
         LipSyncController::new(VisemeTimeline::new(
             vec![
-                VisemeCue { start: Duration::ZERO, viseme: Viseme::X },
-                VisemeCue { start: Duration::from_millis(200), viseme: Viseme::E },
-                VisemeCue { start: Duration::from_millis(600), viseme: Viseme::X },
+                VisemeCue {
+                    start: Duration::ZERO,
+                    viseme: Viseme::X,
+                },
+                VisemeCue {
+                    start: Duration::from_millis(200),
+                    viseme: Viseme::E,
+                },
+                VisemeCue {
+                    start: Duration::from_millis(600),
+                    viseme: Viseme::X,
+                },
             ],
             Duration::from_millis(800),
         ))
@@ -108,13 +127,21 @@ mod tests {
     fn custom_blend_start() {
         let timeline = VisemeTimeline::new(
             vec![
-                VisemeCue { start: Duration::ZERO, viseme: Viseme::X },
-                VisemeCue { start: Duration::from_millis(100), viseme: Viseme::E },
+                VisemeCue {
+                    start: Duration::ZERO,
+                    viseme: Viseme::X,
+                },
+                VisemeCue {
+                    start: Duration::from_millis(100),
+                    viseme: Viseme::E,
+                },
             ],
             Duration::from_millis(200),
         );
         let c = LipSyncController::with_config(
-            timeline, ControllerConfig { blend_start: 0.0 }, VrmVisemeMapper,
+            timeline,
+            ControllerConfig { blend_start: 0.0 },
+            VrmVisemeMapper,
         );
         // blend_start=0 means blending starts immediately, so aa must already be > 0
         assert!(c.weights_at(Duration::from_millis(50)).get(shape::AA) > 0.0);
@@ -126,13 +153,21 @@ mod tests {
         // It should be treated as "never blend" (hold current pose for full cue).
         let timeline = VisemeTimeline::new(
             vec![
-                VisemeCue { start: Duration::ZERO, viseme: Viseme::X },
-                VisemeCue { start: Duration::from_millis(100), viseme: Viseme::E },
+                VisemeCue {
+                    start: Duration::ZERO,
+                    viseme: Viseme::X,
+                },
+                VisemeCue {
+                    start: Duration::from_millis(100),
+                    viseme: Viseme::E,
+                },
             ],
             Duration::from_millis(200),
         );
         let c = LipSyncController::with_config(
-            timeline, ControllerConfig { blend_start: 1.0 }, VrmVisemeMapper,
+            timeline,
+            ControllerConfig { blend_start: 1.0 },
+            VrmVisemeMapper,
         );
         // At end-of-timeline raw==1.0 previously caused NaN -> all weights drop to zero.
         // With the guard, weights are deterministic (current cue held, no blend).
@@ -148,8 +183,14 @@ mod tests {
         // viseme_to_weights(current) - no lerp artifacts, no extra allocations.
         let timeline = VisemeTimeline::new(
             vec![
-                VisemeCue { start: Duration::ZERO, viseme: Viseme::E },
-                VisemeCue { start: Duration::from_millis(500), viseme: Viseme::X },
+                VisemeCue {
+                    start: Duration::ZERO,
+                    viseme: Viseme::E,
+                },
+                VisemeCue {
+                    start: Duration::from_millis(500),
+                    viseme: Viseme::X,
+                },
             ],
             Duration::from_millis(600),
         );
@@ -161,7 +202,8 @@ mod tests {
             assert!(
                 (hold_weights.get(k) - expected.get(k)).abs() < 1e-6,
                 "hold phase: shape '{k}' mismatch — got {}, expected {}",
-                hold_weights.get(k), expected.get(k)
+                hold_weights.get(k),
+                expected.get(k)
             );
         }
     }

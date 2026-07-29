@@ -14,8 +14,15 @@ use std::time::Duration;
 /// `duration_ms`, cycling through all nine Preston Blair shapes.
 fn synthetic_timeline(n_cues: usize, duration_ms: u64) -> VisemeTimeline {
     let shapes = [
-        Viseme::X, Viseme::A, Viseme::B, Viseme::C, Viseme::D,
-        Viseme::E, Viseme::F, Viseme::G, Viseme::H,
+        Viseme::X,
+        Viseme::A,
+        Viseme::B,
+        Viseme::C,
+        Viseme::D,
+        Viseme::E,
+        Viseme::F,
+        Viseme::G,
+        Viseme::H,
     ];
     let step = duration_ms / n_cues.max(1) as u64;
     let cues = (0..n_cues)
@@ -35,18 +42,14 @@ fn bench_blend_state(c: &mut Criterion) {
     let timeline_3s_20cues = synthetic_timeline(20, 3000);
 
     group.bench_function(BenchmarkId::new("single_call", "20_cues_3s"), |b| {
-        b.iter(|| {
-            black_box(timeline_3s_20cues.blend_state(black_box(Duration::from_millis(1500))))
-        })
+        b.iter(|| black_box(timeline_3s_20cues.blend_state(black_box(Duration::from_millis(1500)))))
     });
 
     // Longer fragment (~8s, e.g. a longer sentence), 50 cues, to see how the
     // binary search scales with cue count.
     let timeline_8s_50cues = synthetic_timeline(50, 8000);
     group.bench_function(BenchmarkId::new("single_call", "50_cues_8s"), |b| {
-        b.iter(|| {
-            black_box(timeline_8s_50cues.blend_state(black_box(Duration::from_millis(4000))))
-        })
+        b.iter(|| black_box(timeline_8s_50cues.blend_state(black_box(Duration::from_millis(4000)))))
     });
 
     group.finish();

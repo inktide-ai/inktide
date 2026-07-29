@@ -20,10 +20,15 @@ struct RhubarbOutput {
 }
 
 #[derive(Deserialize)]
-struct RhubarbMetadata { duration: f64 }
+struct RhubarbMetadata {
+    duration: f64,
+}
 
 #[derive(Deserialize)]
-struct RhubarbCue { start: f64, value: String }
+struct RhubarbCue {
+    start: f64,
+    value: String,
+}
 
 /// Default Rhubarb subprocess timeout, aligned with the Inktide <=4 s end-to-end
 /// latency budget. Rhubarb normally finishes in 100-500 ms; this allows an 8-40x
@@ -46,7 +51,9 @@ pub struct RhubarbAnalyzer {
 }
 
 impl RhubarbAnalyzer {
-    pub fn new(config: RhubarbConfig) -> Self { Self { config } }
+    pub fn new(config: RhubarbConfig) -> Self {
+        Self { config }
+    }
 
     pub fn from_path() -> Option<Self> {
         which::which("rhubarb").ok().map(|exe| {
@@ -59,7 +66,9 @@ impl RhubarbAnalyzer {
 }
 
 impl LipSyncBackend for RhubarbAnalyzer {
-    fn name(&self) -> &str { "rhubarb" }
+    fn name(&self) -> &str {
+        "rhubarb"
+    }
 
     #[instrument(skip(self, wav_bytes), fields(bytes = wav_bytes.len()))]
     fn analyze(&self, wav_bytes: &[u8]) -> Result<VisemeTimeline, LipSyncError> {
@@ -134,7 +143,9 @@ fn write_temp_wav(wav_bytes: &[u8]) -> Result<NamedTempFile, LipSyncError> {
 
 fn checked_secs(secs: f64, context: &str) -> Result<Duration, LipSyncError> {
     if secs < 0.0 || !secs.is_finite() {
-        return Err(LipSyncError::RhubarbFailed(format!("invalid {context}: {secs}")));
+        return Err(LipSyncError::RhubarbFailed(format!(
+            "invalid {context}: {secs}"
+        )));
     }
     Ok(Duration::from_secs_f64(secs))
 }
@@ -142,11 +153,15 @@ fn checked_secs(secs: f64, context: &str) -> Result<Duration, LipSyncError> {
 fn parse_output(stdout: &[u8]) -> Result<VisemeTimeline, LipSyncError> {
     let parsed: RhubarbOutput = serde_json::from_slice(stdout).map_err(LipSyncError::Json)?;
 
-    let cues = parsed.mouth_cues.iter()
-        .map(|c| Ok(VisemeCue {
-            start: checked_secs(c.start, "cue timestamp")?,
-            viseme: Viseme::try_from(c.value.as_str())?,
-        }))
+    let cues = parsed
+        .mouth_cues
+        .iter()
+        .map(|c| {
+            Ok(VisemeCue {
+                start: checked_secs(c.start, "cue timestamp")?,
+                viseme: Viseme::try_from(c.value.as_str())?,
+            })
+        })
         .collect::<Result<Vec<_>, LipSyncError>>()?;
 
     Ok(VisemeTimeline::new(

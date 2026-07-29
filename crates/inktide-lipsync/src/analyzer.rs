@@ -20,7 +20,9 @@ pub struct LipSyncAnalyzer {
 impl LipSyncAnalyzer {
     /// Primary extension point - wraps any [`LipSyncBackend`] implementation.
     pub fn from_backend(backend: impl LipSyncBackend + 'static) -> Self {
-        Self { inner: Box::new(backend) }
+        Self {
+            inner: Box::new(backend),
+        }
     }
 
     /// Probes `$PATH` for `rhubarb`; falls back to amplitude if not found.
