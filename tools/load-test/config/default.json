@@ -1,0 +1,56 @@
+{
+  "baseUrl": "http://localhost:5001",
+  "keycloak": {
+    "url": "http://localhost:8080",
+    "realm": "chimera",
+    "clientId": "chimera-web"
+  },
+  "endpoints": {
+    "healthLive": "/health/live",
+    "healthReady": "/health/ready",
+    "chatProviders": "/api/v1/chat/providers",
+    "ttsProviders": "/api/v1/tts/providers",
+    "ttsVoices": "/api/v1/tts/voices",
+    "demoChat": "/api/v1/demo/chat",
+    "me": "/api/v1/me",
+    "mePreferences": "/api/v1/me/preferences",
+    "projects": "/api/v1/projects",
+    "soulsCards": "/api/v1/souls/cards",
+    "ttsSynthesize": "/api/v1/tts/synthesize",
+    "chatSend": "/api/v1/connectors/inktide/messages",
+    "audioHub": "/hubs/audio"
+  },
+  "hubEvents": {
+    "textChunk": "textChunk",
+    "audioReceived": "audioReceived"
+  },
+  "slo": {
+    "chatTotalMs": 4000,
+    "chatViolationRate": 0.05,
+    "chatTimeoutMs": 30000
+  },
+  "rateBudgets": {
+    "anonPerMinPerIp": 60,
+    "authPerMinPerUser": 300,
+    "ttsPerMinPerUser": 20,
+    "demoChatPerMinPerIp": 5
+  },
+  "tts": {
+    "providerId": "kokoro",
+    "voiceId": "af_bella",
+    "format": "mp3",
+    "text": "The tide comes in slowly at first, then all at once, carrying every small sound of the harbor with it."
+  },
+  "chat": {
+    "messagesPerSession": 3,
+    "cooldownSeconds": 2
+  },
+  "scenarioMeta": {
+    "health":     { "auth": false },
+    "publicRest": { "auth": false },
+    "authCrud":   { "auth": true },
+    "ttsStream":  { "auth": true, "perUserBudget": "tts" },
+    "chatE2E":    { "auth": true, "closedModel": true },
+    "rateLimits": { "auth": true, "exemptFromGuard": true }
+  }
+}

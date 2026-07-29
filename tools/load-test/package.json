@@ -1,0 +1,15 @@
+{
+  "name": "load-test",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bootstrap": "node scripts/bootstrap-realm.mjs",
+    "seed": "node scripts/seed-users.mjs",
+    "tokens": "node scripts/fetch-tokens.mjs",
+    "smoke": "PROFILE=smoke bash scripts/run.sh",
+    "baseline": "PROFILE=baseline bash scripts/run.sh",
+    "report": "node scripts/report.mjs",
+    "bombardier": "bash scripts/bombardier.sh"
+  }
+}

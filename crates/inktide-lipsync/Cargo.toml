@@ -18,3 +18,10 @@ thiserror = "2"
 which = "7"
 tracing = "0.1"
 wait-timeout = "0.2"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "blend_state"
+harness = false

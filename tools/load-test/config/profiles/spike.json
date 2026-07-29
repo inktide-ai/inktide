@@ -1,0 +1,30 @@
+{
+  "description": "Burst resilience: sudden 8x jump in authenticated traffic, hold, and recovery. Never run against production.",
+  "scenarios": {
+    "health":     { "enabled": true, "executor": "constant-arrival-rate", "rate": 6, "timeUnit": "1m", "duration": "7m", "preAllocatedVUs": 2, "maxVUs": 4 },
+    "publicRest": { "enabled": false },
+    "authCrud":   {
+      "enabled": true,
+      "executor": "ramping-arrival-rate",
+      "startRate": 20,
+      "timeUnit": "1s",
+      "preAllocatedVUs": 50,
+      "maxVUs": 400,
+      "stages": [
+        { "target": 20,  "duration": "2m" },
+        { "target": 160, "duration": "10s" },
+        { "target": 160, "duration": "1m" },
+        { "target": 20,  "duration": "10s" },
+        { "target": 20,  "duration": "3m" }
+      ]
+    },
+    "ttsStream":  { "enabled": false },
+    "chatE2E":    { "enabled": false },
+    "rateLimits": { "enabled": false }
+  },
+  "thresholds": {
+    "http_req_failed{scenario:authCrud,kind:api}": ["rate<0.05"],
+    "crud_429": ["rate<0.02"]
+  },
+  "userPool": { "size": 100 }
+}

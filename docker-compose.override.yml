@@ -1,0 +1,14 @@
+# Local override for the benchmark run:
+# - Developer module races its own DB migration at startup and kills the host — disabled.
+# - LlmProviders section is absent from appsettings, so the Kernel has no fallback
+#   "ollama" chat service — registered here against host Ollama.
+services:
+  dotnet:
+    environment:
+      "Modules__Developer.Infrastructure__Enabled": "false"
+      "Modules__Developer.REST__Enabled": "false"
+      "LlmProviders__Providers__ollama__IsEnabled": "true"
+      "LlmProviders__Providers__ollama__ProviderType": "openai-compat"
+      "LlmProviders__Providers__ollama__BaseUrl": "http://host.docker.internal:11434/v1"
+      "LlmProviders__Providers__ollama__FallbackModel": "qwen2.5:7b"
+      "LlmProviders__Providers__ollama__ApiKey": "ollama"

@@ -1,0 +1,30 @@
+{
+  "description": "Find the saturation knee of the authenticated CRUD path. Latency thresholds off — the point is to observe degradation, not gate on it. Never run against production.",
+  "scenarios": {
+    "health":     { "enabled": true, "executor": "constant-arrival-rate", "rate": 6, "timeUnit": "1m", "duration": "16m", "preAllocatedVUs": 2, "maxVUs": 4 },
+    "publicRest": { "enabled": false },
+    "authCrud":   {
+      "enabled": true,
+      "executor": "ramping-arrival-rate",
+      "startRate": 10,
+      "timeUnit": "1s",
+      "preAllocatedVUs": 50,
+      "maxVUs": 400,
+      "stages": [
+        { "target": 50,  "duration": "3m" },
+        { "target": 100, "duration": "4m" },
+        { "target": 150, "duration": "4m" },
+        { "target": 200, "duration": "4m" },
+        { "target": 0,   "duration": "1m" }
+      ]
+    },
+    "ttsStream":  { "enabled": false },
+    "chatE2E":    { "enabled": false },
+    "rateLimits": { "enabled": false }
+  },
+  "thresholds": {
+    "http_req_failed{scenario:authCrud,kind:api}": ["rate<0.05"],
+    "crud_429": ["rate<0.01"]
+  },
+  "userPool": { "size": 100 }
+}

@@ -1,0 +1,25 @@
+{
+  "description": "Steady-state SLO measurement at production-like mixed load. ~10 min. Needs full stack (workers) for ttsStream/chatE2E.",
+  "scenarios": {
+    "health":     { "enabled": true, "executor": "constant-arrival-rate", "rate": 6, "timeUnit": "1m", "duration": "10m", "preAllocatedVUs": 2, "maxVUs": 4 },
+    "publicRest": { "enabled": true, "executor": "constant-arrival-rate", "rate": 40, "timeUnit": "1m", "duration": "10m", "preAllocatedVUs": 3, "maxVUs": 8 },
+    "authCrud":   { "enabled": true, "executor": "constant-arrival-rate", "rate": 30, "timeUnit": "1s", "duration": "10m", "preAllocatedVUs": 30, "maxVUs": 100 },
+    "ttsStream":  { "enabled": true, "executor": "constant-arrival-rate", "rate": 5, "timeUnit": "1s", "duration": "10m", "preAllocatedVUs": 10, "maxVUs": 40 },
+    "chatE2E":    { "enabled": true, "executor": "constant-vus", "vus": 5, "duration": "10m", "gracefulStop": "45s" },
+    "rateLimits": { "enabled": false }
+  },
+  "thresholds": {
+    "checks": ["rate>0.99"],
+    "http_req_failed{scenario:authCrud,kind:api}": ["rate<0.01"],
+    "http_req_duration{scenario:authCrud,kind:api}": ["p(95)<300"],
+    "http_req_duration{scenario:publicRest}": ["p(95)<200"],
+    "http_req_duration{scenario:health}": ["p(95)<100"],
+    "anon_429": ["rate==0"],
+    "crud_429": ["rate<0.005"],
+    "tts_429": ["rate<0.01"],
+    "tts_ttfb_ms": ["p(95)<1500"],
+    "chat_total_ms": ["p(95)<4000"],
+    "chat_slo_violations": ["rate<0.05"]
+  },
+  "userPool": { "size": 50 }
+}

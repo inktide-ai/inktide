@@ -89,7 +89,7 @@ keycloakify/
 keycloak/
 *.textClipping
 
-# Diploma / local scratch files
+# Local scratch files
 diploma_screens/
 generate_diploma_section.py
 result.docx

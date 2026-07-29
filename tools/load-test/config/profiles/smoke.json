@@ -1,0 +1,25 @@
+{
+  "description": "Functional gate: minimal load, strict error-rate thresholds, loose latency. ~1 min. Safe for CI.",
+  "scenarios": {
+    "health":     { "enabled": true, "executor": "constant-arrival-rate", "rate": 6, "timeUnit": "1m", "duration": "1m", "preAllocatedVUs": 2, "maxVUs": 4 },
+    "publicRest": { "enabled": true, "executor": "constant-arrival-rate", "rate": 20, "timeUnit": "1m", "duration": "1m", "preAllocatedVUs": 2, "maxVUs": 6 },
+    "authCrud":   { "enabled": true, "executor": "constant-arrival-rate", "rate": 2, "timeUnit": "1s", "duration": "1m", "preAllocatedVUs": 4, "maxVUs": 10 },
+    "ttsStream":  { "enabled": false },
+    "chatE2E":    { "enabled": true, "executor": "per-vu-iterations", "vus": 2, "iterations": 2, "maxDuration": "1m" },
+    "rateLimits": { "enabled": false }
+  },
+  "chat": { "messagesPerSession": 0 },
+  "thresholds": {
+    "checks": ["rate>0.99"],
+    "http_req_failed{scenario:health}": ["rate<0.01"],
+    "http_req_failed{scenario:publicRest}": ["rate<0.01"],
+    "http_req_failed{scenario:authCrud,kind:api}": ["rate<0.01"],
+    "http_req_duration{scenario:health}": ["p(95)<1000"],
+    "http_req_duration{scenario:publicRest}": ["p(95)<1000"],
+    "http_req_duration{scenario:authCrud,kind:api}": ["p(95)<1000"],
+    "anon_429": ["rate==0"],
+    "crud_429": ["rate==0"],
+    "signalr_handshake_ok": ["rate==1"]
+  },
+  "userPool": { "size": 5 }
+}

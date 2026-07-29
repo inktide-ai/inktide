@@ -1,0 +1,12 @@
+{"ts":"2026-07-18T20:31:24.195Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":11444,"totalMs":19365,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:31:49.937Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":11592,"totalMs":23503,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:32:15.647Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":13517,"totalMs":23400,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:32:43.358Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":9480,"totalMs":25332,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:33:05.108Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":11570,"totalMs":19488,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:33:28.830Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":13610,"totalMs":21514,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:33:52.536Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":13530,"totalMs":21453,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:34:14.392Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":11701,"totalMs":19651,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:34:36.125Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":9638,"totalMs":19526,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:34:55.892Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":9617,"totalMs":17528,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:35:19.628Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":13556,"totalMs":21469,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}
+{"ts":"2026-07-18T20:35:41.353Z","channelId":"53d4185c-a8ff-4abd-a2a3-210660cc9bad","message":"Hello, benchmark test.","firstByteMs":11513,"totalMs":19439,"chunks":3,"sloViolation":true,"sloThresholdMs":4000}

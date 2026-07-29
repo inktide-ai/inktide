@@ -1,0 +1,29 @@
+# Prometheus config for the compose `bench` profile.
+# Two API targets are configured on purpose — one of them being DOWN is
+# expected and labeled:
+#   dotnet:5001               → API running inside compose  (source=compose)
+#   host.docker.internal:5001 → API running via `dotnet run` (source=host)
+# k6 pushes its metrics here via remote write (--web.enable-remote-write-receiver).
+
+global:
+  scrape_interval: 5s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: inktide-api-compose
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['dotnet:5001']
+        labels:
+          source: compose
+
+  - job_name: inktide-api-host
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['host.docker.internal:5001']
+        labels:
+          source: host
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']

@@ -28,14 +28,6 @@ export function configureApiAuth(provider: ApiAuthProvider): void {
   _auth = provider
 }
 
-/**
- * @deprecated Returns a potentially-stale token with no refresh.
- */
-export function getAuthToken(): string | undefined {
-  return _auth.getToken()
-}
-
-
 export class ApiError extends Error {
   constructor(
     public readonly status: number,

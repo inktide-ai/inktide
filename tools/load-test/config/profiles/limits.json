@@ -1,0 +1,15 @@
+{
+  "description": "Rate-limiter enforcement verification: deliberately exceeds anon and TTS budgets and asserts 429s. Poisons the shared IP budget for ~60s — run in isolation, never alongside other profiles.",
+  "scenarios": {
+    "health":     { "enabled": false },
+    "publicRest": { "enabled": false },
+    "authCrud":   { "enabled": false },
+    "ttsStream":  { "enabled": false },
+    "chatE2E":    { "enabled": false },
+    "rateLimits": { "enabled": true, "executor": "per-vu-iterations", "vus": 1, "iterations": 1, "maxDuration": "5m" }
+  },
+  "thresholds": {
+    "limiter_enforced": ["rate==1"]
+  },
+  "userPool": { "size": 1 }
+}

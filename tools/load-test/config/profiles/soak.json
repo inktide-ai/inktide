@@ -1,0 +1,21 @@
+{
+  "description": "2h endurance at modest steady load: memory leaks, latency drift, WS keepalive, token refresh churn.",
+  "scenarios": {
+    "health":     { "enabled": true, "executor": "constant-arrival-rate", "rate": 6, "timeUnit": "1m", "duration": "2h", "preAllocatedVUs": 2, "maxVUs": 4 },
+    "publicRest": { "enabled": true, "executor": "constant-arrival-rate", "rate": 20, "timeUnit": "1m", "duration": "2h", "preAllocatedVUs": 2, "maxVUs": 6 },
+    "authCrud":   { "enabled": true, "executor": "constant-arrival-rate", "rate": 10, "timeUnit": "1s", "duration": "2h", "preAllocatedVUs": 15, "maxVUs": 60 },
+    "ttsStream":  { "enabled": true, "executor": "constant-arrival-rate", "rate": 1, "timeUnit": "1s", "duration": "2h", "preAllocatedVUs": 5, "maxVUs": 20 },
+    "chatE2E":    { "enabled": true, "executor": "constant-vus", "vus": 3, "duration": "2h", "gracefulStop": "45s" },
+    "rateLimits": { "enabled": false }
+  },
+  "thresholds": {
+    "checks": ["rate>0.99"],
+    "http_req_failed{scenario:authCrud,kind:api}": ["rate<0.01"],
+    "http_req_duration{scenario:authCrud,kind:api}": ["p(95)<400"],
+    "anon_429": ["rate==0"],
+    "crud_429": ["rate<0.005"],
+    "chat_total_ms": ["p(95)<4000"],
+    "chat_slo_violations": ["rate<0.05"]
+  },
+  "userPool": { "size": 20 }
+}

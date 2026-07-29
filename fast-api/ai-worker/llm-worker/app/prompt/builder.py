@@ -1,7 +1,6 @@
 from app.models.envelope import SynapseAggregatedEnvelope
 
-
-type OllamaMessage = dict[str, str]
+OllamaMessage = dict[str, str]
 
 
 def build_messages(envelope: SynapseAggregatedEnvelope) -> list[OllamaMessage]:

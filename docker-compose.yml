@@ -3,6 +3,7 @@
 # Запуск инфры:                    docker compose --profile core up -d
 # Запуск AI воркеров:              docker compose --profile workers up -d
 # Запуск всего:                    docker compose --profile core --profile workers up -d
+# Нагрузочное тестирование:        docker compose --profile bench up -d   (+ tools/load-test/)
 # Остановка:                       docker compose down
 # Логи сервиса:                    docker compose logs -f keycloak
 # Пересобрать один:                docker compose up -d --no-deps --build dotnet
@@ -17,6 +18,8 @@
 #   scribe      8001   — FastAPI факт-экстракция (Qwen via Ollama на хосте :11434)
 #   kokoro      8880   — Kokoro TTS
 #   ngrok       4040   — ngrok inspector (dev profile, туннель → :5001)
+#   prometheus  9090   — метрики нагрузочных прогонов (bench profile)
+#   grafana     3001   — дашборд load-test (bench profile; 3000 занят Next.js)
 #
 # Ollama запускается нативно на хосте :11434 — не контейнер.
 
@@ -26,6 +29,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: inktide-api:local   # стабильный тег: CI собирает его через buildx (gha cache) и запускает compose с --no-build
     platform: linux/amd64   # Rhubarb ships x86-64 only; Rosetta handles emulation on Apple Silicon
     profiles: [core]
     restart: unless-stopped
@@ -297,6 +301,52 @@ services:
       - "8880:8880"
     restart: unless-stopped
 
+  # ── Нагрузочное тестирование (bench profile, tools/load-test/) ────────────
+  # Prometheus скрейпит /metrics API (и compose-, и host-вариант — один из
+  # таргетов всегда down, это ожидаемо) и принимает remote write от k6.
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    profiles: [bench]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512m
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+      - --storage.tsdb.retention.time=7d
+    ports:
+      - "127.0.0.1:9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./tools/load-test/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_bench_data:/prometheus
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    profiles: [bench]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256m
+    environment:
+      # Локальный бенч-стенд: анонимный админ, без регистрации.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "127.0.0.1:3001:3000"   # 3000 занят Next.js
+    volumes:
+      - ./tools/load-test/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./tools/load-test/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
 volumes:
   postgres_data:
   keycloak_postgres_data:
@@ -305,3 +355,4 @@ volumes:
   minio_data:
   rabbitmq_data:
   dotnet_dataprotection:
+  prometheus_bench_data:

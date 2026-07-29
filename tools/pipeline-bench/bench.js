@@ -11,7 +11,7 @@ const MESSAGE       = process.env.MESSAGE || 'Hello, benchmark test.'
 const API_URL       = process.env.API_URL  || 'http://localhost:5001'
 const REDIS_URL     = process.env.REDIS_URL || 'redis://localhost:6379'
 const SLO_MS     = 4000
-const TIMEOUT_MS = 30_000
+const TIMEOUT_MS = Number(process.env.TIMEOUT_MS || 30_000)
 const JSON_MODE  = process.argv.includes('--json') || process.env.JSON_OUTPUT === '1'
 
 function log(...args) {
@@ -54,10 +54,20 @@ async function run() {
   let totalMs       = null
   let chunkCount    = 0
   let finished      = false
+  let textCount     = 0
+  let textLastSeen  = false
 
   const timeout = setTimeout(() => {
     if (!finished) fatal('TIMEOUT', new Error(`No audio received within ${TIMEOUT_MS}ms`))
   }, TIMEOUT_MS)
+
+  // audioReceived carries no isLast/sequenceNumber; textChunk does.
+  // Completion = saw the isLast text chunk AND received as many audio chunks as text chunks.
+  connection.on('textChunk', payload => {
+    if (finished) return
+    textCount++
+    if (payload.isLast) textLastSeen = true
+  })
 
   connection.on('audioReceived', payload => {
     if (finished) return
@@ -71,7 +81,7 @@ async function run() {
       log(`[t=${now - publishTime}ms]  Audio chunk (seq=${payload.sequenceNumber ?? '?'})`)
     }
 
-    if (payload.isLast) {
+    if (textLastSeen && chunkCount >= textCount) {
       totalMs  = now - publishTime
       finished = true
       clearTimeout(timeout)

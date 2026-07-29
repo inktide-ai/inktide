@@ -41,11 +41,6 @@ public sealed class ProjectSceneService : IProjectSceneService
     public Task<ProjectScene?> GetByIdAsync(Guid sceneId, CancellationToken ct = default)
         => _sceneRepo.GetByIdAsync(sceneId, ct);
 
-    public ScenePresignResult PresignValidate(string fileName, long sizeBytes)
-    {
-        throw new NotImplementedException("Call PresignAsync instead.");
-    }
-
     public Task<ScenePresignResult> PresignAsync(Guid projectId, Guid userId, string fileName, string contentType, long sizeBytes, CancellationToken ct = default)
     {
         if (!_storage.IsEnabled)

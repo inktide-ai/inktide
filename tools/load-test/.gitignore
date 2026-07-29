@@ -1,0 +1,6 @@
+results/*
+!results/.gitkeep
+data/*
+!data/.gitkeep
+.env
+node_modules/
