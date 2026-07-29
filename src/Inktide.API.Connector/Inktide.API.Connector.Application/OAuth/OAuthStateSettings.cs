@@ -8,7 +8,7 @@ namespace Inktide.API.Connector.Application.OAuth;
 /// </summary>
 public sealed class OAuthStateSettings
 {
-    /// <summary>Signing secret — minimum 32 characters. Set via <c>AuthSettings__SigningSecret</c> env var.</summary>
+    /// <summary>Signing secret - minimum 32 characters. Set via <c>AuthSettings__SigningSecret</c> env var.</summary>
     [Required(AllowEmptyStrings = false)]
     [MinLength(32)]
     public string SigningSecret { get; init; } = string.Empty;

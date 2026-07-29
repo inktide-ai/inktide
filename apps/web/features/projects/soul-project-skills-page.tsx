@@ -28,7 +28,7 @@ export default function SoulProjectSkillsPage() {
     getProject(projectId)
       .then(p => {
         setProject(p)
-        // null = using backend default — show it so user can see what the AI uses
+        // null = using backend default - show it so user can see what the AI uses
         setPrompt(p.system_prompt ?? DEFAULTS.systemPrompt)
       })
       .catch(handleError)
@@ -83,7 +83,7 @@ export default function SoulProjectSkillsPage() {
     }
   }
 
-  // Dirty when: on default — text was modified; on custom — text differs from saved
+  // Dirty when: on default - text was modified; on custom - text differs from saved
   const isDirty = project !== null && (
     isUsingDefault
       ? prompt !== DEFAULTS.systemPrompt

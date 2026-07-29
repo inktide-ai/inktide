@@ -68,7 +68,7 @@ export function PluginCard({
         </button>
       </div>
 
-      {/* config slot — shown when plugin is enabled and slot is provided */}
+      {/* config slot - shown when plugin is enabled and slot is provided */}
       {isEnabled && configSlot && (
         <div className="border-t border-[var(--border-subtle)] px-4 py-3">
           {configSlot}

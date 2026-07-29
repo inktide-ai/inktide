@@ -38,7 +38,7 @@ public sealed class TtsSynthesizeRequest
     public string? ProviderId { get; set; }
 
     /// <summary>
-    /// Output audio format token (<c>mp3</c>, <c>wav</c>, <c>opus</c>, …).
+    /// Output audio format token (<c>mp3</c>, <c>wav</c>, <c>opus</c>, ...).
     /// Passed to the provider as <c>response_format</c>; also sets the response <c>Content-Type</c>.
     /// </summary>
     [JsonProperty("audio_format")]

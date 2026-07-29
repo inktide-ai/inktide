@@ -208,7 +208,7 @@ public sealed class AiCardsController : ApiController
         return Ok(new AiCardStatsResponse(stats.Messages24h, stats.LlmCalls24h, stats.TtsChars24h, stats.MemoryCount));
     }
 
-    /// <summary>Move a soul to a new position. previousId=null → beginning; nextId=null → end.</summary>
+    /// <summary>Move a soul to a new position. previousId=null -> beginning; nextId=null -> end.</summary>
     [HttpPatch("{cardId:guid}/position")]
     [ProducesResponseType(typeof(AiCardListItem), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]

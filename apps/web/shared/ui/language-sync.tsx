@@ -6,7 +6,7 @@ import { useGlobalPreferences } from '@/shared/hooks/useGlobalPreferences'
 
 /**
  * Applies the server-stored language preference to i18next after global
- * preferences are fetched. Server is the source of truth — no guard on
+ * preferences are fetched. Server is the source of truth - no guard on
  * current i18n language, so this wins over any other service that might
  * have set a different language (e.g. from Keycloak token locale).
  */

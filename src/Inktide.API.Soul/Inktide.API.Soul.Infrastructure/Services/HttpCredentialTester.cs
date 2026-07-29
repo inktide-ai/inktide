@@ -6,7 +6,7 @@ namespace Inktide.API.Soul.Infrastructure.Services;
 
 /// <summary>
 /// Validates a provider credential by making a minimal HTTP call to the provider's API.
-/// Uses stored credentials only — keys are never returned to the client.
+/// Uses stored credentials only - keys are never returned to the client.
 /// OCP: adding a new cloud provider = one entry in _cloudProviders; no method changes.
 /// </summary>
 public sealed class HttpCredentialTester : ICredentialTester
@@ -36,7 +36,7 @@ public sealed class HttpCredentialTester : ICredentialTester
             ["vertex"]       = new("Google",        string.Empty, null),
         };
 
-    // Maps provider id → (defaultBaseUrl, healthPath).
+    // Maps provider id -> (defaultBaseUrl, healthPath).
     private static readonly Dictionary<string, (string DefaultBase, string Path)> _localProviders =
         new(StringComparer.OrdinalIgnoreCase)
         {

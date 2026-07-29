@@ -11,7 +11,7 @@ function isInputTarget(e: KeyboardEvent): boolean {
   return false
 }
 
-// Safe in SSR — document access only inside KeyboardProvider's useEffect.
+// Safe in SSR - document access only inside KeyboardProvider's useEffect.
 class ShortcutRegistry {
   private handlers = new Map<string, ShortcutEntry[]>()
 

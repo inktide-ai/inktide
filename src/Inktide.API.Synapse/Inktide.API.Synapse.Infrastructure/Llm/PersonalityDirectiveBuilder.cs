@@ -5,7 +5,7 @@ namespace Inktide.API.Synapse.Infrastructure.Llm;
 /// <summary>
 /// Converts a <see cref="SynapsePersonalitySnapshot"/> into a natural-language
 /// directive block that is injected into the LLM system prompt.
-/// Returns null when the personality is entirely default — no noise for unconfigured cards.
+/// Returns null when the personality is entirely default - no noise for unconfigured cards.
 /// </summary>
 internal static class PersonalityDirectiveBuilder
 {

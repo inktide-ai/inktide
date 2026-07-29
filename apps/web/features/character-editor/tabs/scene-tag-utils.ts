@@ -16,7 +16,7 @@ export function mergeSceneTagPickOptions(customTags: CustomSceneTagDto[] | strin
   return out
 }
 
-/** Build a label→hex color map from custom tags. Only entries with a stored color are included. */
+/** Build a label->hex color map from custom tags. Only entries with a stored color are included. */
 export function getCustomTagsColorMap(customTags: CustomSceneTagDto[]): Map<string, string> {
   const map = new Map<string, string>()
   for (const t of customTags) {
@@ -180,7 +180,7 @@ export function getTagDisplayStyleWithColor(label: string, storedColor?: string 
   return getTagDisplayStyle(label)
 }
 
-/** Pill row colours (text/bg/border only — no active card chrome). */
+/** Pill row colours (text/bg/border only - no active card chrome). */
 export function getPillColors(label: string, storedColor?: string | null): { text: string; bg: string; border: string } {
   const s = getTagDisplayStyleWithColor(label, storedColor)
   return { text: s.text, bg: s.bg, border: s.border }

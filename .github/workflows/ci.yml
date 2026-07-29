@@ -11,9 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ─────────────────────────────────────────────────────────────
-  # .NET backend: restore → build → test
-  # ─────────────────────────────────────────────────────────────
+  # -------------------------------------------------------------
+  # .NET backend: restore -> build -> test
+  # -------------------------------------------------------------
   backend:
     name: .NET Build & Test
     runs-on: ubuntu-latest
@@ -37,9 +37,9 @@ jobs:
         run: dotnet test Inktide.API.sln --no-build -c Release -v minimal
         # Will be a no-op until test projects are added; keeps the step so it's visible in CI.
 
-  # ─────────────────────────────────────────────────────────────
-  # Frontend: install → lint → build
-  # ─────────────────────────────────────────────────────────────
+  # -------------------------------------------------------------
+  # Frontend: install -> lint -> build
+  # -------------------------------------------------------------
   frontend:
     name: Frontend Build & Lint
     runs-on: ubuntu-latest
@@ -78,9 +78,9 @@ jobs:
           NEXT_PUBLIC_KEYCLOAK_REALM: chimera
           NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: chimera-web
 
-  # ─────────────────────────────────────────────────────────────
+  # -------------------------------------------------------------
   # Python AI workers: ruff lint + pytest
-  # ─────────────────────────────────────────────────────────────
+  # -------------------------------------------------------------
   python:
     name: Python Workers
     runs-on: ubuntu-latest
@@ -112,9 +112,9 @@ jobs:
         run: python -m pytest -q
         working-directory: ${{ matrix.worker }}
 
-  # ─────────────────────────────────────────────────────────────
+  # -------------------------------------------------------------
   # Rust crates: fmt + clippy + test
-  # ─────────────────────────────────────────────────────────────
+  # -------------------------------------------------------------
   rust:
     name: Rust Crates
     runs-on: ubuntu-latest
@@ -143,9 +143,9 @@ jobs:
         run: cargo test
         working-directory: crates
 
-  # ─────────────────────────────────────────────────────────────
+  # -------------------------------------------------------------
   # Docker image build (on push to main only)
-  # ─────────────────────────────────────────────────────────────
+  # -------------------------------------------------------------
   docker:
     name: Docker Build
     runs-on: ubuntu-latest

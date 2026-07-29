@@ -75,7 +75,7 @@ export default function ChannelConnectorPage() {
   const connectorId  = (params.connector_id as string).toLowerCase()
   const { t } = useTranslation('channels')
 
-  // Guard against invalid connectorId — avoids unsafe type cast in sub-components
+  // Guard against invalid connectorId - avoids unsafe type cast in sub-components
   if (!isActiveChannel(connectorId)) {
     return (
       <div className="min-h-screen px-6 py-8">
@@ -107,12 +107,12 @@ export default function ChannelConnectorPage() {
     [allChannels, connectorId],
   )
 
-  // Evaluated once per mount via useState lazy init — no side effects in render phase.
+  // Evaluated once per mount via useState lazy init - no side effects in render phase.
   const [justConnected] = useState(() =>
     resolveOAuthReturn(searchParams, soulId, connectorId),
   )
 
-  // Idempotent cleanup after genuine OAuth return (Strict Mode safe — removeItem is idempotent).
+  // Idempotent cleanup after genuine OAuth return (Strict Mode safe - removeItem is idempotent).
   useEffect(() => {
     if (justConnected) {
       sessionStorage.removeItem(oauthPendingKey(connectorId, soulId))

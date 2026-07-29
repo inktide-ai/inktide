@@ -91,7 +91,7 @@ public sealed class YooKassaRenewalJob : BackgroundService
             toMark.Add(idempKey);
         }
 
-        // Flush all outbox rows in a single SaveChanges — BillingDbContext is resolved from the same scope.
+        // Flush all outbox rows in a single SaveChanges - BillingDbContext is resolved from the same scope.
         if (toMark.Count > 0)
         {
             var dbCtx = scope.ServiceProvider

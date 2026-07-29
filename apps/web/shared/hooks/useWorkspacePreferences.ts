@@ -76,7 +76,7 @@ export function usePatchWorkspacePreferences(characterId: string) {
 
 /**
  * Debounced patch for workspace fields that change at high frequency (drag events).
- * Returns a stable dispatch function — safe to call on every animation frame.
+ * Returns a stable dispatch function - safe to call on every animation frame.
  */
 export function useDebouncedWorkspacePatch(characterId: string, delayMs: number) {
   const { mutate } = usePatchWorkspacePreferences(characterId)

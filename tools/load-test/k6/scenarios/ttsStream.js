@@ -1,9 +1,9 @@
 // Streaming TTS synthesis. Closed-form measurement per request:
-//   tts_ttfb_ms  — time to first streamed byte (product-meaningful: this is
+//   tts_ttfb_ms  - time to first streamed byte (product-meaningful: this is
 //                  when audio playback could start)
-//   tts_total_ms — full stream duration
+//   tts_total_ms - full stream duration
 // Arrival rate must respect the 20 req/60s per-user window; preflight enforces
-// rate/poolSize ≤ 0.25 req/s/user.
+// rate/poolSize <= 0.25 req/s/user.
 
 import { ttsApi } from '../clients/ttsApi.js';
 import { expectStatus } from '../lib/checks.js';

@@ -76,8 +76,8 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
                 StreamNames.IntegrationEvents,
                 ConsumerGroup,
                 ConsumerName,
-                60_000,      // minIdleTimeInMs — claim messages idle > 60 s
-                "0-0",       // startAt — scan from beginning of PEL
+                60_000,      // minIdleTimeInMs - claim messages idle > 60 s
+                "0-0",       // startAt - scan from beginning of PEL
                 10);
 
             foreach (var entry in result.ClaimedEntries)
@@ -148,7 +148,7 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
             return;
         }
 
-        // Transient errors — do NOT ACK; message stays in PEL for retry.
+        // Transient errors - do NOT ACK; message stays in PEL for retry.
         // PEL recovery runs every PelRecoveryInterval polls via RecoverPendingEntriesAsync.
         await PurgeOrgDataAsync(evt.UserId, ct);
         await db.StreamAcknowledgeAsync(StreamNames.IntegrationEvents, ConsumerGroup, entry.Id);
@@ -173,7 +173,7 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
             .ConfigureAwait(false);
 
         // Guard: skip orgs where this user is the sole admin but other members exist.
-        // Single query — avoids N×3 round trips from per-org CountAsync calls.
+        // Single query - avoids Nx3 round trips from per-org CountAsync calls.
         var orgStats = await db.OrganizationMembers
             .Where(m => memberOrgIds.Contains(m.OrganizationId))
             .GroupBy(m => m.OrganizationId)
@@ -198,13 +198,13 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
                 "UserAccountDeletedConsumer (org): user {UserId} is sole admin of {Count} org(s) with other members — " +
                 "skipping those orgs, manual admin transfer required. OrgIds: {OrgIds}",
                 userId, blockedOrgIds.Count, string.Join(", ", blockedOrgIds));
-            // memberOrgIds is List<Guid> (from .ToListAsync above) — reassignment is valid
+            // memberOrgIds is List<Guid> (from .ToListAsync above) - reassignment is valid
             memberOrgIds = memberOrgIds.Except(blockedOrgIds).ToList();
         }
 
         // Find orgs where this user is now the only remaining member.
-        // If sole member → delete the org (cascade removes the membership and invites via FK).
-        // If other members exist → remove only this user's membership.
+        // If sole member -> delete the org (cascade removes the membership and invites via FK).
+        // If other members exist -> remove only this user's membership.
         var orgsToDelete = orgStats
             .Where(s => !blockedOrgIds.Contains(s.OrgId) && s.TotalCount == 1)
             .Select(s => s.OrgId)

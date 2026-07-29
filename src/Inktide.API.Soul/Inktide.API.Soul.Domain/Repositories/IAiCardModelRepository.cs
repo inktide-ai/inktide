@@ -14,7 +14,7 @@ public interface IAiCardModelRepository
 
     Task DeleteAsync(AiCardModel model, CancellationToken ct = default);
 
-    /// <summary>Returns all models for the card except <paramref name="excludeId"/> — used to clean up before replacing.</summary>
+    /// <summary>Returns all models for the card except <paramref name="excludeId"/> - used to clean up before replacing.</summary>
     Task<IReadOnlyList<AiCardModel>> ListOthersByCardAsync(Guid userId, Guid aiCardId, Guid excludeId, CancellationToken ct = default);
 
     /// <summary>Sets is_active = false for every model in the card in a single UPDATE.</summary>

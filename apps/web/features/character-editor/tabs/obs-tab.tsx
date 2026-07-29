@@ -3,8 +3,8 @@ import { useClipboard } from '@/shared/hooks/useClipboard'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { getCard, type ChannelResponse } from '@/features/soul/api/index' // fsd:cross-feature-ok — soul editor
-// fsd:cross-feature-ok — renderer composition in soul editor
+import { getCard, type ChannelResponse } from '@/features/soul/api/index' // fsd:cross-feature-ok - soul editor
+// fsd:cross-feature-ok - renderer composition in soul editor
 import { useCardModel, useCardScene } from '@/entities/soul/hooks'
 import type { AiCharacter } from '@/shared/lib/character'
 import { buildObsSceneUrl } from '@/shared/lib/utils/obs-url'

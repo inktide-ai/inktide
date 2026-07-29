@@ -107,7 +107,7 @@ export function SoulListRow({ data, onOpen, onDelete }: SoulListRowProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Confirm delete — Dialog renders via Portal, position here doesn't matter */}
+      {/* Confirm delete - Dialog renders via Portal, position here doesn't matter */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent
           onClick={e => e.stopPropagation()}

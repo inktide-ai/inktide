@@ -206,7 +206,7 @@ public sealed class StripeWebhookProcessorTests
     {
         var (p, subs, _, _) = Create();
         var existing = new UserSubscription { UserId = UserId, Plan = PlanType.Pro };
-        // No userId in metadata → fallback to GetByProviderSubIdAsync
+        // No userId in metadata -> fallback to GetByProviderSubIdAsync
         subs.GetByProviderSubIdAsync(PaymentIntentId, Arg.Any<CancellationToken>()).Returns(existing);
         subs.GetByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(existing);
 
@@ -246,7 +246,7 @@ public sealed class StripeWebhookProcessorTests
     public async Task AlreadyProcessed_IdempotencyGuardSkips_NoUpsert()
     {
         var (p, subs, _, db) = Create();
-        // Override: doneKey exists → already processed
+        // Override: doneKey exists -> already processed
         db.KeyExistsAsync(Arg.Any<RedisKey>(), Arg.Any<CommandFlags>()).Returns(true);
 
         await p.ProcessAsync(BuildEvent("payment_intent.succeeded"));

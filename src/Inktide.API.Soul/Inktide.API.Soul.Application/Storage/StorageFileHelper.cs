@@ -3,7 +3,7 @@ namespace Inktide.API.Soul.Application.Storage;
 /// <summary>
 /// Pure static helpers for file-name sanitisation and content-type inference.
 /// SRP: one place to change when naming/MIME rules change.
-/// OCP: all upload services benefit without modification — they call these methods.
+/// OCP: all upload services benefit without modification - they call these methods.
 /// </summary>
 public static class StorageFileHelper
 {

@@ -14,7 +14,7 @@ public sealed class OrganizationExceptionFilter : IExceptionFilter
             InviteNotFoundException        => new NotFoundResult(),
             InviteExpiredException         => new BadRequestObjectResult(new { code = "INVITE_EXPIRED" }),
             InviteAlreadyAcceptedException => new ConflictObjectResult(new { code = "ALREADY_ACCEPTED" }),
-            _                              => null,  // unknown exceptions bubble up to global error handler → 500
+            _                              => null,  // unknown exceptions bubble up to global error handler -> 500
         };
         if (context.Result is not null)
             context.ExceptionHandled = true;

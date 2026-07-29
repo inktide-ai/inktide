@@ -85,7 +85,7 @@ public sealed class YooKassaBillingProvider : IBillingProvider
         return confirmationUrl ?? throw new InvalidOperationException("YooKassa did not return a confirmation URL.");
     }
 
-    /// <summary>YooKassa has no hosted billing portal. Returns null — caller shows own UI.</summary>
+    /// <summary>YooKassa has no hosted billing portal. Returns null - caller shows own UI.</summary>
     public Task<string?> CreatePortalUrlAsync(string providerCustomerId, string returnUrl, CancellationToken ct = default)
         => Task.FromResult<string?>(null);
 }

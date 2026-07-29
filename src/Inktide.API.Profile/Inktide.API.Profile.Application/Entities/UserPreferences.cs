@@ -9,7 +9,7 @@ public sealed class UserPreferences
     public string Language { get; private set; } = "en";
     public NotifPrefs Notifications { get; private set; } = NotifPrefs.Default;
     public string[] Favorites { get; private set; } = Array.Empty<string>();
-    // Raw JSON maps keyed by characterId — Npgsql stores as JSONB
+    // Raw JSON maps keyed by characterId - Npgsql stores as JSONB
     public string HubLayouts { get; private set; } = "{}";
     public string SceneSettings { get; private set; } = "{}";
     public DateTimeOffset UpdatedAt { get; private set; }
@@ -66,7 +66,7 @@ public sealed class UserPreferences
         }
         catch (JsonException ex)
         {
-            // Stored JSON is corrupt — surface this so the caller can log and decide how to proceed.
+            // Stored JSON is corrupt - surface this so the caller can log and decide how to proceed.
             throw new InvalidOperationException("Workspace preference data is corrupt and cannot be updated.", ex);
         }
 

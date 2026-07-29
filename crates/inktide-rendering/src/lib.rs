@@ -1,4 +1,4 @@
-//! Avatar rendering control — bridges [`VisemeTimeline`] to blend-shape weights.
+//! Avatar rendering control - bridges [`VisemeTimeline`] to blend-shape weights.
 //!
 //! Swap the mapper to target any avatar format:
 //!

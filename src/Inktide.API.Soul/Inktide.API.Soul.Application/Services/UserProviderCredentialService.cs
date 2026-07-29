@@ -61,7 +61,7 @@ public sealed class UserProviderCredentialService : IUserProviderCredentialServi
             existing.BaseUrl    = baseUrl;
             existing.Config     = config;
             existing.UpdatedAt  = now;
-            // Key changed — clear previous test result so guard doesn't act on stale data
+            // Key changed - clear previous test result so guard doesn't act on stale data
             existing.VerifiedAt = null;
             existing.LastError  = null;
             await _repo.UpsertAsync(existing, ct);

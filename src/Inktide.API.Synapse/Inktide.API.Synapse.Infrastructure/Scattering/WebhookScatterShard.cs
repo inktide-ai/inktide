@@ -11,7 +11,7 @@ namespace Inktide.API.Synapse.Infrastructure.Scattering;
 /// Tier-2 webhook shard: calls a user-registered external URL and injects the returned context
 /// into the prompt as additional context text.
 /// Hard-cancelled at 800 ms to stay within latency budget.
-/// On any error or timeout, logs and continues silently — the pipeline must never block on user webhooks.
+/// On any error or timeout, logs and continues silently - the pipeline must never block on user webhooks.
 /// </summary>
 internal sealed class WebhookScatterShard : IPipelineStage
 {

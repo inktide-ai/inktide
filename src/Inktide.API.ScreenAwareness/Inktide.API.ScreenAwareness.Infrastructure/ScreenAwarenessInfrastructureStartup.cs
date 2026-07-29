@@ -30,7 +30,7 @@ public sealed class ScreenAwarenessInfrastructureStartup : IStartup
             .ValidateOnStart();
         services.AddSingleton<IValidateOptions<ScreenFrameStreamSettings>, ScreenFrameStreamSettingsValidator>();
 
-        // Vision providers — both registered; active one selected by VisionProvider setting
+        // Vision providers - both registered; active one selected by VisionProvider setting
         services.AddHttpClient<AnthropicVisionClient>();
         services.AddHttpClient<OllamaVisionClient>();
         services.AddSingleton<IVisionModelClient>(sp =>

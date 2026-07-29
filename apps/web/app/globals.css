@@ -1,6 +1,6 @@
 /* ============================================================
-   globals.css — entry point
-   Imports: Tailwind → fonts → design system
+   globals.css - entry point
+   Imports: Tailwind -> fonts -> design system
    Owns: @theme (Tailwind extensions), @utility, base layer
    ============================================================ */
 
@@ -15,15 +15,15 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Tailwind v4 theme extensions ────────────────────────────────────────── */
+/* -- Tailwind v4 theme extensions ------------------------------------------ */
 @theme {
-  /* Animate utilities — keyframes are defined in design-system/animations.css */
+  /* Animate utilities - keyframes are defined in design-system/animations.css */
   --animate-marquee:           marquee 25s linear infinite;
   --animate-settings-page-in: settingsPageIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-menu-in:           menuIn 0.18s cubic-bezier(0.2, 0.9, 0.2, 1);
   --animate-menu-out:          menuOut 0.12s ease-in forwards;
 
-  /* Custom text-size scale (text-2xs, text-caption … text-body-lg) */
+  /* Custom text-size scale (text-2xs, text-caption ... text-body-lg) */
   --text-2xs:     0.625rem;
   --text-caption: 0.6875rem;
   --text-xs:      0.75rem;
@@ -33,7 +33,7 @@
   --text-body-lg: 1rem;
 }
 
-/* ── Custom utilities ────────────────────────────────────────────────────── */
+/* -- Custom utilities ------------------------------------------------------ */
 @utility no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -44,7 +44,7 @@
   text-wrap: balance;
 }
 
-/* ── Base layer ──────────────────────────────────────────────────────────── */
+/* -- Base layer ------------------------------------------------------------ */
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
@@ -74,7 +74,7 @@ body {
 
   p { line-height: 1.6; }
 
-  /* Thin scrollbar — 4px, rounded, theme-aware */
+  /* Thin scrollbar - 4px, rounded, theme-aware */
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb) transparent;

@@ -296,7 +296,7 @@ public sealed class ProjectController : ControllerBase
         return Guid.Parse(sub);
     }
 
-    /// <summary>Move a project to a new position. previousId=null → beginning; nextId=null → end.</summary>
+    /// <summary>Move a project to a new position. previousId=null -> beginning; nextId=null -> end.</summary>
     [HttpPatch("{id:guid}/position")]
     [ProducesResponseType(typeof(ProjectResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

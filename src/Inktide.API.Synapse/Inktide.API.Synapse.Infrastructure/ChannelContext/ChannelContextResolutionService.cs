@@ -16,7 +16,7 @@ namespace Inktide.API.Synapse.Infrastructure.ChannelContext;
 /// <summary>
 /// Resolves the active <see cref="AiCardContext"/> for the inbound channel (prerequisite for scatter).
 /// Uses <see cref="IAiCardChannelQueryService"/> so Synapse stays decoupled from Soul's DB context.
-/// Run preset overrides are applied after the base context is built and are NOT cached —
+/// Run preset overrides are applied after the base context is built and are NOT cached -
 /// allowing the active scene to change at runtime without requiring a cache flush.
 /// </summary>
 internal sealed class ChannelContextResolutionService : IChannelContextResolutionService
@@ -57,12 +57,12 @@ internal sealed class ChannelContextResolutionService : IChannelContextResolutio
         {
             AiCardChannelContext? raw = await _cardQuery.ResolveByChannelIdAsync(channelId, cancellationToken);
 
-            // Inktide-chat fallback: channelId is "{cardId}:{userId}" — resolve directly by card ID.
+            // Inktide-chat fallback: channelId is "{cardId}:{userId}" - resolve directly by card ID.
             if (raw is null && context.Message.PlatformId == SynapseConstants.Platforms.InktideChat)
                 raw = await TryResolveInktideChatAsync(channelId, cancellationToken);
 
             // Connector fallback: channel registry moved to Project context and ResolveByChannelId is a no-op.
-            // Connectors (Discord, Twitch, Telegram) already embed CharacterId in the message — use it directly.
+            // Connectors (Discord, Twitch, Telegram) already embed CharacterId in the message - use it directly.
             if (raw is null && context.Message.CharacterId.HasValue)
                 raw = await _cardQuery.ResolveByCardIdAsync(context.Message.CharacterId.Value, cancellationToken);
 
@@ -122,7 +122,7 @@ internal sealed class ChannelContextResolutionService : IChannelContextResolutio
                 TtsProviderParamsJson:  SerializeTtsProviderParams(tts));
 
             // Resolve which Project (if any) has this Soul as its active execution profile.
-            // The Project now owns behavior config — it overrides defaults set above.
+            // The Project now owns behavior config - it overrides defaults set above.
             if (_projectQuery is not null)
             {
                 var projectLink = await _projectQuery.FindProjectIdBySoulIdAsync(raw.AiCardId, cancellationToken);
@@ -222,9 +222,9 @@ internal sealed class ChannelContextResolutionService : IChannelContextResolutio
 
     /// <summary>
     /// Validates namespaced model IDs (airi pattern: "providerId/modelId").
-    /// - Prefixed and matching provider  → strip prefix, return tail ("elevenlabs/tts-1" + "elevenlabs" → "tts-1")
-    /// - Prefixed with wrong provider    → return null (contamination from another provider)
-    /// - No prefix                       → return as-is (backwards-compat, valid for any provider)
+    /// - Prefixed and matching provider  -> strip prefix, return tail ("elevenlabs/tts-1" + "elevenlabs" -> "tts-1")
+    /// - Prefixed with wrong provider    -> return null (contamination from another provider)
+    /// - No prefix                       -> return as-is (backwards-compat, valid for any provider)
     /// </summary>
     private static string? StripProviderPrefix(string? modelId, string? providerId)
     {
@@ -234,7 +234,7 @@ internal sealed class ChannelContextResolutionService : IChannelContextResolutio
         var prefix = modelId[..slashIndex];
         if (string.Equals(prefix, providerId, StringComparison.OrdinalIgnoreCase))
             return modelId[(slashIndex + 1)..];
-        return null; // wrong provider prefix → use provider default
+        return null; // wrong provider prefix -> use provider default
     }
 
 }

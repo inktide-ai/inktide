@@ -52,7 +52,7 @@ public sealed class YooKassaWebhookValidationTests
     [InlineData("192.168.1.1")]
     public void BlockedNetworks_AlwaysRejected_EvenIfInAllowlist(string ip)
     {
-        // Deliberately include private ranges in the configured allowlist — must still be rejected.
+        // Deliberately include private ranges in the configured allowlist - must still be rejected.
         var p = CreateProcessor([$"{ip}/32"]);
         Assert.False(Validate(p, ip));
     }
@@ -71,7 +71,7 @@ public sealed class YooKassaWebhookValidationTests
     public void CustomAllowedIps_OverridesDefaults_YooKassaIpRejected()
     {
         var p = CreateProcessor(["1.2.3.4/32"]);
-        Assert.False(Validate(p, "185.71.76.5"));  // YooKassa default — not in custom list
+        Assert.False(Validate(p, "185.71.76.5"));  // YooKassa default - not in custom list
     }
 
     [Fact]

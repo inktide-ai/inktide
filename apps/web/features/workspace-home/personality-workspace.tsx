@@ -205,7 +205,7 @@ export function PersonalityWorkspace({ personality, onChange, onClose }: Persona
         </button>
       </div>
 
-      {/* Section 1 — Emotional Profiles */}
+      {/* Section 1 - Emotional Profiles */}
       <Section index={0}>
         <span className={sectionLabel}>{t('personalityWs.emotionalProfiles')}</span>
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
@@ -235,7 +235,7 @@ export function PersonalityWorkspace({ personality, onChange, onClose }: Persona
         </div>
       </Section>
 
-      {/* Section 2 — Personality Traits */}
+      {/* Section 2 - Personality Traits */}
       <Section index={1}>
         <span className={sectionLabel}>{t('personalityWs.personalityTraits')}</span>
         <TraitSlider label={t('personalityWs.warmth')}        field="warmth"        value={personality.warmth}        onChange={(v) => set({ warmth: v,        presetId: null })} />
@@ -244,14 +244,14 @@ export function PersonalityWorkspace({ personality, onChange, onClose }: Persona
         <TraitSlider label={t('personalityWs.playfulness')}   field="playfulness"   value={personality.playfulness}   onChange={(v) => set({ playfulness: v,   presetId: null })} />
       </Section>
 
-      {/* Section 3 — Communication Style */}
+      {/* Section 3 - Communication Style */}
       <Section index={2}>
         <span className={sectionLabel}>{t('personalityWs.communicationStyle')}</span>
         <BipolarSlider lowLabel={t('personalityWs.casual')}   highLabel={t('personalityWs.formal')}  field="formality" value={personality.formality} onChange={(v) => set({ formality: v, presetId: null })} />
         <BipolarSlider lowLabel={t('personalityWs.sincere')}  highLabel={t('personalityWs.witty')}   field="sarcasm"   value={personality.sarcasm}   onChange={(v) => set({ sarcasm: v,   presetId: null })} />
       </Section>
 
-      {/* Section 4 — Emotional State */}
+      {/* Section 4 - Emotional State */}
       <Section index={3}>
         <span className={sectionLabel}>{t('personalityWs.emotionalState')}</span>
         <div className="mb-4">
@@ -266,7 +266,7 @@ export function PersonalityWorkspace({ personality, onChange, onClose }: Persona
         <TraitSlider label={t('personalityWs.adaptability')}        field="emotionResponsiveness" value={personality.emotionResponsiveness} onChange={(v) => set({ emotionResponsiveness: v, presetId: null })} />
       </Section>
 
-      {/* Section 5 — Response Behavior */}
+      {/* Section 5 - Response Behavior */}
       <Section index={4}>
         <span className={sectionLabel}>{t('personalityWs.responseBehavior')}</span>
         <div className="mb-4">

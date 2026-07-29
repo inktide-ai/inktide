@@ -6,8 +6,8 @@ use crate::error::LipSyncError;
 /// Rhubarb / Preston Blair mouth shapes.
 ///
 /// ```text
-/// X — rest    A — P/B/M    B — K/G/NG   C — CH/SH/ZH
-/// D — E/I     E — A/O      F — F/V      G — TH/DH    H — L/D/N
+/// X - rest    A - P/B/M    B - K/G/NG   C - CH/SH/ZH
+/// D - E/I     E - A/O      F - F/V      G - TH/DH    H - L/D/N
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Viseme { X, A, B, C, D, E, F, G, H }
@@ -30,7 +30,7 @@ impl Viseme {
     pub fn from_rhubarb(s: &str) -> Option<Self> { Self::try_from(s).ok() }
 }
 
-// Serde uses { secs, nanos } for Duration by default — useless on the wire.
+// Serde uses { secs, nanos } for Duration by default - useless on the wire.
 // These helpers produce a plain millisecond f64 that the frontend can use directly.
 mod duration_ms {
     use serde::{Deserializer, Serializer};
@@ -59,7 +59,7 @@ pub struct VisemeCue {
     pub viseme: Viseme,
 }
 
-/// Private helper — plain deserialization target without any invariant.
+/// Private helper - plain deserialization target without any invariant.
 /// [`VisemeTimeline`] is deserialized via `From<VisemeTimelineRaw>` so that
 /// `new()` (and its sort `assert!`) always runs.
 #[derive(Deserialize)]
@@ -77,7 +77,7 @@ impl From<VisemeTimelineRaw> for VisemeTimeline {
 
 /// Complete lip-sync timeline for one audio chunk.
 ///
-/// Cues must be sorted by `start` time — [`VisemeTimeline::new`] asserts this in
+/// Cues must be sorted by `start` time - [`VisemeTimeline::new`] asserts this in
 /// debug builds. Providing unsorted cues silently breaks [`blend_state`](Self::blend_state)
 /// because it relies on `partition_point`.
 ///
@@ -104,7 +104,7 @@ impl VisemeTimeline {
     pub fn cues(&self) -> &[VisemeCue] { &self.cues }
     pub fn duration(&self) -> Duration { self.duration }
 
-    /// Returns `(current, next, progress)` at `time`, where `progress` ∈ [0, 1]
+    /// Returns `(current, next, progress)` at `time`, where `progress` in [0, 1]
     /// is how far through the current cue we are. Used by the renderer to blend.
     pub fn blend_state(&self, time: Duration) -> (Viseme, Viseme, f32) {
         if self.cues.is_empty() {
@@ -211,7 +211,7 @@ mod tests {
         let original = timeline();
         let json = serde_json::to_string(&original).unwrap();
         let restored: VisemeTimeline = serde_json::from_str(&json).unwrap();
-        // blend_state must work on the restored timeline — regression for Deserialize bypass.
+        // blend_state must work on the restored timeline - regression for Deserialize bypass.
         let (cur, _, _) = restored.blend_state(Duration::from_millis(200));
         assert_eq!(cur, Viseme::E);
     }

@@ -12,7 +12,7 @@ export function buildAnimationGraph(baselineMood: string): AnimationGraphConfig 
     crossFadeDuration: v.crossFadeDuration,
   }))
 
-  // breathing_idle is not in the default graph — add it if any variation references it
+  // breathing_idle is not in the default graph - add it if any variation references it
   const needsBreathing = profile.variations.some(v => v.clipId === 'breathing_idle')
   const extraNodes = needsBreathing ? [{ id: 'breathing_idle', looping: false }] : []
   const extraUrls: Record<string, string>  = needsBreathing ? { breathing_idle: '/idle/breathing_idle.vrma' } : {}

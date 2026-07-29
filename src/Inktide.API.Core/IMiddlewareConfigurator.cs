@@ -11,7 +11,7 @@ public interface IMiddlewareConfigurator
 {
     /// <summary>
     /// Execution order in the middleware pipeline. Lower values run first.
-    /// Convention: 0–99 = infrastructure (exception, routing, CORS, auth), 100+ = application.
+    /// Convention: 0-99 = infrastructure (exception, routing, CORS, auth), 100+ = application.
     /// </summary>
     int Order => 100;
 

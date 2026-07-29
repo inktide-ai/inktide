@@ -10,7 +10,7 @@ using Inktide.API.Project.Infrastructure.Services;
 using NSubstitute;
 using Xunit;
 
-// ProjectExportService + InktFileImportService are internal — exposed via InternalsVisibleTo.
+// ProjectExportService + InktFileImportService are internal - exposed via InternalsVisibleTo.
 
 namespace Inktide.API.Project.Tests.Export;
 

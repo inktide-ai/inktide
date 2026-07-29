@@ -2,7 +2,7 @@
 
 import type { CSSProperties } from 'react'
 
-// Gradient palette — deterministic, indexed by cardHash(id)
+// Gradient palette - deterministic, indexed by cardHash(id)
 const GRADIENT_PALETTE: Array<[string, string]> = [
   ['#1a1f2e', '#2d1b4e'],
   ['#0f2027', '#1b3a4b'],

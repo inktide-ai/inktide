@@ -33,7 +33,7 @@ public sealed class TtsController : ControllerBase
 
 
     /// <summary>
-    /// Catalog of registered TTS providers (id, display name, capabilities). Public — no auth required.
+    /// Catalog of registered TTS providers (id, display name, capabilities). Public - no auth required.
     /// </summary>
     [HttpGet("providers")]
     [AllowAnonymous]
@@ -44,7 +44,7 @@ public sealed class TtsController : ControllerBase
     }
 
     /// <summary>
-    /// Lists available voice IDs for a provider. Public — no auth required.
+    /// Lists available voice IDs for a provider. Public - no auth required.
     /// Returns 501 if the provider does not support voice listing.
     /// </summary>
     [HttpGet("voices")]

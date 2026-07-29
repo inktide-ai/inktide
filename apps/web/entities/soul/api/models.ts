@@ -41,7 +41,7 @@ export async function completeCardModelUpload(
 }
 
 // uploadCardModelFile перенесён в services/upload/CardModelUploader.ts + PresignedUploadService.ts
-// OCP: паттерн presign→PUT→complete написан один раз, не дублируется здесь
+// OCP: паттерн presign->PUT->complete написан один раз, не дублируется здесь
 
 export async function listCardModels(cardId: string): Promise<AiCardModelResponse[]> {
   const res = await apiFetch(`/api/v1/souls/cards/${cardId}/models`)

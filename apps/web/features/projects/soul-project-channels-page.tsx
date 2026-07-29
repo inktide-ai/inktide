@@ -130,7 +130,7 @@ export default function SoulProjectChannelsPage() {
               <ChannelTab character={character} />
             </div>
 
-            {/* right: latest platforms — mirrors recommendations-module */}
+            {/* right: latest platforms - mirrors recommendations-module */}
             <div className="flex flex-col items-center justify-start gap-6 flex-initial p-6 border border-[var(--border-subtle)] rounded-xl w-[305px] shrink-0">
               <Layers size={24} />
 

@@ -8,7 +8,7 @@ namespace Inktide.API.Synapse.Infrastructure.Scattering;
 /// <summary>
 /// Scatter shard: fetches recent screen awareness events for the current AI card.
 /// Only runs when <see cref="AiCardContext.ScreenAwarenessEnabled"/> is true.
-/// Falls back to an empty context on any error — never aborts the pipeline.
+/// Falls back to an empty context on any error - never aborts the pipeline.
 /// </summary>
 internal sealed class ScreenContextScatterShard : IPipelineStage
 {

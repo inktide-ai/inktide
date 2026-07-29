@@ -11,8 +11,8 @@ namespace Inktide.API.Project.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // auto_pilot, behavior_settings, memory_settings already exist in DB — skip
-            // project_scenes, project_tools already exist in DB — skip
+            // auto_pilot, behavior_settings, memory_settings already exist in DB - skip
+            // project_scenes, project_tools already exist in DB - skip
 
             migrationBuilder.AddColumn<string>(
                 name: "personality",

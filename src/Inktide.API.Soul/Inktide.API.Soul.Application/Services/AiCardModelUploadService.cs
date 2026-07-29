@@ -11,8 +11,8 @@ using AiCardModelEntity = Inktide.API.Soul.Domain.Entities.AiCardModel;
 namespace Inktide.API.Soul.Application.Services;
 
 /// <summary>
-/// Orchestrates two-phase (presign → complete) model uploads.
-/// SRP: upload flow only — retention policy delegated to IModelRetentionPolicy.
+/// Orchestrates two-phase (presign -> complete) model uploads.
+/// SRP: upload flow only - retention policy delegated to IModelRetentionPolicy.
 /// OCP: changing the "how many models to keep" rule means swapping IModelRetentionPolicy registration.
 /// DIP: depends on IModelRetentionPolicy and StorageFileHelper abstractions, not on their implementations.
 /// </summary>
@@ -138,7 +138,7 @@ public sealed class AiCardModelUploadService : IAiCardModelUploadService
             _time.GetUtcNow().UtcDateTime,
             isActive: true);
 
-        // DeactivateAllByCardAsync uses ExecuteUpdateAsync (bypasses change tracker — commits immediately).
+        // DeactivateAllByCardAsync uses ExecuteUpdateAsync (bypasses change tracker - commits immediately).
         // AddAsync stages the new entity in the change tracker.
         // Both must be inside one explicit transaction so a SaveChangesAsync failure doesn't
         // leave all models deactivated with no new active model.
@@ -198,7 +198,7 @@ public sealed class AiCardModelUploadService : IAiCardModelUploadService
         if (exists is null)
             return SetActiveModelResult.Fail(ModelUploadError.ModelNotFound, "Model not found.");
 
-        // Both are ExecuteUpdateAsync (bypass change tracker — each commits immediately without explicit tx).
+        // Both are ExecuteUpdateAsync (bypass change tracker - each commits immediately without explicit tx).
         await _txManager.BeginTransactionAsync(ct).ConfigureAwait(false);
         try
         {

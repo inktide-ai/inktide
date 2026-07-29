@@ -3,7 +3,7 @@
 // client allows the password grant (directAccessGrantsEnabled).
 //
 // Locally this is a no-op (the chimera realm is hand-built); in CI it creates
-// the realm from scratch — there is no realm export in the repo, this script
+// the realm from scratch - there is no realm export in the repo, this script
 // is what makes the smoke job self-contained.
 //
 // Usage: node scripts/bootstrap-realm.mjs
@@ -13,7 +13,7 @@ import { kcEnv, adminToken, adminClient } from './lib/keycloak.mjs';
 const env = kcEnv();
 const kc = adminClient(env, await adminToken(env));
 
-// ── Realm ─────────────────────────────────────────────────────────────────
+// -- Realm -----------------------------------------------------------------
 const realm = await kc(`/realms/${env.realm}`, { okStatuses: [404] });
 if (realm.status === 404) {
   await kc('/realms', {
@@ -31,7 +31,7 @@ if (realm.status === 404) {
   console.log(`realm ✓ '${env.realm}' exists`);
 }
 
-// ── Public client with password grant ─────────────────────────────────────
+// -- Public client with password grant -------------------------------------
 const clients = await kc(`/realms/${env.realm}/clients?clientId=${encodeURIComponent(env.clientId)}`);
 const existing = clients.json?.[0];
 

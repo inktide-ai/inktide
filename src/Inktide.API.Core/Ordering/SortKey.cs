@@ -29,7 +29,7 @@ public sealed record SortKey
         return false;
     }
 
-    /// <summary>Returns "a0" — the initial key when no items exist.</summary>
+    /// <summary>Returns "a0" - the initial key when no items exist.</summary>
     public static SortKey Initial() => new(FractionalIndexer.GenerateKeyBetween(null, null));
 
     /// <summary>Generates a key after <paramref name="previous" /> (append to end).</summary>

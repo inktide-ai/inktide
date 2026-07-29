@@ -7,6 +7,6 @@ namespace Inktide.API.Synapse.Application.Models;
 /// </summary>
 public readonly record struct VadVector(float V, float A, float D)
 {
-    /// <summary>Neutral baseline — no emotional modulation.</summary>
+    /// <summary>Neutral baseline - no emotional modulation.</summary>
     public static VadVector Neutral => new(0f, 0f, 0f);
 }

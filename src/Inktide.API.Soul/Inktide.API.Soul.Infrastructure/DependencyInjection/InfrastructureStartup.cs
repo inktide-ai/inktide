@@ -74,7 +74,7 @@ public sealed class InfrastructureStartup : IStartup, IBusModuleConfigurator
             o.UsePostgres();
             o.UseBusOutbox();
         });
-        // Soul only publishes — no consumers here.
+        // Soul only publishes - no consumers here.
         // Connector.SoulStatusChangedMTConsumer handles inbound soul status messages.
     }
 

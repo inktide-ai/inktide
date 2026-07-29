@@ -2,7 +2,7 @@ namespace Inktide.API.Memory.Domain.Models;
 
 /// <summary>
 /// PostgreSQL mirror of a Qdrant memory vector owned by the Memory bounded context.
-/// CharacterId is a correlation identifier — no EF navigation to Soul's AiCard entity.
+/// CharacterId is a correlation identifier - no EF navigation to Soul's AiCard entity.
 /// </summary>
 public sealed class MemoryMetadata
 {

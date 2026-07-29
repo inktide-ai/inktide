@@ -2,7 +2,7 @@
 import { useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok — OBS scene embeds avatar preview
+import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok - OBS scene embeds avatar preview
 import { useLipSync } from '@/shared/hooks/useLipSync'
 import { useAudioStream } from '@/shared/hooks/useAudioStream'
 import { SCENE_RENDERER_DEFAULTS, type SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
@@ -18,19 +18,19 @@ import './obs-scene.css'
 // any auth session (OBS Browser Source has no Keycloak context).
 //
 // Required:
-//   modelUrl   — Public URL of the VRM/GLB/Live2D model asset (MinIO)
-//   modelType  — 'vrm' | 'glb' | 'live2d'
+//   modelUrl   - Public URL of the VRM/GLB/Live2D model asset (MinIO)
+//   modelType  - 'vrm' | 'glb' | 'live2d'
 //
 // Optional (audio):
-//   channelId  — Discord/platform channel ID to join in AudioHub (omit for silent preview)
+//   channelId  - Discord/platform channel ID to join in AudioHub (omit for silent preview)
 //
 // Optional:
-//   projectId  — Project ID; when present, scene config is fetched from the public API
+//   projectId  - Project ID; when present, scene config is fetched from the public API
 //                and kept fresh on window focus. Takes priority over settings/mood params.
-//   sceneUrl   — Public URL of a background image (MinIO). Takes priority over bg.
-//   bg         — CSS color or 'transparent' (default: 'transparent')
-//   settings   — Fallback JSON-serialized SceneRendererSettings (used when projectId absent)
-//   mood       — Fallback baselineMood string (used when projectId absent)
+//   sceneUrl   - Public URL of a background image (MinIO). Takes priority over bg.
+//   bg         - CSS color or 'transparent' (default: 'transparent')
+//   settings   - Fallback JSON-serialized SceneRendererSettings (used when projectId absent)
+//   mood       - Fallback baselineMood string (used when projectId absent)
 
 
 // Block RFC-1918, link-local, and loopback addresses.
@@ -164,9 +164,9 @@ export default function ObsScenePage() {
     queryKey: queryKeys.projects.sceneConfig(projectId ?? ''),
     queryFn:  () => getProjectSceneConfig(projectId!),
     enabled:  !!projectId,
-    // staleTime: 0 (default) — refetch on every mount + window focus.
+    // staleTime: 0 (default) - refetch on every mount + window focus.
     // OBS Browser Source runs for hours; streamer changes settings in Sandbox
-    // → OBS picks up on next focus/re-activate without manual reload.
+    // -> OBS picks up on next focus/re-activate without manual reload.
   })
 
   const [rendererSettings, setRendererSettings] = useState<SceneRendererSettings>(

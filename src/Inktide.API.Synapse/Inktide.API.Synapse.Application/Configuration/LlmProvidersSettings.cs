@@ -14,7 +14,7 @@ public sealed class LlmProvidersSettings
 
 /// <summary>
 /// Connection configuration for a single LLM provider.
-/// API keys must be supplied via user secrets or environment variables — not committed to appsettings.
+/// API keys must be supplied via user secrets or environment variables - not committed to appsettings.
 /// </summary>
 public sealed class LlmProviderConfig
 {

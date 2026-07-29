@@ -6,7 +6,7 @@
 //   node scripts/report.mjs <result.json>                 formatted table
 //   node scripts/report.mjs <result.json> --ci            key=value + exit 1 on FAIL
 //   node scripts/report.mjs compare <base> <new> [--tolerance 10]
-//   node scripts/report.mjs promote <result.json>         → baselines/<profile>.json
+//   node scripts/report.mjs promote <result.json>         -> baselines/<profile>.json
 
 import { readFileSync, writeFileSync, copyFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -24,9 +24,9 @@ const load = (p) => JSON.parse(readFileSync(resolve(root, p), 'utf8'));
 const fmtMs = (x) =>
   typeof x !== 'number' || !isFinite(x) ? '-' : x >= 1000 ? `${(x / 1000).toFixed(2)}s` : `${x.toFixed(1)}ms`;
 const pct = (x) => `${(x * 100).toFixed(2)}%`;
-const LINE = '─'.repeat(76);
+const LINE = '-'.repeat(76);
 
-// ── compare ───────────────────────────────────────────────────────────────
+// -- compare ---------------------------------------------------------------
 if (args[0] === 'compare') {
   const [, fileA, fileB] = args;
   const tolIdx = args.indexOf('--tolerance');
@@ -75,7 +75,7 @@ if (args[0] === 'compare') {
   process.exit(0);
 }
 
-// ── promote ───────────────────────────────────────────────────────────────
+// -- promote ---------------------------------------------------------------
 if (args[0] === 'promote') {
   const file = args[1];
   const data = load(file);
@@ -86,7 +86,7 @@ if (args[0] === 'promote') {
   process.exit(0);
 }
 
-// ── report / --ci ─────────────────────────────────────────────────────────
+// -- report / --ci ---------------------------------------------------------
 const data = load(args[0]);
 const ci = args.includes('--ci');
 

@@ -126,7 +126,7 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
             return;
         }
 
-        // Transient errors — do NOT ACK; message stays in PEL for retry (ClaimStalePendingAsync re-claims it).
+        // Transient errors - do NOT ACK; message stays in PEL for retry (ClaimStalePendingAsync re-claims it).
         await PurgeBillingDataAsync(evt.UserId, ct);
         await db.StreamAcknowledgeAsync(StreamNames.IntegrationEvents, ConsumerGroup, entry.Id);
         _logger.LogInformation(
@@ -136,7 +136,7 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
 
     /// <summary>
     /// Claims messages that have been pending (unacknowledged) in the PEL for more than 1 minute
-    /// — i.e. delivered to a consumer that crashed before ACKing — and reprocesses them.
+    /// - i.e. delivered to a consumer that crashed before ACKing - and reprocesses them.
     /// </summary>
     private async Task ClaimStalePendingAsync(IDatabase db, CancellationToken ct)
     {

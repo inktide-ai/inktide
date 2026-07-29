@@ -29,7 +29,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (val: T | 
           try {
             window.localStorage.setItem(key, JSON.stringify(next))
           } catch {
-            // quota exceeded or private browsing — state still updates in-memory
+            // quota exceeded or private browsing - state still updates in-memory
           }
         }
         return next

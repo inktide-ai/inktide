@@ -108,7 +108,7 @@ export function PageClient() {
       {/* Profile card */}
       <div className="mx-auto flex max-w-lg flex-col items-center px-6 pb-16 text-center">
 
-        {/* Avatar — overlaps cover */}
+        {/* Avatar - overlaps cover */}
         <div className="-mt-12 mb-4 overflow-hidden rounded-2xl border-2 border-[var(--bg-0)] shadow-xl">
           <img
             src={soul.avatar_url ?? '/avatars/nova.png'}

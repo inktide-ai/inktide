@@ -10,7 +10,7 @@ public sealed class OpenAiCompatibleTtsSettings
 
     /// <summary>
     /// Base URL of the OpenAI-compatible API, e.g. <c>http://localhost:8000/v1</c>.
-    /// Required — no default.
+    /// Required - no default.
     /// </summary>
     public Uri? Endpoint { get; set; }
 

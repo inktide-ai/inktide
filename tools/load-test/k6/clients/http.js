@@ -1,4 +1,4 @@
-// Base HTTP adapter. Every REST client in clients/ goes through this factory —
+// Base HTTP adapter. Every REST client in clients/ goes through this factory -
 // it owns base-URL resolution, auth-header injection and standard tagging.
 // The `name` tag defaults to the path template so per-endpoint metrics don't
 // explode in cardinality when IDs appear in URLs (pass tags.name to override).

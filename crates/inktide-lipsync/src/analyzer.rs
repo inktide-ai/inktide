@@ -18,7 +18,7 @@ pub struct LipSyncAnalyzer {
 }
 
 impl LipSyncAnalyzer {
-    /// Primary extension point — wraps any [`LipSyncBackend`] implementation.
+    /// Primary extension point - wraps any [`LipSyncBackend`] implementation.
     pub fn from_backend(backend: impl LipSyncBackend + 'static) -> Self {
         Self { inner: Box::new(backend) }
     }
@@ -58,7 +58,7 @@ impl LipSyncAnalyzer {
         Self::from_backend(AmplitudeAnalyzer::new(config))
     }
 
-    /// Blocking — ~100–500 ms for Rhubarb. Use `spawn_blocking` in async contexts.
+    /// Blocking - ~100-500 ms for Rhubarb. Use `spawn_blocking` in async contexts.
     pub fn analyze(&self, wav_bytes: &[u8]) -> Result<VisemeTimeline, LipSyncError> {
         self.inner.analyze(wav_bytes)
     }

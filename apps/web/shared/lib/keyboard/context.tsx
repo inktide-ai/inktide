@@ -20,7 +20,7 @@ export function KeyboardProvider({ children }: { children: ReactNode }) {
  * Combo syntax: "meta+k" | "ctrl+," | "$mod+k" | "escape" | "shift+$mod+z"
  * "$mod" resolves to "meta" on Mac and "ctrl" on Win/Linux at module init time.
  *
- * handler does NOT need to be wrapped in useCallback — it is stored in a ref
+ * handler does NOT need to be wrapped in useCallback - it is stored in a ref
  * so the shortcut registration is stable across re-renders.
  */
 export function useShortcut(

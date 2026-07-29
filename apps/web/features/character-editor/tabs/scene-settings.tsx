@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import type { ProjectSceneResponse } from '@/features/projects/api/scenes'
 import type { AiCharacter } from '@/shared/lib/character'
 import { inferModelType } from '@/shared/lib/utils/model-type'
-import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok — editor embeds avatar preview
+import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok - editor embeds avatar preview
 import { useCardModel } from '@/entities/soul/hooks'
 import { useSceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import { getSceneDisplayTitle } from './scene-tag-utils'
@@ -39,12 +39,12 @@ interface SceneSettingsProps {
 export function SceneSettings({ character, scene, projectId, onBack, onScenesChanged, onSceneReplaced, onSceneDeleted }: SceneSettingsProps) {
   const { t } = useTranslation('scene')
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const cardId = undefined // scene settings no longer has cardId — model preview not available
+  const cardId = undefined // scene settings no longer has cardId - model preview not available
   const { model, loading: modelLoading, error: modelError } = useCardModel(cardId)
   const effectiveModelType = model ? inferModelType(model.original_file_name, model.content_type) : character.appearance.modelType
   const hasAvatarModel = Boolean(model?.public_url)
 
-  // Pure UI toggles — renderer/model visibility, not related to data loading
+  // Pure UI toggles - renderer/model visibility, not related to data loading
   const [modelVisible, setModelVisible] = useState(true)
   const [rendererPanelOpen, setRendererPanelOpen] = useState(false)
 

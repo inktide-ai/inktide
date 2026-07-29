@@ -76,7 +76,7 @@ export default function SoulProjectsPage() {
       const result = await importProjectFile(data)
       router.push(`/projects/${result.project_id}`)
     } catch (err) {
-      // Invalid .inkt file (bad JSON) or import failure — surface to the user, don't white-screen.
+      // Invalid .inkt file (bad JSON) or import failure - surface to the user, don't white-screen.
       handleError(err)
     } finally {
       setImporting(false)

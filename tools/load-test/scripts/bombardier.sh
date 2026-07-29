@@ -3,8 +3,8 @@
 #
 # What this measures (and what it doesn't): beyond 60 anon req/min or
 # 300 authed req/min the API answers 429 by design, so sustained bombardier
-# numbers characterize the Kestrel + rate-limiter SHED PATH — how fast the
-# API rejects excess traffic (a real resilience property) — NOT business
+# numbers characterize the Kestrel + rate-limiter SHED PATH - how fast the
+# API rejects excess traffic (a real resilience property) - NOT business
 # throughput. For SLO latency numbers use the k6 profiles.
 #
 # Usage: bash scripts/bombardier.sh    (reads tools/load-test/.env if present)

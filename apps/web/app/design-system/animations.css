@@ -1,5 +1,5 @@
 /* ============================================================
-   Animations — all @keyframes definitions
+   Animations - all @keyframes definitions
    Referenced via @theme { --animate-* } in globals.css,
    or directly via animation: <name> ... in component styles.
    ============================================================ */

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.Soul.REST.Controllers;
 
 /// <summary>
-/// BYOK — per-user LLM provider credentials.
+/// BYOK - per-user LLM provider credentials.
 /// The actual API key is never returned in responses.
 /// </summary>
 [ApiController]

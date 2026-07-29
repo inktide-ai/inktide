@@ -135,7 +135,7 @@ function RemoteConnectionPanel({ providerId }: { providerId: string }) {
         if (cred?.hasKey) credTest.setStatus(statusFromCredential(cred.verifiedAt, cred.lastError))
       })
       .catch(() => {})
-    // credTest.setStatus is a stable useState setter — intentionally omitted
+    // credTest.setStatus is a stable useState setter - intentionally omitted
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [providerId])
 

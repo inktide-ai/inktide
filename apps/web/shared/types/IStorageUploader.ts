@@ -1,5 +1,5 @@
 /** OCP: добавить новый тип медиазагрузки = создать новый класс с `implements IStorageUploader<T>`.
- *  Логика presign→PUT→complete написана один раз в PresignedUploadService.ts. */
+ *  Логика presign->PUT->complete написана один раз в PresignedUploadService.ts. */
 
 export interface PresignResult {
   upload_url: string

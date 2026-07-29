@@ -2,7 +2,7 @@ import type { NextConfig } from 'next'
 import path from 'path'
 
 // @tailwindcss/node resolves CSS imports from wrong base when Next.js doesn't
-// set opts.from in the PostCSS result — it ends up resolving from apps/ (parent
+// set opts.from in the PostCSS result - it ends up resolving from apps/ (parent
 // of apps/web/) instead of apps/web/, so tailwindcss is not found.
 // __tw_resolve is checked first by @tailwindcss/node before falling back to
 // enhanced-resolve, so we can intercept here without patching node_modules.
@@ -78,7 +78,7 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
-      // /api/* is handled by app/api/[...path]/route.ts (BFF proxy) — no rewrite needed
+      // /api/* is handled by app/api/[...path]/route.ts (BFF proxy) - no rewrite needed
       {
         source: '/hubs/:path*',
         destination: `${backendUrl}/hubs/:path*`,

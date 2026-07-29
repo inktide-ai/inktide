@@ -4,7 +4,7 @@ namespace Inktide.API.Core.Configuration;
 
 /// <summary>
 /// Application configuration for chat providers (defaults, feature flags).
-/// API keys and secrets must not live here — pass them per call via <see cref="ProviderOptions"/>
+/// API keys and secrets must not live here - pass them per call via <see cref="ProviderOptions"/>
 /// (populated from user secrets, vault, or your secret store at the application boundary).
 /// </summary>
 public sealed class ChatProviderOptions

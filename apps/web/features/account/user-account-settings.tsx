@@ -145,7 +145,7 @@ export default function UserAccountSettings({ initialPage, onClose }: UserAccoun
           <TabsList className="flex flex-col gap-3 px-2 py-2 outline-none" aria-label="Settings sections">
             {NAV_SECTIONS.map((group) => (
               <div key={group.section} className="flex flex-col gap-0.5">
-                {/* Group label — 12px/500/tertiary, 6px padding — matches Notion */}
+                {/* Group label - 12px/500/tertiary, 6px padding - matches Notion */}
                 <div className="px-2 py-[6px] overflow-hidden text-ellipsis text-[12px] font-medium leading-[16px] text-[var(--text-tertiary)]">
                   {group.section}
                 </div>

@@ -4,13 +4,13 @@
    patterns that cannot be expressed as Tailwind utilities.
    ============================================================ */
 
-/* ── Logo theme swap ──────────────────────────────────────────────────────── */
+/* -- Logo theme swap -------------------------------------------------------- */
 .logo-dark  { display: block; }
 .logo-light { display: none;  }
 .light .logo-dark  { display: none;  }
 .light .logo-light { display: block; }
 
-/* ── Checkbox toggle control ──────────────────────────────────────────────── */
+/* -- Checkbox toggle control ------------------------------------------------ */
 .toggle-control {
   display: block;
   position: relative;
@@ -55,7 +55,7 @@
   left: 21px;
 }
 
-/* ── Slider input (SliderWithTicks) ───────────────────────────────────────── */
+/* -- Slider input (SliderWithTicks) ----------------------------------------- */
 .slider-input {
   position: relative;
   z-index: 2;
@@ -102,7 +102,7 @@
   height: 16px;
 }
 
-/* ── SettingsHubPage — tab card grid (react-grid-layout overrides) ─────────── */
+/* -- SettingsHubPage - tab card grid (react-grid-layout overrides) ----------- */
 .tab-cards-grid {
   max-width: 1100px;
   margin-inline: auto;
@@ -147,7 +147,7 @@
   border-radius: 0 0 2px 0;
 }
 
-/* ── Tab card ─────────────────────────────────────────────────────────────── */
+/* -- Tab card --------------------------------------------------------------- */
 .tab-card {
   position: relative;
   display: flex;
@@ -202,7 +202,7 @@
 .light .tab-card-editing:hover { border-color: var(--border-strong); }
 .light .tab-card-active { border-color: var(--accent-primary) !important; background: var(--accent-soft) !important; }
 
-/* Character hub page — light theme overrides */
+/* Character hub page - light theme overrides */
 .light .chub-header { background: var(--surface-1); border-color: var(--border-subtle); }
 .light .chub-tag { background: var(--surface-2); border-color: var(--border-subtle); }
 .light .chub-divider { background: var(--border-subtle); }
@@ -283,7 +283,7 @@
 [data-tabid="backup"]  .tab-card-ghost svg { width: 110px; height: 110px; }
 [data-tabid="backup"]  .tab-card-label     { font-size: 1.0625rem; }
 
-/* ── Inspector panel inputs (pseudo-element resets) ───────────────────────── */
+/* -- Inspector panel inputs (pseudo-element resets) ------------------------- */
 .inspector-num-input::-webkit-inner-spin-button,
 .inspector-num-input::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -304,7 +304,7 @@
 }
 .inspector-textarea::placeholder { color: #4B5563; }
 
-/* ── Integration tab channel toggle ──────────────────────────────────────── */
+/* -- Integration tab channel toggle ---------------------------------------- */
 .integration-toggle {
   position: relative;
   display: inline-block;
@@ -344,7 +344,7 @@
   cursor: not-allowed;
 }
 
-/* ── Scene renderer panel slider ──────────────────────────────────────────── */
+/* -- Scene renderer panel slider -------------------------------------------- */
 .scene-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -378,7 +378,7 @@
   cursor: pointer;
 }
 
-/* ── react-colorful overrides ─────────────────────────────────────────────── */
+/* -- react-colorful overrides ----------------------------------------------- */
 .new-tag-picker {
   width: 100% !important;
   height: 140px !important;
@@ -411,7 +411,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* ── Interactive element focus reset ─────────────────────────────────────── */
+/* -- Interactive element focus reset --------------------------------------- */
 button:focus-visible,
 select:focus-visible,
 [role="button"]:focus-visible,
@@ -422,7 +422,7 @@ textarea:focus-visible {
 
 code { font-family: var(--font-mono); }
 
-/* ── App typography split ─────────────────────────────────────────────────── */
+/* -- App typography split --------------------------------------------------- */
 .app-font-split,
 .home-font-split {
   font-family: var(--font-home-ui);
@@ -439,7 +439,7 @@ code { font-family: var(--font-mono); }
 
 .sandbox-text-render { text-rendering: geometricPrecision; }
 
-/* ── Brain LLM slider ─────────────────────────────────────────────────────── */
+/* -- Brain LLM slider ------------------------------------------------------- */
 .brain-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -469,7 +469,7 @@ code { font-family: var(--font-mono); }
   cursor: pointer;
 }
 
-/* ── Account Settings Modal ───────────────────────────────────────────────── */
+/* -- Account Settings Modal ------------------------------------------------- */
 .sm-sidebar {
   width: var(--sm-sidebar-width);
   flex-shrink: 0;

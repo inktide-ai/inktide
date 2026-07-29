@@ -27,12 +27,12 @@ public sealed class BrowserAudioPublisher
         [property: JsonPropertyName("llmModel")]        string        LlmModel,
         /// <summary>
         /// Rhubarb viseme timeline, or <c>null</c> when Rhubarb is unavailable.
-        /// Passed through opaquely as a raw JSON element — no Realtime-layer parsing needed.
+        /// Passed through opaquely as a raw JSON element - no Realtime-layer parsing needed.
         /// </summary>
         [property: JsonPropertyName("visemeTimeline")]  JsonElement?  VisemeTimeline,
         [property: JsonPropertyName("emotionId")]        string?       EmotionId        = null,
         [property: JsonPropertyName("emotionIntensity")] float         EmotionIntensity = 0f,
-        // SoulState — VAD vector and PhysicalState forwarded from LlmStreamWorker
+        // SoulState - VAD vector and PhysicalState forwarded from LlmStreamWorker
         [property: JsonPropertyName("vadV")]      float VadV      = 0f,
         [property: JsonPropertyName("vadA")]      float VadA      = 0f,
         [property: JsonPropertyName("vadD")]      float VadD      = 0f,
@@ -66,7 +66,7 @@ public sealed class BrowserAudioPublisher
                 correlationId    = payload.CorrelationId,
                 audioBase64      = payload.AudioBase64,
                 contentType      = payload.ContentType,
-                visemeTimeline   = payload.VisemeTimeline,  // null → frontend uses formant fallback
+                visemeTimeline   = payload.VisemeTimeline,  // null -> frontend uses formant fallback
                 emotion          = payload.EmotionId,
                 emotionIntensity = payload.EmotionIntensity,
                 // SoulState sent to all frontend animation controllers

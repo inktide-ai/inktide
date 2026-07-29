@@ -26,7 +26,7 @@ export function useSelectedCharacter(repo: ICardRepository) {
 
   const selected = selectedId ? characters.get(selectedId) ?? null : null
 
-  // Uses TanStack Query for deduplication and cache — staleTime: Infinity
+  // Uses TanStack Query for deduplication and cache - staleTime: Infinity
   // prevents background refetches while the user is editing.
   const loadFullCard = useCallback(async (id: string): Promise<AiCharacter> => {
     const char = await queryClient.fetchQuery({

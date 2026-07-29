@@ -78,7 +78,7 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
         _metrics         = metrics         ?? throw new ArgumentNullException(nameof(metrics));
         _logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
 
-        // Parse once — settings is a singleton so CIDR strings never change at runtime.
+        // Parse once - settings is a singleton so CIDR strings never change at runtime.
         _allowedNetworks = settings.WebhookAllowedIps.Length > 0
             ? [.. settings.WebhookAllowedIps
                 .Where(c => IPNetwork.TryParse(c, out _))
@@ -89,7 +89,7 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
     /// <summary>
     /// YooKassa doesn't use HMAC. Security model: IP allowlist (CIDR) + re-fetch via API in ProcessAsync.
     /// clientIp must be the resolved address from HttpContext.Connection.RemoteIpAddress after
-    /// ForwardedHeadersMiddleware — never parsed from headers inside this method.
+    /// ForwardedHeadersMiddleware - never parsed from headers inside this method.
     /// </summary>
     public bool ValidateSignature(
         IReadOnlyDictionary<string, IReadOnlyList<string>> headers,
@@ -133,7 +133,7 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
         var paymentId = obj.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
         if (string.IsNullOrEmpty(paymentId)) return;
 
-        // UUID validation before URL construction — prevents path traversal and log injection.
+        // UUID validation before URL construction - prevents path traversal and log injection.
         // YooKassa payment IDs are UUID v4.
         if (!Guid.TryParse(paymentId, out _))
         {
@@ -313,11 +313,11 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
         catch (Exception ex)
         {
             _logger.LogError(ex, "YooKassa re-fetch network failure for payment {PaymentId}", paymentId);
-            throw; // Transient failure — propagate so controller returns 503 and YooKassa retries.
+            throw; // Transient failure - propagate so controller returns 503 and YooKassa retries.
         }
 
         if (response.StatusCode == HttpStatusCode.NotFound)
-            return null; // Payment does not exist — webhook body was invalid, discard safely.
+            return null; // Payment does not exist - webhook body was invalid, discard safely.
 
         if (!response.IsSuccessStatusCode)
         {

@@ -5,7 +5,7 @@ namespace Inktide.API.Soul.Infrastructure.Security;
 
 /// <summary>
 /// Wraps ASP.NET Core Data Protection for encrypting/decrypting LLM provider API keys.
-/// Purpose string is versioned so keys can be rotated in future (v1 → v2 migration).
+/// Purpose string is versioned so keys can be rotated in future (v1 -> v2 migration).
 /// </summary>
 public sealed class ApiKeyProtector : IApiKeyProtector
 {

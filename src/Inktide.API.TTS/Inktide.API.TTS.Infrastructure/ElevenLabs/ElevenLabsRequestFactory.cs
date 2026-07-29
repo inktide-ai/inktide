@@ -52,7 +52,7 @@ internal static class ElevenLabsRequestFactory
     }
 
     /// <summary>
-    /// <c>GET /v1/models</c> — public endpoint, no API key required.
+    /// <c>GET /v1/models</c> - public endpoint, no API key required.
     /// </summary>
     internal static HttpRequestMessage CreateGetModelsRequest(Uri baseUri)
     {

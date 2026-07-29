@@ -146,7 +146,7 @@ internal sealed class DeveloperAppService : IDeveloperAppService
         if (allowed == requested) return true;
         if (!allowed.EndsWith("*")) return false;
         var prefix = allowed[..^1];
-        // Wildcard is only safe when the character before * is / — prevents matching sibling domains
+        // Wildcard is only safe when the character before * is / - prevents matching sibling domains
         // e.g. "https://a.com/*" is safe; "https://a.com*" would match "https://a.com.evil.com/"
         if (!prefix.EndsWith('/')) return false;
         return requested.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);

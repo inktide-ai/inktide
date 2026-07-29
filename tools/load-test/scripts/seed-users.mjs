@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Idempotently seeds the bench user pool (bench-user-0001 … bench-user-NNNN)
-// via the Keycloak admin API and writes data/users.json (no secrets in it —
+// Idempotently seeds the bench user pool (bench-user-0001 ... bench-user-NNNN)
+// via the Keycloak admin API and writes data/users.json (no secrets in it -
 // the shared password stays in BENCH_USER_PASSWORD).
 //
 // Usage:
@@ -29,7 +29,7 @@ async function findByUsername(username) {
   return res.json?.[0] ?? null;
 }
 
-// ── Delete mode ───────────────────────────────────────────────────────────
+// -- Delete mode -----------------------------------------------------------
 if (deleteMode) {
   const res = await kc(`${usersBase}?username=bench-user-&max=2000`);
   const victims = (res.json || []).filter(
@@ -43,7 +43,7 @@ if (deleteMode) {
   process.exit(0);
 }
 
-// ── Seed mode ─────────────────────────────────────────────────────────────
+// -- Seed mode -------------------------------------------------------------
 if (!env.benchPassword) {
   console.error('seed-users: BENCH_USER_PASSWORD is required');
   process.exit(1);

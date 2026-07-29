@@ -256,7 +256,7 @@ public sealed class FinalizeImportRequest
     [JsonProperty("target_soul_id")]
     public Guid? TargetSoulId { get; set; }
 
-    /// <summary>Default true — connector stubs require re-authentication.</summary>
+    /// <summary>Default true - connector stubs require re-authentication.</summary>
     [JsonProperty("import_connectors_disabled")]
     public bool? ImportConnectorsDisabled { get; set; }
 }

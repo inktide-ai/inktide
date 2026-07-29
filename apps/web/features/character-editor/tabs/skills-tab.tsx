@@ -88,7 +88,7 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => {
             min={50} max={2000} step={50}
             onChange={v => onUpdate({ behavior: { ...bh, maxResponseLength: Math.min(2000, Math.max(50, v)) } })}
           />
-          {/* Row 2: Language select | Emotion — 2×2 grid */}
+          {/* Row 2: Language select | Emotion - 2x2 grid */}
           <SelectCell
             value={bh.language}
             options={LANGUAGE_OPTIONS}
@@ -119,7 +119,7 @@ const SkillsTab = ({ character, onUpdate }: SkillsTabProps) => {
       <CollapsibleSection title={t('skillsTab.liveMode')}>
         {(collapse) => (
           /* Single 3-column grid: [1fr] [1fr] [24px]
-             All rows share the same column widths → perfect alignment */
+             All rows share the same column widths -> perfect alignment */
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr 24px',

@@ -3,7 +3,7 @@ using Inktide.API.Billing.Application.Models;
 namespace Inktide.API.Billing.Application.Interfaces;
 
 /// <summary>
-/// Payment provider abstraction. Implement for each processor (Lemon Squeezy, Stripe, Paddle…).
+/// Payment provider abstraction. Implement for each processor (Lemon Squeezy, Stripe, Paddle...).
 /// </summary>
 public interface IBillingProvider
 {

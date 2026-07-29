@@ -21,7 +21,7 @@ export function saveOAuthPending(state: OAuthPendingState): void {
 // Known limitation: sessionStorage is not shared across tabs.
 // If the OAuth provider opens the callback in a new tab,
 // justConnected will be false and the success banner won't show.
-// This is an accepted trade-off — all known providers redirect to the originating tab.
+// This is an accepted trade-off - all known providers redirect to the originating tab.
 //
 // The key is NOT removed here; removal is a side effect and belongs in useEffect.
 // Natural lifecycle: tab close clears sessionStorage; TTL prevents stale banners;

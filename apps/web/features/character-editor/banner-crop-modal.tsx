@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import Cropper from 'react-easy-crop'
 import type { Area } from 'react-easy-crop'
 
-// 3:1 width:height — matches banner display ratio
+// 3:1 width:height - matches banner display ratio
 const BANNER_ASPECT = 3
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -19,7 +19,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 async function cropToBlob(imageSrc: string, px: Area): Promise<Blob> {
   const img = await loadImage(imageSrc)
   const canvas = document.createElement('canvas')
-  // Output at 2× banner display width for crisp rendering
+  // Output at 2x banner display width for crisp rendering
   const scale = Math.min(2, img.naturalWidth / px.width)
   canvas.width = Math.round(px.width * scale)
   canvas.height = Math.round(px.height * scale)

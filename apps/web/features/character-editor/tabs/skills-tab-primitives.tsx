@@ -51,7 +51,7 @@ export function Section({ title, right, children }: {
         left: -16, right: -8,
         height: 1, background: C.separator,
       }} />
-      {/* Header — no own padding */}
+      {/* Header - no own padding */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         height: 24, marginBottom: 8,
@@ -68,7 +68,7 @@ export function Section({ title, right, children }: {
         </h2>
         {right}
       </div>
-      {/* Body — no own padding */}
+      {/* Body - no own padding */}
       {children}
     </div>
   )
@@ -82,7 +82,7 @@ export function CollapsibleSection({ title, children }: {
   const [open, setOpen] = useState(false)
   return (
     <div style={{ position: 'relative' }}>
-      {/* Bottom separator — matches all other sections */}
+      {/* Bottom separator - matches all other sections */}
       <div style={{
         position: 'absolute', bottom: 0, left: -16, right: -8,
         height: 1, background: C.separator,

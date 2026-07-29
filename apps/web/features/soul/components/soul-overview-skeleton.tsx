@@ -54,7 +54,7 @@ export function SoulOverviewSkeleton() {
         </CardShell>
       </div>
 
-      {/* Secondary cards — 4×col-span-3 */}
+      {/* Secondary cards - 4xcol-span-3 */}
       {[...Array(4)].map((_, i) => (
         <div key={i} className="col-span-3">
           <CardShell>

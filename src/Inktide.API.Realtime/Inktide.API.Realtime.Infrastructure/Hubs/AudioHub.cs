@@ -9,8 +9,8 @@ namespace Inktide.API.Realtime.Infrastructure.Hubs;
 /// Real-time audio delivery hub. Browser clients join a channel group to receive
 /// synthesized audio payloads as they arrive from the TTS pipeline.
 ///
-/// <para>Flow: client connects → calls <see cref="JoinChannel"/> with the Discord/platform
-/// channel ID → receives <c>audioReceived</c> events pushed by <see cref="Messaging.BrowserAudioPublisher"/>.</para>
+/// <para>Flow: client connects -> calls <see cref="JoinChannel"/> with the Discord/platform
+/// channel ID -> receives <c>audioReceived</c> events pushed by <see cref="Messaging.BrowserAudioPublisher"/>.</para>
 ///
 /// <para>SignalR JWT note: browsers cannot set Authorization headers on WebSocket connections.
 /// The frontend must pass the token as <c>?access_token=&lt;jwt&gt;</c> query param.

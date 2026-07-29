@@ -3,7 +3,7 @@ using Inktide.API.Soul.Domain.Enums;
 namespace Inktide.API.Soul.Domain.Entities;
 
 /// <summary>
-/// Core aggregate root — thin soul identity: name, LLM/TTS provider selection, and 3D models.
+/// Core aggregate root - thin soul identity: name, LLM/TTS provider selection, and 3D models.
 /// Behavior config (system prompt, personality, response behavior, memory, autopilot, screen awareness)
 /// has moved to the Project context.
 /// </summary>

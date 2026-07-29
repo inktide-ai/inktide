@@ -5,7 +5,7 @@ namespace Inktide.API.Soul.Infrastructure.Services;
 
 /// <summary>
 /// Reads the total memory count published by the Memory bounded context into Redis.
-/// Key: "memory:stats:total" — written by Memory on ingest and deletion.
+/// Key: "memory:stats:total" - written by Memory on ingest and deletion.
 /// Returns 0 when the key is absent (Memory has not published yet, or Redis is cold).
 /// </summary>
 public sealed class RedisMemoryStatsCache : IMemoryStatsCache

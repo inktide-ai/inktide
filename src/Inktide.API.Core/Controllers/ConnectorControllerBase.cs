@@ -13,7 +13,7 @@ public abstract class ConnectorControllerBase : ControllerBase
     /// Returns the authenticated user's ID from the JWT <c>sub</c> claim.
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the claim is absent — indicates misconfigured auth middleware, not a
+    /// Thrown when the claim is absent - indicates misconfigured auth middleware, not a
     /// user-facing auth failure. Expected 401s are handled by <c>[Authorize]</c> before
     /// this method is ever reached.
     /// </exception>

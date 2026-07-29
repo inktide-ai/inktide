@@ -6,7 +6,7 @@ import type { LookAtMode } from './renderers/vrm-renderer'
 import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import type { EmotionState, SoulState } from '@/shared/types/IVrmController'
 
-// Lazy-load heavy renderers — three.js is ~600KB, don't load until needed
+// Lazy-load heavy renderers - three.js is ~600KB, don't load until needed
 const VrmRenderer   = lazy(() => import('./renderers/vrm-renderer'))
 const GlbRenderer   = lazy(() => import('./renderers/glb-renderer'))
 const Live2dRenderer = lazy(() => import('./renderers/live2d-renderer'))
@@ -22,17 +22,17 @@ export interface AvatarRendererProps {
   className?: string
   /**
    * Called every animation frame to obtain current mouth expression weights.
-   * Only consumed by VrmRenderer — other renderers ignore it.
+   * Only consumed by VrmRenderer - other renderers ignore it.
    */
   getMouthWeights?: () => MouthWeights
   /**
    * Called every animation frame to obtain current emotion state.
-   * Only consumed by VrmRenderer — other renderers ignore it.
+   * Only consumed by VrmRenderer - other renderers ignore it.
    */
   getEmotionState?: () => EmotionState
   /**
    * Called every animation frame to obtain SoulState (VAD + PhysicalState).
-   * Only consumed by VrmRenderer — other renderers ignore it.
+   * Only consumed by VrmRenderer - other renderers ignore it.
    */
   getSoulState?: () => SoulState | null
   /** When false, only the avatar mesh is hidden; scene / CSS background stays visible. */

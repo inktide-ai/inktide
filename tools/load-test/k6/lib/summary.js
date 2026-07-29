@@ -1,13 +1,13 @@
 // handleSummary implementation. Produces, per run:
-//   results/<runId>_<profile>_summary.json — full k6 summary (debugging)
-//   results/<runId>_<profile>.json         — compact stable schema, shared
+//   results/<runId>_<profile>_summary.json - full k6 summary (debugging)
+//   results/<runId>_<profile>.json         - compact stable schema, shared
 //                                            with bombardier & report.mjs
-//   stdout                                 — human-readable table (no jslib
+//   stdout                                 - human-readable table (no jslib
 //                                            imports; the suite is hermetic)
 //
 // Compact schema:
 //   { tool, profile, ts, run_id, git_sha,
-//     metrics:   { <name>: { type, avg|rate|count, p50/p95/p99, … } },
+//     metrics:   { <name>: { type, avg|rate|count, p50/p95/p99, ... } },
 //     thresholds:{ <metric>: { <expr>: ok } },
 //     passed: bool }
 
@@ -62,7 +62,7 @@ function fmtMs(x) {
 }
 
 function renderText(compact, config) {
-  const line = '─'.repeat(72);
+  const line = '-'.repeat(72);
   const rows = [];
   rows.push(line);
   rows.push(` inktide load-test · profile=${config.profileName} · run=${config.runId}` + (compact.git_sha ? ` · ${compact.git_sha}` : ''));

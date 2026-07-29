@@ -5,7 +5,7 @@ namespace Inktide.API.Soul.REST.Mappers;
 
 /// <summary>
 /// Maps catalog domain entities to REST response models.
-/// SRP: one reason to change — catalog read representation (LLM and TTS).
+/// SRP: one reason to change - catalog read representation (LLM and TTS).
 /// OCP: adding an image-generation catalog only requires adding ToImageGenResponse here.
 /// </summary>
 public static class CatalogResponseMapper

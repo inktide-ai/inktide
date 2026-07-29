@@ -11,7 +11,7 @@ using StackExchange.Redis;
 namespace Inktide.API.Realtime.Infrastructure.Messaging;
 
 /// <summary>
-/// Base class for Redis Stream → SignalR browser publishers.
+/// Base class for Redis Stream -> SignalR browser publishers.
 /// Handles consumer group lifecycle, polling, XAUTOCLAIM, entry processing, and ACK.
 /// Subclasses implement only <see cref="Deserialize"/>, <see cref="IsValid"/>, and
 /// <see cref="PushToClientsAsync"/>.

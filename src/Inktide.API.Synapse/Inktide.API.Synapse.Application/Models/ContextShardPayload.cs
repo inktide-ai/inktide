@@ -27,7 +27,7 @@ public sealed record ContextShardPayload(
     string? TtsModelId,
     /// <summary>Speech speed multiplier. 1.0 = normal.</summary>
     float TtsSpeed,
-    /// <summary>"chat" — buffer full response as one TTS chunk; "narration" — sentence-based chunking.</summary>
+    /// <summary>"chat" - buffer full response as one TTS chunk; "narration" - sentence-based chunking.</summary>
     string ChunkingMode = "narration",
     /// <summary>BCP-47 language tag for LLM response language (e.g. "ru", "en"). Null = no override.</summary>
     string? Language = null,
@@ -37,17 +37,17 @@ public sealed record ContextShardPayload(
     int LlmMaxTokens = 512,
     /// <summary>Top-p nucleus sampling.</summary>
     float LlmTopP = 0.9f,
-    /// <summary>Frequency penalty — reduces repetition of the same phrases.</summary>
+    /// <summary>Frequency penalty - reduces repetition of the same phrases.</summary>
     float LlmFrequencyPenalty = 0f,
-    /// <summary>Presence penalty — encourages new topics.</summary>
+    /// <summary>Presence penalty - encourages new topics.</summary>
     float LlmPresencePenalty = 0f,
     /// <summary>Milliseconds to wait before publishing the first TTS chunk after generation completes.</summary>
     int ResponseDelayMs = 0,
-    /// <summary>Per-card base URL override — wins over global BYOK credential base URL.</summary>
+    /// <summary>Per-card base URL override - wins over global BYOK credential base URL.</summary>
     string? LlmBaseUrl = null,
-    /// <summary>False for keyless providers (Ollama, LM Studio) — worker skips credential lookup.</summary>
+    /// <summary>False for keyless providers (Ollama, LM Studio) - worker skips credential lookup.</summary>
     bool LlmRequiresApiKey = true,
-    /// <summary>How quickly emotions adapt to messages — scales TTS speed modulation. From PersonalitySettings.</summary>
+    /// <summary>How quickly emotions adapt to messages - scales TTS speed modulation. From PersonalitySettings.</summary>
     float EmotionResponsiveness = 0.7f,
     /// <summary>Natural-language personality directive block injected into the LLM system prompt. Null = no personality configured.</summary>
     string? PersonalityDirective = null,
@@ -55,5 +55,5 @@ public sealed record ContextShardPayload(
     IReadOnlyList<ProjectPluginDto>? Plugins = null,
     /// <summary>Per-soul TTS endpoint override (e.g. self-hosted Kokoro). Null = use globally configured endpoint.</summary>
     string? TtsBaseUrl = null,
-    /// <summary>Pre-serialized JSON of provider-specific TTS params (stability, pitch, etc.). Opaque string — deserialized only in LlmResponseStreamConsumer.</summary>
+    /// <summary>Pre-serialized JSON of provider-specific TTS params (stability, pitch, etc.). Opaque string - deserialized only in LlmResponseStreamConsumer.</summary>
     string? TtsProviderParamsJson = null);

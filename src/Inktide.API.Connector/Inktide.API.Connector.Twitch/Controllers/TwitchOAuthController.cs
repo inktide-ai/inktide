@@ -135,7 +135,7 @@ public sealed class TwitchOAuthController : ConnectorControllerBase
         }
     }
 
-    /// <summary>Revokes a Twitch connection — deactivates in DB, leaves IRC channel, revokes token.</summary>
+    /// <summary>Revokes a Twitch connection - deactivates in DB, leaves IRC channel, revokes token.</summary>
     [HttpDelete("channels/{channelId:guid}")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

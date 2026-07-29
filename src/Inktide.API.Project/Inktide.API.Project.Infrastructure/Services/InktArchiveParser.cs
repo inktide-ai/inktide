@@ -6,7 +6,7 @@ namespace Inktide.API.Project.Infrastructure.Services;
 
 /// <summary>
 /// Extracts and validates the contents of a .inkt ZIP archive.
-/// Pure extraction — no I/O beyond the stream, no external dependencies.
+/// Pure extraction - no I/O beyond the stream, no external dependencies.
 /// Throws InvalidOperationException with a user-facing message on any parse failure.
 /// </summary>
 internal static class InktArchiveParser

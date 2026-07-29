@@ -1,6 +1,6 @@
 export interface IdleVariation {
   clipId: string
-  /** 0–1 chance to trigger at end of each idle cycle. */
+  /** 0-1 chance to trigger at end of each idle cycle. */
   probability: number
   crossFadeDuration: number
 }

@@ -8,7 +8,7 @@ public sealed class MemoryMetadataConfiguration : IEntityTypeConfiguration<Memor
 {
     public void Configure(EntityTypeBuilder<MemoryMetadata> b)
     {
-        // Table stays in soul schema — no data movement required.
+        // Table stays in soul schema - no data movement required.
         // FK to soul.ai_cards is enforced at DB level (CASCADE DELETE) but not via EF navigation.
         b.ToTable("memory_metadata", "soul");
         b.HasKey(e => e.Id);

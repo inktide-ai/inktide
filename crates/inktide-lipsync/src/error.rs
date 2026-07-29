@@ -2,7 +2,7 @@ use thiserror::Error;
 
 /// Errors from lip-sync analysis.
 ///
-/// `#[non_exhaustive]` — match with a `_ =>` catch-all.
+/// `#[non_exhaustive]` - match with a `_ =>` catch-all.
 #[non_exhaustive]
 #[derive(Debug, Error)]
 pub enum LipSyncError {

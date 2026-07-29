@@ -4,7 +4,7 @@ namespace Inktide.API.Soul.Application.ActivityFeed;
 
 /// <summary>
 /// Encodes/decodes a 16-byte opaque keyset cursor: 8 bytes OccurredAt ticks (big-endian) + 8 bytes GUID.
-/// Base64Url-encoded; tamper-resistant by obscurity (not signed — acceptable since no privilege escalation
+/// Base64Url-encoded; tamper-resistant by obscurity (not signed - acceptable since no privilege escalation
 /// is possible from a forged cursor; all rows are already filtered by card id and visibility).
 /// </summary>
 public static class CursorCodec

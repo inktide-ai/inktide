@@ -62,7 +62,7 @@ public sealed class TtsRateLimiterStartup : IStartup
 
             options.AddPolicy(AuthRateLimitPolicy, ctx =>
             {
-                // Auth endpoints are hit before a valid token exists — partition by IP.
+                // Auth endpoints are hit before a valid token exists - partition by IP.
                 var key = ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
                 return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
                 {
@@ -73,7 +73,7 @@ public sealed class TtsRateLimiterStartup : IStartup
                 });
             });
 
-            // Applied as the default policy — protects all routes without explicit policy.
+            // Applied as the default policy - protects all routes without explicit policy.
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
             {
                 var userId = ctx.User.FindFirstValue("sub")

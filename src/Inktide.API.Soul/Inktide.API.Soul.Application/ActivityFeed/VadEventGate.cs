@@ -3,7 +3,7 @@ namespace Inktide.API.Soul.Application.ActivityFeed;
 public sealed record VadGateResult(bool ShouldEmit, string? HumanLabel, string? TemplateKey);
 
 /// <summary>
-/// Pure static gate — no I/O. Caller is responsible for cooldown DB checks.
+/// Pure static gate - no I/O. Caller is responsible for cooldown DB checks.
 /// VAD values are normalized 0..1 with 0.5 = neutral.
 /// Boundary high = 0.6, boundary low = 0.4 (1 - 0.6).
 /// </summary>

@@ -25,7 +25,7 @@ public sealed class SubscriptionRepository : ISubscriptionRepository
 
     public async Task UpsertAsync(UserSubscription subscription, CancellationToken ct = default)
     {
-        // Atomic upsert — avoids the SELECT + INSERT/UPDATE pattern which has a race
+        // Atomic upsert - avoids the SELECT + INSERT/UPDATE pattern which has a race
         // condition when two webhook deliveries arrive concurrently for a new user.
         var plan   = subscription.Plan.ToString();
         var status = subscription.Status.ToString();

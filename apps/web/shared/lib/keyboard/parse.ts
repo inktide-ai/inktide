@@ -1,6 +1,6 @@
 import type { ParsedCombo } from './types'
 
-// Resolved once at module init — not on every keydown.
+// Resolved once at module init - not on every keydown.
 const isMac =
   typeof navigator !== 'undefined' &&
   /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
@@ -57,7 +57,7 @@ export function comboFromEvent(e: KeyboardEvent): string {
   })
 }
 
-/** Human-readable hint for display (e.g. "⌘K", "Ctrl+,"). */
+/** Human-readable hint for display (e.g. "CmdK", "Ctrl+,"). */
 export function formatCombo(raw: string): string {
   const parts = raw
     .toLowerCase()

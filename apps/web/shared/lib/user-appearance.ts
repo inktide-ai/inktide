@@ -5,7 +5,7 @@
  * Accent hex is synced to `--inktide-accent-base` on `<html>`; see globals.css derivatives.
  */
 
-// Key kept for backward compat — useGlobalPreferences migration reads it once then removes it.
+// Key kept for backward compat - useGlobalPreferences migration reads it once then removes it.
 export const USER_APPEARANCE_STORAGE_KEY = 'inktide_user_appearance' as const
 
 export interface AppearancePrefs {

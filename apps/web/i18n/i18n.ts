@@ -54,12 +54,12 @@ const bundledResources = {
 }
 
 // All plugins registered synchronously at module load time.
-// HttpBackend is only wired on the client — on the server common resources
+// HttpBackend is only wired on the client - on the server common resources
 // come from bundledResources so no HTTP calls are made during SSR.
 if (isBrowser) i18n.use(HttpBackend)
 i18n.use(LanguageDetector).use(initReactI18next)
 
-// Init fires immediately when this module is first imported — before any
+// Init fires immediately when this module is first imported - before any
 // component renders. bundledResources makes common available synchronously;
 // other namespaces are fetched lazily by HttpBackend.
 const _ready = i18n.init({

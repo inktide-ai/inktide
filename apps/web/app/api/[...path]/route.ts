@@ -9,7 +9,7 @@ const BACKEND_URL = process.env.BACKEND_URL ?? 'http://127.0.0.1:5001'
 const STRIP_HEADERS = new Set(['host', 'x-user-id', 'x-user-name', 'x-user-picture'])
 
 // auth() is request-scoped (AsyncLocalStorage) and called once per request.
-// It must NOT be cached in module scope — a shared cache would hand one user's
+// It must NOT be cached in module scope - a shared cache would hand one user's
 // session to a concurrent request from a different user (cross-tenant leak).
 
 async function proxyRequest(
@@ -19,7 +19,7 @@ async function proxyRequest(
   const { path: segments } = await params
   const path = segments.join('/')
 
-  // auth/* is handled by next-auth handler — should never reach here
+  // auth/* is handled by next-auth handler - should never reach here
   if (path.startsWith('auth/')) {
     return new NextResponse('Not found', { status: 404 })
   }
@@ -49,8 +49,8 @@ async function proxyRequest(
   try {
     backendRes = await fetch(backendUrl, fetchOptions(buildHeaders(accessToken)))
   } catch (err) {
-    // Upstream unreachable / aborted — surface a gateway error instead of crashing the route.
-    // NOTE: no full-request AbortSignal timeout here on purpose — the proxy streams long-lived
+    // Upstream unreachable / aborted - surface a gateway error instead of crashing the route.
+    // NOTE: no full-request AbortSignal timeout here on purpose - the proxy streams long-lived
     // responses (SSE / LLM / TTS) and a blanket timeout would cut them off mid-stream.
     const isAbort = err instanceof Error && err.name === 'AbortError'
     return new NextResponse(

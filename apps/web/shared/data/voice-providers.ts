@@ -15,7 +15,7 @@ export interface VoiceProviderCatalogEntry {
   requiresApiKey: boolean
   /** Filter type tags for the Type dropdown */
   types: string[]
-  /** Icon is dark/black — needs white background container on dark theme */
+  /** Icon is dark/black - needs white background container on dark theme */
   darkIcon?: boolean
   websiteUrl?: string
   supportUrl?: string

@@ -4,7 +4,7 @@ using Inktide.API.Connector.Application.Models;
 namespace Inktide.API.Soul.Infrastructure.Connectors;
 
 /// <summary>
-/// Stub adapter — AiCardChannel has moved to the Project context.
+/// Stub adapter - AiCardChannel has moved to the Project context.
 /// This class keeps the DI registration compiling while the migration is in progress.
 /// TODO: replace with a Project-context implementation once Project owns channels.
 /// </summary>

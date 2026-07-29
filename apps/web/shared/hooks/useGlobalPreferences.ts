@@ -52,7 +52,7 @@ function deleteLegacyKeys() {
     localStorage.removeItem(LEGACY_APPEARANCE_KEY)
     localStorage.removeItem(LEGACY_NOTIFICATIONS_KEY)
     localStorage.removeItem(LEGACY_FAVORITES_KEY)
-    // inktide_lang is NOT removed — i18next-browser-languagedetector reads it on
+    // inktide_lang is NOT removed - i18next-browser-languagedetector reads it on
     // every page load for language detection. Deleting it causes the language to
     // reset to the browser's navigator language on reload.
   } catch { /* ignore */ }
@@ -72,7 +72,7 @@ async function fetchWithMigration(): Promise<GlobalPreferencesDto> {
           deleteLegacyKeys()
           writeCache(merged)
         })
-        .catch(() => { /* flag not set — retry next session, old data preserved */ })
+        .catch(() => { /* flag not set - retry next session, old data preserved */ })
     } else {
       localStorage.setItem(MIGRATION_FLAG, '1')
     }

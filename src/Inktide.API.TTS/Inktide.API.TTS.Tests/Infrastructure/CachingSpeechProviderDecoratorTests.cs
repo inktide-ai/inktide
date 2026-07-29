@@ -39,7 +39,7 @@ public sealed class CachingSpeechProviderDecoratorTests
         await decorator.GetVoicesAsync(options, "model-1");
         await decorator.GetVoicesAsync(options, "model-1");
 
-        // Inner provider must be called on every BYOK request — never cached.
+        // Inner provider must be called on every BYOK request - never cached.
         await innerVl.Received(2)
             .GetVoicesAsync(Arg.Any<ProviderOptions>(), "model-1", Arg.Any<CancellationToken>());
     }
@@ -53,7 +53,7 @@ public sealed class CachingSpeechProviderDecoratorTests
         await decorator.GetVoicesAsync(options, "model-1");
         await decorator.GetVoicesAsync(options, "model-1");
 
-        // Inner provider must be called exactly once — second call served from cache.
+        // Inner provider must be called exactly once - second call served from cache.
         await innerVl.Received(1)
             .GetVoicesAsync(Arg.Any<ProviderOptions>(), "model-1", Arg.Any<CancellationToken>());
     }

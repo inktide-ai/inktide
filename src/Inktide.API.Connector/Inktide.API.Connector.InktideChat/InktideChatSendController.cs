@@ -29,7 +29,7 @@ public sealed class InktideChatSendController : ConnectorControllerBase
     /// <summary>
     /// Enqueues a browser chat message for the Synapse pipeline.
     /// <c>channelId</c> must be <c>"{cardId}:{userId}"</c> where <c>userId</c> matches
-    /// the authenticated principal — enforced server-side to prevent channel hijacking.
+    /// the authenticated principal - enforced server-side to prevent channel hijacking.
     /// </summary>
     [HttpPost("messages")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]

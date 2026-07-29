@@ -4,7 +4,7 @@ import { useShortcut } from '@/shared/lib/keyboard'
 import { useTranslation } from 'react-i18next'
 import { HexColorPicker } from 'react-colorful'
 import { cn } from '@/lib/utils'
-import { addCustomSceneTag } from '@/features/soul/api/index' // fsd:cross-feature-ok — soul editor
+import { addCustomSceneTag } from '@/features/soul/api/index' // fsd:cross-feature-ok - soul editor
 
 const MAX_LEN = 128
 const TAG_COLOR_PRESETS = ['#818cf8', '#a78bfa', '#f472b6', '#4ade80', '#38bdf8', '#fb923c', '#f87171', '#facc15']
@@ -63,7 +63,7 @@ export function NewTagModal({ cardId, onClose, onCreated }: NewTagModalProps) {
           <div>
             <div className={modalFieldLabel}>Цвет тега</div>
             <div className="flex flex-col gap-[10px] mt-[6px]">
-              {/* react-colorful — override via .new-tag-picker class in globals.css */}
+              {/* react-colorful - override via .new-tag-picker class in globals.css */}
               <div className="new-tag-picker-wrap">
                 <HexColorPicker color={color} onChange={setColor} className="new-tag-picker" />
               </div>

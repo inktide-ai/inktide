@@ -55,7 +55,7 @@ public sealed class EmailChangeService : IEmailChangeService
             return null;
         }
 
-        // Publish to EF outbox — consumer retries Keycloak update up to 10 times (backoff → 1h)
+        // Publish to EF outbox - consumer retries Keycloak update up to 10 times (backoff -> 1h)
         await _publishEndpoint
             .Publish(new KeycloakEmailUpdateRequested(guid, newEmail), ct)
             .ConfigureAwait(false);

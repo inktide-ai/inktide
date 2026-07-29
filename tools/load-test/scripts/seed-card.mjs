@@ -2,7 +2,7 @@
 // Creates (idempotently) one soul card owned by bench-user-0001 for the
 // chatE2E scenario and prints its id as CHAT_CARD_ID.
 //
-// Flow: password-grant token → pick first LLM catalog entry →
+// Flow: password-grant token -> pick first LLM catalog entry ->
 //       POST /api/v1/souls/cards { name: "Bench Card", llmCatalogId }
 //
 // Usage: node scripts/seed-card.mjs   (requires BENCH_USER_PASSWORD + seeded pool)

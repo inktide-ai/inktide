@@ -41,7 +41,7 @@ export interface KcLinkedAccount {
 }
 
 //
-// All calls go through the BFF proxy at /api/kc-account/[[...path]] —
+// All calls go through the BFF proxy at /api/kc-account/[[...path]] -
 // the token is injected server-side; the browser never sees it.
 
 async function kcFetch(path: string, init?: RequestInit): Promise<Response> {

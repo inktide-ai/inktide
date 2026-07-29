@@ -66,7 +66,7 @@ const METHOD_STYLES: Record<Method, string> = {
 export default function DeveloperPortalLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const { t } = useTranslation('developer')
-  // Mobile off-canvas drawer (≥lg the sidebar is a static column, so this is inert there).
+  // Mobile off-canvas drawer (>=lg the sidebar is a static column, so this is inert there).
   const [open, setOpen] = useState(false)
 
   useEffect(() => { setOpen(false) }, [pathname])
@@ -100,7 +100,7 @@ export default function DeveloperPortalLayout({ children }: { children: ReactNod
         />
       )}
 
-      {/* Sidebar — static column ≥lg, off-canvas drawer below. */}
+      {/* Sidebar - static column >=lg, off-canvas drawer below. */}
       <aside
         className={`flex h-full shrink-0 flex-col gap-1 overflow-y-auto border-r border-[var(--border-subtle)] p-4 fixed inset-y-0 left-0 z-50 w-[280px] -translate-x-full bg-[var(--bg-0)] shadow-xl transition-transform duration-300 ease-out motion-reduce:transition-none lg:static lg:z-auto lg:w-72 lg:translate-x-0 lg:shadow-none lg:transition-none ${open ? 'translate-x-0' : ''}`}
       >

@@ -22,7 +22,7 @@ public sealed class InktideTtsStartup : IStartup
         services.AddInktideTts(ctx.Configuration);
         services.AddSingleton<IRhubarbService, RhubarbService>();
 
-        // Stream consumer: LLM responses → TTS synthesis → audio output stream.
+        // Stream consumer: LLM responses -> TTS synthesis -> audio output stream.
         // This lives here (not in Synapse) because TTS owns the synthesis pipeline.
         services.AddOptions<LlmResponseStreamSettings>()
             .BindConfiguration(LlmResponseStreamSettings.SectionName);

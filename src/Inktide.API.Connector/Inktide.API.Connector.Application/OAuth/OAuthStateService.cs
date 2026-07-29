@@ -9,7 +9,7 @@ namespace Inktide.API.Connector.Application.OAuth;
 /// <summary>
 /// CSRF-protected OAuth2 state token.
 /// State = Base64Url( JSON payload ) + "." + HMAC-SHA256 signature.
-/// Shared by all connector OAuth flows (Discord, Twitch, …).
+/// Shared by all connector OAuth flows (Discord, Twitch, ...).
 /// </summary>
 public sealed class OAuthStateService : IOAuthStateService
 {

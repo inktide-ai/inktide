@@ -7,7 +7,7 @@ namespace Inktide.API.Soul.Infrastructure.Messaging;
 /// <summary>
 /// Publishes integration events to Redis Streams.
 /// To swap to Kafka: implement <see cref="IIntegrationEventPublisher"/> in a Kafka adapter
-/// and replace this registration in DI — no other code changes needed.
+/// and replace this registration in DI - no other code changes needed.
 /// </summary>
 internal sealed class RedisStreamsIntegrationEventPublisher : IIntegrationEventPublisher
 {

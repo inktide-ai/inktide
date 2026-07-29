@@ -7,7 +7,7 @@ namespace Inktide.API.Connector.Twitch.Gateway;
 
 /// <summary>
 /// Populates TwitchChannelRegistry from DB on startup, then bulk-JOINs all active channels
-/// via TwitchConnector. Throttles JOIN to ≤20 per 10s to respect Twitch IRC rate limits.
+/// via TwitchConnector. Throttles JOIN to <=20 per 10s to respect Twitch IRC rate limits.
 /// </summary>
 internal sealed class TwitchChannelRegistryLoader(
     IServiceScopeFactory scopeFactory,
@@ -53,7 +53,7 @@ internal sealed class TwitchChannelRegistryLoader(
             return;
         }
 
-        // Throttled bulk JOIN: ≤20 channels per 10 seconds
+        // Throttled bulk JOIN: <=20 channels per 10 seconds
         for (int i = 0; i < logins.Count; i += JoinBatchSize)
         {
             var batch = logins.Skip(i).Take(JoinBatchSize);

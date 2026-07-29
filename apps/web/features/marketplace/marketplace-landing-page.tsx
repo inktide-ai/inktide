@@ -82,7 +82,7 @@ export function MarketplaceLandingPage() {
       <section className="px-6 pt-10">
         <div className="mx-auto max-w-[1300px]">
           <div className="relative flex overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--surface-1)] to-[var(--surface-2)]">
-            {/* Left column — fixed width, Notion-style layout */}
+            {/* Left column - fixed width, Notion-style layout */}
             <div className="flex w-[44%] shrink-0 flex-col justify-between px-8 py-8">
               <div>
                 <div className="mb-3">
@@ -103,7 +103,7 @@ export function MarketplaceLandingPage() {
               </a>
             </div>
 
-            {/* Right — illustration fills the space, bleeds out of top */}
+            {/* Right - illustration fills the space, bleeds out of top */}
             <div className="relative flex-1 overflow-hidden" aria-hidden>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -259,7 +259,7 @@ function ConnectorRow({
       onClick={() => onInstall(connector.slug)}
       className="flex w-full items-center gap-5 px-5 py-4 text-left transition-colors hover:bg-[var(--surface-1)]"
     >
-      {/* 64×64 icon */}
+      {/* 64x64 icon */}
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[var(--surface-2)] [&_svg]:h-full [&_svg]:w-full">
         {Icon ? <Icon /> : (
           <div

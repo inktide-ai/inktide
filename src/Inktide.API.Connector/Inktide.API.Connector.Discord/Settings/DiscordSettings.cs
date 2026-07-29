@@ -29,7 +29,7 @@ public sealed class DiscordSettings
         set => _botToken = value;
     }
 
-    /// <summary>Discord Application Client ID (from Developer Portal → OAuth2).</summary>
+    /// <summary>Discord Application Client ID (from Developer Portal -> OAuth2).</summary>
     [Required(AllowEmptyStrings = false)]
     public string ClientId
     {
@@ -59,7 +59,7 @@ public sealed class DiscordSettings
 
     /// <summary>
     /// Display name stored as BotUsername in the channel record.
-    /// Defaults to "Inktide" — override in config to match your bot's actual display name.
+    /// Defaults to "Inktide" - override in config to match your bot's actual display name.
     /// </summary>
     public string BotUsername { get; init; } = "Inktide";
 

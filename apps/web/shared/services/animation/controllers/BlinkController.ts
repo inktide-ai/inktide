@@ -16,9 +16,9 @@ function randomRange(min: number, max: number): number {
 
 /**
  * Blink interval is driven by SoulState.vad.arousal:
- *   high arousal (excited/surprised) → fast blink (min 0.8s, max 2.0s)
- *   low arousal (relax/sleepy)       → slow blink (min 1.2s, max 5.1s)
- *   energy < 0.1                     → droopy blink (min 1.0s, max 1.5s)
+ *   high arousal (excited/surprised) -> fast blink (min 0.8s, max 2.0s)
+ *   low arousal (relax/sleepy)       -> slow blink (min 1.2s, max 5.1s)
+ *   energy < 0.1                     -> droopy blink (min 1.0s, max 1.5s)
  *
  * Falls back to legacy constant range when soulState is null.
  */
@@ -76,9 +76,9 @@ export class BlinkController implements IVrmController {
     // Sleepy override: droopy frequent partial blinks
     if (energy < 0.1) return randomRange(1.0, 1.5)
 
-    // Arousal-driven range: a in [-1,+1] → min [1.2,0.8], max [5.1,2.0]
-    const minInterval = 0.8 + (1 - a) * 0.2  // 0.8s (arousal=1) → 1.2s (arousal=-1)
-    const maxInterval = 2.0 + (1 - a) * 1.55 // 2.0s (arousal=1) → 5.1s (arousal=-1)
+    // Arousal-driven range: a in [-1,+1] -> min [1.2,0.8], max [5.1,2.0]
+    const minInterval = 0.8 + (1 - a) * 0.2  // 0.8s (arousal=1) -> 1.2s (arousal=-1)
+    const maxInterval = 2.0 + (1 - a) * 1.55 // 2.0s (arousal=1) -> 5.1s (arousal=-1)
     return randomRange(minInterval, maxInterval)
   }
 }

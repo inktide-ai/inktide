@@ -2,21 +2,21 @@ use std::collections::HashMap;
 
 use inktide_lipsync::Viseme;
 
-/// VRM 1.0 expression name constants — all lowercase per spec.
+/// VRM 1.0 expression name constants - all lowercase per spec.
 pub mod shape {
     pub const AA: &str = "aa"; // open vowel
     pub const IH: &str = "ih"; // front mid
     pub const OU: &str = "ou"; // rounded close
     pub const EE: &str = "ee"; // front close
     pub const OH: &str = "oh"; // back mid
-    pub const PP: &str = "pp"; // bilabial — P, B, M
-    pub const FF: &str = "ff"; // labiodental — F, V
-    pub const TH: &str = "th"; // dental — TH, DH
-    pub const DD: &str = "dd"; // alveolar — D, L, N
-    pub const KK: &str = "kk"; // velar — K, G, NG
-    pub const CH: &str = "ch"; // sibilant — CH, SH, ZH
-    pub const SS: &str = "ss"; // fricative — S, Z
-    pub const NN: &str = "nn"; // nasal — N, NG
+    pub const PP: &str = "pp"; // bilabial - P, B, M
+    pub const FF: &str = "ff"; // labiodental - F, V
+    pub const TH: &str = "th"; // dental - TH, DH
+    pub const DD: &str = "dd"; // alveolar - D, L, N
+    pub const KK: &str = "kk"; // velar - K, G, NG
+    pub const CH: &str = "ch"; // sibilant - CH, SH, ZH
+    pub const SS: &str = "ss"; // fricative - S, Z
+    pub const NN: &str = "nn"; // nasal - N, NG
 }
 
 /// Per-shape blend weights in [0.0, 1.0]. Absent keys are treated as 0 by the renderer.
@@ -42,7 +42,7 @@ impl BlendShapeWeights {
         self.0.iter().map(|(&k, &v)| (k, v))
     }
 
-    /// Linear interpolation toward `other` by `t ∈ [0, 1]`. Absent keys treated as 0.
+    /// Linear interpolation toward `other` by `t in [0, 1]`. Absent keys treated as 0.
     pub fn lerp(&self, other: &Self, t: f32) -> Self {
         let mut out = Self::new();
         for (k, va) in self.iter() {
@@ -60,7 +60,7 @@ impl BlendShapeWeights {
 /// Maps a Rhubarb viseme to VRM 1.0 blend shape weights.
 ///
 /// The TypeScript counterpart (`VISEME_WEIGHTS` in `useLipSync.ts`) is derived
-/// from this table — keep them in sync when adjusting weights.
+/// from this table - keep them in sync when adjusting weights.
 pub(crate) fn viseme_to_weights(viseme: Viseme) -> BlendShapeWeights {
     let mut w = BlendShapeWeights::new();
     match viseme {

@@ -64,7 +64,7 @@ export function BannerColorPicker({ value, onChange }: BannerColorPickerProps) {
 
       {open && (
         <div className="absolute top-[calc(100%+10px)] left-0 z-[200] w-60 bg-[#181C23] border border-[#272C33] rounded-[14px] p-4 shadow-[0_24px_64px_rgba(0,0,0,0.7)] flex flex-col gap-[0.875rem]">
-          {/* react-colorful — override styles applied via globals.css .banner-color-picker */}
+          {/* react-colorful - override styles applied via globals.css .banner-color-picker */}
           <div className="banner-color-picker">
             <HexColorPicker color={value} onChange={onChange} />
           </div>

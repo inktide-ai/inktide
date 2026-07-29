@@ -49,7 +49,7 @@ const VoiceSandboxTab = ({ character, onBack }: VoiceSandboxTabProps) => {
     needsApiKey, canListVoices, canStream,
   } = useVoiceSandbox(character.tts.providerId ?? '')
 
-  // Simple form fields — no external data dependency, stay in component
+  // Simple form fields - no external data dependency, stay in component
   const [voiceId, setVoiceId] = useState(character.tts.voiceId ?? '')
   const [apiKey, setApiKey]   = useState('')
   const [text, setText]       = useState(() => t('text.defaultSample'))

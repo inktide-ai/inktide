@@ -85,7 +85,7 @@ public sealed class InfrastructureStartup : IStartup
         if (!string.IsNullOrWhiteSpace(fullOverride))
             return fullOverride.Trim();
 
-        // Reuse the same PostgresSettings that Soul uses — projects share the same DB instance.
+        // Reuse the same PostgresSettings that Soul uses - projects share the same DB instance.
         var host     = configuration["PostgresSettings:Host"]     ?? "localhost";
         var port     = configuration["PostgresSettings:Port"]     ?? "5432";
         var database = configuration["PostgresSettings:Database"] ?? "inktide";

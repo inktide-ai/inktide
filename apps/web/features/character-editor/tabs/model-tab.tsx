@@ -3,7 +3,7 @@
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { Slider } from '@/shared/ui/slider'
-import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok — editor embeds avatar preview
+import { AvatarRenderer } from '@/features/avatar' // fsd:cross-feature-ok - editor embeds avatar preview
 import { useSceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import type { AiCharacter, ModelType } from '@/shared/lib/character'
 import { ANIMATION_PRESETS, type AnimationPreset } from '../lib'

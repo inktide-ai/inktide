@@ -41,7 +41,7 @@ export interface ChannelResponse {
   id: string
   platform: string
   channel_name: string
-  /** Discord: guild id — must match connector ingest (Synapse routing). */
+  /** Discord: guild id - must match connector ingest (Synapse routing). */
   channel_id: string | null
   bot_username: string
   is_active: boolean
@@ -167,7 +167,7 @@ export interface AiCardSceneResponse {
   content_type: string
   size_bytes: number
   created_at: string
-  /** Explicit filter tag; omit or null → client uses legacy hash category. */
+  /** Explicit filter tag; omit or null -> client uses legacy hash category. */
   tag?: string | null
   /** Optional display title; when empty client falls back to file name. */
   display_name?: string | null

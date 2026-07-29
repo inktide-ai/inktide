@@ -6,7 +6,7 @@ import { listProjects } from '@/entities/project/api'
 
 interface SceneState {
   scenes: ProjectSceneResponse[]
-  scene: ProjectSceneResponse | null  // scenes[0] ?? null — backward compat for ObsTab / SceneFullscreen
+  scene: ProjectSceneResponse | null  // scenes[0] ?? null - backward compat for ObsTab / SceneFullscreen
   projectId: string | null
   loading: boolean
   error: string | null

@@ -74,7 +74,7 @@ public sealed class FrameIngestionService : IFrameIngestionService
         }
 
         // Scene deduplication via pHash.
-        // On hash failure: skip dedup entirely (do not use 0 as sentinel — it collapses dedup).
+        // On hash failure: skip dedup entirely (do not use 0 as sentinel - it collapses dedup).
         ulong? currentHash = null;
         try
         {

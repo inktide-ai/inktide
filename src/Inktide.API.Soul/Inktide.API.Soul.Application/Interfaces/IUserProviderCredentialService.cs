@@ -11,7 +11,7 @@ public interface IUserProviderCredentialService
     /// <summary>
     /// Returns the decrypted API key + base URL for the given user/provider pair.
     /// Returns null if no credential is configured.
-    /// Called by LlmStreamWorker via IServiceScopeFactory — key is never serialised to Redis.
+    /// Called by LlmStreamWorker via IServiceScopeFactory - key is never serialised to Redis.
     /// </summary>
     Task<DecryptedCredential?> GetDecryptedAsync(Guid userId, string providerId, CancellationToken ct = default);
 

@@ -12,7 +12,7 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
         // The initial seeding migrations generated single-character sort keys (e.g. 'g', 'h', 'i')
         // which are invalid for FractionalIndexer: a key starting with 'i' expects an integer part
         // of length 10, but the key is only 1 character. This causes ArgumentException on reorder.
-        // Fix: replace single-char keys with valid 2-char fractional-index keys ("a0", "a1", …).
+        // Fix: replace single-char keys with valid 2-char fractional-index keys ("a0", "a1", ...).
 
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -89,7 +89,7 @@ WHERE p.id = k.id;");
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Data-only fix — no structural rollback needed.
+            // Data-only fix - no structural rollback needed.
         }
     }
 }

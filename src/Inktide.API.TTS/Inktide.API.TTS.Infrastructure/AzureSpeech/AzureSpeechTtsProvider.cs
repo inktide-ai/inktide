@@ -76,7 +76,7 @@ public sealed class AzureSpeechTtsProvider : ISpeechProvider, IVoiceListingProvi
         if (string.IsNullOrWhiteSpace(options.ApiKey))
             return Task.FromResult(new SpeechVoiceCollection([]));
 
-        // Azure voice catalog is global — use default region for listing.
+        // Azure voice catalog is global - use default region for listing.
         var endpoint = BuildEndpoint(_settings.Value.DefaultRegion);
         return _client.GetVoicesAsync(options.ApiKey, endpoint, ct);
     }

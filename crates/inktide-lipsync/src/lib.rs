@@ -1,4 +1,4 @@
-//! Lip-sync engine: WAV bytes → timed viseme sequence for driving VRM blend shapes.
+//! Lip-sync engine: WAV bytes -> timed viseme sequence for driving VRM blend shapes.
 //!
 //! ```rust,no_run
 //! use inktide_lipsync::LipSyncAnalyzer;

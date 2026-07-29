@@ -14,22 +14,22 @@ export type LookAtMode = 'idle' | 'camera' | 'mouse' | 'disabled'
 export interface EmotionState {
   /** null = нет активной эмоции */
   emotion: string | null
-  /** 0–1 */
+  /** 0-1 */
   intensity: number
 }
 
 /**
  * Single source of truth for character aliveness.
- * All animation controllers read from here — changing SoulState changes
+ * All animation controllers read from here - changing SoulState changes
  * voice, body physics, blink rhythm and head posture simultaneously.
  */
 export interface SoulState {
   /** Valence-Arousal-Dominance, each axis in [-1, +1] */
   vad: { v: number; a: number; d: number }
   /**
-   * Physical state — updated per-message and decays between messages.
-   * energy < 0.1 → sleepy override on all controllers
-   * attention < 0.3 → force idle gaze regardless of lookAtMode
+   * Physical state - updated per-message and decays between messages.
+   * energy < 0.1 -> sleepy override on all controllers
+   * attention < 0.3 -> force idle gaze regardless of lookAtMode
    */
   physical: { energy: number; attention: number; comfort: number }
 }
@@ -51,14 +51,14 @@ export interface VrmAnimationContext {
   mouse: { x: number; y: number }
   lookAtMode: LookAtMode
   jiggleEnabled: boolean
-  /** 0.5–3.0; масштабирует амплитуду JiggleController (fallback если soulState недоступен) */
+  /** 0.5-3.0; масштабирует амплитуду JiggleController (fallback если soulState недоступен) */
   jiggleMult: number
   /**
-   * SoulState — VAD vector + PhysicalState. Null until first audioReceived from SignalR.
+   * SoulState - VAD vector + PhysicalState. Null until first audioReceived from SignalR.
    * Controllers must handle null gracefully and fall back to legacy ctx fields.
    */
   soulState: SoulState | null
-  /** Если false — AnimationStateMachineController не запускает случайные idle-вариации */
+  /** Если false - AnimationStateMachineController не запускает случайные idle-вариации */
   randomAnimationsEnabled: boolean
 }
 
@@ -68,6 +68,6 @@ export interface IVrmController {
   init(setup: VrmControllerSetup): Promise<void>
   /** Вызывается каждый кадр перед vrm.update(). */
   update(delta: number, ctx: VrmAnimationContext): void
-  /** Вызывается при размонтировании — освободить ресурсы, остановить actions. */
+  /** Вызывается при размонтировании - освободить ресурсы, остановить actions. */
   dispose(): void
 }

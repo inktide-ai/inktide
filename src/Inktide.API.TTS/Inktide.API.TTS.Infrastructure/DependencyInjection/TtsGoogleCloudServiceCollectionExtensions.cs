@@ -19,7 +19,7 @@ public static class TtsGoogleCloudServiceCollectionExtensions
         services.Configure<GoogleCloudTtsClientSettings>(
             configuration.GetSection(GoogleCloudTtsClientSettings.SectionName));
 
-        // No IHttpClientFactory — the SDK manages its own gRPC channels internally.
+        // No IHttpClientFactory - the SDK manages its own gRPC channels internally.
         services.AddSingleton<GoogleCloudTtsClient>();
         services.AddSingleton<GoogleCloudTtsProvider>();
 

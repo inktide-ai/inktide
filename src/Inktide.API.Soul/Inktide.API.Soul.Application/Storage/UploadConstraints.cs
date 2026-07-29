@@ -2,7 +2,7 @@ namespace Inktide.API.Soul.Application.Storage;
 
 /// <summary>
 /// Immutable upload constraints for a specific asset type.
-/// Construct one static instance per service — no shared mutable state.
+/// Construct one static instance per service - no shared mutable state.
 /// SRP: validation config changes independently from upload orchestration.
 /// OCP: adding a new asset type means a new UploadConstraints instance, not editing existing services.
 /// </summary>

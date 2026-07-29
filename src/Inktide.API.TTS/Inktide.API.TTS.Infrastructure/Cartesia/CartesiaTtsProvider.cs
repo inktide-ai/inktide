@@ -20,7 +20,7 @@ public sealed class CartesiaTtsProvider : ISpeechProvider, IVoiceListingProvider
     private const double CartesiaMinSpeed = -1.0;
     private const double CartesiaMaxSpeed =  1.0;
 
-    /// <summary>Incoming speed is a familiar multiplier (0.0–2.0); 1.0 = normal.</summary>
+    /// <summary>Incoming speed is a familiar multiplier (0.0-2.0); 1.0 = normal.</summary>
     private const float IncomingMinSpeed = 0.0f;
     private const float IncomingMaxSpeed = 2.0f;
 
@@ -114,7 +114,7 @@ public sealed class CartesiaTtsProvider : ISpeechProvider, IVoiceListingProvider
 
         var p = CartesiaParams.From(speechOptions.ProviderParams);
 
-        // Map familiar speed multiplier (0–2, 1=normal) → Cartesia range (-1 to 1, 0=normal).
+        // Map familiar speed multiplier (0-2, 1=normal) -> Cartesia range (-1 to 1, 0=normal).
         var incomingSpeed  = Math.Clamp(speechOptions.Speed <= 0 ? 1.0f : speechOptions.Speed, IncomingMinSpeed, IncomingMaxSpeed);
         var cartesiaSpeed  = Math.Clamp(incomingSpeed - 1.0, CartesiaMinSpeed, CartesiaMaxSpeed);
 

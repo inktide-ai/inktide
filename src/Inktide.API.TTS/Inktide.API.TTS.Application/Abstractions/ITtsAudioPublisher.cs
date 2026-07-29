@@ -16,7 +16,7 @@ public sealed record TtsAudioPayload(
     string  LlmModel,
     string? EmotionId,
     float   EmotionIntensity,
-    // SoulState pass-through — forwarded to synapse.tts.ready and then to SignalR
+    // SoulState pass-through - forwarded to synapse.tts.ready and then to SignalR
     float   VadV      = 0f,
     float   VadA      = 0f,
     float   VadD      = 0f,

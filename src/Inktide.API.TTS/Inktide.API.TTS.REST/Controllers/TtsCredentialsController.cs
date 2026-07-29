@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.TTS.REST.Controllers;
 
 /// <summary>
-/// BYOK — per-user TTS provider credentials (ElevenLabs, Cartesia, etc.).
+/// BYOK - per-user TTS provider credentials (ElevenLabs, Cartesia, etc.).
 /// Shares the same <c>soul.user_provider_credentials</c> table as LLM credentials.
 /// The actual API key is never returned in responses.
 /// </summary>

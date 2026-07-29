@@ -22,7 +22,7 @@ export const useRealtimeStore = create<RealtimeStore>((set, get) => ({
   connect: async (channelId, getToken) => {
     const state = get()
 
-    // Reuse existing connection if same channelId — just increment consumer count
+    // Reuse existing connection if same channelId - just increment consumer count
     if (state.connection && state.channelId === channelId) {
       set({ consumers: state.consumers + 1 })
       return

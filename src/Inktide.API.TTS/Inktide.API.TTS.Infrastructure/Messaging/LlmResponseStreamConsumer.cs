@@ -14,7 +14,7 @@ namespace Inktide.API.TTS.Infrastructure.Messaging;
 /// Consumes LLM text responses from <c>synapse.llm.response</c>, synthesizes audio via TTS,
 /// and publishes audio payloads to <c>synapse.tts.ready</c> for the Publisher Worker.
 ///
-/// Bounded context responsibility: the TTS context owns the full synthesis pipeline —
+/// Bounded context responsibility: the TTS context owns the full synthesis pipeline -
 /// it independently reads from the stream, calls Kokoro, and publishes the result.
 /// No other module needs to orchestrate this step.
 /// </summary>
@@ -35,7 +35,7 @@ public sealed class LlmResponseStreamConsumer : RedisStreamConsumerBase
         [property: JsonPropertyName("isLast")]         bool    IsLast,
         /// <summary>Voice id resolved by the Python worker from the ContextShardPayload. Null = use default.</summary>
         [property: JsonPropertyName("voiceId")]        string? VoiceId,
-        /// <summary>UserId (Guid) of the card owner — used for per-user TTS credential lookup.</summary>
+        /// <summary>UserId (Guid) of the card owner - used for per-user TTS credential lookup.</summary>
         [property: JsonPropertyName("userId")]         Guid?   UserId,
         /// <summary>TTS provider id. Null = use configured default provider.</summary>
         [property: JsonPropertyName("ttsProviderId")]  string? TtsProviderId,
@@ -45,7 +45,7 @@ public sealed class LlmResponseStreamConsumer : RedisStreamConsumerBase
         [property: JsonPropertyName("ttsSpeed")]       float?  TtsSpeed,
         /// <summary>Emotion the avatar should express. Null = no reaction.</summary>
         [property: JsonPropertyName("emotionId")]        string? EmotionId        = null,
-        /// <summary>Emotion intensity 0.0–1.0.</summary>
+        /// <summary>Emotion intensity 0.0-1.0.</summary>
         [property: JsonPropertyName("emotionIntensity")] float   EmotionIntensity = 0f,
         /// <summary>Per-soul TTS endpoint override. Null = use globally configured endpoint.</summary>
         [property: JsonPropertyName("ttsBaseUrl")]           string? TtsBaseUrl           = null,
@@ -55,7 +55,7 @@ public sealed class LlmResponseStreamConsumer : RedisStreamConsumerBase
         [property: JsonPropertyName("ttsSpeedModifier")]  float  TtsSpeedModifier  = 1.0f,
         /// <summary>Energy/style modifier from VAD formula. Default 1.0 = no change.</summary>
         [property: JsonPropertyName("ttsEnergyModifier")] float  TtsEnergyModifier = 1.0f,
-        // SoulState — VAD vector and PhysicalState for frontend animation
+        // SoulState - VAD vector and PhysicalState for frontend animation
         [property: JsonPropertyName("vadV")]      float VadV      = 0f,
         [property: JsonPropertyName("vadA")]      float VadA      = 0f,
         [property: JsonPropertyName("vadD")]      float VadD      = 0f,
@@ -159,7 +159,7 @@ public sealed class LlmResponseStreamConsumer : RedisStreamConsumerBase
             ? response.TtsSpeed * response.TtsSpeedModifier
             : (float?)null;
 
-        // Deserialize provider params here — the only place in the pipeline that needs them.
+        // Deserialize provider params here - the only place in the pipeline that needs them.
         IReadOnlyDictionary<string, object>? providerParams = null;
         if (response.TtsProviderParamsJson is not null)
         {

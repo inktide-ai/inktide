@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { EMOTION_OVERRIDE_DURATION_MS } from '@/shared/hooks/useEmotionOverride'
 import fluent from '@iconify-json/fluent-emoji-flat/icons.json'
 
-// Register only the icons used in this component — avoids CDN fetches blocked by CSP
+// Register only the icons used in this component - avoids CDN fetches blocked by CSP
 addCollection(fluent as Parameters<typeof addCollection>[0])
 
 // IDs must match DEFAULT_GRAPH_CONFIG node IDs in defaultGraph.ts

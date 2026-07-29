@@ -1,8 +1,8 @@
 # Prometheus config for the compose `bench` profile.
-# Two API targets are configured on purpose — one of them being DOWN is
+# Two API targets are configured on purpose - one of them being DOWN is
 # expected and labeled:
-#   dotnet:5001               → API running inside compose  (source=compose)
-#   host.docker.internal:5001 → API running via `dotnet run` (source=host)
+#   dotnet:5001               -> API running inside compose  (source=compose)
+#   host.docker.internal:5001 -> API running via `dotnet run` (source=host)
 # k6 pushes its metrics here via remote write (--web.enable-remote-write-receiver).
 
 global:

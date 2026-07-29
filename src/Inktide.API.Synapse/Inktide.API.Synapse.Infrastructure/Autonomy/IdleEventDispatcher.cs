@@ -15,11 +15,11 @@ namespace Inktide.API.Synapse.Infrastructure.Autonomy;
 /// Tracks per-character activity and publishes synthetic idle-trigger messages to
 /// <c>synapse.ingest</c> when a soul has been silent for longer than its state-derived threshold.
 ///
-/// The threshold is driven by VAD arousal — excited characters initiate after 45 s,
+/// The threshold is driven by VAD arousal - excited characters initiate after 45 s,
 /// sad/low-energy characters rarely initiate at all.
 ///
 /// The dispatched message goes through the normal pipeline so the LLM receives full context
-/// and the response flows through TTS → SignalR exactly like a real user message.
+/// and the response flows through TTS -> SignalR exactly like a real user message.
 /// </summary>
 public sealed class IdleEventDispatcher : BackgroundService, IIdleActivityTracker
 {
@@ -159,7 +159,7 @@ public sealed class IdleEventDispatcher : BackgroundService, IIdleActivityTracke
         if (_thresholdOverrideSeconds > 0)
             return TimeSpan.FromSeconds(_thresholdOverrideSeconds);
 
-        if (energy < 0.1f)  return TimeSpan.MaxValue;            // sleepy — never
+        if (energy < 0.1f)  return TimeSpan.MaxValue;            // sleepy - never
         if (arousal > 0.7f) return TimeSpan.FromSeconds(45);     // excited
         if (arousal > 0.2f) return TimeSpan.FromMinutes(2);      // active
         if (arousal > -0.3f) return TimeSpan.FromMinutes(4);     // relax

@@ -38,7 +38,7 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
         }
         catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
         {
-            // TODO: wire up an alert on this log message — in Kubernetes, LogCritical goes to stdout
+            // TODO: wire up an alert on this log message - in Kubernetes, LogCritical goes to stdout
             // but without an explicit alert rule the consumer is silently inactive until pod restart.
             _logger.LogCritical(ex, "UserAccountDeletedConsumer: failed to create consumer group — consumer will not process events");
             return;
@@ -104,7 +104,7 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
             return;
         }
 
-        // Poison-message path: unrecoverable — ACK to prevent infinite retry.
+        // Poison-message path: unrecoverable - ACK to prevent infinite retry.
         if (payload is null)
         {
             _logger.LogWarning("UserAccountDeletedConsumer: entry {Id} has no payload — discarding", entry.Id);
@@ -131,7 +131,7 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
             return;
         }
 
-        // Transient errors (DB unavailable, network, deadlock) — do NOT ACK.
+        // Transient errors (DB unavailable, network, deadlock) - do NOT ACK.
         // Message stays in PEL; will be redelivered after consumer restart or via XAUTOCLAIM.
         await PurgeSoulDataAsync(evt.UserId, ct);
         await db.StreamAcknowledgeAsync(StreamNames.IntegrationEvents, ConsumerGroup, entry.Id);
@@ -157,7 +157,7 @@ public sealed class UserAccountDeletedConsumer : BackgroundService
             .Where(c => c.UserId == userId)
             .ExecuteDeleteAsync(ct).ConfigureAwait(false);
 
-        // No FK to AiCard — must delete explicitly
+        // No FK to AiCard - must delete explicitly
         var credentialsDeleted = await db.UserProviderCredentials
             .Where(c => c.UserId == userId)
             .ExecuteDeleteAsync(ct).ConfigureAwait(false);

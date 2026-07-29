@@ -9,7 +9,7 @@ namespace Inktide.API.Billing.REST.Controllers;
 
 /// <summary>
 /// Routes incoming webhooks to the appropriate provider processor.
-/// All webhook endpoints are unauthenticated — signature validation is the security mechanism.
+/// All webhook endpoints are unauthenticated - signature validation is the security mechanism.
 /// Each processor resolves its own signing secret from its injected settings.
 /// </summary>
 [ApiController]
@@ -34,7 +34,7 @@ public sealed class WebhookController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Handle(string provider, CancellationToken ct)
     {
-        // Read raw bytes before any deserialization — needed for HMAC validation
+        // Read raw bytes before any deserialization - needed for HMAC validation
         using var ms = new MemoryStream();
         await Request.Body.CopyToAsync(ms, ct).ConfigureAwait(false);
         var rawBody = ms.ToArray();
@@ -59,7 +59,7 @@ public sealed class WebhookController : ControllerBase
             return Unauthorized();
         }
 
-        // Process synchronously — non-200 response signals the provider to retry.
+        // Process synchronously - non-200 response signals the provider to retry.
         // Fire-and-forget would silently lose events if the background task crashes after
         // we already returned 200.
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);

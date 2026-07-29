@@ -10,7 +10,7 @@ public interface IAiCardRunPresetQueryService
     Task<ActiveRunPresetDto?> GetActiveForCardAsync(Guid cardId, CancellationToken ct = default);
 }
 
-/// <summary>Read projection of an active run preset — contains only fields relevant to Synapse.</summary>
+/// <summary>Read projection of an active run preset - contains only fields relevant to Synapse.</summary>
 public sealed record ActiveRunPresetDto(
     Guid Id,
     string Name,

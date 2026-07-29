@@ -8,7 +8,7 @@ namespace Inktide.API.Soul.Infrastructure.Queries;
 
 /// <summary>
 /// Resolves AI card identity + provider config for Synapse channel routing.
-/// AiCardChannel has moved to the Project context — channel-by-ID resolution always returns null
+/// AiCardChannel has moved to the Project context - channel-by-ID resolution always returns null
 /// until Synapse is updated to query the Project context directly.
 /// Card-by-ID resolution still works for the inktide-chat fallback path.
 /// </summary>

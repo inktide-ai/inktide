@@ -9,8 +9,8 @@ namespace Inktide.API.TTS.Infrastructure;
 
 /// <summary>
 /// Resolves TTS API keys.
-/// Sync path (REST): X-TTS-Api-Key header → global config.
-/// Async path (pipeline consumer): header → per-user credential (Soul DB) → global config.
+/// Sync path (REST): X-TTS-Api-Key header -> global config.
+/// Async path (pipeline consumer): header -> per-user credential (Soul DB) -> global config.
 /// </summary>
 public sealed class TtsApiKeyResolver : IApiKeyResolver
 {
@@ -76,7 +76,7 @@ public sealed class TtsApiKeyResolver : IApiKeyResolver
         ArgumentException.ThrowIfNullOrWhiteSpace(providerId);
 
         if (!_speechProviderRegistry.TryGet(providerId, out var provider))
-            return null; // provider not registered — caller handles missing provider separately
+            return null; // provider not registered - caller handles missing provider separately
 
         if (!provider.Capabilities.RequiresApiKey)
             return null;
@@ -87,7 +87,7 @@ public sealed class TtsApiKeyResolver : IApiKeyResolver
         if (!string.IsNullOrWhiteSpace(headerKey))
             return headerKey;
 
-        // 2. Per-user credential stored in Soul DB (BYOK — ElevenLabs, etc.)
+        // 2. Per-user credential stored in Soul DB (BYOK - ElevenLabs, etc.)
         // Uses a scope because ITtsCredentialPort is Scoped (depends on EF DbContext).
         if (userId is { } uid && uid != Guid.Empty)
         {

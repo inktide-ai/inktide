@@ -41,7 +41,7 @@ export function FeaturedTemplateCard({ template, onPreview }: FeaturedTemplateCa
           return <Icon size={48} style={{ color: template.accentColor }} aria-hidden />
         })()}
 
-        {/* Platform badges — top right */}
+        {/* Platform badges - top right */}
         {platforms.length > 0 && (
           <div className="absolute right-3 top-3 flex flex-wrap justify-end gap-1">
             {platforms.map(p => (
@@ -60,7 +60,7 @@ export function FeaturedTemplateCard({ template, onPreview }: FeaturedTemplateCa
           </div>
         )}
 
-        {/* Category badge — bottom left */}
+        {/* Category badge - bottom left */}
         <span className="absolute bottom-3 left-3 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-1)]/70 px-2 py-0.5 text-[10px] font-medium capitalize text-[var(--text-tertiary)] backdrop-blur-sm">
           {template.category}
         </span>

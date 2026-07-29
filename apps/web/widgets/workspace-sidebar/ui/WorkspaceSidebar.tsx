@@ -14,7 +14,7 @@ import { queryKeys } from '@/shared/lib/query/keys'
 import { fetchStorageUsage } from '@/api/storage'
 import { PLAN_LIMITS } from '@/shared/lib/plan-limits'
 import { ProPlanCard } from '@/features/workspace-home/pro-plan-card'
-// fsd:cross-feature-ok — widget layer composes across features
+// fsd:cross-feature-ok - widget layer composes across features
 import AccountSettingsModal from '@/features/account/account-settings-modal'
 import InviteMembersModal from '@/features/organization/invite-members-modal'
 import { ImportProjectDialog } from '@/features/projects'
@@ -136,7 +136,7 @@ export function WorkspaceSidebar() {
   const [toolsOpen, setToolsOpen]     = useState(true)
   const [apiOpen, setApiOpen]         = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(true)
-  // Mobile off-canvas drawer (≥lg the sidebar is a static column, so this is inert there).
+  // Mobile off-canvas drawer (>=lg the sidebar is a static column, so this is inert there).
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   // Close the drawer on navigation.
@@ -194,13 +194,13 @@ export function WorkspaceSidebar() {
     }
   }
 
-  // ⌘, — open Settings
+  // Cmd, - open Settings
   useShortcut('$mod+,', () => {
     setAccountModalPage('security')
     setAccountModalOpen(true)
   })
 
-  // ⌘. — open Profile
+  // Cmd. - open Profile
   useShortcut('$mod+.', () => {
     setAccountModalPage('profile')
     setAccountModalOpen(true)
@@ -208,7 +208,7 @@ export function WorkspaceSidebar() {
 
   return (
     <>
-      {/* Mobile-only hamburger — opens the off-canvas drawer (hidden ≥lg). */}
+      {/* Mobile-only hamburger - opens the off-canvas drawer (hidden >=lg). */}
       <button
         type="button"
         onClick={() => setDrawerOpen(true)}
@@ -234,7 +234,7 @@ export function WorkspaceSidebar() {
         // Mobile: off-canvas drawer that slides in from the left.
         'fixed inset-y-0 left-0 z-50 w-[280px] -translate-x-full shadow-xl transition-transform duration-300 ease-out motion-reduce:transition-none',
         drawerOpen && 'translate-x-0',
-        // ≥lg: static column, original inset-border styling, no transform.
+        // >=lg: static column, original inset-border styling, no transform.
         'lg:static lg:z-auto lg:w-[260px] lg:translate-x-0 lg:shadow-[inset_calc(var(--direction)*-1px)_0_0_0_var(--c-borSec)] lg:transition-none',
       )}
     >

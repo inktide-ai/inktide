@@ -29,7 +29,7 @@ public sealed class KeycloakUserDeletionConsumer(
             return;
         }
 
-        // Non-null error = retriable failure — throw so MassTransit retries
+        // Non-null error = retriable failure - throw so MassTransit retries
         throw new KeycloakOperationException(
             $"Failed to delete Keycloak user {userId}: {err}");
     }

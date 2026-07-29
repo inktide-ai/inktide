@@ -43,7 +43,7 @@ internal sealed class LlmStreamWorker : RedisStreamConsumerBase
 
     private const int MaxHistoryTurns = 20;
 
-    // Concurrency guard — controlled by LlmStreamSettings.MaxConcurrentRequests.
+    // Concurrency guard - controlled by LlmStreamSettings.MaxConcurrentRequests.
     private readonly SemaphoreSlim _llmSem;
 
     protected override string StreamName              => _settings.StreamIn;
@@ -152,10 +152,10 @@ internal sealed class LlmStreamWorker : RedisStreamConsumerBase
         var userId     = ctx?.UserId ?? Guid.Empty;
 
         // Resolve chat completion service.
-        // Priority: BYOK (user's own key) → platform provider registered in Kernel.
+        // Priority: BYOK (user's own key) -> platform provider registered in Kernel.
         var chatService = await ResolveChatServiceAsync(providerId, modelId, userId, ctx?.LlmBaseUrl, ctx?.LlmRequiresApiKey ?? true, ct);
 
-        // No BYOK — fall back to the platform provider registered in the Kernel (e.g. Ollama).
+        // No BYOK - fall back to the platform provider registered in the Kernel (e.g. Ollama).
         if (chatService is null)
         {
             var fallbackId = _settings.FallbackProviderId;
@@ -347,7 +347,7 @@ internal sealed class LlmStreamWorker : RedisStreamConsumerBase
         var emotionId        = envelope.Emotion?.CurrentEmotion;
         var emotionIntensity = envelope.Emotion?.Intensity ?? 0f;
 
-        // VAD-based TTS prosody — continuous formula replaces static lookup table
+        // VAD-based TTS prosody - continuous formula replaces static lookup table
         var vad              = EmotionVadTable.Map(emotionId);
         var ttsSpeedModifier  = Math.Clamp(1.0f + vad.A * 0.28f, 0.75f, 1.35f);
         var ttsEnergyModifier = Math.Clamp(1.0f + (vad.A * 0.5f + vad.V * 0.2f) * 0.25f, 0.80f, 1.30f);
@@ -374,7 +374,7 @@ internal sealed class LlmStreamWorker : RedisStreamConsumerBase
             emotionIntensity,
             ttsSpeedModifier,
             ttsEnergyModifier,
-            // SoulState — drives all frontend animation controllers
+            // SoulState - drives all frontend animation controllers
             vadV = vad.V,
             vadA = vad.A,
             vadD = vad.D,

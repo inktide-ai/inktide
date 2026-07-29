@@ -22,7 +22,7 @@ public sealed record AiCardContext(
     string? TtsModelId,
     /// <summary>Speech speed multiplier. 1.0 = normal.</summary>
     float TtsSpeed,
-    /// <summary>"chat" — buffer full response as one TTS chunk; "narration" — sentence-based chunking.</summary>
+    /// <summary>"chat" - buffer full response as one TTS chunk; "narration" - sentence-based chunking.</summary>
     string ChunkingMode = "narration",
     /// <summary>BCP-47 language tag for LLM response language (e.g. "ru", "en"). Null = no override.</summary>
     string? Language = null,
@@ -32,13 +32,13 @@ public sealed record AiCardContext(
     int LlmMaxTokens = 512,
     /// <summary>Nucleus sampling probability mass (top-p).</summary>
     float LlmTopP = 0.9f,
-    /// <summary>Penalty for token frequency — reduces repetition of the same phrases.</summary>
+    /// <summary>Penalty for token frequency - reduces repetition of the same phrases.</summary>
     float LlmFrequencyPenalty = 0f,
-    /// <summary>Penalty for token presence — encourages talking about new topics.</summary>
+    /// <summary>Penalty for token presence - encourages talking about new topics.</summary>
     float LlmPresencePenalty = 0f,
     /// <summary>Milliseconds to wait before publishing the first TTS chunk after LLM generation completes.</summary>
     int ResponseDelayMs = 0,
-    /// <summary>Per-card base URL override — wins over global BYOK credential base URL.</summary>
+    /// <summary>Per-card base URL override - wins over global BYOK credential base URL.</summary>
     string? LlmBaseUrl = null,
     /// <summary>False for local/self-hosted providers (Ollama, LM Studio) that need no API key.</summary>
     bool LlmRequiresApiKey = true,
@@ -46,7 +46,7 @@ public sealed record AiCardContext(
     float EmotionIntensityScale = 1.0f,
     /// <summary>Natural-language personality directive block injected into the LLM system prompt. Null = no personality configured.</summary>
     string? PersonalityDirective = null,
-    /// <summary>How quickly emotions adapt to messages — scales TTS speed modulation. From PersonalitySettings.EmotionResponsiveness.</summary>
+    /// <summary>How quickly emotions adapt to messages - scales TTS speed modulation. From PersonalitySettings.EmotionResponsiveness.</summary>
     float EmotionResponsiveness = 0.7f,
     /// <summary>Emotional dynamics parameters for the runtime emotional state blending.</summary>
     EmotionDynamics? EmotionDynamics = null,

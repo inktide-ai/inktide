@@ -1,7 +1,7 @@
 namespace Inktide.API.Memory.Domain.Models;
 
 /// <summary>
-/// Result of a Qdrant semantic search query — one retrieved memory fact.
+/// Result of a Qdrant semantic search query - one retrieved memory fact.
 /// </summary>
 public sealed record MemoryRecord(
     Guid PointId,

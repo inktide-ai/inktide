@@ -11,8 +11,8 @@ namespace Inktide.API.Connector.Infrastructure.Endpoints;
 
 /// <summary>
 /// Maps health check endpoints and controllers.
-/// /health/live  — liveness probe: returns 200 if the process is running (no dependency checks).
-/// /health/ready — readiness probe: returns 200 only when all "ready"-tagged checks pass.
+/// /health/live  - liveness probe: returns 200 if the process is running (no dependency checks).
+/// /health/ready - readiness probe: returns 200 only when all "ready"-tagged checks pass.
 /// </summary>
 public sealed class StreamingConnectorEndpointConfigurator : IEndpointConfigurator
 {

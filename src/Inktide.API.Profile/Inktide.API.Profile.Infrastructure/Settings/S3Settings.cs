@@ -18,7 +18,7 @@ public sealed class S3Settings
 
     /// <summary>
     /// Optional public origin for object URLs shown in browsers (e.g. reverse proxy or MinIO API URL).
-    /// If empty, <see cref="ServiceUrl"/> is used with path-style <c>…/bucket/key</c>.
+    /// If empty, <see cref="ServiceUrl"/> is used with path-style <c>.../bucket/key</c>.
     /// </summary>
     public string PublicBaseUrl
     {

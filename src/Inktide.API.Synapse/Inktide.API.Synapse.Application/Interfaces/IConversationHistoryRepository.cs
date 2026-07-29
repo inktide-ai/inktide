@@ -13,7 +13,7 @@ public interface IConversationHistoryRepository
 
     /// <summary>
     /// Appends a completed turn and trims the list to <paramref name="maxTurns"/>.
-    /// Fire-and-forget safe — never throws.
+    /// Fire-and-forget safe - never throws.
     /// </summary>
     Task AppendAsync(string channelId, string userMessage, string assistantReply, int maxTurns, CancellationToken ct = default);
 }

@@ -9,7 +9,7 @@ namespace Inktide.API.Connector.InktideChat;
 
 /// <summary>
 /// Registers the InktideChat connector as both <see cref="IChatConnector"/> and
-/// <see cref="IInktideChatInbox"/> — single singleton instance serves both roles.
+/// <see cref="IInktideChatInbox"/> - single singleton instance serves both roles.
 /// </summary>
 public sealed class InktideChatStartup : IStartup
 {

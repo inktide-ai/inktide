@@ -14,7 +14,7 @@ function safeHostname(uri: string): string {
   try { return new URL(uri).hostname } catch { return uri }
 }
 
-/** Only http(s) targets may be used for navigation — blocks javascript:/data: schemes. */
+/** Only http(s) targets may be used for navigation - blocks javascript:/data: schemes. */
 function isSafeHttpUrl(uri: string): boolean {
   try {
     const u = new URL(uri)
@@ -52,7 +52,7 @@ function OAuthAuthorizeContent() {
       .finally(() => setLoading(false))
   }, [clientId, redirectUri, scope])
 
-  // Handle unauthenticated users — save params and redirect to login
+  // Handle unauthenticated users - save params and redirect to login
   useEffect(() => {
     if (authLoading || loading) return
     if (!user && appInfo) {

@@ -6,7 +6,7 @@ using StackExchange.Redis;
 namespace Inktide.API.Marketplace.Infrastructure.Services;
 
 // Publishes events to the same Redis stream that Developer.WebhookDeliveryWorker consumes.
-// No direct project reference to Developer — uses the agreed stream name.
+// No direct project reference to Developer - uses the agreed stream name.
 internal sealed class ConnectorEventPublisher(
     IConnectionMultiplexer redis,
     ILogger<ConnectorEventPublisher> logger) : IConnectorEventPublisher
@@ -39,7 +39,7 @@ internal sealed class ConnectorEventPublisher(
             data,
         });
 
-        // The application_id field is left blank here — WebhookDeliveryWorker looks up apps by connector_slug
+        // The application_id field is left blank here - WebhookDeliveryWorker looks up apps by connector_slug
         // when application_id is missing. This avoids direct DB query from Marketplace.
         var db = redis.GetDatabase();
         await db.StreamAddAsync(StreamName,

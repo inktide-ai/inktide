@@ -33,7 +33,7 @@ export interface ImportProjectResponse {
 
 
 // Note: updateProject, deleteProject, bindSoul, unbindSoul are project-management
-// operations used by app/ pages directly — kept here as feature-level API.
+// operations used by app/ pages directly - kept here as feature-level API.
 
 export async function updateProject(
   id: string,
@@ -108,7 +108,7 @@ export interface InktParseResponse {
 export async function parseInktFile(file: File): Promise<InktParseResponse> {
   const formData = new FormData()
   formData.append('file', file)
-  // Do NOT set Content-Type — browser sets multipart boundary automatically.
+  // Do NOT set Content-Type - browser sets multipart boundary automatically.
   const res = await apiFetch('/api/v1/projects/import/parse', { method: 'POST', body: formData })
   return jsonOrThrow<InktParseResponse>(res)
 }

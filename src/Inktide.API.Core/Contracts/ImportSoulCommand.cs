@@ -2,7 +2,7 @@ namespace Inktide.API.Core.Contracts;
 
 /// <summary>
 /// Cross-context command for creating a Soul during project import.
-/// The JSON-string fields (LlmConfig, Appearance, etc.) reflect Soul's actual JSONB storage format —
+/// The JSON-string fields (LlmConfig, Appearance, etc.) reflect Soul's actual JSONB storage format -
 /// Soul.Domain has no typed value objects for these blobs, so strings are the correct representation.
 /// PersonalityConfigJson is deserialized by Soul.Infrastructure via PersonalitySettings.Parse().
 /// </summary>

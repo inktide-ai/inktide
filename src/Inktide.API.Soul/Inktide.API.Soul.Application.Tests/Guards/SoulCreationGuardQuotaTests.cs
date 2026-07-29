@@ -22,7 +22,7 @@ public sealed class SoulCreationGuardQuotaTests
         var planResolver = Substitute.For<IUserPlanResolver>();
         planResolver.GetLimitsAsync(UserId.ToString(), Arg.Any<CancellationToken>()).Returns(limits);
 
-        // SoulCreationValidationQueryService is concrete — build it with mocked deps.
+        // SoulCreationValidationQueryService is concrete - build it with mocked deps.
         // For quota-exceeded tests it is never reached; for below-limit tests it will
         // throw SoulCreationException (catalog not found), which is intentional.
         var catalogRepo = Substitute.For<ICatalogRepository>();
@@ -57,7 +57,7 @@ public sealed class SoulCreationGuardQuotaTests
     [Fact]
     public async Task Does_not_throw_PlanLimitExceededException_when_count_below_limit()
     {
-        // count = 0, limit = 1 → quota not exceeded.
+        // count = 0, limit = 1 -> quota not exceeded.
         // Guard proceeds to catalog check (returns SoulCreationException, not PlanLimitExceededException).
         var guard = BuildGuard(currentCount: 0, limits: PlanLimits.Free);
 

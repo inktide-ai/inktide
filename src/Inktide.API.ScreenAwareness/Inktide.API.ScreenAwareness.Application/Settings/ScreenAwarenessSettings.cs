@@ -16,7 +16,7 @@ public sealed class ScreenAwarenessSettings
     public string? AnthropicApiKey { get; set; }
     public string AnthropicModel { get; set; } = "claude-haiku-4-5";
 
-    /// <summary>pHash Hamming distance threshold (0–64). Frames with distance below this are deduplicated.</summary>
+    /// <summary>pHash Hamming distance threshold (0-64). Frames with distance below this are deduplicated.</summary>
     public int PHashThresholdDefault { get; set; } = 10;
 
     public int FreePlanHourlyBudget { get; set; } = 300;

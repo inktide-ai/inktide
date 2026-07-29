@@ -18,7 +18,7 @@ internal sealed class FishAudioSpeechOptions
     [JsonPropertyName("format")]
     public string Format { get; set; } = "mp3";
 
-    /// <summary>Playback speed multiplier. Clamped to 0.5–2.0 by Fish Audio.</summary>
+    /// <summary>Playback speed multiplier. Clamped to 0.5-2.0 by Fish Audio.</summary>
     [JsonPropertyName("speed")]
     public float Speed { get; set; } = 1.0f;
 

@@ -7,7 +7,7 @@ namespace Inktide.API.Soul.REST.Mappers;
 
 /// <summary>
 /// Constructs and patches AiCard domain entities from REST request models.
-/// SRP: one reason to change — write/mutate representation of an AiCard.
+/// SRP: one reason to change - write/mutate representation of an AiCard.
 /// </summary>
 public static class AiCardEntityFactory
 {
@@ -39,7 +39,7 @@ public static class AiCardEntityFactory
 
         if (request.Name        is not null) existing.Name        = request.Name;
         if (request.Slug        is not null) existing.Slug        = request.Slug;
-        // AvatarUrl is intentionally not handled here — use POST /avatar to change it.
+        // AvatarUrl is intentionally not handled here - use POST /avatar to change it.
         if (request.LlmCatalogId.HasValue)   existing.LlmCatalogId = request.LlmCatalogId.Value;
         if (request.LlmConfig   is not null) existing.LlmConfig   = Serialize(request.LlmConfig) ?? "{}";
         if (request.TtsCatalogId.HasValue)   existing.TtsCatalogId = request.TtsCatalogId.Value;

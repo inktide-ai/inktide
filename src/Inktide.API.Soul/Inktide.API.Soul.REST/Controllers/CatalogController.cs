@@ -39,7 +39,7 @@ public sealed class CatalogController : ApiController
         return Ok(voices.Select(CatalogResponseMapper.ToTtsResponse).ToList());
     }
 
-    // Deprecated aliases — 301 Permanent Redirect
+    // Deprecated aliases - 301 Permanent Redirect
     [HttpGet("/api/soul/catalog/llm-models")]
     public IActionResult GetLlmModelsLegacy() =>
         RedirectPermanent("/api/v1/soul/catalog/llm-models");

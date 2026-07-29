@@ -42,7 +42,7 @@ public sealed class UserAccountDeletionService : IUserAccountDeletionService
             .ExecuteDeleteAsync(ct)
             .ConfigureAwait(false);
 
-        // Publishes to MT EF outbox — persisted atomically with the DELETE above
+        // Publishes to MT EF outbox - persisted atomically with the DELETE above
         await _publishEndpoint
             .Publish(new KeycloakDeleteUserRequested(userId), ct)
             .ConfigureAwait(false);

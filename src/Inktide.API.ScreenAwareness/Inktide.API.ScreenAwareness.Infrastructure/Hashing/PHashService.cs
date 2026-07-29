@@ -8,7 +8,7 @@ namespace Inktide.API.ScreenAwareness.Infrastructure.Hashing;
 
 /// <summary>
 /// Difference-hash (dHash) implementation.
-/// Algorithm: resize to 9×8 grayscale → compute 8×8 horizontal gradients → pack 64 bits into ulong.
+/// Algorithm: resize to 9x8 grayscale -> compute 8x8 horizontal gradients -> pack 64 bits into ulong.
 /// Hamming distance via BitOperations.PopCount on XOR.
 /// </summary>
 public sealed class PHashService : IPhashService

@@ -89,7 +89,7 @@ public sealed class InfrastructureStartup : IStartup
         services.AddSingleton<IEmotionalStateService, RedisEmotionalStateService>();
 
         // ---------------------------------------------------------------
-        // Idle event dispatcher — autonomous speech driven by SoulState
+        // Idle event dispatcher - autonomous speech driven by SoulState
         // ---------------------------------------------------------------
         services.AddSingleton<IdleEventDispatcher>();
         services.AddSingleton<IIdleActivityTracker>(sp => sp.GetRequiredService<IdleEventDispatcher>());
@@ -115,7 +115,7 @@ public sealed class InfrastructureStartup : IStartup
             .BindConfiguration(LlmProvidersSettings.SectionName);
 
         // ---------------------------------------------------------------
-        // Semantic Kernel — registered as Singleton via factory so we can
+        // Semantic Kernel - registered as Singleton via factory so we can
         // read LlmProvidersSettings through IOptions (avoids needing the
         // Microsoft.Extensions.Configuration.Binder package at startup).
         // Each enabled provider gets its own IChatCompletionService keyed
@@ -146,7 +146,7 @@ public sealed class InfrastructureStartup : IStartup
                         break;
 
                     default:
-                        // "openai-compat" — covers Ollama (/v1), OpenAI, OpenRouter, Groq,
+                        // "openai-compat" - covers Ollama (/v1), OpenAI, OpenRouter, Groq,
                         // DeepSeek, LM Studio, Fireworks, Together, and any other /v1 provider.
                         if (cfg.BaseUrl is not null)
                         {
@@ -171,7 +171,7 @@ public sealed class InfrastructureStartup : IStartup
         });
 
         // ---------------------------------------------------------------
-        // Chat service factory registry (Strategy pattern — OCP).
+        // Chat service factory registry (Strategy pattern - OCP).
         // To add a new LLM provider: implement IChatServiceFactory and
         // add another AddSingleton line below. Nothing else changes.
         // ---------------------------------------------------------------
@@ -182,7 +182,7 @@ public sealed class InfrastructureStartup : IStartup
         services.AddHostedService<ScatterShardValidator>();
 
         // ---------------------------------------------------------------
-        // Prompt builder — sections registered in order; new section = new AddSingleton line.
+        // Prompt builder - sections registered in order; new section = new AddSingleton line.
         // ---------------------------------------------------------------
         services.AddSingleton<IPromptSection, RagContextSection>();
         services.AddSingleton<IPromptSection, PersonalitySection>();

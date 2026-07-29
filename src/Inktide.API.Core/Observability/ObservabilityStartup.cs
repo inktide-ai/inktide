@@ -9,12 +9,12 @@ namespace Inktide.API.Core.Observability;
 
 /// <summary>
 /// Registers OpenTelemetry tracing + metrics for all Inktide contexts.
-/// Auto-discovered from Core by the module scanner — no appsettings entry needed.
+/// Auto-discovered from Core by the module scanner - no appsettings entry needed.
 ///
 /// Metrics endpoint: GET /metrics (Prometheus scrape format).
 ///
 /// SLO meters: <c>synapse_e2e_latency_ms</c>, <c>synapse_context_degraded_rate</c>, <c>synapse_gpu_queue_depth</c>.
-/// NOTE: these instruments are DEFINED but NOT YET INSTRUMENTED — the Synapse pipeline does not
+/// NOTE: these instruments are DEFINED but NOT YET INSTRUMENTED - the Synapse pipeline does not
 /// record against them yet (see <see cref="E2ELatencyMs"/>, <see cref="ContextDegradedRate"/>,
 /// <see cref="SetGpuQueueDepth"/>: no callers). They export as empty series until wired up.
 /// </summary>
@@ -22,7 +22,7 @@ public sealed class ObservabilityStartup : IStartup, IMiddlewareConfigurator
 {
     public const string MeterName = "Inktide";
 
-    // SLO meter and instruments — static so Synapse infrastructure can record against them.
+    // SLO meter and instruments - static so Synapse infrastructure can record against them.
     private static readonly Meter SynapseMeter = new(MeterName, "1.0");
 
     /// <summary>End-to-end pipeline latency in milliseconds. SLO: p95 &lt; 4000 ms.</summary>

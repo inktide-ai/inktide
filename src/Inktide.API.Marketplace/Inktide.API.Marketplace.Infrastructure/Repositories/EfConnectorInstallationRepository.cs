@@ -33,7 +33,7 @@ internal sealed class EfConnectorInstallationRepository(MarketplaceDbContext db)
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
         {
-            // Concurrent install for the same (soulId, connectorId) — return the existing row.
+            // Concurrent install for the same (soulId, connectorId) - return the existing row.
             // ChangeTracker.Clear() is required: without it, EF still tracks the failed entity
             // in a broken state and will throw again on the subsequent re-read.
             db.ChangeTracker.Clear();

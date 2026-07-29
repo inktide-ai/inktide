@@ -1,10 +1,10 @@
 // Chat message injection port with two adapters, selected by CHAT_INJECTOR:
 //
-//   http (default) — POST /api/v1/connectors/inktide/messages. Exercises the
+//   http (default) - POST /api/v1/connectors/inktide/messages. Exercises the
 //     real user-facing surface; channelId ownership and rate limits apply
 //     naturally. Returns the k6 http response (202 = accepted).
 //
-//   redis — XADD to synapse.ingest with the exact message shape used by
+//   redis - XADD to synapse.ingest with the exact message shape used by
 //     tools/pipeline-bench, for cross-validation against its numbers.
 //     Needs REDIS_URL reachable from the load generator.
 
@@ -51,5 +51,5 @@ async function redisInject(channelId, text) {
   return { ok: true, status: 202 };
 }
 
-// sendChatMessage(channelId, text) → Promise<{ ok, status }>
+// sendChatMessage(channelId, text) -> Promise<{ ok, status }>
 export const sendChatMessage = CONFIG.chatInjector === 'redis' ? redisInject : httpInject;

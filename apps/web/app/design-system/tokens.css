@@ -1,12 +1,12 @@
 /* ============================================================
-   Design Tokens — Dark (default) + Light overrides
+   Design Tokens - Dark (default) + Light overrides
    All CSS custom properties live here. Do not add utilities
    or component classes. Use var(--token-name) in components.
    ============================================================ */
 
 :root {
-  /* ── Vercel Geist Design Tokens (dark) ────────────────────────────────── */
-  /* Gray scale — HSL triplets used inside hsla() */
+  /* -- Vercel Geist Design Tokens (dark) ---------------------------------- */
+  /* Gray scale - HSL triplets used inside hsla() */
   --ds-gray-100-value:  0, 0%, 10%;
   --ds-gray-200-value:  0, 0%, 12%;
   --ds-gray-300-value:  0, 0%, 16%;
@@ -32,7 +32,7 @@
   --ds-gray-1000: hsla(var(--ds-gray-1000-value), 1);
   --ds-background-100: hsla(var(--ds-background-100-value), 1);
   --ds-background-200: hsla(var(--ds-background-200-value), 1);
-  /* Alpha overlays — extracted directly from vercel.com DevTools */
+  /* Alpha overlays - extracted directly from vercel.com DevTools */
   --ds-gray-alpha-100: #ffffff0f;
   --ds-gray-alpha-200: #ffffff17;
   --ds-gray-alpha-300: #ffffff21;
@@ -71,7 +71,7 @@
   --ds-focus-border:        0 0 0 1px var(--ds-gray-alpha-600), 0 0 0 4px var(--ds-gray-alpha-500);
   --ds-shadow-border-inset: inset 0 0 0 1px #ffffff1a;
 
-  /* ── Design system v2 ──────────────────────────────────────────────────── */
+  /* -- Design system v2 ---------------------------------------------------- */
   --bg-0: var(--ds-background-200);
   --bg-1: var(--ds-background-200-value);
   --bg-2: var(--ds-background-100-value);
@@ -111,7 +111,7 @@
   --menu-segment-active: var(--ds-gray-alpha-300);
   --menu-icon-filter: brightness(0) saturate(100%) invert(60%) sepia(5%) saturate(200%) hue-rotate(10deg);
 
-  /* ── Legacy (kept for compatibility) ──────────────────────────────────── */
+  /* -- Legacy (kept for compatibility) ------------------------------------ */
   --bg-dark: var(--ds-background-200);
   --bg-deeper: var(--ds-background-200);
   --bg-surface: var(--ds-gray-100);
@@ -197,7 +197,7 @@
   --c-bacSec: var(--sidebar-bg);
   --c-borSec: var(--ds-gray-alpha-200);
 
-  /* ── Semantic surface/text/border tokens ─────────────────────────────── */
+  /* -- Semantic surface/text/border tokens ------------------------------- */
   --surface-card: var(--ds-background-100);
   --surface-card-hover: var(--ds-gray-100);
   --surface-panel: hsla(var(--ds-background-100-value), 0.96);
@@ -238,7 +238,7 @@
   --stat-accent-warn: #F4C35A;
   --stat-accent-info: #7B8BFF;
 
-  /* Platform brand colors — static, theme-invariant */
+  /* Platform brand colors - static, theme-invariant */
   --platform-discord:  #5865F2;
   --platform-twitch:   #9146FF;
   --platform-telegram: #0088CC;
@@ -263,7 +263,7 @@
   --color-blue-primary: #3B82F6;
   --color-card-dark:    #13151A;
 
-  /* ── Graph & mood ──────────────────────────────────────────────────────── */
+  /* -- Graph & mood -------------------------------------------------------- */
   --graph-node-bg: var(--ds-background-100);
   --graph-node-active-bg: color-mix(in srgb, var(--accent-base) 12%, transparent);
   --graph-node-active-border: color-mix(in srgb, var(--accent-base) 48%, transparent);
@@ -283,14 +283,14 @@
   --mood-gradient-from: color-mix(in srgb, var(--accent-base) 36%, var(--bg-0));
   --mood-gradient-via: color-mix(in srgb, var(--accent-base) 12%, var(--bg-0));
 
-  /* ── Semantic component aliases ─────────────────────────────────────────── */
+  /* -- Semantic component aliases ------------------------------------------- */
   --card-bg:            var(--ds-background-100);
   --card-border:        var(--border-subtle);
   --input-bg:           var(--ds-gray-alpha-100);
   --input-bg-dark:      var(--ds-gray-alpha-100);
   --input-border:       var(--border-subtle);
   --input-border-focus: var(--border-default);
-  /* Panel inputs (brain / voice settings panels — darker opaque style) */
+  /* Panel inputs (brain / voice settings panels - darker opaque style) */
   --panel-input-bg:           #1e1f22;
   --panel-input-bg-hover:     #26282e;
   --panel-input-border:       #2d2f33;
@@ -300,7 +300,7 @@
   --inspector-section-separator: var(--ds-gray-alpha-100);
   --inspector-row-label: var(--ds-gray-600);
 
-  /* ── Checkout page ─────────────────────── */
+  /* -- Checkout page ----------------------- */
   --checkout-page-bg:    #0A0A0A;
   --checkout-surface:    #1a1a1a;
   --checkout-border:     #2a2a2a;
@@ -309,7 +309,7 @@
   --checkout-stripe-danger:  #ef4444;
   --checkout-stripe-primary: var(--accent-primary);
 
-  /* ── Pricing section ───────────────────── */
+  /* -- Pricing section --------------------- */
   --pricing-card-bg:             #0D0D11;
   --pricing-pro-card-bg:         #0D0E23;
   --pricing-card-border:         rgba(255,255,255,0.08);
@@ -338,7 +338,7 @@
   --pricing-icon-orange-bg:      #2d1500;
   --pricing-icon-orange-border:  #5c3000;
 
-  /* ── Settings modal layout ─────────────────────────────────────────────── */
+  /* -- Settings modal layout ----------------------------------------------- */
   --sm-sidebar-width:        240px;
   --sm-sidebar-bg:           var(--c-bacSec);
   --sm-content-bg:           var(--bg-primary);
@@ -358,7 +358,7 @@
   --sm-content-padding:      clamp(18px, 5vw, 60px);
 }
 
-/* ── Light theme overrides ─────────────────────────────────────────────────── */
+/* -- Light theme overrides --------------------------------------------------- */
 .light {
   /* Vercel Geist Design Tokens (light) */
   --ds-gray-100-value:  0, 0%, 95%;
@@ -397,7 +397,7 @@
   --ds-gray-alpha-800: #000000c4;
   --ds-gray-alpha-900: #000000d4;
   --ds-gray-alpha-1000: #000000eb;
-  /* Semantic color families — light */
+  /* Semantic color families - light */
   --ds-blue-100-value: 212, 100%, 94%;
   --ds-blue-900-value: 212, 100%, 35%;
   --ds-blue-100: hsla(var(--ds-blue-100-value), 1);

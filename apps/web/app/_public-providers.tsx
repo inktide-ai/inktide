@@ -11,8 +11,8 @@ import { avatarService } from '@/shared/services/index'
 
 export function PublicProviders({ children }: { children: ReactNode }) {
   useEffect(() => {
-    // common + landing are bundled — init is already synchronous.
-    // This effect ensures other namespaces (profile, voice, …) get fetched
+    // common + landing are bundled - init is already synchronous.
+    // This effect ensures other namespaces (profile, voice, ...) get fetched
     // lazily by HttpBackend for any client-side navigations that need them.
     if (!i18n.isInitialized) initI18n().catch(() => {})
   }, [])

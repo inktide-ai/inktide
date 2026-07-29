@@ -29,7 +29,7 @@ export interface LlmProviderDef {
   /** Local providers: editable default URL */
   defaultBaseUrl?: string
   extraFields?: ProviderFieldDef[]
-  /** Pure format check — no network call. Returns null if OK, error string if not. */
+  /** Pure format check - no network call. Returns null if OK, error string if not. */
   autoValidate: (cfg: { apiKey: string; baseUrl: string }) => string | null
 
   /** Path under `public/` e.g. `/images/providers/brain/foo.svg` */
@@ -46,7 +46,7 @@ export interface LlmProviderDef {
   contextSize?: string
   recommended?: boolean
   badge?: string
-  /** Icon is dark/black — render on white background on dark theme */
+  /** Icon is dark/black - render on white background on dark theme */
   darkIcon?: boolean
   websiteUrl?: string
   supportUrl?: string
@@ -768,7 +768,7 @@ export const LLM_PROVIDER_CATALOG: LlmProviderDef[] = [
   },
 ]
 
-/** Look up a provider by id. Type-safe — returns undefined if not found. */
+/** Look up a provider by id. Type-safe - returns undefined if not found. */
 export function findProvider(id: string): LlmProviderDef | undefined {
   return LLM_PROVIDER_CATALOG.find((p) => p.id === id)
 }

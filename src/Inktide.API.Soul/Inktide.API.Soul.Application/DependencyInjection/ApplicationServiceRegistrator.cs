@@ -17,7 +17,7 @@ public sealed class ApplicationServiceRegistrator : IServiceRegistrator
 {
     public void Register(IRegistrator registrator, IConfiguration configuration)
     {
-        // Typed storage settings — injected as ObjectStorageSettings (not IConfiguration).
+        // Typed storage settings - injected as ObjectStorageSettings (not IConfiguration).
         // DIP: services depend on this value object, not on the framework's IConfiguration.
         var storageSettings = new ObjectStorageSettings();
         configuration.GetSection("S3Settings").Bind(storageSettings);
@@ -32,7 +32,7 @@ public sealed class ApplicationServiceRegistrator : IServiceRegistrator
         registrator.Register<IAiCardActivityService, AiCardActivityService>(Reuse.Scoped);
         registrator.Register<ISoulActivityFeedService, SoulActivityFeedService>(Reuse.Scoped);
 
-        // Activity feed domain event handlers — resolved by InMemoryDomainEventDispatcher via IServiceProvider.GetServices
+        // Activity feed domain event handlers - resolved by InMemoryDomainEventDispatcher via IServiceProvider.GetServices
         registrator.Register<IDomainEventHandler<AiCardMoodShiftedEvent>,      MoodShiftFeedHandler>(Reuse.Scoped);
         registrator.Register<IDomainEventHandler<AiCardAppearanceChangedEvent>, AppearanceChangeFeedHandler>(Reuse.Scoped);
         registrator.Register<IDomainEventHandler<AiCardMilestoneReachedEvent>,  MilestoneFeedHandler>(Reuse.Scoped);

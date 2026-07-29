@@ -9,7 +9,7 @@ import SkillsTab from './tabs/skills-tab'
 import ModelTab from './tabs/model-tab'
 import SceneTab from './tabs/scene-tab'
 import MemoryTab from './tabs/memory-tab'
-import { BrainTab } from '@/features/brain' // fsd:cross-feature-ok — character-editor orchestrates brain config
+import { BrainTab } from '@/features/brain' // fsd:cross-feature-ok - character-editor orchestrates brain config
 import VoiceTab from './tabs/voice-tab'
 
 const PencilIcon = () => <Edit />

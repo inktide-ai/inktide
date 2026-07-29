@@ -196,7 +196,7 @@ public sealed class AiCardScreenAwarenessDto
     [JsonProperty("hourly_budget_override")]
     public int HourlyBudgetOverride { get; set; } = 0;
 
-    /// <summary>pHash Hamming distance threshold for scene deduplication (0–64).</summary>
+    /// <summary>pHash Hamming distance threshold for scene deduplication (0-64).</summary>
     [JsonProperty("phash_threshold")]
     public int PHashThreshold { get; set; } = 10;
 }

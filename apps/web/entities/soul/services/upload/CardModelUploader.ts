@@ -3,7 +3,7 @@ import { presignCardModelUpload, completeCardModelUpload } from '@/entities/soul
 import type { IStorageUploader, PresignResult } from '@/shared/types/IStorageUploader'
 
 /**
- * OCP: этот класс добавлен как новый файл — uploadCardModelFile() удалён из soul.ts.
+ * OCP: этот класс добавлен как новый файл - uploadCardModelFile() удалён из soul.ts.
  * Логика PUT в MinIO живёт в PresignedUploadService, здесь только специфика эндпоинтов.
  */
 export class CardModelUploader implements IStorageUploader<AiCardModelResponse> {

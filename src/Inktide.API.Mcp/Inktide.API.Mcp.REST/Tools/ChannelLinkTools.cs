@@ -7,7 +7,7 @@ using ModelContextProtocol.Server;
 namespace Inktide.API.Mcp.REST.Tools;
 
 /// <summary>
-/// Channel link tools — channel management has moved to the Project context.
+/// Channel link tools - channel management has moved to the Project context.
 /// These tools are stubs until the Project context exposes channel CRUD.
 /// </summary>
 [McpServerToolType]

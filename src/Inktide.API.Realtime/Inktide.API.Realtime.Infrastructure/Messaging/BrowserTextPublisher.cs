@@ -15,7 +15,7 @@ namespace Inktide.API.Realtime.Infrastructure.Messaging;
 /// clients as <c>textChunk</c> SignalR events via <see cref="AudioHub"/>.
 ///
 /// <para>Runs a separate consumer group (<c>text-delivery-workers</c>) on the same Redis stream
-/// that the TTS pipeline also reads — Redis Streams fan-out per group, so the two pipelines
+/// that the TTS pipeline also reads - Redis Streams fan-out per group, so the two pipelines
 /// are fully independent.</para>
 ///
 /// <para>Delivery guarantee: at-least-once (ACK after SendAsync). Duplicate chunks are

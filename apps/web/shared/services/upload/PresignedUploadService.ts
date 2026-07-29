@@ -10,12 +10,12 @@ const ALLOWED_CONTENT_TYPES = new Set([
   'application/octet-stream',
 ])
 
-// Browsers report application/octet-stream for .vrm and .glb — validate by extension
+// Browsers report application/octet-stream for .vrm and .glb - validate by extension
 // so a renamed .html cannot slip through the MIME check.
 const OCTET_STREAM_ALLOWED_EXTS = new Set(['vrm', 'glb'])
 
 /**
- * OCP + DRY: паттерн presign→PUT→complete написан ОДИН РАЗ.
+ * OCP + DRY: паттерн presign->PUT->complete написан ОДИН РАЗ.
  * Добавить новый тип медиазагрузки = создать новый класс `implements IStorageUploader<T>`.
  * Этот файл не меняется.
  */

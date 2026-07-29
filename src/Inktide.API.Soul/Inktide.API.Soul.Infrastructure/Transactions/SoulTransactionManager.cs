@@ -14,7 +14,7 @@ namespace Inktide.API.Soul.Infrastructure.Transactions;
 
 internal sealed class SoulTransactionManager : ITransactionManager, IDisposable, IAsyncDisposable
 {
-    // Unique constraint names → human-readable field labels for error messages.
+    // Unique constraint names -> human-readable field labels for error messages.
     private static readonly Dictionary<string, string> _constraintToFieldMap = new(StringComparer.OrdinalIgnoreCase)
     {
         { "idx_ai_cards_sort",                       "Название карточки" },
@@ -93,7 +93,7 @@ internal sealed class SoulTransactionManager : ITransactionManager, IDisposable,
         await DisposeTransactionAsync().ConfigureAwait(false);
     }
 
-    // SaveChangesAsync is used outside of explicit Begin/Commit — single atomic unit.
+    // SaveChangesAsync is used outside of explicit Begin/Commit - single atomic unit.
     public async Task SaveChangesAsync(CancellationToken ct = default)
     {
         try
@@ -132,7 +132,7 @@ internal sealed class SoulTransactionManager : ITransactionManager, IDisposable,
         var integrationEvents = _collector.IntegrationEvents.ToList();
         _collector.Clear();
 
-        // Publish integration events via MT EF outbox — messages are stored atomically
+        // Publish integration events via MT EF outbox - messages are stored atomically
         // in the outbox table alongside the domain changes during SaveChangesAsync below.
         foreach (var evt in integrationEvents)
         {
@@ -158,7 +158,7 @@ internal sealed class SoulTransactionManager : ITransactionManager, IDisposable,
 
         await _db.SaveChangesAsync(ct).ConfigureAwait(false);
 
-        // Domain events may trigger handlers that raise further events — loop until settled.
+        // Domain events may trigger handlers that raise further events - loop until settled.
         while (domainEvents.Count > 0)
         {
             await _dispatcher.DispatchAsync(domainEvents, ct).ConfigureAwait(false);

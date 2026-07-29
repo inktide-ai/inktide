@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEv
 import { useRouter, useParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { SANDBOX_ROUTE } from '@/lib/routes'
-import { getCard, updateCard, uploadCardAvatar } from '@/features/soul/api/index' // fsd:cross-feature-ok — soul editor
+import { getCard, updateCard, uploadCardAvatar } from '@/features/soul/api/index' // fsd:cross-feature-ok - soul editor
 import {
   apiResponseToCharacter,
   characterToUpdateRequest,
@@ -11,7 +11,7 @@ import {
 } from '@/shared/lib/character'
 import { BannerColorPicker } from './banner-color-picker'
 import { getBannerAccent, getBannerStyle } from '@/shared/ui/banner-presets'
-import { uploadCardBanner, removeCardBanner } from '@/features/soul/api/index' // fsd:cross-feature-ok — soul editor
+import { uploadCardBanner, removeCardBanner } from '@/features/soul/api/index' // fsd:cross-feature-ok - soul editor
 import BannerCropModal from './banner-crop-modal'
 
 function PencilIcon() {

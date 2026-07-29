@@ -164,7 +164,7 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
                 onConfirm={(config) => {
                   const selections = config?.botToken
                     ? { ...state.stepSelections, channels: { id: 'discord', name: 'Discord', config: { botToken: config.botToken } } }
-                    : state.stepSelections // same reference — no spurious persist
+                    : state.stepSelections // same reference - no spurious persist
                   confirmChannels(['discord'], selections)
                 }}
               />

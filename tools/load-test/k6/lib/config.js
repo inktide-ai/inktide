@@ -1,8 +1,8 @@
 // Init-context configuration assembly.
-// Merge order (lowest → highest precedence):
-//   1. config/default.json      — environment-independent constants
-//   2. config/profiles/<P>.json — load shape + thresholds for the selected profile
-//   3. __ENV overrides          — passed by scripts/run.sh as -e flags
+// Merge order (lowest -> highest precedence):
+//   1. config/default.json      - environment-independent constants
+//   2. config/profiles/<P>.json - load shape + thresholds for the selected profile
+//   3. __ENV overrides          - passed by scripts/run.sh as -e flags
 //
 // Layering rule: lib/ imports nothing project-local. Everything downstream
 // (clients/, scenarios/, main.js) reads CONFIG from here and only here.
@@ -65,7 +65,7 @@ export const CONFIG = {
 
 // Translate profile scenario entries into k6 options.scenarios.
 // Every enabled entry is passed through verbatim (k6-native executor fields),
-// minus our `enabled` marker, plus `exec` = scenario name — which must match
+// minus our `enabled` marker, plus `exec` = scenario name - which must match
 // a named export of main.js.
 export function buildScenarios(config) {
   const out = {};

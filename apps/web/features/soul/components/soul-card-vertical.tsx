@@ -126,7 +126,7 @@ export function SoulCardVertical({ data, isFavorite, onFavoriteToggle, onOpen, o
         </DropdownMenu>
       </div>
 
-      {/* Confirm delete — DialogContent renders via Portal outside this Card */}
+      {/* Confirm delete - DialogContent renders via Portal outside this Card */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent
           onClick={e => e.stopPropagation()}

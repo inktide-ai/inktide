@@ -1,4 +1,4 @@
-// Server Components only — do NOT import in 'use client' files
+// Server Components only - do NOT import in 'use client' files
 import { auth } from '@/lib/auth'
 
 export interface ServerUser {

@@ -2,7 +2,7 @@ namespace Inktide.API.Soul.Domain.ValueObjects;
 
 /// <summary>
 /// Named personality presets. Loaded into the UI as one-click templates.
-/// No DB table — these are static configuration values, not user data.
+/// No DB table - these are static configuration values, not user data.
 /// </summary>
 public static class PersonalityPresets
 {

@@ -1,7 +1,7 @@
 namespace Inktide.API.Connector.Discord.Gateway;
 
 /// <summary>
-/// In-memory map from Discord guild_id → CharacterId (AI card id).
+/// In-memory map from Discord guild_id -> CharacterId (AI card id).
 /// Used by DiscordConnector to route incoming messages to the correct soul.
 /// </summary>
 public interface IGuildSoulRegistry

@@ -85,7 +85,7 @@ export class AnimationStateMachineController implements IVrmController {
     this.actor.start()
     this.actor.send({ type: 'CLIP_READY', nodeId: 'idle' })
 
-    // Pre-load all emote clips in the background — non-blocking.
+    // Pre-load all emote clips in the background - non-blocking.
     void this._preloadEmotes(this._preloadAbort.signal)
   }
 
@@ -93,7 +93,7 @@ export class AnimationStateMachineController implements IVrmController {
     if (this._disposed || !this.mixer) return
 
     // 1. Advance Three.js mixer with arousal-driven tempo.
-    //    In idle state: arousal drives timeScale (excited=1.6×, sleepy=0.3×).
+    //    In idle state: arousal drives timeScale (excited=1.6x, sleepy=0.3x).
     //    In emote/transitioning states: use 1.0 to avoid disrupting choreographed timing.
     if (ctx.soulState && this.actor.getSnapshot().value === 'idle') {
       const a = ctx.soulState.vad.a
@@ -216,7 +216,7 @@ export class AnimationStateMachineController implements IVrmController {
       }
     } else {
       const toAction = this.registry.getAction(t.toNodeId)
-      if (!toAction) return  // clip not loaded yet — wait
+      if (!toAction) return  // clip not loaded yet - wait
 
       if (this.lastFadedTo !== t.toNodeId) {
         const fromAction = this.registry.getAction(this.lastFadedTo ?? t.fromNodeId)
@@ -229,7 +229,7 @@ export class AnimationStateMachineController implements IVrmController {
             blend.crossFadeTo(fromAction, toAction, t.crossFadeDuration)
           }
         } else {
-          // No source action — just play directly.
+          // No source action - just play directly.
           toAction.reset()
           toAction.play()
         }
@@ -275,7 +275,7 @@ export class AnimationStateMachineController implements IVrmController {
         this.vrm!,
       )
     } finally {
-      // Release GPU resources — only the AnimationClip is kept, not the GLTF scene.
+      // Release GPU resources - only the AnimationClip is kept, not the GLTF scene.
       gltf.scene.traverse((obj) => {
         const mesh = obj as THREE.Mesh
         mesh.geometry?.dispose()
@@ -306,7 +306,7 @@ export class AnimationStateMachineController implements IVrmController {
         action.clampWhenFinished = true
         this.registry.setAction(node.id, action)
       } catch (e) {
-        // AbortError from signal.throwIfAborted() or the _disposed guard — expected, exit cleanly.
+        // AbortError from signal.throwIfAborted() or the _disposed guard - expected, exit cleanly.
         if (signal.aborted || this._disposed) return
         console.warn(`[AnimSM] preload failed: ${node.id}`, e)
       }

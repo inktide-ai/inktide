@@ -139,7 +139,7 @@ public sealed class GoogleCloudTtsProvider : ISpeechProvider, IVoiceListingProvi
 
     /// <summary>
     /// Derives a BCP-47 language code from a Google voice name.
-    /// e.g. "en-US-Standard-A" → "en-US", "cmn-CN-Wavenet-A" → "cmn-CN".
+    /// e.g. "en-US-Standard-A" -> "en-US", "cmn-CN-Wavenet-A" -> "cmn-CN".
     /// </summary>
     private static string DeriveLocale(string voiceName)
     {

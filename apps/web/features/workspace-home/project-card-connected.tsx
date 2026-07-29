@@ -1,6 +1,6 @@
 'use client'
 import type { ReactNode } from 'react'
-import { useProjectPreviewUrl } from '@/features/projects' // fsd:cross-feature-ok — workspace home renders project cards
+import { useProjectPreviewUrl } from '@/features/projects' // fsd:cross-feature-ok - workspace home renders project cards
 import { ProjectCard } from './project-card'
 import type { ProjectListItem } from '@/entities/project/api'
 

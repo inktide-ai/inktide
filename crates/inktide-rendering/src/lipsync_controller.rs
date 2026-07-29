@@ -44,7 +44,7 @@ impl<M: VisemeMapper> LipSyncController<M> {
         let (current, next, raw) = self.timeline.blend_state(playback_time);
 
         // Hold the current pose for `blend_start` fraction, then ease into next.
-        // Guard: if blend_start >= 1.0 the denominator would be zero → NaN.
+        // Guard: if blend_start >= 1.0 the denominator would be zero -> NaN.
         // Treat it as "never blend" (hold the current pose for the full cue duration).
         let t = if raw < self.config.blend_start || self.config.blend_start >= 1.0 {
             0.0
@@ -134,7 +134,7 @@ mod tests {
         let c = LipSyncController::with_config(
             timeline, ControllerConfig { blend_start: 1.0 }, VrmVisemeMapper,
         );
-        // At end-of-timeline raw==1.0 previously caused NaN → all weights drop to zero.
+        // At end-of-timeline raw==1.0 previously caused NaN -> all weights drop to zero.
         // With the guard, weights are deterministic (current cue held, no blend).
         let w = c.weights_at(Duration::from_millis(200));
         for (_, v) in w.iter() {
@@ -145,7 +145,7 @@ mod tests {
     #[test]
     fn hold_phase_weights_equal_current_viseme() {
         // During the hold phase (t == 0.0), weights_at must return exactly
-        // viseme_to_weights(current) — no lerp artifacts, no extra allocations.
+        // viseme_to_weights(current) - no lerp artifacts, no extra allocations.
         let timeline = VisemeTimeline::new(
             vec![
                 VisemeCue { start: Duration::ZERO, viseme: Viseme::E },
@@ -153,7 +153,7 @@ mod tests {
             ],
             Duration::from_millis(600),
         );
-        // blend_start=0.70 → hold for first 70% of the cue (0–350 ms)
+        // blend_start=0.70 -> hold for first 70% of the cue (0-350 ms)
         let c = LipSyncController::new(timeline);
         let hold_weights = c.weights_at(Duration::from_millis(100)); // well inside hold phase
         let expected = VrmVisemeMapper.viseme_to_weights(Viseme::E);

@@ -7,7 +7,7 @@ namespace Inktide.API.Connector.Infrastructure.Messaging;
 
 /// <summary>
 /// Enqueues chat messages into the in-memory queue for async Redis Stream (XADD) publishing.
-/// Non-blocking — connector event loops are never stalled by Redis I/O.
+/// Non-blocking - connector event loops are never stalled by Redis I/O.
 /// </summary>
 public sealed class SynapseIngestMessageHandler : IStreamMessageHandler
 {

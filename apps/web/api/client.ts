@@ -4,7 +4,7 @@ import { API_BASE_URL } from './config'
 // The HTTP client is decoupled from Keycloak: it works with any token source.
 // Call `configureApiAuth` once at application bootstrap (see main.tsx).
 //
-// NOTE: Bearer tokens are no longer injected here — the BFF proxy at
+// NOTE: Bearer tokens are no longer injected here - the BFF proxy at
 // app/api/[...path]/route.ts reads the session cookie server-side and adds the
 // Authorization header. configureApiAuth is retained for onUnauthenticated.
 
@@ -56,13 +56,13 @@ export async function apiFetch(
 
   const res = await fetch(url, { ...init, headers, redirect: 'manual' })
 
-  // Middleware redirect (e.g. RefreshTokenError) — treat as 401
+  // Middleware redirect (e.g. RefreshTokenError) - treat as 401
   if (res.type === 'opaqueredirect') {
     _auth.onUnauthenticated?.()
     return new Response(null, { status: 401 })
   }
 
-  // 401 from proxy means session expired — trigger re-login
+  // 401 from proxy means session expired - trigger re-login
   if (res.status === 401) {
     _auth.onUnauthenticated?.()
   }
@@ -79,7 +79,7 @@ export async function jsonOrThrow<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>
 }
 
-/** 204 No Content or empty body — success without JSON. */
+/** 204 No Content or empty body - success without JSON. */
 export async function emptyOrThrow(res: Response): Promise<void> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({})) as { error?: string; message?: string; code?: string }

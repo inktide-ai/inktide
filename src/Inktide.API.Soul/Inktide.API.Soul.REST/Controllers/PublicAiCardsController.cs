@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inktide.API.Soul.REST.Controllers;
 
 /// <summary>
-/// Unauthenticated public profile endpoints — no credentials or private config exposed.
+/// Unauthenticated public profile endpoints - no credentials or private config exposed.
 /// </summary>
 [ApiController]
 [Route("api/v1/souls/public")]

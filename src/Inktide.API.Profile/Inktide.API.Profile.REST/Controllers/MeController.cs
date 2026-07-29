@@ -192,7 +192,7 @@ public sealed class MeController : ControllerBase
         return WorkspaceJson(result);
     }
 
-    // Raw JSON strings from the DB are valid JSON — embed them directly to avoid
+    // Raw JSON strings from the DB are valid JSON - embed them directly to avoid
     // Newtonsoft circular-reference issues with System.Text.Json.Nodes.JsonNode.
     private static ContentResult WorkspaceJson(UserPreferencesWorkspace w) => new()
     {

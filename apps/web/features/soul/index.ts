@@ -1,4 +1,4 @@
-// Shared UI primitives, hooks, utilities, and API functions — safe for any layer to import.
+// Shared UI primitives, hooks, utilities, and API functions - safe for any layer to import.
 export * from './api'
 export * from './components'
 export { useCardChannelId, useChannelMutation, useFavorites, useVoiceProvider } from './hooks'

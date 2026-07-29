@@ -8,7 +8,7 @@ namespace Inktide.API.Synapse.Infrastructure.Llm;
 /// <summary>
 /// Builds a <see cref="ChatHistory"/> from a <see cref="SynapseAggregatedEnvelope"/>.
 /// Port of fast-api/ai-worker/llm-worker/app/prompt/builder.py.
-/// Sections are injected via DI — add a new <see cref="IPromptSection"/> registration to extend the prompt.
+/// Sections are injected via DI - add a new <see cref="IPromptSection"/> registration to extend the prompt.
 /// </summary>
 internal sealed class SynapsePromptBuilder
 {

@@ -1,6 +1,6 @@
 // Authenticated read/write mix over a 20-slot deterministic ring:
-//   40% GET /me/preferences · 20% GET /me · 20% PATCH /me/preferences
-//   15% GET /projects       ·  5% GET /souls/cards
+//   40% GET /me/preferences - 20% GET /me - 20% PATCH /me/preferences
+//   15% GET /projects       -  5% GET /souls/cards
 // One request per iteration (arrival rate == request rate, see preflight).
 // PATCH writes are safe: each VU maps to its own bench user, and language is
 // a benign field to churn.

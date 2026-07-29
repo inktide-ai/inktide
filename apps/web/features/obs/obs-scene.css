@@ -1,4 +1,4 @@
-/* OBS Scene page — zero chrome, transparent background.
+/* OBS Scene page - zero chrome, transparent background.
    OBS Browser Source setting: ✅ Allow transparency */
 
 html,
@@ -17,13 +17,13 @@ body,
   height: 100vh;
 }
 
-/* Passed as className to AvatarRenderer — fills the .root wrapper inside it */
+/* Passed as className to AvatarRenderer - fills the .root wrapper inside it */
 .obs-fill {
   width: 100%;
   height: 100%;
 }
 
-/* Shown only when required URL params are missing — never visible in OBS */
+/* Shown only when required URL params are missing - never visible in OBS */
 .obs-error {
   padding: 20px;
   font-family: monospace;

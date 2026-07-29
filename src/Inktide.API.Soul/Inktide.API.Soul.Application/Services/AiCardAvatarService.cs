@@ -11,7 +11,7 @@ namespace Inktide.API.Soul.Application.Services;
 /// Uploads an avatar image to object storage and updates the card's AvatarUrl.
 /// DIP: depends on ObjectStorageSettings (typed options), not on IConfiguration.
 ///      IConfiguration is a framework concern; ObjectStorageSettings is a domain value object.
-/// SRP: avatar upload only — file sanitisation delegated to StorageFileHelper.
+/// SRP: avatar upload only - file sanitisation delegated to StorageFileHelper.
 /// </summary>
 public sealed class AiCardAvatarService : IAiCardAvatarService
 {

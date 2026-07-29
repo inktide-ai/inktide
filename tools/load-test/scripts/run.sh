@@ -19,7 +19,7 @@ fi
 PROFILE="${PROFILE:-smoke}"
 K6_BIN="${K6_BIN:-k6}"
 # v2+: k6/websockets is stable, redis lives at k6/x/redis (removed from
-# k6/experimental in v2) — older binaries can't load the suite.
+# k6/experimental in v2) - older binaries can't load the suite.
 K6_MIN_MAJOR=2
 
 command -v "$K6_BIN" >/dev/null 2>&1 || {
@@ -32,7 +32,7 @@ if [ -z "$K6_MAJOR" ] || [ "$K6_MAJOR" -lt "$K6_MIN_MAJOR" ]; then
   exit 1
 fi
 
-# Rate-budget guard — aborts before k6 starts if this profile would trip the
+# Rate-budget guard - aborts before k6 starts if this profile would trip the
 # API's rate limiter (see scripts/preflight.mjs).
 PROFILE="$PROFILE" USER_POOL_SIZE="${USER_POOL_SIZE:-}" node "$SCRIPT_DIR/preflight.mjs"
 
@@ -47,7 +47,7 @@ for VAR in BASE_URL WS_URL KC_URL KC_REALM KC_CLIENT_ID BENCH_USER_PASSWORD USER
   fi
 done
 
-# k6 → Prometheus remote write (compose bench profile). Off when PROM_RW_URL empty.
+# k6 -> Prometheus remote write (compose bench profile). Off when PROM_RW_URL empty.
 if [ -n "${PROM_RW_URL:-}" ]; then
   export K6_PROMETHEUS_RW_SERVER_URL="$PROM_RW_URL"
   export K6_PROMETHEUS_RW_TREND_STATS="p(95),p(99),avg,max"

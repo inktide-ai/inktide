@@ -11,7 +11,7 @@ namespace Inktide.API.TTS.Infrastructure.Decorators;
 
 /// <summary>
 /// Caches <see cref="IModelListingProvider.GetModelsAsync"/> and <see cref="IVoiceListingProvider.GetVoicesAsync"/>
-/// results per provider. Synthesis is never cached — it is a stateful streaming operation.
+/// results per provider. Synthesis is never cached - it is a stateful streaming operation.
 /// Wraps any <see cref="ISpeechProvider"/>; listing methods are no-ops when the inner
 /// provider does not declare the corresponding capability.
 /// </summary>

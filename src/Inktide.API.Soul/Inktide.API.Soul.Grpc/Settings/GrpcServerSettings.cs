@@ -33,7 +33,7 @@ public sealed class SoulGrpcServerSettings
     }
 
     /// <summary>
-    /// Path to TLS certificate file (optional — omit for plaintext HTTP/2).
+    /// Path to TLS certificate file (optional - omit for plaintext HTTP/2).
     /// </summary>
     public string? CertPath
     {

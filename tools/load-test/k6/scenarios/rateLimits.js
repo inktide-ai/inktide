@@ -1,4 +1,4 @@
-// Rate-limiter enforcement verification (limits profile only — this scenario
+// Rate-limiter enforcement verification (limits profile only - this scenario
 // deliberately violates budgets and poisons the shared IP window for ~60s).
 //
 // Three assertions, each recorded into limiter_enforced (threshold rate==1):

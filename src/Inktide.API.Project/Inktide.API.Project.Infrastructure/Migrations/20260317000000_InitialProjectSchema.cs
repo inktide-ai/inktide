@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Inktide.API.Project.Infrastructure.Migrations
 {
     // Brownfield baseline: table may already exist in production.
-    // IF NOT EXISTS guards make this idempotent — succeeds on both fresh installs
+    // IF NOT EXISTS guards make this idempotent - succeeds on both fresh installs
     // and existing databases, registering the baseline in __EFMigrationsHistory.
     public partial class InitialProjectSchema : Migration
     {

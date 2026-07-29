@@ -14,7 +14,7 @@ public sealed class IngestFrameRequest
     [JsonProperty("character_id")]
     public Guid CharacterId { get; set; }
 
-    /// <summary>Opaque client session identifier — used for per-session audit logging.</summary>
+    /// <summary>Opaque client session identifier - used for per-session audit logging.</summary>
     [Required]
     [JsonProperty("session_id")]
     public string SessionId { get; set; } = string.Empty;

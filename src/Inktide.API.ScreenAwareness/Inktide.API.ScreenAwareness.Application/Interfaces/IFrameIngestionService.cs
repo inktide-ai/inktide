@@ -10,7 +10,7 @@ public enum FrameIngestionResult
 
 /// <summary>
 /// Orchestrates the frame ingestion pipeline:
-/// feature check → budget → pHash dedup → XADD to <c>screen.frames.pending</c>.
+/// feature check -> budget -> pHash dedup -> XADD to <c>screen.frames.pending</c>.
 /// </summary>
 public interface IFrameIngestionService
 {

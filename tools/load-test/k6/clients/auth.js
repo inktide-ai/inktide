@@ -2,7 +2,7 @@
 // so module-level state is per-VU by construction).
 //
 // Tokens are seeded from the pre-fetched pool (data/tokens.json) and refreshed
-// ~60s before expiry via refresh_token grant, falling back to password grant —
+// ~60s before expiry via refresh_token grant, falling back to password grant -
 // soak runs can outlive Keycloak's SSO idle timeout for refresh tokens.
 //
 // All Keycloak requests are tagged kind:auth so profile thresholds scoped to

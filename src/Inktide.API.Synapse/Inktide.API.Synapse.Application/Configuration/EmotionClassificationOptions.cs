@@ -9,7 +9,7 @@ public sealed class EmotionClassificationOptions
 
     /// <summary>
     /// Model used for classification. Should be small and fast.
-    /// Default: qwen2.5:7b — already available in the standard Inktide Ollama setup.
+    /// Default: qwen2.5:7b - already available in the standard Inktide Ollama setup.
     /// </summary>
     public string Model { get; set; } = "qwen2.5:7b";
 

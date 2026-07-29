@@ -7,7 +7,7 @@ namespace Inktide.API.Soul.Application.Policies;
 
 /// <summary>
 /// Enforces "one active model per card" by deleting all other models after a new one is saved.
-/// OCP: to allow multiple models, register MultipleModelsRetentionPolicy instead — no service edits needed.
+/// OCP: to allow multiple models, register MultipleModelsRetentionPolicy instead - no service edits needed.
 /// SRP: cleanup logic lives here, not inside AiCardModelUploadService.
 /// DIP: AiCardModelUploadService depends on IModelRetentionPolicy, not on this concrete class.
 /// </summary>

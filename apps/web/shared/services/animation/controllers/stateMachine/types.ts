@@ -9,13 +9,13 @@ export interface AnimationNode {
 }
 
 /**
- * Intermediate pose within a transition — e.g. a wind-up before 'angry'.
+ * Intermediate pose within a transition - e.g. a wind-up before 'angry'.
  * Equivalent to AnimationKeyframe in Zira.
  */
 export interface AnimationKeyframe {
   clipId: string
   duration: number  // seconds
-  fadeIn: number    // seconds — cross-fade from previous clip
+  fadeIn: number    // seconds - cross-fade from previous clip
 }
 
 /**
@@ -42,7 +42,7 @@ export interface AnimationTransition {
 export interface SelfTransition {
   nodeId: string
   variationClipId: string
-  /** 0–1 chance to trigger at end of each idle cycle. */
+  /** 0-1 chance to trigger at end of each idle cycle. */
   probability: number
   crossFadeDuration: number
 }
@@ -65,7 +65,7 @@ export interface AnimationMachineContext {
 export interface InTransitionState {
   fromNodeId: string
   toNodeId: string
-  /** Normalised 0–1 progress through the full transition. */
+  /** Normalised 0-1 progress through the full transition. */
   progress: number
   /** Elapsed time in seconds. */
   elapsed: number

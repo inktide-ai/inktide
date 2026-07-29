@@ -132,7 +132,7 @@ export default function ProjectScenePage() {
       const file = new File([blob], `${preset.name}.jpg`, { type: blob.type || 'image/jpeg' })
       const uploader = new CardSceneUploader(project.id)
       const scene = await executePresignedUpload(uploader, file)
-      // setActiveScene → onSettled → invalidateAll → scenes query refetches
+      // setActiveScene -> onSettled -> invalidateAll -> scenes query refetches
       await setActiveScene(scene.id)
     } catch (err) {
       console.error('Preset import failed:', err)
@@ -256,7 +256,7 @@ export default function ProjectScenePage() {
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">
-            {/* Preset scenes — click to copy to MinIO and activate */}
+            {/* Preset scenes - click to copy to MinIO and activate */}
             {filteredPresets.map(preset => {
               const importing = importingId === preset.id
               const pillColors = getPillColors(preset.tagName)

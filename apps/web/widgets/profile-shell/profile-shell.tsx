@@ -97,7 +97,7 @@ export default function ProfileShell({ children }: ProfileShellProps) {
               aria-haspopup="true"
               className="flex items-center gap-2 bg-transparent border-none p-0 cursor-pointer min-w-0 group"
             >
-              {/* Avatar 20×20 */}
+              {/* Avatar 20x20 */}
               <div
                 className="flex items-center justify-center font-bold text-[9px] text-white flex-shrink-0 overflow-hidden"
                 style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--avatar-fallback-gradient)' }}
@@ -149,11 +149,11 @@ export default function ProfileShell({ children }: ProfileShellProps) {
         </nav>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t border-[var(--border-subtle)] pb-1 pt-2">
-          {/* Header row — toggles between label and search input */}
+          {/* Header row - toggles between label and search input */}
           <div className="px-2 pb-1.5">
             {searchOpen ? (
               <div className="flex h-[30px] items-center gap-1.5">
-                {/* Search box — ends BEFORE the × */}
+                {/* Search box - ends BEFORE the x */}
                 <div className="flex h-full flex-1 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-2 py-0 box-border">
                   <span className="flex flex-shrink-0 text-[var(--text-tertiary)] [&>svg]:h-[14px] [&>svg]:w-[14px]">
                     <Search size={18} />
@@ -167,7 +167,7 @@ export default function ProfileShell({ children }: ProfileShellProps) {
                     className="min-w-0 flex-1 border-none bg-transparent text-sm text-[var(--text-primary)] caret-[var(--accent-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
                   />
                 </div>
-                {/* × OUTSIDE the search box border */}
+                {/* x OUTSIDE the search box border */}
                 <button type="button" onClick={() => { setSearchOpen(false); setSearch('') }}
                   className="flex h-[30px] w-[30px] flex-shrink-0 cursor-pointer items-center justify-center border-none bg-transparent p-0 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">
                   <svg width="14" height="14" viewBox="0 0 10 10" fill="none">

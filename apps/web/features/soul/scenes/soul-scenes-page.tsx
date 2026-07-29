@@ -64,7 +64,7 @@ function SceneButton({ id, name, isActive, kindLabel, activeLabel, bgStyle, tagN
     >
       <div className="aspect-[4/3] w-full" style={bgStyle} />
 
-      {/* Trash icon — only for deletable scenes */}
+      {/* Trash icon - only for deletable scenes */}
       {onDelete && !confirming && (
         <button
           type="button"
@@ -339,7 +339,7 @@ export default function SoulScenesPage() {
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSceneDragEnd}>
               <div className="grid grid-cols-2 gap-2">
-                {/* Preset scenes — not sortable */}
+                {/* Preset scenes - not sortable */}
                 {filteredPresets.map(item => (
                   <SceneButton
                     key={item.data.id}
@@ -358,7 +358,7 @@ export default function SoulScenesPage() {
                   />
                 ))}
 
-                {/* Custom scenes — sortable */}
+                {/* Custom scenes - sortable */}
                 <SortableContext items={filteredCustom.map(i => i.data.id)} strategy={rectSortingStrategy}>
                   {filteredCustom.map(item => (
                     <SortableSceneButton

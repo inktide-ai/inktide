@@ -2,7 +2,7 @@
 import { useTranslation } from 'react-i18next'
 import { SliderField } from '@/shared/ui/slider-field'
 import { ApiKeyCallout } from '@/shared/ui/api-key-callout'
-import { useVoiceProvider } from '@/features/soul/hooks/useVoiceProvider' // fsd:cross-feature-ok — soul voice panel
+import { useVoiceProvider } from '@/features/soul/hooks/useVoiceProvider' // fsd:cross-feature-ok - soul voice panel
 import { infoContent, formGroup, labelCls, labelHint, inputCls, voiceSelectWrap, voiceSelect } from './panel-styles'
 import type { PanelProps } from './types'
 

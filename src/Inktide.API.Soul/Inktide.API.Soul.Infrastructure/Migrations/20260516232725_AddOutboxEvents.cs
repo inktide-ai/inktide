@@ -11,7 +11,7 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // memory_metadata and user_profiles remain in the DB — they are now owned by
+            // memory_metadata and user_profiles remain in the DB - they are now owned by
             // MemoryDbContext and ProfileDbContext respectively (R4/R5). Do NOT drop them here.
 
             migrationBuilder.AddColumn<string>(

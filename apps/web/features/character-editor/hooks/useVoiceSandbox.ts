@@ -47,7 +47,7 @@ export function useVoiceSandbox(initialProviderId: string): UseVoiceSandboxResul
       .catch((err) => { console.error('[useVoiceSandbox] failed to load TTS providers', err) })
       .finally(() => { if (!cancelled) setProvidersLoading(false) })
     return () => { cancelled = true }
-  }, []) // intentional: selectedProviderId excluded — refetch on navigation would reset selection
+  }, []) // intentional: selectedProviderId excluded - refetch on navigation would reset selection
 
   const provider      = providers.find((p) => p.id === selectedProviderId)
   const needsApiKey   = provider?.capabilities.requiresApiKey ?? false
@@ -72,7 +72,7 @@ export function useVoiceSandbox(initialProviderId: string): UseVoiceSandboxResul
       .catch(() => { if (!cancelled) setVoices(getFallbackVoices(selectedProviderId)) })
       .finally(() => { if (!cancelled) setVoicesLoading(false) })
     return () => { cancelled = true }
-    // intentional: needsApiKey/apiKey excluded — apiKey changes must not trigger voice refetch
+    // intentional: needsApiKey/apiKey excluded - apiKey changes must not trigger voice refetch
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProviderId, providers])
 

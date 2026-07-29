@@ -38,12 +38,12 @@ public interface IAiCardService
         Guid cardId,
         CancellationToken ct = default);
 
-    /// <summary>Move a card to a new position. previousId=null → beginning; nextId=null → end. Returns null when not found.</summary>
+    /// <summary>Move a card to a new position. previousId=null -> beginning; nextId=null -> end. Returns null when not found.</summary>
     Task<AiCard?> ReorderAsync(Guid userId, Guid cardId, Guid? previousId, Guid? nextId, CancellationToken ct = default);
 
     /// <summary>
     /// Creates a Soul from a cross-context import command. Returns the new Soul ID.
-    /// AiCard entity is built entirely inside Soul — callers never construct domain entities.
+    /// AiCard entity is built entirely inside Soul - callers never construct domain entities.
     /// </summary>
     Task<Guid> CreateFromImportAsync(Guid userId, ImportSoulCommand command, CancellationToken ct = default);
 

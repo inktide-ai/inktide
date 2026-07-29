@@ -1,4 +1,4 @@
-// Token pool loading + VU→user assignment.
+// Token pool loading + VU->user assignment.
 // SharedArray keeps one read-only copy across all VUs. The modulo assignment
 // is stable and deterministic, which keeps per-user request rates predictable
 // for the rate-limit budget math in scripts/preflight.mjs.

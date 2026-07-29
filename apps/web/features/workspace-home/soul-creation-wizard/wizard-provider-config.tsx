@@ -43,7 +43,7 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
 
   useEffect(() => {
     credTest.reset()
-    // credTest.reset is stable — intentionally omitted from deps
+    // credTest.reset is stable - intentionally omitted from deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.apiKey])
 

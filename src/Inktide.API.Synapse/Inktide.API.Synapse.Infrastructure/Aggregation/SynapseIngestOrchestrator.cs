@@ -53,7 +53,7 @@ internal sealed class SynapseIngestOrchestrator : ISynapseIngestOrchestrator
         var soulId  = cardCtx?.CharacterId.ToString() ?? "unknown";
 
         // SoulRuntime runs plugin nodes from the soul's saved graph.
-        // If no graph exists, it returns silently — we fall back to shards below.
+        // If no graph exists, it returns silently - we fall back to shards below.
         var graphEnriched = false;
         try
         {

@@ -120,7 +120,7 @@ const SceneFullscreen = ({ character, cardId, projectId, showToolbar = true, sho
           )}
         </AnimatePresence>
 
-        {/* Fullscreen chat mode — overlays the scene */}
+        {/* Fullscreen chat mode - overlays the scene */}
         <AnimatePresence>
           {showChat && user && chatOpen && chatMode === 'fullscreen' && (
             <div className="absolute inset-0 z-20">
@@ -182,7 +182,7 @@ const SceneFullscreen = ({ character, cardId, projectId, showToolbar = true, sho
               gap: 0,
             }}
           >
-            {/* Floating chat panel — renders above the button */}
+            {/* Floating chat panel - renders above the button */}
             <AnimatePresence>
               {chatOpen && chatMode === 'floating' && (
                 <div style={{ marginBottom: 8 }}>
@@ -217,7 +217,7 @@ const SceneFullscreen = ({ character, cardId, projectId, showToolbar = true, sho
         )}
       </div>
 
-      {/* Sidebar chat mode — docked to the right */}
+      {/* Sidebar chat mode - docked to the right */}
       <AnimatePresence>
         {showChat && user && chatOpen && chatMode === 'sidebar' && (
           <SceneChat

@@ -7,7 +7,7 @@ namespace Inktide.API.Synapse.Infrastructure.Providers;
 /// Resolves the correct <see cref="IChatServiceFactory"/> for a given provider ID.
 ///
 /// Factories are ranked by <see cref="IChatServiceFactory.Priority"/> (descending) at construction
-/// time so resolution is a simple linear scan — O(n) where n is the number of registered factories,
+/// time so resolution is a simple linear scan - O(n) where n is the number of registered factories,
 /// which is always tiny.
 ///
 /// Lifetime: Singleton. The sorted list is built once at startup.
@@ -46,7 +46,7 @@ internal sealed class ChatServiceFactoryRegistry
     }
 
     /// <summary>
-    /// Creates an <see cref="IChatCompletionService"/> directly — convenience wrapper
+    /// Creates an <see cref="IChatCompletionService"/> directly - convenience wrapper
     /// around <see cref="Resolve"/> + <see cref="IChatServiceFactory.Create"/>.
     /// </summary>
     public IChatCompletionService CreateService(

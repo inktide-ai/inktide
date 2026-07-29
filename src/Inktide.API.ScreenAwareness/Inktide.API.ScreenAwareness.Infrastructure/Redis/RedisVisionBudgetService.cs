@@ -35,7 +35,7 @@ public sealed class RedisVisionBudgetService : IVisionBudgetService
 
         if (newCount == 1)
         {
-            // First increment this hour — set expiry to top of next UTC hour + 5 min buffer.
+            // First increment this hour - set expiry to top of next UTC hour + 5 min buffer.
             var now    = DateTimeOffset.UtcNow;
             var expiry = new DateTimeOffset(now.Year, now.Month, now.Day, now.Hour, 0, 0, TimeSpan.Zero)
                              .AddHours(1)

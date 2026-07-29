@@ -66,11 +66,11 @@ internal sealed class SynapseAggregationService : ISynapseAggregationService
         var cardCtx = context.Get<AiCardContext>();
         if (cardCtx is null) return null;
 
-        // Intentionally excluded from envelope — pipeline-internal, not consumed by the LLM worker:
-        //   EmotionDynamics        → consumed by EmotionScatterShard / RedisEmotionalStateService
-        //   EmotionIntensityScale  → applied to EmotionalState.Intensity inside LlmStreamWorker
-        //   ProjectId / ActiveRunPreset* → diagnostics only, no downstream consumer
-        //   ScreenAwarenessEnabled → resolved events travel as ScreenContext shard output
+        // Intentionally excluded from envelope - pipeline-internal, not consumed by the LLM worker:
+        //   EmotionDynamics        -> consumed by EmotionScatterShard / RedisEmotionalStateService
+        //   EmotionIntensityScale  -> applied to EmotionalState.Intensity inside LlmStreamWorker
+        //   ProjectId / ActiveRunPreset* -> diagnostics only, no downstream consumer
+        //   ScreenAwarenessEnabled -> resolved events travel as ScreenContext shard output
         const int maxPreview = 2000;
         var preview = context.Message.Text is { Length: > maxPreview } t
             ? t[..maxPreview] + "…"

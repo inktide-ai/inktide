@@ -17,7 +17,7 @@ public sealed class MarketplaceExceptionFilter : IExceptionFilter
             ConnectorUnavailableException or
             InvalidConnectorSlugException  => new BadRequestObjectResult(
                 new { error = context.Exception.Message }),
-            _                              => null, // unhandled exceptions bubble to global 500 handler — intentional
+            _                              => null, // unhandled exceptions bubble to global 500 handler - intentional
         };
 
         if (context.Result is not null)

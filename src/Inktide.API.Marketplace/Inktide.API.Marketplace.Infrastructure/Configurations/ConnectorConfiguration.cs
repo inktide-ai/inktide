@@ -41,7 +41,7 @@ public sealed class ConnectorConfiguration : IEntityTypeConfiguration<Connector>
             .HasDatabaseName("idx_connectors_category");
 
         // FK relationship is defined in ConnectorInstallationConfiguration (the owning side).
-        // Defining it here too would create a hidden ordering dependency — removed.
+        // Defining it here too would create a hidden ordering dependency - removed.
 
         b.HasData(
             Connector.Create(DiscordId,  "discord",  "Discord",  "Route guild messages to your AI character in real-time.",          "Route guild messages to your AI character",    "Chat",   "/icons/connectors/discord.svg",  true,  true,  "oauth",   "Inktide", null,                        1),

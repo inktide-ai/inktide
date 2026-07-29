@@ -281,7 +281,7 @@ export function buildAnimationMachine(transitions: AnimationTransition[]) {
             actions: ['clearRequestedEmotion', 'beginTransitionToIdle'],
           },
 
-          // Clip near end → cross-fade back to idle (or queued emotion)
+          // Clip near end -> cross-fade back to idle (or queued emotion)
           TRANSITION_COMPLETE: [
             {
               guard: 'hasQueuedEmotion',

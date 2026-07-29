@@ -7,7 +7,7 @@ namespace Inktide.API.Core.Ordering;
 /// <summary>
 ///     Fractional indexing algorithm for generating lexicographically sortable order keys.
 ///     Spec-compatible with rocicorp/fractional-indexing (CC0). Base-62: 0-9 A-Z a-z.
-///     Zero-copy spans, stackalloc-first, ArrayPool fallback, O(1) char→digit lookup.
+///     Zero-copy spans, stackalloc-first, ArrayPool fallback, O(1) char->digit lookup.
 /// </summary>
 public static class FractionalIndexer
 {
@@ -24,7 +24,7 @@ public static class FractionalIndexer
     private const int StackBufferSize = 256;
     private const int IntScratchSize = 64;
 
-    // 128-byte ASCII → base62 digit lookup table (RVA data — no heap allocation).
+    // 128-byte ASCII -> base62 digit lookup table (RVA data - no heap allocation).
     private static ReadOnlySpan<byte> DigitTable =>
     [
         Invalid, Invalid, Invalid, Invalid, Invalid, Invalid, Invalid, Invalid,
@@ -47,7 +47,7 @@ public static class FractionalIndexer
 
     /// <summary>
     ///     Generates a single order key strictly between <paramref name="a" /> and <paramref name="b" />.
-    ///     Pass null for an open lower or upper bound. Both null → returns "a0".
+    ///     Pass null for an open lower or upper bound. Both null -> returns "a0".
     /// </summary>
     public static string GenerateKeyBetween(string? a, string? b)
     {

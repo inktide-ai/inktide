@@ -30,7 +30,7 @@ export function validateProviderUrl(raw: string): string | null {
 }
 
 export async function pingOllama(baseUrl: string): Promise<string | null> {
-  // Ollama intentionally runs on localhost — no SSRF guard here.
+  // Ollama intentionally runs on localhost - no SSRF guard here.
   try {
     const url = baseUrl.replace(/\/v1\/?$/, '').replace(/\/$/, '')
     const res = await fetch(`${url}/api/tags`, { signal: AbortSignal.timeout(4000) })

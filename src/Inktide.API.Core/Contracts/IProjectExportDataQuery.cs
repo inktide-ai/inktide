@@ -24,7 +24,7 @@ public sealed record SoulExportSnapshot(
     string PersonalityConfigJson,
     IReadOnlyList<ConnectorExportRecord> Connectors);
 
-/// <summary>Channel metadata included in export — no tokens, no secrets.</summary>
+/// <summary>Channel metadata included in export - no tokens, no secrets.</summary>
 public sealed record ConnectorExportRecord(
     string LocalId,
     string Platform,

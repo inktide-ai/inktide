@@ -5,7 +5,7 @@ namespace Inktide.API.Connector.Twitch.Gateway;
 
 /// <summary>
 /// Maps a raw TwitchLib message event to the unified <see cref="ChatMessage"/> model.
-/// Mirrors <c>DiscordMessageMapper</c> — keeps mapping logic separate from routing logic.
+/// Mirrors <c>DiscordMessageMapper</c> - keeps mapping logic separate from routing logic.
 /// </summary>
 internal sealed class TwitchMessageMapper : ITwitchMessageMapper
 {

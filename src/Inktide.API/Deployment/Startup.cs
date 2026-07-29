@@ -23,9 +23,9 @@ namespace Inktide.API.Deployment;
 /// <remarks>
 /// <para><b>DI Architecture (DryIoc vs MS DI):</b></para>
 /// <list type="bullet">
-///   <item><b>DryIoc</b> — primary container used as the app's service provider (via DryIocServiceProviderFactory).
+///   <item><b>DryIoc</b> - primary container used as the app's service provider (via DryIocServiceProviderFactory).
 ///   Hosts App, ILogger&lt;T&gt;, IServiceRegistrator implementations, modules dictionary, and custom registrations.</item>
-///   <item><b>MS DI (IServiceCollection)</b> — used for ASP.NET Core built-in services (Authentication, Authorization,
+///   <item><b>MS DI (IServiceCollection)</b> - used for ASP.NET Core built-in services (Authentication, Authorization,
 ///   MVC, Configuration). Registrations are populated into DryIoc when the host starts.</item>
 /// </list>
 /// </remarks>
@@ -149,7 +149,7 @@ public static class Startup
                     startup.ConfigureServices(ctx, services);
                 }
 
-                // Single MassTransit bus — aggregates all module consumer + outbox registrations.
+                // Single MassTransit bus - aggregates all module consumer + outbox registrations.
                 var busConfigurators = startups.OfType<IBusModuleConfigurator>().ToList();
                 if (busConfigurators.Count > 0)
                 {

@@ -1,5 +1,5 @@
 /**
- * Format a number into a compact string: 1500 → "1.5K", 2000000 → "2.0M"
+ * Format a number into a compact string: 1500 -> "1.5K", 2000000 -> "2.0M"
  */
 export function formatApiCalls(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`

@@ -1,6 +1,6 @@
 namespace Inktide.API.Soul.Application.ActivityFeed;
 
-/// <summary>Template key → (emoji, renderedCopy) map. Used by handlers to produce feed text at write-time.</summary>
+/// <summary>Template key -> (emoji, renderedCopy) map. Used by handlers to produce feed text at write-time.</summary>
 public static class ActivityCopyTemplates
 {
     private static readonly IReadOnlyDictionary<string, (string Emoji, string Copy)> Map =

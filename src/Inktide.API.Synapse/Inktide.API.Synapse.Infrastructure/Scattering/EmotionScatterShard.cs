@@ -14,7 +14,7 @@ namespace Inktide.API.Synapse.Infrastructure.Scattering;
 /// idle thresholds driven by current arousal and energy.
 ///
 /// SRP: classification + state update only.
-/// OCP: registered via <see cref="IPipelineStage"/> — removing this feature = delete file + DI.
+/// OCP: registered via <see cref="IPipelineStage"/> - removing this feature = delete file + DI.
 /// </summary>
 internal sealed class EmotionScatterShard : IPipelineStage
 {
@@ -61,7 +61,7 @@ internal sealed class EmotionScatterShard : IPipelineStage
             return;
         }
 
-        // Autonomous idle messages skip emotion classification — they carry their own directive
+        // Autonomous idle messages skip emotion classification - they carry their own directive
         if (context.Message.Text == SynapseConstants.AutonomousIdleTrigger)
         {
             var existing = await _emotionalState.GetAsync(cardCtx.CharacterId, cancellationToken);

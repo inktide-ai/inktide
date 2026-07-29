@@ -72,7 +72,7 @@ public sealed class RobokassaWebhookProcessor : IWebhookProcessor
 
         var expected = RobokassaSignature.ComputeMd5Hex($"{outSum}:{invId}:{_settings.Password2}:{shpPart}");
 
-        // Constant-time comparison — expected is always uppercase (ComputeMd5Hex), normalize sig to match.
+        // Constant-time comparison - expected is always uppercase (ComputeMd5Hex), normalize sig to match.
         var normalizedSig = sig.ToUpperInvariant();
         if (normalizedSig.Length != expected.Length ||
             !CryptographicOperations.FixedTimeEquals(

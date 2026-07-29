@@ -35,7 +35,7 @@ public sealed class LlmStreamSettings
 
     /// <summary>
     /// Maximum number of LLM requests processed concurrently by this worker instance.
-    /// Default 1 (serial) is safe for single-tenant dev; raise to 3–5 for production
+    /// Default 1 (serial) is safe for single-tenant dev; raise to 3-5 for production
     /// with a fast LLM provider. Higher values increase throughput at the cost of
     /// proportionally higher LLM API spend and memory.
     /// </summary>

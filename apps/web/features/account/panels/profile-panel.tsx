@@ -87,7 +87,7 @@ export default function ProfilePanel() {
       if (profile) await updateKcProfile({ ...profile, firstName: name, lastName: '' })
       setNickname(name.slice(0, 64))
     } catch {
-      /* silently ignore — local nickname still updates */
+      /* silently ignore - local nickname still updates */
       setNickname(name.slice(0, 64))
     } finally {
       setNameSaving(false)

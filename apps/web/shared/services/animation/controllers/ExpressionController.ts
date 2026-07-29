@@ -2,7 +2,7 @@ import type { VRM } from '@pixiv/three-vrm'
 import { MathUtils } from 'three'
 import type { IVrmController, VrmAnimationContext, VrmControllerSetup } from '@/shared/types/IVrmController'
 
-// Только face expressions. Mouth expressions (aa/ih/ou/ee/oh) и blink — чужая ответственность.
+// Только face expressions. Mouth expressions (aa/ih/ou/ee/oh) и blink - чужая ответственность.
 const MANAGED_EXPRESSIONS = [
   'happy', 
   'sad', 
@@ -44,7 +44,7 @@ export class ExpressionController implements IVrmController {
     const mapped = ctx.emotion.emotion
       ? EMOTION_EXPRESSION_MAP[ctx.emotion.emotion]
       : undefined
-    // Unknown emotions silently fall back to neutral — no warn spam in production
+    // Unknown emotions silently fall back to neutral - no warn spam in production
     const targetExpr = mapped ?? null
 
     const targetIntensity = ctx.emotion.intensity

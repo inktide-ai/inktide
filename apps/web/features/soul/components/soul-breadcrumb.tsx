@@ -35,7 +35,7 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
     <TooltipProvider delayDuration={400} skipDelayDuration={200}>
       <div className="relative flex h-14 items-center border-b border-[var(--border-divider)] bg-[var(--bg-0)] px-4">
 
-        {/* Left — soul name + star */}
+        {/* Left - soul name + star */}
         <div className="flex shrink-0 items-center gap-1.5">
           <span className="text-body font-medium text-[var(--text-primary)]">{soulName}</span>
           <Tooltip>
@@ -55,7 +55,7 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
           </Tooltip>
         </div>
 
-        {/* Center — breadcrumb path (absolute) */}
+        {/* Center - breadcrumb path (absolute) */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
           <span className="text-body font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] hover:underline cursor-pointer">
             {t('soulTopbar.souls')}
@@ -66,7 +66,7 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
           <span className="text-body font-medium text-[var(--text-primary)]">{soulName}</span>
         </div>
 
-        {/* Right — status + actions */}
+        {/* Right - status + actions */}
         <div className="ml-auto flex items-center gap-1 pr-0">
           <span
             className={`mr-1 rounded-full px-2 py-0.5 text-xs font-medium ${online ? 'bg-[var(--success-bg)] text-[var(--success-text)]' : 'bg-[var(--surface-2)] text-[var(--text-secondary)]'}`}
@@ -135,7 +135,7 @@ export function SoulBreadcrumb({ soulName, online }: SoulBreadcrumbProps) {
             </DropdownMenuPortal>
           </DropdownMenu>
 
-          {/* Three dots menu — like Vercel's right-side action */}
+          {/* Three dots menu - like Vercel's right-side action */}
           <Tooltip>
             <TooltipTrigger asChild>
               <button type="button" className={iconBtnClass} aria-label={t('soulTopbar.moreActions')}>

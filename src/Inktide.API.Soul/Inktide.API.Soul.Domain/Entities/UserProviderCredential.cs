@@ -1,7 +1,7 @@
 namespace Inktide.API.Soul.Domain.Entities;
 
 /// <summary>
-/// Per-user LLM/TTS provider credential — BYOK (Bring Your Own Key).
+/// Per-user LLM/TTS provider credential - BYOK (Bring Your Own Key).
 /// One row per (user_id, provider_id) pair. The API key is encrypted at the application layer.
 /// </summary>
 public sealed class UserProviderCredential
@@ -36,7 +36,7 @@ public sealed class UserProviderCredential
         set => _providerId = value;
     }
 
-    /// <summary>Encrypted at application layer — null for key-less providers (e.g. Ollama).</summary>
+    /// <summary>Encrypted at application layer - null for key-less providers (e.g. Ollama).</summary>
     public string? ApiKeyEnc
     {
         get => _apiKeyEnc;

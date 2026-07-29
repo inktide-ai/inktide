@@ -5,7 +5,7 @@ import { z } from 'zod'
  * These mirror the C# typed DTOs (AiCardLlmConfigDto, etc.) and prevent
  * silent nulls when the backend schema drifts or a field is renamed.
  *
- * All schemas use .default() so parse() never throws on missing fields —
+ * All schemas use .default() so parse() never throws on missing fields -
  * falling back to sensible defaults instead of crashing the mapper.
  */
 

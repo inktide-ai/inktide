@@ -9,7 +9,7 @@ public sealed class InktideChatSendRequest
     [Required]
     public string ChannelId { get; set; } = string.Empty;
 
-    /// <summary>Message text — 1 to 2 000 characters.</summary>
+    /// <summary>Message text - 1 to 2 000 characters.</summary>
     [Required]
     [StringLength(2000, MinimumLength = 1)]
     public string Text { get; set; } = string.Empty;

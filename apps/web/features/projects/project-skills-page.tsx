@@ -224,7 +224,7 @@ export default function ProjectSkillsPage() {
         </header>
 
         <section>
-          {/* section label row — above the card */}
+          {/* section label row - above the card */}
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <FileText size={14} className="text-[var(--text-tertiary)]" />

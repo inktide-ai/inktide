@@ -2,7 +2,7 @@ namespace Inktide.API.TTS.Application.Configuration;
 
 /// <summary>
 /// Settings for consuming LLM text responses from the <c>synapse.llm.response</c> Redis stream.
-/// The TTS bounded context owns this consumer — it reads completed LLM responses and drives audio synthesis.
+/// The TTS bounded context owns this consumer - it reads completed LLM responses and drives audio synthesis.
 /// </summary>
 public sealed class LlmResponseStreamSettings
 {

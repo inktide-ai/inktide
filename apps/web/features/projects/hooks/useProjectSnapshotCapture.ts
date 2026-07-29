@@ -57,7 +57,7 @@ function compositeViaWorkerBitmaps(
       reject(e)
     }
 
-    // No transfer array — structured clone keeps bitmapRef.current alive in main thread.
+    // No transfer array - structured clone keeps bitmapRef.current alive in main thread.
     // The worker closes its copies in the finally block.
     worker.postMessage({ avatar, scene, width: avatar.width, height: avatar.height })
   })
@@ -138,8 +138,8 @@ export function useProjectSnapshotCapture({ projectId, sceneUrl, captureImmediat
     return () => document.removeEventListener('visibilitychange', handler)
   }, [])
 
-  // Called by VrmRenderer.onFirstRender — every SNAPSHOT_INTERVAL_MS (30s) and immediately
-  // on first render. Canvas is valid in this RAF frame — safe to createImageBitmap.
+  // Called by VrmRenderer.onFirstRender - every SNAPSHOT_INTERVAL_MS (30s) and immediately
+  // on first render. Canvas is valid in this RAF frame - safe to createImageBitmap.
   // ImageBitmap is an independent heap object; survives VrmRenderer disposal.
   return useCallback((canvas: HTMLCanvasElement) => {
     canvasRef.current = canvas

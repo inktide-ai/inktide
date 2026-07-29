@@ -1,21 +1,21 @@
 // End-to-end chat pipeline over the real user surface:
-//   inject message → Redis synapse.ingest → LlmStreamWorker → SignalR events
+//   inject message -> Redis synapse.ingest -> LlmStreamWorker -> SignalR events
 //
 // Closed model (constant-vus) by design: each VU runs full sessions and waits
 // for the pipeline to answer before sending the next message. An open model
 // would pile unbounded work onto the GPU-bound LLM queue and measure queue
 // explosion, not capacity.
 //
-// One iteration = one session: connect → JoinChannel → N message exchanges →
+// One iteration = one session: connect -> JoinChannel -> N message exchanges ->
 // close. k6's event loop must drain before an iteration ends, so a WS
-// connection cannot outlive its iteration — sessions, not single messages,
+// connection cannot outlive its iteration - sessions, not single messages,
 // keep the connect overhead amortized and realistic.
 //
 // Each VU has its own channel ({cardId}:{userId}); one in-flight message per
 // channel means no correlation-id plumbing is needed.
 //
 // CI mode: with CHAT_CARD_ID unset the scenario degrades to a connect +
-// JoinChannel handshake check — validates auth, WS upgrade and hub protocol
+// JoinChannel handshake check - validates auth, WS upgrade and hub protocol
 // without needing LLM/TTS workers.
 
 import { b64decode } from 'k6/encoding';
@@ -83,7 +83,7 @@ function runExchange(hub, channelId) {
       if (payload && payload.isLast) finish(false);
     });
 
-    // Handlers armed — inject.
+    // Handlers armed - inject.
     sendChatMessage(channelId, `Answer briefly: what does the tide carry? (${t0})`)
       .then((r) => {
         if (!r.ok) {

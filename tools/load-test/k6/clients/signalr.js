@@ -4,14 +4,14 @@
 // without the negotiate handshake.
 //
 // Protocol messages handled:
-//   handshake  {protocol:'json',version:1} → first reply frame {} (or {error})
-//   type 1     invocation (client→server invoke / server→client event)
+//   handshake  {protocol:'json',version:1} -> first reply frame {} (or {error})
+//   type 1     invocation (client->server invoke / server->client event)
 //   type 3     completion (matched to pending invokes by invocationId)
-//   type 6     ping (we answer and also ping proactively — the server's
+//   type 6     ping (we answer and also ping proactively - the server's
 //              default client timeout is 30s; soak runs die without this)
 //   type 7     close
 //
-// This is the single import site for k6's websockets module — if the import
+// This is the single import site for k6's websockets module - if the import
 // path ever moves again, only this file changes.
 
 import { WebSocket } from 'k6/websockets';
@@ -65,7 +65,7 @@ class SignalRClient {
 
   _dispatch(msg) {
     switch (msg.type) {
-      case 1: { // server → client event
+      case 1: { // server -> client event
         const h = this.handlers[msg.target];
         if (h) h.apply(null, msg.arguments || []);
         break;
@@ -78,7 +78,7 @@ class SignalRClient {
         }
         break;
       }
-      case 6: // server ping — reply to be safe with server-side timeouts
+      case 6: // server ping - reply to be safe with server-side timeouts
         this.ws.send(JSON.stringify({ type: 6 }) + SEP);
         break;
       case 7: // server-initiated close

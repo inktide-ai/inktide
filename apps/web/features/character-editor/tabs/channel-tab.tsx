@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   getCard,
   type ChannelResponse,
-} from '@/features/soul/api/index' // fsd:cross-feature-ok — soul editor
+} from '@/features/soul/api/index' // fsd:cross-feature-ok - soul editor
 import { ApiError } from '@/api/client'
 import type { AiCharacter } from '@/shared/lib/character'
 
@@ -186,7 +186,7 @@ const ChannelTab = ({ character }: ChannelTabProps) => {
                   </div>
                 </div>
 
-                {/* right: configure button — z-10 to sit above the overlay */}
+                {/* right: configure button - z-10 to sit above the overlay */}
                 <a
                   href={href}
                   onClick={e => { e.preventDefault(); router.push(href) }}
@@ -196,7 +196,7 @@ const ChannelTab = ({ character }: ChannelTabProps) => {
                 </a>
               </div>
 
-              {/* invisible overlay — whole-card click target */}
+              {/* invisible overlay - whole-card click target */}
               <span
                 role="button"
                 tabIndex={0}

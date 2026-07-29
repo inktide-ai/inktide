@@ -80,7 +80,7 @@ export default function GlbRenderer({
     dir.position.set(1, 2, 3)
     scene.add(dir)
 
-    // Load model independently — will be added to scene once renderer is ready
+    // Load model independently - will be added to scene once renderer is ready
     const loader = new GLTFLoader()
     let modelReady = false
 
@@ -121,7 +121,7 @@ export default function GlbRenderer({
         if (!w || !h) continue
 
         if (!initialized) {
-          // First time we have real dimensions — create renderer
+          // First time we have real dimensions - create renderer
           renderer = new THREE.WebGLRenderer({ antialias: true, alpha: background === 'transparent' })
           renderer.setPixelRatio(window.devicePixelRatio)
           renderer.setSize(w, h)
@@ -144,7 +144,7 @@ export default function GlbRenderer({
           initialized = true
           if (modelReady) startLoop()
         } else {
-          // Container resized — update renderer and camera
+          // Container resized - update renderer and camera
           renderer?.setSize(w, h)
           if (camera) {
             camera.aspect = w / h

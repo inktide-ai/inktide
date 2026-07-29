@@ -25,9 +25,9 @@ export interface UseAudioStreamOptions {
 }
 
 export interface UseAudioStreamResult {
-  /** Stable getter — read current emotion state each animation frame. */
+  /** Stable getter - read current emotion state each animation frame. */
   getEmotionState: () => EmotionState
-  /** Stable getter — read current SoulState each animation frame. Null until first audio event. */
+  /** Stable getter - read current SoulState each animation frame. Null until first audio event. */
   getSoulState: () => SoulState | null
 }
 

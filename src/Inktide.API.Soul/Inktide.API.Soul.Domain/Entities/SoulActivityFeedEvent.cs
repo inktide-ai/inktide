@@ -15,7 +15,7 @@ public sealed class SoulActivityFeedEvent
 
     public string Emoji { get; init; } = string.Empty;
 
-    /// <summary>Raw values for analytics — never included in public API responses.</summary>
+    /// <summary>Raw values for analytics - never included in public API responses.</summary>
     public string? MetadataJson { get; init; }
 
     public DateTime OccurredAt { get; init; }

@@ -82,7 +82,7 @@ export async function putCardSceneMetadata(
 }
 
 // uploadCardSceneFile перенесён в services/upload/CardSceneUploader.ts + PresignedUploadService.ts
-// OCP: паттерн presign→PUT→complete написан один раз, не дублируется здесь
+// OCP: паттерн presign->PUT->complete написан один раз, не дублируется здесь
 
 export async function deleteCardScene(cardId: string, sceneId: string): Promise<void> {
   const res = await apiFetch(`/api/v1/souls/cards/${cardId}/scenes/${sceneId}`, { method: 'DELETE' })

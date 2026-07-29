@@ -92,7 +92,7 @@ public sealed class RedisStreamPublisherWorker : BackgroundService
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
-            // host is shutting down — ConsumeAllAsync threw on iterator teardown, not an error
+            // host is shutting down - ConsumeAllAsync threw on iterator teardown, not an error
         }
 
         _logger.LogInformation(

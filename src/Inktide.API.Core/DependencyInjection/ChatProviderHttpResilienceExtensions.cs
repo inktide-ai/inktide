@@ -21,8 +21,8 @@ public static class ChatProviderHttpResilienceExtensions
         ArgumentNullException.ThrowIfNull(builder);
 
         // Circuit breaker sits inside the retry so that a broken circuit surfaces as
-        // BrokenCircuitException — which the retry does NOT retry — instead of a slow
-        // waterfall of 3 × timeout attempts.
+        // BrokenCircuitException - which the retry does NOT retry - instead of a slow
+        // waterfall of 3 x timeout attempts.
         var circuitBreaker = HttpPolicyExtensions
             .HandleTransientHttpError()
             .CircuitBreakerAsync(

@@ -1,9 +1,9 @@
 /**
- * Live2D renderer — requires Cubism Web SDK (proprietary).
+ * Live2D renderer - requires Cubism Web SDK (proprietary).
  *
  * Setup:
  *   1. Download Live2D Cubism SDK for Web: https://www.live2d.com/en/sdk/download/web/
- *   2. Copy CubismSdkForWeb/Core/live2dcubismcore.min.js → public/live2d/core.js
+ *   2. Copy CubismSdkForWeb/Core/live2dcubismcore.min.js -> public/live2d/core.js
  *   3. Add to index.html: <script src="/live2d/core.js"></script>
  *   4. npm install pixi.js pixi-live2d-display
  *   5. Replace this placeholder with the actual renderer.

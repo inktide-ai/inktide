@@ -8,7 +8,7 @@ namespace Inktide.API.Soul.Infrastructure.Security;
 /// <summary>
 /// Encrypts the Data Protection key ring XML with AES-256-CBC using a master key
 /// supplied via configuration. Ensures the key ring stored in the DB is not readable
-/// without the master key — so a DB-only breach does not expose the encryption keys.
+/// without the master key - so a DB-only breach does not expose the encryption keys.
 /// </summary>
 public sealed class MasterKeyXmlEncryptor : IXmlEncryptor
 {
@@ -45,7 +45,7 @@ public sealed class MasterKeyXmlEncryptor : IXmlEncryptor
     }
 }
 
-/// <summary>Counterpart to <see cref="MasterKeyXmlEncryptor"/> — registered in DI for runtime key decryption.</summary>
+/// <summary>Counterpart to <see cref="MasterKeyXmlEncryptor"/> - registered in DI for runtime key decryption.</summary>
 public sealed class MasterKeyXmlDecryptor : IXmlDecryptor
 {
     private readonly byte[] _masterKey;

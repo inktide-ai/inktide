@@ -1,7 +1,7 @@
 # Local override for the benchmark run:
-# - Developer module races its own DB migration at startup and kills the host — disabled.
+# - Developer module races its own DB migration at startup and kills the host - disabled.
 # - LlmProviders section is absent from appsettings, so the Kernel has no fallback
-#   "ollama" chat service — registered here against host Ollama.
+#   "ollama" chat service - registered here against host Ollama.
 services:
   dotnet:
     environment:

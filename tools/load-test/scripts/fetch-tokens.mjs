@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Pre-fetches password-grant tokens for the whole pool → data/tokens.json.
+// Pre-fetches password-grant tokens for the whole pool -> data/tokens.json.
 // Done in Node (not k6 setup()) so k6 startup stays fast for large pools and
 // bombardier.sh can reuse the same file.
 //
@@ -20,7 +20,7 @@ if (!env.benchPassword) {
 }
 
 // Against a pre-seeded environment (staging CI) data/users.json isn't on
-// disk — synthesize the canonical bench-user list from USER_POOL_SIZE.
+// disk - synthesize the canonical bench-user list from USER_POOL_SIZE.
 let users;
 if (existsSync(usersPath)) {
   ({ users } = JSON.parse(readFileSync(usersPath, 'utf8')));

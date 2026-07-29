@@ -25,8 +25,8 @@ struct RhubarbMetadata { duration: f64 }
 #[derive(Deserialize)]
 struct RhubarbCue { start: f64, value: String }
 
-/// Default Rhubarb subprocess timeout, aligned with the Inktide ≤4 s end-to-end
-/// latency budget. Rhubarb normally finishes in 100–500 ms; this allows an 8–40×
+/// Default Rhubarb subprocess timeout, aligned with the Inktide <=4 s end-to-end
+/// latency budget. Rhubarb normally finishes in 100-500 ms; this allows an 8-40x
 /// margin before the process is killed. Used by [`RhubarbAnalyzer::from_path`] and
 /// [`LipSyncAnalyzer::rhubarb`].
 pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(4);
@@ -81,7 +81,7 @@ impl RhubarbAnalyzer {
             .spawn()
             .map_err(LipSyncError::Io)?;
 
-        // Drain pipes on background threads — without this, a large JSON output
+        // Drain pipes on background threads - without this, a large JSON output
         // can fill the OS pipe buffer while we're blocked in wait(), deadlocking both sides.
         let stdout_t = child.stdout.take().map(|out| {
             std::thread::spawn(move || {

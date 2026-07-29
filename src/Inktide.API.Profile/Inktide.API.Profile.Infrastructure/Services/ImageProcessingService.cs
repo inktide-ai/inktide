@@ -23,7 +23,7 @@ public sealed class ImageProcessingService : IImageProcessingService
 
         using (image)
         {
-            // Center-crop to square then resize to AvatarSize×AvatarSize
+            // Center-crop to square then resize to AvatarSizexAvatarSize
             var size = Math.Min(image.Width, image.Height);
             image.Mutate(x => x
                 .Crop(new Rectangle((image.Width - size) / 2, (image.Height - size) / 2, size, size))

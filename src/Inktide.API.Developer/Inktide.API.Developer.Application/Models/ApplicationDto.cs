@@ -16,7 +16,7 @@ public sealed record ApplicationDto(
     string? ConnectorSlug,
     DateTime CreatedAt)
 {
-    // Only populated on create / rotate-secret — never stored, never re-fetched
+    // Only populated on create / rotate-secret - never stored, never re-fetched
     public string? ClientSecret { get; init; }
 
     public static ApplicationDto From(DeveloperApplication app, string? plainSecret = null) => new(

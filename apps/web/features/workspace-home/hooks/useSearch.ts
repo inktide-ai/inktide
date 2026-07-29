@@ -103,7 +103,7 @@ export function useSearch() {
     }
   }, [isOpen, results, activeIndex, navigate, close])
 
-  // ⌘K / Ctrl+K — focus search
+  // CmdK / Ctrl+K - focus search
   useShortcut('$mod+k', () => {
     inputRef.current?.focus()
     inputRef.current?.select()

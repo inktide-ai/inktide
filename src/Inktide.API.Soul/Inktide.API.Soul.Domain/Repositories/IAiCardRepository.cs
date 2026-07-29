@@ -39,7 +39,7 @@ public interface IAiCardRepository
     /// <summary>Updates sort_key for each entry in the list. Only rows owned by <paramref name="userId"/> are updated.</summary>
     Task BulkUpdateSortKeysAsync(Guid userId, IReadOnlyList<(Guid Id, string SortKey)> updates, DateTime updatedAt, CancellationToken ct = default);
 
-    /// <summary>Targeted single-column update — avoids tracking the full entity graph.</summary>
+    /// <summary>Targeted single-column update - avoids tracking the full entity graph.</summary>
     Task SetAvatarUrlAsync(Guid cardId, string? avatarUrl, DateTime updatedAt, CancellationToken ct = default);
 
     /// <summary>Targeted single-column update for the banner image URL.</summary>

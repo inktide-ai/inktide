@@ -15,7 +15,7 @@ public interface IBusModuleConfigurator
     /// <summary>
     /// Configures receive endpoints (queue names, retry policies, consumer wiring).
     /// Called inside UsingRabbitMq after all consumer registrations are complete.
-    /// Default implementation is a no-op — override only when explicit endpoint config is required.
+    /// Default implementation is a no-op - override only when explicit endpoint config is required.
     /// </summary>
     void ConfigureEndpoints(
         IReceiveConfigurator<IReceiveEndpointConfigurator> cfg,

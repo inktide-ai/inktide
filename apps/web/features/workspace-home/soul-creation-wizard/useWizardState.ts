@@ -60,12 +60,12 @@ type WizardAction =
   | { type: 'CONFIRM_CHANNELS';  channels: string[]; selections: Record<string, StepSelection> }
 
 // IMPORTANT: each case must return the same object reference for fields that
-// didn't change. The persist effects below use reference equality — spreading
+// didn't change. The persist effects below use reference equality - spreading
 // an unchanged field creates a new reference and fires a spurious saveWithTTL.
 function wizardReducer(state: WizardState, action: WizardAction): WizardState {
   switch (action.type) {
     case 'NAVIGATE':
-      // stepSelections / personalityConfig / channelsSelected — same refs, persist won't fire
+      // stepSelections / personalityConfig / channelsSelected - same refs, persist won't fire
       return { ...state, screen: action.to, direction: action.dir }
 
     case 'SELECT_TEMPLATE':
@@ -74,13 +74,13 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         screen: 'steps',
         direction: 1,
         selectedTemplate: action.id,
-        // personalityConfig present only in the true-branch; false-branch returns same ref → persist stays silent
+        // personalityConfig present only in the true-branch; false-branch returns same ref -> persist stays silent
         personalityConfig:     'personalityConfig' in action ? action.personalityConfig : state.personalityConfig,
         personalityConfigured: action.personalityConfigured,
       }
 
     case 'SELECT_PROVIDER':
-      // personalityConfig / channelsSelected — same refs; stepSelections — NEW ref (intentional persist)
+      // personalityConfig / channelsSelected - same refs; stepSelections - NEW ref (intentional persist)
       return {
         ...state,
         screen: 'steps',
@@ -89,19 +89,19 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
       }
 
     case 'SET_PERSONALITY':
-      // stepSelections / channelsSelected — same refs; personalityConfig — NEW ref (intentional persist)
+      // stepSelections / channelsSelected - same refs; personalityConfig - NEW ref (intentional persist)
       return { ...state, personalityConfig: action.config }
 
     case 'OPEN_PERSONALITY':
-      // stepSelections / personalityConfig / channelsSelected — same refs
+      // stepSelections / personalityConfig / channelsSelected - same refs
       return { ...state, personalityOpen: true }
 
     case 'CLOSE_PERSONALITY':
-      // stepSelections / personalityConfig / channelsSelected — same refs
+      // stepSelections / personalityConfig / channelsSelected - same refs
       return { ...state, personalityOpen: false, personalityConfigured: true }
 
     case 'CONFIRM_CHANNELS':
-      // personalityConfig — same ref; channelsSelected / stepSelections — NEW refs (intentional persist)
+      // personalityConfig - same ref; channelsSelected / stepSelections - NEW refs (intentional persist)
       return { ...state, screen: 'steps', direction: -1, channelsSelected: action.channels, stepSelections: action.selections }
 
     default:

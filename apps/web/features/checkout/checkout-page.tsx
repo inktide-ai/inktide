@@ -45,7 +45,7 @@ function CardPaymentPanel({ loading, setLoading }: CardPaymentPanelProps) {
         return_url: window.location.origin + '/home?upgraded=1',
       },
     })
-    // confirmPayment redirects on success — we only reach here on error
+    // confirmPayment redirects on success - we only reach here on error
     if (stripeError) setError(stripeError.message ?? t('error.payment'))
     setLoading(false)
   }
@@ -245,7 +245,7 @@ function CheckoutContent() {
             </>
           )}
 
-          {/* Section 2 — disabled */}
+          {/* Section 2 - disabled */}
           <div className="mt-6 pt-6 pointer-events-none select-none opacity-35 border-t border-[var(--checkout-border)]">
             <p className="text-[13px] font-medium mb-3 text-white">{t('billingAddress')}</p>
             <div className="rounded-xl border border-[var(--checkout-border)] bg-[var(--checkout-surface)] px-4 py-3 text-[13px] text-gray-500">

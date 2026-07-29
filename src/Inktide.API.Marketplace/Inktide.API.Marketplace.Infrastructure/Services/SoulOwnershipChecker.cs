@@ -8,8 +8,8 @@ namespace Inktide.API.Marketplace.Infrastructure.Services;
 /// <summary>
 /// Verifies soul ownership by calling GET /api/soul/cards/{soulId} and checking for 200.
 /// Forwards the caller's Bearer token so Keycloak auth is preserved.
-/// 4xx responses (401, 403, 404) → not owned (returns false).
-/// 5xx responses → Soul API is unavailable; throws so the caller gets 500, not a silent 404.
+/// 4xx responses (401, 403, 404) -> not owned (returns false).
+/// 5xx responses -> Soul API is unavailable; throws so the caller gets 500, not a silent 404.
 /// </summary>
 internal sealed class SoulOwnershipChecker(
     IHttpClientFactory httpClientFactory,
@@ -42,7 +42,7 @@ internal sealed class SoulOwnershipChecker(
                 "Downstream service may be unavailable.");
         }
 
-        // 401, 403, 404 — not owned or token issue; treat as ownership denied
+        // 401, 403, 404 - not owned or token issue; treat as ownership denied
         logger.LogWarning(
             "Soul API returned {StatusCode} during ownership check of soul {SoulId}. Treating as access denied.",
             (int)response.StatusCode, soulId);

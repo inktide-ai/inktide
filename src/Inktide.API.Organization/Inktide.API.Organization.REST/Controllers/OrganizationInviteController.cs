@@ -39,7 +39,7 @@ public sealed class OrganizationInviteController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> SendInvites([FromBody] SendInvitesRequest dto, CancellationToken ct)
     {
-        // Role is validated by SendInvitesRequestValidator — TryParse is guaranteed to succeed here.
+        // Role is validated by SendInvitesRequestValidator - TryParse is guaranteed to succeed here.
         Enum.TryParse<OrganizationRole>(dto.Role, ignoreCase: true, out var role);
         var result = await _service.SendInvitesAsync(GetUserId(), dto.Emails, role, ct);
         return StatusCode(StatusCodes.Status201Created, new SendInvitesResponse

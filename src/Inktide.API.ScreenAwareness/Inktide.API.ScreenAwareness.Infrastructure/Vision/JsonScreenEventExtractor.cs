@@ -32,7 +32,7 @@ public sealed class JsonScreenEventExtractor : IScreenEventExtractor
 
         try
         {
-            // Find first { ... } block in the output — vision models sometimes prefix with prose.
+            // Find first { ... } block in the output - vision models sometimes prefix with prose.
             var start = rawModelOutput.IndexOf('{');
             var end   = rawModelOutput.LastIndexOf('}');
             if (start < 0 || end < 0 || end <= start)

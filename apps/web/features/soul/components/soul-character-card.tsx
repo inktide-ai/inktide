@@ -260,7 +260,7 @@ export function SoulCharacterCard({ character }: SoulCharacterCardProps) {
         </div>
       </div>
 
-      {/* Confirm delete — DialogContent renders via Portal outside this article */}
+      {/* Confirm delete - DialogContent renders via Portal outside this article */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="fixed left-1/2 top-1/2 z-[2001] w-[min(400px,95vw)] -translate-x-1/2 -translate-y-1/2 rounded-[14px] border border-[var(--border-subtle)] bg-[var(--menu-panel-bg)] p-6 shadow-[var(--menu-panel-shadow)] outline-none">
           <DialogTitle className="text-base font-semibold text-[var(--text-primary)]">

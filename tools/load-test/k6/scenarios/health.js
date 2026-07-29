@@ -1,6 +1,6 @@
 // Canary probe: alternates /health/live and /health/ready at a fixed cadence.
 // One request per iteration so the configured arrival rate equals the request
-// rate — the guard math in scripts/preflight.mjs depends on that.
+// rate - the guard math in scripts/preflight.mjs depends on that.
 
 import exec from 'k6/execution';
 import { publicApi } from '../clients/publicApi.js';

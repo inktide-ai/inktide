@@ -58,7 +58,7 @@ public sealed class MemoryIngestionWorker : BackgroundService
             }
             catch (OperationCanceledException) when (!stoppingToken.IsCancellationRequested)
             {
-                // batch window expired — flush whatever we have
+                // batch window expired - flush whatever we have
             }
             catch (OperationCanceledException)
             {

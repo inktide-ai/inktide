@@ -16,14 +16,14 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                 schema: "soul",
                 table: "ai_cards");
 
-            // donkey_engine → auto_pilot (rename only, no data change)
+            // donkey_engine -> auto_pilot (rename only, no data change)
             migrationBuilder.RenameColumn(
                 name: "donkey_engine",
                 schema: "soul",
                 table: "ai_cards",
                 newName: "auto_pilot");
 
-            // behavior → response_behavior (will extract visual fields into appearance below)
+            // behavior -> response_behavior (will extract visual fields into appearance below)
             migrationBuilder.RenameColumn(
                 name: "behavior",
                 schema: "soul",
@@ -49,7 +49,7 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                 );
                 """);
 
-            // Remove visual fields from response_behavior — keep only runtime fields
+            // Remove visual fields from response_behavior - keep only runtime fields
             migrationBuilder.Sql("""
                 UPDATE soul.ai_cards
                 SET response_behavior = response_behavior

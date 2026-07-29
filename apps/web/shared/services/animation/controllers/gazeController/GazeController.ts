@@ -27,12 +27,12 @@ function randomSaccadeInterval(energyScale: number): number {
 /**
  * Gaze controller with SoulState integration:
  *
- *  attention < 0.3 → override to idle saccade regardless of lookAtMode
+ *  attention < 0.3 -> override to idle saccade regardless of lookAtMode
  *    (character's focus drifts when not engaged)
  *
- *  energy < 0.1 → saccade interval ×3 (droopy, barely looking around)
+ *  energy < 0.1 -> saccade interval x3 (droopy, barely looking around)
  *
- *  attention > 0.95 (surprised spike) → saccade interval shrinks to 50ms for 1s
+ *  attention > 0.95 (surprised spike) -> saccade interval shrinks to 50ms for 1s
  *    (eyes dart around quickly on surprise)
  */
 export class GazeController implements IVrmController {
@@ -46,10 +46,10 @@ export class GazeController implements IVrmController {
   private saccadeTimeSinceLast = 0
   private saccadeNextAfter = -1
 
-  // Surprise dart state — after a spike, eyes move rapidly for a brief window
+  // Surprise dart state - after a spike, eyes move rapidly for a brief window
   private surpriseDartRemaining = 0
 
-  // Instance-owned scratch objects — safe for multi-avatar rendering
+  // Instance-owned scratch objects - safe for multi-avatar rendering
   private readonly _raycaster = new THREE.Raycaster()
   private readonly _mouseNdc  = new THREE.Vector2()
   private readonly _cameraDir = new THREE.Vector3()
@@ -110,7 +110,7 @@ export class GazeController implements IVrmController {
   private _updateSaccade(delta: number, energy: number): void {
     this.saccadeTimeSinceLast += delta
 
-    // Energy scale: sleepy = 3× slower saccades; surprise dart = 50ms intervals
+    // Energy scale: sleepy = 3x slower saccades; surprise dart = 50ms intervals
     const energyScale = this.surpriseDartRemaining > 0
       ? 0.05 / 0.4                // ~50ms interval during dart
       : energy < 0.1
@@ -127,7 +127,7 @@ export class GazeController implements IVrmController {
       this.saccadeNextAfter = randomSaccadeInterval(energyScale) / 1000
     }
 
-    // Frame-rate independent lerp — normalised to 60 fps
+    // Frame-rate independent lerp - normalised to 60 fps
     this.lookAtObj.position.lerp(this.saccadeTarget, 1 - Math.pow(0.9, delta * 60))
   }
 

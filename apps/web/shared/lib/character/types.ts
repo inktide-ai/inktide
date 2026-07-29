@@ -6,12 +6,12 @@ export type Visibility = 'private' | 'unlisted' | 'public'
 
 //
 // Компоненты принимают только то, что используют:
-//   BrainTab    → CharacterLlm
-//   VoiceTab    → CharacterTts
-//   BehaviorTab → CharacterBehavior
-//   IdentityCard → CharacterIdentity + CharacterAppearance
-//   MemoryTab   → CharacterMemory
-//   AutoPilot   → CharacterAutoPilot
+//   BrainTab    -> CharacterLlm
+//   VoiceTab    -> CharacterTts
+//   BehaviorTab -> CharacterBehavior
+//   IdentityCard -> CharacterIdentity + CharacterAppearance
+//   MemoryTab   -> CharacterMemory
+//   AutoPilot   -> CharacterAutoPilot
 
 export type ProjectStatus = 'active' | 'paused' | 'archived'
 
@@ -63,11 +63,11 @@ export interface CharacterTts {
   speed: number
   stability: number
   similarityBoost: number
-  /** Style exaggeration 0–1 (ElevenLabs). */
+  /** Style exaggeration 0-1 (ElevenLabs). */
   style: number
   /** Speaker boost toggle (ElevenLabs). */
   useSpeakerBoost: boolean
-  /** Pitch multiplier — stored for UI. */
+  /** Pitch multiplier - stored for UI. */
   pitch: number
   /** Volume multiplier. */
   volume: number
@@ -112,7 +112,7 @@ export interface CharacterAutoPilot {
 }
 
 /**
- * Полный агрегат — для backward compat с существующими компонентами.
+ * Полный агрегат - для backward compat с существующими компонентами.
  * Новые компоненты должны принимать конкретный суб-интерфейс.
  */
 export interface AiCharacter extends CharacterIdentity {
@@ -124,6 +124,6 @@ export interface AiCharacter extends CharacterIdentity {
   autoPilot: CharacterAutoPilot
   /** Structured personality traits and emotional dynamics (distinct from free-text `personality` description). */
   personalityConfig: CharacterPersonality
-  /** Flat list of channel links — managed via Channel tab, not via updateCard. */
+  /** Flat list of channel links - managed via Channel tab, not via updateCard. */
   channels: ChannelResponse[]
 }

@@ -96,7 +96,7 @@ public sealed class TtsSynthesisService : ITtsSynthesisService
 
         Guid? parsedUserId = Guid.TryParse(command.UserId, out var g) ? g : null;
 
-        // Use async resolver: header → per-user credential (Soul DB) → global config → null
+        // Use async resolver: header -> per-user credential (Soul DB) -> global config -> null
         var apiKey = await _apiKeyResolver.ResolveAsync(parsedUserId, provider.Id, cancellationToken);
 
         if (provider.Capabilities.RequiresApiKey && string.IsNullOrWhiteSpace(apiKey))

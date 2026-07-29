@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace Inktide.API.Connector.Infrastructure.DependencyInjection;
 
-/// <summary>Infrastructure startup — messaging pipeline (Redis Streams ingest) and health checks.</summary>
+/// <summary>Infrastructure startup - messaging pipeline (Redis Streams ingest) and health checks.</summary>
 public sealed class SynapseIngestConnectorStartup : IStartup, IBusModuleConfigurator
 {
 

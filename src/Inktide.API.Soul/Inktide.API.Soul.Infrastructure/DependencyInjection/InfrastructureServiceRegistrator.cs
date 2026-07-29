@@ -39,18 +39,18 @@ public sealed class InfrastructureServiceRegistrator : IServiceRegistrator
         registrator.Register<IProjectImportService, ProjectImportService>(Reuse.Scoped);
         registrator.Register<IProjectExportDataQuery, ProjectExportDataQueryService>(Reuse.Scoped);
 
-        // Transaction infrastructure — scoped per request
+        // Transaction infrastructure - scoped per request
         registrator.Register<IDomainEventCollector, DomainEventCollector>(Reuse.Scoped);
         registrator.Register<IDomainEventDispatcher, InMemoryDomainEventDispatcher>(Reuse.Scoped);
         registrator.Register<ITransactionManager, SoulTransactionManager>(Reuse.Scoped);
 
-        // Integration event publisher — singleton, stateless Redis client
+        // Integration event publisher - singleton, stateless Redis client
         registrator.Register<IIntegrationEventPublisher, RedisStreamsIntegrationEventPublisher>(Reuse.Singleton);
 
-        // Synapse gate cache — singleton, Redis key per soul card
+        // Synapse gate cache - singleton, Redis key per soul card
         registrator.Register<IAiCardStatusGateCache, SoulStatusGateRedisCache>(Reuse.Singleton);
 
-        // Connector decoupling adapter — stub while AiCardChannel migrates to Project context
+        // Connector decoupling adapter - stub while AiCardChannel migrates to Project context
         registrator.Register<IConnectorChannelService, ConnectorChannelServiceAdapter>(Reuse.Scoped);
     }
 

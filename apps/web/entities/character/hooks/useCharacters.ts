@@ -15,11 +15,11 @@ export type { SaveStatus } from './characters/useCharacterMutations'
  * который ожидает CharactersContext. Внешний API не изменился.
  *
  * DIP: зависит от SoulCardRepository через ICardRepository интерфейс.
- * OCP-тест: заменить REST→GraphQL = только поменять `new SoulCardRepository()`
+ * OCP-тест: заменить REST->GraphQL = только поменять `new SoulCardRepository()`
  *           ни один из четырёх суб-хуков не трогается.
  */
 export function useCharacters() {
-  // DI через singleton ref — позволяет тестировать, подменяя реализацию
+  // DI через singleton ref - позволяет тестировать, подменяя реализацию
   const repoRef = useRef(new SoulCardRepository())
   const repo = repoRef.current
 
@@ -27,7 +27,7 @@ export function useCharacters() {
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Stable ref to handleSave to avoid circular dep in updateCharacter
   const handleSaveRef = useRef<(id?: string, char?: AiCharacter) => Promise<void>>(() => Promise.resolve())
-  // Always-current map of characters — read at timer fire time for entity-bound save
+  // Always-current map of characters - read at timer fire time for entity-bound save
   const charactersRef = useRef<Map<string, AiCharacter>>(new Map())
 
 
@@ -144,7 +144,7 @@ export function useCharacters() {
       if (actuallyDirty) {
         markDirty()
         // Auto-save: debounce so rapid edits (typing) collapse into one API call.
-        // Capture id at creation time; read latest char state at fire time — decouples save from selectedId.
+        // Capture id at creation time; read latest char state at fire time - decouples save from selectedId.
         if (autoSaveTimerRef.current !== null) clearTimeout(autoSaveTimerRef.current)
         const capturedId = id
         autoSaveTimerRef.current = setTimeout(() => {
@@ -165,7 +165,7 @@ export function useCharacters() {
     await handleSaveCard()
     // Snapshot entries so (a) new registrations mid-save are excluded,
     // (b) already-unregistered plugins are skipped before execution starts.
-    // Note: filter runs before allSettled — it cannot cancel fns already mid-await.
+    // Note: filter runs before allSettled - it cannot cancel fns already mid-await.
     // mountedRef guards the setState calls after allSettled completes.
     const snapshot = [...savePluginsRef.current.entries()]
     const results = await Promise.allSettled(

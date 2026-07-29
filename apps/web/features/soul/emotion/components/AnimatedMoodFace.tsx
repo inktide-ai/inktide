@@ -27,17 +27,17 @@ function getMoodColors(p: CharacterPersonality): {
   return               { bg: 'rgba(167,139,250,0.09)', border: 'rgba(167,139,250,0.18)', stroke: '#8b5cf6' }
 }
 
-// M lx ly Q cx cy rx ry  (quadratic bezier, same structure for all → Framer can interpolate)
+// M lx ly Q cx cy rx ry  (quadratic bezier, same structure for all -> Framer can interpolate)
 
 function getMouthPath(p: CharacterPersonality): string {
   const moodScore: Record<string, number> = {
     happy: 0.9, hyped: 0.65, chill: 0.1, neutral: 0, melancholic: -0.7,
   }
   const mood = moodScore[p.baselineMood] ?? 0
-  const smile = p.warmth * 0.45 + mood * 0.55  // –0.5 → 1
+  const smile = p.warmth * 0.45 + mood * 0.55  // -0.5 -> 1
 
   // Control point: higher y = more smile in SVG (y-down)
-  const cy = 16 + smile * 3.2                   // 12.8 (frown) → 19.2 (big smile)
+  const cy = 16 + smile * 3.2                   // 12.8 (frown) -> 19.2 (big smile)
 
   // Smirk: shift right endpoint up if sarcasm is high
   const smirkShift = p.sarcasm * 2.4
@@ -50,12 +50,12 @@ function getMouthPath(p: CharacterPersonality): string {
 
 function getEyeShape(p: CharacterPersonality) {
   const mood = p.baselineMood
-  // Happy/hyped → squinted (small ry)
+  // Happy/hyped -> squinted (small ry)
   const squint = mood === 'happy' ? 0.8 : mood === 'hyped' ? 0.9 : 1.4
-  // Volatile → wide eyes (large ry)
+  // Volatile -> wide eyes (large ry)
   const wide = 1 + p.emotionVolatility * 0.5
   const ry = squint * wide
-  // Sarcasm → one eye more closed
+  // Sarcasm -> one eye more closed
   return { ry: Math.max(0.6, Math.min(2.2, ry)), sarcasmSquint: p.sarcasm }
 }
 
@@ -90,7 +90,7 @@ export function AnimatedMoodFace({ personality }: AnimatedMoodFaceProps) {
           fill="transparent"
         />
 
-        {/* Right eye — smirk squints this one */}
+        {/* Right eye - smirk squints this one */}
         <motion.ellipse
           cx={16} cy={9}
           rx={1.4}

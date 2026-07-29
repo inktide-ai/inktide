@@ -60,7 +60,7 @@ export const DEFAULT_TRANSITIONS: AnimationTransition[] = [
 
 
 export const DEFAULT_SELF_TRANSITIONS: SelfTransition[] = [
-  // Example — uncomment and supply a clip URL when breathing_idle.vrma is ready:
+  // Example - uncomment and supply a clip URL when breathing_idle.vrma is ready:
   // { nodeId: 'idle', variationClipId: 'breathing_idle', probability: 0.15, crossFadeDuration: 0.3 },
 ]
 

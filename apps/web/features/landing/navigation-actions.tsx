@@ -182,7 +182,7 @@ export default function NavigationActions({
       <AnimatePresence>
         {mobileOpen && (
           <>
-            {/* Backdrop — closes menu on outside click */}
+            {/* Backdrop - closes menu on outside click */}
             <motion.div
               key="backdrop"
               initial={{ opacity: 0 }}

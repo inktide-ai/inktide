@@ -25,7 +25,7 @@ public interface IObjectStorageService
     /// </summary>
     string? GetPreSignedPutUrl(string objectKey, string contentType, TimeSpan expires);
 
-    /// <summary>HEAD object — size and content type. Null if missing or storage disabled.</summary>
+    /// <summary>HEAD object - size and content type. Null if missing or storage disabled.</summary>
     Task<ObjectStorageObjectInfo?> GetObjectInfoAsync(string objectKey, CancellationToken ct = default);
 }
 

@@ -29,7 +29,7 @@ interface VrmRendererProps {
   /** Full renderer settings (camera, lights, model transform, look-at mode). */
   rendererSettings?: SceneRendererSettings
   baselineMood?: string
-  /** Called once after the first rendered frame — canvas contains the composited image. */
+  /** Called once after the first rendered frame - canvas contains the composited image. */
   onFirstRender?: (canvas: HTMLCanvasElement) => void
   /** When set, a secondary render pass uses this portrait camera before onFirstRender fires. */
   captureCamera?: { heightRatio: number; distance: number; fov: number }
@@ -305,7 +305,7 @@ export default function VrmRenderer({
                 firstRenderFired.current = true
                 onFirstRenderRef.current?.(rendererRef.current.domElement)
               }
-              // else: renderer settings not yet applied — skip, retry next frame
+              // else: renderer settings not yet applied - skip, retry next frame
             } else {
               lastSnapshotTime = now
               // Periodic update: current camera view, no portrait pass

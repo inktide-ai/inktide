@@ -9,19 +9,19 @@
 # Пересобрать один:                docker compose up -d --no-deps --build dotnet
 
 # Сервисы и порты:
-#   postgres    5432   — основная БД приложения
-#   redis       6379   — кэш / pub-sub
-#   qdrant      6333   — векторное хранилище (HTTP), 6334 (gRPC)
-#   keycloak    8080   — SSO/OAuth2 (admin/admin)
-#   minio       9000   — S3-хранилище (консоль: 9001)
-#   dotnet      5001   — .NET API (включает LlmStreamWorker)
-#   scribe      8001   — FastAPI факт-экстракция (Qwen via Ollama на хосте :11434)
-#   kokoro      8880   — Kokoro TTS
-#   ngrok       4040   — ngrok inspector (dev profile, туннель → :5001)
-#   prometheus  9090   — метрики нагрузочных прогонов (bench profile)
-#   grafana     3001   — дашборд load-test (bench profile; 3000 занят Next.js)
+#   postgres    5432   - основная БД приложения
+#   redis       6379   - кэш / pub-sub
+#   qdrant      6333   - векторное хранилище (HTTP), 6334 (gRPC)
+#   keycloak    8080   - SSO/OAuth2 (admin/admin)
+#   minio       9000   - S3-хранилище (консоль: 9001)
+#   dotnet      5001   - .NET API (включает LlmStreamWorker)
+#   scribe      8001   - FastAPI факт-экстракция (Qwen via Ollama на хосте :11434)
+#   kokoro      8880   - Kokoro TTS
+#   ngrok       4040   - ngrok inspector (dev profile, туннель -> :5001)
+#   prometheus  9090   - метрики нагрузочных прогонов (bench profile)
+#   grafana     3001   - дашборд load-test (bench profile; 3000 занят Next.js)
 #
-# Ollama запускается нативно на хосте :11434 — не контейнер.
+# Ollama запускается нативно на хосте :11434 - не контейнер.
 
 services:
 
@@ -160,7 +160,7 @@ services:
     volumes:
       - ./keycloak-extensions:/opt/keycloak/providers
     healthcheck:
-      # Quarkus management port (9000) — available in Keycloak 17+ (this image: 25.0.6).
+      # Quarkus management port (9000) - available in Keycloak 17+ (this image: 25.0.6).
       # curl/wget are not present in the UBI-based image, so we use bash /dev/tcp.
       test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/9000' 2>/dev/null"]
       interval: 30s
@@ -213,7 +213,7 @@ services:
 
   mailhog:
     image: mailhog/mailhog:latest
-    profiles: [dev]   # dev only — catches all outgoing emails locally (http://localhost:8025)
+    profiles: [dev]   # dev only - catches all outgoing emails locally (http://localhost:8025)
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -228,7 +228,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"   # Linux compatibility; no-op on Docker Desktop
     ports:
-      - "4040:4040"   # ngrok web inspector — http://localhost:4040
+      - "4040:4040"   # ngrok web inspector - http://localhost:4040
 
 
   rabbitmq:
@@ -245,7 +245,7 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-inktide}
     ports:
       - "5672:5672"
-      - "15672:15672"   # management UI — http://localhost:15672
+      - "15672:15672"   # management UI - http://localhost:15672
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -301,8 +301,8 @@ services:
       - "8880:8880"
     restart: unless-stopped
 
-  # ── Нагрузочное тестирование (bench profile, tools/load-test/) ────────────
-  # Prometheus скрейпит /metrics API (и compose-, и host-вариант — один из
+  # -- Нагрузочное тестирование (bench profile, tools/load-test/) ------------
+  # Prometheus скрейпит /metrics API (и compose-, и host-вариант - один из
   # таргетов всегда down, это ожидаемо) и принимает remote write от k6.
   prometheus:
     image: prom/prometheus:v2.53.0

@@ -1,9 +1,9 @@
 // Reusable assertion helpers. Check names double as documentation in the
-// summary output, so keep them short and stable — dashboards group by them.
+// summary output, so keep them short and stable - dashboards group by them.
 
 import { check } from 'k6';
 
-// expectStatus(res, 200, 'chat providers') / expectStatus(res, [200, 202], …)
+// expectStatus(res, 200, 'chat providers') / expectStatus(res, [200, 202], ...)
 export function expectStatus(res, expected, label) {
   const statuses = Array.isArray(expected) ? expected : [expected];
   return check(res, {

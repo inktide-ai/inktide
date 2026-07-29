@@ -79,7 +79,7 @@ export function ScenesPage() {
     try {
       const preset = await updateRunPreset(cardId, editing.id, { ...body, name: body.name })
       setPresets(prev => prev.map(p => p.id === preset.id ? preset : p))
-      setEditing(null) // close only on success — draft preserved for retry on failure
+      setEditing(null) // close only on success - draft preserved for retry on failure
     } catch {
       setMutationError(t('scenesPage.errorUpdate'))
     }

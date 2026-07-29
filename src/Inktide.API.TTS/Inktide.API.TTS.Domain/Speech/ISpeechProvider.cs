@@ -5,9 +5,9 @@ using Inktide.API.TTS.Domain.Models;
 namespace Inktide.API.TTS.Domain.Speech;
 
 /// <summary>
-/// Speech (TTS) provider port. No transport types — implementations live in Infrastructure.
+/// Speech (TTS) provider port. No transport types - implementations live in Infrastructure.
 /// Optional listing operations are split into <see cref="IVoiceListingProvider"/> and
-/// <see cref="IModelListingProvider"/> — only implemented by providers that support them.
+/// <see cref="IModelListingProvider"/> - only implemented by providers that support them.
 /// </summary>
 public interface ISpeechProvider : IProvider
 {

@@ -10,7 +10,7 @@ namespace Inktide.API.Organization.Infrastructure.RateLimiting;
 public sealed class RedisInviteAttemptTracker : IInviteAttemptTracker
 {
     // Token is SHA256-hashed before persistence to avoid storing raw invite secrets in Redis.
-    // actorId must be canonical internal user identifier — not external identity claim (sub, email).
+    // actorId must be canonical internal user identifier - not external identity claim (sub, email).
     // Using external claims risks split counters across identity provider migrations.
     private static readonly string LuaScript =
         """

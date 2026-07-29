@@ -29,7 +29,7 @@ export function ApiKeyConnectionPanel({ providerName, providerId }: ApiKeyConnec
         if (cred?.hasKey) setStatus(statusFromCredential(cred.verifiedAt, cred.lastError))
       })
       .catch(() => {})
-    // setStatus is a stable useState setter — intentionally omitted from deps
+    // setStatus is a stable useState setter - intentionally omitted from deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [providerId])
 

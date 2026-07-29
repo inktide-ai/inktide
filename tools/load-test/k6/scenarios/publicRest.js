@@ -1,12 +1,12 @@
 // Anonymous catalog traffic under the shared 60 req/min/IP budget.
 // One request per iteration, endpoint picked from a deterministic weighted
-// ring — the mix stays stable regardless of VU scheduling, and arrival rate
+// ring - the mix stays stable regardless of VU scheduling, and arrival rate
 // equals request rate for the preflight budget math.
 //
 // Optional members of the mix (both proxy to live backends):
-//   ttsVoices — joins when TTS_VOICES_PROVIDER is set (needs that provider up)
-//   demoChat  — joins when DEMO_LLM=1 (needs Ollama); 1/10 weight keeps it
-//               under its 5 req/min/IP cap at any scenario rate ≤ 50/min
+//   ttsVoices - joins when TTS_VOICES_PROVIDER is set (needs that provider up)
+//   demoChat  - joins when DEMO_LLM=1 (needs Ollama); 1/10 weight keeps it
+//               under its 5 req/min/IP cap at any scenario rate <= 50/min
 
 import exec from 'k6/execution';
 import { publicApi } from '../clients/publicApi.js';

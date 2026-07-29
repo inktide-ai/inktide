@@ -9,7 +9,7 @@ public interface IOAuthStateService
     string CreateState(Guid userId, Guid cardId);
 
     /// <summary>
-    /// Verifies the state token. Returns false for any invalid input — never throws on bad data.
+    /// Verifies the state token. Returns false for any invalid input - never throws on bad data.
     /// </summary>
     bool TryVerify(string state, out (Guid UserId, Guid CardId) ctx);
 }

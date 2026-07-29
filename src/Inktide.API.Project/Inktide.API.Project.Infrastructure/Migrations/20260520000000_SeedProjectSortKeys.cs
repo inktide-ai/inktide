@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Inktide.API.Project.Infrastructure.Migrations
 {
-    // Data migration only — no DDL changes.
+    // Data migration only - no DDL changes.
     // Idempotent: WHERE sort_key = 'a0' and LENGTH < 2 guards prevent double-apply.
     public partial class SeedProjectSortKeys : Migration
     {
@@ -35,7 +35,7 @@ namespace Inktide.API.Project.Infrastructure.Migrations
                 WHERE p.id = r.id
                 """);
 
-            // Fix single-char sort keys (invalid for FractionalIndexer — expects length >= 2).
+            // Fix single-char sort keys (invalid for FractionalIndexer - expects length >= 2).
             migrationBuilder.Sql("""
                 WITH rn_data AS (
                     SELECT id,
@@ -63,7 +63,7 @@ namespace Inktide.API.Project.Infrastructure.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Data-only fix — no structural rollback.
+            // Data-only fix - no structural rollback.
         }
     }
 }

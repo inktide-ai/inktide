@@ -71,7 +71,7 @@ public sealed class AuthStartup : IStartup
                     },
                     // SignalR: browsers cannot set Authorization headers on WebSocket connections.
                     // Accepts either a full JWT or a short-lived ws-ticket (no dots) from Redis.
-                    // Ticket path: Next.js POST /api/auth/ws-ticket → Redis ws:ticket:{id} → userId.
+                    // Ticket path: Next.js POST /api/auth/ws-ticket -> Redis ws:ticket:{id} -> userId.
                     // StringGetDeleteAsync is atomic: single-use is guaranteed without a race.
                     OnMessageReceived = async context =>
                     {
@@ -160,7 +160,7 @@ public sealed class AuthStartup : IStartup
     /// <summary>
     /// Keycloak puts the user ID in the "sub" claim. ASP.NET Core expects
     /// <see cref="ClaimTypes.NameIdentifier"/> for <c>User.FindFirstValue</c>.
-    /// This maps "sub" → NameIdentifier so controllers work seamlessly.
+    /// This maps "sub" -> NameIdentifier so controllers work seamlessly.
     /// </summary>
     private static void MapKeycloakSubClaim(TokenValidatedContext context)
     {

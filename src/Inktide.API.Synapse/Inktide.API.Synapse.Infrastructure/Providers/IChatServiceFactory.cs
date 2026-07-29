@@ -9,13 +9,13 @@ namespace Inktide.API.Synapse.Infrastructure.Providers;
 /// whose <see cref="CanHandle"/> returns <c>true</c> wins.
 ///
 /// Convention:
-///   Priority = 0  → catch-all / default (OpenAI-compat)
-///   Priority = 10 → provider-specific override (e.g. native Anthropic SDK)
+///   Priority = 0  -> catch-all / default (OpenAI-compat)
+///   Priority = 10 -> provider-specific override (e.g. native Anthropic SDK)
 ///
 /// To add a new provider:
 ///   1. Implement this interface.
 ///   2. Register with <c>services.AddSingleton&lt;IChatServiceFactory, MyFactory&gt;()</c>.
-///   3. Done — no other code changes required.
+///   3. Done - no other code changes required.
 /// </summary>
 public interface IChatServiceFactory
 {

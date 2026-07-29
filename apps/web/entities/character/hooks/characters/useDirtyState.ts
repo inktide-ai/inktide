@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react'
 import type { AiCharacter } from '@/shared/lib/character/types'
 
 /**
- * ISP: единственная ответственность — dirty-tracking и snapshot.
+ * ISP: единственная ответственность - dirty-tracking и snapshot.
  * Не знает о API, выборе карточки или мутациях.
  */
 export function useDirtyState() {

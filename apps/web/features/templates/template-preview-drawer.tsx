@@ -104,7 +104,7 @@ export function TemplatePreviewDrawer({ template, onClose, onUse }: TemplatePrev
             </div>
           </div>
 
-          {/* System prompt — collapsible */}
+          {/* System prompt - collapsible */}
           <div>
             <button
               type="button"

@@ -9,9 +9,9 @@ namespace Inktide.API.Soul.Application.Services;
 
 /// <summary>
 /// Uploads / removes a banner image and persists the card's BannerUrl via a targeted atomic update.
-/// DIP: depends on IAiCardRepository directly — does not call IAiCardService to avoid chaining
+/// DIP: depends on IAiCardRepository directly - does not call IAiCardService to avoid chaining
 ///      application services (which would trigger slug-check, audit log, events unnecessarily).
-/// SRP: banner upload + BannerUrl persistence only — file sanitisation delegated to StorageFileHelper.
+/// SRP: banner upload + BannerUrl persistence only - file sanitisation delegated to StorageFileHelper.
 /// </summary>
 public sealed class AiCardBannerService : IAiCardBannerService
 {

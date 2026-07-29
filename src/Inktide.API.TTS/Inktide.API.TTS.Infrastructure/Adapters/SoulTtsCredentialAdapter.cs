@@ -5,7 +5,7 @@ namespace Inktide.API.TTS.Infrastructure.Adapters;
 
 /// <summary>
 /// ACL adapter: resolves per-user TTS credentials from Soul's <see cref="IUserProviderCredentialService"/>.
-/// Mirrors <c>LlmCredentialAdapter</c> in Synapse.Infrastructure — same Soul table, same encryption.
+/// Mirrors <c>LlmCredentialAdapter</c> in Synapse.Infrastructure - same Soul table, same encryption.
 /// </summary>
 internal sealed class SoulTtsCredentialAdapter : ITtsCredentialPort
 {

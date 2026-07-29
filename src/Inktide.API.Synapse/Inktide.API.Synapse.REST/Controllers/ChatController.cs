@@ -39,8 +39,8 @@ public sealed class ChatController : ControllerBase
     /// <summary>
     /// Lists available models for a provider. Fetches live from the provider API.
     /// Pass <c>base_url</c> for self-hosted providers like Ollama.
-    /// Pass the API key via <c>X-Api-Key</c> request header — never in the URL.
-    /// No auth required — credentials are not stored here.
+    /// Pass the API key via <c>X-Api-Key</c> request header - never in the URL.
+    /// No auth required - credentials are not stored here.
     /// </summary>
     [HttpGet("models")]
     [AllowAnonymous]

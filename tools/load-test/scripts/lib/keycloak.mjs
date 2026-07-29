@@ -1,8 +1,8 @@
-// Shared Keycloak helpers for the seeding scripts (Node ≥ 20, global fetch).
+// Shared Keycloak helpers for the seeding scripts (Node >= 20, global fetch).
 // Admin auth resolution, in order:
-//   1. KC_ADMIN_CLIENT_ID + KC_ADMIN_CLIENT_SECRET → client-credentials grant
+//   1. KC_ADMIN_CLIENT_ID + KC_ADMIN_CLIENT_SECRET -> client-credentials grant
 //      on the target realm (staging: confidential client with manage-users)
-//   2. KC_ADMIN_USER + KC_ADMIN_PASSWORD → password grant on admin-cli in the
+//   2. KC_ADMIN_USER + KC_ADMIN_PASSWORD -> password grant on admin-cli in the
 //      master realm (local/CI: the compose KEYCLOAK_ADMIN account)
 
 export function kcEnv() {

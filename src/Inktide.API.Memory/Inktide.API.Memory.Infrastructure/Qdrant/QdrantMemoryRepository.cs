@@ -8,7 +8,7 @@ namespace Inktide.API.Memory.Infrastructure.Qdrant;
 
 /// <summary>
 /// Direct Qdrant.Client implementation of <see cref="IVectorMemoryRepository"/>.
-/// Uses PointStruct + payload dictionary — no SK VectorData abstractions.
+/// Uses PointStruct + payload dictionary - no SK VectorData abstractions.
 /// Collection: chat_memories, vector size: configured via QdrantSettings.VectorSize, distance: Cosine.
 /// </summary>
 public sealed class QdrantMemoryRepository : IVectorMemoryRepository

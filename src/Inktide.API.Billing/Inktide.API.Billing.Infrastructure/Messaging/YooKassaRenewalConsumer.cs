@@ -84,7 +84,7 @@ public sealed class YooKassaRenewalConsumer : IConsumer<YooKassaRenewalRequested
 
         if (permanent)
         {
-            // 4xx = card declined / invalid payment method — do not retry via MT
+            // 4xx = card declined / invalid payment method - do not retry via MT
             await db.StringSetAsync(idempKey, "failed:4xx", TimeSpan.FromHours(48)).ConfigureAwait(false);
             _logger.LogWarning(
                 "YooKassaRenewalConsumer: permanent failure for user {UserId}: {Error}",
@@ -92,7 +92,7 @@ public sealed class YooKassaRenewalConsumer : IConsumer<YooKassaRenewalRequested
             return;
         }
 
-        // 5xx / network error — throw so MT retries with exponential backoff
+        // 5xx / network error - throw so MT retries with exponential backoff
         throw new InvalidOperationException(
             $"YooKassa renewal transient failure for user {msg.UserId}: {lastError}");
     }

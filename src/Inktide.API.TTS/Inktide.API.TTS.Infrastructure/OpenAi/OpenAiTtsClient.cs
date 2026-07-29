@@ -8,7 +8,7 @@ namespace Inktide.API.TTS.Infrastructure.OpenAi;
 /// <summary>
 /// Shared HTTP client for both <see cref="OpenAiTtsProvider"/> and <see cref="OpenAiCompatibleTtsProvider"/>.
 /// Caches one <see cref="AudioClient"/> per (modelId, endpoint) pair for config-sourced API keys so the
-/// underlying HTTP connection pool is reused — avoiding socket exhaustion under load.
+/// underlying HTTP connection pool is reused - avoiding socket exhaustion under load.
 /// BYOK (per-request header keys) bypass the cache to prevent unbounded growth.
 /// Key rotation requires a process restart when the config-key path is used.
 /// </summary>

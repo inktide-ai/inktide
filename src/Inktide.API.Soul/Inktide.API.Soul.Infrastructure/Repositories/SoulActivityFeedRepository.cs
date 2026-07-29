@@ -15,7 +15,7 @@ internal sealed class SoulActivityFeedRepository : ISoulActivityFeedRepository
     public async Task AddAsync(SoulActivityFeedEvent feedEvent, CancellationToken ct = default)
     {
         _db.SoulActivityFeedEvents.Add(feedEvent);
-        // No SaveChangesAsync — the outer ITransactionManager commits the unit of work.
+        // No SaveChangesAsync - the outer ITransactionManager commits the unit of work.
     }
 
     public async Task<IReadOnlyList<SoulActivityFeedEvent>> GetPublicPageAsync(

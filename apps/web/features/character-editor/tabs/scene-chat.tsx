@@ -137,7 +137,7 @@ const SceneChat = ({ cardId, userId, mode = 'floating', lipSync, emotionGetterRe
           </svg>
         </div>
         <div className="flex items-center gap-0.5">
-          {/* New chat — placeholder, reloads the channel by clearing input */}
+          {/* New chat - placeholder, reloads the channel by clearing input */}
           <button
             type="button"
             aria-label="New chat"

@@ -14,7 +14,7 @@ export function useCardChannelId(cardId: string | undefined): string | null {
         const active = card.channels?.find((ch) => ch.is_active && ch.channel_id)
         setChannelId(active?.channel_id ?? null)
       })
-      .catch(() => { /* non-critical — audio just won't play */ })
+      .catch(() => { /* non-critical - audio just won't play */ })
     return () => { cancelled = true }
   }, [cardId])
 

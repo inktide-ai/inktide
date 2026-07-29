@@ -7,7 +7,7 @@ interface GlobalErrorProps {
   reset: () => void
 }
 
-// Catches errors in the root layout itself. Minimal UI — no theme/providers available.
+// Catches errors in the root layout itself. Minimal UI - no theme/providers available.
 // Uses hardcoded Tailwind values (CSS vars from globals.css are unavailable at this boundary).
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {

@@ -8,7 +8,7 @@ namespace Inktide.API.Synapse.Infrastructure.Providers;
 
 /// <summary>
 /// Chat provider backed by a local Ollama server.
-/// Only <see cref="ListModelsAsync"/> is implemented here — inference goes through the Synapse pipeline.
+/// Only <see cref="ListModelsAsync"/> is implemented here - inference goes through the Synapse pipeline.
 /// </summary>
 internal sealed class OllamaChatProvider : IChatProvider
 {

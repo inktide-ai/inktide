@@ -36,7 +36,7 @@ export function useLipSync(): LipSyncHandle {
   /** Active Rhubarb timeline + AudioContext.currentTime когда source.start() был вызван. */
   const timelineRef = useRef<{ cues: VisemeCue[]; startT: number } | null>(null)
 
-  /** Последний использованный провайдер — для сброса сглаживания при смене. */
+  /** Последний использованный провайдер - для сброса сглаживания при смене. */
   const lastProviderIdRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export function useLipSync(): LipSyncHandle {
 
   /**
    * OCP: итерируем реестр провайдеров. Первый подходящий вычисляет веса.
-   * useLipSync не знает о конкретных алгоритмах — только об интерфейсе IVisemeProvider.
+   * useLipSync не знает о конкретных алгоритмах - только об интерфейсе IVisemeProvider.
    */
   const getMouthWeights = useCallback((): MouthWeights => {
     const ctx      = ctxRef.current
@@ -98,7 +98,7 @@ export function useLipSync(): LipSyncHandle {
 
     if (!provider) return { ...SILENT_MOUTH }
 
-    // Сброс сглаживания при смене провайдера (например, timeline → formant)
+    // Сброс сглаживания при смене провайдера (например, timeline -> formant)
     if (provider.id !== lastProviderIdRef.current) {
       visemeProviderRegistry.forEach((p) => {
         if (p.id !== provider.id) p.reset()

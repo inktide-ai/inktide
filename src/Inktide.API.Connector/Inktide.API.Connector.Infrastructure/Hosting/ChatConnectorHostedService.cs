@@ -44,7 +44,7 @@ public sealed class ChatConnectorHostedService : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        // DisposeAsync is intentionally NOT called here — connectors are DI singletons and the
+        // DisposeAsync is intentionally NOT called here - connectors are DI singletons and the
         // container calls DisposeAsync on IAsyncDisposable instances when it is disposed.
         // Calling it here would cause double-dispose.
         foreach (var connector in _connectors)

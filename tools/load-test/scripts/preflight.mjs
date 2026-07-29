@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Static rate-budget guard. Refuses load shapes that would trip the API's
-// rate limiter and poison the measurement — the suite must never require
+// rate limiter and poison the measurement - the suite must never require
 // touching the API's production rate-limit config.
 //
 // Budgets (from src/Inktide.API/Deployment/TtsRateLimiterStartup.cs, mirrored
@@ -9,7 +9,7 @@
 //   authenticated: 300 req/min per user (sliding window, partitioned by sub)
 //   tts synthesize: 20 req/60s per user
 //
-// Guard margins: auth ≤ 80% of budget, tts ≤ 75%, anon abort > 90% / warn > 80%.
+// Guard margins: auth <= 80% of budget, tts <= 75%, anon abort > 90% / warn > 80%.
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -38,7 +38,7 @@ function timeUnitSeconds(tu = '1s') {
 
 // Peak request rate (req/s) a scenario can generate. Closed-model executors
 // (constant-vus, per-vu-iterations) self-throttle on response time and can't
-// be bounded statically → null.
+// be bounded statically -> null.
 function peakRatePerSec(sc) {
   const unit = timeUnitSeconds(sc.timeUnit || '1s');
   if (sc.executor === 'constant-arrival-rate') return sc.rate / unit;

@@ -15,7 +15,7 @@ namespace Inktide.API.Synapse.Infrastructure.Emotion;
 /// an AI character should show in response to a chat message.
 ///
 /// SRP: only responsible for the HTTP call and response parsing.
-/// Never throws — returns <see cref="EmotionResult"/> with null emotion on any failure.
+/// Never throws - returns <see cref="EmotionResult"/> with null emotion on any failure.
 /// </summary>
 internal sealed class OllamaEmotionClassifier : IEmotionClassificationService
 {

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Inktide.API.TTS.Infrastructure.FishAudio;
 
 /// <summary>
-/// Typed projection of Fish Audio–specific keys from
+/// Typed projection of Fish Audio-specific keys from
 /// <c>SpeechOptions.ProviderParams</c>.
 /// </summary>
 internal sealed class FishAudioParams

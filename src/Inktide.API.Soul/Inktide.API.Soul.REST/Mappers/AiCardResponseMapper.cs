@@ -7,7 +7,7 @@ namespace Inktide.API.Soul.REST.Mappers;
 
 /// <summary>
 /// Maps AiCard domain entities to REST response models.
-/// SRP: one reason to change — AiCard read representation.
+/// SRP: one reason to change - AiCard read representation.
 /// </summary>
 public static class AiCardResponseMapper
 {

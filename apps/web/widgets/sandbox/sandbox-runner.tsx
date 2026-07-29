@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { ChevronLeft } from 'lucide-react'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { SceneFullscreen } from '@/widgets/scene-fullscreen'
-import { useProjectRuntime, useProjectSnapshotCapture } from '@/features/projects' // fsd:cross-feature-ok — sandbox is always a sub-view of a project runtime
+import { useProjectRuntime, useProjectSnapshotCapture } from '@/features/projects' // fsd:cross-feature-ok - sandbox is always a sub-view of a project runtime
 
 interface SandboxRunnerProps {
   projectId: string

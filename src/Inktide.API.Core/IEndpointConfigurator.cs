@@ -4,7 +4,7 @@ namespace Inktide.API.Core;
 
 /// <summary>
 /// Maps endpoints (controllers, gRPC services, health checks, etc.).
-/// All implementations are called inside a single UseEndpoints() block — order does not matter.
+/// All implementations are called inside a single UseEndpoints() block - order does not matter.
 /// </summary>
 public interface IEndpointConfigurator
 {

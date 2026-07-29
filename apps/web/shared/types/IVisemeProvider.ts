@@ -4,22 +4,22 @@
  */
 
 export interface MouthWeights {
-  /** Open vowel "A"    — jaw drop, neutral lip shape.   0 = closed, 1 = open. */
+  /** Open vowel "A"    - jaw drop, neutral lip shape.   0 = closed, 1 = open. */
   aa: number
-  /** Front mid "I/E"  — lips slightly spread inward. */
+  /** Front mid "I/E"  - lips slightly spread inward. */
   ih: number
-  /** Rounded close "U"— lips pursed forward. */
+  /** Rounded close "U"- lips pursed forward. */
   ou: number
-  /** Front close "EE" — lips flat, wide spread. */
+  /** Front close "EE" - lips flat, wide spread. */
   ee: number
-  /** Back mid "O"     — lips rounded, jaw half open. */
+  /** Back mid "O"     - lips rounded, jaw half open. */
   oh: number
 }
 
 /** Rhubarb mouth shape letters (Preston Blair set). */
 export type RhubarbViseme = 'X' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H'
 
-/** Single viseme cue from the backend timeline — matches the existing useLipSync.ts contract. */
+/** Single viseme cue from the backend timeline - matches the existing useLipSync.ts contract. */
 export interface VisemeCue {
   /** Milliseconds from the start of the audio chunk. */
   startMs: number

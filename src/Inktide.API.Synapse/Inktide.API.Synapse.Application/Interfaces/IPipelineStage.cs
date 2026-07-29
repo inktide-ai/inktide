@@ -5,7 +5,7 @@ namespace Inktide.API.Synapse.Application.Interfaces;
 /// <summary>
 /// One stage of the scatter phase (Session, RAG, Emotion, etc.).
 /// All stages receive the same <see cref="MessageProcessingContext"/> after channel context resolution.
-/// Register additional stages via DI — the orchestrator discovers them automatically.
+/// Register additional stages via DI - the orchestrator discovers them automatically.
 /// </summary>
 public interface IPipelineStage
 {

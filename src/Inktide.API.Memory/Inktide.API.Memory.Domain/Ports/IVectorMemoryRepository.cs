@@ -4,7 +4,7 @@ namespace Inktide.API.Memory.Domain.Ports;
 
 /// <summary>
 /// Outbound port for vector storage. Implemented in Infrastructure (Qdrant).
-/// Application layer depends only on this interface — no Qdrant SDK imports required.
+/// Application layer depends only on this interface - no Qdrant SDK imports required.
 /// </summary>
 public interface IVectorMemoryRepository
 {

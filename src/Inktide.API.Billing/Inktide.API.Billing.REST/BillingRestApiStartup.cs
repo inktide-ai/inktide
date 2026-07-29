@@ -12,7 +12,7 @@ namespace Inktide.API.Billing.REST;
 
 public sealed class BillingRestApiStartup : IStartup, IMiddlewareConfigurator, IEndpointConfigurator
 {
-    // Policy name constant — registered in Inktide.API/Deployment/TtsRateLimiterStartup.cs
+    // Policy name constant - registered in Inktide.API/Deployment/TtsRateLimiterStartup.cs
     // (AddRateLimiter requires Microsoft.NET.Sdk.Web which is unavailable in REST class-library projects)
     public const string WebhookRateLimitPolicy = "billing-webhook";
 
@@ -33,14 +33,14 @@ public sealed class BillingRestApiStartup : IStartup, IMiddlewareConfigurator, I
         services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            // Trust only the reverse proxy on the same host (nginx/caddy → loopback → Kestrel).
-            // Clear defaults first — ASP.NET Core adds loopback to KnownNetworks by default, but
+            // Trust only the reverse proxy on the same host (nginx/caddy -> loopback -> Kestrel).
+            // Clear defaults first - ASP.NET Core adds loopback to KnownNetworks by default, but
             // that would trust ANY source on loopback, not just a configured proxy.
             options.KnownNetworks.Clear();
             options.KnownProxies.Clear();
             options.KnownProxies.Add(IPAddress.Loopback);
             options.KnownProxies.Add(IPAddress.IPv6Loopback);
-            // Process only the rightmost XFF hop — attacker-supplied left-side entries are ignored.
+            // Process only the rightmost XFF hop - attacker-supplied left-side entries are ignored.
             options.ForwardLimit = 1;
         });
     }

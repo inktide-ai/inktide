@@ -69,7 +69,7 @@ internal static class SynapseConstants
 
     /// <summary>
     /// Centralises plugin enable/disable resolution so every call site uses the same semantics:
-    /// null plugins (= no project linked) → all features ON (backwards compatible).
+    /// null plugins (= no project linked) -> all features ON (backwards compatible).
     /// </summary>
     internal static class PluginGate
     {

@@ -4,7 +4,7 @@ namespace Inktide.API.Core.Middleware;
 
 /// <summary>
 /// Configures the middleware pipeline with the correct order:
-/// Global exception handler → CORS → Routing → Authentication → Authorization.
+/// Global exception handler -> CORS -> Routing -> Authentication -> Authorization.
 /// <para>
 /// When this class exists, <see cref="Deployment.Startup"/> skips the default <c>UseRouting()</c>
 /// because at least one <see cref="IMiddlewareConfigurator"/> is found.

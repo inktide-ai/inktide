@@ -30,7 +30,7 @@ namespace Inktide.API.Memory.Infrastructure.DependencyInjection;
 /// Registers all Memory module services into MS DI (discovered via <see cref="IStartup"/>).
 ///
 /// Vector store: Qdrant via direct Qdrant.Client SDK.
-///   No SK VectorData abstractions — full Qdrant coupling by design.
+///   No SK VectorData abstractions - full Qdrant coupling by design.
 ///
 /// Embeddings: Ollama via Microsoft.Extensions.AI + OpenAI compat endpoint (stable).
 /// </summary>

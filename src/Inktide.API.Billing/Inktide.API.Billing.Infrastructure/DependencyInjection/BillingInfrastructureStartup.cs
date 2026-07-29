@@ -66,7 +66,7 @@ public sealed class BillingInfrastructureStartup : IStartup, IBusModuleConfigura
             opts.UseNpgsql(connStr, npgsql =>
                 npgsql.MigrationsHistoryTable("__ef_billing_migrations", "billing")));
 
-        // Typed HTTP clients — handler pool is managed by IHttpClientFactory (fixes socket exhaustion).
+        // Typed HTTP clients - handler pool is managed by IHttpClientFactory (fixes socket exhaustion).
         void ConfigureYooKassaClient(HttpClient client)
         {
             client.BaseAddress = new Uri("https://api.yookassa.ru/v3");
@@ -83,12 +83,12 @@ public sealed class BillingInfrastructureStartup : IStartup, IBusModuleConfigura
         services.AddHttpClient("yookassa-renewal", ConfigureYooKassaClient);
 
         // AddHttpClient<YooKassaBillingProvider> already registers YooKassaBillingProvider as a
-        // transient with its configured HttpClient — adding AddTransient<YooKassaBillingProvider>()
+        // transient with its configured HttpClient - adding AddTransient<YooKassaBillingProvider>()
         // after it would override that registration. RobokassaBillingProvider has no typed
         // HttpClient, so it needs an explicit registration so the factory below can resolve it.
         services.AddTransient<RobokassaBillingProvider>();
 
-        // Active checkout provider — resolved by name. Adding a new provider requires one new arm.
+        // Active checkout provider - resolved by name. Adding a new provider requires one new arm.
         services.AddTransient<IBillingProvider>(sp =>
         {
             var activeId = sp.GetRequiredService<BillingSettings>().ActiveProvider;

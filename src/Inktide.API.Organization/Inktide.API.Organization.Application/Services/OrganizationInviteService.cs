@@ -139,7 +139,7 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         var invite = await _inviteRepo.GetByTokenAsync(token, ct);
         if (invite is null)
         {
-            // Increment only for nonexistent tokens — valid and expired invites are NOT throttled.
+            // Increment only for nonexistent tokens - valid and expired invites are NOT throttled.
             // Design: abuse economics. Token entropy (384 bits) handles cryptographic protection.
             if (!await _attemptTracker.TryRecordAttemptAsync(token, acceptingUserId, ct))
                 return new AcceptInviteResult(AcceptOutcome.TooManyInvalidAttempts);
@@ -176,7 +176,7 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
             JoinedAt       = utcNow,
         }, ct);
         invite.Status = InviteStatus.Accepted;
-        // Single SaveChanges — atomically commits the new member row and the invite status update
+        // Single SaveChanges - atomically commits the new member row and the invite status update
         // because both repos share the same scoped OrganizationDbContext.
         await _memberRepo.SaveChangesAsync(ct);
 
@@ -226,7 +226,7 @@ public sealed class OrganizationInviteService : IOrganizationInviteService
         }
         catch (OrganizationConcurrentCreationException)
         {
-            // Another request won the race — retry the fetch to get the created org.
+            // Another request won the race - retry the fetch to get the created org.
             org = await _orgRepo.GetByOwnerIdAsync(ownerId, ct);
             if (org is null) throw;
         }

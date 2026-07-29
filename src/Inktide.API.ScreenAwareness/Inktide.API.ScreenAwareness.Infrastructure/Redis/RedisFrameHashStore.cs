@@ -7,7 +7,7 @@ namespace Inktide.API.ScreenAwareness.Infrastructure.Redis;
 public sealed class RedisFrameHashStore : IFrameHashStore
 {
 
-    // Atomically returns the old hash and sets the new one with a TTL — one round-trip.
+    // Atomically returns the old hash and sets the new one with a TTL - one round-trip.
     private static readonly LuaScript AtomicGetSet = LuaScript.Prepare(
         "local old = redis.call('GET', @key)\n" +
         "redis.call('SET', @key, @value, 'EX', @ttl)\n" +

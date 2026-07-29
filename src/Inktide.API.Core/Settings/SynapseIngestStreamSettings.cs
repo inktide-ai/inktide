@@ -2,7 +2,7 @@ using Inktide.API.Core.Generators;
 namespace Inktide.API.Core.Settings;
 
 /// <summary>
-/// Connector → Synapse ingest transport over Redis Streams (see SYNAPSE_IDEAL_ARCHITECTURE).
+/// Connector -> Synapse ingest transport over Redis Streams (see SYNAPSE_IDEAL_ARCHITECTURE).
 /// </summary>
 public sealed class SynapseIngestStreamSettings
 {

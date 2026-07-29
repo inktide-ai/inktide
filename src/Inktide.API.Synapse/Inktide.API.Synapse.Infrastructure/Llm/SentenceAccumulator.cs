@@ -8,11 +8,11 @@ namespace Inktide.API.Synapse.Infrastructure.Llm;
 /// Port of fast-api/ai-worker/llm-worker/app/llm/sentence_accumulator.py.
 /// </summary>
 /// <remarks>
-/// <b>Narration</b> — splits on sentence-ending punctuation (.!?) with a lookahead buffer
+/// <b>Narration</b> - splits on sentence-ending punctuation (.!?) with a lookahead buffer
 /// so each chunk is a complete sentence. Keeps latency low by yielding as soon as
 /// a sentence boundary is confirmed.
 ///
-/// <b>Chat</b> — buffers the entire LLM response and emits it as one chunk.
+/// <b>Chat</b> - buffers the entire LLM response and emits it as one chunk.
 /// Preserves semantic coherence for short conversational replies where latency matters
 /// less than delivering the full thought at once.
 /// </remarks>
@@ -76,7 +76,7 @@ internal static class SentenceAccumulator
             if (i + 1 < text.Length && (text[i + 1] == '.' || text[i + 1] == '!' || text[i + 1] == '?'))
                 continue;
 
-            // The character after punctuation must be whitespace or end of buffer —
+            // The character after punctuation must be whitespace or end of buffer -
             // otherwise this is mid-word (e.g. a URL or decimal number).
             if (i + 1 < text.Length && !char.IsWhiteSpace(text[i + 1]))
                 continue;
@@ -110,7 +110,7 @@ internal static class SentenceAccumulator
             start--;
 
         var word = text[start..end];
-        // Only flag short words — genuine sentence-ending words are almost always longer.
+        // Only flag short words - genuine sentence-ending words are almost always longer.
         return word.Length is >= 1 and <= 4 && Abbreviations.Contains(word);
     }
 

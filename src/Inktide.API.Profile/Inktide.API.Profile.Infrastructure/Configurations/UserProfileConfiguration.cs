@@ -8,7 +8,7 @@ public sealed class UserProfileConfiguration : IEntityTypeConfiguration<UserProf
 {
     public void Configure(EntityTypeBuilder<UserProfile> b)
     {
-        // Table stays in soul schema — no data movement required.
+        // Table stays in soul schema - no data movement required.
         b.ToTable("user_profiles", "soul");
         b.HasKey(e => e.UserId);
         b.Property(e => e.UserId).HasColumnName("user_id").HasMaxLength(64).IsRequired();

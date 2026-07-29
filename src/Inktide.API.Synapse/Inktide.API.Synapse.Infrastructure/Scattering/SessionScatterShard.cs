@@ -8,7 +8,7 @@ namespace Inktide.API.Synapse.Infrastructure.Scattering;
 /// <summary>
 /// Scatter shard: loads recent conversation history from Redis for the current channel.
 /// Runs in parallel with RAG and Context shards.
-/// Falls back to an empty history on any error — never aborts the pipeline.
+/// Falls back to an empty history on any error - never aborts the pipeline.
 /// </summary>
 internal sealed class SessionScatterShard : IPipelineStage
 {

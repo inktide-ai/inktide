@@ -19,7 +19,7 @@ const ModelTypeSchema     = z.enum(['vrm', 'glb', 'live2d', 'none'])
 
 
 export function apiResponseToCharacter(r: AiCardResponse): AiCharacter {
-  // Zod schemas parse with defaults — safe against schema drift and missing fields
+  // Zod schemas parse with defaults - safe against schema drift and missing fields
   const llm     = LlmConfigSchema.parse(r.llm_config ?? {})
   const tts     = TtsConfigSchema.parse(r.tts_config ?? {})
   const ap      = AppearanceSchema.parse(r.appearance ?? {})

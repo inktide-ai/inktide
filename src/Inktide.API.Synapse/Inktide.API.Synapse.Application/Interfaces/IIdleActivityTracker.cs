@@ -2,7 +2,7 @@ namespace Inktide.API.Synapse.Application.Interfaces;
 
 /// <summary>
 /// Reports soul activity so IdleEventDispatcher can track per-character idle thresholds.
-/// Registered as a singleton — the same instance that implements BackgroundService.
+/// Registered as a singleton - the same instance that implements BackgroundService.
 /// </summary>
 public interface IIdleActivityTracker
 {

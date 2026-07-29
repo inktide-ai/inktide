@@ -31,7 +31,7 @@ export interface UseChatChannelResult {
   send: (text: string) => Promise<void>
   retry: (messageId: string) => void
   connected: boolean
-  /** Stable getter — read current emotion state each animation frame. */
+  /** Stable getter - read current emotion state each animation frame. */
   getEmotionState: () => EmotionState
 }
 

@@ -14,7 +14,7 @@ using Microsoft.Extensions.Hosting;
 namespace Inktide.API.Connector.Discord;
 
 /// <summary>
-/// Registers Discord connector (IChatConnector) — Gateway WebSocket via Discord.Net.
+/// Registers Discord connector (IChatConnector) - Gateway WebSocket via Discord.Net.
 /// Also registers Discord OAuth2 services and the REST controller.
 /// </summary>
 public sealed class DiscordStartup : IStartup

@@ -55,7 +55,7 @@ export default function ProvidersPage() {
     }).catch((err) => { console.error('[providers-page] failed to load credentials', err) })
   }, [])
 
-  // counts per type across full catalog — dep is [] because LLM_PROVIDER_CATALOG is a
+  // counts per type across full catalog - dep is [] because LLM_PROVIDER_CATALOG is a
   // module-level const and the type IDs never change at runtime
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = {

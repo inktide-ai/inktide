@@ -9,11 +9,11 @@ interface SliderProps {
   max?: number
   step?: number
   disabled?: boolean
-  /** Fill color — defaults to var(--text-secondary) */
+  /** Fill color - defaults to var(--text-secondary) */
   fill?: string
-  /** Track height in px — defaults to 3 */
+  /** Track height in px - defaults to 3 */
   trackHeight?: number
-  /** Thumb size in px — defaults to 12 */
+  /** Thumb size in px - defaults to 12 */
   thumbSize?: number
   className?: string
 }

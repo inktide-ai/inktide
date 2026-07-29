@@ -61,10 +61,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, account, profile }) {
-      // Initial login — persist tokens and user claims
+      // Initial login - persist tokens and user claims
       if (account) {
         // Keycloak access token may carry a different sub than the ID token
-        // (e.g. pairwise subject identifiers). Decode without verification —
+        // (e.g. pairwise subject identifiers). Decode without verification -
         // we only need the sub to build channelIds on the frontend.
         let backendUserId: string | undefined
         try {
@@ -72,7 +72,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             Buffer.from(account.access_token!.split('.')[1], 'base64url').toString(),
           ) as { sub?: string }
           backendUserId = payload.sub
-        } catch { /* ignore — falls back to token.sub */ }
+        } catch { /* ignore - falls back to token.sub */ }
 
         return {
           ...token,
@@ -86,10 +86,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
-      // Token still valid (with 2-minute buffer — refresh early to avoid hitting expiry under load)
+      // Token still valid (with 2-minute buffer - refresh early to avoid hitting expiry under load)
       if (Date.now() < (token.expiresAt as number) - 120_000) return token
 
-      // Refresh expired token — deduplicated across concurrent BFF requests
+      // Refresh expired token - deduplicated across concurrent BFF requests
       const tokens = await refreshWithDedup(token.sub!, token.refreshToken as string)
       if (!tokens) return { ...token, error: 'RefreshTokenError' as const }
 

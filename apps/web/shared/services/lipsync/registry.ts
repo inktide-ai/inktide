@@ -10,7 +10,7 @@ import { FormantVisemeProvider } from './FormantVisemeProvider'
  *   2. Добавить импорт и элемент в этот массив
  *
  * useLipSync.ts НЕ МЕНЯЕТСЯ. Провайдеры проверяются по порядку; первый
- * у которого isApplicable() → true, используется для вычисления весов рта.
+ * у которого isApplicable() -> true, используется для вычисления весов рта.
  * Rhubarb имеет приоритет над formant (более точный результат).
  */
 export const visemeProviderRegistry: IVisemeProvider[] = [

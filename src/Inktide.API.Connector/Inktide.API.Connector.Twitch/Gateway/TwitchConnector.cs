@@ -39,7 +39,7 @@ internal sealed class TwitchConnector : IChatConnector, ITwitchConnector, IAsync
 
         var s = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
 
-        // TwitchLib.Communication v2: automatic reconnect with exponential backoff 3s→3s, max 10 attempts
+        // TwitchLib.Communication v2: automatic reconnect with exponential backoff 3s->3s, max 10 attempts
         var commOptions = new ClientOptions(
             new ReconnectionPolicy(reconnectInterval: 3000, maxAttempts: 10),
             useSsl: true,
@@ -48,7 +48,7 @@ internal sealed class TwitchConnector : IChatConnector, ITwitchConnector, IAsync
 
         var webSocketClient = new WebSocketClient(commOptions, loggerFactory.CreateLogger<WebSocketClient>());
 
-        // 750 messages per 30s burst — within Twitch moderator rate limits
+        // 750 messages per 30s burst - within Twitch moderator rate limits
         var sendOptions = new SendOptions(
             sendsAllowedInPeriod: 750,
             queueCapacity: 1000,
@@ -76,7 +76,7 @@ internal sealed class TwitchConnector : IChatConnector, ITwitchConnector, IAsync
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _logger.LogInformation("TwitchConnector: connecting...");
 
-        // TwitchLib's ConnectAsync accepts no CancellationToken — guard with an explicit timeout
+        // TwitchLib's ConnectAsync accepts no CancellationToken - guard with an explicit timeout
         // so startup can't block indefinitely. If TwitchLib eventually connects after the deadline,
         // OnConnected() fires normally and IsConnected becomes true.
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

@@ -16,7 +16,7 @@ public abstract record SpeechResult
 
     /// <summary>
     /// Upstream provider returned an error. The <see cref="Message"/> is safe to log but
-    /// must NOT be forwarded to clients — it may contain internal service details.
+    /// must NOT be forwarded to clients - it may contain internal service details.
     /// </summary>
     public sealed record UpstreamError(string Message) : SpeechResult;
 

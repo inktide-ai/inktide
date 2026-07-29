@@ -24,7 +24,7 @@ public interface IApiKeyResolver
 
     /// <summary>
     /// Async variant for background pipeline consumers (no HTTP context guaranteed).
-    /// Resolution order: X-TTS-Api-Key header → per-user credential (Soul DB) → global config → null.
+    /// Resolution order: X-TTS-Api-Key header -> per-user credential (Soul DB) -> global config -> null.
     /// Returns null when provider does not require a key or no key is configured for this user/provider.
     /// </summary>
     Task<string?> ResolveAsync(Guid? userId, string providerId, CancellationToken ct = default);

@@ -12,12 +12,12 @@ namespace Inktide.API.TTS.Infrastructure.LipSync;
 ///
 /// Auto-detects <c>rhubarb</c> in <c>$PATH</c> at construction time.
 /// When unavailable, <see cref="IsAvailable"/> is <c>false</c> and
-/// <see cref="AnalyzeAsync"/> returns <c>null</c> — the frontend falls back
+/// <see cref="AnalyzeAsync"/> returns <c>null</c> - the frontend falls back
 /// to real-time formant analysis.
 /// </summary>
 public sealed class RhubarbService : IRhubarbService
 {
-    // Rhubarb on a typical 2–3 s TTS clip finishes in < 500 ms; 8 s is generous.
+    // Rhubarb on a typical 2-3 s TTS clip finishes in < 500 ms; 8 s is generous.
     private static readonly TimeSpan AnalysisTimeout = TimeSpan.FromSeconds(8);
 
     private static readonly JsonSerializerOptions JsonOpts =

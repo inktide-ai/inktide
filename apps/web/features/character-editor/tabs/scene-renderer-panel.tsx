@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { Slider } from '@/shared/ui/slider'
 import type { SceneRendererSettings } from '@/shared/hooks/useSceneRendererSettings'
 import { SCENE_RENDERER_DEFAULTS } from '@/shared/hooks/useSceneRendererSettings'
-import type { LookAtMode } from '@/features/avatar' // fsd:cross-feature-ok — editor embeds avatar preview
+import type { LookAtMode } from '@/features/avatar' // fsd:cross-feature-ok - editor embeds avatar preview
 
 
 interface SliderFieldProps {
