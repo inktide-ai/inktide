@@ -1,4 +1,11 @@
-from pydantic import BaseModel
+from typing import Annotated
+
+from pydantic import BaseModel, Field
+
+# Cosine similarity is mathematically bounded to [-1, 1]. Declaring the bound
+# here keeps it in the OpenAPI schema and turns any regression in the scoring
+# code into a loud validation error instead of a silently out-of-range score.
+CosineScore = Annotated[float, Field(ge=-1.0, le=1.0)]
 
 
 # Request models
@@ -29,5 +36,5 @@ class ClassifyRequest(BaseModel):
 
 class ClassifyResponse(BaseModel):
     category: str
-    score: float
-    scores: dict[str, float]  # All category scores
+    score: CosineScore
+    scores: dict[str, CosineScore]  # All category scores

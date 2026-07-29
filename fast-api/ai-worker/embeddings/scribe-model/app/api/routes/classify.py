@@ -34,11 +34,14 @@ async def classify(request: ClassifyRequest):
     else:
         try:
             categories = _load_default_categories()
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
             raise HTTPException(
                 status_code=503,
-                detail="Default categories not found. Run: python scripts/extract_twitch_categories.py",
-            )
+                detail=(
+                    "Default categories not found. "
+                    "Run: python scripts/extract_twitch_categories.py"
+                ),
+            ) from exc
 
     if not categories:
         raise HTTPException(status_code=400, detail="Categories cannot be empty")

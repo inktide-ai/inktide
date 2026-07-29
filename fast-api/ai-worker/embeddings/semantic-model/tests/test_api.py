@@ -1,5 +1,4 @@
 """API endpoint tests."""
-import pytest
 
 
 def test_health_returns_ok_when_ready(client):

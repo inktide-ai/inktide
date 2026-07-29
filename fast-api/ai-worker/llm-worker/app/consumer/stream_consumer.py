@@ -196,7 +196,9 @@ class StreamConsumer:
 
         # Response delay: LLM generation starts immediately; we sleep before the first
         # publish so the response appears in chat after the configured delay.
-        response_delay_s = (ctx.response_delay_ms / 1000.0) if ctx and ctx.response_delay_ms > 0 else 0.0
+        response_delay_s = (
+            (ctx.response_delay_ms / 1000.0) if ctx and ctx.response_delay_ms > 0 else 0.0
+        )
 
         logger.info(
             "LLM request started. user=%s channel=%s model=%s correlation=%s",
@@ -207,7 +209,11 @@ class StreamConsumer:
         )
 
         try:
-            mode = ChunkingMode(ctx.chunking_mode) if ctx and ctx.chunking_mode else ChunkingMode.NARRATION
+            mode = (
+                ChunkingMode(ctx.chunking_mode)
+                if ctx and ctx.chunking_mode
+                else ChunkingMode.NARRATION
+            )
         except ValueError:
             mode = ChunkingMode.NARRATION
 

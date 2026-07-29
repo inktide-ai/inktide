@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-
 from app.services.embeddings import (
     _encode,
     embed_batch,

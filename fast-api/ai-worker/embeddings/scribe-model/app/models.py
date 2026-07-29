@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
 FactType = Literal["fact", "preference", "event", "relationship", "opinion", "skill"]
+
+# Cosine similarity is mathematically bounded to [-1, 1]. Declaring the bound
+# here keeps it in the OpenAPI schema and turns any regression in the scoring
+# code into a loud validation error instead of a silently out-of-range score.
+CosineScore = Annotated[float, Field(ge=-1.0, le=1.0)]
 
 
 
@@ -37,8 +42,8 @@ class ClassifyRequest(BaseModel):
 
 class ClassifyResponse(BaseModel):
     category: str
-    score: float
-    scores: dict[str, float]
+    score: CosineScore
+    scores: dict[str, CosineScore]
 
 
 

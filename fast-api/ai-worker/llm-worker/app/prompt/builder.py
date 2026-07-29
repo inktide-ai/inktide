@@ -31,8 +31,8 @@ def _build_system(envelope: SynapseAggregatedEnvelope) -> str:
         lang_name = _LANGUAGE_NAMES.get(ctx.language, ctx.language)
         parts.append(
             f"CRITICAL INSTRUCTION: You MUST respond exclusively in {lang_name}. "
-            f"This rule overrides everything else in this prompt, including the character's voice, style, "
-            f"and any language used in the system prompt. "
+            f"This rule overrides everything else in this prompt, including the "
+            f"character's voice, style, and any language used in the system prompt. "
             f"Never switch to another language under any circumstances."
         )
 

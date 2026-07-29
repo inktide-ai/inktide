@@ -72,7 +72,9 @@ def embed_batch(texts: list[str]):
     return [result[i] for i in range(len(texts))]
 
 
-def classify_by_similarity(text: str, categories: dict[str, list[str]]) -> tuple[str, float, dict[str, float]]:
+def classify_by_similarity(
+    text: str, categories: dict[str, list[str]]
+) -> tuple[str, float, dict[str, float]]:
     """
     Classify text by semantic similarity to category examples.
     Returns (best_category, best_score, all_scores).
@@ -95,7 +97,9 @@ def classify_by_similarity(text: str, categories: dict[str, list[str]]) -> tuple
         sims = np.dot(ex_embs, text_emb) / (
             np.linalg.norm(ex_embs, axis=1) * np.linalg.norm(text_emb)
         )
-        scores[category] = float(np.mean(sims))
+        # float32 accumulation over the embedding dimensions drifts past the
+        # mathematical [-1, 1] range of cosine similarity, so clamp explicitly.
+        scores[category] = float(np.clip(np.mean(sims), -1.0, 1.0))
 
     best = max(scores.items(), key=lambda x: x[1])
     return best[0], best[1], scores

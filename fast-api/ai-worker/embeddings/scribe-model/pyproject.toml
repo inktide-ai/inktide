@@ -3,15 +3,13 @@ name = "inktide-scribe-model"
 version = "0.2.0"
 description = "REST API for conversation memory: fact extraction, embeddings, and classification (Qwen via Ollama)"
 readme = "README.md"
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.12,<4.0"
 license = { text = "Proprietary" }
 classifiers = [
     "Development Status :: 4 - Beta",
     "Framework :: FastAPI",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
@@ -37,12 +35,8 @@ scripts = [
 testpaths = ["tests"]
 pythonpath = ["."]
 
-[tool.ruff]
-target-version = "py311"
-line-length = 100
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
 
 [build-system]
 requires = ["hatchling"]

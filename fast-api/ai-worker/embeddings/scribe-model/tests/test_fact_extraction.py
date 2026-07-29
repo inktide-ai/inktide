@@ -1,8 +1,6 @@
 """Unit tests for fact extraction — parsing, prompt building, coercion."""
 import json
 
-import pytest
-
 from app.models import ConversationTurn, GameState, UserMessage
 from app.services.fact_extraction import (
     VALID_FACT_TYPES,
@@ -10,8 +8,6 @@ from app.services.fact_extraction import (
     coerce_fact,
     parse_facts,
 )
-
-
 
 
 class TestParseFacts:
@@ -50,7 +46,9 @@ class TestParseFacts:
 
 class TestCoerceFact:
     def test_valid_fact(self):
-        f = coerce_fact({"text": "hello", "type": "preference", "entities": ["a"], "importance": 0.8})
+        f = coerce_fact(
+            {"text": "hello", "type": "preference", "entities": ["a"], "importance": 0.8}
+        )
         assert f is not None
         assert f.type == "preference"
         assert f.importance == 0.8
@@ -103,7 +101,9 @@ class TestBuildUserPrompt:
         assert 'Bot: "hello"' in prompt
 
     def test_with_game_state(self):
-        prompt = build_user_prompt(self._turn(gameState=GameState(activity="mining", biome="caves")))
+        prompt = build_user_prompt(
+            self._turn(gameState=GameState(activity="mining", biome="caves"))
+        )
         assert "mining" in prompt
         assert "caves" in prompt
 

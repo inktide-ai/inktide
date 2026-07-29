@@ -1,7 +1,7 @@
 """Pytest fixtures. Mock model to avoid loading real weights in tests."""
-import numpy as np
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 

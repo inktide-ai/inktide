@@ -13,18 +13,19 @@ CHAT mode — buffers the entire LLM response and emits it as a single chunk.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import queue as sq
 import threading
-from enum import Enum
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
+from enum import StrEnum
 
 from stream2sentence import generate_sentences
 
 logger = logging.getLogger(__name__)
 
 
-class ChunkingMode(str, Enum):
+class ChunkingMode(StrEnum):
     CHAT = "chat"
     NARRATION = "narration"
 
@@ -85,12 +86,12 @@ async def iter_sentences(
                 yield sentence
     finally:
         feeder.cancel()
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await feeder
-        except asyncio.CancelledError:
-            pass
         # Unblock the split thread if it is still waiting on tok_q
         tok_q.put_nowait(None)
         await asyncio.get_event_loop().run_in_executor(None, lambda: thread.join(timeout=30))
         if thread.is_alive():
-            logger.error("sentence splitter thread did not finish within 30s — possible resource leak")
+            logger.error(
+                "sentence splitter thread did not finish within 30s - possible resource leak"
+            )

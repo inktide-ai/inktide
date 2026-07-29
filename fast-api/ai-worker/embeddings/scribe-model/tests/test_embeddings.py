@@ -1,6 +1,5 @@
 """Unit tests for the embeddings service layer."""
 import numpy as np
-
 from app.services.embeddings import (
     embed_batch,
     embed_single,

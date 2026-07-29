@@ -1,7 +1,5 @@
 from datetime import datetime
 
-import pytest
-
 from app.models.envelope import (
     ChatMessage,
     ContextShardPayload,

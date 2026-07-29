@@ -31,7 +31,10 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version="0.2.0",
-    description="REST API for conversation memory: fact extraction, embeddings, and classification (Qwen via Ollama)",
+    description=(
+        "REST API for conversation memory: fact extraction, embeddings, "
+        "and classification (Qwen via Ollama)"
+    ),
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",

@@ -1,5 +1,4 @@
 import pytest
-
 from app.llm.sentence_accumulator import ChunkingMode, iter_sentences
 
 

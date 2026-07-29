@@ -29,7 +29,9 @@ def classify(request: ClassifyRequest):
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
 
-    categories = request.categories if request.categories is not None else _load_default_categories()
+    categories = (
+        request.categories if request.categories is not None else _load_default_categories()
+    )
     if not categories:
         raise HTTPException(status_code=400, detail="Categories cannot be empty")
 

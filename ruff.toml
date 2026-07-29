@@ -1,0 +1,21 @@
+# Lint policy for every Python package in the monorepo.
+#
+# Ruff resolves configuration by walking up from the file being linted, so the
+# per-worker pyproject.toml files intentionally carry no [tool.ruff] section:
+# they inherit this file. Keeping one copy stops the workers' lint rules from
+# drifting apart as they did before.
+#
+# target-version tracks the Python that actually runs in production
+# (fast-api/**/Dockerfile is python:3.12-slim). Keep the two in step.
+target-version = "py312"
+line-length = 100
+
+[lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]

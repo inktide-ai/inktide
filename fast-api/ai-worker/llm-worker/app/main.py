@@ -1,11 +1,12 @@
 import asyncio
+import contextlib
 import logging
 import signal
 
 import redis.asyncio as aioredis
 
-from app.core.config import settings
 from app.consumer.stream_consumer import StreamConsumer
+from app.core.config import settings
 from app.llm.client import OllamaClient
 
 
@@ -48,10 +49,8 @@ async def main() -> None:
 
     logger.info("Shutdown signal received, stopping...")
     consumer_task.cancel()
-    try:
+    with contextlib.suppress(asyncio.CancelledError):
         await consumer_task
-    except asyncio.CancelledError:
-        pass
 
     await llm.aclose()
     await redis.aclose()

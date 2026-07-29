@@ -80,7 +80,10 @@ def classify_by_similarity(
             scores[category] = 0.0
             continue
         ex_embs_n = _cached_encode_normalized(tuple(examples))
-        scores[category] = float(np.mean(ex_embs_n @ text_emb) / text_norm)
+        # float32 accumulation over the embedding dimensions drifts past the
+        # mathematical [-1, 1] range of cosine similarity, so clamp explicitly.
+        mean_similarity = np.mean(ex_embs_n @ text_emb) / text_norm
+        scores[category] = float(np.clip(mean_similarity, -1.0, 1.0))
 
     best = max(scores.items(), key=lambda x: x[1])
     return best[0], best[1], scores

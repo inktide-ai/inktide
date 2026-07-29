@@ -26,16 +26,20 @@ def valid_message(msg: str, min_len: int = 5, max_len: int = 200) -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Extract Twitch chat examples for classification")
-    parser.add_argument("--gaming", type=int, default=200, help="Number of gaming examples to extract")
-    parser.add_argument("--output", type=str, default="data/stream_categories.json", help="Output JSON path")
+    parser.add_argument(
+        "--gaming", type=int, default=200, help="Number of gaming examples to extract"
+    )
+    parser.add_argument(
+        "--output", type=str, default="data/stream_categories.json", help="Output JSON path"
+    )
     parser.add_argument("--sample", type=int, default=100_000, help="Max rows to scan from dataset")
     args = parser.parse_args()
 
     try:
         from datasets import load_dataset
-    except ImportError:
+    except ImportError as exc:
         print("Install: uv add datasets")
-        raise SystemExit(1)
+        raise SystemExit(1) from exc
 
     print("Loading lparkourer10/twitch_chat...")
     # Use subset to avoid loading full 8M rows
