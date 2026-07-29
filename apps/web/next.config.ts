@@ -6,7 +6,8 @@ import path from 'path'
 // of apps/web/) instead of apps/web/, so tailwindcss is not found.
 // __tw_resolve is checked first by @tailwindcss/node before falling back to
 // enhanced-resolve, so we can intercept here without patching node_modules.
-;(globalThis as any).__tw_resolve = (id: string) => {
+;(globalThis as typeof globalThis & { __tw_resolve?: (id: string) => string | null })
+  .__tw_resolve = (id: string) => {
   const base = path.join(process.cwd(), 'node_modules')
   if (id === 'tailwindcss') return path.join(base, 'tailwindcss/index.css')
   if (id.startsWith('tailwindcss/')) return path.join(base, id.replace('tailwindcss/', 'tailwindcss/') + '.css')

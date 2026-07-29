@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowRight, Clock, Puzzle, Search, Zap } from 'lucide-react'
 import { useCharactersContext } from '@/entities/character'
 import { ICON_MAP, PLATFORM_COLORS } from './icons'
+import Link from 'next/link'
 
 interface StaticConnector {
   slug: string
@@ -225,13 +226,13 @@ export function MarketplaceLandingPage() {
                   {t('marketplace.pluginDevDesc')}
                 </p>
               </div>
-              <a
+              <Link
                 href="/projects"
                 className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-2)]"
               >
                 {t('marketplace.goToProjects')}
                 <ArrowRight size={13} />
-              </a>
+              </Link>
             </div>
           </div>
         </div>

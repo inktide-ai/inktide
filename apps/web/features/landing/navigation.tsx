@@ -4,6 +4,7 @@ import { NavigationScrollShell } from './navigation-scroll-shell'
 import NavigationActions from './navigation-actions'
 import type { NavItem } from './navigation-actions'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 
 const menuItemClass = cn(
   'relative inline-flex items-center',
@@ -28,14 +29,14 @@ export default async function Navigation() {
       <div className="max-w-[1400px] h-full mx-auto flex items-center justify-between gap-8">
 
         <div className="flex items-center gap-3">
-          <a
+          <Link
             href="/"
             aria-label="inktide"
             className="flex items-center gap-[0.55rem] no-underline flex-shrink-0"
           >
             <img src="/logo/icon_main_white.svg" className="logo-dark  h-7 w-auto object-contain -mt-1" alt="" aria-hidden />
             <img src="/logo/icon_main.svg"       className="logo-light h-7 w-auto object-contain -mt-1" alt="" aria-hidden />
-          </a>
+          </Link>
 
           <div className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (

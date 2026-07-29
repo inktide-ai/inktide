@@ -10,7 +10,15 @@ interface RealtimeStore {
   consumers: number
   connect: (channelId: string, getToken: () => Promise<string>) => Promise<void>
   disconnect: () => Promise<void>
-  on: (event: string, handler: (...args: any[]) => void) => () => void
+  /**
+   * Subscribe to a hub event. Generic over the handler's arguments so each
+   * caller keeps its own payload type instead of widening the store's
+   * interface to `any`. Returns an unsubscribe function.
+   */
+  on: <TArgs extends unknown[]>(
+    event: string,
+    handler: (...args: TArgs) => void,
+  ) => () => void
 }
 
 export const useRealtimeStore = create<RealtimeStore>((set, get) => ({
@@ -63,11 +71,12 @@ export const useRealtimeStore = create<RealtimeStore>((set, get) => ({
   },
 
   on: (event, handler) => {
-    const { connection } = get()
-    connection?.on(event, handler)
+    // SignalR types its callback as (...args: any[]) => void, so the widening
+    // happens here once rather than in every caller's payload type.
+    const forward = handler as (...args: unknown[]) => void
+    get().connection?.on(event, forward)
     return () => {
-      const { connection: conn } = get()
-      conn?.off(event, handler)
+      get().connection?.off(event, forward)
     }
   },
 }))

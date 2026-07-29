@@ -81,7 +81,7 @@ export default function SoulsListPage() {
       queryKeys.souls.all,
       (old) => {
         if (!old) return old
-        let remaining = [...reordered]
+        const remaining = [...reordered]
         return {
           ...old,
           pages: old.pages.map((page) => {

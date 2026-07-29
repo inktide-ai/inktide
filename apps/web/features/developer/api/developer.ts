@@ -45,7 +45,7 @@ export interface CreateApplicationRequest {
   scopes: OAuthScope[]
 }
 
-export interface UpdateApplicationRequest extends CreateApplicationRequest {}
+export type UpdateApplicationRequest = CreateApplicationRequest
 
 export async function getMyApps(): Promise<ApplicationDto[]> {
   const res = await apiFetch('/api/v1/developer/apps')

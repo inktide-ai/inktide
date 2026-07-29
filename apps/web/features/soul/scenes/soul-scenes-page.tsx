@@ -129,7 +129,7 @@ function SceneButton({ id, name, isActive, kindLabel, activeLabel, bgStyle, tagN
   )
 }
 
-interface SortableSceneButtonProps extends SceneButtonProps {}
+type SortableSceneButtonProps = SceneButtonProps
 
 function SortableSceneButton(props: SortableSceneButtonProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.id })

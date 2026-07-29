@@ -1,0 +1,245 @@
+{
+  "app/(authenticated)/(developer)/developer/layout.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "app/(authenticated)/edit/sandbox/_sandbox-layout-client.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "app/oauth/authorize/page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "entities/character/hooks/characters/useCharacterMutations.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "entities/character/hooks/useCharacters.ts": {
+    "react-hooks/refs": {
+      "count": 4
+    }
+  },
+  "entities/soul/hooks/use-card-model.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "entities/soul/hooks/use-card-scene.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/account/edit-profile-modal.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/account/panels/profile-panel.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/account/panels/sessions-panel.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/account/protected-route.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/avatar/renderers/glb-renderer.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "features/avatar/renderers/vrm-renderer.tsx": {
+    "react-hooks/refs": {
+      "count": 8
+    }
+  },
+  "features/brain/components/remote-provider-panel.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "features/brain/hooks/useOllamaCredentials.ts": {
+    "react-hooks/refs": {
+      "count": 3
+    }
+  },
+  "features/brain/provider-settings-page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  },
+  "features/character-editor/account-avatar-panel.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/character-editor/banner-color-picker.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/character-editor/hooks/useSceneSettings.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/character-editor/hooks/useVoiceSandbox.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  },
+  "features/character-editor/tabs/channel-tab.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/character-editor/tabs/emotion-panel.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/character-editor/tabs/useModelTab.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/checkout/checkout-page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  },
+  "features/invite/invite-page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/landing/hero-inktide.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/landing/navigation-actions.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/obs/obs-scene-page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/organization/invite-members-modal.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/projects/hooks/useProjectSnapshotCapture.ts": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "features/projects/project-background-page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/projects/project-grid-card-connected.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    }
+  },
+  "features/projects/project-list-row-connected.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    }
+  },
+  "features/projects/project-overview-page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/projects/setup-checklist.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/projects/soul-project-overview-page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/projects/soul-projects-page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/soul/activity/components/activity-feed.tsx": {
+    "react-hooks/immutability": {
+      "count": 1
+    }
+  },
+  "features/soul/components/soul-card.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/soul/hooks/useVoiceProvider.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/soul/scenes/create-preset-modal.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/soul/scenes/scenes-page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/soul/scenes/soul-scenes-page.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/workspace-home/hooks/useSearch.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/workspace-home/soul-creation-wizard/wizard-discord-config.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "features/workspace-home/tetris-background.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    }
+  },
+  "shared/services/auth/AuthContext.tsx": {
+    "react-hooks/preserve-manual-memoization": {
+      "count": 3
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  },
+  "widgets/workspace-sidebar/ui/WorkspaceSidebar.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  }
+}

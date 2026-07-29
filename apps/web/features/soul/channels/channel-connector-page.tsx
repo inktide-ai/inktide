@@ -68,30 +68,45 @@ function PlatformIcon({ theme }: { theme: PanelTheme }) {
   )
 }
 
+// Split in two on purpose. Validating connectorId inside the hook-bearing
+// component would skip its hooks for an unknown platform, and React faults on
+// the next render when the hook count changes. Routing the decision through a
+// parent keeps the child's hook order fixed for its whole lifetime.
 export default function ChannelConnectorPage() {
-  const params       = useParams()
-  const searchParams = useSearchParams()
-  const soulId       = params.id as string
-  const connectorId  = (params.connector_id as string).toLowerCase()
-  const { t } = useTranslation('channels')
+  const params      = useParams()
+  const soulId      = params.id as string
+  const connectorId = (params.connector_id as string).toLowerCase()
 
   // Guard against invalid connectorId - avoids unsafe type cast in sub-components
   if (!isActiveChannel(connectorId)) {
-    return (
-      <div className="min-h-screen px-6 py-8">
-        <div className="mx-auto max-w-[1200px]">
-          <Link
-            href={`/souls/${soulId}/channels`}
-            className="inline-flex items-center gap-1.5 text-body text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-8"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 18l-6-6 6-6"/></svg>
-            {t('connector.backToChannels')}
-          </Link>
-          <p className="text-body text-[var(--text-secondary)]">{t('connector.notAvailable')}</p>
-        </div>
-      </div>
-    )
+    return <ChannelNotAvailable soulId={soulId} />
   }
+
+  return <ChannelConnector soulId={soulId} connectorId={connectorId} />
+}
+
+function ChannelNotAvailable({ soulId }: { soulId: string }) {
+  const { t } = useTranslation('channels')
+
+  return (
+    <div className="min-h-screen px-6 py-8">
+      <div className="mx-auto max-w-[1200px]">
+        <Link
+          href={`/souls/${soulId}/channels`}
+          className="inline-flex items-center gap-1.5 text-body text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-8"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 18l-6-6 6-6"/></svg>
+          {t('connector.backToChannels')}
+        </Link>
+        <p className="text-body text-[var(--text-secondary)]">{t('connector.notAvailable')}</p>
+      </div>
+    </div>
+  )
+}
+
+function ChannelConnector({ soulId, connectorId }: { soulId: string; connectorId: ChannelPlatform }) {
+  const searchParams = useSearchParams()
+  const { t } = useTranslation('channels')
 
   const sc = CHANNEL_STATIC[connectorId]
 

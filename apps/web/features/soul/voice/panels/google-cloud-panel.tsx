@@ -10,11 +10,14 @@ import { ApiKeyConnectionPanel } from './api-key-panel'
 export function GoogleCloudSettings() {
   const { t } = useTranslation('voice')
   const { selected, selectedId, updateCharacter } = useCharactersContext()
+  // Hooks must run on every render: the early return below would
+  // otherwise change the hook order once a character is selected.
+  const apiKey = selected?.tts.apiKey ?? ''
+  const { voices, loading: voicesLoading } = useVoiceProvider('google-cloud-tts', apiKey)
+
   if (!selected || !selectedId) return null
   const tts = selected.tts
   const patch = (p: Partial<typeof tts>) => updateCharacter(selectedId, { tts: { ...tts, ...p } })
-  const apiKey = tts.apiKey ?? ''
-  const { voices, loading: voicesLoading } = useVoiceProvider('google-cloud-tts', apiKey)
 
   return (
     <>

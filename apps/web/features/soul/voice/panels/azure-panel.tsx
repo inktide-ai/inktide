@@ -24,13 +24,16 @@ export const AZURE_REGIONS = [
 export function AzureSpeechSettings() {
   const { t } = useTranslation('voice')
   const { selected, selectedId, updateCharacter } = useCharactersContext()
+  // Hooks must run on every render: the early return below would
+  // otherwise change the hook order once a character is selected.
+  const apiKey = selected?.tts.apiKey ?? ''
+  const region = selected?.tts.baseUrl ?? ''
+  const { voices, loading: voicesLoading } = useVoiceProvider('azure-speech', apiKey, region)
+
   if (!selected || !selectedId) return null
   const tts = selected.tts
   const patch = (p: Partial<typeof tts>) => updateCharacter(selectedId, { tts: { ...tts, ...p } })
-  const apiKey = tts.apiKey ?? ''
-  const region = tts.baseUrl ?? ''
   const canLoadVoices = apiKey.trim() && region.trim()
-  const { voices, loading: voicesLoading } = useVoiceProvider('azure-speech', apiKey, region)
 
   return (
     <>

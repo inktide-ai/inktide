@@ -104,6 +104,10 @@ export function WizardDiscordConfig({
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar space-y-4">
+        {/* Route handler that starts the Discord OAuth redirect, not a page.
+            next/link would resolve it client-side and never leave the app,
+            so a plain anchor is required here. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/api/auth/discord"
           className="flex h-10 w-full items-center justify-center gap-2 rounded-xl text-body font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80"

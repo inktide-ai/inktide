@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import { AppCard } from '@/features/developer/components/app-card'
 import { useMyApps, useDeleteApp } from '@/features/developer/hooks/use-developer-apps'
+import Link from 'next/link'
 
 export default function MyAppsPage() {
   const router = useRouter()
@@ -31,12 +32,12 @@ export default function MyAppsPage() {
             {t('apps.heroSubtitle')}
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a
+            <Link
               href="/developer/apps/new"
               className="inline-flex h-11 items-center gap-1.5 rounded-xl bg-[var(--accent-primary)] px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
             >
               {t('apps.newApplication')}
-            </a>
+            </Link>
             <a
               href="/developer/api"
               className="inline-flex h-11 items-center rounded-xl border border-[var(--border-default)] px-5 text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-1)]"
