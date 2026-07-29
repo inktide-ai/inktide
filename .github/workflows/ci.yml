@@ -10,10 +10,25 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Every job gets the least privilege it needs. The default token is
+# read/write on contents, which no job here requires.
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '10.x'
+  NODE_VERSION: '22'
+  # Matches requires-python in the workers and the python:3.12-slim base image
+  # their Dockerfiles use. Test what production runs.
+  PYTHON_VERSION: '3.12'
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
 jobs:
-  # -------------------------------------------------------------
+  # ---------------------------------------------------------------
   # .NET backend: restore -> build -> test
-  # -------------------------------------------------------------
+  # ---------------------------------------------------------------
   backend:
     name: .NET Build & Test
     runs-on: ubuntu-latest
@@ -22,12 +37,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET 10
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
+      # Central Package Management gives every project one pinned version set,
+      # so the lock is keyed on the two manifests plus the project files.
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', 'Directory.Build.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
         run: dotnet restore Inktide.API.sln
 
       - name: Build (Release)
@@ -35,11 +59,10 @@ jobs:
 
       - name: Test
         run: dotnet test Inktide.API.sln --no-build -c Release -v minimal
-        # Will be a no-op until test projects are added; keeps the step so it's visible in CI.
 
-  # -------------------------------------------------------------
-  # Frontend: install -> lint -> build
-  # -------------------------------------------------------------
+  # ---------------------------------------------------------------
+  # Frontend: lint -> typecheck -> build -> test
+  # ---------------------------------------------------------------
   frontend:
     name: Frontend Build & Lint
     runs-on: ubuntu-latest
@@ -48,39 +71,46 @@ jobs:
       run:
         working-directory: apps/web
 
+    env:
+      # next.config.ts refuses to produce a production build without this, so
+      # that an image can never ship pointing at localhost. CI only needs the
+      # build to succeed, so a placeholder is supplied explicitly.
+      BACKEND_URL: http://127.0.0.1:5001
+      NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:8080
+      NEXT_PUBLIC_KEYCLOAK_REALM: chimera
+      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: chimera-web
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: apps/web/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
+      # --prune-suppressions fails the run when eslint-suppressions.json lists
+      # a violation that no longer exists, so the baseline shrinks with the
+      # code instead of going stale. See eslint-suppressions.README.md.
       - name: Lint
-        run: npm run lint
+        run: npm run lint -- --prune-suppressions
+
+      - name: Typecheck
+        run: npm run typecheck
 
       - name: Build
         run: npm run build
-        env:
-          NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:8080
-          NEXT_PUBLIC_KEYCLOAK_REALM: chimera
-          NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: chimera-web
 
       - name: Test
         run: npm run test -- --run
-        env:
-          NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:8080
-          NEXT_PUBLIC_KEYCLOAK_REALM: chimera
-          NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: chimera-web
 
-  # -------------------------------------------------------------
+  # ---------------------------------------------------------------
   # Python AI workers: ruff lint + pytest
-  # -------------------------------------------------------------
+  # ---------------------------------------------------------------
   python:
     name: Python Workers
     runs-on: ubuntu-latest
@@ -98,12 +128,16 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ${{ matrix.worker }}/pyproject.toml
 
       - name: Install dependencies
         run: pip install -e ".[dev]"
         working-directory: ${{ matrix.worker }}
 
+      # Rules come from the repository-root ruff.toml, which ruff finds by
+      # walking up from each file. Workers do not carry their own copy.
       - name: Lint (ruff)
         run: python -m ruff check .
         working-directory: ${{ matrix.worker }}
@@ -112,13 +146,16 @@ jobs:
         run: python -m pytest -q
         working-directory: ${{ matrix.worker }}
 
-  # -------------------------------------------------------------
+  # ---------------------------------------------------------------
   # Rust crates: fmt + clippy + test
-  # -------------------------------------------------------------
+  # ---------------------------------------------------------------
   rust:
     name: Rust Crates
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: crates
 
     steps:
       - uses: actions/checkout@v4
@@ -133,24 +170,26 @@ jobs:
 
       - name: Format check
         run: cargo fmt --check
-        working-directory: crates
 
+      # Lint levels live in [workspace.lints] in crates/Cargo.toml, so a local
+      # `cargo clippy` and this step apply exactly the same policy. --all-targets
+      # also covers benches and tests, which the bare invocation skipped - that
+      # is how an unformatted bench reached the default branch.
       - name: Clippy
-        run: cargo clippy -- -D warnings
-        working-directory: crates
+        run: cargo clippy --workspace --all-targets
 
       - name: Test
-        run: cargo test
-        working-directory: crates
+        run: cargo test --workspace
 
-  # -------------------------------------------------------------
-  # Docker image build (on push to main only)
-  # -------------------------------------------------------------
+  # ---------------------------------------------------------------
+  # Docker image: builds from source on every PR
+  # ---------------------------------------------------------------
   docker:
     name: Docker Build
     runs-on: ubuntu-latest
+    # The image is built from the same sources these jobs check, so there is no
+    # point spending build minutes on a tree that already failed.
     needs: [backend, frontend]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 20
 
     steps:
@@ -159,12 +198,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build API image (no push)
-        uses: docker/build-push-action@v5
+      # Previously this only ran on push to main, so a Dockerfile change could
+      # not break until after merge. It now runs on pull requests too: the
+      # image builds from source and no longer depends on a publish/ directory
+      # that is gitignored and absent from a clean checkout.
+      - name: Build API image
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
+          platforms: linux/amd64
           push: false
+          load: false
           tags: inktide-api:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

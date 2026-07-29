@@ -10,6 +10,9 @@ on:
         default: '10'
         required: false
 
+permissions:
+  contents: read
+
 jobs:
   benchmark:
     name: Pipeline latency SLO check
@@ -19,15 +22,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # A scheduled run against an environment that was never configured would
+      # fail every morning and train everyone to ignore the badge. Stop early
+      # and say why instead.
+      - name: Verify benchmark environment is configured
+        env:
+          API_URL: ${{ secrets.BENCH_API_URL }}
+        run: |
+          if [ -z "$API_URL" ]; then
+            echo "::error::BENCH_API_URL is not set. This workflow measures a deployed" \
+                 "environment; configure BENCH_API_URL, BENCH_CHANNEL_ID, BENCH_JWT_TOKEN" \
+                 "and BENCH_REDIS_URL in repository secrets."
+            exit 1
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: tools/pipeline-bench/package.json
+          # Key the cache on the lock file: package.json can be unchanged while
+          # the resolved tree moves underneath it.
+          cache-dependency-path: tools/pipeline-bench/package-lock.json
 
+      # ci, not install: a benchmark that silently picks up different
+      # dependency versions than the last run is not a benchmark.
       - name: Install dependencies
-        run: npm install
+        run: npm ci
         working-directory: tools/pipeline-bench
 
       - name: Run benchmark
