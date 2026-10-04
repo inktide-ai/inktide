@@ -4,6 +4,7 @@
 #   ./make-env.sh <app-host>          # once: writes .env with generated secrets
 #   docker compose up -d --build
 #   ./setup-keycloak.sh               # once: realm, client and demo user
+#   ./setup-models.sh                 # once: local Ollama models (4-thread chat model)
 #
 # Every service restarts with the Docker daemon, so stopping and starting the VM
 # brings the stack back without manual steps.
@@ -64,6 +65,8 @@ services:
       context: ../..
       dockerfile: Dockerfile
     image: inktide-api:server
+    # Rhubarb runs here on every sentence, so it belongs with the voice cores.
+    cpuset: ${VOICE_CPUS:-}
     env_file: .env
     environment:
       ASPNETCORE_ENVIRONMENT: Staging
@@ -84,6 +87,7 @@ services:
       TtsProviders__Kokoro__Endpoint: http://kokoro:8880/v1
       OllamaSettings__Host: http://ollama
       EmotionClassificationOptions__OllamaBaseUrl: http://ollama:11434
+      EmotionClassificationOptions__Model: qwen2.5-1.5b-4t
       MemoryOptions__ScribeBaseUrl: http://scribe:8000
       TelegramSettings__FrontendBaseUrl: https://${APP_HOST}
       BillingSettings__SuccessUrl: https://${APP_HOST}/billing/success
@@ -211,19 +215,29 @@ services:
     volumes:
       - minio_data:/data
 
-  # CPU weights: voice synthesis sits on the reply path, so it outranks the
-  # background memory work (Scribe's fact extraction through Ollama), which
-  # runs a few seconds after each reply. Weights only apply under contention;
-  # pinning cores instead made Kokoro ~40% slower when the machine was idle.
+  # Voice synthesis sits on the reply path; Scribe's fact extraction through
+  # Ollama runs a few seconds after each reply, i.e. while the next reply is
+  # voiced. Weights give Kokoro priority. On VMs without hyperthreads,
+  # make-env.sh also splits the cores (VOICE_CPUS / BACKGROUND_CPUS): with
+  # Kokoro's 8 PyTorch threads and Ollama's on the same 8 cores, a 50-character
+  # sentence took 10 s instead of 0.7 s. With hyperthreads the split put Kokoro
+  # on shared siblings and slowed it down, so it is left empty there.
   kokoro:
     <<: *restart
     image: ghcr.io/remsky/kokoro-fastapi-cpu:v0.2.2
     cpu_shares: 2048
+    cpuset: ${VOICE_CPUS:-}
+    environment:
+      OMP_NUM_THREADS: ${VOICE_THREADS:-4}
 
   ollama:
     <<: *restart
     image: ollama/ollama:latest
     cpu_shares: 256
+    cpuset: ${BACKGROUND_CPUS:-}
+    # Cap matches the 4-thread models from setup-models.sh: half the cores stay
+    # free for Kokoro even while Scribe extracts facts.
+    cpus: "4"
     environment:
       # The per-message emotion check must not queue behind a fact extraction.
       OLLAMA_NUM_PARALLEL: "2"
@@ -233,12 +247,13 @@ services:
   scribe:
     <<: *restart
     cpu_shares: 256
+    cpuset: ${BACKGROUND_CPUS:-}
     build:
       context: ../../fast-api/ai-worker/embeddings/scribe-model
     image: inktide-scribe:server
     environment:
       OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_CHAT_MODEL: qwen2.5:1.5b
+      OLLAMA_CHAT_MODEL: qwen2.5-1.5b-4t
       OLLAMA_EMBED_MODEL: nomic-embed-text
     depends_on: [ollama]
 

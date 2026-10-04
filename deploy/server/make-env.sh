@@ -11,11 +11,25 @@ APP_HOST="${1:?usage: ./make-env.sh <app-host>}"
 [ -e .env ] && { echo ".env already exists, not overwriting" >&2; exit 1; }
 
 secret() { openssl rand -base64 33 | tr -d '/+=' | cut -c1-32; }
+
+# Split cores between the voice path and background models only on 8+ cores
+# without hyperthreads (see the kokoro service in compose.yml).
+cores=$(nproc 2>/dev/null || echo 1)
+tpc=$(lscpu 2>/dev/null | awk -F: '/Thread\(s\) per core/ {gsub(/ /, "", $2); print $2}')
+voice_cpus=; background_cpus=
+if [ "$cores" -ge 8 ] && [ "${tpc:-2}" = 1 ]; then
+  half=$((cores / 2))
+  voice_cpus="0-$((half - 1))"; background_cpus="${half}-$((cores - 1))"
+fi
 pg=$(secret); kcpg=$(secret); kcadmin=$(secret); rabbit=$(secret); minio=$(secret)
 
 umask 077
 cat > .env <<EOF
 APP_HOST=${APP_HOST}
+
+# CPU split (empty = no pinning)
+VOICE_CPUS=${voice_cpus}
+BACKGROUND_CPUS=${background_cpus}
 
 # Compose-level secrets (also read by the containers that own them)
 POSTGRES_PASSWORD=${pg}
