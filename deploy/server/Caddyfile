@@ -1,0 +1,24 @@
+# TLS certificates are issued automatically by Let's Encrypt for every site below.
+# APP_HOST comes from deploy/server/.env (e.g. 51-250-39-195.sslip.io or a real domain).
+
+{$APP_HOST} {
+	encode zstd gzip
+
+	# SignalR goes straight to the API: Caddy proxies WebSocket upgrades natively,
+	# so realtime traffic does not depend on Next.js rewrites.
+	handle /hubs/* {
+		reverse_proxy api:5001
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+}
+
+auth.{$APP_HOST} {
+	reverse_proxy keycloak:8080
+}
+
+s3.{$APP_HOST} {
+	reverse_proxy minio:9000
+}
