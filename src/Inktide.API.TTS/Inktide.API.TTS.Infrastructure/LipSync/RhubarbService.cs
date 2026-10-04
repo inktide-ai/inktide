@@ -17,7 +17,8 @@ namespace Inktide.API.TTS.Infrastructure.LipSync;
 /// </summary>
 public sealed class RhubarbService : IRhubarbService
 {
-    // Rhubarb on a typical 2-3 s TTS clip finishes in < 500 ms; 8 s is generous.
+    // The phonetic recognizer takes ~1 s on a 3 s clip (8 vCPU EPYC); the default
+    // pocketSphinx took ~4.4 s for nearly the same cues, and the audio waits for it.
     private static readonly TimeSpan AnalysisTimeout = TimeSpan.FromSeconds(8);
 
     private static readonly JsonSerializerOptions JsonOpts =
@@ -76,7 +77,7 @@ public sealed class RhubarbService : IRhubarbService
         var psi = new ProcessStartInfo
         {
             FileName               = _executable,
-            ArgumentList           = { "--machineReadable", "-f", "json", wavPath },
+            ArgumentList           = { "--machineReadable", "-f", "json", "-r", "phonetic", wavPath },
             RedirectStandardOutput = true,
             RedirectStandardError  = true,
             UseShellExecute        = false,
