@@ -10,7 +10,9 @@ namespace Inktide.API.Synapse.Infrastructure.Llm;
 /// <remarks>
 /// <b>Narration</b> - splits on sentence-ending punctuation (.!?) with a lookahead buffer
 /// so each chunk is a complete sentence. Keeps latency low by yielding as soon as
-/// a sentence boundary is confirmed.
+/// a sentence boundary is confirmed. The first chunk may also end at a clause boundary
+/// (, ; : or a dash): audio starts only once the first chunk is synthesized, and an
+/// opener like "Oh, benchmark," is voiced far sooner than a whole long sentence.
 ///
 /// <b>Chat</b> - buffers the entire LLM response and emits it as one chunk.
 /// Preserves semantic coherence for short conversational replies where latency matters
@@ -20,6 +22,9 @@ internal static class SentenceAccumulator
 {
 
     private const int MinSentenceLength = 10;
+
+    // Shorter first clauses ("Oh,") would be voiced as a lone word with an odd cadence.
+    private const int MinFirstClauseLength = 12;
 
     private static readonly HashSet<string> Abbreviations = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -46,13 +51,23 @@ internal static class SentenceAccumulator
 
         // Narration: yield one sentence at a time.
         var buffer = new StringBuilder();
+        var first  = true;
 
         await foreach (var tok in tokens.WithCancellation(ct))
         {
             buffer.Append(tok);
 
+            if (first && TryExtractFirstClause(buffer, out var clause))
+            {
+                first = false;
+                yield return clause;
+            }
+
             while (TryExtractSentence(buffer, out var sentence))
+            {
+                first = false;
                 yield return sentence;
+            }
         }
 
         // Flush any remaining text that didn't end with punctuation.
@@ -94,6 +109,44 @@ internal static class SentenceAccumulator
         }
 
         sentence = string.Empty;
+        return false;
+    }
+
+
+    private static bool TryExtractFirstClause(StringBuilder buffer, out string clause)
+    {
+        var text = buffer.ToString();
+
+        for (var i = MinFirstClauseLength - 1; i < text.Length; i++)
+        {
+            var ch = text[i];
+
+            // A sentence that ends first is TryExtractSentence's to take.
+            if (ch is '.' or '!' or '?')
+                break;
+
+            var isDash = ch is '—' or '–';
+            if (!isDash && ch is not (',' or ';' or ':'))
+                continue;
+
+            // Commas, semicolons and colons count only before whitespace ("1,000" and
+            // "3:30" stay whole); wait for the next token when the buffer ends here.
+            // Dashes are often written without spaces ("jam—perfect").
+            if (!isDash)
+            {
+                if (i + 1 >= text.Length)
+                    break;
+                if (!char.IsWhiteSpace(text[i + 1]))
+                    continue;
+            }
+
+            var candidate = (isDash ? text[..i] : text[..(i + 1)]).Trim();
+            buffer.Remove(0, i + 1);
+            clause = candidate;
+            return true;
+        }
+
+        clause = string.Empty;
         return false;
     }
 
