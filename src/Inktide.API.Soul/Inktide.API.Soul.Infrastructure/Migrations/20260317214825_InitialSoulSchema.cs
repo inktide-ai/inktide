@@ -218,34 +218,27 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "memory_metadata",
-                schema: "soul",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ai_card_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    qdrant_point_id = table.Column<string>(type: "text", nullable: false),
-                    fact_text = table.Column<string>(type: "text", nullable: false),
-                    category = table.Column<string>(type: "text", nullable: false, defaultValue: "general"),
-                    source_type = table.Column<string>(type: "text", nullable: false, defaultValue: "chat"),
-                    importance = table.Column<double>(type: "double precision", nullable: false, defaultValue: 0.5),
-                    remembered_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    last_recalled_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    recall_count = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
-                    expires_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_memory_metadata", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_memory_metadata_ai_cards_ai_card_id",
-                        column: x => x.ai_card_id,
-                        principalSchema: "soul",
-                        principalTable: "ai_cards",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            // memory_metadata is now owned by MemoryDbContext, whose InitialCreate creates the same
+            // table idempotently. On a fresh database the two contexts migrate concurrently and
+            // either may get there first, so this side must tolerate the table already existing.
+            migrationBuilder.Sql("""
+                CREATE TABLE IF NOT EXISTS soul.memory_metadata (
+                    id               uuid                     NOT NULL,
+                    ai_card_id       uuid                     NOT NULL,
+                    qdrant_point_id  text                     NOT NULL,
+                    fact_text        text                     NOT NULL,
+                    category         text                     NOT NULL DEFAULT 'general',
+                    source_type      text                     NOT NULL DEFAULT 'chat',
+                    importance       double precision         NOT NULL DEFAULT 0.5,
+                    remembered_at    timestamptz              NOT NULL,
+                    last_recalled_at timestamptz,
+                    recall_count     integer                  NOT NULL DEFAULT 0,
+                    expires_at       timestamptz,
+                    CONSTRAINT "PK_memory_metadata" PRIMARY KEY (id),
+                    CONSTRAINT "FK_memory_metadata_ai_cards_ai_card_id" FOREIGN KEY (ai_card_id)
+                        REFERENCES soul.ai_cards (id) ON DELETE CASCADE
+                )
+                """);
 
             migrationBuilder.CreateTable(
                 name: "usage_daily",
@@ -361,38 +354,11 @@ namespace Inktide.API.Soul.Infrastructure.Migrations
                 columns: new[] { "provider", "model_id" },
                 unique: true);
 
-            migrationBuilder.CreateIndex(
-                name: "idx_memory_card",
-                schema: "soul",
-                table: "memory_metadata",
-                column: "ai_card_id");
-
-            migrationBuilder.CreateIndex(
-                name: "idx_memory_category",
-                schema: "soul",
-                table: "memory_metadata",
-                columns: new[] { "ai_card_id", "category" });
-
-            migrationBuilder.CreateIndex(
-                name: "idx_memory_expiry",
-                schema: "soul",
-                table: "memory_metadata",
-                column: "expires_at",
-                filter: "expires_at IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "idx_memory_importance",
-                schema: "soul",
-                table: "memory_metadata",
-                columns: new[] { "ai_card_id", "importance" },
-                descending: new[] { false, true });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_memory_metadata_ai_card_id_qdrant_point_id",
-                schema: "soul",
-                table: "memory_metadata",
-                columns: new[] { "ai_card_id", "qdrant_point_id" },
-                unique: true);
+            migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS idx_memory_card ON soul.memory_metadata (ai_card_id)");
+            migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS idx_memory_category ON soul.memory_metadata (ai_card_id, category)");
+            migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS idx_memory_expiry ON soul.memory_metadata (expires_at) WHERE expires_at IS NOT NULL");
+            migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS idx_memory_importance ON soul.memory_metadata (ai_card_id, importance DESC)");
+            migrationBuilder.Sql("""CREATE UNIQUE INDEX IF NOT EXISTS "IX_memory_metadata_ai_card_id_qdrant_point_id" ON soul.memory_metadata (ai_card_id, qdrant_point_id)""");
 
             migrationBuilder.CreateIndex(
                 name: "IX_plans_name",

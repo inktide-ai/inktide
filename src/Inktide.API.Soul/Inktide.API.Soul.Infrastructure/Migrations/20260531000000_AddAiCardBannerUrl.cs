@@ -1,3 +1,5 @@
+using Inktide.API.Soul.Infrastructure.DbContext;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -5,7 +7,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Inktide.API.Soul.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddAiCardBannerUrl : Migration
+    [DbContext(typeof(SoulDbContext))]
+[Migration("20260531000000_AddAiCardBannerUrl")]
+public partial class AddAiCardBannerUrl : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

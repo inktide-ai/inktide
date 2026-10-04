@@ -57,6 +57,7 @@
     <ProjectReference Include="..\Inktide.API.Profile\Inktide.API.Profile.REST\Inktide.API.Profile.REST.csproj" />
     <!-- Soul -->
     <ProjectReference Include="..\Inktide.API.Soul\Inktide.API.Soul.Application\Inktide.API.Soul.Application.csproj" />
+    <ProjectReference Include="..\Inktide.API.Soul\Inktide.API.Soul.Infrastructure\Inktide.API.Soul.Infrastructure.csproj" />
     <ProjectReference Include="..\Inktide.API.Soul\Inktide.API.Soul.REST\Inktide.API.Soul.REST.csproj" />
     <ProjectReference Include="..\Inktide.API.Soul\Inktide.API.Soul.Grpc\Inktide.API.Soul.Grpc.csproj" />
     <ProjectReference Include="..\Inktide.API.Soul\Inktide.API.Soul.Grpc.AiCards.Service\Inktide.API.Soul.Grpc.AiCards.Service.csproj" />

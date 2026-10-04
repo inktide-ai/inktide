@@ -1,3 +1,5 @@
+using Inktide.API.Billing.Infrastructure.DbContext;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -5,6 +7,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Inktide.API.Billing.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(BillingDbContext))]
+    [Migration("20260603120000_AddSubscriptionExpiryIndex")]
     public partial class AddSubscriptionExpiryIndex : Migration
     {
         /// <inheritdoc />

@@ -1,4 +1,6 @@
 using System;
+using Inktide.API.Marketplace.Infrastructure.DbContext;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,6 +8,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Inktide.API.Marketplace.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(MarketplaceDbContext))]
+    [Migration("20260529200000_AddConnectorApplicationId")]
     public partial class AddConnectorApplicationId : Migration
     {
         /// <inheritdoc />

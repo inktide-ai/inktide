@@ -125,6 +125,7 @@ public sealed class BillingInfrastructureStartup : IStartup, IBusModuleConfigura
         services.AddScoped<ISubscriptionService, SubscriptionService>();
         services.AddScoped<IUserPlanResolver, PlanLimitResolver>();
 
+        services.AddHostedService<BillingDbInitializer>();
         services.AddHostedService<Messaging.UserAccountDeletedConsumer>();
         services.AddHostedService<Services.SubscriptionExpiryJob>();
         services.AddHostedService<Providers.YooKassa.YooKassaRenewalJob>();

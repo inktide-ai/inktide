@@ -1,3 +1,5 @@
+using Inktide.API.Project.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -5,6 +7,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Inktide.API.Project.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(ProjectDbContext))]
+    [Migration("20260605000000_AddProjectPreviewUrl")]
     public partial class AddProjectPreviewUrl : Migration
     {
         /// <inheritdoc />

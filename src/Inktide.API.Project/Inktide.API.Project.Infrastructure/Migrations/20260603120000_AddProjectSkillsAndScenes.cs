@@ -1,9 +1,13 @@
+using Inktide.API.Project.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Inktide.API.Project.Infrastructure.Migrations
 {
+    [DbContext(typeof(ProjectDbContext))]
+    [Migration("20260603120000_AddProjectSkillsAndScenes")]
     public partial class AddProjectSkillsAndScenes : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

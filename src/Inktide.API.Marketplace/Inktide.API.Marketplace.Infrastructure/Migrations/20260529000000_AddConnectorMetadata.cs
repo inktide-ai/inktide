@@ -1,3 +1,5 @@
+using Inktide.API.Marketplace.Infrastructure.DbContext;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -7,6 +9,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Inktide.API.Marketplace.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(MarketplaceDbContext))]
+    [Migration("20260529000000_AddConnectorMetadata")]
     public partial class AddConnectorMetadata : Migration
     {
         /// <inheritdoc />
@@ -55,45 +59,42 @@ namespace Inktide.API.Marketplace.Infrastructure.Migrations
                 maxLength: 512,
                 nullable: true);
 
-            migrationBuilder.UpdateData(
-                schema: "marketplace",
-                table: "connectors",
-                keyColumn: "id",
-                keyValue: new Guid("00000000-0000-0000-0000-000000000001"),
-                columns: new[] { "short_description", "auth_type", "is_native", "author_name", "website_url" },
-                values: new object[] { "Route guild messages to your AI character", "oauth", true, "Inktide", null });
+            // Raw SQL rather than UpdateData: this hand-written migration has no target model,
+            // so EF cannot resolve the column types UpdateData needs.
+            migrationBuilder.Sql("""
+                UPDATE marketplace.connectors
+                SET short_description = 'Route guild messages to your AI character', auth_type = 'oauth', is_native = true,
+                    author_name = 'Inktide', website_url = NULL
+                WHERE id = '00000000-0000-0000-0000-000000000001'
+                """);
 
-            migrationBuilder.UpdateData(
-                schema: "marketplace",
-                table: "connectors",
-                keyColumn: "id",
-                keyValue: new Guid("00000000-0000-0000-0000-000000000002"),
-                columns: new[] { "short_description", "auth_type", "is_native", "author_name", "website_url" },
-                values: new object[] { "Read and respond to Twitch chat live", "oauth", true, "Inktide", null });
+            migrationBuilder.Sql("""
+                UPDATE marketplace.connectors
+                SET short_description = 'Read and respond to Twitch chat live', auth_type = 'oauth', is_native = true,
+                    author_name = 'Inktide', website_url = NULL
+                WHERE id = '00000000-0000-0000-0000-000000000002'
+                """);
 
-            migrationBuilder.UpdateData(
-                schema: "marketplace",
-                table: "connectors",
-                keyColumn: "id",
-                keyValue: new Guid("00000000-0000-0000-0000-000000000003"),
-                columns: new[] { "short_description", "auth_type", "is_native", "author_name", "website_url" },
-                values: new object[] { "Telegram bot token — no OAuth needed", "apikey", true, "Inktide", null });
+            migrationBuilder.Sql("""
+                UPDATE marketplace.connectors
+                SET short_description = 'Telegram bot token — no OAuth needed', auth_type = 'apikey', is_native = true,
+                    author_name = 'Inktide', website_url = NULL
+                WHERE id = '00000000-0000-0000-0000-000000000003'
+                """);
 
-            migrationBuilder.UpdateData(
-                schema: "marketplace",
-                table: "connectors",
-                keyColumn: "id",
-                keyValue: new Guid("00000000-0000-0000-0000-000000000004"),
-                columns: new[] { "short_description", "auth_type", "is_native", "author_name", "website_url" },
-                values: new object[] { "YouTube Live chat (coming soon)", "oauth", false, "Inktide", "https://youtube.com" });
+            migrationBuilder.Sql("""
+                UPDATE marketplace.connectors
+                SET short_description = 'YouTube Live chat (coming soon)', auth_type = 'oauth', is_native = false,
+                    author_name = 'Inktide', website_url = 'https://youtube.com'
+                WHERE id = '00000000-0000-0000-0000-000000000004'
+                """);
 
-            migrationBuilder.UpdateData(
-                schema: "marketplace",
-                table: "connectors",
-                keyColumn: "id",
-                keyValue: new Guid("00000000-0000-0000-0000-000000000005"),
-                columns: new[] { "short_description", "auth_type", "is_native", "author_name", "website_url" },
-                values: new object[] { "TikTok LIVE comments (coming soon)", "webhook", false, "Inktide", "https://developers.tiktok.com" });
+            migrationBuilder.Sql("""
+                UPDATE marketplace.connectors
+                SET short_description = 'TikTok LIVE comments (coming soon)', auth_type = 'webhook', is_native = false,
+                    author_name = 'Inktide', website_url = 'https://developers.tiktok.com'
+                WHERE id = '00000000-0000-0000-0000-000000000005'
+                """);
         }
 
         /// <inheritdoc />
