@@ -40,9 +40,12 @@ const nextConfig: NextConfig = {
     const storageOrigin   = process.env.NEXT_PUBLIC_STORAGE_URL   ?? 'http://localhost:9000'
     const csp = [
       "default-src 'self'",
-      // unsafe-eval + unsafe-inline required by Next.js dev mode; removed in production
+      // The App Router streams page data through inline <script> tags in production too.
+      // Without 'unsafe-inline' (or a per-request nonce, which would force every page into
+      // dynamic rendering) the browser blocks them and pages never hydrate: no countdown,
+      // videos or animations. unsafe-eval stays dev-only.
       process.env.NODE_ENV === 'production'
-        ? "script-src 'self' https://js.stripe.com"
+        ? "script-src 'self' 'unsafe-inline' https://js.stripe.com"
         : "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: blob: https: ${storageOrigin}`,
