@@ -211,18 +211,28 @@ services:
     volumes:
       - minio_data:/data
 
+  # CPU weights: voice synthesis sits on the reply path, so it outranks the
+  # background memory work (Scribe's fact extraction through Ollama), which
+  # runs a few seconds after each reply. Weights only apply under contention;
+  # pinning cores instead made Kokoro ~40% slower when the machine was idle.
   kokoro:
     <<: *restart
     image: ghcr.io/remsky/kokoro-fastapi-cpu:v0.2.2
+    cpu_shares: 2048
 
   ollama:
     <<: *restart
     image: ollama/ollama:latest
+    cpu_shares: 256
+    environment:
+      # The per-message emotion check must not queue behind a fact extraction.
+      OLLAMA_NUM_PARALLEL: "2"
     volumes:
       - ollama_data:/root/.ollama
 
   scribe:
     <<: *restart
+    cpu_shares: 256
     build:
       context: ../../fast-api/ai-worker/embeddings/scribe-model
     image: inktide-scribe:server
