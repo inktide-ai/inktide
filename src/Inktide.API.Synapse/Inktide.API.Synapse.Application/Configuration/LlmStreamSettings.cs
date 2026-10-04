@@ -24,6 +24,13 @@ public sealed class LlmStreamSettings
     /// <summary>Provider ID to use when an AiCard's provider is not registered or unavailable.</summary>
     public string FallbackProviderId { get; set; } = "ollama";
 
+    /// <summary>
+    /// When true, every character is answered by <see cref="FallbackProviderId"/> (configured under
+    /// <c>LlmProviders</c>) and the AiCard's own provider, model and BYOK key are ignored. Pins one
+    /// platform model for the whole deployment, e.g. a cloud model for a live demo, without editing cards.
+    /// </summary>
+    public bool ForceFallbackProvider { get; set; }
+
     public int ReadCount { get; set; } = 8;
     public int ReadBlockMilliseconds { get; set; } = 2000;
     public int AutoClaimMinIdleMs { get; set; } = 30_000;

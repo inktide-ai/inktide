@@ -14,6 +14,13 @@ namespace Inktide.API.Synapse.Infrastructure.Providers;
 /// </summary>
 internal sealed class OpenAiCompatChatServiceFactory : IChatServiceFactory
 {
+    private readonly IHttpClientFactory _http;
+
+    public OpenAiCompatChatServiceFactory(IHttpClientFactory http)
+    {
+        _http = http ?? throw new ArgumentNullException(nameof(http));
+    }
+
     public int Priority => 0;
 
     /// <summary>
@@ -24,11 +31,12 @@ internal sealed class OpenAiCompatChatServiceFactory : IChatServiceFactory
 
     public IChatCompletionService Create(string modelId, string apiKey, string? baseUrl)
     {
+        var httpClient = _http.CreateClient(LlmHttpClient.Name);
 #pragma warning disable SKEXP0010
         if (baseUrl is null)
-            return new OpenAIChatCompletionService(modelId, apiKey);
+            return new OpenAIChatCompletionService(modelId, apiKey, httpClient: httpClient);
 
-        return new OpenAIChatCompletionService(modelId, new Uri(baseUrl.TrimEnd('/')), apiKey);
+        return new OpenAIChatCompletionService(modelId, new Uri(baseUrl.TrimEnd('/')), apiKey, httpClient: httpClient);
 #pragma warning restore SKEXP0010
     }
 }

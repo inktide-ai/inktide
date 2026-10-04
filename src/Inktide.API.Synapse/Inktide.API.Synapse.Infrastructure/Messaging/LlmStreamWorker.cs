@@ -147,13 +147,17 @@ internal sealed class LlmStreamWorker : RedisStreamConsumerBase
         CancellationToken ct)
     {
         var ctx        = envelope.Context;
-        var providerId = ctx?.LlmProviderId ?? _settings.FallbackProviderId;
-        var modelId    = ctx?.LlmModel;
+        var forced     = _settings.ForceFallbackProvider;
+        var providerId = forced ? _settings.FallbackProviderId : ctx?.LlmProviderId ?? _settings.FallbackProviderId;
+        var modelId    = forced ? null : ctx?.LlmModel;
         var userId     = ctx?.UserId ?? Guid.Empty;
 
         // Resolve chat completion service.
         // Priority: BYOK (user's own key) -> platform provider registered in Kernel.
-        var chatService = await ResolveChatServiceAsync(providerId, modelId, userId, ctx?.LlmBaseUrl, ctx?.LlmRequiresApiKey ?? true, ct);
+        // ForceFallbackProvider skips BYOK so the platform provider answers every card.
+        var chatService = forced
+            ? null
+            : await ResolveChatServiceAsync(providerId, modelId, userId, ctx?.LlmBaseUrl, ctx?.LlmRequiresApiKey ?? true, ct);
 
         // No BYOK - fall back to the platform provider registered in the Kernel (e.g. Ollama).
         if (chatService is null)

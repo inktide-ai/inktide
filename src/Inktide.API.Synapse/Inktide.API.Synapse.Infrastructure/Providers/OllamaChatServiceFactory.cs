@@ -11,6 +11,13 @@ namespace Inktide.API.Synapse.Infrastructure.Providers;
 /// </summary>
 internal sealed class OllamaChatServiceFactory : IChatServiceFactory
 {
+    private readonly IHttpClientFactory _http;
+
+    public OllamaChatServiceFactory(IHttpClientFactory http)
+    {
+        _http = http ?? throw new ArgumentNullException(nameof(http));
+    }
+
     public int Priority => 10;
 
     public bool CanHandle(string providerId) =>
@@ -20,7 +27,8 @@ internal sealed class OllamaChatServiceFactory : IChatServiceFactory
     {
         var normalizedUrl = NormalizeBaseUrl(baseUrl ?? "http://localhost:11434");
 #pragma warning disable SKEXP0010
-        return new OpenAIChatCompletionService(modelId, new Uri(normalizedUrl), apiKey);
+        return new OpenAIChatCompletionService(
+            modelId, new Uri(normalizedUrl), apiKey, httpClient: _http.CreateClient(LlmHttpClient.Name));
 #pragma warning restore SKEXP0010
     }
 

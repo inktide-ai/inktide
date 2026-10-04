@@ -121,9 +121,12 @@ public sealed class InfrastructureStartup : IStartup
         // Each enabled provider gets its own IChatCompletionService keyed
         // by providerId (== LlmCatalogEntry.Provider on the AiCard).
         // ---------------------------------------------------------------
+        services.AddHttpClient(LlmHttpClient.Name);
+
         services.AddSingleton(sp =>
         {
             var opts = sp.GetRequiredService<IOptions<LlmProvidersSettings>>().Value;
+            var http = sp.GetRequiredService<IHttpClientFactory>();
             var builder = Kernel.CreateBuilder();
 
             foreach (var pair in opts.Providers)
@@ -142,7 +145,8 @@ public sealed class InfrastructureStartup : IStartup
                             deploymentName: cfg.AzureDeploymentName ?? cfg.FallbackModel,
                             endpoint:       cfg.BaseUrl!,
                             apiKey:         cfg.ApiKey!,
-                            serviceId:      providerId);
+                            serviceId:      providerId,
+                            httpClient:     http.CreateClient(LlmHttpClient.Name));
                         break;
 
                     default:
@@ -152,16 +156,18 @@ public sealed class InfrastructureStartup : IStartup
                         {
                             builder.AddOpenAIChatCompletion(
                                 modelId:   cfg.FallbackModel,
-                                endpoint:  new Uri(cfg.BaseUrl),
-                                apiKey:    cfg.ApiKey,
-                                serviceId: providerId);
+                                endpoint:   new Uri(cfg.BaseUrl),
+                                apiKey:     cfg.ApiKey,
+                                serviceId:  providerId,
+                                httpClient: http.CreateClient(LlmHttpClient.Name));
                         }
                         else
                         {
                             builder.AddOpenAIChatCompletion(
                                 modelId:   cfg.FallbackModel,
-                                apiKey:    cfg.ApiKey ?? "no-key",
-                                serviceId: providerId);
+                                apiKey:     cfg.ApiKey ?? "no-key",
+                                serviceId:  providerId,
+                                httpClient: http.CreateClient(LlmHttpClient.Name));
                         }
                         break;
                 }
