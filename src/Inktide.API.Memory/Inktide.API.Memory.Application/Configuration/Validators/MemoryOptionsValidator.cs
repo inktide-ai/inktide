@@ -15,7 +15,7 @@ public sealed class MemoryOptionsValidator : IValidateOptions<MemoryOptions>
             options.ScribeBaseUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase))
         {
             return ValidateOptionsResult.Fail(
-                "MemoryOptions.ScribeBaseUrl contains 'localhost' — set Memory__ScribeBaseUrl in production.");
+                "MemoryOptions.ScribeBaseUrl contains 'localhost' — set MemoryOptions__ScribeBaseUrl in production.");
         }
 
         return ValidateOptionsResult.Success;

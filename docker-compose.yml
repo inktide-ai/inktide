@@ -59,7 +59,7 @@ services:
       OllamaSettings__Host: http://host.docker.internal
       EmotionClassificationOptions__OllamaBaseUrl: http://host.docker.internal:11434
       # Scribe fact extraction (workers profile)
-      MemorySettings__ScribeBaseUrl: http://scribe:8001
+      MemoryOptions__ScribeBaseUrl: http://scribe:8000
       # SMTP settings come from .env (SmtpSettings__Host / Port / Username / Password)
     extra_hosts:
       - "host.docker.internal:host-gateway"   # Linux compatibility; no-op on Docker Desktop
