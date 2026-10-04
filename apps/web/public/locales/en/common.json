@@ -472,6 +472,11 @@
     "description": "An unexpected error occurred.",
     "retry": "Try again"
   },
+  "notFound": {
+    "title": "Page not found",
+    "description": "This page is off the air: the link is broken or the page has moved.",
+    "home": "Back to home"
+  },
   "proPlan": {
     "title": "Pro Plan",
     "characters": "Characters",

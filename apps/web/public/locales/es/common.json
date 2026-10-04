@@ -391,5 +391,15 @@
     "titleDone": "¡Todo listo!",
     "progress": "{{done}} de {{total}} pasos completados",
     "link": "Configurar"
+  },
+  "errorBoundary": {
+    "title": "Algo salió mal",
+    "description": "Se produjo un error inesperado.",
+    "retry": "Intentar de nuevo"
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "description": "Esta página está fuera del aire: el enlace está roto o la página se ha movido.",
+    "home": "Volver al inicio"
   }
 }

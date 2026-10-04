@@ -1,6 +1,9 @@
 'use client'
 
+import '@/i18n/i18n'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { ErrorScreen } from '@/widgets/error-screen'
 
 interface ErrorProps {
   error: Error & { digest?: string }
@@ -8,23 +11,22 @@ interface ErrorProps {
 }
 
 export default function Error({ error, reset }: ErrorProps) {
+  const { t } = useTranslation('common')
+
   useEffect(() => {
     // Log to your error tracking service here (e.g., Sentry.captureException(error))
     console.error('[Route Error]', error)
   }, [error])
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center">
-      <h2 className="text-xl font-semibold text-[var(--text-primary)]">Something went wrong</h2>
-      <p className="max-w-sm text-sm text-[var(--text-secondary)]">
-        {error.digest ? `Error ID: ${error.digest}` : 'An unexpected error occurred.'}
-      </p>
-      <button
-        onClick={reset}
-        className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
-      >
-        Try again
-      </button>
-    </div>
+    <ErrorScreen
+      code="500"
+      caption="Technical difficulties"
+      title={t('errorBoundary.title')}
+      description={t('errorBoundary.description')}
+      primary={{ label: t('errorBoundary.retry'), onClick: reset }}
+      secondary={{ label: t('notFound.home'), href: '/' }}
+      reference={error.digest}
+    />
   )
 }

@@ -391,5 +391,15 @@
     "titleDone": "全部完成！",
     "progress": "已完成 {{done}}/{{total}} 步",
     "link": "设置"
+  },
+  "errorBoundary": {
+    "title": "出了点问题",
+    "description": "发生了意外错误。",
+    "retry": "重试"
+  },
+  "notFound": {
+    "title": "页面未找到",
+    "description": "此页面不在直播中：链接已失效，或页面已被移动。",
+    "home": "返回首页"
   }
 }

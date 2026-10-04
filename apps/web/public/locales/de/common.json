@@ -391,5 +391,15 @@
     "titleDone": "Alles bereit!",
     "progress": "{{done}} von {{total}} Schritten abgeschlossen",
     "link": "Einrichten"
+  },
+  "errorBoundary": {
+    "title": "Etwas ist schiefgelaufen",
+    "description": "Ein unerwarteter Fehler ist aufgetreten.",
+    "retry": "Erneut versuchen"
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Diese Seite ist nicht auf Sendung: Der Link ist defekt oder die Seite wurde verschoben.",
+    "home": "Zur Startseite"
   }
 }

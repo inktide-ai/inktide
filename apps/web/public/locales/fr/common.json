@@ -391,5 +391,15 @@
     "titleDone": "Tout est prêt !",
     "progress": "{{done}} sur {{total}} étapes terminées",
     "link": "Configurer"
+  },
+  "errorBoundary": {
+    "title": "Un problème est survenu",
+    "description": "Une erreur inattendue s’est produite.",
+    "retry": "Réessayer"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "description": "Cette page n’est plus à l’antenne : le lien est cassé ou la page a été déplacée.",
+    "home": "Retour à l’accueil"
   }
 }

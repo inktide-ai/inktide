@@ -391,5 +391,15 @@
     "titleDone": "準備完了！",
     "progress": "{{total}} 中 {{done}} ステップ完了",
     "link": "設定する"
+  },
+  "errorBoundary": {
+    "title": "問題が発生しました",
+    "description": "予期しないエラーが発生しました。",
+    "retry": "再試行"
+  },
+  "notFound": {
+    "title": "ページが見つかりません",
+    "description": "このページは放送していません。リンクが切れているか、ページが移動しました。",
+    "home": "ホームに戻る"
   }
 }
