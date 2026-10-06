@@ -32,6 +32,8 @@ export interface LlmProviderDef {
   defaultBaseUrl?: string
   /** Example shown in the URL field when defaultBaseUrl is empty */
   baseUrlPlaceholder?: string
+  /** The backend lists the models served at the endpoint (GET /api/v1/chat/models) */
+  modelsFromServer?: boolean
   extraFields?: ProviderFieldDef[]
   /** Pure format check - no network call. Returns null if OK, error string if not. */
   autoValidate: (cfg: { apiKey: string; baseUrl: string }) => string | null
@@ -75,6 +77,11 @@ function requiresHttpsEndpoint(label: string) {
     if (!apiKey.trim()) return 'API key is required.'
     return null
   }
+}
+
+// Local servers host whatever the user pulled, so the model is typed or picked from the server's list.
+function localModelField(placeholder: string): ProviderFieldDef {
+  return { key: 'model', label: 'Model', hint: 'Model name exactly as the server lists it.', type: 'text', placeholder, required: true }
 }
 
 function requiresLocalUrl(label: string) {
@@ -162,8 +169,10 @@ export const LLM_PROVIDER_CATALOG: LlmProviderDef[] = [
     id: 'ollama',
     name: 'Ollama',
     requiresKey: false,
-    defaultBaseUrl: 'http://localhost:11434',
+    defaultBaseUrl: process.env.NEXT_PUBLIC_DEFAULT_OLLAMA_URL || 'http://localhost:11434',
+    modelsFromServer: true,
     extraFields: [
+      localModelField('qwen2.5:1.5b'),
       {
         key: 'thinkingMode',
         label: 'Thinking Mode',
@@ -395,6 +404,7 @@ export const LLM_PROVIDER_CATALOG: LlmProviderDef[] = [
     requiresKey: false,
     defaultBaseUrl: 'http://localhost:1234',
     extraFields: [
+      localModelField('qwen2.5-7b-instruct'),
       {
         key: 'headers',
         label: 'Custom Headers',
@@ -688,6 +698,7 @@ export const LLM_PROVIDER_CATALOG: LlmProviderDef[] = [
     requiresKey: false,
     defaultBaseUrl: 'http://localhost:1337',
     extraFields: [
+      localModelField('llama3.2-3b-instruct'),
       {
         key: 'headers',
         label: 'Custom Headers',
@@ -710,6 +721,7 @@ export const LLM_PROVIDER_CATALOG: LlmProviderDef[] = [
     requiresKey: false,
     defaultBaseUrl: 'http://localhost:8080',
     extraFields: [
+      localModelField('model-name'),
       {
         key: 'headers',
         label: 'Custom Headers',
@@ -732,6 +744,7 @@ export const LLM_PROVIDER_CATALOG: LlmProviderDef[] = [
     requiresKey: false,
     defaultBaseUrl: 'http://localhost:8000',
     extraFields: [
+      localModelField('Qwen/Qwen2.5-7B-Instruct'),
       {
         key: 'headers',
         label: 'Custom Headers',
@@ -754,6 +767,7 @@ export const LLM_PROVIDER_CATALOG: LlmProviderDef[] = [
     requiresKey: false,
     defaultBaseUrl: 'http://localhost:8080',
     extraFields: [
+      localModelField('model-name'),
       {
         key: 'headers',
         label: 'Custom Headers',

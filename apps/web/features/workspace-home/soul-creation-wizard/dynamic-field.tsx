@@ -1,4 +1,5 @@
 'use client'
+import { useId } from 'react'
 import { cn } from '@/lib/utils'
 import type { ProviderFieldDef } from '@/shared/data/llm-provider-catalog'
 
@@ -13,11 +14,16 @@ export function DynamicField({
   field,
   value,
   onChange,
+  suggestions,
 }: {
   field: ProviderFieldDef
   value: string
   onChange: (v: string) => void
+  /** Offered in a dropdown under a text field; the user can still type anything. */
+  suggestions?: string[]
 }) {
+  const listId = useId()
+
   if (field.type === 'select' && field.options) {
     return (
       <div className="relative">
@@ -83,14 +89,23 @@ export function DynamicField({
     )
   }
 
+  const hasSuggestions = field.type === 'text' && !!suggestions?.length
   return (
-    <input
-      type={field.type === 'password' ? 'password' : 'text'}
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      placeholder={field.placeholder}
-      className={inputCls}
-      autoComplete={field.type === 'password' ? 'new-password' : 'off'}
-    />
+    <>
+      <input
+        type={field.type === 'password' ? 'password' : 'text'}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={field.placeholder}
+        className={inputCls}
+        autoComplete={field.type === 'password' ? 'new-password' : 'off'}
+        list={hasSuggestions ? listId : undefined}
+      />
+      {hasSuggestions && (
+        <datalist id={listId}>
+          {suggestions!.map(s => <option key={s} value={s} />)}
+        </datalist>
+      )}
+    </>
   )
 }

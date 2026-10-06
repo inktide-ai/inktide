@@ -1,11 +1,12 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { LLM_PROVIDER_CATALOG } from '@/shared/data/llm-provider-catalog'
 import { VOICE_PROVIDER_CATALOG } from '@/shared/data/voice-providers'
 import { CredentialStatusBadge } from '@/shared/ui/credential-status-badge'
 import { useCredentialTest } from '@/shared/lib/hooks/useCredentialTest'
+import { getChatModels } from '@/features/brain/api/chat'
 import { DynamicField } from './dynamic-field'
 import type { WizardProviderItem } from './wizard-provider-card'
 
@@ -50,6 +51,28 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
     : null
 
   const credTest = useCredentialTest(item.id)
+
+  // Chat models the endpoint actually serves (Ollama), offered for the "model" field.
+  const listsModels = !!llmDef?.modelsFromServer
+  const [serverModels, setServerModels] = useState<string[]>([])
+  useEffect(() => {
+    if (!listsModels || !endpoint) return
+    let cancelled = false
+    const timer = setTimeout(() => {
+      getChatModels(item.id, endpoint)
+        .then(models => {
+          if (!cancelled) setServerModels(models.map(m => m.id).filter(id => !/embed/i.test(id)))
+        })
+        .catch(() => { if (!cancelled) setServerModels([]) })
+    }, 400)
+    return () => { cancelled = true; clearTimeout(timer) }
+  }, [listsModels, item.id, endpoint])
+  const modelSuggestions = useMemo(() => (listsModels ? serverModels : []), [listsModels, serverModels])
+
+  // Pick the first served model so a local provider works without typing anything.
+  useEffect(() => {
+    if (modelSuggestions.length > 0 && !config.model) onChange('model', modelSuggestions[0])
+  }, [modelSuggestions, config.model, onChange])
 
   useEffect(() => {
     credTest.reset()
@@ -167,6 +190,7 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
               field={field}
               value={config[field.key] ?? String(field.default ?? '')}
               onChange={v => onChange(field.key, v)}
+              suggestions={field.key === 'model' ? modelSuggestions : undefined}
             />
           </div>
         ))}

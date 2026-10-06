@@ -31,9 +31,9 @@ public sealed class CreateAiCardRequestValidator : AbstractValidator<CreateAiCar
             RuleFor(x => x.LlmConfig!.PresencePenalty).InclusiveBetween(-2.0, 2.0);
 
             RuleFor(x => x.LlmConfig!.BaseUrl)
-                .Must(IsValidHttpsUrl)
+                .Must((req, url) => LlmBaseUrlRule.IsAllowed(req.LlmConfig!.ProviderId, url))
                 .When(x => x.LlmConfig!.BaseUrl is not null)
-                .WithMessage("llm_config.base_url must be a valid HTTPS URL.");
+                .WithMessage(LlmBaseUrlRule.Message);
         });
 
 

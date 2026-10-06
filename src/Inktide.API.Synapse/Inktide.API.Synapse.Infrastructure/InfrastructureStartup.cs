@@ -182,7 +182,7 @@ public sealed class InfrastructureStartup : IStartup
         // add another AddSingleton line below. Nothing else changes.
         // ---------------------------------------------------------------
         services.AddSingleton<IChatServiceFactory, OpenAiCompatChatServiceFactory>();
-        services.AddSingleton<IChatServiceFactory, OllamaChatServiceFactory>();
+        services.AddSingleton<IChatServiceFactory, LocalServerChatServiceFactory>();
         services.AddSingleton<ChatServiceFactoryRegistry>();
 
         services.AddHostedService<ScatterShardValidator>();

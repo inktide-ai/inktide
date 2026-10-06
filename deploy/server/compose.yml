@@ -39,6 +39,8 @@ services:
       args:
         NEXT_PUBLIC_KEYCLOAK_URL: https://auth.${APP_HOST}
         NEXT_PUBLIC_STORAGE_URL: https://s3.${APP_HOST}
+        # The stack's own Ollama (see setup-models.sh), as the API container reaches it.
+        NEXT_PUBLIC_DEFAULT_OLLAMA_URL: http://ollama:11434
         BACKEND_URL: http://api:5001
     image: inktide-web:server
     environment:

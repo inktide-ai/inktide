@@ -16,6 +16,11 @@ public sealed class UpdateAiCardRequestValidator : AbstractValidator<UpdateAiCar
             RuleFor(x => x.LlmConfig!.Temperature).InclusiveBetween(0.0, 2.0);
             RuleFor(x => x.LlmConfig!.TopP).InclusiveBetween(0.0, 1.0);
             RuleFor(x => x.LlmConfig!.MaxTokens).InclusiveBetween(1, 128_000);
+
+            RuleFor(x => x.LlmConfig!.BaseUrl)
+                .Must((req, url) => LlmBaseUrlRule.IsAllowed(req.LlmConfig!.ProviderId, url))
+                .When(x => x.LlmConfig!.BaseUrl is not null)
+                .WithMessage(LlmBaseUrlRule.Message);
         });
 
         When(x => x.TtsConfig is not null, () =>
