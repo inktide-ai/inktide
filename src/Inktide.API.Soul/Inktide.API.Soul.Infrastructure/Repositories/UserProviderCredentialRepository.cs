@@ -40,10 +40,12 @@ public sealed class UserProviderCredentialRepository : IUserProviderCredentialRe
         var existing = await _db.UserProviderCredentials
             .FirstOrDefaultAsync(c => c.Id == credential.Id, ct);
 
+        // The caller usually passes a detached copy of the row loaded here, so copy its
+        // values onto the tracked instance instead of attaching a second one with the same key.
         if (existing is null)
             _db.UserProviderCredentials.Add(credential);
         else
-            _db.UserProviderCredentials.Update(credential);
+            _db.Entry(existing).CurrentValues.SetValues(credential);
 
         await _db.SaveChangesAsync(ct).ConfigureAwait(false);
         return credential;
