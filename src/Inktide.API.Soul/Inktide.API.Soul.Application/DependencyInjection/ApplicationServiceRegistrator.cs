@@ -49,6 +49,14 @@ public sealed class ApplicationServiceRegistrator : IServiceRegistrator
         registrator.Register<IModelRetentionPolicy, NoOpModelRetentionPolicy>(Reuse.Scoped);
         registrator.Register<IAiCardModelUploadService, AiCardModelUploadService>(Reuse.Scoped);
 
+        // Resumable uploads stage chunks on local disk until the whole file is there.
+        var chunkedRoot = configuration["ChunkedUploads:Root"];
+        registrator.RegisterInstance(new ChunkedUploadStore(
+            string.IsNullOrWhiteSpace(chunkedRoot)
+                ? Path.Combine(Path.GetTempPath(), "inktide-model-uploads")
+                : chunkedRoot));
+        registrator.Register<IChunkedModelUploadService, ChunkedModelUploadService>(Reuse.Scoped);
+
         // --- Catalog ---
         registrator.Register<ICatalogService, CatalogService>(Reuse.Scoped);
 

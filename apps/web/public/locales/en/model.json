@@ -16,7 +16,8 @@
     "noFile": "No file — accepts {{ext}}",
     "remove": "Remove",
     "saveFirst": "Save the character first — then uploads go to your project storage.",
-    "success": "Uploaded — preview updated."
+    "success": "Uploaded — preview updated.",
+    "retrying": "Connection dropped — resuming upload…"
   },
   "tab": {
     "currentModel": "Current Model",
@@ -26,6 +27,7 @@
     "format": "Format",
     "size": "Size",
     "uploading": "Uploading…",
+    "uploadingPercent": "Uploading… {{percent}}%",
     "replaceModel": "Replace Model",
     "modelSettings": "Model Settings",
     "defaultAnimation": "Default Animation",

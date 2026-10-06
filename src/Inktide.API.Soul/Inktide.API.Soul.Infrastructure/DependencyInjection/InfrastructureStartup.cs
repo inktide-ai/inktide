@@ -1,6 +1,7 @@
 using Inktide.API.Core.MassTransit;
 using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
+using Inktide.API.Soul.Application.Workers;
 using Inktide.API.Soul.Infrastructure.Cache;
 using Inktide.API.Soul.Infrastructure.DbContext;
 using Inktide.API.Soul.Infrastructure.Services;
@@ -60,6 +61,7 @@ public sealed class InfrastructureStartup : IStartup, IBusModuleConfigurator
         services.AddHostedService<DatabaseMigrationService>();
         services.AddHostedService<UserAccountDeletedConsumer>();
         services.AddHostedService<SoulStatusGateSeedWorker>();
+        services.AddHostedService<ChunkedUploadCleanupWorker>();
 
         services
             .AddHealthChecks()

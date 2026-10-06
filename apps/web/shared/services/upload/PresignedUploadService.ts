@@ -24,12 +24,16 @@ export async function executePresignedUpload<TResult>(
   file: File,
   extra?: Record<string, unknown>,
 ): Promise<TResult> {
-  const contentType = file.type.trim() || 'application/octet-stream'
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  // Browsers disagree about .vrm/.glb (Chromium on Linux says model/vrml, the unrelated VRML
+  // format), so for those the extension decides; the server checks the bytes anyway.
+  const contentType = OCTET_STREAM_ALLOWED_EXTS.has(ext)
+    ? 'application/octet-stream'
+    : file.type.trim() || 'application/octet-stream'
   if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
     throw new ApiError(415, `Unsupported file type: ${contentType}`)
   }
   if (contentType === 'application/octet-stream') {
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
     if (!OCTET_STREAM_ALLOWED_EXTS.has(ext)) {
       throw new ApiError(415, `Unsupported file type: ${contentType}`)
     }

@@ -56,7 +56,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
 
   const modelLabel = (m: { value: ModelType; label: string }) => m.value === 'none' ? t('tab.noModel') : m.label
   const modelTypeMeta  = MODEL_TYPES.find(m => m.value === character.appearance.modelType)!
-  const { fileRef, uploadBusy, uploadHint, filteredModels, activeModel, displayModel, activatingId,
+  const { fileRef, uploadBusy, uploadHint, uploadProgress, filteredModels, activeModel, displayModel, activatingId,
           confirmDeleteId, deletingId, requestDelete, cancelDelete, handleDelete,
           search, setSearch, animation, setAnimation, handleFile, handleActivate } = tab
 
@@ -68,6 +68,7 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
         : 'none'
 
   const { capture, isCapturing } = useThumbnailCapture(cardId, displayModel?.id)
+  const uploadPercent = uploadProgress === null ? null : Math.floor(uploadProgress * 100)
 
   return (
     <div className="relative flex flex-col gap-8 w-full">
@@ -167,10 +168,27 @@ export default function ModelTab({ character, onUpdate, cardId }: ModelTabProps)
                   'disabled:opacity-40 disabled:cursor-not-allowed',
                 )}
               >
-                {uploadBusy ? t('tab.uploading') : t('tab.replaceModel')}
+                {uploadBusy
+                  ? uploadPercent !== null ? t('tab.uploadingPercent', { percent: uploadPercent }) : t('tab.uploading')
+                  : t('tab.replaceModel')}
               </button>
             </div>
           </div>
+
+          {uploadBusy && uploadPercent !== null && (
+            <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={uploadPercent}
+              className="mx-5 mb-3 h-1 overflow-hidden rounded-full bg-[var(--surface-3)]"
+            >
+              <div
+                className="h-full bg-[var(--accent-primary)] transition-[width] duration-300"
+                style={{ width: `${uploadPercent}%` }}
+              />
+            </div>
+          )}
 
           {uploadHint && (
             <p className="px-5 pb-3 text-xs text-[var(--text-tertiary)]">{uploadHint}</p>

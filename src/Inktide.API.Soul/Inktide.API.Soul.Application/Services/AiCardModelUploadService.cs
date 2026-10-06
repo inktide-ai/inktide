@@ -18,12 +18,7 @@ namespace Inktide.API.Soul.Application.Services;
 /// </summary>
 public sealed class AiCardModelUploadService : IAiCardModelUploadService
 {
-    private static readonly UploadConstraints Constraints = new()
-    {
-        MaxBytes           = SoulConstants.Upload.MaxModelBytes,
-        AllowedExtensions  = new HashSet<string> { ".vrm", ".glb", ".gltf", ".zip", ".json" },
-        FallbackFileName   = "model.bin",
-    };
+    private static readonly UploadConstraints Constraints = ModelUploadConstraints.Value;
 
     private readonly IAiCardService _cards;
     private readonly IObjectStorageService _storage;

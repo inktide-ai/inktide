@@ -2,8 +2,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { CardModelUploader } from '@/entities/soul/services/upload/CardModelUploader'
-import { executePresignedUpload } from '@/shared/services/upload/PresignedUploadService'
+import { CardModelChunkedUploader } from '@/entities/soul/services/upload/CardModelChunkedUploader'
+import { executeChunkedUpload } from '@/shared/services/upload/ChunkedUploadService'
 import { listCardModels, activateCardModel, deleteCardModel, type AiCardModelResponse } from '@/features/soul/api/index' // fsd:cross-feature-ok
 import { queryKeys } from '@/shared/lib/query/keys'
 import type { AiCharacter } from '@/shared/lib/character'
@@ -13,6 +13,8 @@ export interface UseModelTabResult {
   fileRef: React.RefObject<HTMLInputElement>
   uploadBusy: boolean
   uploadHint: string | null
+  /** 0..1 while a file is uploading, null otherwise. */
+  uploadProgress: number | null
   allModels: AiCardModelResponse[]
   filteredModels: AiCardModelResponse[]
   activeModel: AiCardModelResponse | undefined
@@ -42,6 +44,7 @@ export function useModelTab(
 
   const [uploadBusy, setUploadBusy]     = useState(false)
   const [uploadHint, setUploadHint]     = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const [activatingId, setActivatingId] = useState<string | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [deletingId, setDeletingId]     = useState<string | null>(null)
@@ -60,8 +63,16 @@ export function useModelTab(
     setUploadHint(null)
     if (!cardId) { setUploadHint(t('upload.saveFirst')); return }
     setUploadBusy(true)
+    setUploadProgress(0)
+    const retrying = t('upload.retrying')
     try {
-      const newModel = await executePresignedUpload(new CardModelUploader(cardId), file)
+      const newModel = await executeChunkedUpload(new CardModelChunkedUploader(cardId), file, {
+        onProgress: (sent, total) => {
+          setUploadProgress(total > 0 ? sent / total : 1)
+          setUploadHint(hint => (hint === retrying ? null : hint))
+        },
+        onRetry: () => setUploadHint(retrying),
+      })
       setPreviewModelId(newModel.id)
       setUploadHint(t('upload.success'))
       await queryClient.invalidateQueries({ queryKey: queryKeys.souls.models(cardId) })
@@ -69,6 +80,7 @@ export function useModelTab(
       setUploadHint(err instanceof Error ? err.message : 'Upload failed')
     } finally {
       setUploadBusy(false)
+      setUploadProgress(null)
     }
   }
 
@@ -113,7 +125,7 @@ export function useModelTab(
 
   return {
     fileRef,
-    uploadBusy, uploadHint,
+    uploadBusy, uploadHint, uploadProgress,
     allModels, filteredModels,
     activeModel, displayModel,
     activatingId,

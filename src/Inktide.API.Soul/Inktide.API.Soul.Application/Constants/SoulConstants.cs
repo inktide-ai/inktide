@@ -11,6 +11,8 @@ internal static class SoulConstants
         internal const int  MaxModelsPerCard = 20;
         internal const int  MaxScenesPerCard = 50;
         internal static readonly TimeSpan PresignTtl = TimeSpan.FromMinutes(15);
+        /// <summary>Chunked uploads nobody touched for this long are deleted from disk.</summary>
+        internal static readonly TimeSpan UploadSessionTtl = TimeSpan.FromHours(24);
     }
 
     internal static class Slug

@@ -197,3 +197,23 @@ public sealed class AiCardModelResponse
     public string? ThumbnailUrl { get; set; }
 
 }
+
+public sealed record StartModelUploadRequest(
+    [property: JsonProperty("file_name")]  string FileName,
+    [property: JsonProperty("size_bytes")] long SizeBytes);
+
+/// <summary>State of a resumable upload; the client sends chunk_bytes at a time from received_bytes on.</summary>
+public sealed record ModelUploadSessionResponse(
+    [property: JsonProperty("upload_id")]      Guid UploadId,
+    [property: JsonProperty("size_bytes")]     long SizeBytes,
+    [property: JsonProperty("received_bytes")] long ReceivedBytes,
+    [property: JsonProperty("chunk_bytes")]    int ChunkBytes);
+
+public sealed record ModelUploadChunkResponse(
+    [property: JsonProperty("received_bytes")] long ReceivedBytes);
+
+/// <summary>409 body: the server holds a different number of bytes than the client assumed.</summary>
+public sealed record ModelUploadConflictResponse(
+    [property: JsonProperty("received_bytes")] long ReceivedBytes,
+    [property: JsonProperty("error")]          string Error,
+    [property: JsonProperty("code")]           string Code);
