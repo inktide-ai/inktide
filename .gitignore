@@ -100,3 +100,8 @@ result.docx
 # Recording scripts (may contain credentials)
 scripts/record-app-demo.spec.mjs
 scripts/recording-output/
+
+# Personal Claude Code instructions (not shared)
+/CLAUDE.md
+/INSTRUCTION.md
+/docs/prompts/
