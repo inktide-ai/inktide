@@ -11,7 +11,8 @@ public sealed record ProjectPluginDto(
 public sealed record ProjectLinkResult(
     Guid Id,
     string? SystemPrompt,
-    IReadOnlyList<ProjectPluginDto> Plugins);
+    IReadOnlyList<ProjectPluginDto> Plugins,
+    string? Language = null);
 
 /// <summary>
 /// Cross-context contract: allows Synapse to resolve which Project is linked to a given Soul,

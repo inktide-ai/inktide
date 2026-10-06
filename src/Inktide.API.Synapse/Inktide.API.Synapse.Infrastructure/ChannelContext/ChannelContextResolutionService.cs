@@ -131,6 +131,7 @@ internal sealed class ChannelContextResolutionService : IChannelContextResolutio
                         ProjectId    = projectLink.Id,
                         SystemPrompt = NullIfEmpty(projectLink.SystemPrompt) ?? resolved.SystemPrompt,
                         Plugins      = projectLink.Plugins,
+                        Language     = NullIfEmpty(projectLink.Language) ?? resolved.Language,
                     };
             }
 

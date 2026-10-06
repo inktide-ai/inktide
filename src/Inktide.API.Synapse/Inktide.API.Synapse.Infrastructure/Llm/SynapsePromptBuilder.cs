@@ -16,7 +16,8 @@ internal sealed class SynapsePromptBuilder
     {
         ["ru"] = "Russian",  ["en"] = "English",  ["de"] = "German",
         ["fr"] = "French",   ["es"] = "Spanish",  ["ja"] = "Japanese",
-        ["zh"] = "Chinese",  ["uk"] = "Ukrainian",
+        ["zh"] = "Chinese",  ["uk"] = "Ukrainian", ["ko"] = "Korean",
+        ["pt"] = "Portuguese",
     };
 
     private readonly IReadOnlyList<IPromptSection> _sections;
