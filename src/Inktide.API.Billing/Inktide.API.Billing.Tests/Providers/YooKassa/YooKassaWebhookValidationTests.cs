@@ -3,7 +3,7 @@ using Inktide.API.Billing.Infrastructure.DbContext;
 using Inktide.API.Billing.Infrastructure.Providers.YooKassa;
 using Inktide.API.Billing.Infrastructure.Settings;
 using Inktide.API.Billing.Infrastructure.Telemetry;
-using MassTransit;
+using Inktide.API.Core.MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -19,7 +19,7 @@ public sealed class YooKassaWebhookValidationTests
         var settings  = new YooKassaSettings { WebhookAllowedIps = allowedIps };
         var redis     = Substitute.For<IConnectionMultiplexer>();
         var subs      = Substitute.For<ISubscriptionRepository>();
-        var publish   = Substitute.For<IPublishEndpoint>();
+        var publish   = Substitute.For<IOutboxPublisher<BillingDbContext>>();
         var db        = new BillingDbContext(new DbContextOptionsBuilder<BillingDbContext>()
                             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
         var logger    = NullLogger<YooKassaWebhookProcessor>.Instance;

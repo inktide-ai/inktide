@@ -10,9 +10,9 @@ using Inktide.API.Billing.Infrastructure.Repositories;
 using Inktide.API.Billing.Infrastructure.Services;
 using Inktide.API.Billing.Infrastructure.Settings;
 using Inktide.API.Billing.Infrastructure.Telemetry;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
-using Inktide.API.Core.MassTransit;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -133,11 +133,7 @@ public sealed class BillingInfrastructureStartup : IStartup, IBusModuleConfigura
 
     public void ConfigureConsumers(IBusRegistrationConfigurator x)
     {
-        x.AddEntityFrameworkOutbox<BillingDbContext>(o =>
-        {
-            o.UsePostgres();
-            o.UseBusOutbox();
-        });
+        x.AddModuleOutbox<BillingDbContext>();
 
         x.AddConsumer<ReceiptEmailConsumer>();
         x.AddConsumer<YooKassaRenewalConsumer>();

@@ -8,7 +8,7 @@ using Inktide.API.Billing.Infrastructure.Providers.YooKassa;
 using Inktide.API.Billing.Infrastructure.Settings;
 using Inktide.API.Billing.Infrastructure.Telemetry;
 using Inktide.API.Core.Models;
-using MassTransit;
+using Inktide.API.Core.MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -58,7 +58,7 @@ public sealed class YooKassaWebhookProcessorTests
             Arg.Any<TimeSpan?>(), Arg.Any<bool>(), Arg.Any<When>(), Arg.Any<CommandFlags>()).Returns(true);
         db.KeyDeleteAsync(Arg.Any<RedisKey>(), Arg.Any<CommandFlags>()).Returns(true);
 
-        var publish    = Substitute.For<IPublishEndpoint>();
+        var publish    = Substitute.For<IOutboxPublisher<BillingDbContext>>();
         var incidents  = Substitute.For<IBillingIncidentRepository>();
         var dbCtx      = new BillingDbContext(new DbContextOptionsBuilder<BillingDbContext>()
                              .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);

@@ -1,6 +1,6 @@
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Core;
 using Inktide.API.Core.Contracts;
-using Inktide.API.Core.MassTransit;
 using Inktide.API.Soul.Infrastructure.Cache;
 using Inktide.API.Soul.Infrastructure.DbContext;
 using Inktide.API.Soul.Infrastructure.Services;
@@ -69,11 +69,7 @@ public sealed class InfrastructureStartup : IStartup, IBusModuleConfigurator
 
     public void ConfigureConsumers(IBusRegistrationConfigurator x)
     {
-        x.AddEntityFrameworkOutbox<SoulDbContext>(o =>
-        {
-            o.UsePostgres();
-            o.UseBusOutbox();
-        });
+        x.AddModuleOutbox<SoulDbContext>();
         // Soul only publishes - no consumers here.
         // Connector.SoulStatusChangedMTConsumer handles inbound soul status messages.
     }

@@ -4,7 +4,7 @@ using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Infrastructure.DbContext;
 using Inktide.API.Billing.Infrastructure.Providers.Robokassa;
 using Inktide.API.Billing.Infrastructure.Settings;
-using MassTransit;
+using Inktide.API.Core.MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -26,7 +26,7 @@ public sealed class RobokassaWebhookValidationTests
         var settings  = new RobokassaSettings { Password2 = password2 };
         var redis     = Substitute.For<IConnectionMultiplexer>();
         var subs      = Substitute.For<ISubscriptionRepository>();
-        var publish   = Substitute.For<IPublishEndpoint>();
+        var publish   = Substitute.For<IOutboxPublisher<BillingDbContext>>();
         var db        = new BillingDbContext(new DbContextOptionsBuilder<BillingDbContext>()
                             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
         var logger    = NullLogger<RobokassaWebhookProcessor>.Instance;

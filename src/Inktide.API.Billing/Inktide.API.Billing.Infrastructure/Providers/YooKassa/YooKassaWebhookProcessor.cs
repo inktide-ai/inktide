@@ -7,8 +7,8 @@ using Inktide.API.Billing.Infrastructure.DbContext;
 using Inktide.API.Billing.Infrastructure.Idempotency;
 using Inktide.API.Billing.Infrastructure.Settings;
 using Inktide.API.Billing.Infrastructure.Telemetry;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Core.Models;
-using MassTransit;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -46,7 +46,7 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
     private readonly YooKassaSettings _settings;
     private readonly ISubscriptionRepository _subscriptions;
     private readonly IBillingIncidentRepository _incidents;
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IOutboxPublisher<BillingDbContext> _publishEndpoint;
     private readonly BillingDbContext _db;
     private readonly HttpClient _http;
     private readonly IConnectionMultiplexer _redis;
@@ -60,7 +60,7 @@ public sealed class YooKassaWebhookProcessor : IWebhookProcessor
         YooKassaSettings settings,
         ISubscriptionRepository subscriptions,
         IBillingIncidentRepository incidents,
-        IPublishEndpoint publishEndpoint,
+        IOutboxPublisher<BillingDbContext> publishEndpoint,
         BillingDbContext db,
         IConnectionMultiplexer redis,
         TimeProvider time,

@@ -1,5 +1,5 @@
-using Inktide.API.Core;
 using Inktide.API.Core.MassTransit;
+using Inktide.API.Core;
 using Inktide.API.Developer.Infrastructure.Messaging;
 using Inktide.API.Developer.Infrastructure.Persistence;
 using MassTransit;
@@ -33,11 +33,7 @@ public sealed class DeveloperInfrastructureStartup : IStartup, IBusModuleConfigu
 
     public void ConfigureConsumers(IBusRegistrationConfigurator x)
     {
-        x.AddEntityFrameworkOutbox<DeveloperDbContext>(o =>
-        {
-            o.UsePostgres();
-            o.UseBusOutbox();
-        });
+        x.AddModuleOutbox<DeveloperDbContext>();
 
         x.AddConsumer<WebhookDeliveryConsumer>();
         x.AddConsumer<WebhookDeliveryFaultConsumer>();

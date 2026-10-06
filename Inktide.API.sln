@@ -152,6 +152,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inktide.API.Connector.Appli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inktide.API.Profile.Infrastructure.Tests", "src\Inktide.API.Profile\Inktide.API.Profile.Infrastructure.Tests\Inktide.API.Profile.Infrastructure.Tests.csproj", "{53955DD8-B246-4A74-A894-0C95C3EA22B1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inktide.API.Core.Tests", "src\Inktide.API.Core.Tests\Inktide.API.Core.Tests.csproj", "{81AC6533-DDC1-4644-B434-40AC682AF4F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -834,6 +836,18 @@ Global
 		{53955DD8-B246-4A74-A894-0C95C3EA22B1}.Release|x64.Build.0 = Release|Any CPU
 		{53955DD8-B246-4A74-A894-0C95C3EA22B1}.Release|x86.ActiveCfg = Release|Any CPU
 		{53955DD8-B246-4A74-A894-0C95C3EA22B1}.Release|x86.Build.0 = Release|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Debug|x64.Build.0 = Debug|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Debug|x86.Build.0 = Debug|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Release|x64.ActiveCfg = Release|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Release|x64.Build.0 = Release|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Release|x86.ActiveCfg = Release|Any CPU
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -911,5 +925,6 @@ Global
 		{D4E5F6A7-B8C9-4012-5678-9ABCDEF01234} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{F4F0DD9E-6DA7-4BEC-9836-5C4768E60946} = {AA6DC115-3A68-29B8-1C38-55114B34ED51}
 		{53955DD8-B246-4A74-A894-0C95C3EA22B1} = {7F46405B-B06A-5290-96C5-DA37B58FA2E9}
+		{81AC6533-DDC1-4644-B434-40AC682AF4F9} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

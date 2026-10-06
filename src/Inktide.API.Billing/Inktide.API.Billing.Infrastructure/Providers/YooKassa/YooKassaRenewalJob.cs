@@ -1,6 +1,6 @@
 using Inktide.API.Billing.Application.Interfaces;
 using Inktide.API.Billing.Application.Messages;
-using MassTransit;
+using Inktide.API.Core.MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -58,7 +58,7 @@ public sealed class YooKassaRenewalJob : BackgroundService
 
         await using var scope   = _scopeFactory.CreateAsyncScope();
         var repo                = scope.ServiceProvider.GetRequiredService<ISubscriptionRepository>();
-        var publishEndpoint     = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+        var publishEndpoint     = scope.ServiceProvider.GetRequiredService<IOutboxPublisher<Inktide.API.Billing.Infrastructure.DbContext.BillingDbContext>>();
 
         var due = await repo.GetDueForRenewalAsync("yookassa", horizon, ct).ConfigureAwait(false);
 

@@ -7,8 +7,8 @@ using Inktide.API.Billing.Application.Models;
 using Inktide.API.Billing.Infrastructure.DbContext;
 using Inktide.API.Billing.Infrastructure.Idempotency;
 using Inktide.API.Billing.Infrastructure.Settings;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Core.Models;
-using MassTransit;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -20,7 +20,7 @@ public sealed class RobokassaWebhookProcessor : IWebhookProcessor
 
     private readonly RobokassaSettings _settings;
     private readonly ISubscriptionRepository _subscriptions;
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IOutboxPublisher<BillingDbContext> _publishEndpoint;
     private readonly BillingDbContext _db;
     private readonly IConnectionMultiplexer _redis;
     private readonly TimeProvider _time;
@@ -29,7 +29,7 @@ public sealed class RobokassaWebhookProcessor : IWebhookProcessor
     public RobokassaWebhookProcessor(
         RobokassaSettings settings,
         ISubscriptionRepository subscriptions,
-        IPublishEndpoint publishEndpoint,
+        IOutboxPublisher<BillingDbContext> publishEndpoint,
         BillingDbContext db,
         IConnectionMultiplexer redis,
         TimeProvider time,

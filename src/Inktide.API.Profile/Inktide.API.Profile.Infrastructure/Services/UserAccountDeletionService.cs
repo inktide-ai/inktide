@@ -1,11 +1,11 @@
 using System.Text.Json;
 using Inktide.API.Core.Constants;
 using Inktide.API.Core.Events;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Core.Transactions;
 using Inktide.API.Profile.Application.Interfaces;
 using Inktide.API.Profile.Application.Messages;
 using Inktide.API.Profile.Infrastructure.DbContext;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -14,13 +14,13 @@ namespace Inktide.API.Profile.Infrastructure.Services;
 public sealed class UserAccountDeletionService : IUserAccountDeletionService
 {
     private readonly ProfileDbContext _db;
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IOutboxPublisher<ProfileDbContext> _publishEndpoint;
     private readonly IIntegrationEventPublisher _publisher;
     private readonly ILogger<UserAccountDeletionService> _logger;
 
     public UserAccountDeletionService(
         ProfileDbContext db,
-        IPublishEndpoint publishEndpoint,
+        IOutboxPublisher<ProfileDbContext> publishEndpoint,
         IIntegrationEventPublisher publisher,
         ILogger<UserAccountDeletionService> logger)
     {

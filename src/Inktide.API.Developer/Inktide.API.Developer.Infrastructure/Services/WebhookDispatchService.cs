@@ -1,9 +1,10 @@
 using System.Text.Json;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Developer.Application.Interfaces;
 using Inktide.API.Developer.Application.Messages;
 using Inktide.API.Developer.Domain.Entities;
 using Inktide.API.Developer.Domain.Repositories;
-using MassTransit;
+using Inktide.API.Developer.Infrastructure.Persistence;
 using Microsoft.Extensions.Logging;
 
 namespace Inktide.API.Developer.Infrastructure.Services;
@@ -12,13 +13,13 @@ internal sealed class WebhookDispatchService : IWebhookDispatchService
 {
     private readonly IDeveloperApplicationRepository _appRepo;
     private readonly IWebhookDeliveryRepository _deliveryRepo;
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IOutboxPublisher<DeveloperDbContext> _publishEndpoint;
     private readonly ILogger<WebhookDispatchService> _logger;
 
     public WebhookDispatchService(
         IDeveloperApplicationRepository appRepo,
         IWebhookDeliveryRepository deliveryRepo,
-        IPublishEndpoint publishEndpoint,
+        IOutboxPublisher<DeveloperDbContext> publishEndpoint,
         ILogger<WebhookDispatchService> logger)
     {
         _appRepo         = appRepo         ?? throw new ArgumentNullException(nameof(appRepo));
@@ -48,8 +49,8 @@ internal sealed class WebhookDispatchService : IWebhookDispatchService
             if (string.IsNullOrWhiteSpace(app.WebhookUrl)) continue;
 
             var delivery = WebhookDelivery.Create(app.Id, eventType, payloadJson);
-            await _deliveryRepo.AddAsync(delivery, ct);
 
+            // Publish before AddAsync: its SaveChanges stores the delivery and the outbox row together.
             await _publishEndpoint.Publish(new WebhookDeliveryRequested(
                 delivery.Id,
                 app.Id,
@@ -57,6 +58,7 @@ internal sealed class WebhookDispatchService : IWebhookDispatchService
                 payloadJson,
                 app.WebhookUrl!,
                 app.WebhookSecretHash ?? string.Empty), ct);
+            await _deliveryRepo.AddAsync(delivery, ct);
 
             _logger.LogDebug("Dispatched {EventType} for app {AppId} delivery {DeliveryId}",
                 eventType, app.Id, delivery.Id);

@@ -1,5 +1,5 @@
-using Inktide.API.Core;
 using Inktide.API.Core.MassTransit;
+using Inktide.API.Core;
 using Inktide.API.Profile.Infrastructure.DbContext;
 using Inktide.API.Profile.Infrastructure.Keycloak;
 using Inktide.API.Profile.Infrastructure.Messaging;
@@ -29,11 +29,7 @@ public sealed class ProfileInfrastructureStartup : IStartup, IBusModuleConfigura
 
     public void ConfigureConsumers(IBusRegistrationConfigurator x)
     {
-        x.AddEntityFrameworkOutbox<ProfileDbContext>(o =>
-        {
-            o.UsePostgres();
-            o.UseBusOutbox();
-        });
+        x.AddModuleOutbox<ProfileDbContext>();
 
         x.AddConsumer<KeycloakUserDeletionConsumer>();
         x.AddConsumer<KeycloakEmailUpdateConsumer>();

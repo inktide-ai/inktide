@@ -1,10 +1,10 @@
 using System.Data;
 using System.Data.Common;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Core.Messages;
 using Inktide.API.Core.Transactions;
 using Inktide.API.Soul.Domain.IntegrationEvents;
 using Inktide.API.Soul.Infrastructure.DbContext;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -28,7 +28,7 @@ internal sealed class SoulTransactionManager : ITransactionManager, IDisposable,
     private readonly SoulDbContext _db;
     private readonly IDomainEventCollector _collector;
     private readonly IDomainEventDispatcher _dispatcher;
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IOutboxPublisher<SoulDbContext> _publishEndpoint;
     private readonly ILogger<SoulTransactionManager> _logger;
 
     private IDbContextTransaction? _currentTransaction;
@@ -37,7 +37,7 @@ internal sealed class SoulTransactionManager : ITransactionManager, IDisposable,
         SoulDbContext db,
         IDomainEventCollector collector,
         IDomainEventDispatcher dispatcher,
-        IPublishEndpoint publishEndpoint,
+        IOutboxPublisher<SoulDbContext> publishEndpoint,
         ILogger<SoulTransactionManager> logger)
     {
         _db              = db              ?? throw new ArgumentNullException(nameof(db));

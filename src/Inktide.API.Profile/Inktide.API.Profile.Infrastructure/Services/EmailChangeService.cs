@@ -1,3 +1,4 @@
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Profile.Application.Interfaces;
 using Inktide.API.Profile.Application.Messages;
 using Inktide.API.Profile.Infrastructure.DbContext;
@@ -5,7 +6,6 @@ using Inktide.API.Profile.Infrastructure.Settings;
 using Inktide.API.Profile.Infrastructure.Templates;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using MassTransit;
 using MimeKit;
 using Microsoft.Extensions.Logging;
 
@@ -16,7 +16,7 @@ public sealed class EmailChangeService : IEmailChangeService
     private readonly IVerificationCodeGenerator _codeGen;
     private readonly IEmailVerificationStore _store;
     private readonly SmtpSettings _smtp;
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IOutboxPublisher<ProfileDbContext> _publishEndpoint;
     private readonly ProfileDbContext _db;
     private readonly ILogger<EmailChangeService> _logger;
 
@@ -24,7 +24,7 @@ public sealed class EmailChangeService : IEmailChangeService
         IVerificationCodeGenerator codeGen,
         IEmailVerificationStore store,
         SmtpSettings smtp,
-        IPublishEndpoint publishEndpoint,
+        IOutboxPublisher<ProfileDbContext> publishEndpoint,
         ProfileDbContext db,
         ILogger<EmailChangeService> logger)
     {

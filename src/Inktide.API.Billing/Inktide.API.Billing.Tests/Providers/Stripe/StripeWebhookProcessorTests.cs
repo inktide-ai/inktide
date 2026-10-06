@@ -8,7 +8,7 @@ using Inktide.API.Billing.Infrastructure.Providers.Stripe;
 using Inktide.API.Billing.Infrastructure.Settings;
 using Inktide.API.Billing.Infrastructure.Telemetry;
 using Inktide.API.Core.Models;
-using MassTransit;
+using Inktide.API.Core.MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -25,13 +25,13 @@ public sealed class StripeWebhookProcessorTests
 
     private static (StripeWebhookProcessor Processor,
                     ISubscriptionRepository Subs,
-                    IPublishEndpoint Publish,
+                    IOutboxPublisher<BillingDbContext> Publish,
                     IDatabase Db)
         Create(TimeProvider? time = null)
     {
         var settings = new StripeSettings { WebhookSecret = "whsec_test", SecretKey = "sk_test" };
         var subs     = Substitute.For<ISubscriptionRepository>();
-        var publish  = Substitute.For<IPublishEndpoint>();
+        var publish  = Substitute.For<IOutboxPublisher<BillingDbContext>>();
         var db       = Substitute.For<IDatabase>();
         var redis    = Substitute.For<IConnectionMultiplexer>();
         redis.GetDatabase(Arg.Any<int>(), Arg.Any<object?>()).Returns(db);

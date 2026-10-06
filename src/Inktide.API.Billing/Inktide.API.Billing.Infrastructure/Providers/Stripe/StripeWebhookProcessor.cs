@@ -8,8 +8,8 @@ using Inktide.API.Billing.Infrastructure.DbContext;
 using Inktide.API.Billing.Infrastructure.Idempotency;
 using Inktide.API.Billing.Infrastructure.Settings;
 using Inktide.API.Billing.Infrastructure.Telemetry;
+using Inktide.API.Core.MassTransit;
 using Inktide.API.Core.Models;
-using MassTransit;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -25,7 +25,7 @@ public sealed class StripeWebhookProcessor : IWebhookProcessor
     private readonly StripeSettings _settings;
     private readonly ISubscriptionRepository _subscriptions;
     private readonly IBillingIncidentRepository _incidents;
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IOutboxPublisher<BillingDbContext> _publishEndpoint;
     private readonly BillingDbContext _db;
     private readonly IConnectionMultiplexer _redis;
     private readonly TimeProvider _time;
@@ -36,7 +36,7 @@ public sealed class StripeWebhookProcessor : IWebhookProcessor
         StripeSettings settings,
         ISubscriptionRepository subscriptions,
         IBillingIncidentRepository incidents,
-        IPublishEndpoint publishEndpoint,
+        IOutboxPublisher<BillingDbContext> publishEndpoint,
         BillingDbContext db,
         IConnectionMultiplexer redis,
         TimeProvider time,
