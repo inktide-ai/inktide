@@ -57,6 +57,13 @@ interface ChunkBuffer {
   lastSeq: number
 }
 
+// Chunks arrive as trimmed sentences or clauses (the backend trims them for TTS),
+// so the space between them has to be put back here.
+function appendChunk(content: string, chunk: string): string {
+  if (!content || !chunk || /\s$/.test(content) || /^[\s.,!?;:…)\]»"'’”]/.test(chunk)) return content + chunk
+  return `${content} ${chunk}`
+}
+
 
 export function useChatChannel(
   channelId: string | null,
@@ -122,7 +129,7 @@ export function useChatChannel(
             setMessages((prev) =>
               prev.map((m) => {
                 if (m.id !== buf!.messageId) return m
-                const next = { ...m, content: m.content + event.text }
+                const next = { ...m, content: appendChunk(m.content, event.text) }
                 if (event.isLast) {
                   next.pending = false
                   next.correlationId = undefined
