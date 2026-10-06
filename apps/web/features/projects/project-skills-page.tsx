@@ -177,7 +177,8 @@ export default function ProjectSkillsPage() {
     }
   }
 
-  const isUsingDefault = project?.system_prompt === null
+  // The API leaves null fields out, so a project without its own prompt has system_prompt undefined.
+  const isUsingDefault = !!project && project.system_prompt == null
   const showingDefault = isUsingDefault && prompt === DEFAULTS.systemPrompt
 
   async function handleSave() {
