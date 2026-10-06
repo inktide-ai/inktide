@@ -16,9 +16,11 @@ import { FishAudioSettings } from './panels/fish-audio-panel'
 import { CartesiaSettings } from './panels/cartesia-panel'
 import { GoogleCloudSettings } from './panels/google-cloud-panel'
 import { AzureSpeechSettings } from './panels/azure-panel'
+import { SileroSettings } from './panels/silero-panel'
 
 const PROVIDER_SETTINGS: Record<string, React.ComponentType> = {
   'kokoro':            KokoroSettings,
+  'silero':            SileroSettings,
   'elevenlabs':        ElevenLabsSettings,
   'openai':            OpenAiSettings,
   'openai-compatible': OpenAiCompatibleSettings,

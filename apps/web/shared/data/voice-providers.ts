@@ -19,7 +19,18 @@ export interface VoiceProviderCatalogEntry {
   darkIcon?: boolean
   websiteUrl?: string
   supportUrl?: string
+  /** Voice a new soul gets with this provider (the backend default is a Kokoro voice) */
+  defaultVoiceId?: string
 }
+
+/** Speakers of Silero v4_ru (fast-api/ai-worker/tts/silero). */
+export const SILERO_VOICES = [
+  { id: 'xenia',   label: 'Xenia — женский' },
+  { id: 'kseniya', label: 'Kseniya — женский' },
+  { id: 'baya',    label: 'Baya — женский' },
+  { id: 'aidar',   label: 'Aidar — мужской' },
+  { id: 'eugene',  label: 'Eugene — мужской' },
+]
 
 export const VOICE_PROVIDER_CATALOG: VoiceProviderCatalogEntry[] = [
   {
@@ -33,6 +44,19 @@ export const VOICE_PROVIDER_CATALOG: VoiceProviderCatalogEntry[] = [
     types: ['local', 'open-source', 'streaming'],
     websiteUrl: 'https://github.com/hexgrad/kokoro',
     supportUrl: 'https://github.com/hexgrad/kokoro/issues',
+  },
+  {
+    id: 'silero',
+    name: 'Silero',
+    description: 'Local Russian TTS — natural voices, no API key, runs on your server.',
+    iconSrc: '/images/providers/voice/silero.svg',
+    kind: 'Local',
+    tags: ['Free', 'Offline', 'Russian'],
+    requiresApiKey: false,
+    types: ['local', 'open-source'],
+    defaultVoiceId: 'xenia',
+    websiteUrl: 'https://github.com/snakers4/silero-models',
+    supportUrl: 'https://github.com/snakers4/silero-models/issues',
   },
   {
     id: 'elevenlabs',

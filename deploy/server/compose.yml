@@ -88,6 +88,7 @@ services:
       KeycloakAdminSettings__Enabled: "false"
       CorsSettings__AllowedOrigins__0: https://${APP_HOST}
       TtsProviders__Kokoro__Endpoint: http://kokoro:8880/v1
+      TtsProviders__Silero__Endpoint: http://silero:8000/v1
       OllamaSettings__Host: http://ollama
       EmotionClassificationOptions__OllamaBaseUrl: http://ollama:11434
       EmotionClassificationOptions__Model: qwen2.5-1.5b-4t
@@ -232,6 +233,17 @@ services:
     cpuset: ${VOICE_CPUS:-}
     environment:
       OMP_NUM_THREADS: ${VOICE_THREADS:-4}
+
+  # Russian voice: Kokoro has none. Same API as Kokoro, same priority over background work.
+  silero:
+    <<: *restart
+    build:
+      context: ../../fast-api/ai-worker/tts/silero
+    image: inktide-silero:server
+    cpu_shares: 2048
+    cpuset: ${VOICE_CPUS:-}
+    environment:
+      SILERO_THREADS: ${VOICE_THREADS:-4}
 
   ollama:
     <<: *restart

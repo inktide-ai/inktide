@@ -72,6 +72,7 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
       tts: {
         ...base.tts,
         providerId: state.stepSelections.tts?.id ?? null,
+        voiceId:    VOICE_PROVIDER_CATALOG.find(e => e.id === state.stepSelections.tts?.id)?.defaultVoiceId ?? base.tts.voiceId,
         apiKey:     state.stepSelections.tts?.config?.apiKey ?? null,
       },
       personalityConfig: state.personalityConfig,

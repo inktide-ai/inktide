@@ -219,6 +219,7 @@
     "hintGoogleVoices": "Выберите из голосов Google Cloud.",
     "hintAzureVoices": "Выберите из нейронных голосов Azure.",
     "hintKokoroVoice": "Выберите голос Kokoro для синтеза.",
+    "hintSileroVoice": "Выберите голос Silero. Silero говорит только по-русски.",
     "hintOpenAiVoice": "Выберите голос OpenAI.",
     "kokoroServerDesc": "Эндпоинт Kokoro API (локальный сервер).",
     "azureKeyDesc": "Ключ подписки Azure Speech.",

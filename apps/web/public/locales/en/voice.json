@@ -219,6 +219,7 @@
     "hintGoogleVoices": "Select from Google Cloud voices.",
     "hintAzureVoices": "Select from Azure neural voices.",
     "hintKokoroVoice": "Choose a Kokoro voice for synthesis.",
+    "hintSileroVoice": "Choose a Silero voice. Silero speaks Russian only.",
     "hintOpenAiVoice": "Select an OpenAI voice.",
     "kokoroServerDesc": "Kokoro API endpoint (local server).",
     "azureKeyDesc": "Azure Speech subscription key.",

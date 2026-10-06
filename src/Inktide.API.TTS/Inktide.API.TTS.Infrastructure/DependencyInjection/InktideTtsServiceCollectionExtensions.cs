@@ -9,6 +9,7 @@ using Inktide.API.TTS.Infrastructure.ElevenLabs;
 using Inktide.API.TTS.Infrastructure.FishAudio;
 using Inktide.API.TTS.Infrastructure.GoogleCloud;
 using Inktide.API.TTS.Infrastructure.Kokoro;
+using Inktide.API.TTS.Infrastructure.Silero;
 using Inktide.API.TTS.Infrastructure.OpenAi;
 using Inktide.API.TTS.Infrastructure.Messaging;
 using Inktide.API.TTS.Infrastructure.Telemetry;
@@ -40,6 +41,7 @@ public static class InktideTtsServiceCollectionExtensions
         services.AddInktideTtsAzureSpeechClients(configuration);
         services.AddInktideTtsGoogleCloudClients(configuration);
         services.AddInktideTtsCartesiaClients(configuration);
+        var sileroConfigured = services.AddInktideTtsSileroClients(configuration);
 
         services.AddSingleton<SpeechProviderDecoratorApplicator>();
 
@@ -56,6 +58,8 @@ public static class InktideTtsServiceCollectionExtensions
         Register<AzureSpeechTtsProvider>(services);
         Register<GoogleCloudTtsProvider>(services);
         Register<CartesiaTtsProvider>(services);
+        if (sileroConfigured)
+            Register<SileroTtsProvider>(services);
 
         services.AddSingleton<ITtsAudioPublisher, RedisTtsAudioPublisher>();
         services.AddInktideSpeechProviders(configuration);
