@@ -17,6 +17,8 @@ export interface ProviderFieldDef {
   placeholder?: string
   options?: ProviderFieldOption[]
   default?: unknown
+  /** The provider cannot be selected while this field is empty. */
+  required?: boolean
 }
 
 export interface LlmProviderDef {
@@ -28,6 +30,8 @@ export interface LlmProviderDef {
   fixedBaseUrl?: string
   /** Local providers: editable default URL */
   defaultBaseUrl?: string
+  /** Example shown in the URL field when defaultBaseUrl is empty */
+  baseUrlPlaceholder?: string
   extraFields?: ProviderFieldDef[]
   /** Pure format check - no network call. Returns null if OK, error string if not. */
   autoValidate: (cfg: { apiKey: string; baseUrl: string }) => string | null
@@ -59,6 +63,17 @@ function isValidUrl(s: string): boolean {
     return u.protocol === 'http:' || u.protocol === 'https:'
   } catch {
     return false
+  }
+}
+
+// Cards reject non-HTTPS base URLs (CreateAiCardRequestValidator), so remote custom endpoints must be HTTPS.
+function requiresHttpsEndpoint(label: string) {
+  return ({ apiKey, baseUrl }: { apiKey: string; baseUrl: string }): string | null => {
+    const url = baseUrl.trim()
+    if (!url) return `${label} endpoint URL is required.`
+    if (!url.startsWith('https://') || !isValidUrl(url)) return 'Enter a valid https:// URL.'
+    if (!apiKey.trim()) return 'API key is required.'
+    return null
   }
 }
 
@@ -402,9 +417,18 @@ export const LLM_PROVIDER_CATALOG: LlmProviderDef[] = [
   {
     id: 'openai-compat',
     name: 'OpenAI-compatible',
-    requiresKey: false,
+    requiresKey: true,
     defaultBaseUrl: '',
+    baseUrlPlaceholder: 'https://routerai.ru/api/v1',
     extraFields: [
+      {
+        key: 'model',
+        label: 'Model',
+        hint: 'Model ID exactly as the endpoint names it.',
+        type: 'text',
+        placeholder: 'openai/gpt-4.1-mini',
+        required: true,
+      },
       {
         key: 'headers',
         label: 'Custom Headers',
@@ -412,10 +436,10 @@ export const LLM_PROVIDER_CATALOG: LlmProviderDef[] = [
         type: 'kv-pairs',
       },
     ],
-    autoValidate: requiresLocalUrl('OpenAI-compatible'),
+    autoValidate: requiresHttpsEndpoint('OpenAI-compatible'),
     iconSrc: '/images/providers/brain/chatgpt.svg',
     icon: '⊕',
-    description: 'Connect any OpenAI-compatible API endpoint — vLLM, LocalAI, Llama.cpp and more.',
+    description: 'Connect any OpenAI-compatible API endpoint — RouterAI, vLLM, LocalAI and more.',
     model: 'Custom',
     kind: 'Custom',
     tags: ['Self-hosted', 'Flexible', 'Any model'],

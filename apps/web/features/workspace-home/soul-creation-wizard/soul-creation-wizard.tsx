@@ -63,6 +63,8 @@ export function SoulCreationWizard({ onBack, onFinish, onStep, onLlmSelect, onTt
       llm: {
         ...base.llm,
         providerId: state.stepSelections.llm?.id ?? null,
+        // Typed for OpenAI-compatible endpoints; otherwise the catalog entry's model is used.
+        modelId:    state.stepSelections.llm?.config?.model?.trim() || base.llm.modelId,
         baseUrl:    state.stepSelections.llm?.config?.baseUrl ?? null,
       },
       tts: {

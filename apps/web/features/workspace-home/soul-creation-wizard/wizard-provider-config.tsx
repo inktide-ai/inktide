@@ -33,11 +33,21 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
 
   const needsApiKey = llmDef?.requiresKey || ttsDef?.requiresApiKey
   const fixedEndpoint = llmDef?.fixedBaseUrl
+  // An empty default still means "the user types the URL" (OpenAI-compatible).
   const editableEndpoint = llmDef?.defaultBaseUrl
+  const hasEditableEndpoint = editableEndpoint !== undefined
   const extraFields = llmDef?.extraFields ?? []
   const description = llmDef?.description ?? ttsDef?.description ?? ''
 
-  const hasFields = needsApiKey || editableEndpoint || extraFields.length > 0
+  const hasFields = needsApiKey || hasEditableEndpoint || extraFields.length > 0
+
+  // The URL the key is saved and tested against: what the user typed, else the provider's own.
+  // Without it the backend tests every key against api.openai.com.
+  const endpoint = config.baseUrl ?? fixedEndpoint ?? editableEndpoint ?? ''
+  const missingField = extraFields.find(f => f.required && !config[f.key]?.trim())
+  const validationError = llmDef
+    ? (missingField ? `${missingField.label} is required.` : llmDef.autoValidate({ apiKey: config.apiKey ?? '', baseUrl: endpoint }))
+    : null
 
   const credTest = useCredentialTest(item.id)
 
@@ -48,8 +58,9 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
   }, [config.apiKey])
 
   const handleClick = async () => {
+    if (validationError) return
     if (needsApiKey && config.apiKey && credTest.status === 'untested') {
-      await credTest.test(config.apiKey, config.baseUrl ?? null)
+      await credTest.test(config.apiKey, endpoint || null)
       return
     }
     onConfirm()
@@ -132,14 +143,14 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
           </div>
         )}
 
-        {editableEndpoint && (
+        {hasEditableEndpoint && (
           <div className="mb-4">
             <span className={labelCls}>{t('wizard.serverUrl')}</span>
             <input
               type="text"
               value={config.baseUrl ?? editableEndpoint}
               onChange={e => onChange('baseUrl', e.target.value)}
-              placeholder={editableEndpoint}
+              placeholder={llmDef?.baseUrlPlaceholder ?? editableEndpoint}
               className={inputCls}
               autoComplete="off"
             />
@@ -168,10 +179,13 @@ export function WizardProviderConfig({ panelType, item, config, onChange, onConf
       </div>
 
       <div className="flex-shrink-0 border-t border-[var(--border-subtle)] px-5 py-4">
+        {validationError && (
+          <p className="home-ui-font mb-2 text-xs text-[var(--text-tertiary)]">{validationError}</p>
+        )}
         <button
           type="button"
           onClick={handleClick}
-          disabled={credTest.testing}
+          disabled={credTest.testing || !!validationError}
           className="home-ui-font flex h-9 w-full items-center justify-center rounded-xl text-body font-semibold text-white transition-colors hover:opacity-90 active:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ background: 'var(--accent-base)' }}
         >
