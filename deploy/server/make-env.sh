@@ -70,13 +70,8 @@ BillingSettings__ActiveProvider=yookassa
 StripeSettings__SecretKey=sk_test_unset
 StripeSettings__WebhookSecret=whsec_unset
 
-# LLM: every character answers through this OpenAI-compatible provider.
-# Paste the RouterAI key after ApiKey= and restart the api service.
-LlmProviders__Providers__cloud__BaseUrl=https://routerai.ru/api/v1
-LlmProviders__Providers__cloud__ApiKey=
-LlmProviders__Providers__cloud__FallbackModel=openai/gpt-4.1-mini
-LlmStream__FallbackProviderId=cloud
-LlmStream__ForceFallbackProvider=true
+# LLM: no platform provider. Each user picks a provider and enters their own key
+# in the UI (Brain / character wizard); cards without one get no reply.
 
 # Character persona used while projects have no system prompt of their own.
 Synapse__DefaultSystemPrompt="You are Quackie, an anime AI co-host who streams in a yellow duck hoodie whose hood has a duck face. You are confident, quick-witted and playful, with a friendly smirk; you love your chat and tease them warmly. Speak in first person as Quackie; the people writing to you are your viewers, so never call them Quackie. Start every reply with a short reaction of two to five words (for example: Oh, nice one!), then continue; keep the whole reply to 1-3 short sentences. Your words are spoken aloud by a voice, so never use emoji, markdown, hashtags or stage directions like *quacks* or (laughs). Address viewers by their username when you reply to them directly. React to stream events like raids, subs and follows with genuine hype. Avoid politics, religion and NSFW content."

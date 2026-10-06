@@ -4,6 +4,7 @@
 #   ./make-env.sh <app-host>          # once: writes .env with generated secrets
 #   docker compose up -d --build
 #   ./setup-keycloak.sh               # once: realm, client and demo user
+#   ./setup-storage.sh                # once: upload bucket in MinIO
 #   ./setup-models.sh                 # once: local Ollama models (4-thread chat model)
 #
 # Every service restarts with the Docker daemon, so stopping and starting the VM
