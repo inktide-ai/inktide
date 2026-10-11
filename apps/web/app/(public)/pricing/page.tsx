@@ -3,6 +3,7 @@ import Link from 'next/link'
 import PricingSection from '@/features/landing/pricing-section'
 import { HOME_ROUTE } from '@/lib/routes'
 import { getServerUser } from '@/lib/auth-server'
+import { fetchPriceLabels } from '@/entities/billing/api/plan-prices-server'
 
 export const metadata: Metadata = {
   title: 'Pricing — Inktide',
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 }
 
 export default async function PricingPage() {
-  const serverUser = await getServerUser()
+  const [serverUser, prices] = await Promise.all([getServerUser(), fetchPriceLabels()])
   return (
     <div className="min-h-screen bg-[var(--bg-dark)]">
       <div className="flex h-14 items-center px-6 border-b border-[var(--border-subtle)]">
@@ -19,6 +20,7 @@ export default async function PricingPage() {
         </Link>
       </div>
       <PricingSection
+        prices={prices}
         plans={['starter', 'pro']}
         isLoggedIn={!!serverUser}
         registerUrl=""

@@ -26,6 +26,7 @@ export const queryKeys = {
   },
   billing: {
     subscription: ['billing', 'subscription'] as const,
+    plans: ['billing', 'plans'] as const,
   },
   me: {
     profile: ['me'] as const,

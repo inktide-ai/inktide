@@ -24,8 +24,8 @@
     "billingMonthly": "Billed monthly in EUR",
     "tax": "Estimated tax",
     "dueToday": "Due today",
-    "renewsYearly": "Renews annually until cancelled. You will be charged {{price}} €/year (incl. tax).",
-    "renewsMonthly": "Renews monthly until cancelled. You will be charged {{price}} €/month (incl. tax)."
+    "renewsYearly": "Renews annually until cancelled. You will be charged {{price}}/year (incl. tax).",
+    "renewsMonthly": "Renews monthly until cancelled. You will be charged {{price}}/month (incl. tax)."
   },
   "error": {
     "payment": "Payment error",

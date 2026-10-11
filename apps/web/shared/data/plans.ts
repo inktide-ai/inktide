@@ -2,9 +2,6 @@ export type PlanKey = 'starter' | 'pro'
 
 export interface PlanMeta {
   name: string
-  monthlyPrice: number
-  yearlyPrice: number
-  yearlyTotal: number
   features: string[]
   accentColor: string
 }
@@ -12,9 +9,6 @@ export interface PlanMeta {
 export const PLANS: Record<PlanKey, PlanMeta> = {
   starter: {
     name: 'Starter',
-    monthlyPrice: 16,
-    yearlyPrice: 12,
-    yearlyTotal: 144,
     features: [
       '3 Soul Cards',
       'Discord + Twitch connectors',
@@ -26,9 +20,6 @@ export const PLANS: Record<PlanKey, PlanMeta> = {
   },
   pro: {
     name: 'Pro',
-    monthlyPrice: 30,
-    yearlyPrice: 24,
-    yearlyTotal: 288,
     features: [
       'Unlimited Soul Cards',
       'All platforms + future connectors',

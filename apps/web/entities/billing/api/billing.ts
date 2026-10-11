@@ -7,6 +7,18 @@ export interface SubscriptionDto {
   periodEnd: string | null
 }
 
+/** Monthly price of a paid plan, exactly as checkout charges it. */
+export interface PlanPriceDto {
+  plan: 'starter' | 'pro'
+  amount: number
+  currency: string
+}
+
+export async function getPlanPrices(): Promise<PlanPriceDto[]> {
+  const res = await apiFetch('/api/v1/billing/plans')
+  return jsonOrThrow<PlanPriceDto[]>(res)
+}
+
 export async function getSubscription(): Promise<SubscriptionDto> {
   const res = await apiFetch('/api/v1/billing/subscription')
   return jsonOrThrow<SubscriptionDto>(res)

@@ -1,4 +1,5 @@
 using Inktide.API.Core.Generators;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -31,6 +32,12 @@ public sealed class YooKassaBillingProvider : IBillingProvider
         _billing = billing ?? throw new ArgumentNullException(nameof(billing));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
+
+    public IReadOnlyList<PlanPrice> Prices =>
+    [
+        new(PlanType.Starter, decimal.Parse(_settings.StarterPriceAmount, CultureInfo.InvariantCulture), _settings.PriceCurrency),
+        new(PlanType.Pro,     decimal.Parse(_settings.ProPriceAmount,     CultureInfo.InvariantCulture), _settings.PriceCurrency),
+    ];
 
     public async Task<string> CreateCheckoutUrlAsync(CreateCheckoutRequest request, CancellationToken ct = default)
     {

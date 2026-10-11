@@ -4,8 +4,8 @@ public sealed class YooKassaSettings
 {
     public string   ShopId             { get; init; } = string.Empty;
     public string   SecretKey          { get; init; } = string.Empty;
-    public string   StarterPriceAmount { get; init; } = "199.00";
-    public string   ProPriceAmount     { get; init; } = "299.00";
+    public string   StarterPriceAmount { get; init; } = "1390.00";
+    public string   ProPriceAmount     { get; init; } = "2890.00";
     public string   PriceCurrency      { get; init; } = "RUB";
     public string   StarterDescription { get; init; } = "Inktide Starter — 1 месяц";
     public string   ProDescription     { get; init; } = "Inktide Pro — 1 месяц";

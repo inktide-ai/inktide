@@ -8,6 +8,9 @@ public interface ISubscriptionService
     /// <summary>Returns the current subscription, or a synthetic Free record when none exists.</summary>
     Task<SubscriptionDto> GetSubscriptionAsync(string userId, CancellationToken ct = default);
 
+    /// <summary>Monthly prices of the paid plans, as the active payment provider charges them.</summary>
+    IReadOnlyList<PlanPrice> GetPlanPrices();
+
     /// <summary>Creates a hosted checkout URL for the given plan.</summary>
     Task<string> CreateCheckoutUrlAsync(string userId, string userEmail, string returnUrl, PlanType plan, CancellationToken ct = default);
 

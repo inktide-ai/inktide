@@ -9,12 +9,15 @@ import { motion } from 'framer-motion'
 import { Shield, RefreshCw, Sparkles, Crown, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { fadeUp } from '@/shared/lib/motion'
+import type { PriceLabels } from '@/entities/billing/lib/price-labels'
 import PlanCard, { type PlanCardConfig } from './plan-card'
 import { sectionContainer } from './section-container'
 
 type PlanKey = 'free' | 'starter' | 'pro'
 
 interface PricingSectionProps {
+  /** From fetchPriceLabels(); null when the billing API is unreachable. */
+  prices: PriceLabels | null
   plans?: PlanKey[]
   isLoggedIn?: boolean
   registerUrl?: string  // unused, kept for backwards compat
@@ -29,6 +32,7 @@ const trustItems = [
 ]
 
 export default function PricingSection({
+  prices,
   plans = ['free', 'starter', 'pro'],
   isLoggedIn = false,
   registerUrl: _registerUrl = '',
@@ -65,7 +69,7 @@ export default function PricingSection({
       iconColor: '#7B61FF',
       name: t('pricing.free.name'),
       tagline: t('pricing.free.tagline'),
-      price: t('pricing.free.price'),
+      price: prices?.free ?? '—',
       perMonthLabel: t('pricing.perMonth'),
       features: t('pricing.free.features', { returnObjects: true }) as string[],
       checkBg: '#5B56F0',
@@ -82,7 +86,7 @@ export default function PricingSection({
       iconColor: '#FF6A2B',
       name: t('pricing.starter.name'),
       tagline: t('pricing.starter.tagline'),
-      price: '$16',
+      price: prices?.starter ?? '—',
       perMonthLabel: t('pricing.perMonth'),
       billedLabel: t('pricing.billedMonthly'),
       features: t('pricing.starter.features', { returnObjects: true }) as string[],
@@ -101,7 +105,7 @@ export default function PricingSection({
       iconColor: '#7B61FF',
       name: t('pricing.pro.name'),
       tagline: t('pricing.pro.tagline'),
-      price: '$30',
+      price: prices?.pro ?? '—',
       perMonthLabel: t('pricing.perMonth'),
       billedLabel: t('pricing.billedMonthly'),
       features: t('pricing.pro.features', { returnObjects: true }) as string[],
@@ -115,7 +119,7 @@ export default function PricingSection({
       highlighted: true,
       popularLabel: t('pricing.mostPopular'),
     },
-  }), [t, isLoggedIn, currentPlan]) // eslint-disable-line react-hooks/exhaustive-deps
+  }), [t, prices, isLoggedIn, currentPlan]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeCards = plans.map(key => configs[key])
   const gridClass = plans.length === 2

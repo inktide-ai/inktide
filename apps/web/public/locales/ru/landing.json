@@ -178,13 +178,10 @@
     "savePercent": "Скидка 33%",
     "perMonth": "/мес",
     "billedMonthly": "Оплата ежемесячно",
-    "billedYearlyStarter": "Оплата за год $144",
-    "billedYearlyPro": "Оплата за год $288",
     "mostPopular": "Популярный",
     "free": {
       "name": "Free",
       "tagline": "Для любопытных",
-      "price": "$0",
       "cta": "Начать бесплатно",
       "features": ["1 Soul Card", "1 коннектор (Discord или Twitch)", "Стандартные LLM модели", "Поддержка сообщества"]
     },

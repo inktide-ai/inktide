@@ -178,13 +178,10 @@
     "savePercent": "Save 33%",
     "perMonth": "/mo",
     "billedMonthly": "Billed monthly",
-    "billedYearlyStarter": "Billed yearly $144",
-    "billedYearlyPro": "Billed yearly $288",
     "mostPopular": "Most popular",
     "free": {
       "name": "Free",
       "tagline": "For curious minds",
-      "price": "$0",
       "cta": "Get started free",
       "features": ["1 Soul Card", "1 platform connector (Discord or Twitch)", "Standard LLM models", "Community support"]
     },

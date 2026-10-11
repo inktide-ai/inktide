@@ -35,6 +35,8 @@ public sealed class SubscriptionService : ISubscriptionService
         return new SubscriptionDto(userId, sub.Plan, sub.Status, sub.Provider, sub.CurrentPeriodEnd);
     }
 
+    public IReadOnlyList<PlanPrice> GetPlanPrices() => _provider.Prices;
+
     public async Task<string> CreateCheckoutUrlAsync(
         string userId,
         string userEmail,

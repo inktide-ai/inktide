@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Web;
 using Inktide.API.Billing.Application.Interfaces;
@@ -24,6 +25,12 @@ public sealed class RobokassaBillingProvider : IBillingProvider
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _logger   = logger   ?? throw new ArgumentNullException(nameof(logger));
     }
+
+    public IReadOnlyList<PlanPrice> Prices =>
+    [
+        new(PlanType.Starter, decimal.Parse(_settings.StarterOutSum, CultureInfo.InvariantCulture), _settings.PriceCurrency),
+        new(PlanType.Pro,     decimal.Parse(_settings.ProOutSum,     CultureInfo.InvariantCulture), _settings.PriceCurrency),
+    ];
 
     public Task<string> CreateCheckoutUrlAsync(CreateCheckoutRequest request, CancellationToken ct = default)
     {

@@ -10,6 +10,9 @@ public interface IBillingProvider
     /// <summary>Unique lowercase identifier, e.g. "lemon_squeezy".</summary>
     string ProviderId { get; }
 
+    /// <summary>Monthly prices of the paid plans: exactly what <see cref="CreateCheckoutUrlAsync"/> charges.</summary>
+    IReadOnlyList<PlanPrice> Prices { get; }
+
     Task<string> CreateCheckoutUrlAsync(CreateCheckoutRequest request, CancellationToken ct = default);
 
     /// <returns>Portal URL, or null when the provider does not support customer portals.</returns>

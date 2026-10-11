@@ -47,6 +47,18 @@ public sealed class BillingController : ControllerBase
         });
     }
 
+    /// <summary>Monthly prices of the paid plans, exactly as checkout charges them. Public: the pricing page shows them to guests.</summary>
+    [HttpGet("plans")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IReadOnlyList<PlanPriceResponse>), StatusCodes.Status200OK)]
+    public IActionResult GetPlans() =>
+        Ok(_subscriptions.GetPlanPrices().Select(p => new PlanPriceResponse
+        {
+            Plan     = p.Plan.ToString().ToLowerInvariant(),
+            Amount   = p.Amount,
+            Currency = p.Currency,
+        }));
+
     /// <summary>Creates a hosted checkout session and returns the redirect URL.</summary>
     [HttpPost("checkout")]
     [ProducesResponseType(typeof(CheckoutResponse), StatusCodes.Status200OK)]
@@ -116,6 +128,13 @@ public sealed class BillingController : ControllerBase
             _logger.LogError(ex, "Stripe CreatePaymentIntent failed for user {UserId}", userId);
             return StatusCode(StatusCodes.Status502BadGateway);
         }
+    }
+
+    public sealed class PlanPriceResponse
+    {
+        public string  Plan     { get; init; } = string.Empty;
+        public decimal Amount   { get; init; }
+        public string  Currency { get; init; } = string.Empty;
     }
 
     public sealed class CheckoutRequest             { public string? ReturnUrl { get; init; } public string? Plan { get; init; } }

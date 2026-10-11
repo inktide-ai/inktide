@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Crown, Zap, Sparkles, Check, ExternalLink, type LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useBilling } from '@/entities/billing/context/BillingContext'
+import { usePriceLabels } from '@/entities/billing/hooks/usePriceLabels'
 import { useCharactersContext } from '@/entities/character/context/CharactersContext'
 import { fetchStorageUsage } from '@/api/storage'
 import { queryKeys } from '@/shared/lib/query/keys'
@@ -14,10 +15,10 @@ import { cn } from '@/lib/utils'
 
 const PLAN_ORDER: Record<string, number> = { free: 0, starter: 1, pro: 2 }
 
-const PLAN_META: Record<string, { icon: LucideIcon; iconColor: string; tagline: string; price: string; popular?: boolean }> = {
-  free:    { icon: Sparkles, iconColor: '#7B61FF', tagline: 'For curious minds',  price: '€0'                },
-  starter: { icon: Zap,      iconColor: '#FF6A2B', tagline: 'For early builders', price: '€9'                },
-  pro:     { icon: Crown,    iconColor: '#E8A020', tagline: 'For power users',    price: '€19', popular: true },
+const PLAN_META: Record<string, { icon: LucideIcon; iconColor: string; tagline: string; popular?: boolean }> = {
+  free:    { icon: Sparkles, iconColor: '#7B61FF', tagline: 'For curious minds'                },
+  starter: { icon: Zap,      iconColor: '#FF6A2B', tagline: 'For early builders'               },
+  pro:     { icon: Crown,    iconColor: '#E8A020', tagline: 'For power users',   popular: true },
 }
 
 const PLANS = ['free', 'starter', 'pro'] as const
@@ -47,6 +48,7 @@ export default function BillingPanel() {
     queryFn: fetchStorageUsage,
     staleTime: 60_000,
   })
+  const prices = usePriceLabels()
 
   if (billingLoading || cardsLoading) {
     return (
@@ -154,7 +156,7 @@ export default function BillingPanel() {
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] leading-tight text-[var(--text-secondary)]">{m.price}/mo</p>
+                  <p className="text-[11px] leading-tight text-[var(--text-secondary)]">{prices?.[p] ?? '—'}/mo</p>
 
                   {isCurrent ? (
                     <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-2)] px-2 py-1 text-center text-body font-medium text-[var(--text-secondary)]">
