@@ -394,7 +394,7 @@ export function WorkspaceSidebar() {
               label={t('sidebar.github')}
             />
             <SidebarItem
-              href="https://discord.gg/inktide"
+              href="https://discord.gg/gB6BUmzPn"
               icon={<img src="/icons/menu-discord.svg" alt="" aria-hidden style={{ filter: 'var(--menu-icon-filter)', width: 14, height: 14 }} />}
               label={t('sidebar.discordChat')}
             />
