@@ -58,6 +58,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: CLIENT_SECRET,
       issuer:       `${KC_URL}/realms/${KC_REALM}`,
     }),
+    // Keycloak opens its sign-up form only from the registrations endpoint; on the regular
+    // one it ignores kc_action=register and shows the login form. Same client and tokens.
+    Keycloak({
+      id:            'keycloak-register',
+      clientId:      CLIENT_ID,
+      clientSecret:  CLIENT_SECRET,
+      issuer:        `${KC_URL}/realms/${KC_REALM}`,
+      authorization: {
+        url:    `${KC_URL}/realms/${KC_REALM}/protocol/openid-connect/registrations`,
+        params: { scope: 'openid profile email' },
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, account, profile }) {

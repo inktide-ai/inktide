@@ -131,7 +131,7 @@ export function AuthProvider({ avatarService, children }: AuthProviderProps) {
   )
 
   const registerWithKeycloak = useCallback(
-    () => signIn('keycloak', { callbackUrl: '/home' }, { kc_action: 'register' }),
+    () => signIn('keycloak-register', { callbackUrl: '/home' }),
     [],
   )
 
