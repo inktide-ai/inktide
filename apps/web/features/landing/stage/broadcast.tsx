@@ -22,20 +22,43 @@ export const FPS = 24
 
 // The display faces go through next/font so their files are preloaded with the page,
 // and the headlines wait for them (`block`) instead of first flashing a fallback face.
+// Their stacks are built by hand below, so next/font adds no fallback of its own.
 const monaItalic = localFont({
   src: '../../../node_modules/@fontsource-variable/mona-sans/files/mona-sans-latin-wdth-italic.woff2',
   weight: '200 900',
   style: 'italic',
   display: 'block',
   declarations: [{ prop: 'font-stretch', value: '75% 125%' }],
-  fallback: ['sans-serif'],
+  adjustFontFallback: false,
+})
+
+// Mona Sans has no Cyrillic. Russian headlines take Roboto Condensed's black italic, close
+// to Mona at 75% width; unicode-range keeps Latin pages from ever downloading it.
+const monaCyrillic = localFont({
+  src: '../../../node_modules/@fontsource-variable/roboto-condensed/files/roboto-condensed-cyrillic-wght-italic.woff2',
+  weight: '100 900',
+  style: 'italic',
+  display: 'block',
+  declarations: [{ prop: 'unicode-range', value: 'U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116' }],
+  preload: false,
+  adjustFontFallback: false,
 })
 
 const bungee = localFont({
   src: '../../../node_modules/@fontsource/bungee/files/bungee-latin-400-normal.woff2',
   weight: '400',
   display: 'block',
-  fallback: ['sans-serif'],
+  adjustFontFallback: false,
+})
+
+// Bungee's latin-ext file carries the ruble sign the latin one lacks.
+const bungeeRuble = localFont({
+  src: '../../../node_modules/@fontsource/bungee/files/bungee-latin-ext-400-normal.woff2',
+  weight: '400',
+  display: 'block',
+  declarations: [{ prop: 'unicode-range', value: 'U+20BD' }],
+  preload: false,
+  adjustFontFallback: false,
 })
 
 export const palette = {
@@ -47,7 +70,7 @@ export const palette = {
 } as CSSProperties
 
 export const display: CSSProperties = {
-  fontFamily: monaItalic.style.fontFamily,
+  fontFamily: `${monaItalic.style.fontFamily}, ${monaCyrillic.style.fontFamily}, sans-serif`,
   fontStyle: 'italic',
   fontWeight: 900,
   fontStretch: '75%',
@@ -59,7 +82,7 @@ export const display: CSSProperties = {
 
 /** Squared-off digits for scene numbers and the countdown. */
 export const digits: CSSProperties = {
-  fontFamily: bungee.style.fontFamily,
+  fontFamily: `${bungee.style.fontFamily}, ${bungeeRuble.style.fontFamily}, sans-serif`,
   lineHeight: 1,
   letterSpacing: '-0.03em',
 }

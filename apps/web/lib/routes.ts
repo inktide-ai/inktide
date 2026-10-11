@@ -7,6 +7,8 @@ export function templatePath(id?: string): string {
   return id ? `${TEMPLATES_ROUTE}/${id}` : TEMPLATES_ROUTE
 }
 export const ROOT_ROUTE = '/'
+/** The Quackie landing; becomes ROOT_ROUTE once it replaces the old one. */
+export const LANDING_ROUTE = '/stage'
 export const REGISTER_ROUTE = '/register'
 export const PRICING_ROUTE = '/pricing'
 export const SOULS_ROUTE = '/souls'

@@ -1,30 +1,19 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import PricingSection from '@/features/landing/pricing-section'
-import { HOME_ROUTE } from '@/lib/routes'
+import { GeistMono } from 'geist/font/mono'
+import PricingPage from '@/features/landing/stage/pricing-page'
 import { getServerUser } from '@/lib/auth-server'
 import { fetchPriceLabels } from '@/entities/billing/api/plan-prices-server'
 
 export const metadata: Metadata = {
-  title: 'Pricing — Inktide',
-  description: 'Flexible plans for every creator.',
+  title: { absolute: 'Pricing — Quackie' },
+  description: "Plans for every creator. Start free, upgrade when you're ready.",
 }
 
-export default async function PricingPage() {
+export default async function Pricing() {
   const [serverUser, prices] = await Promise.all([getServerUser(), fetchPriceLabels()])
   return (
-    <div className="min-h-screen bg-[var(--bg-dark)]">
-      <div className="flex h-14 items-center px-6 border-b border-[var(--border-subtle)]">
-        <Link href={HOME_ROUTE} className="text-body text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-          ← Назад
-        </Link>
-      </div>
-      <PricingSection
-        prices={prices}
-        plans={['starter', 'pro']}
-        isLoggedIn={!!serverUser}
-        registerUrl=""
-      />
-    </div>
+    <main className={GeistMono.variable}>
+      <PricingPage prices={prices} isLoggedIn={!!serverUser} />
+    </main>
   )
 }

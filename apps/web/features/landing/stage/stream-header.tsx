@@ -3,9 +3,10 @@
 import { useEffect, useState, type MouseEvent, type ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Menu, UserRound, X } from 'lucide-react'
-import { PRICING_ROUTE, REGISTER_ROUTE } from '@/lib/routes'
+import { LANDING_ROUTE, PRICING_ROUTE, REGISTER_ROUTE } from '@/lib/routes'
 import { cn } from '@/lib/utils'
 import { EASE, digits, display, mono } from './broadcast'
 import DuckMark from './duck-mark'
@@ -32,24 +33,31 @@ const NAV: NavItem[] = [
 const LOGIN_ROUTE = '/login'
 const DISCORD = SOCIALS[0]
 
+const onLanding = (hash: string) => (hash === '#top' ? LANDING_ROUTE : `${LANDING_ROUTE}${hash}`)
+
 interface StreamHeaderProps {
   /** The chapter on screen, as the scenes number themselves. */
   chapter?: string
   /** The hero has cut to LIVE; until then the header stays off its loading screen. */
   onAir: boolean
-  onJump: (chapter: string) => void
+  /** Scrolls the landing to a chapter. Other pages leave it out: their chapters link to the landing. */
+  onJump?: (chapter: string) => void
 }
 
 export default function StreamHeader({ chapter, onAir, onJump }: StreamHeaderProps) {
   const reduceMotion = useReducedMotion() ?? false
   const scrolled = useScrolled(80)
   const [menuOpen, setMenuOpen] = useState(false)
+  const pathname = usePathname()
   const shown = onAir || scrolled
   // At the top the header waits for the stinger to clear; further down it is just there.
   const ease = (delay = 0) => (reduceMotion ? { duration: 0 } : { duration: 0.45, delay, ease: EASE })
 
+  const nav = onJump ? NAV : NAV.map(item => (item.chapter ? { ...item, href: onLanding(item.href) } : item))
+  const isActive = (item: NavItem) => (item.chapter ? item.chapter === chapter : item.href === pathname)
+
   const jump = (item: NavItem) => (e: MouseEvent) => {
-    if (!item.chapter) return
+    if (!item.chapter || !onJump) return
     e.preventDefault()
     setMenuOpen(false)
     onJump(item.chapter)
@@ -68,8 +76,8 @@ export default function StreamHeader({ chapter, onAir, onJump }: StreamHeaderPro
       >
         {/* The logo slot keeps its width, so the menu doesn't shift when the marks swap. */}
         <a
-          href="#top"
-          onClick={jump(NAV[0])}
+          href={nav[0].href}
+          onClick={jump(nav[0])}
           aria-label="Quackie, back to the top"
           className="relative flex h-full shrink-0 items-center lg:w-[150px]"
         >
@@ -93,8 +101,8 @@ export default function StreamHeader({ chapter, onAir, onJump }: StreamHeaderPro
         </a>
 
         <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
-          {NAV.map(item => (
-            <NavLink key={item.label} item={item} active={item.chapter === chapter} onClick={jump(item)} />
+          {nav.map(item => (
+            <NavLink key={item.label} item={item} active={isActive(item)} onClick={jump(item)} />
           ))}
         </nav>
 
@@ -129,7 +137,7 @@ export default function StreamHeader({ chapter, onAir, onJump }: StreamHeaderPro
       </div>
 
       <AnimatePresence>
-        {menuOpen && <MobileMenu chapter={chapter} onPick={jump} onClose={() => setMenuOpen(false)} />}
+        {menuOpen && <MobileMenu items={nav} isActive={isActive} onPick={jump} onClose={() => setMenuOpen(false)} />}
       </AnimatePresence>
     </motion.header>
   )
@@ -168,12 +176,12 @@ function NavLink({ item, active, onClick }: { item: NavItem; active: boolean; on
     </>
   )
 
-  return item.chapter ? (
+  return item.href.startsWith('#') ? (
     <a href={item.href} onClick={onClick} aria-current={active ? 'true' : undefined} className={className}>
       {content}
     </a>
   ) : (
-    <Link href={item.href} className={className}>
+    <Link href={item.href} aria-current={active ? 'page' : undefined} className={className}>
       {content}
     </Link>
   )
@@ -211,11 +219,13 @@ function RoundLink({
 
 /** Phones: the menu drops down from the bar, chapters set as big as section headers. */
 function MobileMenu({
-  chapter,
+  items,
+  isActive,
   onPick,
   onClose,
 }: {
-  chapter?: string
+  items: NavItem[]
+  isActive: (item: NavItem) => boolean
   onPick: (item: NavItem) => (e: MouseEvent) => void
   onClose: () => void
 }) {
@@ -229,8 +239,8 @@ function MobileMenu({
       className="fixed inset-x-0 bottom-0 top-14 overflow-y-auto px-4 pb-10 pt-6 sm:px-6 lg:hidden"
     >
       <nav aria-label="Menu" className="flex flex-col">
-        {NAV.map(item => {
-          const active = item.chapter === chapter
+        {items.map(item => {
+          const active = isActive(item)
           const content = (
             <>
               <span style={digits} className="w-12 text-[18px] text-[var(--q-duck)]">
@@ -245,7 +255,7 @@ function MobileMenu({
             'flex items-baseline gap-3 border-b border-[rgb(255_248_231/0.1)] py-3',
             active ? 'text-[var(--q-cream)]' : 'text-[rgb(255_248_231/0.55)]',
           )
-          return item.chapter ? (
+          return item.href.startsWith('#') ? (
             <a key={item.label} href={item.href} onClick={onPick(item)} className={className}>
               {content}
             </a>
