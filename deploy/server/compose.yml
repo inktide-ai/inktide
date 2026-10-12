@@ -158,10 +158,17 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_PROXY_HEADERS: xforwarded
       KC_HEALTH_ENABLED: "true"
+      # Theme files keep their URL until Keycloak itself is upgraded, so a 30-day browser cache
+      # (the default) would hide theme edits for a month; an hour is enough for a login page.
+      KC_SPI_THEME_STATIC_MAX_AGE: "3600"
     volumes:
       - ../../keycloak-extensions:/opt/keycloak/providers:ro
       # Source themes (FreeMarker, no build); production mode caches them, so restart after edits.
       - ../../keycloak-themes:/opt/keycloak/themes:ro
+    # Keycloak keeps gzipped copies of theme files in data/tmp under that same version, and a
+    # plain restart kept serving the old ones. In tmpfs they go away with every restart.
+    tmpfs:
+      - /opt/keycloak/data/tmp
     depends_on:
       postgres-keycloak: { condition: service_healthy }
     healthcheck:
