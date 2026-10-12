@@ -18,8 +18,8 @@
   <title>${msg("qk.pageTitle")}</title>
   <link rel="icon" href="${url.resourcesPath}/img/quackie-icon.svg" type="image/svg+xml">
   <link rel="preload" href="${url.resourcesPath}/fonts/mona-sans-latin-wdth-italic.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="${url.resourcesPath}/css/quackie.css">
-  <script src="${url.resourcesPath}/js/quackie.js" defer></script>
+  <link rel="stylesheet" href="${url.resourcesPath}/css/quackie.css?v=${properties.qkAssetsVersion!}">
+  <script src="${url.resourcesPath}/js/quackie.js?v=${properties.qkAssetsVersion!}" defer></script>
 </head>
 <body class="qk ${bodyClass}">
   <header class="qk-bar">
