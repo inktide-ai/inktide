@@ -160,6 +160,8 @@ services:
       KC_HEALTH_ENABLED: "true"
     volumes:
       - ../../keycloak-extensions:/opt/keycloak/providers:ro
+      # Source themes (FreeMarker, no build); production mode caches them, so restart after edits.
+      - ../../keycloak-themes:/opt/keycloak/themes:ro
     depends_on:
       postgres-keycloak: { condition: service_healthy }
     healthcheck:

@@ -159,6 +159,8 @@ services:
       - "127.0.0.1:8080:8080"
     volumes:
       - ./keycloak-extensions:/opt/keycloak/providers
+      # Source themes (FreeMarker, no build). start-dev doesn't cache them, so edits show on reload.
+      - ./keycloak-themes:/opt/keycloak/themes
     healthcheck:
       # Quarkus management port (9000) - available in Keycloak 17+ (this image: 25.0.6).
       # curl/wget are not present in the UBI-based image, so we use bash /dev/tcp.

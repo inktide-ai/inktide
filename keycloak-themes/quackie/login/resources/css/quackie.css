@@ -1,0 +1,413 @@
+/* Quackie login theme: the landing's broadcast system (palette, type, REC frame, road) around
+   a VHS tape and its deck. Display type is Mona Sans black italic at 75% width; Cyrillic falls
+   back to Roboto Condensed and the ruble sign to Bungee's latin-ext file, as on the landing. */
+
+@font-face {
+  font-family: 'Mona Sans';
+  src: url('../fonts/mona-sans-latin-wdth-italic.woff2') format('woff2');
+  font-weight: 200 900;
+  font-style: italic;
+  font-stretch: 75% 125%;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Quackie Cyrillic';
+  src: url('../fonts/roboto-condensed-cyrillic-wght-italic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: block;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Bungee';
+  src: url('../fonts/bungee-latin-400-normal.woff2') format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'Bungee';
+  src: url('../fonts/bungee-latin-ext-400-normal.woff2') format('woff2');
+  font-display: block;
+  unicode-range: U+20BD;
+}
+@font-face {
+  font-family: 'Geist';
+  src: url('../fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('../fonts/GeistMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+}
+
+:root {
+  --q-bg: #10131A;
+  --q-bar: #050608;
+  --q-panel: #0A0C11;
+  --q-field: #141821;
+  --q-cream: #FFF8E7;
+  --q-cream-dim: rgb(255 248 231 / 0.62);
+  --q-cream-faint: rgb(255 248 231 / 0.14);
+  --q-duck: #FFC83D;
+  --q-red: #FF3B30;
+  --q-error: #FF6B5E;
+  --q-play: #3DDC84;
+  --q-tape: #252A35;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* The top-right corner is cut off, the way ZZZ cuts its panels. */
+  --chamfer: polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 0 100%);
+  --display: 'Mona Sans', 'Quackie Cyrillic', sans-serif;
+  --mono: 'Geist Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+
+body.qk {
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--q-bg);
+  color: var(--q-cream);
+  font: 16px/1.5 'Geist', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.qk a { color: var(--q-duck); text-decoration: none; font-weight: 600; }
+.qk a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── The frame ───────────────────────────────────────────────────────────── */
+
+.qk-bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 20;
+  display: flex;
+  height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(16px, 6.5vw, 96px);
+  background: var(--q-bar);
+}
+.qk-logo { height: 24px; width: auto; display: block; }
+.qk-bar__right { display: flex; align-items: center; gap: 18px; }
+
+.qk-rec {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--q-cream-dim);
+  font: 12px/1 var(--mono);
+  letter-spacing: 0.14em;
+}
+.qk-rec i { width: 8px; height: 8px; border-radius: 50%; background: var(--q-red); }
+
+.qk-locales { display: flex; gap: 2px; }
+.qk-locales a {
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: var(--q-cream-dim);
+  font: 600 12px/1 var(--mono);
+  letter-spacing: 0.1em;
+}
+.qk-locales a:hover { color: var(--q-cream); text-decoration: none; }
+.qk-locales a.is-current { background: var(--q-cream); color: var(--q-bg); }
+
+.qk-corners span {
+  position: fixed;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border: 0 solid var(--q-duck);
+  pointer-events: none;
+}
+.qk-corners span:nth-child(1) { top: 72px; left: 2.2vw; border-top-width: 2px; border-left-width: 2px; }
+.qk-corners span:nth-child(2) { top: 72px; right: 2.2vw; border-top-width: 2px; border-right-width: 2px; }
+.qk-corners span:nth-child(3) { bottom: 3.2vh; left: 2.2vw; border-bottom-width: 2px; border-left-width: 2px; }
+.qk-corners span:nth-child(4) { bottom: 3.2vh; right: 2.2vw; border-bottom-width: 2px; border-right-width: 2px; }
+
+/* Phones: the corners would sit on the form as it scrolls, and the bar has no room for the timecode. */
+@media (max-width: 640px) {
+  .qk-corners { display: none; }
+  [data-qk-timecode] { display: none; }
+}
+
+/* The hatched road, rising to the right like the landing's track. */
+.qk-road {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 0;
+  height: 48vh;
+  background-image: repeating-linear-gradient(-48deg, #171B26 0 6px, #212734 6px 9px);
+  clip-path: polygon(0 32%, 100% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+
+.qk-main {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  gap: 36px;
+  padding: 104px 16px 56px;
+}
+@media (min-width: 960px) {
+  .qk-main.has-stage {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 5vw;
+    padding: 104px 6.5vw 72px;
+  }
+}
+
+.qk-stage { position: relative; isolation: isolate; width: 100%; max-width: 340px; }
+@media (min-width: 960px) { .qk-stage { max-width: 580px; justify-self: end; } }
+
+/* The landing's yellow band, slanted behind the deck. */
+.qk-stage::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -16%;
+  right: -6%;
+  width: 58%;
+  height: 132%;
+  background: var(--q-duck);
+  clip-path: polygon(36% 0, 100% 0, 64% 100%, 0 100%);
+}
+
+.qk-panel { position: relative; width: 100%; max-width: 460px; }
+@media (min-width: 960px) { .has-stage .qk-panel { justify-self: start; } }
+
+/* A hard offset shadow drawn as a solid copy of the panel. */
+.qk-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--q-bar);
+  clip-path: var(--chamfer);
+  transform: translate(-10px, 10px);
+}
+.qk-panel__inner {
+  position: relative;
+  padding: 36px clamp(22px, 3vw, 40px) 32px;
+  background: var(--q-panel);
+  clip-path: var(--chamfer);
+}
+
+/* ── Type ────────────────────────────────────────────────────────────────── */
+
+.qk-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--q-cream);
+  color: var(--q-bg);
+  font: 12px/1.5 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transform: skewX(-12deg);
+}
+.qk-title {
+  margin: 16px 0 0;
+  font-family: var(--display);
+  /* Sized so the longest Russian word ("возвращением") still fits the panel. */
+  font-size: clamp(36px, 3.6vw, 54px);
+  font-style: italic;
+  font-weight: 900;
+  font-stretch: 75%;
+  line-height: 0.9;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+.qk-lead { margin: 14px 0 0; color: var(--q-cream-dim); font-size: 15px; }
+.qk-info, .qk-switch { margin: 22px 0 0; color: var(--q-cream-dim); font-size: 14px; text-align: center; }
+.qk-info p { margin: 0; }
+
+/* ── Form ────────────────────────────────────────────────────────────────── */
+
+.qk-form, .qk-panel form { display: grid; gap: 18px; margin-top: 26px; }
+
+.qk-field label, .qk-panel label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--q-cream-dim);
+  font: 12px/1.4 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.qk input[type='text'],
+.qk input[type='email'],
+.qk input[type='password'],
+.qk input[type='tel'],
+.qk select {
+  width: 100%;
+  height: 50px;
+  padding: 0 14px;
+  border: 1.5px solid var(--q-cream-faint);
+  border-radius: 10px;
+  background: var(--q-field);
+  color: var(--q-cream);
+  font: 16px 'Geist', system-ui, sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.qk input:focus, .qk select:focus { border-color: var(--q-duck); box-shadow: 0 0 0 3px rgb(255 200 61 / 0.18); }
+.qk .has-error input, .qk input[aria-invalid='true'] { border-color: var(--q-error); }
+
+.qk-field__error, .qk .kc-feedback-text, .qk span[id^='input-error'] { display: block; margin-top: 6px; color: var(--q-error); font-size: 13px; }
+.qk-field__hint { display: block; margin-top: 6px; color: rgb(255 248 231 / 0.45); font-size: 13px; }
+
+.qk-pass { position: relative; }
+.qk-pass input { padding-right: 50px; }
+.qk-pass__toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--q-cream-dim);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+.qk-pass__toggle:hover, .qk-pass__toggle[aria-pressed='true'] { color: var(--q-duck); }
+
+.qk-forgot { justify-self: end; margin-top: -8px; font-size: 13px; }
+
+.qk-btn,
+.qk-panel input[type='submit'],
+.qk-panel button[type='submit'] {
+  display: inline-flex;
+  width: 100%;
+  height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--q-duck);
+  color: #1A1300;
+  font: 600 14px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), background-color 0.2s, color 0.2s;
+}
+.qk-btn:hover, .qk-panel input[type='submit']:hover, .qk-panel button[type='submit']:hover { transform: translateY(-2px); text-decoration: none; }
+.qk-btn:disabled { opacity: 0.7; cursor: progress; transform: none; }
+.qk-btn i { width: 9px; height: 9px; border-radius: 50%; background: var(--q-red); }
+/* PLAY: a triangle instead of the REC dot. */
+.qk-btn i.is-play { width: 0; height: 0; border-radius: 0; background: none; border-style: solid; border-width: 5px 0 5px 9px; border-color: transparent transparent transparent #1A1300; }
+.qk-btn--ghost { background: transparent; color: var(--q-cream); box-shadow: inset 0 0 0 1.5px var(--q-cream-faint); }
+.qk-btn--ghost:hover { box-shadow: inset 0 0 0 1.5px var(--q-cream); }
+
+.qk-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 14px; color: rgb(255 248 231 / 0.4); font: 12px var(--mono); letter-spacing: 0.14em; text-transform: uppercase; }
+.qk-divider::before, .qk-divider::after { content: ''; flex: 1; height: 1px; background: var(--q-cream-faint); }
+.qk-social { display: grid; gap: 10px; }
+
+.qk-alert { margin-top: 18px; padding: 12px 14px; border: 1px solid; border-radius: 10px; font-size: 14px; }
+.qk-alert--error { border-color: rgb(255 59 48 / 0.45); background: rgb(255 59 48 / 0.1); }
+.qk-alert--warning { border-color: rgb(255 200 61 / 0.45); background: rgb(255 200 61 / 0.08); }
+.qk-alert--success { border-color: rgb(61 220 132 / 0.45); background: rgb(61 220 132 / 0.08); }
+.qk-alert--info { border-color: var(--q-cream-faint); background: rgb(255 248 231 / 0.04); }
+
+/* ── The tape and the deck ───────────────────────────────────────────────── */
+
+/* The tape sits in a window whose bottom edge is the deck's slot, so sliding it down feeds it in.
+   The padding leaves room for its hard shadow inside the clip. */
+.qk-deck__window { overflow: hidden; padding: 0 0 12px 12px; }
+
+.qk-tape {
+  aspect-ratio: 1.8;
+  padding: 4.5%;
+  border-radius: 14px;
+  background: var(--q-tape);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06), -10px 10px 0 var(--q-bar);
+  transition: transform 0.7s var(--ease);
+}
+
+.qk-tape__label {
+  display: flex;
+  height: 40%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 6%;
+  border-radius: 8px;
+  background-color: var(--q-cream);
+  /* The ruled lines of a blank label. */
+  background-image: repeating-linear-gradient(transparent 0 calc(33.3% - 1px), rgb(16 19 26 / 0.1) calc(33.3% - 1px) 33.3%);
+  color: var(--q-bg);
+}
+.qk-tape__name {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--display);
+  font-size: clamp(24px, 3.1vw, 46px);
+  font-style: italic;
+  font-weight: 900;
+  font-stretch: 75%;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.qk-tape__name.is-blank { color: rgb(16 19 26 / 0.26); }
+.qk-tape__meta { flex-shrink: 0; font: 12px var(--mono); letter-spacing: 0.14em; opacity: 0.6; }
+
+.qk-tape__window {
+  display: flex;
+  height: 42%;
+  align-items: center;
+  justify-content: space-between;
+  margin: 5% 12% 0;
+  padding: 0 7%;
+  border-radius: 8px;
+  background: #0B0D12;
+}
+.qk-reel {
+  display: grid;
+  height: 78%;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  background: repeating-conic-gradient(#3A4150 0 18deg, #2A303C 18deg 60deg);
+  transition: transform 0.9s var(--ease);
+}
+.qk-reel::after { content: ''; width: 34%; aspect-ratio: 1; border-radius: 50%; background: #0B0D12; box-shadow: 0 0 0 2px #3A4150; }
+
+/* The deck overlaps the window's shadow room, so the tape disappears under its top edge. */
+.qk-vcr {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 64px;
+  align-items: center;
+  gap: 14px;
+  margin: -12px 0 0 12px;
+  padding: 0 22px;
+  border-radius: 12px;
+  background: linear-gradient(#1C212C, #141821);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), -10px 10px 0 var(--q-bar);
+}
+.qk-vcr__slot { flex: 1; height: 10px; border-radius: 6px; background: #05060A; box-shadow: inset 0 2px 3px rgb(0 0 0 / 0.6); }
+.qk-vcr__led { width: 10px; height: 10px; border-radius: 50%; background: #3A2424; transition: background-color 0.3s, box-shadow 0.3s; }
+.qk-vcr__state { color: var(--q-cream-dim); font: 12px var(--mono); letter-spacing: 0.14em; }
+
+/* Submitting feeds the tape into the deck: the reels turn and the LED lights. */
+.qk-deck.is-inserting .qk-tape { transform: translateY(108%); }
+.qk-deck.is-inserting .qk-reel { transform: rotate(240deg); }
+.qk-deck.is-inserting .qk-vcr__led { background: var(--q-red); box-shadow: 0 0 12px var(--q-red); }
+.qk-deck[data-mode='play'].is-inserting .qk-vcr__led { background: var(--q-play); box-shadow: 0 0 12px var(--q-play); }
+.qk-deck.is-inserting .qk-vcr__state { color: var(--q-cream); }
+
+@media (prefers-reduced-motion: reduce) {
+  .qk *, .qk *::before, .qk *::after { transition: none !important; animation: none !important; }
+}
