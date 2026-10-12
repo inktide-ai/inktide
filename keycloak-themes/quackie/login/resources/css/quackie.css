@@ -41,6 +41,9 @@
 }
 
 :root {
+  /* Dark scrollbars and form controls: a classic scrollbar (Mac with a mouse) then reads as part
+     of the page instead of a light strip cutting off the fixed bar. */
+  color-scheme: dark;
   --q-bg: #10131A;
   --q-bar: #050608;
   --q-panel: #0A0C11;
@@ -153,11 +156,12 @@ body.qk {
   gap: 36px;
   padding: 104px 16px 56px;
 }
+/* Desktop paddings keep sign-up within a laptop window (1470×820), so it doesn't scroll. */
 @media (min-width: 960px) {
   .qk-main.has-stage {
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
     gap: 5vw;
-    padding: 104px 6.5vw 72px;
+    padding: 84px 6.5vw 36px;
   }
 }
 
@@ -191,7 +195,7 @@ body.qk {
 }
 .qk-panel__inner {
   position: relative;
-  padding: 36px clamp(22px, 3vw, 40px) 32px;
+  padding: 30px clamp(22px, 3vw, 40px) 26px;
   background: var(--q-panel);
   clip-path: var(--chamfer);
 }
@@ -226,7 +230,7 @@ body.qk {
 
 /* ── Form ────────────────────────────────────────────────────────────────── */
 
-.qk-form, .qk-panel form { display: grid; gap: 18px; margin-top: 26px; }
+.qk-form, .qk-panel form { display: grid; gap: 16px; margin-top: 22px; }
 
 .qk-field label, .qk-panel label {
   display: block;
