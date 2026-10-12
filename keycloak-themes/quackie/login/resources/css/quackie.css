@@ -64,11 +64,10 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; }
+/* The page itself never scrolls; .qk-main does (see Layout). */
+html, body { height: 100%; margin: 0; overflow: hidden; }
 
 body.qk {
-  min-height: 100vh;
-  overflow-x: clip;
   background: var(--q-bg);
   color: var(--q-cream);
   font: 16px/1.5 'Geist', system-ui, sans-serif;
@@ -147,18 +146,26 @@ body.qk {
 
 /* ── Layout ──────────────────────────────────────────────────────────────── */
 
+/* <main> is the scroll container, so a classic scrollbar runs under the fixed bar instead of
+   beside it. The inner grid grows past the window when it must, so scrolling starts at the top
+   (a centred grid inside a scroller would push its top out of reach). */
 .qk-main {
   position: relative;
   z-index: 1;
+  height: 100%;
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+.qk-main__inner {
   display: grid;
-  min-height: 100vh;
+  min-height: 100%;
   place-items: center;
   gap: 36px;
   padding: 104px 16px 56px;
 }
-/* Desktop paddings keep sign-up within a laptop window (1470×820), so it doesn't scroll. */
 @media (min-width: 960px) {
-  .qk-main.has-stage {
+  .qk-main__inner.has-stage {
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
     gap: 5vw;
     padding: 84px 6.5vw 36px;
@@ -353,6 +360,8 @@ body.qk {
 .qk-tape__name {
   min-width: 0;
   overflow: hidden;
+  /* The italic leans its last letter past the box; without this the clip cuts it ("NIKX22" for nikx222). */
+  padding-right: 0.14em;
   font-family: var(--display);
   font-size: clamp(24px, 3.1vw, 46px);
   font-style: italic;

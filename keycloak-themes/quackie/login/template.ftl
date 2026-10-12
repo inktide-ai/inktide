@@ -39,28 +39,32 @@
   <div class="qk-corners" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
   <div class="qk-road" aria-hidden="true"></div>
 
-  <main class="qk-main<#if hasStage> has-stage</#if>">
-    <#if hasStage>
-      <section class="qk-stage" aria-hidden="true">${stage}</section>
-    </#if>
+  <#-- <main> scrolls, not the page: a classic scrollbar (Mac with a mouse) then starts under the
+       fixed bar instead of cutting it short, whatever the window's height. -->
+  <main class="qk-main">
+    <div class="qk-main__inner<#if hasStage> has-stage</#if>">
+      <#if hasStage>
+        <section class="qk-stage" aria-hidden="true">${stage}</section>
+      </#if>
 
-    <section class="qk-panel">
-      <div class="qk-panel__inner">
-        <#if chip?markup_string?trim?has_content><span class="qk-chip">${chip}</span></#if>
-        <h1 class="qk-title"><#nested "header"></h1>
+      <section class="qk-panel">
+        <div class="qk-panel__inner">
+          <#if chip?markup_string?trim?has_content><span class="qk-chip">${chip}</span></#if>
+          <h1 class="qk-title"><#nested "header"></h1>
 
-        <#if displayMessage && message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
-          <div class="qk-alert qk-alert--${message.type}" role="alert">${kcSanitize(message.summary)?no_esc}</div>
-        </#if>
+          <#if displayMessage && message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
+            <div class="qk-alert qk-alert--${message.type}" role="alert">${kcSanitize(message.summary)?no_esc}</div>
+          </#if>
 
-        <#nested "form">
-        <#nested "socialProviders">
+          <#nested "form">
+          <#nested "socialProviders">
 
-        <#if displayInfo>
-          <div class="qk-info"><#nested "info"></div>
-        </#if>
-      </div>
-    </section>
+          <#if displayInfo>
+            <div class="qk-info"><#nested "info"></div>
+          </#if>
+        </div>
+      </section>
+    </div>
   </main>
 </body>
 </html>

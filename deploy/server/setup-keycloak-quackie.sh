@@ -11,8 +11,11 @@ kc() { docker compose exec -T keycloak /opt/keycloak/bin/kcadm.sh "$@"; }
 
 kc config credentials --server http://localhost:8080 --realm master --user admin --password "$ADMIN_PW" >/dev/null
 
+# The realm had no password policy at all: sign-up accepted "1". The policy applies when a password
+# is set or changed; existing ones keep working until then.
 kc update realms/chimera -s loginTheme=quackie -s registrationEmailAsUsername=true \
-  -s internationalizationEnabled=true -s 'supportedLocales=["ru","en"]' -s defaultLocale=ru
+  -s internationalizationEnabled=true -s 'supportedLocales=["ru","en"]' -s defaultLocale=ru \
+  -s 'passwordPolicy=length(8) and notUsername and notEmail'
 
 # Sign-up asks for email, nickname and password. First and last name stay on existing accounts
 # but are no longer required; the nickname reaches the tokens through the "profile" scope's
