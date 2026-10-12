@@ -166,9 +166,11 @@ services:
       # Source themes (FreeMarker, no build); production mode caches them, so restart after edits.
       - ../../keycloak-themes:/opt/keycloak/themes:ro
     # Keycloak keeps gzipped copies of theme files in data/tmp under that same version, and a
-    # plain restart kept serving the old ones. In tmpfs they go away with every restart.
+    # plain restart kept serving the old ones. In tmpfs they go away with every restart. The
+    # mount must belong to the image's keycloak user (uid 1000): a root-owned one makes every
+    # theme file fail with HTTP 500.
     tmpfs:
-      - /opt/keycloak/data/tmp
+      - /opt/keycloak/data/tmp:uid=1000,gid=0,mode=0770
     depends_on:
       postgres-keycloak: { condition: service_healthy }
     healthcheck:
