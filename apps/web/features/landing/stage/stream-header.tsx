@@ -3,9 +3,11 @@
 import { useEffect, useState, type MouseEvent, type ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Menu, UserRound, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { SUPPORTED_LANGUAGES, type Language } from '@/i18n/languages'
 import { LANDING_ROUTE, PRICING_ROUTE, REGISTER_ROUTE } from '@/lib/routes'
 import { cn } from '@/lib/utils'
 import { EASE, digits, display, mono } from './broadcast'
@@ -19,15 +21,16 @@ import { SOCIALS } from './stream-footer'
 
 const BAR = '#050608'
 
+// `label` is a key under stage.nav in landing.json.
 type NavItem = { label: string; chapter?: string; href: string }
 
 const NAV: NavItem[] = [
-  { label: 'Home', chapter: '00', href: '#top' },
-  { label: 'Listen', chapter: '01', href: '#listen' },
-  { label: 'Remember', chapter: '02', href: '#remember' },
-  { label: 'Talk', chapter: '03', href: '#clips' },
-  { label: 'Customize', chapter: '04', href: '#customize' },
-  { label: 'Pricing', href: PRICING_ROUTE },
+  { label: 'home', chapter: '00', href: '#top' },
+  { label: 'listen', chapter: '01', href: '#listen' },
+  { label: 'remember', chapter: '02', href: '#remember' },
+  { label: 'talk', chapter: '03', href: '#clips' },
+  { label: 'customize', chapter: '04', href: '#customize' },
+  { label: 'pricing', href: PRICING_ROUTE },
 ]
 
 const LOGIN_ROUTE = '/login'
@@ -49,6 +52,7 @@ export default function StreamHeader({ chapter, onAir, onJump }: StreamHeaderPro
   const scrolled = useScrolled(80)
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
+  const { t } = useTranslation('landing')
   const shown = onAir || scrolled
   // At the top the header waits for the stinger to clear; further down it is just there.
   const ease = (delay = 0) => (reduceMotion ? { duration: 0 } : { duration: 0.45, delay, ease: EASE })
@@ -78,7 +82,7 @@ export default function StreamHeader({ chapter, onAir, onJump }: StreamHeaderPro
         <a
           href={nav[0].href}
           onClick={jump(nav[0])}
-          aria-label="Quackie, back to the top"
+          aria-label={t('stage.nav.backToTop')}
           className="relative flex h-full shrink-0 items-center lg:w-[150px]"
         >
           <motion.span
@@ -100,13 +104,14 @@ export default function StreamHeader({ chapter, onAir, onJump }: StreamHeaderPro
           <HangingMark hidden={scrolled || !shown} transition={ease()} />
         </a>
 
-        <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
+        <nav aria-label={t('stage.nav.main')} className="hidden items-center gap-1 lg:flex">
           {nav.map(item => (
             <NavLink key={item.label} item={item} active={isActive(item)} onClick={jump(item)} />
           ))}
         </nav>
 
         <div className="ml-auto flex items-center gap-2.5">
+          <LanguageToggle className="hidden lg:flex" />
           <Link
             href={REGISTER_ROUTE}
             className={cn(
@@ -116,17 +121,17 @@ export default function StreamHeader({ chapter, onAir, onJump }: StreamHeaderPro
             )}
           >
             <span className="size-1.5 rounded-full bg-[#1A1300]" />
-            Go live
+            {t('stage.hero.cta')}
           </Link>
           <RoundLink href={DISCORD.href} label={DISCORD.label} external className="hidden lg:grid">
             <span className="size-[18px]">{DISCORD.icon}</span>
           </RoundLink>
-          <RoundLink href={LOGIN_ROUTE} label="Log in" className="hidden lg:grid">
+          <RoundLink href={LOGIN_ROUTE} label={t('stage.nav.logIn')} className="hidden lg:grid">
             <UserRound className="size-[18px]" strokeWidth={2.2} />
           </RoundLink>
           <button
             type="button"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-label={menuOpen ? t('stage.nav.closeMenu') : t('stage.nav.openMenu')}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen(!menuOpen)}
             className="grid size-9 place-items-center rounded-full ring-1 ring-[rgb(255_248_231/0.18)] lg:hidden"
@@ -159,6 +164,7 @@ function HangingMark({ hidden, transition }: { hidden: boolean; transition: obje
 }
 
 function NavLink({ item, active, onClick }: { item: NavItem; active: boolean; onClick: (e: MouseEvent) => void }) {
+  const { t } = useTranslation('landing')
   const className = cn(
     'relative rounded-full px-3.5 py-1.5 text-[14px] font-semibold transition-colors duration-300',
     active ? 'text-[var(--q-bg)]' : 'text-[rgb(255_248_231/0.5)] hover:bg-[rgb(255_248_231/0.1)] hover:text-[var(--q-cream)]',
@@ -172,7 +178,7 @@ function NavLink({ item, active, onClick }: { item: NavItem; active: boolean; on
           className="absolute inset-0 rounded-full bg-[var(--q-cream)]"
         />
       )}
-      <span className="relative">{item.label}</span>
+      <span className="relative">{t(`stage.nav.${item.label}`)}</span>
     </>
   )
 
@@ -229,6 +235,7 @@ function MobileMenu({
   onPick: (item: NavItem) => (e: MouseEvent) => void
   onClose: () => void
 }) {
+  const { t } = useTranslation('landing')
   return (
     <motion.div
       initial={{ clipPath: 'inset(0 0 100% 0)' }}
@@ -238,7 +245,7 @@ function MobileMenu({
       style={{ backgroundColor: BAR }}
       className="fixed inset-x-0 bottom-0 top-14 overflow-y-auto px-4 pb-10 pt-6 sm:px-6 lg:hidden"
     >
-      <nav aria-label="Menu" className="flex flex-col">
+      <nav aria-label={t('stage.nav.menu')} className="flex flex-col">
         {items.map(item => {
           const active = isActive(item)
           const content = (
@@ -247,7 +254,7 @@ function MobileMenu({
                 {item.chapter ?? '→'}
               </span>
               <span style={{ ...display, textShadow: 'none' }} className="text-[44px] uppercase">
-                {item.label}
+                {t(`stage.nav.${item.label}`)}
               </span>
             </>
           )
@@ -266,8 +273,9 @@ function MobileMenu({
           )
         })}
       </nav>
-      <div className="mt-8 flex items-center gap-2.5">
-        <RoundLink href={LOGIN_ROUTE} label="Log in" className="grid">
+      <div className="mt-8 flex flex-wrap items-center gap-2.5">
+        <LanguageToggle className="mr-2 flex" />
+        <RoundLink href={LOGIN_ROUTE} label={t('stage.nav.logIn')} className="grid">
           <UserRound className="size-[18px]" strokeWidth={2.2} />
         </RoundLink>
         {SOCIALS.map(s => (
@@ -277,6 +285,36 @@ function MobileMenu({
         ))}
       </div>
     </motion.div>
+  )
+}
+
+/** RU / EN, as on the sign-in pages. The server re-renders afterwards, so <html lang> and the title follow. */
+function LanguageToggle({ className }: { className?: string }) {
+  const { t, i18n } = useTranslation('landing')
+  const router = useRouter()
+  const current = (i18n.resolvedLanguage ?? 'en') as Language
+  const pick = (lang: Language) => {
+    if (lang === current) return
+    void i18n.changeLanguage(lang).then(() => router.refresh())
+  }
+
+  return (
+    <div role="group" aria-label={t('stage.nav.language')} className={cn(mono, 'items-center gap-0.5 text-[12px] font-semibold', className)}>
+      {[...SUPPORTED_LANGUAGES].reverse().map(lang => (
+        <button
+          key={lang}
+          type="button"
+          aria-pressed={lang === current}
+          onClick={() => pick(lang)}
+          className={cn(
+            'rounded-full px-2.5 py-1 uppercase tracking-[0.12em] transition-colors',
+            lang === current ? 'bg-[var(--q-cream)] text-[var(--q-bg)]' : 'text-[rgb(255_248_231/0.5)] hover:text-[var(--q-cream)]',
+          )}
+        >
+          {lang}
+        </button>
+      ))}
+    </div>
   )
 }
 

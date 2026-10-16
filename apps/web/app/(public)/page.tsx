@@ -1,11 +1,18 @@
 import type { Metadata } from 'next'
-import LandingPage from '@/features/landing/landing-page'
+import { GeistMono } from 'geist/font/mono'
+import StreamPage from '@/features/landing/stage/stream-page'
+import { getTranslations } from '@/lib/i18n-server'
 
-export const metadata: Metadata = {
-  title: 'Inktide — AI Streaming Platform',
-  description: 'Give your AI character a voice. Real-time, sub-1.3s latency.',
+// The title is the root layout's default; the description is set here so it stays the landing's own.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('common')
+  return { description: t('meta.description') }
 }
 
 export default function Home() {
-  return <LandingPage />
+  return (
+    <main className={GeistMono.variable}>
+      <StreamPage />
+    </main>
+  )
 }

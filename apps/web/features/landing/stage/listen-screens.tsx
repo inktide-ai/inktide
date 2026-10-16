@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { EASE } from './broadcast'
 
@@ -20,39 +21,27 @@ const DESIGN = { w: 560, h: 392 }
 type Msg = { id: number; name: string; color: string; text: string; tip?: string }
 type Line = Omit<Msg, 'id'>
 
-const CHAT: Record<Platform, Line[]> = {
-  twitch: [
-    { name: 'kot_enjoyer', color: '#FF7F50', text: 'gg that clutch was insane' },
-    { name: 'mira_bakes', color: '#9ACD32', text: 'quackie say hi to my mom 👋' },
-    { name: 'oleg_plays', color: '#1E90FF', text: 'what are we playing next?' },
-    { name: 'sasha', color: '#FF69B4', text: 'KEKW' },
-    { name: 'dimon_tv', color: '#DAA520', text: 'first time here, love the vibe' },
-    { name: 'nightowl', color: '#B57EDC', text: 'can you read my name? 🦉' },
-    { name: 'pixel_pan', color: '#00CED1', text: 'clip that 😂' },
-  ],
-  telegram: [
-    { name: 'Vova', color: '#E17076', text: 'watching from the bus lol' },
-    { name: 'Lera', color: '#7BC862', text: 'can you drop the clip here?' },
-    { name: 'Kirill', color: '#65AADD', text: 'stream tonight? 👀' },
-    { name: 'Nastya', color: '#EE7AAE', text: 'the duck hoodie is back!!' },
-    { name: 'Ilya', color: '#FAA774', text: 'good luck with the boss 🍀' },
-    { name: 'Sonya', color: '#6EC9CB', text: 'morning everyone ☀️' },
-  ],
-  youtube: [
-    { name: 'Anya K.', color: '#E57373', text: 'good luck tonight!' },
-    { name: 'Max', color: '#64B5F6', text: 'only caught the end, what happened?' },
-    { name: 'Leo', color: '#81C784', text: 'hello from Brazil 🇧🇷' },
-    { name: 'Ren', color: '#FFB74D', text: 'keep it up quackie!', tip: '$5.00' },
-    { name: 'Tanya', color: '#BA68C8', text: 'your voice is so calm' },
-    { name: 'Mark', color: '#4DD0E1', text: 'subbed, see you next stream' },
-  ],
+// Nick colours, line for line with stage.listen.chat.<platform> in landing.json, which holds
+// the names and messages so the chat reads in the visitor's language.
+const COLORS: Record<Platform, string[]> = {
+  twitch: ['#FF7F50', '#9ACD32', '#1E90FF', '#FF69B4', '#DAA520', '#B57EDC', '#00CED1'],
+  telegram: ['#E17076', '#7BC862', '#65AADD', '#EE7AAE', '#FAA774', '#6EC9CB'],
+  youtube: ['#E57373', '#64B5F6', '#81C784', '#FFB74D', '#BA68C8', '#4DD0E1'],
+}
+
+function useChatPool(platform: Platform): Line[] {
+  const { t } = useTranslation('landing')
+  return useMemo(() => {
+    const lines = t(`stage.listen.chat.${platform}`, { returnObjects: true }) as Omit<Line, 'color'>[]
+    return lines.map((line, i) => ({ ...line, color: COLORS[platform][i % COLORS[platform].length] }))
+  }, [t, platform])
 }
 
 let nextId = 1
 
 /** The platform's chat: a few messages already there, then one more every few seconds while playing. */
 function useChat(platform: Platform, playing: boolean) {
-  const pool = CHAT[platform]
+  const pool = useChatPool(platform)
   const cursor = useRef(4)
   const [log, setLog] = useState<Msg[]>(() => pool.slice(0, 4).map(m => ({ ...m, id: nextId++ })))
   const [latest, setLatest] = useState<Msg | null>(null)
@@ -193,6 +182,7 @@ const Glyph = ({ d, className, style }: { d: string; className?: string; style?:
 )
 
 function TwitchApp({ log }: { log: Msg[] }) {
+  const { t } = useTranslation('landing')
   return (
     <div className="flex size-full flex-col bg-[#0e0e10] text-[#efeff1]">
       <div className="flex h-[42px] shrink-0 items-center gap-2.5 bg-[#18181b] px-3 shadow-[0_1px_0_rgb(0_0_0/0.6)]">
@@ -200,8 +190,8 @@ function TwitchApp({ log }: { log: Msg[] }) {
         <span className="text-[15px] font-bold">quackie</span>
         <span className="grid size-[13px] place-items-center rounded-full bg-[#9146FF] text-[9px] font-black text-white">✓</span>
         <span className="rounded-[4px] bg-[#EB0400] px-1.5 py-[2px] text-[11px] font-bold tracking-wide text-white">LIVE</span>
-        <span className="text-[12px] text-[#adadb8]">4.8K watching</span>
-        <span className="ml-auto rounded-[6px] bg-[#9146FF] px-3 py-[5px] text-[12px] font-bold text-white">♥ Follow</span>
+        <span className="text-[12px] text-[#adadb8]">{t('stage.listen.apps.twitch.watching')}</span>
+        <span className="ml-auto rounded-[6px] bg-[#9146FF] px-3 py-[5px] text-[12px] font-bold text-white">{t('stage.listen.apps.twitch.follow')}</span>
       </div>
       <div className="flex min-h-0 flex-1">
         <div className="flex w-[318px] shrink-0 flex-col gap-2 p-2.5">
@@ -214,7 +204,7 @@ function TwitchApp({ log }: { log: Msg[] }) {
           <div className="flex items-center gap-2">
             <span className="size-[30px] shrink-0 rounded-full bg-[#FFC83D] ring-2 ring-[#9146FF]" />
             <div className="min-w-0">
-              <div className="truncate text-[13px] font-bold">Just chatting with Quackie 🐥</div>
+              <div className="truncate text-[13px] font-bold">{t('stage.listen.apps.twitch.title')}</div>
               <div className="flex gap-1.5 text-[11px]">
                 <span className="text-[#bf94ff]">Just Chatting</span>
                 <span className="rounded-full bg-[#2f2f35] px-1.5 text-[#dedee3]">vtuber</span>
@@ -224,7 +214,7 @@ function TwitchApp({ log }: { log: Msg[] }) {
           </div>
         </div>
         <div className="flex min-w-0 flex-1 flex-col border-l border-[#2f2f35] bg-[#18181b]">
-          <div className="border-b border-[#2f2f35] py-2 text-center text-[11px] font-semibold tracking-[0.08em] text-[#adadb8]">STREAM CHAT</div>
+          <div className="border-b border-[#2f2f35] py-2 text-center text-[11px] font-semibold tracking-[0.08em] text-[#adadb8]">{t('stage.listen.apps.twitch.chatHeader')}</div>
           <Feed log={log} row={24} className="px-2.5 pb-1">
             {m => (
               <div className="truncate py-[3px] text-[14px] leading-[18px]">
@@ -234,8 +224,8 @@ function TwitchApp({ log }: { log: Msg[] }) {
             )}
           </Feed>
           <div className="flex shrink-0 items-center gap-2 p-2">
-            <span className="flex-1 rounded-[6px] bg-[#2f2f35] px-2 py-[6px] text-[11px] text-[#7a7a85]">Send a message</span>
-            <span className="rounded-[6px] bg-[#9146FF] px-2.5 py-[5px] text-[11px] font-bold text-white">Chat</span>
+            <span className="flex-1 rounded-[6px] bg-[#2f2f35] px-2 py-[6px] text-[11px] text-[#7a7a85]">{t('stage.listen.apps.twitch.placeholder')}</span>
+            <span className="rounded-[6px] bg-[#9146FF] px-2.5 py-[5px] text-[11px] font-bold text-white">{t('stage.listen.apps.twitch.send')}</span>
           </div>
         </div>
       </div>
@@ -259,11 +249,12 @@ const YouTubeLogo = ({ size = 18 }: { size?: number }) => (
 const initial = (name: string) => name.trim()[0]?.toUpperCase() ?? '?'
 
 function YouTubeApp({ log }: { log: Msg[] }) {
+  const { t } = useTranslation('landing')
   return (
     <div className="flex size-full flex-col bg-[#0f0f0f] text-[#f1f1f1]">
       <div className="flex h-[42px] shrink-0 items-center gap-3 px-3">
         <YouTubeLogo />
-        <span className="ml-6 h-[24px] w-[190px] rounded-full border border-[#303030] bg-[#121212] px-3 text-[11px] leading-[22px] text-[#717171]">Search</span>
+        <span className="ml-6 h-[24px] w-[190px] rounded-full border border-[#303030] bg-[#121212] px-3 text-[11px] leading-[22px] text-[#717171]">{t('stage.listen.apps.youtube.search')}</span>
         <span className="ml-auto size-[22px] rounded-full bg-[#FFC83D]" />
       </div>
       <div className="flex min-h-0 flex-1 gap-2.5 px-2.5 pb-2.5">
@@ -273,21 +264,21 @@ function YouTubeApp({ log }: { log: Msg[] }) {
             style={{ backgroundImage: 'url(/images/landing/listen/stream-youtube.webp)' }}
           >
             <span className="absolute left-2 top-2 rounded-[3px] bg-[#CC0000] px-1.5 py-[1px] text-[10px] font-bold text-white">LIVE</span>
-            <span className="absolute bottom-2 left-2 rounded-[3px] bg-black/70 px-1.5 py-[1px] text-[10px] text-white">12K watching</span>
+            <span className="absolute bottom-2 left-2 rounded-[3px] bg-black/70 px-1.5 py-[1px] text-[10px] text-white">{t('stage.listen.apps.youtube.watching')}</span>
           </div>
-          <div className="truncate text-[14px] font-bold">chill stream with quackie 🐥</div>
+          <div className="truncate text-[14px] font-bold">{t('stage.listen.apps.youtube.title')}</div>
           <div className="flex items-center gap-2">
             <span className="grid size-[26px] place-items-center rounded-full bg-[#FFC83D] text-[12px] font-black text-[#10131A]">Q</span>
             <div className="leading-tight">
               <div className="text-[12px] font-bold">Quackie</div>
-              <div className="text-[10px] text-[#aaa]">241K subscribers</div>
+              <div className="text-[10px] text-[#aaa]">{t('stage.listen.apps.youtube.subscribers')}</div>
             </div>
-            <span className="ml-auto rounded-full bg-[#f1f1f1] px-3 py-[5px] text-[11px] font-bold text-[#0f0f0f]">Subscribe</span>
+            <span className="ml-auto rounded-full bg-[#f1f1f1] px-3 py-[5px] text-[11px] font-bold text-[#0f0f0f]">{t('stage.listen.apps.youtube.subscribe')}</span>
           </div>
         </div>
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[10px] border border-[#303030]">
           <div className="flex items-center border-b border-[#303030] px-2.5 py-2 text-[12px]">
-            Top chat <span className="ml-1 text-[#aaa]">▾</span>
+            {t('stage.listen.apps.youtube.topChat')} <span className="ml-1 text-[#aaa]">▾</span>
           </div>
           <Feed log={log} row={26} className="px-2">
             {m =>
@@ -314,7 +305,7 @@ function YouTubeApp({ log }: { log: Msg[] }) {
               )
             }
           </Feed>
-          <div className="m-2 shrink-0 rounded-full bg-[#272727] px-2.5 py-[5px] text-[11px] text-[#aaa]">Chat…</div>
+          <div className="m-2 shrink-0 rounded-full bg-[#272727] px-2.5 py-[5px] text-[11px] text-[#aaa]">{t('stage.listen.apps.youtube.placeholder')}</div>
         </div>
       </div>
     </div>
@@ -324,14 +315,15 @@ function YouTubeApp({ log }: { log: Msg[] }) {
 // ── Telegram ─────────────────────────────────────────────────────────────────
 
 function TelegramApp({ log }: { log: Msg[] }) {
+  const { t } = useTranslation('landing')
   return (
     <div className="flex size-full flex-col bg-[#0e1621] text-[#f5f5f5]">
       <div className="flex h-[48px] shrink-0 items-center gap-2.5 bg-[#17212b] px-3">
         <span className="text-[18px] text-[#6d7f8f]">‹</span>
         <span className="grid size-[32px] place-items-center rounded-full bg-[linear-gradient(135deg,#FFD66B,#FFC83D)] text-[15px] font-black text-[#10131A]">Q</span>
         <div className="leading-tight">
-          <div className="text-[15px] font-bold">Quackie Fan Club</div>
-          <div className="text-[11px] text-[#6d7f8f]">1,204 members, 87 online</div>
+          <div className="text-[15px] font-bold">{t('stage.listen.apps.telegram.group')}</div>
+          <div className="text-[11px] text-[#6d7f8f]">{t('stage.listen.apps.telegram.members')}</div>
         </div>
         <Glyph d={TELEGRAM_GLYPH} className="ml-auto size-[20px] text-[#2AABEE]" />
       </div>
@@ -362,7 +354,7 @@ function TelegramApp({ log }: { log: Msg[] }) {
       </Feed>
       <div className="flex h-[42px] shrink-0 items-center gap-3 bg-[#17212b] px-3 text-[#6d7f8f]">
         <span className="text-[16px]">📎</span>
-        <span className="flex-1 text-[13px]">Message</span>
+        <span className="flex-1 text-[13px]">{t('stage.listen.apps.telegram.placeholder')}</span>
         <span className="grid size-[28px] place-items-center rounded-full bg-[#2AABEE] text-[13px] text-white">🎙</span>
       </div>
     </div>
@@ -371,19 +363,17 @@ function TelegramApp({ log }: { log: Msg[] }) {
 
 // ── The readable card above the tablet ───────────────────────────────────────
 
-const CARD: Record<Platform, { label: string; glyph: ReactNode; className: string }> = {
+// Labels come from landing.json (stage.listen.card.<platform>).
+const CARD: Record<Platform, { glyph: ReactNode; className: string }> = {
   twitch: {
-    label: 'Twitch chat',
     glyph: <Glyph d={TWITCH_GLYPH} className="size-[1.1em] text-[#9146FF]" />,
     className: 'bg-[#18181b] text-[#efeff1] ring-1 ring-[#9146FF]/40',
   },
   youtube: {
-    label: 'YouTube live chat',
     glyph: <span className="inline-block h-[0.8em] w-[1.15em] rounded-[3px] bg-[#FF0033]" />,
     className: 'bg-[#0f0f0f] text-[#f1f1f1] ring-1 ring-white/15',
   },
   telegram: {
-    label: 'Telegram group',
     glyph: <Glyph d={TELEGRAM_GLYPH} className="size-[1.1em] text-[#2AABEE]" />,
     className: 'bg-[#182533] text-[#f5f5f5] ring-1 ring-[#2AABEE]/40',
   },
@@ -393,6 +383,7 @@ const CARD: Record<Platform, { label: string; glyph: ReactNode; className: strin
  *  its tail points, as fractions of the character frame; the card hangs up and to the left of it. */
 function MessageCard({ platform, latest, at }: { platform: Platform; latest: Msg | null; at: Pt }) {
   const card = CARD[platform]
+  const { t } = useTranslation('landing')
 
   return (
     <div
@@ -415,7 +406,7 @@ function MessageCard({ platform, latest, at }: { platform: Platform; latest: Msg
           >
             <div className="mb-[0.3em] flex items-center gap-[0.4em] text-[0.78em] opacity-70">
               {card.glyph}
-              {card.label}
+              {t(`stage.listen.card.${platform}`)}
               {latest.tip && <span className="ml-auto rounded-full bg-[#FFCA28] px-[0.5em] font-bold text-[#10131A]">{latest.tip}</span>}
             </div>
             <div className="leading-snug">

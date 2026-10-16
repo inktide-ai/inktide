@@ -1,6 +1,8 @@
 'use client'
 
+import { useMemo } from 'react'
 import Image from 'next/image'
+import { Trans, useTranslation } from 'react-i18next'
 import { ListenOverlay, TWITCH_GLYPH, type Platform } from './listen-screens'
 import ShowcaseScene, { type ShowcaseItem, type ShowcaseStage } from './showcase-scene'
 import { SOCIALS } from './stream-footer'
@@ -49,7 +51,7 @@ const PLATFORMS: (ShowcaseItem & { id: Platform })[] = [
 
 const pct = (n: number) => `${n * 100}%`
 
-const STAGE: ShowcaseStage = {
+const stageWith = (figureAlt: string): ShowcaseStage => ({
   // A soft shadow on the floor under Quackie, so the cut-out sits down instead of floating.
   backdrop: (
     <div
@@ -60,7 +62,7 @@ const STAGE: ShowcaseStage = {
   figure: (
     <Image
       src={ART.src}
-      alt="Quackie sitting on the floor with a tablet, looking up over the shoulder"
+      alt={figureAlt}
       fill
       sizes="(min-width: 1024px) 90vw, 150vw"
       className="object-cover"
@@ -79,26 +81,26 @@ const STAGE: ShowcaseStage = {
       />
     </ListenOverlay>
   ),
-}
+})
 
 export default function ListenScene() {
+  const { t } = useTranslation('landing')
+  const stage = useMemo(() => stageWith(t('stage.listen.figureAlt')), [t])
   return (
     <ShowcaseScene
       id="listen"
       chapter="01"
-      label="Listen"
-      ariaLabel="Quackie listens to every chat"
+      label={t('stage.nav.listen')}
+      ariaLabel={t('stage.listen.ariaLabel')}
       tag="SOURCE"
       title={[
-        'Every chat.',
-        <>
-          One <span className="text-[var(--q-duck)]">ear.</span>
-        </>,
+        t('stage.listen.title1'),
+        <Trans key="title2" ns="landing" t={t} i18nKey="stage.listen.title2" components={{ accent: <span className="text-[var(--q-duck)]" /> }} />,
       ]}
-      body="Chat from every platform in one feed. Quackie reads each message as it lands."
+      body={t('stage.listen.body')}
       items={PLATFORMS}
-      noun="platform"
-      stage={STAGE}
+      pickerLabels={{ prev: t('stage.listen.prev'), next: t('stage.listen.next') }}
+      stage={stage}
       // Phones: a narrower frame keeps the tablet and most of Quackie on screen.
       frameClassName="w-[150vw] right-[-8vw]"
     />

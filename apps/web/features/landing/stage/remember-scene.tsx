@@ -1,17 +1,18 @@
 'use client'
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'framer-motion'
+import { Trans, useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { EASE, RevealLine, digits, display, ribbonStrip, useSceneFocus } from './broadcast'
+import { parseMarkedWords, type Word } from './marked-words'
 
 // Scene 02: memory. A viewer's message is squeezed down to the facts worth keeping and
 // filed as a card in the vector store while chat carries on. A cut later ("7 days later")
 // the same viewer writes again; the search finds the card, it comes back out, and
 // Quackie picks the thread up again. It plays by itself, viewer after viewer.
 
-type Word = { text: string; key?: boolean }
 
 /** A line of chat from someone else: nick, nick colour, text, and whether they wear a badge. */
 type Chatter = [string, string, string, boolean?]
@@ -38,86 +39,77 @@ type Memory = {
   reply: string
 }
 
-const w = (text: string): Word[] => text.split(' ').map(t => ({ text: t }))
-const key = (text: string): Word[] => [{ text, key: true }]
+/** A chat line without its text: nick, nick colour, badge. The words come from landing.json. */
+type ChatterMeta = [string, string, boolean?]
 
-const MEMORIES: Memory[] = [
+/** What the demo needs besides words; stage.remember.memories in landing.json holds the
+ *  matching text, round for round, so chat reads in the visitor's language. */
+type MemoryMeta = Pick<Memory, 'viewer' | 'color' | 'vector' | 'cell' | 'stream'> & {
+  chatter: ChatterMeta[]
+  after: ChatterMeta[]
+  next: ChatterMeta[]
+}
+
+type MemoryText = Pick<Memory, 'back' | 'facts' | 'later' | 'reply'> & {
+  chatter: string[]
+  after: string[]
+  next: string[]
+  words: string
+}
+
+const MEMORIES: MemoryMeta[] = [
   {
     viewer: 'kot_enjoyer',
-    chatter: [
-      ['mira_bakes', '#9BE38A', 'W stream', true],
-      ['oleg_plays', '#FFC83D', 'that boss was rigged'],
-      ['sasha', '#FFF8E7', 'hiii chat'],
-    ],
-    after: [
-      ['sasha', '#FFF8E7', 'mochi is a menace'],
-      ['oleg_plays', '#FFC83D', 'F for the monitor'],
-    ],
-    next: [
-      ['mira_bakes', '#9BE38A', 'first!', true],
-      ['dimon_tv', '#9BE38A', 'o7'],
-    ],
-    back: "yo quackie, I'm back",
+    chatter: [['mira_bakes', '#9BE38A', true], ['oleg_plays', '#FFC83D'], ['sasha', '#FFF8E7']],
+    after: [['sasha', '#FFF8E7'], ['oleg_plays', '#FFC83D']],
+    next: [['mira_bakes', '#9BE38A', true], ['dimon_tv', '#9BE38A']],
     color: '#7CC4FF',
-    words: [...w('my'), ...key('cat Mochi'), ...w('knocked my'), ...key('monitor'), ...w('off the desk again lol')],
-    facts: ['Has a cat: Mochi', 'Mochi vs. the monitor'],
     vector: '0.12 −0.84 0.33 0.07 −0.51 0.68',
     cell: 21,
-    later: '7 days later',
     stream: 14,
-    reply: 'kot_enjoyer! Is Mochi still at war with your monitor?',
   },
   {
     viewer: 'lena_draws',
-    chatter: [
-      ['dimon_tv', '#9BE38A', 'LMAO'],
-      ['mira_bakes', '#9BE38A', 'the hat is back', true],
-      ['oleg_plays', '#FFC83D', 'quackie say hi to my mom'],
-    ],
-    after: [
-      ['kot_enjoyer', '#7CC4FF', 'good luck!!', true],
-      ['sasha', '#FFF8E7', 'you got this'],
-    ],
-    next: [
-      ['oleg_plays', '#FFC83D', 'hi hi'],
-      ['mira_bakes', '#9BE38A', 'quackie!!', true],
-    ],
-    back: "hiii it's me again",
+    chatter: [['dimon_tv', '#9BE38A'], ['mira_bakes', '#9BE38A', true], ['oleg_plays', '#FFC83D']],
+    after: [['kot_enjoyer', '#7CC4FF', true], ['sasha', '#FFF8E7']],
+    next: [['oleg_plays', '#FFC83D'], ['mira_bakes', '#9BE38A', true]],
     color: '#FFC83D',
-    words: [...w('big'), ...key('exam tomorrow'), ...w('wish me luck, I'), ...key('barely slept')],
-    facts: ['Exam this week', 'Pulls all-nighters'],
     vector: '−0.27 0.91 −0.05 0.44 0.18 −0.73',
     cell: 42,
-    later: '3 days later',
     stream: 15,
-    reply: 'lena_draws! So how did the exam go?',
   },
   {
     viewer: 'dimon_tv',
-    chatter: [
-      ['sasha', '#FFF8E7', 'gg'],
-      ['kot_enjoyer', '#7CC4FF', 'mochi says hi', true],
-      ['lena_draws', '#FFC83D', 'chat is so fast today'],
-    ],
-    after: [
-      ['mira_bakes', '#9BE38A', 'only 40? rookie numbers', true],
-      ['lena_draws', '#FFC83D', 'margit is a wall'],
-    ],
-    next: [
-      ['sasha', '#FFF8E7', 'we are so back'],
-      ['kot_enjoyer', '#7CC4FF', 'hi chat', true],
-    ],
-    back: "ok I'm back. don't ask",
+    chatter: [['sasha', '#FFF8E7'], ['kot_enjoyer', '#7CC4FF', true], ['lena_draws', '#FFC83D']],
+    after: [['mira_bakes', '#9BE38A', true], ['lena_draws', '#FFC83D']],
+    next: [['sasha', '#FFF8E7'], ['kot_enjoyer', '#7CC4FF', true]],
     color: '#9BE38A',
-    words: [...w('first time in'), ...key('Elden Ring'), ...w('and I already'), ...key('died 40 times')],
-    facts: ['New to Elden Ring', '40 deaths and counting'],
     vector: '0.58 0.02 −0.66 −0.31 0.24 0.95',
     cell: 7,
-    later: '2 days later',
     stream: 16,
-    reply: 'dimon_tv! Beat Margit yet, or is it 400 deaths now?',
   },
 ]
+
+const withText = (lines: ChatterMeta[], texts: string[]): Chatter[] =>
+  lines.map(([nick, color, badge], i) => [nick, color, texts[i] ?? '', badge])
+
+function useMemories(): Memory[] {
+  const { t } = useTranslation('landing')
+  return useMemo(() => {
+    const texts = t('stage.remember.memories', { returnObjects: true }) as MemoryText[]
+    return MEMORIES.map((meta, i) => {
+      const text = texts[i]
+      return {
+        ...meta,
+        ...text,
+        chatter: withText(meta.chatter, text.chatter),
+        after: withText(meta.after, text.after),
+        next: withText(meta.next, text.next),
+        words: parseMarkedWords(text.words),
+      }
+    })
+  }, [t])
+}
 
 // One round of the demo, step by step, with how long each step holds (ms). Paced so
 // each beat can be read before the next one lands.
@@ -201,15 +193,17 @@ export default function RememberScene() {
     return () => window.clearTimeout(id)
   }, [running, step])
 
+  const { t } = useTranslation('landing')
+  const memories = useMemories()
   const now = reduceMotion ? at('reply') : step
-  const memory = MEMORIES[round % MEMORIES.length]
+  const memory = memories[round % memories.length]
 
   return (
     <section
       ref={ref}
       id="remember"
       data-chapter="02"
-      aria-label="Quackie remembers your viewers"
+      aria-label={t('stage.remember.ariaLabel')}
       // Quackie's frame is 80 stage units wide and 16:9.
       style={
         {
@@ -256,14 +250,19 @@ export default function RememberScene() {
               className="text-[clamp(52px,6.4vw,120px)] uppercase [--remember-shadow:-0.035em_0.03em_0_var(--q-bg)] lg:text-[calc(var(--u)*4.4)] lg:[--remember-shadow:none]"
             >
               <RevealLine delay={0.1} play={entered}>
-                Never forgets
+                {t('stage.remember.title1')}
               </RevealLine>
               <RevealLine delay={0.2} play={entered}>
-                a <span className="text-[var(--q-duck)] lg:bg-[var(--q-duck)] lg:px-[0.08em] lg:text-[var(--q-bg)]">regular.</span>
+                <Trans
+                  ns="landing"
+                  t={t}
+                  i18nKey="stage.remember.title2"
+                  components={{ accent: <span className="text-[var(--q-duck)] lg:bg-[var(--q-duck)] lg:px-[0.08em] lg:text-[var(--q-bg)]" /> }}
+                />
               </RevealLine>
             </h2>
             <p className="mt-4 max-w-[46ch] text-[clamp(15px,1.15vw,18px)] leading-relaxed text-[var(--q-cream-dim)] lg:text-[calc(var(--u)*1.1)] lg:text-[rgb(16_19_26/0.75)]">
-              Chat is compressed into memories in a vector database. Next stream, Quackie picks up where you left off.
+              {t('stage.remember.body')}
             </p>
           </div>
 
@@ -279,7 +278,7 @@ export default function RememberScene() {
             02
           </div>
           <div style={{ ...flat, fontStretch: '84%' }} className="pb-[calc(var(--u)*0.5)] text-[calc(var(--u)*2.6)] uppercase">
-            Remember
+            {t('stage.nav.remember')}
           </div>
         </div>
       </div>
@@ -330,6 +329,7 @@ function Character({ recalled }: { recalled: boolean }) {
 }
 
 function Demo({ memory, round, now }: { memory: Memory; round: number; now: number }) {
+  const { t } = useTranslation('landing')
   const step = STEPS[now][0]
   const cardOut = step === 'card' || now >= at('recall')
   const found = now >= at('recall')
@@ -350,7 +350,7 @@ function Demo({ memory, round, now }: { memory: Memory; round: number; now: numb
         'lg:p-[calc(var(--u)*1.5)] lg:shadow-[-12px_10px_0_0_#0B0D12]',
       )}
     >
-      <div className={cn(label, 'text-[var(--q-cream-dim)]')}>Stream chat</div>
+      <div className={cn(label, 'text-[var(--q-cream-dim)]')}>{t('stage.remember.streamChat')}</div>
 
       <LayoutGroup id="remember">
         {/* The stage: chat, the card the message turns into, and the reply. */}
@@ -460,11 +460,12 @@ function ChatLine({ memory, compressing }: { memory: Memory; compressing: boolea
 }
 
 function Card({ memory }: { memory: Memory }) {
+  const { t } = useTranslation('landing')
   return (
     <motion.div layoutId="memory" className="rounded-2xl bg-[var(--q-cream)] p-4 text-[var(--q-bg)]" transition={{ duration: 0.9, ease: EASE }}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35, delay: 0.5 }}>
         <div className={cn(label, 'flex items-center justify-between text-[rgb(16_19_26/0.55)]')}>
-          <span>MEMORY</span>
+          <span>{t('stage.remember.memory')}</span>
           <span className="normal-case tracking-normal text-[var(--q-bg)]">{memory.viewer}</span>
         </div>
         <div className="mt-2.5 flex flex-wrap gap-2">
@@ -487,6 +488,7 @@ function Card({ memory }: { memory: Memory }) {
 /** The vector store: a grid of filed memories, with the demo's card landing in its cell.
  *  When the viewer is back, the cell pulses as the search finds it. */
 function Vault({ memory, round, now }: { memory: Memory; round: number; now: number }) {
+  const { t } = useTranslation('landing')
   const index = round % MEMORIES.length
   const step = STEPS[now][0]
   const inVault = now >= at('store') && now < at('recall')
@@ -497,19 +499,19 @@ function Vault({ memory, round, now }: { memory: Memory; round: number; now: num
   return (
     <div className="mt-3">
       <div className={cn(label, 'mb-2 flex justify-between text-[rgb(255_248_231/0.4)]')}>
-        <span>VECTOR DB</span>
+        <span>{t('stage.remember.vectorDb')}</span>
         {found ? (
           <span className="text-[var(--q-duck)]">
-            Match · <span className="normal-case tracking-normal">{memory.viewer}</span>
+            {t('stage.remember.match')} · <span className="normal-case tracking-normal">{memory.viewer}</span>
           </span>
         ) : (
           <span>
             {calling ? (
               <>
-                Search · <span className="normal-case tracking-normal">{memory.viewer}</span>
+                {t('stage.remember.search')} · <span className="normal-case tracking-normal">{memory.viewer}</span>
               </>
             ) : (
-              'Compressed'
+              t('stage.remember.compressed')
             )}
           </span>
         )}
@@ -590,6 +592,7 @@ function Reply({ text }: { text: string }) {
 
 /** The jump cut between streams: a yellow bar sweeps over the demo with how much later it is. */
 function Stinger({ run, memory }: { run: number | null; memory: Memory }) {
+  const { t } = useTranslation('landing')
   return (
     <AnimatePresence>
       {run !== null && (
@@ -609,7 +612,7 @@ function Stinger({ run, memory }: { run: number | null; memory: Memory }) {
             {memory.later}
           </span>
           <span style={flat} className="skew-x-12 text-[clamp(18px,1.6vw,26px)] uppercase lg:text-[calc(var(--u)*1.6)]">
-            STREAM #{memory.stream}
+            {t('stage.remember.stream', { number: memory.stream })}
           </span>
         </motion.div>
       )}

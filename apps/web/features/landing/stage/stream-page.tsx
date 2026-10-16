@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { digits, palette } from './broadcast'
 import ClipsScene from './clips-scene'
@@ -89,16 +90,17 @@ function useChapter(container: RefObject<HTMLElement | null>) {
 }
 
 function SidePager({ index, chapters, goTo }: ReturnType<typeof useChapter>) {
+  const { t } = useTranslation('landing')
   const count = chapters.length
   if (!count) return null
   const arrow = 'grid size-8 place-items-center text-[var(--q-cream)] transition-colors hover:text-[var(--q-duck)] disabled:opacity-25'
 
   return (
     <nav
-      aria-label="Chapters"
+      aria-label={t('stage.nav.chapters')}
       className="fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 flex-col items-center gap-1 rounded-l-2xl bg-[#0B0D12] py-3 pl-2.5 pr-2 ring-1 ring-[rgb(255_248_231/0.12)] lg:flex"
     >
-      <button type="button" aria-label="Previous chapter" disabled={index === 0} onClick={() => goTo(index - 1)} className={arrow}>
+      <button type="button" aria-label={t('stage.nav.prevChapter')} disabled={index === 0} onClick={() => goTo(index - 1)} className={arrow}>
         <ChevronUp className="size-5" />
       </button>
       <span style={digits} aria-current="step" className="text-[22px] text-[var(--q-duck)]">
@@ -106,7 +108,7 @@ function SidePager({ index, chapters, goTo }: ReturnType<typeof useChapter>) {
       </span>
       <button
         type="button"
-        aria-label="Next chapter"
+        aria-label={t('stage.nav.nextChapter')}
         disabled={index === count - 1}
         onClick={() => goTo(index + 1)}
         className={arrow}

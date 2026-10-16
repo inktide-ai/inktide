@@ -1,18 +1,7 @@
-import type { Metadata } from 'next'
-import { GeistMono } from 'geist/font/mono'
-import StreamPage from '@/features/landing/stage/stream-page'
+import { permanentRedirect } from 'next/navigation'
+import { LANDING_ROUTE } from '@/lib/routes'
 
-// Preview route for the "the site is a stream" landing while its scenes are
-// being built; it replaces the hero on `/` once the direction is settled.
-export const metadata: Metadata = {
-  title: { absolute: 'Quackie — Starting soon' },
-  robots: { index: false, follow: false },
-}
-
+// The landing was previewed here before it took over the root; old links still land on it.
 export default function StagePreviewPage() {
-  return (
-    <main className={GeistMono.variable}>
-      <StreamPage />
-    </main>
-  )
+  permanentRedirect(LANDING_ROUTE)
 }

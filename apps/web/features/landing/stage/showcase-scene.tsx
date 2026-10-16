@@ -51,8 +51,8 @@ interface ShowcaseSceneProps {
   title: [ReactNode, ReactNode]
   body: ReactNode
   items: ShowcaseItem[]
-  /** What one item is called, for the picker's buttons. */
-  noun: string
+  /** The picker's arrow labels, whole phrases: in Russian the word for "previous" agrees with the noun. */
+  pickerLabels: PickerLabels
   stage?: ShowcaseStage
   /** Overrides the character frame's size and place, e.g. to keep a wide figure in view on phones. */
   frameClassName?: string
@@ -76,7 +76,7 @@ export default function ShowcaseScene({
   title,
   body,
   items,
-  noun,
+  pickerLabels,
   stage,
   frameClassName,
 }: ShowcaseSceneProps) {
@@ -205,7 +205,7 @@ export default function ShowcaseScene({
 
         <p className="mt-6 max-w-[34ch] text-[clamp(15px,1.15vw,18px)] leading-relaxed text-[var(--q-cream-dim)]">{body}</p>
 
-        <Picker items={items} noun={noun} index={index} onPick={pick} className="mt-8" />
+        <Picker items={items} labels={pickerLabels} index={index} onPick={pick} className="mt-8" />
       </div>
 
       {/* Scene number on the yellow plate, the way ZZZ labels its sections. */}
@@ -269,15 +269,17 @@ function ShutterBar({ run, className }: { run: number; className: string }) {
   )
 }
 
+type PickerLabels = { prev: string; next: string }
+
 function Picker({
   items,
-  noun,
+  labels,
   index,
   onPick,
   className,
 }: {
   items: ShowcaseItem[]
-  noun: string
+  labels: PickerLabels
   index: number
   onPick: (i: number) => void
   className?: string
@@ -285,7 +287,7 @@ function Picker({
   const arrow = 'grid size-10 place-items-center rounded-full text-[var(--q-cream)] transition-colors hover:bg-white/10'
   return (
     <div className={cn('flex w-fit items-center gap-2 rounded-full bg-[#0B0D12] p-2 ring-1 ring-[rgb(255_248_231/0.12)]', className)}>
-      <button type="button" aria-label={`Previous ${noun}`} onClick={() => onPick(index - 1)} className={arrow}>
+      <button type="button" aria-label={labels.prev} onClick={() => onPick(index - 1)} className={arrow}>
         <ChevronLeft className="size-5" />
       </button>
       {items.map((it, i) => (
@@ -304,7 +306,7 @@ function Picker({
           {it.thumb ? <Image src={it.thumb} alt="" fill sizes="64px" className="object-cover" /> : <span className="size-7">{it.icon}</span>}
         </button>
       ))}
-      <button type="button" aria-label={`Next ${noun}`} onClick={() => onPick(index + 1)} className={arrow}>
+      <button type="button" aria-label={labels.next} onClick={() => onPick(index + 1)} className={arrow}>
         <ChevronRight className="size-5" />
       </button>
     </div>

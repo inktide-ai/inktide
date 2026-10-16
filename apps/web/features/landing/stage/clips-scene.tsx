@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import Image from 'next/image'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { EASE, RevealLine, digits, display, hatch, mono, ribbonStrip, useLoopSrc, useNearScreen, useSceneFocus, type LoopSources } from './broadcast'
 
@@ -25,6 +26,7 @@ const loopFiles = (base: string): LoopSources => ({
 
 // Placeholders: the keyed character loops stand in until there are recordings of
 // the product on stream. Those will be opaque clips with sound and burned-in subtitles.
+// Titles here are the English fallbacks; the shown ones come from landing.json (stage.talk.clips).
 const CLIPS: Clip[] = [
   {
     tag: 'Twitch',
@@ -62,16 +64,21 @@ export default function ClipsScene() {
   const [index, setIndex] = useState(0)
   // Null until someone presses play or pause; until then clips play unless motion is reduced.
   const [paused, setPaused] = useState<boolean | null>(null)
+  const { t } = useTranslation('landing')
+  const clips = useMemo(() => {
+    const titles = t('stage.talk.clips', { returnObjects: true }) as string[]
+    return CLIPS.map((c, i) => ({ ...c, title: titles[i] ?? c.title }))
+  }, [t])
 
-  const pick = (next: number) => setIndex((next + CLIPS.length) % CLIPS.length)
-  const clip = CLIPS[index]
+  const pick = (next: number) => setIndex((next + clips.length) % clips.length)
+  const clip = clips[index]
 
   return (
     <section
       ref={ref}
       id="clips"
       data-chapter="03"
-      aria-label="Clips from the stream"
+      aria-label={t('stage.talk.ariaLabel')}
       // Stage units, as in the other scenes: sizes follow the height on screens wider than 16:9.
       style={{ '--u': 'min(1vw, 1.7778svh)' } as CSSProperties}
       className={cn(
@@ -116,17 +123,17 @@ export default function ClipsScene() {
           className="mt-5 text-[clamp(52px,6.4vw,120px)] uppercase [--clips-shadow:-0.035em_0.03em_0_var(--q-bg)] lg:text-[calc(var(--u)*4.2)] lg:[--clips-shadow:none]"
         >
           <RevealLine delay={0.1} play={entered}>
-            Chat asks.
+            {t('stage.talk.title1')}
           </RevealLine>
           <RevealLine delay={0.2} play={entered}>
-            Quackie
+            {t('stage.talk.title2')}
           </RevealLine>
           <RevealLine delay={0.3} play={entered}>
-            answers.
+            {t('stage.talk.title3')}
           </RevealLine>
         </h2>
         <p className="mt-5 max-w-[34ch] text-[clamp(15px,1.15vw,18px)] leading-relaxed text-[var(--q-cream-dim)] lg:text-[calc(var(--u)*1.15)] lg:text-[rgb(16_19_26/0.78)]">
-          A viewer writes, Quackie reads it and answers out loud, right on stream.
+          {t('stage.talk.body')}
         </p>
       </div>
 
@@ -142,14 +149,14 @@ export default function ClipsScene() {
             playing={focused && !(paused ?? reduceMotion)}
             onToggle={() => setPaused(!(paused ?? reduceMotion))}
           />
-          <Rail index={index} onPick={pick} className="mt-[calc(var(--u)*1.6)]" />
+          <Rail clips={clips} index={index} onPick={pick} className="mt-[calc(var(--u)*1.6)]" />
         </motion.div>
       </div>
 
       {/* Scene number on the yellow plate, the way ZZZ labels its sections. */}
       <div className="pointer-events-none absolute bottom-[8%] right-[5vw] hidden text-right text-[var(--q-bg)] lg:block">
         <div style={{ ...flat, fontStretch: '84%' }} className="text-[calc(var(--u)*2.6)] uppercase">
-          Talk
+          {t('stage.nav.talk')}
         </div>
         <div style={digits} className="origin-bottom-right -skew-x-[11deg] text-[calc(var(--u)*9)]">
           03
@@ -193,6 +200,7 @@ function Player({
   onToggle: () => void
 }) {
   const src = useLoopSrc(clip.loop)
+  const { t } = useTranslation('landing')
   const video = useRef<HTMLVideoElement>(null)
   // Which clip is actually showing frames; its poster covers the switch until then.
   const [live, setLive] = useState<string | null>(null)
@@ -236,7 +244,7 @@ function Player({
       <div className="absolute left-4 top-4 z-10 flex items-center gap-2.5 sm:left-6 sm:top-6">
         <button
           type="button"
-          aria-label={playing ? 'Pause clip' : 'Play clip'}
+          aria-label={playing ? t('stage.talk.pause') : t('stage.talk.play')}
           onClick={onToggle}
           className="grid size-11 place-items-center rounded-[10px] bg-[var(--q-duck)] text-[var(--q-bg)] ring-2 ring-[var(--q-bg)] transition-transform duration-200 hover:-translate-y-0.5"
         >
@@ -261,7 +269,8 @@ function Player({
   )
 }
 
-function Rail({ index, onPick, className }: { index: number; onPick: (i: number) => void; className?: string }) {
+function Rail({ clips, index, onPick, className }: { clips: Clip[]; index: number; onPick: (i: number) => void; className?: string }) {
+  const { t } = useTranslation('landing')
   const arrow = 'grid size-10 shrink-0 place-items-center rounded-full text-[var(--q-cream)] transition-colors hover:bg-white/10'
   return (
     <div
@@ -270,11 +279,11 @@ function Rail({ index, onPick, className }: { index: number; onPick: (i: number)
         className,
       )}
     >
-      <button type="button" aria-label="Previous clip" onClick={() => onPick(index - 1)} className={arrow}>
+      <button type="button" aria-label={t('stage.talk.prev')} onClick={() => onPick(index - 1)} className={arrow}>
         <ChevronLeft className="size-5" />
       </button>
       <div className="flex min-w-0 gap-2 overflow-x-auto">
-        {CLIPS.map((c, i) => (
+        {clips.map((c, i) => (
           <button
             key={c.title}
             type="button"
@@ -291,7 +300,7 @@ function Rail({ index, onPick, className }: { index: number; onPick: (i: number)
           </button>
         ))}
       </div>
-      <button type="button" aria-label="Next clip" onClick={() => onPick(index + 1)} className={arrow}>
+      <button type="button" aria-label={t('stage.talk.next')} onClick={() => onPick(index + 1)} className={arrow}>
         <ChevronRight className="size-5" />
       </button>
     </div>

@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Rewind } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { DEVELOPER_ROUTE, PRICING_ROUTE, REGISTER_ROUTE } from '@/lib/routes'
 import { cn } from '@/lib/utils'
 import { Timecode, digits, display, hatch, mono, ribbonStrip } from './broadcast'
@@ -55,16 +56,12 @@ export const SOCIALS: Social[] = [
 ]
 
 // Privacy and Terms point at pages that don't exist yet.
+// Labels are keys under stage.footer.links in landing.json.
 const LINKS = [
-  { label: 'Pricing', href: PRICING_ROUTE },
-  { label: 'Docs', href: DEVELOPER_ROUTE },
-  { label: 'Privacy', href: '/privacy' },
-  { label: 'Terms', href: '/terms' },
-]
-
-const CREDITS = [
-  { role: 'Starring', name: 'Quackie' },
-  { role: 'Chat', name: 'You' },
+  { label: 'pricing', href: PRICING_ROUTE },
+  { label: 'docs', href: DEVELOPER_ROUTE },
+  { label: 'privacy', href: '/privacy' },
+  { label: 'terms', href: '/terms' },
 ]
 
 const flat = { ...display, textShadow: 'none' }
@@ -73,6 +70,11 @@ const flat = { ...display, textShadow: 'none' }
 const HOST = { src: '/images/landing/footer/quackie-bye.png', w: 1207, h: 1160 }
 
 export default function StreamFooter() {
+  const { t } = useTranslation('landing')
+  const credits = [
+    { role: t('stage.footer.starring'), name: 'Quackie' },
+    { role: t('stage.footer.chat'), name: t('stage.footer.you') },
+  ]
   return (
     <footer
       // Stage units, as in the scenes: sizes follow the height on screens wider than 16:9.
@@ -117,13 +119,13 @@ export default function StreamFooter() {
         />
         <div>
           <h2 style={display} className="text-[clamp(56px,9vw,150px)] uppercase lg:text-[calc(var(--u)*9)]">
-            Thanks for
+            {t('stage.footer.title1')}
             <br />
-            <span className="text-[var(--q-duck)]">watching.</span>
+            <span className="text-[var(--q-duck)]">{t('stage.footer.title2')}</span>
           </h2>
-          <p className={cn(mono, 'mt-7 flex items-center gap-3 text-[13px] tracking-[0.14em] text-[var(--q-cream-dim)]')}>
+          <p className={cn(mono, 'mt-7 flex items-center gap-3 text-[13px] uppercase tracking-[0.14em] text-[var(--q-cream-dim)]')}>
             <span className="size-2.5 rounded-full bg-[var(--q-red)]" />
-            YOU WATCHED
+            {t('stage.footer.watched')}
             <span className="text-[16px] tracking-[0.06em] text-[var(--q-cream)]">
               <Timecode />
             </span>
@@ -132,9 +134,9 @@ export default function StreamFooter() {
 
         <div className="flex flex-col items-start gap-5 lg:mr-[calc(var(--u)*26)] lg:items-end lg:pb-3">
           <p style={flat} className="text-[clamp(28px,2.6vw,40px)] uppercase lg:text-right">
-            Your turn to
+            {t('stage.footer.cta1')}
             <br />
-            go live.
+            {t('stage.footer.cta2')}
           </p>
           <Link
             href={REGISTER_ROUTE}
@@ -145,11 +147,11 @@ export default function StreamFooter() {
             )}
           >
             <span className="size-2 rounded-full bg-[#1A1300]" />
-            Go live
+            {t('stage.footer.cta')}
           </Link>
           {/* On desktop the links drop to their own line, so this column stays narrow. */}
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[14px] text-[var(--q-cream-dim)] lg:flex-col lg:items-end">
-            <span>or hang out with us on</span>
+            <span>{t('stage.footer.hangOut')}</span>
             <span className="flex items-center gap-2">
               {[SOCIALS[0], SOCIALS[1]].map((s, i) => (
                 <span key={s.label} className="inline-flex items-center gap-2">
@@ -177,7 +179,7 @@ export default function StreamFooter() {
           />
           <Image
             src={HOST.src}
-            alt="Quackie waving goodbye"
+            alt={t('stage.footer.hostAlt')}
             width={HOST.w}
             height={HOST.h}
             sizes="(min-width: 1024px) 25vw, 78vw"
@@ -201,7 +203,7 @@ export default function StreamFooter() {
           <nav aria-label="Footer" className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-[15px] text-[var(--q-cream-dim)]">
             {LINKS.map(l => (
               <Link key={l.label} href={l.href} className="transition-colors hover:text-[var(--q-cream)]">
-                {l.label}
+                {t(`stage.footer.links.${l.label}`)}
               </Link>
             ))}
             <a href={`mailto:${EMAIL}`} className="transition-colors hover:text-[var(--q-cream)]">
@@ -211,7 +213,7 @@ export default function StreamFooter() {
 
           {/* The end credits, rolled into one line. */}
           <dl className={cn(mono, 'flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.2em]')}>
-            {CREDITS.map(c => (
+            {credits.map(c => (
               <div key={c.role} className="flex gap-2">
                 <dt className="text-[rgb(255_248_231/0.4)]">{c.role}</dt>
                 <dd className="text-[var(--q-cream)]">{c.name}</dd>
@@ -219,7 +221,7 @@ export default function StreamFooter() {
             ))}
           </dl>
 
-          <p className="text-[13px] text-[rgb(255_248_231/0.4)]">© {new Date().getFullYear()} Quackie. All rights reserved.</p>
+          <p className="text-[13px] text-[rgb(255_248_231/0.4)]">{t('stage.footer.rights', { year: new Date().getFullYear() })}</p>
         </div>
       </div>
     </footer>
@@ -228,9 +230,11 @@ export default function StreamFooter() {
 
 /** Back to the top, as a tab hanging off the ribbon — rewinding the stream to 00. */
 function Rewinder() {
+  const { t } = useTranslation('landing')
   return (
     <button
       type="button"
+      aria-label={t('stage.footer.backToTop')}
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       className={cn(
         'group absolute left-6 top-[23px] z-10 flex w-[96px] flex-col items-center gap-1 rounded-b-[22px] bg-[var(--q-cream)] pb-3.5 pt-4 text-[var(--q-bg)] sm:left-[6.5vw] sm:w-[112px]',

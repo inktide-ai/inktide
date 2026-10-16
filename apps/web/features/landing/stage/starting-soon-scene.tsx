@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore, type CSSProperties, type PointerEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Trans, useTranslation } from 'react-i18next'
 import {
   AnimatePresence,
   motion,
@@ -426,6 +427,7 @@ function Headline({
   onReplay: () => void
 }) {
   const x = useTransform(sx, v => v * -5)
+  const { t } = useTranslation('landing')
 
   return (
     <motion.div
@@ -454,7 +456,7 @@ function Headline({
               <div
                 style={countType}
                 role="timer"
-                aria-label={`Starting in ${count}`}
+                aria-label={t('stage.hero.startingIn', { count })}
                 className="h-[1em] origin-bottom-left -skew-x-[11deg] scale-x-[1.12] overflow-hidden text-[var(--q-duck)]"
               >
                 <AnimatePresence mode="popLayout" initial={false}>
@@ -476,9 +478,9 @@ function Headline({
         ) : (
           <motion.div key="live">
             <h1 style={display} className="text-[clamp(48px,6.6vw,128px)] uppercase">
-              <RevealLine delay={0.5}>Your co-host</RevealLine>
+              <RevealLine delay={0.5}>{t('stage.hero.title1')}</RevealLine>
               <RevealLine delay={0.6}>
-                is <span className="text-[var(--q-duck)]">on air.</span>
+                <Trans ns="landing" t={t} i18nKey="stage.hero.title2" components={{ accent: <span className="text-[var(--q-duck)]" /> }} />
               </RevealLine>
             </h1>
 
@@ -488,7 +490,7 @@ function Headline({
               transition={{ duration: 0.6, delay: 0.8, ease: EASE }}
               className="mt-7 max-w-[34ch] text-[clamp(15px,1.2vw,19px)] leading-relaxed text-[var(--q-cream-dim)]"
             >
-              Quackie reads your Twitch, Discord and Telegram chat and answers out loud — the moment a message lands.
+              {t('stage.hero.body')}
             </motion.p>
 
             <motion.div
@@ -506,14 +508,14 @@ function Headline({
                 )}
               >
                 <span className="size-2 rounded-full bg-[#1A1300]" />
-                Go live
+                {t('stage.hero.cta')}
               </Link>
               <button
                 type="button"
                 onClick={onReplay}
                 className={cn(mono, 'text-[12px] tracking-[0.16em] text-[var(--q-cream-dim)] uppercase hover:text-[var(--q-cream)]')}
               >
-                ↺ Replay
+                {t('stage.hero.replay')}
               </button>
             </motion.div>
           </motion.div>

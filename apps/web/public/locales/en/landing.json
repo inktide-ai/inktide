@@ -1,6 +1,6 @@
 {
   "demoChat": {
-    "welcome": "Hey! I'm Akane — an AI streamer powered by Inktide. Wanna chat? Ask me anything or try roasting me.",
+    "welcome": "Hey! I'm Akane — an AI streamer powered by Quackie. Wanna chat? Ask me anything or try roasting me.",
     "errorResponse": "Failed to get response",
     "errorGeneric": "Something went wrong",
     "errorMessage": "Hmm, my brain is buffering. Is Ollama running? Try again in a sec.",
@@ -70,12 +70,12 @@
       },
       "api": {
         "title": "API and integrations",
-        "description": "Connect Inktide to Twitch, YouTube, Discord and other platforms. Set up once — works everywhere."
+        "description": "Connect Quackie to Twitch, YouTube, Discord and other platforms. Set up once — works everywhere."
       }
     }
   },
   "benefits": {
-    "heading": "Why Inktide",
+    "heading": "Why Quackie",
     "subheading": "Analytics and insights to grow your AI companion",
     "tabs": {
       "engagement": {
@@ -88,7 +88,7 @@
       },
       "integration": {
         "label": "Stream Integration Metrics",
-        "description": "See how Inktide integrates with Twitch, YouTube, and Discord. Track donation reactions, chat triggers, and community engagement. Data-driven decisions help you create the perfect AI companion for your channel."
+        "description": "See how Quackie integrates with Twitch, YouTube, and Discord. Track donation reactions, chat triggers, and community engagement. Data-driven decisions help you create the perfect AI companion for your channel."
       },
       "growth": {
         "label": "Channel Growth & Trends",
@@ -114,7 +114,7 @@
       "front": {
         "label": "THE IMPACT",
         "title": "AI Data",
-        "text": "Based on our analysis, we track how AI companions perform across streaming platforms. Each quarter, Inktide identifies engagement patterns and viewer interaction metrics to help streamers optimize their AI personalities.",
+        "text": "Based on our analysis, we track how AI companions perform across streaming platforms. Each quarter, Quackie identifies engagement patterns and viewer interaction metrics to help streamers optimize their AI personalities.",
         "highlight": "Streamers using AI companions see up to 40% higher viewer retention and increased chat activity. Our analytics help you understand what works.",
         "chartTitle": "AI Engagement by Platform"
       }
@@ -124,7 +124,7 @@
     "steps": {
       "0": {
         "heading": "See how it works",
-        "description": "Inktide sets up in minutes and integrates into your stream with no hassle. Connect the OBS plugin, add your AI, and go live."
+        "description": "Quackie sets up in minutes and integrates into your stream with no hassle. Connect the OBS plugin, add your AI, and go live."
       },
       "1": {
         "heading": "Ready out of the box",
@@ -158,11 +158,11 @@
       "documentation": "Documentation"
     },
     "followUs": "Follow us",
-    "copyright": "© {{year}} Inktide. All rights reserved."
+    "copyright": "© {{year}} Quackie. All rights reserved."
   },
   "profileSection": {
     "title": "Profile",
-    "loggedIn": "You are logged in to Inktide",
+    "loggedIn": "You are logged in to Quackie",
     "logOut": "Log out"
   },
   "partners": {
@@ -206,6 +206,301 @@
       "cancelDesc": "No commitments.\nNo hidden fees.",
       "improvingTitle": "Always improving",
       "improvingDesc": "We ship new features\nevery week."
+    }
+  },
+  "stage": {
+    "hero": {
+      "title1": "Your co-host",
+      "title2": "is <accent>on air.</accent>",
+      "body": "Quackie reads your Twitch, Discord and Telegram chat and answers out loud — the moment a message lands.",
+      "cta": "Go live",
+      "replay": "↺ Replay",
+      "startingIn": "Starting in {{count}}"
+    },
+    "nav": {
+      "home": "Home",
+      "listen": "Listen",
+      "remember": "Remember",
+      "talk": "Talk",
+      "customize": "Customize",
+      "pricing": "Pricing",
+      "logIn": "Log in",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "backToTop": "Quackie, back to the top",
+      "main": "Main",
+      "menu": "Menu",
+      "chapters": "Chapters",
+      "prevChapter": "Previous chapter",
+      "nextChapter": "Next chapter",
+      "language": "Language"
+    },
+    "listen": {
+      "ariaLabel": "Quackie listens to every chat",
+      "title1": "Every chat.",
+      "title2": "One <accent>ear.</accent>",
+      "body": "Chat from every platform in one feed. Quackie reads each message as it lands.",
+      "prev": "Previous platform",
+      "next": "Next platform",
+      "figureAlt": "Quackie sitting on the floor with a tablet, looking up over the shoulder",
+      "card": {
+        "twitch": "Twitch chat",
+        "youtube": "YouTube live chat",
+        "telegram": "Telegram group"
+      },
+      "apps": {
+        "twitch": {
+          "watching": "4.8K watching",
+          "follow": "♥ Follow",
+          "title": "Just chatting with Quackie 🐥",
+          "chatHeader": "STREAM CHAT",
+          "placeholder": "Send a message",
+          "send": "Chat"
+        },
+        "youtube": {
+          "search": "Search",
+          "watching": "12K watching",
+          "title": "chill stream with quackie 🐥",
+          "subscribers": "241K subscribers",
+          "subscribe": "Subscribe",
+          "topChat": "Top chat",
+          "placeholder": "Chat…"
+        },
+        "telegram": {
+          "group": "Quackie Fan Club",
+          "members": "1,204 members, 87 online",
+          "placeholder": "Message"
+        }
+      },
+      "chat": {
+        "twitch": [
+          {
+            "name": "kot_enjoyer",
+            "text": "gg that clutch was insane"
+          },
+          {
+            "name": "mira_bakes",
+            "text": "quackie say hi to my mom 👋"
+          },
+          {
+            "name": "oleg_plays",
+            "text": "what are we playing next?"
+          },
+          {
+            "name": "sasha",
+            "text": "KEKW"
+          },
+          {
+            "name": "dimon_tv",
+            "text": "first time here, love the vibe"
+          },
+          {
+            "name": "nightowl",
+            "text": "can you read my name? 🦉"
+          },
+          {
+            "name": "pixel_pan",
+            "text": "clip that 😂"
+          }
+        ],
+        "telegram": [
+          {
+            "name": "Vova",
+            "text": "watching from the bus lol"
+          },
+          {
+            "name": "Lera",
+            "text": "can you drop the clip here?"
+          },
+          {
+            "name": "Kirill",
+            "text": "stream tonight? 👀"
+          },
+          {
+            "name": "Nastya",
+            "text": "the duck hoodie is back!!"
+          },
+          {
+            "name": "Ilya",
+            "text": "good luck with the boss 🍀"
+          },
+          {
+            "name": "Sonya",
+            "text": "morning everyone ☀️"
+          }
+        ],
+        "youtube": [
+          {
+            "name": "Anya K.",
+            "text": "good luck tonight!"
+          },
+          {
+            "name": "Max",
+            "text": "only caught the end, what happened?"
+          },
+          {
+            "name": "Leo",
+            "text": "hello from Brazil 🇧🇷"
+          },
+          {
+            "name": "Ren",
+            "text": "keep it up quackie!",
+            "tip": "$5.00"
+          },
+          {
+            "name": "Tanya",
+            "text": "your voice is so calm"
+          },
+          {
+            "name": "Mark",
+            "text": "subbed, see you next stream"
+          }
+        ]
+      }
+    },
+    "remember": {
+      "ariaLabel": "Quackie remembers your viewers",
+      "title1": "Never forgets",
+      "title2": "a <accent>regular.</accent>",
+      "body": "Chat is compressed into memories in a vector database. Next stream, Quackie picks up where you left off.",
+      "streamChat": "Stream chat",
+      "memory": "Memory",
+      "vectorDb": "Vector DB",
+      "match": "Match",
+      "search": "Search",
+      "compressed": "Compressed",
+      "stream": "Stream #{{number}}",
+      "memories": [
+        {
+          "chatter": [
+            "W stream",
+            "that boss was rigged",
+            "hiii chat"
+          ],
+          "after": [
+            "mochi is a menace",
+            "F for the monitor"
+          ],
+          "next": [
+            "first!",
+            "o7"
+          ],
+          "back": "yo quackie, I'm back",
+          "words": "my [cat Mochi] knocked my [monitor] off the desk again lol",
+          "facts": [
+            "Has a cat: Mochi",
+            "Mochi vs. the monitor"
+          ],
+          "later": "7 days later",
+          "reply": "kot_enjoyer! Is Mochi still at war with your monitor?"
+        },
+        {
+          "chatter": [
+            "LMAO",
+            "the hat is back",
+            "quackie say hi to my mom"
+          ],
+          "after": [
+            "good luck!!",
+            "you got this"
+          ],
+          "next": [
+            "hi hi",
+            "quackie!!"
+          ],
+          "back": "hiii it's me again",
+          "words": "big [exam tomorrow] wish me luck, I [barely slept]",
+          "facts": [
+            "Exam this week",
+            "Pulls all-nighters"
+          ],
+          "later": "3 days later",
+          "reply": "lena_draws! So how did the exam go?"
+        },
+        {
+          "chatter": [
+            "gg",
+            "mochi says hi",
+            "chat is so fast today"
+          ],
+          "after": [
+            "only 40? rookie numbers",
+            "margit is a wall"
+          ],
+          "next": [
+            "we are so back",
+            "hi chat"
+          ],
+          "back": "ok I'm back. don't ask",
+          "words": "first time in [Elden Ring] and I already [died 40 times]",
+          "facts": [
+            "New to Elden Ring",
+            "40 deaths and counting"
+          ],
+          "later": "2 days later",
+          "reply": "dimon_tv! Beat Margit yet, or is it 400 deaths now?"
+        }
+      ]
+    },
+    "talk": {
+      "ariaLabel": "Clips from the stream",
+      "title1": "Chat asks.",
+      "title2": "Quackie",
+      "title3": "answers.",
+      "body": "A viewer writes, Quackie reads it and answers out loud, right on stream.",
+      "clips": [
+        "Reads the chat, laughs along",
+        "Plotting something",
+        "Chomp!",
+        "Starting soon"
+      ],
+      "play": "Play clip",
+      "pause": "Pause clip",
+      "prev": "Previous clip",
+      "next": "Next clip"
+    },
+    "customize": {
+      "ariaLabel": "Dress Quackie up",
+      "title1": "One host.",
+      "title2": "Any <accent>look.</accent>",
+      "body": "Put Quackie in a duck, raccoon or shark hoodie — every outfit comes with its own attitude.",
+      "prev": "Previous outfit",
+      "next": "Next outfit",
+      "costumes": {
+        "duck": {
+          "name": "Duck",
+          "alt": "Quackie in the duck hoodie"
+        },
+        "raccoon": {
+          "name": "Raccoon",
+          "alt": "Quackie in the raccoon hoodie"
+        },
+        "shark": {
+          "name": "Shark",
+          "alt": "Quackie in the shark hoodie"
+        }
+      }
+    },
+    "footer": {
+      "title1": "Thanks for",
+      "title2": "watching.",
+      "watched": "You watched",
+      "cta1": "Your turn to",
+      "cta2": "go live.",
+      "cta": "Go live",
+      "hangOut": "or hang out with us on",
+      "links": {
+        "pricing": "Pricing",
+        "docs": "Docs",
+        "privacy": "Privacy",
+        "terms": "Terms"
+      },
+      "starring": "Starring",
+      "chat": "Chat",
+      "you": "You",
+      "rights": "© {{year}} Quackie. All rights reserved.",
+      "hostAlt": "Quackie waving goodbye",
+      "backToTop": "Back to the top"
     }
   }
 }
