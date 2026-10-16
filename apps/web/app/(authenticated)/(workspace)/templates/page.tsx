@@ -1,6 +1,6 @@
-import type { Metadata } from 'next'
+import { titleMetadata } from '@/lib/i18n-server'
 import { TemplatesPage } from '@/features/templates'
 
-export const metadata: Metadata = { title: 'Templates — Inktide' }
+export const generateMetadata = titleMetadata('templates')
 
 export default TemplatesPage

@@ -12,10 +12,13 @@ import { PLANS, type PlanKey } from '@/shared/data/plans'
 
 function CheckoutContent() {
   const { t } = useTranslation('checkout')
+  const { t: tLanding } = useTranslation('landing')
   const router = useRouter()
   const params = useSearchParams()
   const planKey = (params.get('plan') ?? 'starter') as PlanKey
   const plan = PLANS[planKey] ?? PLANS.starter
+  // Same list as the pricing page, so checkout never promises something different.
+  const features = tLanding(`pricing.${planKey in PLANS ? planKey : 'starter'}.features`, { returnObjects: true }) as string[]
   const prices = usePriceLabels()
   const price = prices?.[planKey] ?? '—'
 
@@ -105,7 +108,7 @@ function CheckoutContent() {
             <p className="text-[13px] mb-4 text-gray-500">{t('plan.features')}</p>
 
             <ul className="space-y-2.5 mb-5">
-              {plan.features.map(f => (
+              {features.map(f => (
                 <li key={f} className="flex items-center gap-2.5 text-[13px] text-gray-200">
                   <Zap size={13} className="shrink-0" style={{ color: plan.accentColor }} />
                   {f}

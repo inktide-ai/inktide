@@ -1,8 +1,6 @@
-import type { Metadata } from 'next'
+import { titleMetadata } from '@/lib/i18n-server'
 import BrainProviderPage from './_client'
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: 'LLM Provider Settings — Inktide' }
-}
+export const generateMetadata = titleMetadata('llmProvider')
 
 export default BrainProviderPage

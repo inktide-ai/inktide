@@ -157,7 +157,7 @@
   },
   "deleteAccount": {
     "title": "Delete account",
-    "desc": "This removes your characters and related data from Inktide. If the server is configured for it, your login identity is removed from Keycloak as well.",
+    "desc": "This removes your characters and related data from Quackie. If the server is configured for it, your login identity is removed from Keycloak as well.",
     "confirmLabel": "Type anything to confirm",
     "confirmLabelEmail": "Type {{email}} to confirm",
     "placeholder": "your email",

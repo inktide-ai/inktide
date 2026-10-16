@@ -17,19 +17,14 @@ import {
 } from '@/shared/lib/user-appearance'
 import { useAppearancePrefs } from '@/shared/hooks/useAppearancePrefs'
 import { usePatchGlobalPreferences } from '@/shared/hooks/useGlobalPreferences'
+import type { Language } from '@/i18n/languages'
 
 
 
 const LANGUAGES = [
-  { code: 'en', nativeName: 'English (US)',       englishName: 'English (US)'    },
   { code: 'ru', nativeName: 'Русский',            englishName: 'Russian'         },
-  { code: 'zh', nativeName: '中文（简体）',        englishName: 'Chinese (Simplified)' },
-  { code: 'ja', nativeName: '日本語',              englishName: 'Japanese'        },
-  { code: 'ko', nativeName: '한국어',              englishName: 'Korean'          },
-  { code: 'de', nativeName: 'Deutsch',            englishName: 'German'          },
-  { code: 'fr', nativeName: 'Français',           englishName: 'French'          },
-  { code: 'es', nativeName: 'Español',            englishName: 'Spanish'         },
-] as const
+  { code: 'en', nativeName: 'English (US)',       englishName: 'English (US)'    },
+] as const satisfies readonly { code: Language; nativeName: string; englishName: string }[]
 
 function parseTheme(next: string | undefined): AppearancePrefs['theme'] | undefined {
   if (next !== 'dark' && next !== 'light' && next !== 'system') return undefined
@@ -68,7 +63,8 @@ export default function AppearancePanel() {
   const { prefs, update } = useAppearancePrefs()
   const { mutate: patchGlobal } = usePatchGlobalPreferences()
 
-  const currentLang = (i18n.language ?? 'en').split('-')[0]
+  // resolvedLanguage, not language: a preference saved as one of the retired locales resolves to English.
+  const currentLang = (i18n.resolvedLanguage ?? 'en').split('-')[0]
 
   function handleUpdate<K extends keyof AppearancePrefs>(key: K, value: AppearancePrefs[K]) {
     update(key, value)

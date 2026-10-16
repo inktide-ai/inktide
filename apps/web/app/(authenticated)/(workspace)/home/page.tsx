@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
+import { titleMetadata } from '@/lib/i18n-server'
 import HomePage from './_client'
 
-export const metadata: Metadata = { title: 'Dashboard — Inktide' }
+export const generateMetadata = titleMetadata('dashboard')
 
 export default function Page() {
   return <HomePage />

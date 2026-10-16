@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { cn } from '@/lib/utils'
 
@@ -9,9 +10,10 @@ interface SoulTabBarProps {
   soulId: string
 }
 
+// Labels are common: soulLayout.<key>.
 const TABS = [
-  { key: 'overview',     label: 'Overview',     href: (id: string) => `/souls/${id}` },
-  { key: 'deployments',  label: 'Deployments',  href: (id: string) => `/souls/${id}/brain` },
+  { key: 'overview',     href: (id: string) => `/souls/${id}` },
+  { key: 'deployments',  href: (id: string) => `/souls/${id}/brain` },
 ] as const
 
 
@@ -43,6 +45,7 @@ function tabValueFromPath(pathname: string | null, soulId: string): string {
 
 
 export function SoulTabBar({ soulId }: SoulTabBarProps) {
+  const { t } = useTranslation('common')
   const pathname  = usePathname()
   const tabValue  = tabValueFromPath(pathname, soulId)
 
@@ -71,7 +74,7 @@ export function SoulTabBar({ soulId }: SoulTabBarProps) {
                 disabled
                 className={disabledCls}
               >
-                {tab.label}
+                {t(`soulLayout.${tab.key}`)}
               </TabsTrigger>
             )
           }
@@ -83,7 +86,7 @@ export function SoulTabBar({ soulId }: SoulTabBarProps) {
                 scroll={false}
                 className={isActive ? activeCls : inactiveCls}
               >
-                {tab.label}
+                {t(`soulLayout.${tab.key}`)}
               </Link>
             </TabsTrigger>
           )

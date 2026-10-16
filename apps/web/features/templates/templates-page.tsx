@@ -4,7 +4,8 @@ import { useState, useMemo } from 'react'
 import { type LucideIcon, Plus, Search, ArrowRight, LayoutGrid, Tv, Bot, Star, Wrench } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { SYSTEM_TEMPLATES, type AnyProjectTemplate, type TemplatePlatform } from '@/shared/data/project-templates'
+import type { AnyProjectTemplate, TemplatePlatform } from '@/shared/data/project-templates'
+import { useSystemTemplates } from '@/shared/hooks/useSystemTemplates'
 import { useTemplateStore } from '@/shared/lib/templates/useTemplateStore'
 import { FeaturedTemplateCard } from './featured-template-card'
 import { TemplateEditorModal } from './template-editor-modal'
@@ -37,6 +38,7 @@ const CATEGORY_LABEL_KEYS: Record<string, string> = {
 
 export function TemplatesPage() {
   const { t } = useTranslation('common')
+  const systemTemplates = useSystemTemplates()
   const store = useTemplateStore()
   const router = useRouter()
   const { cardList: souls } = useCharactersContext()
@@ -59,8 +61,8 @@ export function TemplatesPage() {
       const searchOk = !q || tpl.name.toLowerCase().includes(q) || tpl.description.toLowerCase().includes(q)
       return catOk && platOk && searchOk
     }
-    return SYSTEM_TEMPLATES.filter(matches)
-  }, [search, categoryFilter, platformFilter])
+    return systemTemplates.filter(matches)
+  }, [systemTemplates, search, categoryFilter, platformFilter])
 
   async function handleCreate(data: CreateTemplateData) {
     await store.create(data)
@@ -144,8 +146,8 @@ export function TemplatesPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
             {CATEGORIES.map(cat => {
               const count = cat === 'all'
-                ? SYSTEM_TEMPLATES.length
-                : SYSTEM_TEMPLATES.filter(tpl => tpl.category === cat).length
+                ? systemTemplates.length
+                : systemTemplates.filter(tpl => tpl.category === cat).length
               const isActive = categoryFilter === cat
               const { icon: Icon, color } = CATEGORY_META[cat]
 

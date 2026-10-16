@@ -214,7 +214,8 @@
     "channels": "Channels",
     "loading": "Loading...",
     "backToSouls": "Souls",
-    "failedToLoad": "Failed to load soul — try refreshing the page."
+    "failedToLoad": "Failed to load soul — try refreshing the page.",
+    "deployments": "Deployments"
   },
   "soulPage": {
     "projects": "Projects",
@@ -281,7 +282,7 @@
     "projectNameDesc": "Used to identify your project on the Dashboard and in URLs.",
     "learnMoreProjectNames": "Learn more about project names",
     "projectId": "Project ID",
-    "projectIdDesc": "Used when interacting with the Inktide API.",
+    "projectIdDesc": "Used when interacting with the Quackie API.",
     "projectIdFooter": "Used when calling the API",
     "copyId": "Copy ID",
     "description": "Description",
@@ -309,7 +310,21 @@
     "deleting": "Deleting…",
     "noDescription": "No description",
     "overview": "Overview",
-    "moreChannels": "+{{count}} more"
+    "moreChannels": "+{{count}} more",
+    "tabs": {
+      "overview": "Overview",
+      "character": "Character",
+      "scene": "Scene",
+      "background": "Background",
+      "channels": "Channels",
+      "emotion": "Emotion",
+      "skills": "Skills",
+      "plugins": "Plugins",
+      "memory": "Memory",
+      "sandbox": "Sandbox",
+      "obs": "OBS",
+      "settings": "Settings"
+    }
   },
   "wizard": {
     "createSoul": "Create a new soul",
@@ -364,7 +379,7 @@
     "discover": "Discover",
     "discoverSubtitle": "Curated AI project templates for streamers, creators, and communities",
     "sectionFeatured": "Featured templates",
-    "sectionFeaturedSubtitle": "Handpicked by the Inktide team",
+    "sectionFeaturedSubtitle": "Handpicked by the Quackie team",
     "bannerTitle": "Build your first AI streamer",
     "bannerSubtitle": "A voice-driven personality that reacts to your live chat in real time.",
     "bannerAction": "Browse templates",
@@ -557,5 +572,225 @@
     "errorNotInkt": "File must be a .inkt archive.",
     "errorParse": "Failed to parse file. Make sure it is a valid .inkt archive.",
     "errorImport": "Import failed. The session may have expired — please try again."
+  },
+  "meta": {
+    "title": "Quackie — AI co-host for your stream",
+    "description": "Quackie reads your Twitch, Discord and Telegram chat and answers out loud.",
+    "dashboard": "Dashboard",
+    "marketplace": "Marketplace",
+    "templates": "Templates",
+    "project": "Project",
+    "character": "Character",
+    "characterProfile": "Character profile",
+    "checkout": "Checkout",
+    "invite": "You're invited",
+    "voiceProvider": "Voice",
+    "llmProvider": "Language model",
+    "channel": "Channel",
+    "channelMarketplace": "Channel catalog",
+    "signIn": "Sign in",
+    "register": "Create account",
+    "resetPassword": "Reset password",
+    "pricing": "Pricing"
+  },
+  "soulTemplates": {
+    "gaming": {
+      "name": "Gaming Streamer",
+      "description": "Aggressive, competitive, calls out plays in real time."
+    },
+    "chill": {
+      "name": "Chill Companion",
+      "description": "Calm, witty, great for late-night streams and long Q&As."
+    },
+    "variety": {
+      "name": "Variety Host",
+      "description": "Energetic, jokes with everyone, keeps chat constantly engaged."
+    },
+    "irl": {
+      "name": "IRL Explorer",
+      "description": "Adventurous, shares reactions to life events and surroundings."
+    },
+    "news": {
+      "name": "News Anchor",
+      "description": "Analytical and informative, breaks down topics clearly."
+    },
+    "tech": {
+      "name": "Tech Advisor",
+      "description": "Explains code, tools, and tech questions in plain language."
+    },
+    "coach": {
+      "name": "Productivity Coach",
+      "description": "Keeps chat focused, motivated, and moving forward."
+    },
+    "philosopher": {
+      "name": "Philosopher",
+      "description": "Slow, thoughtful, turns every topic into a deep question."
+    },
+    "chaos": {
+      "name": "Chaos Gremlin",
+      "description": "Unhinged energy, chaotic good, trolls gently and lovingly."
+    },
+    "tsundere": {
+      "name": "Tsundere",
+      "description": "Cold exterior, secretly caring, delivers affection as roasts."
+    },
+    "cozy": {
+      "name": "Cozy Friend",
+      "description": "Warm, supportive, makes every viewer feel genuinely welcome."
+    },
+    "categories": {
+      "Streamers": "Streamers",
+      "Assistants": "Assistants",
+      "Characters": "Characters"
+    },
+    "badges": {
+      "Popular": "Popular"
+    }
+  },
+  "projectTemplates": {
+    "twitch-bot": {
+      "name": "Twitch Chat Bot",
+      "description": "AI that reads and responds to Twitch chat in real time",
+      "longDescription": "A chat bot that monitors your Twitch channel, responds to viewer messages with personality, reacts to events like donations and raids, and keeps the energy high during your streams.",
+      "defaultName": "Twitch Chat Bot",
+      "features": [
+        "Real-time chat responses",
+        "Donation & raid reactions",
+        "Viewer engagement",
+        "Stream-aware personality"
+      ],
+      "steps": {
+        "connect-soul": {
+          "label": "Connect a Soul",
+          "description": "A Soul is the AI personality that will power your bot"
+        },
+        "connect-twitch": {
+          "label": "Connect Twitch channel",
+          "description": "Link your Twitch channel so the bot can read chat"
+        },
+        "upload-model": {
+          "label": "Add a 3D avatar (optional)",
+          "description": "Upload a VRM model for OBS rendering"
+        }
+      }
+    },
+    "discord-assistant": {
+      "name": "Discord Assistant",
+      "description": "Helpful AI for your Discord community",
+      "longDescription": "An intelligent assistant that answers questions, helps members find resources, and keeps your Discord community engaged and supported around the clock.",
+      "defaultName": "Discord Assistant",
+      "features": [
+        "Q&A and knowledge base",
+        "Community moderation support",
+        "Onboarding new members",
+        "24/7 availability"
+      ],
+      "steps": {
+        "connect-soul": {
+          "label": "Connect a Soul",
+          "description": "Choose the AI personality for your assistant"
+        },
+        "connect-discord": {
+          "label": "Connect Discord server",
+          "description": "Authorize the bot on your Discord server"
+        }
+      }
+    },
+    "ai-vtuber": {
+      "name": "AI VTuber",
+      "description": "A virtual streamer with personality, voice, and live avatar",
+      "longDescription": "Create your own AI VTuber — an animated virtual character that streams live, interacts with chat, shows emotions, and has a consistent unique personality that grows with your audience.",
+      "defaultName": "My AI VTuber",
+      "features": [
+        "Live avatar rendering (VRM)",
+        "Real-time lip sync",
+        "Emotional expressions",
+        "Chat interaction",
+        "Streamer personality"
+      ],
+      "steps": {
+        "connect-soul": {
+          "label": "Connect a Soul",
+          "description": "The AI that will be your VTuber character"
+        },
+        "upload-model": {
+          "label": "Upload a VRM avatar",
+          "description": "Your 3D character model for live rendering"
+        },
+        "connect-channel": {
+          "label": "Connect streaming platform",
+          "description": "Link Twitch, Discord, or another platform"
+        }
+      }
+    },
+    "voice-assistant": {
+      "name": "Voice Assistant",
+      "description": "A spoken AI assistant with natural voice responses",
+      "longDescription": "A voice-first AI assistant that listens and responds with a natural synthesized voice. Perfect for hands-free interaction, ambient AI presence on stream, or as a voice-enabled chatbot.",
+      "defaultName": "Voice Assistant",
+      "features": [
+        "Natural voice responses (TTS)",
+        "Hands-free interaction",
+        "Concise spoken answers",
+        "Real-time synthesis"
+      ],
+      "steps": {
+        "connect-soul": {
+          "label": "Connect a Soul",
+          "description": "Choose the AI for your assistant"
+        },
+        "setup-voice": {
+          "label": "Configure voice (TTS)",
+          "description": "Set up text-to-speech in Soul → Voice settings"
+        }
+      }
+    },
+    "alert-system": {
+      "name": "Alert System",
+      "description": "AI that announces stream events with personality",
+      "longDescription": "An alert system that detects stream events — donations, follows, subs, raids — and responds with custom AI-generated announcements that match the mood and energy of your stream.",
+      "defaultName": "Alert System",
+      "features": [
+        "Donation announcements",
+        "Follow & sub alerts",
+        "Raid reactions",
+        "Custom event responses"
+      ],
+      "steps": {
+        "connect-soul": {
+          "label": "Connect a Soul",
+          "description": "The AI that generates your alerts"
+        },
+        "connect-twitch": {
+          "label": "Connect Twitch channel",
+          "description": "Link Twitch to receive event notifications"
+        }
+      }
+    },
+    "blank": {
+      "name": "Blank Project",
+      "description": "Empty project — configure everything yourself",
+      "longDescription": "A completely empty project. You configure the soul, system prompt, channels, and everything else from scratch. Great if you know exactly what you want.",
+      "defaultName": "My Project",
+      "features": [
+        "Full control",
+        "No presets",
+        "Start fresh"
+      ],
+      "steps": {
+        "connect-soul": {
+          "label": "Connect a Soul",
+          "description": "Link an AI soul to power your project"
+        },
+        "write-prompt": {
+          "label": "Write a system prompt",
+          "description": "Define what your AI should do"
+        }
+      }
+    }
+  },
+  "avatar": {
+    "loadingModel": "Loading model…",
+    "noModel": "No model uploaded"
   }
 }

@@ -104,7 +104,7 @@ export function WizardTemplatesScreen({ direction, onSelect }: Props) {
           }
           return Array.from(categoryMap.entries()).map(([category, items]) => (
             <div key={category}>
-              <TemplateSectionLabel>{category}</TemplateSectionLabel>
+              <TemplateSectionLabel>{t(`soulTemplates.categories.${category}`)}</TemplateSectionLabel>
               {items.map(tmpl => (
                 <TemplateListItem
                   key={tmpl.id}

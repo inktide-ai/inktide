@@ -3,6 +3,7 @@ import {
   Gamepad2, Moon, Mic2, Globe, Radio, Laptop, Zap,
   Sparkles, Shuffle, Snowflake, Leaf, type LucideProps,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { CaretRightSmall } from '@/shared/ui/icons'
 import type { SoulTemplate } from '@/shared/data/soul-templates'
@@ -32,6 +33,7 @@ export function TemplateSectionLabel({ children }: { children: React.ReactNode }
 }
 
 export function TemplateListItem({ template, onSelect }: { template: SoulTemplate; onSelect: () => void }) {
+  const { t } = useTranslation('common')
   const Icon = TEMPLATE_ICONS[template.id]
   return (
     <button
@@ -53,10 +55,10 @@ export function TemplateListItem({ template, onSelect }: { template: SoulTemplat
       </span>
       <span className="min-w-0 flex-1">
         <span className="home-ui-font block truncate text-[13.5px] font-semibold text-[var(--text-primary)]">
-          {template.name}
+          {t(`soulTemplates.${template.id}.name`)}
         </span>
         <span className="home-ui-font block truncate text-body text-[var(--text-secondary)]">
-          {template.description}
+          {t(`soulTemplates.${template.id}.description`)}
         </span>
       </span>
       {template.badge && (
@@ -64,7 +66,7 @@ export function TemplateListItem({ template, onSelect }: { template: SoulTemplat
           className="home-ui-font shrink-0 rounded-full px-2 py-0.5 text-2xs font-semibold"
           style={{ background: `${template.accent}20`, color: template.accent }}
         >
-          {template.badge}
+          {t(`soulTemplates.badges.${template.badge}`)}
         </span>
       )}
       <CaretRightSmall

@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import type { ModelType } from '@/shared/lib/character'
 import type { MouthWeights } from '@/shared/hooks/useLipSync'
@@ -104,15 +105,17 @@ export default function AvatarRenderer({
 }
 
 function LoadingOverlay() {
+  const { t } = useTranslation('common')
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[var(--surface-overlay)] backdrop-blur-[4px]">
       <div className="w-8 h-8 rounded-full border-2 border-[var(--border-default)] border-t-[var(--text-primary)] animate-spin" />
-      <span className="text-[0.8rem] text-[var(--text-secondary)] tracking-[0.05em]">Loading model…</span>
+      <span className="text-[0.8rem] text-[var(--text-secondary)] tracking-[0.05em]">{t('avatar.loadingModel')}</span>
     </div>
   )
 }
 
 function NoModel({ className }: { className?: string }) {
+  const { t } = useTranslation('common')
   return (
     <div className={cn(
       'relative w-full h-full overflow-hidden rounded-[inherit]',
@@ -121,7 +124,7 @@ function NoModel({ className }: { className?: string }) {
       className,
     )}>
       <span className="text-[2rem] opacity-20 leading-none">◈</span>
-      <span className="text-[0.8rem] text-[var(--text-secondary)] tracking-[0.03em]">No model uploaded</span>
+      <span className="text-[0.8rem] text-[var(--text-secondary)] tracking-[0.03em]">{t('avatar.noModel')}</span>
     </div>
   )
 }

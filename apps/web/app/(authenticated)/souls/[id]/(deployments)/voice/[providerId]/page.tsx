@@ -1,7 +1,5 @@
-import type { Metadata } from 'next'
+import { titleMetadata } from '@/lib/i18n-server'
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: 'Voice Provider — Inktide' }
-}
+export const generateMetadata = titleMetadata('voiceProvider')
 
 export { default } from '@/features/soul/voice/voice-provider-settings'

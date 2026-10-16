@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
+import { titleMetadata } from '@/lib/i18n-server'
 import ForgotPasswordPage from './_client'
 
-export const metadata: Metadata = { title: 'Reset Password — Inktide' }
+export const generateMetadata = titleMetadata('resetPassword')
 
 export default function Page() {
   return <ForgotPasswordPage />

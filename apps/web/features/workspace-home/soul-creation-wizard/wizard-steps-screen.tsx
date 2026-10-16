@@ -2,7 +2,6 @@
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Atom, CaretRightSmall } from '@/shared/ui/icons'
-import { SOUL_TEMPLATES } from '@/shared/data/soul-templates'
 import { cn } from '@/lib/utils'
 import { PersonalityWorkspace } from '../personality-workspace'
 import { STEPS } from './wizard-steps'
@@ -83,7 +82,7 @@ export function WizardStepsScreen({ direction, state, setPersonality, closePerso
               </h2>
               {state.selectedTemplate && (
                 <p className="home-ui-font mt-1 text-body text-[var(--text-secondary)]">
-                  {t('wizard.basedOnTemplate', { name: SOUL_TEMPLATES.find(tmpl => tmpl.id === state.selectedTemplate)?.name })}
+                  {t('wizard.basedOnTemplate', { name: t(`soulTemplates.${state.selectedTemplate}.name`) })}
                 </p>
               )}
             </div>

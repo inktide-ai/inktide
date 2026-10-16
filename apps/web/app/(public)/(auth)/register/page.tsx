@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
+import { titleMetadata } from '@/lib/i18n-server'
 import RegisterPage from '@/features/auth/register-page'
 
-export const metadata: Metadata = { title: 'Create Account — Inktide' }
+export const generateMetadata = titleMetadata('register')
 
 export default function Page() {
   return <RegisterPage />

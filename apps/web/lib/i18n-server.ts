@@ -1,6 +1,8 @@
+import type { Metadata } from 'next'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { headers, cookies } from 'next/headers'
+import { LANGUAGE_COOKIE, isSupportedLanguage, languageFromAcceptLanguage, type Language } from '@/i18n/languages'
 
 function resolve(obj: Record<string, unknown>, key: string): string | undefined {
   let cur: unknown = obj
@@ -19,20 +21,20 @@ function loadLocale(locale: string, ns: string): Record<string, unknown> {
   }
 }
 
-const SUPPORTED_LNGS = ['en', 'ru', 'zh', 'ja', 'ko', 'de', 'fr', 'es']
+/** The request's interface language, chosen from the same sources as the browser detector. */
+export async function getLocale(): Promise<Language> {
+  const fromCookie = (await cookies()).get(LANGUAGE_COOKIE)?.value
+  if (isSupportedLanguage(fromCookie)) return fromCookie
+  return languageFromAcceptLanguage((await headers()).get('accept-language'))
+}
+
+/** `export const generateMetadata = titleMetadata('dashboard')` — the root layout appends "— Quackie". */
+export function titleMetadata(key: string) {
+  return async (): Promise<Metadata> => ({ title: (await getTranslations('common'))(`meta.${key}`) })
+}
 
 export async function getTranslations(ns: string) {
-  const jar = await cookies()
-  const fromCookie = jar.get('inktide_lang')?.value
-
-  let locale: string
-  if (fromCookie && SUPPORTED_LNGS.includes(fromCookie)) {
-    locale = fromCookie
-  } else {
-    const h = await headers()
-    const al = (h.get('accept-language') ?? '').toLowerCase()
-    locale = SUPPORTED_LNGS.find(l => new RegExp(`\\b${l}\\b`).test(al)) ?? 'en'
-  }
+  const locale = await getLocale()
 
   const data = loadLocale(locale, ns)
   const fallback = locale !== 'en' ? loadLocale('en', ns) : {}

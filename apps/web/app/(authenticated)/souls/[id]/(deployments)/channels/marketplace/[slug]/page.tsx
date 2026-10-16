@@ -1,8 +1,6 @@
-import type { Metadata } from 'next'
+import { titleMetadata } from '@/lib/i18n-server'
 import MarketplacePage from './_client'
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { title: 'Channel Marketplace — Inktide' }
-}
+export const generateMetadata = titleMetadata('channelMarketplace')
 
 export default MarketplacePage

@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
+import { titleMetadata } from '@/lib/i18n-server'
 import AcceptInvitePage from './_client'
 
-export const metadata: Metadata = { title: "You're invited — Inktide" }
+export const generateMetadata = titleMetadata('invite')
 
 export default function Page() {
   return <AcceptInvitePage />

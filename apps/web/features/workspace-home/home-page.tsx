@@ -15,7 +15,8 @@ import { SectionHeader, SoulCreationWizard, ProjectCardConnected, ProjectCreatio
 import { listProjects } from '@/features/projects'
 import { buildSpark } from '@/shared/lib/spark'
 import { formatApiCalls, editedLabel } from '@/shared/lib/format-utils'
-import { SYSTEM_TEMPLATES, type AnyProjectTemplate } from '@/shared/data/project-templates'
+import type { AnyProjectTemplate } from '@/shared/data/project-templates'
+import { useSystemTemplates } from '@/shared/hooks/useSystemTemplates'
 import { TemplatePreviewDrawer, TEMPLATE_ICONS } from '@/features/templates'
 import { ProjectTemplateWizard } from '@/features/workspace-home/project-template-wizard'
 import { ApiError } from '@/api/client'
@@ -23,6 +24,7 @@ import { PRICING_ROUTE } from '@/lib/routes'
 
 export default function HomePage() {
   const { t } = useTranslation('common')
+  const systemTemplates = useSystemTemplates()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { favs, toggle } = useFavorites()
@@ -298,7 +300,7 @@ export default function HomePage() {
               <section>
                 <SectionHeader title={t('home.fromTemplate')} withArrows={false} />
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-                  {SYSTEM_TEMPLATES.filter(tpl => tpl.id !== 'blank').map(tpl => {
+                  {systemTemplates.filter(tpl => tpl.id !== 'blank').map(tpl => {
                     const Icon = TEMPLATE_ICONS[tpl.id]
                     return (
                       <TemplateCard

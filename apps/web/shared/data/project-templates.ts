@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next'
+
 export type TemplatePlatform = 'twitch' | 'discord' | 'telegram' | 'any'
 export type TemplateCategory = 'streaming' | 'assistant' | 'vtuber' | 'utility'
 
@@ -330,4 +332,25 @@ Style:
 
 export function getSystemTemplate(id: string): ProjectTemplate | undefined {
   return SYSTEM_TEMPLATES.find(t => t.id === id)
+}
+
+/**
+ * A system template with its visible text in the current language (common: projectTemplates.<id>).
+ * The system prompt stays as written: the model answers in the project's language either way.
+ */
+export function localizeSystemTemplate(tpl: ProjectTemplate, t: TFunction): ProjectTemplate {
+  const key = `projectTemplates.${tpl.id}`
+  return {
+    ...tpl,
+    name:            t(`${key}.name`),
+    description:     t(`${key}.description`),
+    longDescription: t(`${key}.longDescription`),
+    defaultName:     t(`${key}.defaultName`),
+    features:        t(`${key}.features`, { returnObjects: true }) as string[],
+    nextSteps:       tpl.nextSteps.map(step => ({
+      ...step,
+      label:       t(`${key}.steps.${step.id}.label`),
+      description: t(`${key}.steps.${step.id}.description`),
+    })),
+  }
 }
